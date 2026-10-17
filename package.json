@@ -50,7 +50,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm test",
-    "export:android": "expo export --platform android"
+    "export:android": "expo export --platform android",
+    "check:edge": "npx --yes deno@2.9.6 check --config supabase/functions/deno.json supabase/functions/places-nearby/index.ts supabase/functions/place-details/index.ts",
+    "test:limiter": "python3 scripts/test-rate-limiter.py"
   },
   "private": true,
   "engines": {

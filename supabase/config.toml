@@ -1,0 +1,11 @@
+project_id = "argala"
+
+# Each handler explicitly validates bearer tokens with Supabase Auth getUser.
+# This supports projects using current asymmetric JWT signing keys.
+[functions.places-nearby]
+verify_jwt = false
+import_map = "./functions/deno.json"
+
+[functions.place-details]
+verify_jwt = false
+import_map = "./functions/deno.json"
