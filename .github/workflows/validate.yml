@@ -1,0 +1,31 @@
+name: Validate foundation
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: validation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22.19.0'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run check:edge
+      - run: npm run lint:edge
+      - run: npx expo install --check
+      - run: npx --yes expo-doctor
+      - run: npm run check:android
+      - run: npm run export:android
+      - name: Install PostgreSQL test binaries
+        run: sudo apt-get update && sudo apt-get install -y postgresql libpq-dev
+      - run: npm run test:limiter
