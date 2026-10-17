@@ -1,0 +1,29 @@
+{
+  "common": {
+    "retry": "再試行",
+    "save": "設定を保存",
+    "saved": "設定を保存しました。",
+    "close": "閉じる"
+  },
+  "auth": {
+    "signIn": "ログイン",
+    "signOut": "ログアウト",
+    "email": "メールアドレス",
+    "password": "パスワード"
+  },
+  "settings": {
+    "title": "設定",
+    "language": "言語",
+    "radius": "AR有効範囲（メートル）"
+  },
+  "map": {
+    "title": "近くの場所",
+    "recenter": "現在地へ",
+    "camera": "カメラを開く",
+    "search": "周辺を検索",
+    "settings": "設定"
+  },
+  "camera": {
+    "title": "ARプレビュー"
+  }
+}

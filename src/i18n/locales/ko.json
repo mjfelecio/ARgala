@@ -1,0 +1,29 @@
+{
+  "common": {
+    "retry": "다시 시도",
+    "save": "설정 저장",
+    "saved": "설정이 저장되었습니다.",
+    "close": "닫기"
+  },
+  "auth": {
+    "signIn": "로그인",
+    "signOut": "로그아웃",
+    "email": "이메일",
+    "password": "비밀번호"
+  },
+  "settings": {
+    "title": "설정",
+    "language": "언어",
+    "radius": "AR 활성화 반경 (미터)"
+  },
+  "map": {
+    "title": "주변 장소",
+    "recenter": "현재 위치로",
+    "camera": "카메라 열기",
+    "search": "주변 장소 검색",
+    "settings": "설정"
+  },
+  "camera": {
+    "title": "AR 미리보기"
+  }
+}

@@ -34,3 +34,9 @@ Google API content must not become a persistent POI database. Query data stays i
 ## Supabase authentication
 
 Create a Supabase project and enable the email/password provider. Leave email confirmation enabled unless your development policy deliberately disables it. Registration without a session tells users to confirm their email, then sign in. No profile table is required. Sessions use the device's app-scoped AsyncStorage, including refresh tokens; use an appropriately secured device for development. No travel history or camera data is stored there.
+
+## Settings and extension points
+
+AR activation defaults to 100 meters and is persisted as one global setting (10–1000 whole meters). Nearby discovery defaults independently to 1000 meters, with a server maximum of 5000 meters and 20 returned results. Settings and language preferences contain no location history. Device language initializes English, Korean or Japanese; partial Korean/Japanese resources fall back to English.
+
+See [backend setup](docs/backend-setup.md) for migrations, secrets and deployment, and [future catalog integration](docs/extending-discovery.md) for destination-centered discovery, preview data and localization extensions.

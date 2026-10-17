@@ -1,14 +1,17 @@
+import { useTranslation } from 'react-i18next';
 import { Alert, Linking } from 'react-native';
 import { Action, Notice } from '@/ui/shared';
 import type { useDeviceLocation } from './use-device-location';
 export function SystemSettingsAction() {
-  return <Action title="Open device settings" onPress={() => { void Linking.openSettings().catch(() => Alert.alert('Unable to open settings. Please open them from Android settings.')); }} />;
+  const { t } = useTranslation();
+  return <Action title={t('common.openSettings')} onPress={() => { void Linking.openSettings().catch(() => Alert.alert(t('common.settingsError'))); }} />;
 }
 export function LocationStatus({ location }: { location: ReturnType<typeof useDeviceLocation> }) {
+  const { t } = useTranslation();
   if (location.status === 'ready') return null;
   return <>
-    <Notice busy={location.status === 'loading'}>{location.status === 'loading' ? 'Finding your location…' : location.status === 'denied' ? 'Location permission is required to discover nearby places.' : location.status === 'disabled' ? 'Enable device location services, then retry.' : location.error ?? 'Location is unavailable.'}</Notice>
-    {location.status !== 'loading' && <Action title="Retry location" onPress={location.retry} />}
+    <Notice busy={location.status === 'loading'}>{location.status === 'loading' ? t('location.loading') : location.status === 'denied' ? t('location.denied') : location.status === 'disabled' ? t('location.disabled') : location.error ?? t('location.unavailable')}</Notice>
+    {location.status !== 'loading' && <Action title={t('location.retry')} onPress={location.retry} />}
     {(location.status === 'denied' || location.status === 'disabled') && <SystemSettingsAction />}
   </>;
 }
