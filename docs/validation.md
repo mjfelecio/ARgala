@@ -5,7 +5,7 @@ Local validation on 2026-10-17 used Node 22.19.0, Expo SDK 57.0.30, TypeScript 6
 | Check | Evidence/result |
 | --- | --- |
 | Lockfile installation | Clean `npm ci` completed after an interrupted registry download was diagnosed and recovered. |
-| `npm run check` | Passed after PR #1 follow-ups: strict TypeScript, zero-warning ESLint, 47 tests across 14 files. |
+| `npm run check` | Passed after PR #1 follow-ups: strict TypeScript, zero-warning ESLint, 50 tests across 15 files. |
 | `npm run check:edge` | All three Edge entrypoints type-check under Deno. |
 | Deno lint | Shared implementation and Edge handlers pass. |
 | `npm run test:limiter` | Actual isolated PostgreSQL migration: 32 concurrent calls allowed 30/denied 2; privileges and window reset passed. No existing database was used. |
@@ -13,7 +13,7 @@ Local validation on 2026-10-17 used Node 22.19.0, Expo SDK 57.0.30, TypeScript 6
 | `npx expo-doctor` | 21/21 checks passed. |
 | `npx expo prebuild --platform android --no-install` | Android native project generated successfully; required permissions and blocked audio/background location inspected. Generated native files stay ignored. |
 | `npm run check:android` | Introspection validates SDK/platform/package, foreground/camera permissions, blocked audio/background permissions, native Maps key injection, and EAS APK profiles. Uses a nonfunctional process-local validation marker, not a real key. |
-| Android export | Corrected-source Metro/Hermes export passed (1548 modules, 4.5 MB bundle). This is not an APK/native compilation. |
+| Android export | Source including the latest request-control and timeout fixes passed Metro/Hermes export (1549 modules, 4.5 MB bundle). This is not an APK/native compilation. |
 | Independent review | Confirmed Android camera API defect plus hidden permission-error recovery path. Both are corrected with focused regression checks; other application/service paths had no confirmed material findings. |
 | Dependency audit | `npm audit --omit=dev` reports 30 transitive counted findings (19 high, 11 moderate, 0 critical), rooted in four advisories. See details below. |
 
@@ -30,6 +30,8 @@ PR #1 follow-ups add four real-hook regressions for watcher callback/setup failu
 Four map component regressions exercise the actual screen, query client and polyline decoding with native/network boundaries mocked. They cover successful route fitting with padding, a stable viewport during later GPS updates, failed requests, deferred focus and nonzero Android layout. The missing viewport update failed before the fix. These tests verify the map command and lifecycle guards; native camera framing still requires a device.
 
 Four additional map regressions use the production query defaults (`staleTime: 0`, `gcTime: 0`) and reproduce unintended paid requests before the fix. Nearby, details and route observers now stay disabled; Search, POI selection and Walk explicitly fetch the corresponding query. Tests cover focus/foreground changes, location-driven remounts, repeated Search at unchanged or moved coordinates, and explicit recovery after failure. Returning to the map never initiates a provider call; the first nearby search also requires Search. Query data remains transient and is discarded when unused.
+
+Three timeout regressions run the real location service, hook, status component and i18next resources, mocking only native boundaries. Fake timers reproduce the actual 15-second GPS timeout in English, Korean and Japanese and verify successful retry clears the error and cancels the timer. Korean/Japanese cases failed with the previous hardcoded English message. The service now throws a typed timeout error; the hook preserves its code and the UI selects the localized resource. A later one-shot timeout still cannot replace an existing watcher failure.
 
 ## External configuration and checks still required
 

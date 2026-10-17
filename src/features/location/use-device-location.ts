@@ -3,15 +3,17 @@ import { useAppActive } from '@/lib/use-app-active';
 import { useFocusEffect } from 'expo-router';
 import type { Coordinate } from './geo';
 import { manageSubscription } from './lifecycle';
+import { locationFailure } from './errors';
 import { getCurrentCoordinates, isLocationEnabled, requestLocationPermission, subscribeToHeading, subscribeToLocation, type Heading } from './service';
 
 type DeviceState = {
   status: 'loading' | 'ready' | 'denied' | 'disabled' | 'error';
   watcherStatus: 'pending' | 'ready' | 'error';
+  errorCode: 'timeout' | null;
   position: Coordinate | null; accuracy: number | null; heading: Heading | null;
   headingStatus: 'pending' | 'ready' | 'unavailable'; canAskAgain: boolean; error: string | null;
 };
-const initial: DeviceState = { status: 'loading', watcherStatus: 'pending', position: null, accuracy: null, heading: null, headingStatus: 'pending', canAskAgain: true, error: null };
+const initial: DeviceState = { status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, headingStatus: 'pending', canAskAgain: true, error: null };
 
 export function useDeviceLocation({ heading: needsHeading = false } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
@@ -37,10 +39,11 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
           const watcherStatus = fromWatcher ? 'ready' : previous.watcherStatus;
           return { ...previous, watcherStatus, status: watcherStatus === 'error' ? 'error' : 'ready',
             position: { latitude: position.coords.latitude, longitude: position.coords.longitude },
-            accuracy: position.coords.accuracy, error: watcherStatus === 'error' ? previous.error : null };
+            accuracy: position.coords.accuracy, error: watcherStatus === 'error' ? previous.error : null,
+            errorCode: watcherStatus === 'error' ? previous.errorCode : null };
         });
       };
-      const watcherFailed = (error: string) => patch({ watcherStatus: 'error', status: 'error', error });
+      const watcherFailed = (error: string) => patch({ watcherStatus: 'error', status: 'error', errorCode: null, error });
       stops.push(manageSubscription(() => subscribeToLocation((position) => receive(position, true), watcherFailed),
         (error) => watcherFailed(error instanceof Error ? error.message : 'Location updates unavailable.')));
       if (needsHeading) {
@@ -50,9 +53,9 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
         }, () => patch({ headingStatus: 'unavailable', heading: null })), () => patch({ headingStatus: 'unavailable', heading: null })));
       }
       try { receive(await getCurrentCoordinates()); }
-      catch (error) { if (!disposed) setState((previous) => previous.position || previous.watcherStatus === 'error' ? previous : { ...previous, status: 'error', error: error instanceof Error ? error.message : 'Location unavailable.' }); }
+      catch (error) { if (!disposed) setState((previous) => previous.position || previous.watcherStatus === 'error' ? previous : { ...previous, status: 'error', ...locationFailure(error) }); }
     }
-    void start().catch((error: unknown) => patch({ status: 'error', error: error instanceof Error ? error.message : 'Location unavailable.' }));
+    void start().catch((error: unknown) => patch({ status: 'error', ...locationFailure(error) }));
     return () => { disposed = true; clearTimeout(headingTimer); stops.forEach((stop) => stop()); };
     // Retry must replace the focused callback to restart native permission and sensor setup.
     // eslint-disable-next-line react-hooks/exhaustive-deps

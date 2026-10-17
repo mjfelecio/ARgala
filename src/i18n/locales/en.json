@@ -33,6 +33,7 @@
     "denied": "Location permission is required to discover nearby places.",
     "disabled": "Enable device location services, then retry.",
     "unavailable": "Location is unavailable.",
+    "timeout": "Location timed out. Try outdoors with location services enabled.",
     "retry": "Retry location",
     "approximate": "Your location accuracy is about {{meters}} meters. Nearby and AR distances may be unreliable."
   },

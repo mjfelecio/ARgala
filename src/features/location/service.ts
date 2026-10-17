@@ -1,6 +1,7 @@
 import * as ExpoLocation from 'expo-location';
 import { LOCATION } from '@/config/limits';
 import { isCoordinate, normalizeHeading } from './geo';
+import { LocationTimeoutError } from './errors';
 
 export type Heading = { degrees: number; reference: 'true' | 'magnetic'; accuracy: number };
 export const requestLocationPermission = () => ExpoLocation.requestForegroundPermissionsAsync();
@@ -10,7 +11,7 @@ export async function getCurrentCoordinates() {
   try {
     const position = await Promise.race([
       ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.High }),
-      new Promise<never>((_resolve, reject) => { timer = setTimeout(() => reject(new Error('Location timed out. Try outdoors with location services enabled.')), LOCATION.timeoutMs); }),
+      new Promise<never>((_resolve, reject) => { timer = setTimeout(() => reject(new LocationTimeoutError()), LOCATION.timeoutMs); }),
     ]);
     if (!isCoordinate(position.coords)) throw new Error('The device returned invalid coordinates.');
     return position;

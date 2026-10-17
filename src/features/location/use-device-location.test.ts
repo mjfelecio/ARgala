@@ -3,6 +3,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { getCurrentCoordinates, subscribeToLocation } from './service';
 import { useDeviceLocation } from './use-device-location';
+import { LocationTimeoutError } from './errors';
 
 vi.mock('./service', () => ({
   requestLocationPermission: vi.fn(async () => ({ granted: true, canAskAgain: true })),
@@ -67,7 +68,8 @@ it('recovers watcher health only when continuous updates actually resume', async
 it('preserves a watcher failure when the one-shot request also fails', async () => {
   await act(async () => { tree = create(React.createElement(Probe)); });
   await act(async () => { vi.mocked(subscribeToLocation).mock.calls[0][1]('GPS watcher stopped'); });
-  await act(async () => { oneShot.reject(new Error('One-shot timed out')); });
+  await act(async () => { oneShot.reject(new LocationTimeoutError()); });
   expect(current.error).toBe('GPS watcher stopped');
+  expect(current.errorCode).toBeNull();
   expect(current.status).toBe('error');
 });
