@@ -30,3 +30,7 @@ See [design](docs/superpowers/specs/2026-10-17-argala-design.md), [implementatio
 The foundation separates authentication, foreground device location/heading, Google Maps, Places, walking routes, camera preview, and settings. Discovery accepts arbitrary geographic centers. It is not limited to a tourist catalog. AR uses GPS and compass bearings; spatial AR and turn-by-turn navigation are excluded.
 
 Google API content must not become a persistent POI database. Query data stays in memory, and no camera frames or travel history are persisted. Public Terms of Use and Privacy Policy URLs must be supplied before distributing the product.
+
+## Supabase authentication
+
+Create a Supabase project and enable the email/password provider. Leave email confirmation enabled unless your development policy deliberately disables it. Registration without a session tells users to confirm their email, then sign in. No profile table is required. Sessions use the device's app-scoped AsyncStorage, including refresh tokens; use an appropriately secured device for development. No travel history or camera data is stored there.
