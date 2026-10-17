@@ -13,7 +13,7 @@ function Navigation() {
   const { t } = useTranslation();
   const { session, loading, error, retry } = useAuth();
   if (loading) return <Screen><Notice busy>{t('auth.restoring')}</Notice></Screen>;
-  if (error) return <Screen><Notice>{error}</Notice><Action title={t('common.retry')} onPress={retry} /></Screen>;
+  if (error) return <Screen><Notice>{t(error)}</Notice><Action title={t('common.retry')} onPress={retry} /></Screen>;
   return <Stack screenOptions={{ headerTitle: 'ARgala' }}>
     <Stack.Protected guard={!session}><Stack.Screen name="sign-in" options={{ headerShown: false }} /></Stack.Protected>
     <Stack.Protected guard={Boolean(session)}><Stack.Screen name="(app)" options={{ headerShown: false }} /></Stack.Protected>

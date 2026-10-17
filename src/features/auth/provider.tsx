@@ -4,7 +4,7 @@ import { AppState } from 'react-native';
 import { getSupabase } from '@/lib/supabase';
 import { queryClient } from '@/lib/query';
 
-type AuthState = { session: Session | null; loading: boolean; error: string | null; retry: () => void };
+type AuthState = { session: Session | null; loading: boolean; error: 'auth.restoreFailed' | null; retry: () => void };
 const AuthContext = createContext<AuthState | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
@@ -28,10 +28,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
     const initialRevision = revision;
     void client.auth.getSession().then(({ data: result, error }) => {
       if (!alive || revision !== initialRevision) return;
-      if (error) setState({ session: null, loading: false, error: error.message });
+      if (error) setState({ session: null, loading: false, error: 'auth.restoreFailed' });
       else update(result.session);
     }).catch(() => {
-      if (alive && revision === initialRevision) setState({ session: null, loading: false, error: 'Unable to restore the session.' });
+      if (alive && revision === initialRevision) setState({ session: null, loading: false, error: 'auth.restoreFailed' });
     });
     const refresh = (status: string) => {
       if (status === 'active') client.auth.startAutoRefresh();

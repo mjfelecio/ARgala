@@ -26,7 +26,13 @@
     "signingOut": "Signing out…",
     "logoutFailed": "Sign out failed. Please try again.",
     "restoring": "Restoring your session…",
-    "setup": "Application setup is required. Configure the Supabase project in .env."
+    "setup": "Application setup is required. Configure the Supabase project in .env.",
+    "invalidCredentials": "The email or password is incorrect.",
+    "emailNotConfirmed": "Confirm your email address before signing in.",
+    "weakPassword": "Choose a stronger password.",
+    "accountExists": "An account already exists with this email. Try signing in.",
+    "rateLimited": "Too many attempts. Please wait and try again.",
+    "restoreFailed": "Unable to restore your session. Please try again."
   },
   "location": {
     "loading": "Finding your location…",

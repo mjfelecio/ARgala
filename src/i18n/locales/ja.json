@@ -9,7 +9,15 @@
     "signIn": "ログイン",
     "signOut": "ログアウト",
     "email": "メールアドレス",
-    "password": "パスワード"
+    "password": "パスワード",
+    "failed": "認証に失敗しました。再試行してください。",
+    "invalidCredentials": "メールアドレスまたはパスワードが正しくありません。",
+    "emailNotConfirmed": "ログインする前に、メールアドレスを確認してください。",
+    "weakPassword": "より安全なパスワードを選んでください。",
+    "accountExists": "このメールアドレスのアカウントは既に存在します。ログインしてください。",
+    "rateLimited": "試行回数が多すぎます。しばらく待ってから再試行してください。",
+    "restoreFailed": "セッションを復元できませんでした。再試行してください。",
+    "logoutFailed": "ログアウトできませんでした。再試行してください。"
   },
   "settings": {
     "title": "設定",

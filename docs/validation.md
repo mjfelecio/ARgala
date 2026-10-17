@@ -5,7 +5,7 @@ Local validation on 2026-10-17 used Node 22.19.0, Expo SDK 57.0.30, TypeScript 6
 | Check | Evidence/result |
 | --- | --- |
 | Lockfile installation | Clean `npm ci` completed after an interrupted registry download was diagnosed and recovered. |
-| `npm run check` | Passed after PR #1 follow-ups: strict TypeScript, zero-warning ESLint, 64 tests across 16 files. |
+| `npm run check` | Passed after PR #1 follow-ups: strict TypeScript, zero-warning ESLint, 77 tests across 17 files. |
 | `npm run check:edge` | All three Edge entrypoints type-check under Deno. |
 | Deno lint | Shared implementation and Edge handlers pass. |
 | `npm run test:limiter` | Actual isolated PostgreSQL migration: 32 concurrent calls allowed 30/denied 2; privileges and window reset passed. No existing database was used. |
@@ -13,8 +13,8 @@ Local validation on 2026-10-17 used Node 22.19.0, Expo SDK 57.0.30, TypeScript 6
 | `npx expo-doctor` | 21/21 checks passed. |
 | `npx expo prebuild --platform android --no-install` | Android native project generated successfully; required permissions and blocked audio/background location inspected. Generated native files stay ignored. |
 | `npm run check:android` | Introspection validates SDK/platform/package, foreground/camera permissions, blocked audio/background permissions, native Maps key injection, and EAS APK profiles. Uses a nonfunctional process-local validation marker, not a real key. |
-| Android export | Source including the latest request-control and timeout fixes passed Metro/Hermes export (1549 modules, 4.5 MB bundle). This is not an APK/native compilation. |
-| Independent review | Confirmed Android camera API defect plus hidden permission-error recovery path. Both are corrected with focused regression checks; other application/service paths had no confirmed material findings. |
+| Android export | Source including the latest Edge/auth error-localization fixes passed Metro/Hermes export (1551 modules, 4.5 MB bundle). This is not an APK/native compilation. |
+| Independent review | Review follow-ups cover Android camera compatibility/recovery, watcher health, route framing, manual paid requests and localized location/Edge/auth errors. Regression evidence appears below. |
 | Dependency audit | `npm audit --omit=dev` reports 30 transitive counted findings (19 high, 11 moderate, 0 critical), rooted in four advisories. See details below. |
 
 The initial main scaffold was checked against the SDK 57 Router template manifests before its first commit. Full compiler/lint/test validation followed the recovered dependency installation on the implementation branch. The branch preserves each coherent unit and its validation in Git; no history was squashed.
@@ -34,6 +34,8 @@ Four additional map regressions use the production query defaults (`staleTime: 0
 Three timeout regressions run the real location service, hook, status component and i18next resources, mocking only native boundaries. Fake timers reproduce the actual 15-second GPS timeout in English, Korean and Japanese and verify successful retry clears the error and cancels the timer. Korean/Japanese cases failed with the previous hardcoded English message. The service now throws a typed timeout error; the hook preserves its code and the UI selects the localized resource. A later one-shot timeout still cannot replace an existing watcher failure.
 
 Edge failure regressions verify structured codes survive the client adapter, malformed/transport/invalid-response failures have typed fallbacks, and successful data remains validated. Six map component cases use real translation resources to cover nearby, details and route failures in Korean/Japanese, including rate limits, upstream errors, unavailable walking routes, unknown codes and ordinary errors. Failures reproduced before the fix. Map errors now select localized resources by code rather than rendering provider messages; unknown failures use a localized generic fallback.
+
+Thirteen auth regressions exercise actual screens/provider and translation resources with the Supabase client boundary mocked. They cover known sign-in/registration codes, the SDK's specialized weak-password and network error classes, unknown-code fallbacks, live language changes, sign-out failures and returned/thrown session-restoration errors. Raw SDK messages reproduced the failures before the fix. Auth state now retains translation keys, and UI boundaries translate them with English/Korean/Japanese resources. These tests do not establish live authentication or email delivery.
 
 ## External configuration and checks still required
 
