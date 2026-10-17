@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import Constants from 'expo-constants';
 import { router, useIsFocused } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
@@ -35,6 +35,7 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   const { t } = useTranslation(); const { language, activationRadiusMeters } = useSettings();
   const active = useAppActive(); const focused = useIsFocused(); const map = useRef<MapView>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [mapLaidOut, setMapLaidOut] = useState(false);
   const [center, setCenter] = useState(position);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [routeRequest, setRouteRequest] = useState<WalkingRequest | null>(null);
@@ -45,6 +46,12 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
     queryFn: () => placesService.details(selectedId!, language) });
   const route = useQuery({ queryKey: ['walking-route', routeRequest], enabled: enabled && Boolean(routeRequest),
     queryFn: async () => { const result = await routeService.walking(routeRequest!); return { ...result, coordinates: decodePolyline(result.encodedPolyline) }; } });
+  useEffect(() => {
+    if (!enabled || !mapLaidOut || !route.data) return;
+    map.current?.fitToCoordinates(route.data.coordinates, {
+      edgePadding: { top: 48, right: 48, bottom: 48, left: 48 }, animated: true,
+    });
+  }, [enabled, mapLaidOut, route.data]);
   const place = details.data ?? nearby.data?.find((item) => item.providerId === selectedId);
   const open = useOpenProviderLink();
   function select(providerId: string | null) { setSelectedId(providerId); setRouteRequest(null); }
@@ -56,7 +63,9 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   return <View style={local.container}>
     <LaunchControls />
     <MapView ref={map} style={local.map} provider={PROVIDER_GOOGLE} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
-      showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)} onPoiClick={(event) => select(event.nativeEvent.placeId)}>
+      showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
+      onLayout={(event) => setMapLaidOut(event.nativeEvent.layout.width > 0 && event.nativeEvent.layout.height > 0)}
+      onPoiClick={(event) => select(event.nativeEvent.placeId)}>
       <Circle center={position} radius={activationRadiusMeters} strokeColor="#125fac" fillColor="rgba(18,95,172,0.08)" />
       {nearby.data?.map((item) => <Marker key={item.id} coordinate={item.coordinates} title={item.name} onPress={() => select(item.providerId)} />)}
       {place && !nearby.data?.some((item) => item.providerId === place.providerId) && <Marker coordinate={place.coordinates} title={place.name} />}
