@@ -78,6 +78,9 @@
     "openGoogle": "Open in Google Maps",
     "linkFailed": "Unable to open this link.",
     "closePlace": "Close place",
-    "settings": "Settings"
+    "settings": "Settings",
+    "activation": "{{active}} · {{distance}} meters away · activation radius {{meters}} meters",
+    "active": "Within activation range",
+    "inactive": "Outside activation range"
   }
 }
