@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { AppState } from 'react-native';
+import { useCallback, useState } from 'react';
+import { useAppActive } from '@/lib/use-app-active';
 import { useFocusEffect } from 'expo-router';
 import type { Coordinate } from './geo';
 import { manageSubscription } from './lifecycle';
@@ -15,11 +15,7 @@ const initial: DeviceState = { status: 'loading', position: null, accuracy: null
 export function useDeviceLocation({ heading: needsHeading = false } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
   const [attempt, setAttempt] = useState(0);
-  const [active, setActive] = useState(AppState.currentState === 'active');
-  useEffect(() => {
-    const listener = AppState.addEventListener('change', (value) => setActive(value === 'active'));
-    return () => listener.remove();
-  }, []);
+  const active = useAppActive();
   useFocusEffect(useCallback(() => {
     if (!active) return;
     let disposed = false;
