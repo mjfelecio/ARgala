@@ -5,7 +5,7 @@ Local validation on 2026-10-17 used Node 22.19.0, Expo SDK 57.0.30, TypeScript 6
 | Check | Evidence/result |
 | --- | --- |
 | Lockfile installation | Clean `npm ci` completed after an interrupted registry download was diagnosed and recovered. |
-| `npm run check` | Passed: strict TypeScript, zero-warning ESLint, 35 tests across 12 files. |
+| `npm run check` | Passed after PR #1 follow-ups: strict TypeScript, zero-warning ESLint, 43 tests across 14 files. |
 | `npm run check:edge` | All three Edge entrypoints type-check under Deno. |
 | Deno lint | Shared implementation and Edge handlers pass. |
 | `npm run test:limiter` | Actual isolated PostgreSQL migration: 32 concurrent calls allowed 30/denied 2; privileges and window reset passed. No existing database was used. |
@@ -24,6 +24,10 @@ The initial main scaffold was checked against the SDK 57 Router template manifes
 Tests cover coordinate boundaries, finite inputs, Haversine/antipodal/dateline distances, geographic bearing, heading normalization/relative angles, inclusive radius checks, late native subscription cleanup, auth credential normalization, public environment validation, arbitrary Places centers and radius bounds, provider normalization/attribution, field masks, the 20-result cap, authentication/rate limiting/body-size/error behavior, WALK routes/duration/warnings, malformed polylines, preferences localization fallback, and current/legacy Supabase runtime key selection.
 
 Camera regression tests render the real screen with native boundaries mocked to reproduce SDK 57 Android's missing web-only availability API, initial permission lookup failure, and focus/background state. They prove the screen's control flow and recovery behavior, not hardware rendering. Pure utilities and handlers use Vitest; the limiter test runs actual PostgreSQL in a disposable cluster.
+
+PR #1 follow-ups add four real-hook regressions for watcher callback/setup failures preceding a successful one-shot fix, recovery only when continuous updates resume, and competing watcher/one-shot failures. The reported asynchronous race failed before the fix and passed afterward. Watcher health is now independent of retained coordinates, and a one-shot request cannot erase a watcher failure.
+
+Four map component regressions exercise the actual screen, query client and polyline decoding with native/network boundaries mocked. They cover successful route fitting with padding, a stable viewport during later GPS updates, failed requests, deferred focus and nonzero Android layout. The missing viewport update failed before the fix. These tests verify the map command and lifecycle guards; native camera framing still requires a device.
 
 ## External configuration and checks still required
 
