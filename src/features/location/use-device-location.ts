@@ -7,10 +7,11 @@ import { getCurrentCoordinates, isLocationEnabled, requestLocationPermission, su
 
 type DeviceState = {
   status: 'loading' | 'ready' | 'denied' | 'disabled' | 'error';
+  watcherStatus: 'pending' | 'ready' | 'error';
   position: Coordinate | null; accuracy: number | null; heading: Heading | null;
   headingStatus: 'pending' | 'ready' | 'unavailable'; canAskAgain: boolean; error: string | null;
 };
-const initial: DeviceState = { status: 'loading', position: null, accuracy: null, heading: null, headingStatus: 'pending', canAskAgain: true, error: null };
+const initial: DeviceState = { status: 'loading', watcherStatus: 'pending', position: null, accuracy: null, heading: null, headingStatus: 'pending', canAskAgain: true, error: null };
 
 export function useDeviceLocation({ heading: needsHeading = false } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
@@ -29,8 +30,19 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
       if (!permission.granted) { patch({ status: 'denied', canAskAgain: permission.canAskAgain }); return; }
       if (!await isLocationEnabled()) { patch({ status: 'disabled' }); return; }
       if (disposed) return;
-      const receive = (position: Awaited<ReturnType<typeof getCurrentCoordinates>>) => patch({ status: 'ready', position: { latitude: position.coords.latitude, longitude: position.coords.longitude }, accuracy: position.coords.accuracy, error: null });
-      stops.push(manageSubscription(() => subscribeToLocation(receive, (error) => patch({ status: 'error', error })), (error) => patch({ status: 'error', error: error instanceof Error ? error.message : 'Location updates unavailable.' })));
+      const receive = (position: Awaited<ReturnType<typeof getCurrentCoordinates>>, fromWatcher = false) => {
+        if (disposed) return;
+        setState((previous) => {
+          // A one-shot fix provides coordinates, but cannot establish watcher health.
+          const watcherStatus = fromWatcher ? 'ready' : previous.watcherStatus;
+          return { ...previous, watcherStatus, status: watcherStatus === 'error' ? 'error' : 'ready',
+            position: { latitude: position.coords.latitude, longitude: position.coords.longitude },
+            accuracy: position.coords.accuracy, error: watcherStatus === 'error' ? previous.error : null };
+        });
+      };
+      const watcherFailed = (error: string) => patch({ watcherStatus: 'error', status: 'error', error });
+      stops.push(manageSubscription(() => subscribeToLocation((position) => receive(position, true), watcherFailed),
+        (error) => watcherFailed(error instanceof Error ? error.message : 'Location updates unavailable.')));
       if (needsHeading) {
         headingTimer = setTimeout(() => patch({ headingStatus: 'unavailable', heading: null }), 10000);
         stops.push(manageSubscription(() => subscribeToHeading((heading) => {
@@ -38,7 +50,7 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
         }, () => patch({ headingStatus: 'unavailable', heading: null })), () => patch({ headingStatus: 'unavailable', heading: null })));
       }
       try { receive(await getCurrentCoordinates()); }
-      catch (error) { if (!disposed) setState((previous) => previous.position ? previous : { ...previous, status: 'error', error: error instanceof Error ? error.message : 'Location unavailable.' }); }
+      catch (error) { if (!disposed) setState((previous) => previous.position || previous.watcherStatus === 'error' ? previous : { ...previous, status: 'error', error: error instanceof Error ? error.message : 'Location unavailable.' }); }
     }
     void start().catch((error: unknown) => patch({ status: 'error', error: error instanceof Error ? error.message : 'Location unavailable.' }));
     return () => { disposed = true; clearTimeout(headingTimer); stops.forEach((stop) => stop()); };
