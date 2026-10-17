@@ -3,13 +3,13 @@ import { useAppActive } from '@/lib/use-app-active';
 import { useFocusEffect } from 'expo-router';
 import type { Coordinate } from './geo';
 import { manageSubscription } from './lifecycle';
-import { locationFailure } from './errors';
+import { locationFailure, type LocationErrorCode } from './errors';
 import { getCurrentCoordinates, isLocationEnabled, requestLocationPermission, subscribeToHeading, subscribeToLocation, type Heading } from './service';
 
 type DeviceState = {
   status: 'loading' | 'ready' | 'denied' | 'disabled' | 'error';
   watcherStatus: 'pending' | 'ready' | 'error';
-  errorCode: 'timeout' | null;
+  errorCode: LocationErrorCode | null;
   position: Coordinate | null; accuracy: number | null; heading: Heading | null;
   headingStatus: 'pending' | 'ready' | 'unavailable'; canAskAgain: boolean; error: string | null;
 };
@@ -43,9 +43,9 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
             errorCode: watcherStatus === 'error' ? previous.errorCode : null };
         });
       };
-      const watcherFailed = (error: string) => patch({ watcherStatus: 'error', status: 'error', errorCode: null, error });
+      const watcherFailed = (error: unknown) => patch({ watcherStatus: 'error', status: 'error', ...locationFailure(error, 'updates-unavailable') });
       stops.push(manageSubscription(() => subscribeToLocation((position) => receive(position, true), watcherFailed),
-        (error) => watcherFailed(error instanceof Error ? error.message : 'Location updates unavailable.')));
+        watcherFailed));
       if (needsHeading) {
         headingTimer = setTimeout(() => patch({ headingStatus: 'unavailable', heading: null }), 10000);
         stops.push(manageSubscription(() => subscribeToHeading((heading) => {

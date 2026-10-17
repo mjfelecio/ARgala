@@ -1,7 +1,7 @@
 import * as ExpoLocation from 'expo-location';
 import { LOCATION } from '@/config/limits';
 import { isCoordinate, normalizeHeading } from './geo';
-import { LocationTimeoutError } from './errors';
+import { LocationError, LocationTimeoutError } from './errors';
 
 export type Heading = { degrees: number; reference: 'true' | 'magnetic'; accuracy: number };
 export const requestLocationPermission = () => ExpoLocation.requestForegroundPermissionsAsync();
@@ -13,13 +13,14 @@ export async function getCurrentCoordinates() {
       ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.High }),
       new Promise<never>((_resolve, reject) => { timer = setTimeout(() => reject(new LocationTimeoutError()), LOCATION.timeoutMs); }),
     ]);
-    if (!isCoordinate(position.coords)) throw new Error('The device returned invalid coordinates.');
+    if (!isCoordinate(position.coords)) throw new LocationError('invalid-position', 'The device returned invalid coordinates.');
     return position;
   } finally { clearTimeout(timer); }
 }
-export function subscribeToLocation(onPosition: (position: ExpoLocation.LocationObject) => void, onError: (message: string) => void) {
+export function subscribeToLocation(onPosition: (position: ExpoLocation.LocationObject) => void, onError: (error: LocationError) => void) {
   return ExpoLocation.watchPositionAsync({ accuracy: ExpoLocation.Accuracy.High, distanceInterval: LOCATION.distanceIntervalMeters, timeInterval: LOCATION.timeIntervalMs },
-    (position) => { if (isCoordinate(position.coords)) onPosition(position); else onError('The device returned invalid coordinates.'); }, onError);
+    (position) => { if (isCoordinate(position.coords)) onPosition(position); else onError(new LocationError('invalid-position', 'The device returned invalid coordinates.')); },
+    (message) => onError(new LocationError('updates-unavailable', message)));
 }
 export function subscribeToHeading(onHeading: (heading: Heading | null) => void, onError: (message: string) => void) {
   return ExpoLocation.watchHeadingAsync((reading) => {

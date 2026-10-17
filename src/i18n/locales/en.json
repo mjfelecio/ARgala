@@ -41,7 +41,9 @@
     "unavailable": "Location is unavailable.",
     "timeout": "Location timed out. Try outdoors with location services enabled.",
     "retry": "Retry location",
-    "approximate": "Your location accuracy is about {{meters}} meters. Nearby and AR distances may be unreliable."
+    "approximate": "Your location accuracy is about {{meters}} meters. Nearby and AR distances may be unreliable.",
+    "invalidPosition": "The device returned an invalid location. Please try again.",
+    "updatesUnavailable": "Location updates are unavailable. Please retry."
   },
   "camera": {
     "title": "AR preview",

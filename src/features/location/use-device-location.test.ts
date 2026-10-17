@@ -3,7 +3,7 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { getCurrentCoordinates, subscribeToLocation } from './service';
 import { useDeviceLocation } from './use-device-location';
-import { LocationTimeoutError } from './errors';
+import { LocationError, LocationTimeoutError } from './errors';
 
 vi.mock('./service', () => ({
   requestLocationPermission: vi.fn(async () => ({ granted: true, canAskAgain: true })),
@@ -39,7 +39,7 @@ afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined
 it.each(['callback', 'setup rejection'] as const)('keeps a watcher %s failure visible after a later successful one-shot fix', async (failure) => {
   await act(async () => { tree = create(React.createElement(Probe)); });
   await act(async () => {
-    if (failure === 'callback') vi.mocked(subscribeToLocation).mock.calls[0][1]('GPS watcher stopped');
+    if (failure === 'callback') vi.mocked(subscribeToLocation).mock.calls[0][1](new LocationError('updates-unavailable', 'GPS watcher stopped'));
     else watch.reject(new Error('GPS watcher stopped'));
   });
   expect(current.status).toBe('error');
@@ -49,12 +49,13 @@ it.each(['callback', 'setup rejection'] as const)('keeps a watcher %s failure vi
   expect(current.status).toBe('error');
   expect(current.error).toBe('GPS watcher stopped');
   expect(current.watcherStatus).toBe('error');
+  expect(current.errorCode).toBe('updates-unavailable');
 });
 
 it('recovers watcher health only when continuous updates actually resume', async () => {
   await act(async () => { tree = create(React.createElement(Probe)); });
   const [receive, fail] = vi.mocked(subscribeToLocation).mock.calls[0];
-  await act(async () => { fail('GPS watcher stopped'); oneShot.resolve(fix); });
+  await act(async () => { fail(new LocationError('updates-unavailable', 'GPS watcher stopped')); oneShot.resolve(fix); });
   // Completing setup alone must not erase an error already delivered by that watcher.
   await act(async () => { watch.resolve({ remove: vi.fn() }); });
   expect(current.status).toBe('error');
@@ -63,13 +64,14 @@ it('recovers watcher health only when continuous updates actually resume', async
   expect(current.status).toBe('ready');
   expect(current.watcherStatus).toBe('ready');
   expect(current.error).toBeNull();
+  expect(current.errorCode).toBeNull();
 });
 
 it('preserves a watcher failure when the one-shot request also fails', async () => {
   await act(async () => { tree = create(React.createElement(Probe)); });
-  await act(async () => { vi.mocked(subscribeToLocation).mock.calls[0][1]('GPS watcher stopped'); });
+  await act(async () => { vi.mocked(subscribeToLocation).mock.calls[0][1](new LocationError('updates-unavailable', 'GPS watcher stopped')); });
   await act(async () => { oneShot.reject(new LocationTimeoutError()); });
   expect(current.error).toBe('GPS watcher stopped');
-  expect(current.errorCode).toBeNull();
+  expect(current.errorCode).toBe('updates-unavailable');
   expect(current.status).toBe('error');
 });
