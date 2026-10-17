@@ -21,19 +21,30 @@ General location-based discovery and a future curated tourist catalog must coexi
 - Do not persist provider results to disk or add POI/location-history/camera-frame storage. Clear transient query data on authentication changes. Display provider attributions and walking warnings with the relevant content.
 - Run location/heading watchers and camera preview only while focused and foregrounded; clean up asynchronous subscriptions even if setup finishes after unmount. Track continuous watcher health separately from the last valid position. A one-shot fix cannot clear a watcher failure.
 - Keep separate concepts separate: nearby discovery defaults to **1000 m**; AR activation defaults to **100 m** for all POIs and is a device-local preference; a future destination-centered establishment radius (for example **500 m**) belongs to the catalog feature. Device-local activation is not a centrally managed setting for all users. Limits live in `src/config/limits.ts` and shared server contracts.
-- Nearby refresh is currently manual through Search. Any future movement-triggered refresh needs a deliberate distance/cost policy; do not query Google on every GPS update.
-- Keep user-facing strings in localization resources, with English fallback for partial Korean/Japanese translations. Never fabricate tourist descriptions or verified preview assets.
+- Paid Places/details/routes requests require an explicit user action: Search, POI selection or Walk. Mounting, refocusing, foreground return, language changes and query invalidation must not silently initiate paid requests. Discovery starts with Search. Any future movement-triggered refresh needs a deliberate distance/cost policy.
+- Never fabricate tourist descriptions or verified preview assets.
+
+## Internationalization and error contracts
+
+- Keep all app-owned display copy in `src/i18n/locales/`: labels, validation, alerts, loading/empty states, permission guidance, success messages, errors and fallbacks. Partial Korean/Japanese translations may fall back to English through i18next. Product/proper names, language autonyms and provider-attributed content may remain data values.
+- Services and native/provider adapters preserve stable error codes. Map recognized failures to feature-owned codes or keys; account for both rejected setup promises and later error callbacks. Use SDK error types/codes rather than parsing English message text.
+- Translate at the UI boundary. Raw native, SDK and server `error.message` values are diagnostic data and must never become display copy, including in generic fallbacks. Unknown failures use a feature fallback such as `location.unavailable`, `service.failed` or `auth.failed`.
+- Keep message keys or error codes in state and call `t()` during rendering so visible messages follow language changes. New or changed error paths need English, Korean and Japanese resources for their known cases and generic fallback.
+- Follow the existing error contracts in [location](src/features/location/errors.ts), [Edge requests](src/lib/edge-error.ts) and [authentication](src/features/auth/errors.ts). Extend the relevant contract when adding failure cases.
 
 ## Development and Git workflow
 
 - Make small, reviewable changes with a clear success criterion. Inspect the relevant flow and current documentation before editing; avoid unrelated refactors or new libraries just to imitate another project's stack.
 - Add focused regression coverage for behavioral fixes. Exercise the real hook/screen/service while mocking native or network boundaries; demonstrate the reported failure before the fix.
+- Verify review findings against code and behavior. When a finding exposes a shared failure pattern, inspect sibling producers and UI consumers and fix confirmed instances together. Record lasting architecture rules here; keep feature details in code and tests.
 - Validate each coherent change before committing. Use Conventional Commit subjects; include a concise body when motivation or material behavior needs explanation. Preserve incremental history and never merge a PR unless asked.
 - Report exactly which checks ran and what remains unverified. Update validation evidence when behavior or coverage changes. Keep credentials and local environment files out of Git.
 
 ## Verification
 
 Run lint and typecheck before declaring any task done. `npm run check` runs both plus the Vitest suite. Run targeted regressions during development, then the full check for the completed change.
+
+Localization regressions must exercise actual locale resources and the real error-to-UI path, covering known errors, unknown fallbacks, recovery and language changes where relevant. Use actual SDK error classes when their shape affects mapping. Query lifecycle/cost tests must use the defaults from `src/lib/query.ts` and cover refocus, foreground return, remount and failure recovery; an infinitely fresh test cache can hide repeated paid calls.
 
 For Edge changes, also run `npm run check:edge` and `npm run lint:edge`; run `npm run test:limiter` when limiter behavior or migrations change. For native configuration or SDK changes, run `npx expo install --check`, `npx expo-doctor`, `npm run check:android` and `npm run export:android`. The PR workflow repeats these checks, including the isolated PostgreSQL test.
 
