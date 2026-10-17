@@ -21,7 +21,7 @@ npx supabase functions deploy place-details
 npx supabase functions deploy walking-route
 ```
 
-The Edge secrets file needs `GOOGLE_PLACES_API_KEY` and `GOOGLE_ROUTES_API_KEY`. Restrict each key to its corresponding API. Supabase provides `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` to hosted functions; never copy the service-role key to the mobile environment. Set Google quotas and billing alerts appropriate to your project; per-user application limits do not replace project quotas.
+Copy `supabase/functions/.env.example` to the ignored `supabase/functions/.env` for local secrets if desired. Pass that path explicitly to CLI commands; never commit its values. The Edge secrets file needs `GOOGLE_PLACES_API_KEY` and `GOOGLE_ROUTES_API_KEY`. Restrict each key to its corresponding API. Hosted Supabase provides `SUPABASE_URL` and named JSON dictionaries `SUPABASE_PUBLISHABLE_KEYS` / `SUPABASE_SECRET_KEYS`; the handlers prefer each dictionary’s `default` key. Single-key local variables (`SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_SECRET_KEY`) and legacy injected anon/service-role keys remain supported as fallbacks. Never copy a secret/service-role key to the mobile environment. Set Google quotas and billing alerts appropriate to your project; per-user application limits do not replace project quotas.
 
 `verify_jwt = false` disables the legacy gateway JWT check; **each handler still validates the bearer token using Supabase Auth `getUser` before reading provider data**, then consumes the database limit. This supports current JWT signing keys. Do not bypass this wrapper when adding handlers. Native calls supply the session token through `supabase.functions.invoke`.
 
@@ -34,3 +34,5 @@ Place data is displayed on the Google map with its attribution visible. Addition
 References: [Nearby Search (New)](https://developers.google.com/maps/documentation/places/web-service/nearby-search), [Place Details](https://developers.google.com/maps/documentation/places/web-service/place-details), [Places policies](https://developers.google.com/maps/documentation/places/web-service/policies), [React Native Auth](https://supabase.com/docs/guides/auth/quickstarts/react-native).
 
 Walking routes use Google Routes computeRoutes with WALK mode and explicit distance/duration/polyline/warning fields. Draw returned paths on the Google map and retain the walking caution and provider warnings. A route is a snapshot from the supplied origin; there is no turn-by-turn guidance, continuous rerouting or guarantee of pedestrian access.
+
+Key injection reference: [Supabase Edge environment variables](https://supabase.com/docs/guides/functions/secrets). The admin secret has service-role privileges for the private limiter RPC; caller JWTs are validated with a low-privilege publishable client.
