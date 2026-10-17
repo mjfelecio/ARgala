@@ -21,3 +21,4 @@ export const access: Access = {
   },
 };
 export const placesDependencies = () => ({ key: required('GOOGLE_PLACES_API_KEY'), fetcher: fetch });
+export const routesDependencies = () => ({ key: required('GOOGLE_ROUTES_API_KEY'), fetcher: fetch });

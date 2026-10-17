@@ -17,3 +17,7 @@ export const nearbyResponseSchema = z.array(placeSchema).max(DISCOVERY_LIMITS.ma
 export const errorSchema = z.object({ error: z.object({ code: z.string(), message: z.string() }) });
 export type Place = z.infer<typeof placeSchema>;
 export type NearbySearch = z.input<typeof nearbyRequestSchema>;
+export const walkingRequestSchema = z.object({ origin: coordinateSchema, destination: coordinateSchema, language: languageSchema.default('en') }).strict();
+export const walkingRouteSchema = z.object({ distanceMeters: z.number().int().nonnegative(), durationSeconds: z.number().nonnegative(), encodedPolyline: z.string().min(1).max(100000), warnings: z.array(z.string()) });
+export type WalkingRequest = z.input<typeof walkingRequestSchema>;
+export type WalkingRoute = z.infer<typeof walkingRouteSchema>;

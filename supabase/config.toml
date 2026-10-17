@@ -9,3 +9,7 @@ import_map = "./functions/deno.json"
 [functions.place-details]
 verify_jwt = false
 import_map = "./functions/deno.json"
+
+[functions.walking-route]
+verify_jwt = false
+import_map = "./functions/deno.json"

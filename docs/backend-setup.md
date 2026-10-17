@@ -18,9 +18,10 @@ Enable billing, Places API (New), and Routes API on a Google Cloud project. Conf
 npx supabase secrets set --env-file /absolute/path/to/ignored-edge-secrets.env
 npx supabase functions deploy places-nearby
 npx supabase functions deploy place-details
+npx supabase functions deploy walking-route
 ```
 
-The Edge secrets file needs `GOOGLE_PLACES_API_KEY` (and `GOOGLE_ROUTES_API_KEY` once the route function is deployed). Restrict each key to its corresponding API. Supabase provides `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` to hosted functions; never copy the service-role key to the mobile environment. Set Google quotas and billing alerts appropriate to your project; per-user application limits do not replace project quotas.
+The Edge secrets file needs `GOOGLE_PLACES_API_KEY` and `GOOGLE_ROUTES_API_KEY`. Restrict each key to its corresponding API. Supabase provides `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` to hosted functions; never copy the service-role key to the mobile environment. Set Google quotas and billing alerts appropriate to your project; per-user application limits do not replace project quotas.
 
 `verify_jwt = false` disables the legacy gateway JWT check; **each handler still validates the bearer token using Supabase Auth `getUser` before reading provider data**, then consumes the database limit. This supports current JWT signing keys. Do not bypass this wrapper when adding handlers. Native calls supply the session token through `supabase.functions.invoke`.
 
@@ -31,3 +32,5 @@ Only the Android Maps SDK key is embedded in the native app. Places and Routes s
 Place data is displayed on the Google map with its attribution visible. Additional returned provider attributions must remain visible with selected place data. AR currently displays no Google place content. Do not add photos, reviews, off-map results, permanent caches or alternative maps without reviewing Google's attribution and data policies. Public product Terms of Use and Privacy Policy must be supplied before distribution.
 
 References: [Nearby Search (New)](https://developers.google.com/maps/documentation/places/web-service/nearby-search), [Place Details](https://developers.google.com/maps/documentation/places/web-service/place-details), [Places policies](https://developers.google.com/maps/documentation/places/web-service/policies), [React Native Auth](https://supabase.com/docs/guides/auth/quickstarts/react-native).
+
+Walking routes use Google Routes computeRoutes with WALK mode and explicit distance/duration/polyline/warning fields. Draw returned paths on the Google map and retain the walking caution and provider warnings. A route is a snapshot from the supplied origin; there is no turn-by-turn guidance, continuous rerouting or guarantee of pedestrian access.
