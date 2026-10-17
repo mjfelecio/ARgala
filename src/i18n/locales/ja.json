@@ -22,7 +22,9 @@
   "settings": {
     "title": "設定",
     "language": "言語",
-    "radius": "AR有効範囲（メートル）"
+    "radius": "AR有効範囲（メートル）",
+    "invalid": "対応する言語と有効なAR有効範囲を選んでください。",
+    "saveFailed": "設定を保存できませんでした。再試行してください。"
   },
   "map": {
     "title": "近くの場所",
