@@ -40,3 +40,22 @@ Create a Supabase project and enable the email/password provider. Leave email co
 AR activation defaults to 100 meters and is persisted as one global setting (10–1000 whole meters). Nearby discovery defaults independently to 1000 meters, with a server maximum of 5000 meters and 20 returned results. Settings and language preferences contain no location history. Device language initializes English, Korean or Japanese; partial Korean/Japanese resources fall back to English.
 
 See [backend setup](docs/backend-setup.md) for migrations, secrets and deployment, and [future catalog integration](docs/extending-discovery.md) for destination-centered discovery, preview data and localization extensions.
+
+## Validation
+
+```sh
+npm run check
+npm run check:edge
+npm run lint:edge
+npm run check:android
+npm run test:limiter
+npx expo install --check
+npx expo-doctor
+npm run export:android
+```
+
+The limiter check needs Python 3 and PostgreSQL server binaries. Edge checks use the pinned Deno CLI through npx. Android configuration introspection uses a nonfunctional local marker to verify key injection; it does not require Google credentials. The PR workflow runs the same checks without app secrets.
+
+See the [validation report](docs/validation.md) for evidence, dependency advisories, external configuration and untested hardware/cloud behavior. Changing the Android Maps key requires regenerating native configuration and rebuilding: run `npx expo prebuild --platform android` before a local `npx expo run:android`, or use a fresh EAS build. Generated native directories are ignored and EAS uses the app config.
+
+Recommended next tasks: configure/deploy the hosted services, build and test an Android preview APK, review provider policies/quotas and inherited dependency advisories, then implement basic bearing-based POI overlays and verified curated content. Complete translation review and destination previews remain later work.
