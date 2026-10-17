@@ -3,7 +3,8 @@ import { QueryClient, QueryClientProvider, notifyManager } from '@tanstack/react
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { routeService, type WalkingRoute } from '@/features/directions/service';
-import type { Place } from '@/features/places/service';
+import { placesService, type Place } from '@/features/places/service';
+import { queryClient } from '@/lib/query';
 import MapScreen from './map-screen';
 
 const controls = vi.hoisted(() => ({
@@ -49,6 +50,7 @@ async function startRoute(laidOut = true) {
   await act(async () => { tree = create(renderMap()); });
   if (laidOut) await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 320 } } }); });
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  await press('map.search');
   await act(async () => { tree!.root.findByType('marker').props.onPress(); });
   await press('map.walk');
 }
@@ -58,9 +60,9 @@ beforeEach(() => {
   controls.position = { latitude: 38.5, longitude: -120.2 };
   // Deliver query notifications within act, without depending on timer timing.
   notifyManager.setScheduler((callback) => callback());
-  client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
-  client.setQueryData(['places', controls.position, 'en'], [destination]);
-  client.setQueryData(['place-details', 'destination', 'en'], destination);
+  client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() });
+  vi.mocked(placesService.nearby).mockReset().mockResolvedValue([destination]);
+  vi.mocked(placesService.details).mockReset().mockResolvedValue(destination);
   request = Promise.withResolvers<WalkingRoute>();
   vi.mocked(routeService.walking).mockReset().mockReturnValue(request.promise);
   const original = console.error;
@@ -110,4 +112,58 @@ it('waits for a nonzero Android map layout before fitting a loaded route', async
   expect(controls.fit).not.toHaveBeenCalled();
   await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 320 } } }); });
   expect(controls.fit).toHaveBeenCalledWith(coordinates, expect.any(Object));
+});
+it.each(['focused', 'active'] as const)('does not repeat paid queries after %s changes or location-driven remounts', async (lifecycle) => {
+  await startRoute();
+  await act(async () => { request.resolve(walkingRoute); });
+  for (let navigation = 0; navigation < 2; navigation++) {
+    controls[lifecycle] = false;
+    await act(async () => { tree!.update(renderMap()); });
+    controls[lifecycle] = true;
+    await act(async () => { tree!.update(renderMap()); });
+  }
+  expect(placesService.nearby).toHaveBeenCalledTimes(1);
+  expect(placesService.details).toHaveBeenCalledTimes(1);
+  expect(routeService.walking).toHaveBeenCalledTimes(1);
+  await act(async () => { tree!.unmount(); });
+  // Location restarts can remove the map observer; production immediately discards unused data.
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  controls.position = { latitude: 38.51, longitude: -120.21 };
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  expect(placesService.nearby).toHaveBeenCalledTimes(1);
+  expect(placesService.details).toHaveBeenCalledTimes(1);
+  expect(routeService.walking).toHaveBeenCalledTimes(1);
+  await press('map.search');
+  expect(placesService.nearby).toHaveBeenCalledTimes(2);
+  expect(placesService.nearby).toHaveBeenLastCalledWith({ center: { latitude: 38.51, longitude: -120.21 }, radiusMeters: 1000, language: 'en' });
+});
+it('requests nearby results only on Search, including repeated searches at the same coordinates', async () => {
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  expect(placesService.nearby).not.toHaveBeenCalled();
+  await press('map.search');
+  expect(tree!.root.findAllByType('marker')).toHaveLength(1);
+  await press('map.search');
+  expect(placesService.nearby).toHaveBeenCalledTimes(2);
+  controls.position = { latitude: 38.52, longitude: -120.22 };
+  await act(async () => { tree!.update(renderMap()); });
+  expect(placesService.nearby).toHaveBeenCalledTimes(2);
+  await press('map.search');
+  expect(placesService.nearby).toHaveBeenCalledTimes(3);
+  expect(placesService.nearby).toHaveBeenLastCalledWith({ center: { latitude: 38.52, longitude: -120.22 }, radiusMeters: 1000, language: 'en' });
+});
+it('does not retry a failed nearby request on refocus and allows an explicit Search retry', async () => {
+  vi.mocked(placesService.nearby).mockRejectedValueOnce(new Error('Nearby unavailable'));
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  await press('map.search');
+  controls.focused = false;
+  await act(async () => { tree!.update(renderMap()); });
+  controls.focused = true;
+  await act(async () => { tree!.update(renderMap()); });
+  expect(placesService.nearby).toHaveBeenCalledTimes(1);
+  await press('map.search');
+  expect(placesService.nearby).toHaveBeenCalledTimes(2);
+  expect(tree!.root.findAllByType('marker')).toHaveLength(1);
 });

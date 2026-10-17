@@ -29,6 +29,8 @@ See [design](docs/superpowers/specs/2026-10-17-argala-design.md), [implementatio
 
 The foundation separates authentication, foreground device location/heading, Google Maps, Places, walking routes, camera preview, and settings. Discovery accepts arbitrary geographic centers. It is not limited to a tourist catalog. AR uses GPS and compass bearings; spatial AR and turn-by-turn navigation are excluded.
 
+Tap Discover near me to load or refresh nearby results, select a POI to request its details, and tap Get walking route to request directions. Opening or returning to the map does not make paid provider requests. Results remain transient; if a location restart removes the map, tap Discover near me again.
+
 Google API content must not become a persistent POI database. Query data stays in memory, and no camera frames or travel history are persisted. Public Terms of Use and Privacy Policy URLs must be supplied before distributing the product.
 
 ## Supabase authentication

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
 import { router, useIsFocused } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -33,6 +33,7 @@ function LocatedMap() {
 }
 function MapContent({ position, accuracy, locationStatus }: { position: Coordinate; accuracy: number | null; locationStatus: React.ReactNode }) {
   const { t } = useTranslation(); const { language, activationRadiusMeters } = useSettings();
+  const queryClient = useQueryClient();
   const active = useAppActive(); const focused = useIsFocused(); const map = useRef<MapView>(null);
   const [mapReady, setMapReady] = useState(false);
   const [mapLaidOut, setMapLaidOut] = useState(false);
@@ -40,12 +41,16 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [routeRequest, setRouteRequest] = useState<WalkingRequest | null>(null);
   const enabled = active && focused && mapReady;
-  const nearby = useQuery({ queryKey: ['places', center, language], enabled,
-    queryFn: () => placesService.nearby({ center, radiusMeters: DISCOVERY.radiusMeters, language }) });
-  const details = useQuery({ queryKey: ['place-details', selectedId, language], enabled: enabled && Boolean(selectedId),
-    queryFn: () => placesService.details(selectedId!, language) });
-  const route = useQuery({ queryKey: ['walking-route', routeRequest], enabled: enabled && Boolean(routeRequest),
-    queryFn: async () => { const result = await routeService.walking(routeRequest!); return { ...result, coordinates: decodePolyline(result.encodedPolyline) }; } });
+  const nearbyOptions = (searchCenter: Coordinate) => ({ queryKey: ['places', searchCenter, language], staleTime: 0,
+    queryFn: () => placesService.nearby({ center: searchCenter, radiusMeters: DISCOVERY.radiusMeters, language }) });
+  const detailsOptions = (providerId: string | null) => ({ queryKey: ['place-details', providerId, language], staleTime: 0,
+    queryFn: () => placesService.details(providerId!, language) });
+  const routeOptions = (request: WalkingRequest | null) => ({ queryKey: ['walking-route', request], staleTime: 0,
+    queryFn: async () => { const result = await routeService.walking(request!); return { ...result, coordinates: decodePolyline(result.encodedPolyline) }; } });
+  // Observe transient results without allowing focus, remounts or invalidation to spend provider calls.
+  const nearby = useQuery({ ...nearbyOptions(center), enabled: false });
+  const details = useQuery({ ...detailsOptions(selectedId), enabled: false });
+  const route = useQuery({ ...routeOptions(routeRequest), enabled: false });
   useEffect(() => {
     if (!enabled || !mapLaidOut || !route.data) return;
     map.current?.fitToCoordinates(route.data.coordinates, {
@@ -54,11 +59,23 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   }, [enabled, mapLaidOut, route.data]);
   const place = details.data ?? nearby.data?.find((item) => item.providerId === selectedId);
   const open = useOpenProviderLink();
-  function select(providerId: string | null) { setSelectedId(providerId); setRouteRequest(null); }
+  function select(providerId: string | null) {
+    if (providerId && !enabled) return;
+    setSelectedId(providerId); setRouteRequest(null);
+    if (providerId) void queryClient.fetchQuery(detailsOptions(providerId)).catch(() => {});
+  }
   function discover() {
+    if (!enabled || nearby.isFetching) return;
     select(null);
-    if (center.latitude === position.latitude && center.longitude === position.longitude) void nearby.refetch();
-    else setCenter({ ...position });
+    const searchCenter = { ...position };
+    setCenter(searchCenter);
+    void queryClient.fetchQuery(nearbyOptions(searchCenter)).catch(() => {});
+  }
+  function walk() {
+    if (!enabled || !place || route.isFetching) return;
+    const request = { origin: { ...position }, destination: place.coordinates, language };
+    setRouteRequest(request);
+    void queryClient.fetchQuery(routeOptions(request)).catch(() => {});
   }
   return <View style={local.container}>
     <LaunchControls />
@@ -72,7 +89,7 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
       {route.data && <Polyline coordinates={route.data.coordinates} strokeColor="#125fac" strokeWidth={5} />}
     </MapView>
     <View style={local.controls}><Action title={t('map.recenter')} onPress={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
-      <Action title={t('map.search')} onPress={discover} disabled={!mapReady || nearby.isFetching} /></View>
+      <Action title={t('map.search')} onPress={discover} disabled={!enabled || nearby.isFetching} /></View>
     <ScrollView style={local.panel} contentContainerStyle={local.panelContent}>
       {locationStatus}
       {!mapReady && <Notice busy>{t('map.loading')}</Notice>}
@@ -88,7 +105,7 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
           <Text style={local.title}>{place.name}</Text>{place.address && <Text>{place.address}</Text>}{place.description && <Text>{place.description}</Text>}
           <Text>{t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters })}</Text>
           {place.mapsUri && <Action title={t('map.openGoogle')} onPress={() => open(place.mapsUri!)} />}
-          <Action title={t('map.walk')} onPress={() => setRouteRequest({ origin: { ...position }, destination: place.coordinates, language })} disabled={route.isFetching} />
+          <Action title={t('map.walk')} onPress={walk} disabled={!enabled || route.isFetching} />
         </>}
         <Action title={t('map.closePlace')} onPress={() => select(null)} />
       </>}
