@@ -1,11 +1,14 @@
 import { z } from 'zod';
 
 export const DISCOVERY_LIMITS = { maxRadiusMeters: 5000, maxResults: 20 } as const;
+export const REQUEST_LIMITS = { maxBodyBytes: 4096 } as const;
 export const coordinateSchema = z.object({ latitude: z.number().min(-90).max(90), longitude: z.number().min(-180).max(180) }).strict();
 export const languageSchema = z.enum(['en', 'ko', 'ja']);
 export type Language = z.infer<typeof languageSchema>;
 export const httpsUrlSchema = z.url().refine((value) => new URL(value).protocol === 'https:');
-const providerIdSchema = z.string().min(1).max(512).regex(/^[A-Za-z0-9_-]+$/);
+// Google specifies no ID length maximum. This ceiling comes from our request budget;
+// the Edge reader also limits the complete JSON envelope, including its overhead.
+const providerIdSchema = z.string().min(1).max(REQUEST_LIMITS.maxBodyBytes).regex(/^[A-Za-z0-9_-]+$/);
 export const nearbyRequestSchema = z.object({ center: coordinateSchema, radiusMeters: z.number().positive().max(DISCOVERY_LIMITS.maxRadiusMeters), language: languageSchema.default('en') }).strict();
 export const detailsRequestSchema = z.object({ providerId: providerIdSchema, language: languageSchema.default('en') }).strict();
 export const placeSchema = z.object({

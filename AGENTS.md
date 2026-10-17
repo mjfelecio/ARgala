@@ -15,6 +15,7 @@ General location-based discovery and a future curated tourist catalog must coexi
 ## Architecture and data boundaries
 
 - Keep feature code in `src/features/`; route files only assemble screens. Screens consume typed services; Google-specific request/response mapping stays behind provider boundaries. Pure geographic calculations must not import device APIs.
+- Preserve provider identifiers unchanged. Base identifier length checks on documented provider constraints or shared application payload budgets; enforce complete request limits before quota consumption or provider work.
 - Use React context for authentication/preferences, TanStack Query for transient server state, and React Native `StyleSheet` for presentation. Reuse the existing stack before adding dependencies.
 - Google Places and Routes web-service calls must go through authenticated Supabase Edge Functions. Keep server credentials in Edge secrets. The public Android Maps SDK key belongs in native configuration with package/SHA restrictions; it is distinct from server keys.
 - Preserve Edge authentication, schema validation, payload/result/radius limits, field masks, timeouts, sanitized errors and the atomic PostgreSQL request limiter before paid provider calls. See backend setup for deployment details.

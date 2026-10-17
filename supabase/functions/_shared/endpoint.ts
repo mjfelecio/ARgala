@@ -1,10 +1,10 @@
 import type { z } from 'zod';
 import { ApiError } from './errors.ts';
+import { REQUEST_LIMITS } from './contracts.ts';
 export type Access = { authenticate(token: string): Promise<string | null>; consume(userId: string): Promise<boolean> };
 const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
-const MAX_BYTES = 4096;
 async function readJson(request: Request): Promise<unknown> {
-  if (Number(request.headers.get('Content-Length')) > MAX_BYTES) throw new ApiError('BODY_TOO_LARGE', 413, 'Request body is too large.');
+  if (Number(request.headers.get('Content-Length')) > REQUEST_LIMITS.maxBodyBytes) throw new ApiError('BODY_TOO_LARGE', 413, 'Request body is too large.');
   if (!request.headers.get('Content-Type')?.toLowerCase().startsWith('application/json')) throw new ApiError('INVALID_CONTENT_TYPE', 415, 'Use application/json.');
   const reader = request.body?.getReader();
   if (!reader) throw new ApiError('INVALID_INPUT', 400, 'A JSON request body is required.');
@@ -13,7 +13,7 @@ async function readJson(request: Request): Promise<unknown> {
     while (true) {
       const { done, value } = await reader.read(); if (done) break;
       total += value.byteLength;
-      if (total > MAX_BYTES) { await reader.cancel(); throw new ApiError('BODY_TOO_LARGE', 413, 'Request body is too large.'); }
+      if (total > REQUEST_LIMITS.maxBodyBytes) { await reader.cancel(); throw new ApiError('BODY_TOO_LARGE', 413, 'Request body is too large.'); }
       text += decoder.decode(value, { stream: true });
     }
     text += decoder.decode();
