@@ -9,11 +9,14 @@
       "@/assets/*": [
         "./assets/*"
       ]
-    }
+    },
+    "allowImportingTsExtensions": true
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "app.config.ts",
+    "vitest.config.mts",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ]
