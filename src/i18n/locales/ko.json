@@ -28,5 +28,12 @@
   },
   "camera": {
     "title": "AR 미리보기"
+  },
+  "service": {
+    "failed": "요청을 완료하지 못했습니다. 다시 시도하세요.",
+    "unavailable": "서비스를 이용할 수 없습니다. 연결을 확인하고 다시 시도하세요.",
+    "rateLimited": "요청이 너무 많습니다. 1분 후에 다시 시도하세요.",
+    "unauthorized": "계속하려면 다시 로그인하세요.",
+    "routeUnavailable": "이 목적지로 가는 도보 경로가 없습니다."
   }
 }

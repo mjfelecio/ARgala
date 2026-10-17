@@ -83,5 +83,12 @@
     "activation": "{{active}} · {{distance}} meters away · activation radius {{meters}} meters",
     "active": "Within activation range",
     "inactive": "Outside activation range"
+  },
+  "service": {
+    "failed": "Unable to complete this request. Please try again.",
+    "unavailable": "The service is unavailable. Check your connection and try again.",
+    "rateLimited": "Too many requests. Wait a minute and try again.",
+    "unauthorized": "Sign in again to continue.",
+    "routeUnavailable": "No walking route is available for this destination."
   }
 }

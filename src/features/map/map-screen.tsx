@@ -14,6 +14,7 @@ import { useDeviceLocation } from '@/features/location/use-device-location';
 import { placesService } from '@/features/places/service';
 import { useSettings } from '@/features/settings/provider';
 import { useAppActive } from '@/lib/use-app-active';
+import { edgeErrorMessageKey } from '@/lib/edge-error';
 import { Action, Notice, Screen } from '@/ui/shared';
 import { ProviderAttributions, useOpenProviderLink } from './attributions';
 
@@ -95,12 +96,12 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
       {!mapReady && <Notice busy>{t('map.loading')}</Notice>}
       {accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}
       {nearby.isFetching && <Notice busy>{t('map.searching')}</Notice>}
-      {nearby.error && <Notice>{nearby.error.message}</Notice>}
+      {nearby.error && <Notice>{t(edgeErrorMessageKey(nearby.error))}</Notice>}
       {nearby.isSuccess && nearby.data.length === 0 && <Notice>{t('map.empty')}</Notice>}
       <Text>{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>
       {selectedId && <>
         {details.isFetching && <Notice busy>{t('map.details')}</Notice>}
-        {details.error && <Notice>{details.error.message}</Notice>}
+        {details.error && <Notice>{t(edgeErrorMessageKey(details.error))}</Notice>}
         {place && <>
           <Text style={local.title}>{place.name}</Text>{place.address && <Text>{place.address}</Text>}{place.description && <Text>{place.description}</Text>}
           <Text>{t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters })}</Text>
@@ -109,7 +110,7 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
         </>}
         <Action title={t('map.closePlace')} onPress={() => select(null)} />
       </>}
-      {route.isFetching && <Notice busy>{t('map.routeLoading')}</Notice>}{route.error && <Notice>{route.error.message}</Notice>}
+      {route.isFetching && <Notice busy>{t('map.routeLoading')}</Notice>}{route.error && <Notice>{t(edgeErrorMessageKey(route.error))}</Notice>}
       {route.data && <><Notice>{t('map.routeSummary', { meters: route.data.distanceMeters, minutes: Math.ceil(route.data.durationSeconds / 60) })}</Notice><Notice>{t('map.walkingCaution')}</Notice>{route.data.warnings.map((warning, index) => <Notice key={index}>{warning}</Notice>)}</>}
       <ProviderAttributions places={[...(nearby.data ?? []), ...(details.data ? [details.data] : [])]} />
     </ScrollView>

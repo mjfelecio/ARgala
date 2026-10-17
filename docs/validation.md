@@ -5,7 +5,7 @@ Local validation on 2026-10-17 used Node 22.19.0, Expo SDK 57.0.30, TypeScript 6
 | Check | Evidence/result |
 | --- | --- |
 | Lockfile installation | Clean `npm ci` completed after an interrupted registry download was diagnosed and recovered. |
-| `npm run check` | Passed after PR #1 follow-ups: strict TypeScript, zero-warning ESLint, 50 tests across 15 files. |
+| `npm run check` | Passed after PR #1 follow-ups: strict TypeScript, zero-warning ESLint, 64 tests across 16 files. |
 | `npm run check:edge` | All three Edge entrypoints type-check under Deno. |
 | Deno lint | Shared implementation and Edge handlers pass. |
 | `npm run test:limiter` | Actual isolated PostgreSQL migration: 32 concurrent calls allowed 30/denied 2; privileges and window reset passed. No existing database was used. |
@@ -32,6 +32,8 @@ Four map component regressions exercise the actual screen, query client and poly
 Four additional map regressions use the production query defaults (`staleTime: 0`, `gcTime: 0`) and reproduce unintended paid requests before the fix. Nearby, details and route observers now stay disabled; Search, POI selection and Walk explicitly fetch the corresponding query. Tests cover focus/foreground changes, location-driven remounts, repeated Search at unchanged or moved coordinates, and explicit recovery after failure. Returning to the map never initiates a provider call; the first nearby search also requires Search. Query data remains transient and is discarded when unused.
 
 Three timeout regressions run the real location service, hook, status component and i18next resources, mocking only native boundaries. Fake timers reproduce the actual 15-second GPS timeout in English, Korean and Japanese and verify successful retry clears the error and cancels the timer. Korean/Japanese cases failed with the previous hardcoded English message. The service now throws a typed timeout error; the hook preserves its code and the UI selects the localized resource. A later one-shot timeout still cannot replace an existing watcher failure.
+
+Edge failure regressions verify structured codes survive the client adapter, malformed/transport/invalid-response failures have typed fallbacks, and successful data remains validated. Six map component cases use real translation resources to cover nearby, details and route failures in Korean/Japanese, including rate limits, upstream errors, unavailable walking routes, unknown codes and ordinary errors. Failures reproduced before the fix. Map errors now select localized resources by code rather than rendering provider messages; unknown failures use a localized generic fallback.
 
 ## External configuration and checks still required
 
