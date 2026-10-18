@@ -56,3 +56,6 @@ coverage/
 *.apk
 *.aab
 supabase/.temp/
+
+# local UI kickoff and reference exports
+/ARgala_UI_Implementation_Kickoff/

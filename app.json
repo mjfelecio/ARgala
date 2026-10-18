@@ -37,6 +37,14 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "mapsConfigured": false,
+      "router": {},
+      "eas": {
+        "projectId": "98fa7d87-0f7d-4424-8da6-dd401b79811d"
+      }
+    },
+    "owner": "mjfelecios-team"
   }
 }
