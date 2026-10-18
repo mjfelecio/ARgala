@@ -2,6 +2,8 @@
 
 Android-only travel discovery foundation using Expo SDK 57 and Expo Router. Application source and configuration live directly in this repository root.
 
+For the complete path from Supabase, Google Cloud and Expo configuration to an installed Android APK, follow the [Android setup guide](docs/android-setup.md). It includes the project-owner-tested sequence, setup checkpoints, an optional development-client workflow and troubleshooting.
+
 ## Local setup
 
 Use Node 22.13 or newer (Node 22 LTS recommended) and npm. Install from the lockfile with `npm ci`.
@@ -60,4 +62,4 @@ The limiter check needs Python 3 and PostgreSQL server binaries. Edge checks use
 
 See the [validation report](docs/validation.md) for evidence, dependency advisories, external configuration and untested hardware/cloud behavior. Changing the Android Maps key requires regenerating native configuration and rebuilding: run `npx expo prebuild --platform android` before a local `npx expo run:android`, or use a fresh EAS build. Generated native directories are ignored and EAS uses the app config.
 
-Recommended next tasks: configure/deploy the hosted services, build and test an Android preview APK, review provider policies/quotas and inherited dependency advisories, then implement basic bearing-based POI overlays and verified curated content. Complete translation review and destination previews remain later work.
+Recommended next tasks: follow the [Android setup guide](docs/android-setup.md) for a new environment, record build/device validation, review provider policies/quotas and inherited dependency advisories, then implement basic bearing-based POI overlays and verified curated content. Complete translation review and destination previews remain later work.
