@@ -15,9 +15,10 @@ const controls = vi.hoisted(() => ({
   fit: vi.fn(), active: true, focused: true,
   language: 'en' as 'en' | 'ko' | 'ja',
   position: { latitude: 38.5, longitude: -120.2 },
+  params: {} as { placeId?: string },
 }));
 vi.mock('expo-constants', () => ({ default: { expoConfig: { extra: { mapsConfigured: true } } } }));
-vi.mock('expo-router', () => ({ router: { push: vi.fn() }, useIsFocused: () => controls.focused }));
+vi.mock('expo-router', () => ({ router: { push: vi.fn(), setParams: vi.fn(() => { controls.params = {}; }) }, useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params }));
 vi.mock('react-native', () => ({ View: 'view', Text: 'text', ScrollView: 'scroll', StyleSheet: { create: (styles: unknown) => styles } }));
 vi.mock('react-native-maps', async () => {
   const { createElement, forwardRef, useImperativeHandle } = await import('react');
@@ -33,7 +34,10 @@ vi.mock('@/features/location/status', () => ({ LocationStatus: () => null }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('@/features/places/service', () => ({ placesService: { nearby: vi.fn(), details: vi.fn() } }));
 vi.mock('@/features/directions/service', () => ({ routeService: { walking: vi.fn() } }));
-vi.mock('./attributions', () => ({ ProviderAttributions: () => null, useOpenProviderLink: () => vi.fn() }));
+vi.mock('./attributions', async () => {
+  const { createElement } = await import('react');
+  return { ProviderAttributions: (props: Record<string, unknown>) => createElement('aside', props), useOpenProviderLink: () => vi.fn() };
+});
 vi.mock('@/ui/shared', async () => {
   const { createElement } = await import('react');
   return { Screen: 'screen', Notice: 'output', Action: (props: Record<string, unknown>) => createElement('button', props) };
@@ -61,7 +65,7 @@ async function startRoute(laidOut = true) {
 }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-  controls.fit.mockReset(); controls.active = true; controls.focused = true;
+  controls.params = {}; controls.fit.mockReset(); controls.active = true; controls.focused = true;
   controls.language = 'en';
   translations = createInstance();
   await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
@@ -197,4 +201,50 @@ it.each([
   const notices = tree!.root.findAllByType('output').map((node) => node.props.children);
   expect(notices).toContain(message);
   expect(notices).not.toContain(failure.message);
+});
+
+it('accepts an AR Place ID from memory without paid calls and reuses the walking route flow', async () => {
+  client.setQueryData(['place-selection', destination.providerId], destination);
+  controls.params = { placeId: destination.providerId };
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  expect(JSON.stringify(tree!.toJSON())).toContain(destination.name);
+  expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(placesService.details).not.toHaveBeenCalled();
+  expect(tree!.root.findByType('aside').props.places).toContainEqual(destination);
+  await press('map.walk');
+  expect(routeService.walking).toHaveBeenCalledWith({ origin: controls.position, destination: destination.coordinates, language: 'en' });
+  await act(async () => { request.resolve(walkingRoute); });
+  expect(tree!.root.findAllByType('polyline')).toHaveLength(1);
+});
+it('consumes a new AR selection on an existing map without automatic details calls', async () => {
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  client.setQueryData(['place-selection', destination.providerId], destination);
+  controls.params = { placeId: destination.providerId };
+  await act(async () => { tree!.update(renderMap()); });
+  expect(JSON.stringify(tree!.toJSON())).toContain(destination.name);
+  expect(placesService.details).not.toHaveBeenCalled();
+  await press('map.walk'); expect(routeService.walking).toHaveBeenCalledTimes(1);
+});
+it('reopens the same consumed AR Place ID after closing the selection', async () => {
+  client.setQueryData(['place-selection', destination.providerId], destination);
+  controls.params = { placeId: destination.providerId };
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  await press('map.closePlace');
+  expect(tree!.root.findAllByType('button').some((b) => b.props.title === translations.t('map.walk'))).toBe(false);
+  controls.params = { placeId: destination.providerId };
+  await act(async () => { tree!.update(renderMap()); });
+  expect(tree!.root.findAllByType('button').some((b) => b.props.title === translations.t('map.walk'))).toBe(true);
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+it('offers an explicit details request when the handoff has expired', async () => {
+  controls.params = { placeId: destination.providerId };
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  expect(JSON.stringify(tree!.toJSON())).toContain(translations.t('map.selectionUnavailable'));
+  expect(placesService.details).not.toHaveBeenCalled();
+  await press('ar.more'); expect(placesService.details).toHaveBeenCalledWith(destination.providerId, 'en');
+  expect(tree!.root.findAllByType('button').some((b) => b.props.title === translations.t('map.walk'))).toBe(true);
 });
