@@ -1,5 +1,7 @@
 # Supabase and Google setup
 
+For the complete setup sequence through Expo signing, an Android APK and phone installation, start with the [Android setup guide](android-setup.md). This document explains the backend contracts and deployment details behind that walkthrough.
+
 Create a Supabase project; use its public publishable key only in the mobile environment. Enable email/password authentication and configure email delivery/confirmation. The foundation uses Supabase PostgreSQL for Auth plus a private request counter, without profile, catalog, POI or travel-history tables.
 
 From the project root, install/use the Supabase CLI and link your project:

@@ -43,7 +43,13 @@ The related message-state audit found Settings still retained translated text. T
 
 Five Places integration cases exercise the real client, Edge adapter, authenticated endpoint wrapper and Google request builder with transport/auth/provider boundaries mocked. IDs of 513, 1000 and 4063 characters reach the provider URL unchanged; the last request fills the complete 4096-byte budget. A 4097-byte envelope fails before quota consumption/provider work, and an identifier that alone exceeds the budget fails before invoking Edge. The original 512-character validation reproduced the failure before the fix. The application body limit, format validation, authentication and limiter order remain intact. This proves contract handling, not the existence of the synthetic IDs or live Google responses.
 
-## External configuration and checks still required
+## Project-owner setup report — 2026-10-18
+
+The project owner reported that every step in the [Android setup walkthrough](android-setup.md) worked correctly, including the sequence from external-service configuration through running the app on a phone. This is user-reported evidence, separate from the agent-run automated checks above. The report did not include a device model, Android version, EAS build ID or individual scenario results; those details have not been inferred, and the setup-guide PR does not repeat deployments or builds.
+
+The historical configuration limitations below describe the original foundation validation on 2026-10-17, rather than the current state of the owner's configured environment. Broader permission, lifecycle and field checks remain necessary before client UAT. Use the guide's device checklist to record future evidence.
+
+## Original external-validation limits and remaining field checks
 
 - Supabase and Google credentials were not supplied (`.env` is absent). Hosted migrations, Edge deployment, real sign-in/registration/email delivery, Places/details, Maps tiles/native POI taps, and real walking routes have not been exercised.
 - EAS project ID/build environment is not configured. No EAS cloud APK build, signing, installation or hardware validation occurred.
