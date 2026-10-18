@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { AppState } from 'react-native';
+function subscribe(onChange: () => void) {
+  const listener = AppState.addEventListener('change', onChange);
+  return () => listener.remove();
+}
+const getSnapshot = () => AppState.currentState === 'active';
 export function useAppActive() {
-  const [active, setActive] = useState(AppState.currentState === 'active');
-  useEffect(() => { const listener = AppState.addEventListener('change', (value) => setActive(value === 'active')); return () => listener.remove(); }, []);
-  return active;
+  // Recheck the native snapshot when subscribing, including changes missed after render.
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }

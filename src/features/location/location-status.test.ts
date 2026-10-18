@@ -3,29 +3,37 @@ import { createInstance } from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { getCurrentPositionAsync, hasServicesEnabledAsync, requestForegroundPermissionsAsync, watchPositionAsync } from 'expo-location';
+import { getCurrentPositionAsync, hasServicesEnabledAsync, requestForegroundPermissionsAsync, watchHeadingAsync, watchPositionAsync } from 'expo-location';
 import { localizationOptions } from '@/i18n/options';
 import { LocationStatus } from './status';
 import { useDeviceLocation } from './use-device-location';
 
+const foreground = vi.hoisted(() => ({ active: true, activateDuringSubscribe: false, listeners: new Set<(state: string) => void>() }));
 vi.mock('expo-location', () => ({
   Accuracy: { High: 4 },
   requestForegroundPermissionsAsync: vi.fn(async () => ({ granted: true, canAskAgain: true })),
   hasServicesEnabledAsync: vi.fn(async () => true),
   getCurrentPositionAsync: vi.fn(),
   watchPositionAsync: vi.fn(async () => ({ remove: vi.fn() })),
+  watchHeadingAsync: vi.fn(async () => ({ remove: vi.fn() })),
 }));
-vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => true }));
 vi.mock('expo-router', async () => {
   const { useEffect } = await import('react');
   return { useFocusEffect: (callback: () => void) => useEffect(callback, [callback]) };
 });
-vi.mock('react-native', () => ({ Alert: { alert: vi.fn() }, Linking: { openSettings: vi.fn() } }));
+vi.mock('react-native', () => ({ Alert: { alert: vi.fn() }, Linking: { openSettings: vi.fn() }, AppState: {
+  get currentState() { return foreground.active ? 'active' : 'background'; },
+  addEventListener: (_event: string, listener: (state: string) => void) => {
+    if (foreground.activateDuringSubscribe) foreground.active = true;
+    foreground.listeners.add(listener);
+    return { remove: () => foreground.listeners.delete(listener) };
+  },
+} }));
 vi.mock('@/ui/shared', async () => {
   const { createElement } = await import('react');
   return { Notice: 'output', Action: (props: Record<string, unknown>) => createElement('button', props) };
 });
-function Probe() { return React.createElement(LocationStatus, { location: useDeviceLocation() }); }
+function Probe({ heading = false }: { heading?: boolean }) { return React.createElement(LocationStatus, { location: useDeviceLocation({ heading }) }); }
 let tree: ReactTestRenderer | undefined;
 const fix: Awaited<ReturnType<typeof getCurrentPositionAsync>> = {
   coords: { latitude: 11.01, longitude: 124.61, accuracy: 8, altitude: null, altitudeAccuracy: null, heading: null, speed: null }, timestamp: 1,
@@ -33,10 +41,22 @@ const fix: Awaited<ReturnType<typeof getCurrentPositionAsync>> = {
 beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
   vi.useFakeTimers();
+  foreground.active = true; foreground.activateDuringSubscribe = false;
+  foreground.listeners.clear();
   vi.mocked(getCurrentPositionAsync).mockReset().mockImplementation(() => new Promise(() => {}));
   vi.mocked(watchPositionAsync).mockClear();
+  vi.mocked(watchHeadingAsync).mockClear();
   const original = console.error;
   vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
+});
+it('starts GPS without reopening after a foreground subscription race', async () => {
+  foreground.active = false; foreground.activateDuringSubscribe = true;
+  vi.mocked(getCurrentPositionAsync).mockResolvedValueOnce(fix);
+  const i18n = createInstance();
+  await i18n.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
+  await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe))); });
+  expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('ready');
+  expect(tree!.root.findAllByType('output')).toHaveLength(0);
 });
 afterEach(async () => {
   await act(async () => tree?.unmount()); tree = undefined;
@@ -55,6 +75,89 @@ it.each([
   vi.mocked(getCurrentPositionAsync).mockResolvedValue(fix);
   await act(async () => { tree!.root.findByType('button').props.onPress(); });
   expect(tree!.root.findAllByType('output')).toHaveLength(0);
+  expect(vi.getTimerCount()).toBe(0);
+});
+it.each(['permission', 'services'] as const)('times out a stalled %s check and ignores its late completion', async (stage) => {
+  const permission = Promise.withResolvers<Awaited<ReturnType<typeof requestForegroundPermissionsAsync>>>();
+  const services = Promise.withResolvers<boolean>();
+  if (stage === 'permission') vi.mocked(requestForegroundPermissionsAsync).mockReturnValueOnce(permission.promise);
+  else vi.mocked(hasServicesEnabledAsync).mockReturnValueOnce(services.promise);
+  const i18n = createInstance();
+  await i18n.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
+  await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe))); });
+  const watchCount = vi.mocked(watchPositionAsync).mock.calls.length;
+  await act(async () => { await vi.advanceTimersByTimeAsync(15000); });
+  expect(tree!.root.findByType('output').props.children).toBe('Location timed out. Try outdoors with location services enabled.');
+  await act(async () => {
+    permission.resolve({ granted: true, canAskAgain: true, status: 'granted', expires: 'never' } as Awaited<ReturnType<typeof requestForegroundPermissionsAsync>>);
+    services.resolve(true);
+  });
+  expect(watchPositionAsync).toHaveBeenCalledTimes(watchCount);
+  expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('error');
+  vi.mocked(getCurrentPositionAsync).mockResolvedValueOnce(fix);
+  await act(async () => { tree!.root.findByType('button').props.onPress(); });
+  expect(tree!.root.findAllByType('output')).toHaveLength(0);
+  expect(vi.getTimerCount()).toBe(0);
+});
+it('removes late watcher setup and ignores a late fix after the startup deadline', async () => {
+  const watch = Promise.withResolvers<Awaited<ReturnType<typeof watchPositionAsync>>>();
+  const oneShot = Promise.withResolvers<typeof fix>();
+  const remove = vi.fn();
+  vi.mocked(watchPositionAsync).mockReturnValueOnce(watch.promise);
+  vi.mocked(getCurrentPositionAsync).mockReturnValueOnce(oneShot.promise);
+  const i18n = createInstance();
+  await i18n.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
+  await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe))); });
+  await act(async () => { await vi.advanceTimersByTimeAsync(15000); });
+  expect(tree!.root.findByType(LocationStatus).props.location.errorCode).toBe('timeout');
+  await act(async () => { watch.resolve({ remove }); oneShot.resolve(fix); });
+  expect(remove).toHaveBeenCalledOnce();
+  expect(tree!.root.findByType(LocationStatus).props.location.position).toBeNull();
+  expect(tree!.root.findByType(LocationStatus).props.location.errorCode).toBe('timeout');
+  expect(vi.getTimerCount()).toBe(0);
+});
+it.each(['pending', 'ready'] as const)('invalidates a %s heading when GPS startup expires', async (headingStatus) => {
+  const permission = Promise.withResolvers<Awaited<ReturnType<typeof requestForegroundPermissionsAsync>>>();
+  if (headingStatus === 'pending') vi.mocked(requestForegroundPermissionsAsync).mockReturnValueOnce(permission.promise);
+  const i18n = createInstance();
+  await i18n.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
+  await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe, { heading: true }))); });
+  if (headingStatus === 'pending') {
+    // Start the 10-second heading watchdog later than the overall GPS deadline.
+    await act(async () => { await vi.advanceTimersByTimeAsync(8000); permission.resolve({ granted: true, canAskAgain: true } as Awaited<ReturnType<typeof requestForegroundPermissionsAsync>>); });
+  } else {
+    await act(async () => { vi.mocked(watchHeadingAsync).mock.calls[0][0]({ trueHeading: 90, magHeading: 90, accuracy: 3 }); });
+  }
+  expect(tree!.root.findByType(LocationStatus).props.location.headingStatus).toBe(headingStatus);
+  await act(async () => { await vi.advanceTimersByTimeAsync(headingStatus === 'pending' ? 7000 : 15000); });
+  const location = tree!.root.findByType(LocationStatus).props.location;
+  expect(location.errorCode).toBe('timeout');
+  expect(location.headingStatus).toBe('unavailable');
+  expect(location.heading).toBeNull();
+  expect(vi.getTimerCount()).toBe(0);
+});
+it('keeps a watcher fix usable when the one-shot GPS request never resolves', async () => {
+  const i18n = createInstance();
+  await i18n.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
+  await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe))); });
+  await act(async () => { vi.mocked(watchPositionAsync).mock.calls[0][1](fix); await vi.advanceTimersByTimeAsync(20000); });
+  expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('ready');
+  expect(vi.getTimerCount()).toBe(0);
+});
+it('cancels startup while backgrounded and restarts after the permission activity returns', async () => {
+  const permission = Promise.withResolvers<Awaited<ReturnType<typeof requestForegroundPermissionsAsync>>>();
+  vi.mocked(requestForegroundPermissionsAsync).mockReturnValueOnce(permission.promise);
+  const i18n = createInstance();
+  await i18n.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
+  await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe))); });
+  await act(async () => { foreground.active = false; foreground.listeners.forEach((listener) => listener('background')); });
+  expect(vi.getTimerCount()).toBe(0);
+  await act(async () => { await vi.advanceTimersByTimeAsync(20000); });
+  vi.mocked(getCurrentPositionAsync).mockResolvedValueOnce(fix);
+  await act(async () => { foreground.active = true; foreground.listeners.forEach((listener) => listener('active')); });
+  expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('ready');
+  await act(async () => { permission.resolve({ granted: false, canAskAgain: true } as Awaited<ReturnType<typeof requestForegroundPermissionsAsync>>); });
+  expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('ready');
   expect(vi.getTimerCount()).toBe(0);
 });
 const failures = [

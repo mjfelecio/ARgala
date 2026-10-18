@@ -1,21 +1,16 @@
 import * as ExpoLocation from 'expo-location';
 import { LOCATION } from '@/config/limits';
 import { isCoordinate, normalizeHeading } from './geo';
-import { LocationError, LocationTimeoutError } from './errors';
+import { LocationError } from './errors';
 
 export type Heading = { degrees: number; reference: 'true' | 'magnetic'; accuracy: number };
 export const requestLocationPermission = () => ExpoLocation.requestForegroundPermissionsAsync();
 export const isLocationEnabled = () => ExpoLocation.hasServicesEnabledAsync();
 export async function getCurrentCoordinates() {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    const position = await Promise.race([
-      ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.High }),
-      new Promise<never>((_resolve, reject) => { timer = setTimeout(() => reject(new LocationTimeoutError()), LOCATION.timeoutMs); }),
-    ]);
-    if (!isCoordinate(position.coords)) throw new LocationError('invalid-position', 'The device returned invalid coordinates.');
-    return position;
-  } finally { clearTimeout(timer); }
+  // The focused owner bounds the entire startup, including permissions and service checks.
+  const position = await ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.High });
+  if (!isCoordinate(position.coords)) throw new LocationError('invalid-position', 'The device returned invalid coordinates.');
+  return position;
 }
 export function subscribeToLocation(onPosition: (position: ExpoLocation.LocationObject) => void, onError: (error: LocationError) => void) {
   return ExpoLocation.watchPositionAsync({ accuracy: ExpoLocation.Accuracy.High, distanceInterval: LOCATION.distanceIntervalMeters, timeInterval: LOCATION.timeIntervalMs },
