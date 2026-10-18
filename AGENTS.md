@@ -8,6 +8,7 @@ ARgala is an Android-only travel discovery app built with Expo SDK 57 and strict
 - [Foundation implementation plan](docs/superpowers/plans/2026-10-17-argala-foundation.md) records the task boundaries.
 - [Discovery extension guide](docs/extending-discovery.md) explains future curated-catalog integration.
 - [Backend setup](docs/backend-setup.md) and [validation evidence](docs/validation.md) describe configuration, checks and outstanding device work.
+- For React Native work, consult the owner's working HOP applications as references for their established patterns and engineering decisions: `~/Source/internship/HOP` and `~/Source/internship/HOP-Driver` (verified local paths). Inspect the relevant implementation before proposing an approach, and adapt those patterns to ARgala's requirements and installed SDK.
 - The draft SRS is not checked into this repository. When it is supplied, reconcile it with the approved architecture; do not infer a nine-destination or Ormoc-only discovery restriction from the draft catalog.
 
 General location-based discovery and a future curated tourist catalog must coexist. Accept arbitrary search centers, including future selected-destination coordinates. Keep catalog ownership and verified tourist content in a future destinations feature; do not add a comprehensive POI database, admin portal or turn-by-turn navigation to the foundation.
