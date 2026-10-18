@@ -37,7 +37,7 @@
 
 ## Task 3: Evidence and PR
 
-- [ ] Attempt development APK build and Android runtime showcase verification using available EAS tooling.
-- [ ] Record exact evidence, selected versions, CSS structure, Phase 2 component mapping and outstanding device checks in `docs/validation.md` and UI integration documentation.
-- [ ] Review the branch, commit documentation, push the dedicated branch and create a focused PR; never merge.
-- [ ] Report Phase 1 results and justified custom components before Phase 2 or additional screens.
+- [x] Attempt development APK build and Android runtime showcase verification using available EAS tooling. APK build passed; installation/runtime verification remains blocked on Android device access.
+- [x] Record exact evidence, selected versions, CSS structure, Phase 2 component mapping and outstanding device checks in `docs/validation.md` and UI integration documentation.
+- [x] Review the branch, commit documentation, push the dedicated branch and create a focused PR; never merge.
+- [x] Report Phase 1 results and justified custom components before Phase 2 or additional screens.
