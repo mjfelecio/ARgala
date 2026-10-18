@@ -92,7 +92,11 @@
     "active": "Within activation range",
     "inactive": "Outside activation range",
     "selectionUnavailable": "The selected place is no longer in memory. Load its details to continue.",
-    "explore": "Explore"
+    "explore": "Explore",
+    "start": "Tap Search Nearby to discover places around your location.",
+    "expand": "Show more",
+    "collapse": "Show less",
+    "results": "{{count}} places returned. Tap a map marker to explore."
   },
   "service": {
     "failed": "Unable to complete this request. Please try again.",
