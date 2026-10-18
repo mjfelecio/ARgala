@@ -127,3 +127,76 @@ npm's suggested direct-package changes include Expo/React Native downgrades or a
 No curated tourist catalog/restriction, verified destination assets/daytime previews, complete reviewed translations, spatial tracking, 3D engine, comprehensive POI database, admin portal or turn-by-turn navigation is implemented. The shared arbitrary-center Places contract and documented catalog integration point preserve both general discovery and future destination-centered supporting establishments. A future 500-meter destination filter remains separate from the 100-meter initial activation setting.
 
 The corrected camera screen was exported after the regression fix. Subsequent backend-only key selection passed its tests, full TypeScript/lint suite and Deno checks. CI is configured to repeat the available checks on the PR; its result should be read from GitHub rather than inferred from this local report.
+
+## Clean Explorer Home UI — 2026-10-18
+
+Branch `feat/ui-home-map` starts from verified `origin/main` at `87db710`.
+Work is isolated in `/tmp/argala-ui-home-map`; the owner's original checkout,
+uncommitted `app.json` change and supplied kickoff folder remain untouched.
+The [approved reference subset](design/clean-explorer/README.md) includes the
+unmodified handoff documents and H01 PNG (SHA-256
+`f9eedd8c3b5b8cfdd4b16635a975f787270fff0e2e91c927977df8290b1d47a5`).
+
+Home now uses shared Clean Explorer tokens and native pill/circle actions,
+floating Search Nearby/AR/Settings/Recenter controls, and a compact docked panel
+with an explicit Show more/Show less action. The native Google map remains
+mounted underneath. The panel displays actual selected-place and walking-route
+content, localized states, location guidance and provider credits. It adds no
+provider fields, backend changes, persistent result storage or dependencies.
+
+| Agent-run check | Result |
+| --- | --- |
+| Baseline `npm run check` | Typecheck, lint and 169 tests across 24 files passed |
+| Final `npm run check` | Typecheck, zero-warning lint and 193 tests across 28 files passed |
+| `npm run check:android` | SDK 57 Android-only configuration, permissions, Maps injection and EAS profile assertions passed with a nonfunctional marker |
+| `npm run export:android` | Metro/React Compiler/Hermes export passed; one Android bundle, approximately 4.5 MB |
+| `git diff --check` | Passed |
+| Reference comparison | H01 image opened and reviewed; copied PNG hash matches supplied source |
+
+The new tests first reproduced absent primitives/controls/panel and missing
+measured layout behavior, then passed with the implementation. Tests use the
+real screen, actions, panel, i18next resources and production Query defaults,
+mocking native/network boundaries. They cover action variants, busy/disabled
+semantics, accessible labels and declared hit targets; unsearched/loading/empty/
+error/retry/results states; long names and missing optional fields; route summary
+and walking warnings; live error-key translation; selection/AR handoff; no paid
+calls on expansion, collapse, pan, focus, foreground, locale changes, remount or
+invalidation; and denied/disabled/approximate location feedback. Existing tests
+cover explicit Search, POI selection, Walk, error fallbacks and recovery.
+
+Independent whole-branch review found two panel issues. Two failing regressions
+drove moving the heading/expansion action into the bounded ScrollView so a
+104-unit panel cap cannot allocate all height to a fixed heading, and moving the
+returned route summary/caution immediately after the destination before activation
+metadata, repeat Walk and Close. The short-height check verifies scroll containment
+and declared cap, not native layout at 150% font scale. Both regressions now pass.
+Review reported no Critical or Minor issues; the two Important findings were fixed.
+
+Android route fitting reserves the measured header and panel in `mapPadding`,
+which also lifts native Google legal controls above the panel. The installed
+`react-native-maps` Android implementation **adds** `fitToCoordinates` edge
+padding to `mapPadding`, so fit calls supply only a bounded extra margin.
+Changes in map/overlay dimensions refit an existing route without another paid
+request; GPS updates alone leave the viewport stable. These tests verify native
+props/commands, not the final Yoga geometry or Google camera animation.
+
+Intentional differences from H01: Android system font and CJK glyph fallback
+(no supplied Plus Jakarta Sans binary); existing protected-stack header and
+AR/Settings entry points (future three-destination shell is excluded); explicit
+expand/collapse instead of a decorative drag handle; actual Google tiles and
+provider data. No categories, microphone, Saved/avatar interactions, sample
+ratings/hours or static Lisbon artwork were added. The existing shared controls
+on other screens and their presentation remain outside this UI pass.
+
+**Device/visual acceptance remains pending.** Neither `adb` nor a local Android
+emulator is installed in this environment; no before/after device screenshots,
+configured APK build/install, live provider calls or outdoor tests were performed.
+H01 comparison at matching viewport, normal/150% text, Korean/Japanese long labels,
+short/multiwindow screens, insets, native Google attribution visibility and touch
+reachability requires a real Android run. Manually exercise Search/no results,
+native POI tap/details failure, AR return/selection, Walk/no route, panel expansion,
+location denied/disabled/approximate and background/foreground transitions before
+client demonstration. Passing tests and export do not establish UAT.
+
+Packages and native configuration did not change, so SDK dependency checks,
+Expo Doctor and Edge/limiter checks were not rerun for this UI-only change.
