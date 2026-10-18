@@ -50,6 +50,8 @@ example
 .code-review-graph/
 .superpowers/
 .claude/
+.agents/
+skills-lock.json
 coverage/
 *.apk
 *.aab
