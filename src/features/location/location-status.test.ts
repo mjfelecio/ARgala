@@ -19,9 +19,9 @@ vi.mock('expo-location', () => ({
 }));
 vi.mock('expo-router', async () => {
   const { useEffect } = await import('react');
-  return { useFocusEffect: (callback: () => void) => useEffect(callback, [callback]) };
+  return { useIsFocused: () => true, useFocusEffect: (callback: () => void) => useEffect(callback, [callback]) };
 });
-vi.mock('react-native', () => ({ Alert: { alert: vi.fn() }, Linking: { openSettings: vi.fn() }, AppState: {
+vi.mock('react-native', () => ({ Text: 'text', Alert: { alert: vi.fn() }, Linking: { openSettings: vi.fn() }, AppState: {
   get currentState() { return foreground.active ? 'active' : 'background'; },
   addEventListener: (_event: string, listener: (state: string) => void) => {
     if (foreground.activateDuringSubscribe) foreground.active = true;
@@ -39,7 +39,7 @@ const fix: Awaited<ReturnType<typeof getCurrentPositionAsync>> = {
   coords: { latitude: 11.01, longitude: 124.61, accuracy: 8, altitude: null, altitudeAccuracy: null, heading: null, speed: null }, timestamp: 1,
 };
 beforeEach(() => {
-  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   vi.useFakeTimers();
   foreground.active = true; foreground.activateDuringSubscribe = false;
   foreground.listeners.clear();
@@ -57,6 +57,18 @@ it('starts GPS without reopening after a foreground subscription race', async ()
   await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe))); });
   expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('ready');
   expect(tree!.root.findAllByType('output')).toHaveLength(0);
+});
+it('shows the developer startup marker with focus and phase without location data', async () => {
+  Object.assign(globalThis, { __DEV__: true });
+  const trace = vi.spyOn(console, 'info').mockImplementation(() => {});
+  const i18n = createInstance();
+  await i18n.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
+  await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe))); });
+  const debug = JSON.parse(tree!.root.findByType('text').props.children);
+  expect(debug).toEqual({ sensorDebug: 2, active: true, focused: true, phase: 'position', status: 'loading', watcherStatus: 'pending', errorCode: null });
+  expect(trace).toHaveBeenCalledWith('[ARgala sensor startup v2]', expect.objectContaining({ active: true, focused: true, phase: 'position' }));
+  expect(JSON.stringify(trace.mock.calls)).not.toContain('latitude');
+  expect(JSON.stringify(trace.mock.calls)).not.toContain('longitude');
 });
 afterEach(async () => {
   await act(async () => tree?.unmount()); tree = undefined;

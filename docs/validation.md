@@ -5,7 +5,7 @@ Local validation on 2026-10-17 used Node 22.19.0, Expo SDK 57.0.30, TypeScript 6
 | Check | Evidence/result |
 | --- | --- |
 | Lockfile installation | Clean `npm ci` completed after an interrupted registry download was diagnosed and recovered. |
-| `npm run check` | Passed after sensor-startup follow-ups: strict TypeScript, zero-warning ESLint, 110 tests across 20 files. |
+| `npm run check` | Passed after sensor-startup follow-ups: strict TypeScript, zero-warning ESLint, 115 tests across 21 files. |
 | `npm run check:edge` | All three Edge entrypoints type-check under Deno. |
 | Deno lint | Shared implementation and Edge handlers pass. |
 | `npm run test:limiter` | Actual isolated PostgreSQL migration: 32 concurrent calls allowed 30/denied 2; privileges and window reset passed. No existing database was used. |
@@ -13,7 +13,7 @@ Local validation on 2026-10-17 used Node 22.19.0, Expo SDK 57.0.30, TypeScript 6
 | `npx expo-doctor` | 21/21 checks passed. |
 | `npx expo prebuild --platform android --no-install` | Android native project generated successfully; required permissions and blocked audio/background location inspected. Generated native files stay ignored. |
 | `npm run check:android` | Introspection validates SDK/platform/package, foreground/camera permissions, blocked audio/background permissions, native Maps key injection, and EAS APK profiles. Uses a nonfunctional process-local validation marker, not a real key. |
-| Android export | Source including the shared Place ID/request budget fix passed Metro/Hermes export (1551 modules, 4.5 MB bundle). This is not an APK/native compilation. |
+| Android export | Source including the sensor-startup/focus follow-up passed Metro/Hermes export (4.5 MB bundle). This is not an APK/native compilation. |
 | Independent review | Review follow-ups cover Android camera compatibility/recovery, watcher health, route framing, manual paid requests and localized location/Edge/auth errors. Regression evidence appears below. |
 | Dependency audit | `npm audit --omit=dev` reports 30 transitive counted findings (19 high, 11 moderate, 0 critical), rooted in four advisories. See details below. |
 
@@ -56,6 +56,12 @@ The owner subsequently tested on a Samsung A53 5G running Android 16. Sign-in wo
 Five regressions failed before the fix: a foreground change between render and listener registration was missed by the shared app-state hook, the same race prevented the real location hook and camera screen from starting, and stalled permission/services checks never reached the existing GPS-only timeout. The foreground hook now uses a subscription-consistent native snapshot. One 15-second deadline bounds the complete focused location attempt and retires its owner on expiry, ignoring late results and removing late subscriptions. Existing watcher-health rules remain covered.
 
 Twelve added cases cover those failures, subsequent foreground changes/listener cleanup, immediate camera permission grant, late watcher/fix completion after timeout, watcher success while the one-shot request stalls, and leaving/returning through a permission activity. Independent review exposed stale/pending heading state after the timeout stopped its watcher; two further failing cases drove clearing the heading and marking it unavailable when the owner expires. The complete suite passes 110 tests across 20 files, with lint and typecheck. Native boundaries are mocked; these results do not establish that the Samsung hardware behavior or process exit is resolved. Revalidation on that phone remains required. No dependency, native configuration or native-module changes are needed for these JavaScript fixes.
+
+The owner retested that first fix and reported unchanged behavior, including after clearing the bundle cache and app data. The only supplied log was Supabase's deprecated `lock` option warning; no native crash stack was available. This retest means the initial fix has not resolved the reported phone behavior.
+
+A follow-up reproduction uses the installed Expo Router 57 hooks with fixture navigation contexts and a pending navigation-container ref. In that condition the route can report focused while `useFocusEffect` never invokes its callback, so the location deadline is never created. Earlier tests replaced that hook with a plain effect and missed this gate. Location startup and camera permission refresh now use effects owned by the reactive focused/foreground state. Camera permission lookup is explicitly owned by that lifecycle, with rejected lookups handled. Four new regressions failed before these changes and pass afterward: first GPS startup, its deadline, cleanup on loss of focus and camera permission refresh after foreground return. The reproduction establishes an SDK lifecycle condition; it does not establish that this is the condition occurring on the Samsung phone.
+
+Development builds now show a selectable JSON indicator with `sensorDebug: 2`, foreground/focus state and location startup phase (`waiting`, `permission`, `services` or `position`). A matching console trace records state transitions. Camera diagnostics show permission and lifecycle state. These contain no coordinates, credentials or raw native errors and are excluded from release display/logging. One additional real-hook/status regression checks the diagnostic path. Full typecheck, zero-warning lint and 115 tests across 21 files pass. The next phone test should confirm the marker and supply its state if startup still stalls; native process-exit diagnosis remains outstanding.
 
 ## Original external-validation limits and remaining field checks
 

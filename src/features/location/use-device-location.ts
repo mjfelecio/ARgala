@@ -1,6 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppActive } from '@/lib/use-app-active';
-import { useFocusEffect } from 'expo-router';
+import { useIsFocused } from 'expo-router';
 import { LOCATION } from '@/config/limits';
 import type { Coordinate } from './geo';
 import { manageSubscription } from './lifecycle';
@@ -8,20 +8,27 @@ import { locationFailure, LocationTimeoutError, type LocationErrorCode } from '.
 import { getCurrentCoordinates, isLocationEnabled, requestLocationPermission, subscribeToHeading, subscribeToLocation, type Heading } from './service';
 
 type DeviceState = {
+  phase: 'waiting' | 'permission' | 'services' | 'position';
   status: 'loading' | 'ready' | 'denied' | 'disabled' | 'error';
   watcherStatus: 'pending' | 'ready' | 'error';
   errorCode: LocationErrorCode | null;
   position: Coordinate | null; accuracy: number | null; heading: Heading | null;
   headingStatus: 'pending' | 'ready' | 'unavailable'; canAskAgain: boolean; error: string | null;
 };
-const initial: DeviceState = { status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, headingStatus: 'pending', canAskAgain: true, error: null };
+const initial: DeviceState = { phase: 'waiting', status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, headingStatus: 'pending', canAskAgain: true, error: null };
 
 export function useDeviceLocation({ heading: needsHeading = false } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
   const [attempt, setAttempt] = useState(0);
   const active = useAppActive();
-  useFocusEffect(useCallback(() => {
-    if (!active) return;
+  const focused = useIsFocused();
+  useEffect(() => {
+    if (typeof __DEV__ !== 'undefined' && __DEV__) console.info('[ARgala sensor startup v2]', {
+      active, focused, phase: state.phase, status: state.status, watcherStatus: state.watcherStatus, errorCode: state.errorCode,
+    });
+  }, [active, focused, state.phase, state.status, state.watcherStatus, state.errorCode]);
+  useEffect(() => {
+    if (!active || !focused) return;
     let disposed = false;
     const stops: (() => void)[] = [];
     let headingTimer: ReturnType<typeof setTimeout> | undefined;
@@ -32,7 +39,7 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
       stops.forEach((unsubscribe) => unsubscribe());
     };
     async function start() {
-      patch(initial);
+      patch({ ...initial, phase: 'permission' });
       // Bound all startup stages, not just the final GPS request. Expire this owner so
       // late native results cannot start new watchers or overwrite a subsequent retry.
       startupTimer = setTimeout(() => {
@@ -42,8 +49,10 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
       const permission = await requestLocationPermission();
       if (disposed) return;
       if (!permission.granted) { clearTimeout(startupTimer); patch({ status: 'denied', canAskAgain: permission.canAskAgain }); return; }
+      patch({ phase: 'services' });
       if (!await isLocationEnabled()) { clearTimeout(startupTimer); patch({ status: 'disabled' }); return; }
       if (disposed) return;
+      patch({ phase: 'position' });
       const receive = (position: Awaited<ReturnType<typeof getCurrentCoordinates>>, fromWatcher = false) => {
         if (disposed) return;
         clearTimeout(startupTimer);
@@ -73,8 +82,7 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
     }
     void start().catch((error: unknown) => { clearTimeout(startupTimer); patch({ status: 'error', ...locationFailure(error) }); });
     return stop;
-    // Retry must replace the focused callback to restart native permission and sensor setup.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, attempt, needsHeading]));
-  return { ...state, retry: () => setAttempt((value) => value + 1) };
+  }, [active, focused, attempt, needsHeading]);
+  return { ...state, retry: () => setAttempt((value) => value + 1),
+    debug: { sensorDebug: 2, active, focused, phase: state.phase, status: state.status, watcherStatus: state.watcherStatus, errorCode: state.errorCode } };
 }

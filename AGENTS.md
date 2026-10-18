@@ -38,6 +38,7 @@ General location-based discovery and a future curated tourist catalog must coexi
 
 - Make small, reviewable changes with a clear success criterion. Inspect the relevant flow and current documentation before editing; avoid unrelated refactors or new libraries just to imitate another project's stack.
 - Add focused regression coverage for behavioral fixes. Exercise the real hook/screen/service while mocking native or network boundaries; demonstrate the reported failure before the fix.
+- Lifecycle regressions must exercise the installed SDK's focus hooks and delayed navigation readiness when those gates affect startup. Replacing a focus hook with a plain effect can hide a screen that never starts its sensors or deadline. Keep development diagnostics free of coordinates, credentials and raw native errors.
 - Verify review findings against code and behavior. When a finding exposes a shared failure pattern, inspect sibling producers and UI consumers and fix confirmed instances together. Record lasting architecture rules here; keep feature details in code and tests.
 - Validate each coherent change before committing. Use Conventional Commit subjects; include a concise body when motivation or material behavior needs explanation. Preserve incremental history and never merge a PR unless asked.
 - Report exactly which checks ran and what remains unverified. Update validation evidence when behavior or coverage changes. Keep credentials and local environment files out of Git.
