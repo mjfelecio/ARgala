@@ -4,7 +4,29 @@ import { isCoordinate, normalizeHeading } from './geo';
 import { LocationError } from './errors';
 
 export type Heading = { degrees: number; reference: 'true' | 'magnetic'; accuracy: number };
-export const requestLocationPermission = () => ExpoLocation.requestForegroundPermissionsAsync();
+type PermissionPrompt = 'never' | 'initial' | 'retry';
+type PermissionOperation = { intent: { prompt: PermissionPrompt }; promise: Promise<ExpoLocation.LocationPermissionResponse> };
+let pendingPermission: PermissionOperation | null = null;
+export function requestLocationPermission({ prompt = 'initial' }: { prompt?: PermissionPrompt } = {}) {
+  // Android permission activities can pause/resume the app even for existing grants.
+  // Replacement foreground owners must join the native operation, not queue another.
+  if (pendingPermission) {
+    // Retry may arrive while a check-only read is pending. Preserve that intent.
+    if (prompt === 'retry' || pendingPermission.intent.prompt === 'never') pendingPermission.intent.prompt = prompt;
+    return pendingPermission.promise;
+  }
+  const intent = { prompt };
+  pendingPermission = {
+    intent,
+    promise: (async () => {
+      const permission = await ExpoLocation.getForegroundPermissionsAsync();
+      if (permission.granted || !permission.canAskAgain || intent.prompt === 'never' ||
+          (permission.status === 'denied' && intent.prompt !== 'retry')) return permission;
+      return ExpoLocation.requestForegroundPermissionsAsync();
+    })().finally(() => { pendingPermission = null; }),
+  };
+  return pendingPermission.promise;
+}
 export const isLocationEnabled = () => ExpoLocation.hasServicesEnabledAsync();
 export async function getCurrentCoordinates() {
   // The focused owner bounds the entire startup, including permissions and service checks.

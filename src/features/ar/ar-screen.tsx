@@ -17,7 +17,7 @@ export default function ArScreen() {
   const active = useAppActive(); const focused = useIsFocused();
   const location = useDeviceLocation({ heading: true });
   const diagnostics = typeof __DEV__ !== 'undefined' && __DEV__ ? <Notice><Text selectable>{JSON.stringify({
-    sensorDebug: 2, feature: 'camera', active, focused, permissionGranted: permission?.granted ?? null, error,
+    sensorDebug: 3, feature: 'camera', active, focused, permissionGranted: permission?.granted ?? null, error,
     hasPosition: Boolean(location.position), headingStatus: location.headingStatus, activationRadiusMeters,
   })}</Text></Notice> : null;
   const checkPermission = useCallback(async () => {

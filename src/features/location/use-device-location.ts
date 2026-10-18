@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppActive } from '@/lib/use-app-active';
 import { useIsFocused } from 'expo-router';
 import { LOCATION } from '@/config/limits';
@@ -20,10 +20,11 @@ const initial: DeviceState = { phase: 'waiting', status: 'loading', watcherStatu
 export function useDeviceLocation({ heading: needsHeading = false } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
   const [attempt, setAttempt] = useState(0);
+  const promptedAttempt = useRef<number | null>(null);
   const active = useAppActive();
   const focused = useIsFocused();
   useEffect(() => {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) console.info('[ARgala sensor startup v2]', {
+    if (typeof __DEV__ !== 'undefined' && __DEV__) console.info('[ARgala sensor startup v3]', {
       active, focused, phase: state.phase, status: state.status, watcherStatus: state.watcherStatus, errorCode: state.errorCode,
     });
   }, [active, focused, state.phase, state.status, state.watcherStatus, state.errorCode]);
@@ -46,7 +47,11 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
         patch({ status: 'error', heading: null, headingStatus: 'unavailable', ...locationFailure(new LocationTimeoutError()) });
         stop();
       }, LOCATION.timeoutMs);
-      const permission = await requestLocationPermission();
+      // A permission activity can replace this foreground owner before it resolves.
+      // Only the initial attempt or an explicit Retry may prompt; resume just checks.
+      const prompt = promptedAttempt.current === attempt ? 'never' : attempt === 0 ? 'initial' : 'retry';
+      promptedAttempt.current = attempt;
+      const permission = await requestLocationPermission({ prompt });
       if (disposed) return;
       if (!permission.granted) { clearTimeout(startupTimer); patch({ status: 'denied', canAskAgain: permission.canAskAgain }); return; }
       patch({ phase: 'services' });
@@ -84,5 +89,5 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
     return stop;
   }, [active, focused, attempt, needsHeading]);
   return { ...state, retry: () => setAttempt((value) => value + 1),
-    debug: { sensorDebug: 2, active, focused, phase: state.phase, status: state.status, watcherStatus: state.watcherStatus, errorCode: state.errorCode } };
+    debug: { sensorDebug: 3, active, focused, phase: state.phase, status: state.status, watcherStatus: state.watcherStatus, errorCode: state.errorCode } };
 }

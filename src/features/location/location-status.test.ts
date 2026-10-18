@@ -3,7 +3,7 @@ import { createInstance } from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { getCurrentPositionAsync, hasServicesEnabledAsync, requestForegroundPermissionsAsync, watchHeadingAsync, watchPositionAsync } from 'expo-location';
+import { getCurrentPositionAsync, getForegroundPermissionsAsync, hasServicesEnabledAsync, requestForegroundPermissionsAsync, watchHeadingAsync, watchPositionAsync } from 'expo-location';
 import { localizationOptions } from '@/i18n/options';
 import { LocationStatus } from './status';
 import { useDeviceLocation } from './use-device-location';
@@ -11,6 +11,7 @@ import { useDeviceLocation } from './use-device-location';
 const foreground = vi.hoisted(() => ({ active: true, activateDuringSubscribe: false, listeners: new Set<(state: string) => void>() }));
 vi.mock('expo-location', () => ({
   Accuracy: { High: 4 },
+  getForegroundPermissionsAsync: vi.fn(async () => ({ granted: false, canAskAgain: true, status: 'undetermined' })),
   requestForegroundPermissionsAsync: vi.fn(async () => ({ granted: true, canAskAgain: true })),
   hasServicesEnabledAsync: vi.fn(async () => true),
   getCurrentPositionAsync: vi.fn(),
@@ -65,8 +66,8 @@ it('shows the developer startup marker with focus and phase without location dat
   await i18n.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
   await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe))); });
   const debug = JSON.parse(tree!.root.findByType('text').props.children);
-  expect(debug).toEqual({ sensorDebug: 2, active: true, focused: true, phase: 'position', status: 'loading', watcherStatus: 'pending', errorCode: null });
-  expect(trace).toHaveBeenCalledWith('[ARgala sensor startup v2]', expect.objectContaining({ active: true, focused: true, phase: 'position' }));
+  expect(debug).toEqual({ sensorDebug: 3, active: true, focused: true, phase: 'position', status: 'loading', watcherStatus: 'pending', errorCode: null });
+  expect(trace).toHaveBeenCalledWith('[ARgala sensor startup v3]', expect.objectContaining({ active: true, focused: true, phase: 'position' }));
   expect(JSON.stringify(trace.mock.calls)).not.toContain('latitude');
   expect(JSON.stringify(trace.mock.calls)).not.toContain('longitude');
 });
@@ -156,7 +157,7 @@ it('keeps a watcher fix usable when the one-shot GPS request never resolves', as
   expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('ready');
   expect(vi.getTimerCount()).toBe(0);
 });
-it('cancels startup while backgrounded and restarts after the permission activity returns', async () => {
+it('pauses startup while backgrounded and consumes the pending permission result on return', async () => {
   const permission = Promise.withResolvers<Awaited<ReturnType<typeof requestForegroundPermissionsAsync>>>();
   vi.mocked(requestForegroundPermissionsAsync).mockReturnValueOnce(permission.promise);
   const i18n = createInstance();
@@ -167,12 +168,13 @@ it('cancels startup while backgrounded and restarts after the permission activit
   await act(async () => { await vi.advanceTimersByTimeAsync(20000); });
   vi.mocked(getCurrentPositionAsync).mockResolvedValueOnce(fix);
   await act(async () => { foreground.active = true; foreground.listeners.forEach((listener) => listener('active')); });
-  expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('ready');
-  await act(async () => { permission.resolve({ granted: false, canAskAgain: true } as Awaited<ReturnType<typeof requestForegroundPermissionsAsync>>); });
+  expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('loading');
+  await act(async () => { permission.resolve({ granted: true, canAskAgain: true } as Awaited<ReturnType<typeof requestForegroundPermissionsAsync>>); });
   expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('ready');
   expect(vi.getTimerCount()).toBe(0);
 });
 const failures = [
+  { failure: 'permission-check', code: null, message: 'unavailable' },
   { failure: 'permission', code: null, message: 'unavailable' },
   { failure: 'services', code: null, message: 'unavailable' },
   { failure: 'one-shot', code: null, message: 'unavailable' },
@@ -191,6 +193,7 @@ it.each(failures.flatMap((failure) => languages.map(({ language, messages }) => 
     vi.mocked(getCurrentPositionAsync).mockReturnValue(oneShot.promise);
     const nativeError = new Error('Native location English');
     const invalidFix = { ...fix, coords: { ...fix.coords, latitude: NaN } };
+    if (failure === 'permission-check') vi.mocked(getForegroundPermissionsAsync).mockRejectedValueOnce(nativeError);
     if (failure === 'permission') vi.mocked(requestForegroundPermissionsAsync).mockRejectedValueOnce(nativeError);
     if (failure === 'services') vi.mocked(hasServicesEnabledAsync).mockRejectedValueOnce(nativeError);
     if (failure === 'one-shot') vi.mocked(getCurrentPositionAsync).mockRejectedValueOnce(nativeError);
