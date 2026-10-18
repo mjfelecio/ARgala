@@ -71,8 +71,8 @@
   "map": {
     "title": "Nearby places",
     "recenter": "Recenter",
-    "camera": "Open camera",
-    "search": "Discover near me",
+    "camera": "Open AR",
+    "search": "Search Nearby",
     "searching": "Searching nearby places…",
     "empty": "No places returned in this search.",
     "limit": "Up to {{count}} Google Places within {{meters}} meters. Results do not include every map label.",
@@ -91,7 +91,8 @@
     "activation": "{{active}} · {{distance}} meters away · activation radius {{meters}} meters",
     "active": "Within activation range",
     "inactive": "Outside activation range",
-    "selectionUnavailable": "The selected place is no longer in memory. Load its details to continue."
+    "selectionUnavailable": "The selected place is no longer in memory. Load its details to continue.",
+    "explore": "Explore"
   },
   "service": {
     "failed": "Unable to complete this request. Please try again.",

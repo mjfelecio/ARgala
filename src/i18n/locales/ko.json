@@ -29,10 +29,11 @@
   "map": {
     "title": "주변 장소",
     "recenter": "현재 위치로",
-    "camera": "카메라 열기",
-    "search": "주변 장소 검색",
+    "camera": "AR 열기",
+    "search": "주변 검색",
     "settings": "설정",
-    "selectionUnavailable": "선택한 장소 정보가 메모리에 없습니다. 계속하려면 상세 정보를 불러오세요."
+    "selectionUnavailable": "선택한 장소 정보가 메모리에 없습니다. 계속하려면 상세 정보를 불러오세요.",
+    "explore": "탐색"
   },
   "location": {
     "timeout": "위치 확인 시간이 초과되었습니다. 위치 서비스를 켜고 야외에서 다시 시도하세요.",

@@ -1,0 +1,25 @@
+import * as React from 'react';
+import { act, create, type ReactTestRenderer } from 'react-test-renderer';
+import { createInstance } from 'i18next';
+import { I18nextProvider, initReactI18next } from 'react-i18next';
+import { afterEach, expect, it, vi } from 'vitest';
+import { localizationOptions } from '@/i18n/options';
+import { HomeMapControls } from './home-map-controls';
+vi.mock('react-native', () => ({ Pressable: 'button', Text: 'text', View: 'view', ScrollView: 'scroll', ActivityIndicator: 'progress', StyleSheet: { create: (s: unknown) => s } }));
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+let tree: ReactTestRenderer;
+afterEach(async () => { await act(async () => tree?.unmount()); });
+it('exposes only four genuine actions and disables Search while unavailable or busy', async () => {
+ const translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
+ const callbacks = { onSearchNearby: vi.fn(), onRecenter: vi.fn(), onOpenAr: vi.fn(), onOpenSettings: vi.fn() };
+ const render = (canSearch: boolean, searching: boolean) => React.createElement(I18nextProvider, { i18n: translations }, React.createElement(HomeMapControls, { ...callbacks, canSearch, searching }));
+ await act(async () => { tree = create(render(true, false)); });
+ const buttons = tree.root.findAllByType('button'); expect(buttons).toHaveLength(4);
+ expect(buttons.map(b => b.props.accessibilityLabel)).toEqual(expect.arrayContaining(['Search Nearby', 'Open AR', 'Settings', 'Recenter']));
+ await act(async () => { buttons.forEach(b => b.props.onPress()); });
+ Object.values(callbacks).forEach(callback => expect(callback).toHaveBeenCalledOnce());
+ for (const [canSearch, searching] of [[false, false], [true, true]]) {
+  await act(async () => tree.update(render(canSearch, searching)));
+  expect(tree.root.findAllByType('button').find(b => b.props.accessibilityLabel === 'Search Nearby')!.props.disabled).toBe(true);
+ }
+});

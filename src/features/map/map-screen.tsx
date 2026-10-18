@@ -18,6 +18,7 @@ import { useSettings } from '@/features/settings/provider';
 import { useAppActive } from '@/lib/use-app-active';
 import { edgeErrorMessageKey } from '@/lib/edge-error';
 import { Action, Notice, Screen } from '@/ui/shared';
+import { HomeMapControls } from './home-map-controls';
 import { ProviderAttributions, useOpenProviderLink } from './attributions';
 
 function LaunchControls() {
@@ -95,7 +96,6 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
     void queryClient.fetchQuery(routeOptions(request)).catch(() => {});
   }
   return <View style={local.container}>
-    <LaunchControls />
     <MapView ref={map} style={local.map} provider={PROVIDER_GOOGLE} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
       onLayout={(event) => setMapLaidOut(event.nativeEvent.layout.width > 0 && event.nativeEvent.layout.height > 0)}
@@ -105,8 +105,9 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
       {place && !nearby.data?.some((item) => item.providerId === place.providerId) && <Marker coordinate={place.coordinates} title={place.name} />}
       {route.data && <Polyline coordinates={route.data.coordinates} strokeColor="#125fac" strokeWidth={5} />}
     </MapView>
-    <View style={local.controls}><Action title={t('map.recenter')} onPress={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
-      <Action title={t('map.search')} onPress={discover} disabled={!enabled || nearby.isFetching} /></View>
+    <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
+      onRecenter={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)}
+      onOpenAr={() => router.push('/ar')} onOpenSettings={() => router.push('/settings')} />
     <ScrollView style={local.panel} contentContainerStyle={local.panelContent}>
       {locationStatus}
       {!mapReady && <Notice busy>{t('map.loading')}</Notice>}

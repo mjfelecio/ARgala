@@ -4,6 +4,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { QueryClient, QueryClientProvider, notifyManager } from '@tanstack/react-query';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { router } from 'expo-router';
 import { routeService, type WalkingRoute } from '@/features/directions/service';
 import { placesService, type Place } from '@/features/places/service';
 import { queryClient } from '@/lib/query';
@@ -19,7 +20,7 @@ const controls = vi.hoisted(() => ({
 }));
 vi.mock('expo-constants', () => ({ default: { expoConfig: { extra: { mapsConfigured: true } } } }));
 vi.mock('expo-router', () => ({ router: { push: vi.fn(), setParams: vi.fn(() => { controls.params = {}; }) }, useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params }));
-vi.mock('react-native', () => ({ View: 'view', Text: 'text', ScrollView: 'scroll', StyleSheet: { create: (styles: unknown) => styles } }));
+vi.mock('react-native', () => ({ View: 'view', Text: 'text', ScrollView: 'scroll', Pressable: 'button', ActivityIndicator: 'progress', StyleSheet: { create: (styles: unknown) => styles } }));
 vi.mock('react-native-maps', async () => {
   const { createElement, forwardRef, useImperativeHandle } = await import('react');
   const MapView = forwardRef((props: Record<string, unknown>, ref) => {
@@ -51,7 +52,7 @@ let tree: ReactTestRenderer | undefined;
 let request: PromiseWithResolvers<WalkingRoute>;
 function renderMap() { return React.createElement(I18nextProvider, { i18n: translations }, React.createElement(QueryClientProvider, { client }, React.createElement(MapScreen))); }
 async function press(title: string) {
-  const action = tree!.root.findAllByType('button').find((button) => button.props.title === translations.t(title));
+  const action = tree!.root.findAllByType('button').find((button) => (button.props.title ?? button.props.accessibilityLabel) === translations.t(title));
   expect(action).toBeDefined();
   await act(async () => { action!.props.onPress(); });
 }
@@ -233,10 +234,10 @@ it('reopens the same consumed AR Place ID after closing the selection', async ()
   await act(async () => { tree = create(renderMap()); });
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
   await press('map.closePlace');
-  expect(tree!.root.findAllByType('button').some((b) => b.props.title === translations.t('map.walk'))).toBe(false);
+  expect(tree!.root.findAllByType('button').some((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('map.walk'))).toBe(false);
   controls.params = { placeId: destination.providerId };
   await act(async () => { tree!.update(renderMap()); });
-  expect(tree!.root.findAllByType('button').some((b) => b.props.title === translations.t('map.walk'))).toBe(true);
+  expect(tree!.root.findAllByType('button').some((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('map.walk'))).toBe(true);
   expect(placesService.details).not.toHaveBeenCalled();
 });
 it('offers an explicit details request when the handoff has expired', async () => {
@@ -246,5 +247,21 @@ it('offers an explicit details request when the handoff has expired', async () =
   expect(JSON.stringify(tree!.toJSON())).toContain(translations.t('map.selectionUnavailable'));
   expect(placesService.details).not.toHaveBeenCalled();
   await press('ar.more'); expect(placesService.details).toHaveBeenCalledWith(destination.providerId, 'en');
-  expect(tree!.root.findAllByType('button').some((b) => b.props.title === translations.t('map.walk'))).toBe(true);
+  expect(tree!.root.findAllByType('button').some((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('map.walk'))).toBe(true);
+});
+
+it('offers floating Home controls and spends nothing on mount, pan, locale, navigation or invalidation', async () => {
+ await act(async () => { tree = create(renderMap()); });
+ await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+ expect(tree!.root.findAllByType('button').filter(b => b.props.accessibilityRole === 'button')).toHaveLength(4);
+ // Native region changes have no paid-refresh handler.
+ await act(async () => { tree!.root.findByType('map').props.onRegionChangeComplete?.({ latitude: 10, longitude: 20 }); });
+ await press('map.camera'); expect(router.push).toHaveBeenLastCalledWith('/ar');
+ await press('map.settings'); expect(router.push).toHaveBeenLastCalledWith('/settings');
+ controls.focused = false; controls.active = false;
+ await act(async () => { tree!.update(renderMap()); });
+ controls.focused = true; controls.active = true; controls.language = 'ja';
+ await act(async () => { await translations.changeLanguage('ja'); tree!.update(renderMap()); await client.invalidateQueries(); });
+ expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+ await press('map.search'); expect(placesService.nearby).toHaveBeenCalledTimes(1);
 });

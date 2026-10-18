@@ -29,10 +29,11 @@
   "map": {
     "title": "近くの場所",
     "recenter": "現在地へ",
-    "camera": "カメラを開く",
+    "camera": "ARを開く",
     "search": "周辺を検索",
     "settings": "設定",
-    "selectionUnavailable": "選択した場所の情報がメモリにありません。続けるには詳細情報を読み込んでください。"
+    "selectionUnavailable": "選択した場所の情報がメモリにありません。続けるには詳細情報を読み込んでください。",
+    "explore": "探索"
   },
   "location": {
     "timeout": "位置情報の取得がタイムアウトしました。位置情報サービスを有効にして、屋外で再試行してください。",
