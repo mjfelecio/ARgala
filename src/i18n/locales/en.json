@@ -90,7 +90,8 @@
     "settings": "Settings",
     "activation": "{{active}} · {{distance}} meters away · activation radius {{meters}} meters",
     "active": "Within activation range",
-    "inactive": "Outside activation range"
+    "inactive": "Outside activation range",
+    "selectionUnavailable": "The selected place is no longer in memory. Load its details to continue."
   },
   "service": {
     "failed": "Unable to complete this request. Please try again.",
@@ -98,5 +99,22 @@
     "rateLimited": "Too many requests. Wait a minute and try again.",
     "unauthorized": "Sign in again to continue.",
     "routeUnavailable": "No walking route is available for this destination."
+  },
+  "ar": {
+    "scan": "Scan / Refresh",
+    "scanning": "Scanning nearby places…",
+    "start": "Tap Scan to discover places around your current location.",
+    "empty": "No nearby places found. Try Scan again from another location.",
+    "approximate": "Approximate direction · {{degrees}}° view · hold upright in portrait",
+    "headingFallback": "Compass unavailable, stale or inaccurate. Use the nearby list; directional labels are paused.",
+    "trackingFallback": "Fresh, accurate location updates are unavailable. Distances and activation are paused; retry location or move outdoors.",
+    "distance": "{{meters}} m away",
+    "distanceUnknown": "Distance unavailable",
+    "noneActive": "No places within your {{meters}} m activation radius. Select any nearby place to inspect it.",
+    "nearest": "Nearest in activation range: {{name}} · {{meters}} m",
+    "nearby": "Nearby places",
+    "more": "Load additional details",
+    "directions": "Get Directions on map",
+    "addressUnknown": "Address unavailable"
   }
 }

@@ -49,3 +49,8 @@ describe('portrait approximate projection', () => {
     expect(layoutLabels(rankPlaces(ranked.map((p) => p.place), origin, null, 100), 360, null)).toEqual([]);
   });
 });
+it('uses direction to break similar-distance priority without displacing much closer places', () => {
+  const ranked = rankPlaces([place('edge', 0.0001), place('center', 0.0002), place('close', 0.0003), place('far', 0.0004)], origin, 0, 100);
+  const candidates = ranked.map((p) => ({ ...p, distance: ({ edge: 100, center: 110, close: 10, far: 1000 } as Record<string, number>)[p.place.id], x: p.place.id === 'edge' ? 0 : 0.5 }));
+  expect(layoutLabels(candidates, 360, null).map((p) => p.place.id)).toEqual(['close', 'center', 'edge']);
+});

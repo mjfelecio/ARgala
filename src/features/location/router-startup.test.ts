@@ -135,3 +135,8 @@ it('refreshes camera permission after foreground return without a ready containe
   expect(navigation.cameraQueries).toHaveBeenCalledTimes(2);
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
 });
+
+vi.mock('@/features/ar/ar-discovery', async () => {
+  const { createElement, Fragment } = await import('react');
+  return { ArDiscovery: ({ preview, cameraStatus }: { preview: React.ReactNode; cameraStatus: React.ReactNode }) => createElement(Fragment, null, preview, cameraStatus) };
+});
