@@ -71,5 +71,20 @@
     "more": "追加情報を読み込む",
     "directions": "地図で道順を表示",
     "addressUnknown": "住所情報がありません"
+  },
+  "showcase": {
+    "title": "Clean Explorer コンポーネント",
+    "description": "開発用プレビュー · HeroUI Native と UniWind",
+    "actions": "操作と状態",
+    "select": "サンプルを選択",
+    "reset": "サンプルをリセット",
+    "disabled": "無効な操作",
+    "loading": "読み込み中の操作",
+    "idle": "サンプル未選択",
+    "selected": "端末内でサンプルを選択しました",
+    "localOnly": "この操作はサンプルの状態のみを変更します。位置情報、カメラ、有料リクエストは使用しません。",
+    "typography": "文字と経路のアクセント",
+    "routeAccent": "青色は経路案内に使用します。",
+    "languages": "English · 한국어 · 日本語"
   }
 }

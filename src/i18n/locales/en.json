@@ -121,5 +121,20 @@
     "more": "Load additional details",
     "directions": "Get Directions on map",
     "addressUnknown": "Address unavailable"
+  },
+  "showcase": {
+    "title": "Clean Explorer components",
+    "description": "Development showcase · HeroUI Native and UniWind",
+    "actions": "Actions and states",
+    "select": "Select sample",
+    "reset": "Reset sample",
+    "disabled": "Disabled action",
+    "loading": "Loading action",
+    "idle": "No sample selected",
+    "selected": "Sample selected locally",
+    "localOnly": "These controls change local sample state. No location, camera or paid requests are used.",
+    "typography": "Typography and route accent",
+    "routeAccent": "Route blue is reserved for navigation.",
+    "languages": "English · 한국어 · 日本語"
   }
 }
