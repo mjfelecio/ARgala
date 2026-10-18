@@ -127,3 +127,21 @@ npm's suggested direct-package changes include Expo/React Native downgrades or a
 No curated tourist catalog/restriction, verified destination assets/daytime previews, complete reviewed translations, spatial tracking, 3D engine, comprehensive POI database, admin portal or turn-by-turn navigation is implemented. The shared arbitrary-center Places contract and documented catalog integration point preserve both general discovery and future destination-centered supporting establishments. A future 500-meter destination filter remains separate from the 100-meter initial activation setting.
 
 The corrected camera screen was exported after the regression fix. Subsequent backend-only key selection passed its tests, full TypeScript/lint suite and Deno checks. CI is configured to repeat the available checks on the PR; its result should be read from GitHub rather than inferred from this local report.
+
+## UniWind / HeroUI infrastructure — 2026-10-18
+
+Phase 1 starts at stable main `69bebee`; PR #6 is unmerged. See [integration architecture and component mapping](ui-infrastructure.md). Product screen layouts, paid request flows, sensors and backend code remain unchanged.
+
+- Baseline: `npm run check` passed typecheck, zero-warning lint and **169 tests / 24 files**.
+- Focused regression: EAS app-config metadata test failed before preservation of `config.extra` and passed afterwards; environment override remains supported.
+- Showcase tests use the actual installed HeroUI components and actual locale resources with native runtime boundaries replaced. They cover selection/reset, accessible selection/disabled/busy state, visible loading labels, Korean/Japanese language changes and development/release/flag access combinations. They do not assert native rendering from mocked output.
+- `npm run check` passed typecheck, zero-warning lint and **179 tests / 26 files**.
+- `npx expo install --check`: dependencies up to date.
+- `npx --yes expo-doctor`: **21/21 checks passed**.
+- `npm run check:android`: SDK 57 Android-only configuration, foreground/camera permissions, blocked background/audio permissions, native Maps injection and EAS APK profiles passed.
+- `npm run export:android -- --max-workers 2`: Android Metro/Hermes export passed with the official UniWind transformer and actual HeroUI showcase imports.
+- Independent review identified an unconverted third-party SafeAreaView `className`; explicit UniWind wrappers now adapt both the showcase SafeAreaView and gesture root. No other Critical/Important findings were reported.
+- Development APK build submitted to EAS: [844de55b-febb-4247-a485-05d2b813145e](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/844de55b-febb-4247-a485-05d2b813145e). Final native build result is recorded below when available.
+- Android runtime verification is **pending**: EAS Simulator reports unavailable for this account. A temporary local Android 15/API 35 AOSP emulator setup was attempted, but boot failed before installation because the emulator required a 7372.80 MB userdata partition with only 5708.46 MB available. The temporary SDK/AVD/downloads were removed. No Android screenshots or successful installation/interaction are claimed.
+
+A successful development APK build establishes native compilation; it does not establish device layout, TalkBack, CJK fallback, 150% text, pressed animations or scrolling. Those showcase scenarios still need installation and runtime testing. Live Google/Supabase, Maps, permissions, GPS, camera, heading and routes also remain field-test work; the diagnostic does not exercise them. No Edge changes were made, so Edge/limiter-specific checks were not rerun.
