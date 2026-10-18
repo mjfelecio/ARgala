@@ -2,7 +2,7 @@
 
 Use the existing **preview APK** profile for your first phone installation. It produces an app you can open without keeping your computer's development server running.
 
-This walkthrough matches Expo SDK 57, Android package `com.mjfelecio.argala`, Supabase authentication, and Google Maps/Places/Routes. The project owner reported successfully following the complete walkthrough on 2026-10-18. That report is separate from the automated foundation checks; see [validation evidence](validation.md).
+This walkthrough matches Expo SDK 57, Android package `com.mjfelecio.argala`, Supabase authentication, and Google Maps/Places/Routes. The project owner followed the walkthrough on 2026-10-18 and confirmed installation and sign-in. Subsequent location/camera startup issues and automated checks are recorded separately in [validation evidence](validation.md).
 
 ## Contents
 

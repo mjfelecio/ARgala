@@ -1,21 +1,38 @@
 import * as ExpoLocation from 'expo-location';
 import { LOCATION } from '@/config/limits';
 import { isCoordinate, normalizeHeading } from './geo';
-import { LocationError, LocationTimeoutError } from './errors';
+import { LocationError } from './errors';
 
 export type Heading = { degrees: number; reference: 'true' | 'magnetic'; accuracy: number };
-export const requestLocationPermission = () => ExpoLocation.requestForegroundPermissionsAsync();
+type PermissionPrompt = 'never' | 'initial' | 'retry';
+type PermissionOperation = { intent: { prompt: PermissionPrompt }; promise: Promise<ExpoLocation.LocationPermissionResponse> };
+let pendingPermission: PermissionOperation | null = null;
+export function requestLocationPermission({ prompt = 'initial' }: { prompt?: PermissionPrompt } = {}) {
+  // Android permission activities can pause/resume the app even for existing grants.
+  // Replacement foreground owners must join the native operation, not queue another.
+  if (pendingPermission) {
+    // Retry may arrive while a check-only read is pending. Preserve that intent.
+    if (prompt === 'retry' || pendingPermission.intent.prompt === 'never') pendingPermission.intent.prompt = prompt;
+    return pendingPermission.promise;
+  }
+  const intent = { prompt };
+  pendingPermission = {
+    intent,
+    promise: (async () => {
+      const permission = await ExpoLocation.getForegroundPermissionsAsync();
+      if (permission.granted || !permission.canAskAgain || intent.prompt === 'never' ||
+          (permission.status === 'denied' && intent.prompt !== 'retry')) return permission;
+      return ExpoLocation.requestForegroundPermissionsAsync();
+    })().finally(() => { pendingPermission = null; }),
+  };
+  return pendingPermission.promise;
+}
 export const isLocationEnabled = () => ExpoLocation.hasServicesEnabledAsync();
 export async function getCurrentCoordinates() {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    const position = await Promise.race([
-      ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.High }),
-      new Promise<never>((_resolve, reject) => { timer = setTimeout(() => reject(new LocationTimeoutError()), LOCATION.timeoutMs); }),
-    ]);
-    if (!isCoordinate(position.coords)) throw new LocationError('invalid-position', 'The device returned invalid coordinates.');
-    return position;
-  } finally { clearTimeout(timer); }
+  // The focused owner bounds the entire startup, including permissions and service checks.
+  const position = await ExpoLocation.getCurrentPositionAsync({ accuracy: ExpoLocation.Accuracy.High });
+  if (!isCoordinate(position.coords)) throw new LocationError('invalid-position', 'The device returned invalid coordinates.');
+  return position;
 }
 export function subscribeToLocation(onPosition: (position: ExpoLocation.LocationObject) => void, onError: (error: LocationError) => void) {
   return ExpoLocation.watchPositionAsync({ accuracy: ExpoLocation.Accuracy.High, distanceInterval: LOCATION.distanceIntervalMeters, timeInterval: LOCATION.timeIntervalMs },

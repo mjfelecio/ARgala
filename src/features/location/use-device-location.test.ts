@@ -13,7 +13,7 @@ vi.mock('./service', () => ({
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => true }));
 vi.mock('expo-router', async () => {
   const { useEffect } = await import('react');
-  return { useFocusEffect: (callback: () => void) => useEffect(callback, [callback]) };
+  return { useIsFocused: () => true, useFocusEffect: (callback: () => void) => useEffect(callback, [callback]) };
 });
 type Position = Awaited<ReturnType<typeof getCurrentCoordinates>>;
 const fix: Position = { coords: { latitude: 11.01, longitude: 124.61, accuracy: 8, altitude: null, altitudeAccuracy: null, heading: null, speed: null }, timestamp: 1 };
