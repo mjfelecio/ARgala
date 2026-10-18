@@ -5,7 +5,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { HomePlaceSheet, type HomePlaceSheetProps } from './place-sheet';
-vi.mock('react-native', () => ({ Pressable: 'button', Text: 'text', View: 'view', ScrollView: 'scroll', ActivityIndicator: 'progress', StyleSheet: { create: (s: unknown) => s } }));
+vi.mock('react-native', () => ({ Pressable: 'button', Text: 'text', View: 'view', ScrollView: 'section', ActivityIndicator: 'progress', StyleSheet: { create: (s: unknown) => s } }));
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 let tree: ReactTestRenderer; let translations: i18n;
 const place = { id: 'google:one', provider: 'google' as const, providerId: 'one', name: 'A very long returned destination name 日本語 한국어 '.repeat(4), coordinates: { latitude: 10, longitude: 20 }, attributions: [] };
@@ -53,4 +53,20 @@ it('shows unavailable route and expired selection without inventing data', async
  expect(content()).toContain(translations.t('map.selectionUnavailable'));
  await press('ar.more'); expect(props.onDetails).toHaveBeenCalledOnce();
  expect(content()).not.toContain(translations.t('map.routeSummary',{meters:250,minutes:3}));
+});
+it('keeps the heading and expansion action scrollable when a short viewport caps the panel at 104 units', async () => {
+ props.maxHeight=104; props.hasSelection=true; props.selectedPlace=place; props.state='selected'; await render();
+ const scroll=tree.root.findByType('section');
+ expect(scroll.findAllByType('button').some(b=>b.props.accessibilityLabel===translations.t('map.expand'))).toBe(true);
+ expect(tree.root.findAllByType('view').find(n=>n.props.testID==='home-place-sheet')!.props.style.flat(Infinity)).toEqual(expect.arrayContaining([expect.objectContaining({maxHeight:104})]));
+ expect(scroll.findAllByType('text').some(n=>n.props.children===place.name)).toBe(true);
+});
+it('prioritizes a returned route summary and caution before repeat-request and close actions', async () => {
+ props.state='route-ready'; props.hasSelection=true; props.selectedPlace=place;
+ props.route={distanceMeters:250,durationSeconds:180,warnings:['Returned warning']}; props.selectionSummary='Activation metadata'; await render();
+ const json=content(); const summary=translations.t('map.routeSummary',{meters:250,minutes:3});
+ expect(json.indexOf(summary)).toBeGreaterThan(json.indexOf(place.name));
+ expect(json.indexOf(summary)).toBeLessThan(json.indexOf('Activation metadata'));
+ expect(json.indexOf(summary)).toBeLessThan(json.indexOf(translations.t('map.walk')));
+ expect(json.indexOf(translations.t('map.walkingCaution'))).toBeLessThan(json.indexOf(translations.t('map.walk')));
 });

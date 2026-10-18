@@ -19,13 +19,21 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const busy = state === 'loading' || state === 'route-loading';
+  const routeContent = <>
+      {state === 'route-loading' && <Message busy>{t('map.routeLoading')}</Message>}
+      {route && <>
+        <Message>{t('map.routeSummary', { meters: route.distanceMeters, minutes: Math.ceil(route.durationSeconds / 60) })}</Message>
+        <Message>{t('map.walkingCaution')}</Message>
+        {route.warnings.map((warning, index) => <Message key={index}>{warning}</Message>)}
+      </>}
+  </>;
   return <FloatingSurface testID="home-place-sheet" style={[styles.sheet, { maxHeight: maxHeight === undefined ? (expanded ? '60%' : '42%') : Math.min(maxHeight, expanded ? maxHeight : Math.max(160, maxHeight * 0.65)) }]}
     onLayout={(event) => onMeasuredHeight(event.nativeEvent.layout.height)}>
-    <View style={styles.heading}>
-      <Text style={styles.section}>{t('map.title')}</Text>
-      <PillAction label={t(expanded ? 'map.collapse' : 'map.expand')} variant="secondary" onPress={() => setExpanded(value => !value)} />
-    </View>
     <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      <View style={styles.heading}>
+        <Text style={styles.section}>{t('map.title')}</Text>
+        <PillAction label={t(expanded ? 'map.collapse' : 'map.expand')} variant="secondary" onPress={() => setExpanded(value => !value)} />
+      </View>
       {locationStatus}
       {mapLoading && <Message busy>{t('map.loading')}</Message>}
       {state === 'unsearched' && <Message>{t('map.start')}</Message>}
@@ -36,9 +44,10 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
       {state === 'failed' && <PillAction label={t('common.retry')} variant="outline" disabled={!canRequest || busy} onPress={onRetrySearch} />}
       {hasSelection && <>
         {detailsLoading && <Message busy>{t('map.details')}</Message>}
-        {!place && <Message>{t('map.selectionUnavailable')}</Message>}
+        {!place && <><Message>{t('map.selectionUnavailable')}</Message>{routeContent}</>}
         {place && <>
           <Text style={styles.title}>{place.name}</Text>
+          {routeContent}
           {selectionSummary && <Text style={styles.body}>{selectionSummary}</Text>}
           {expanded && <>
             {place.address && <Text style={styles.body}>{place.address}</Text>}
@@ -50,12 +59,7 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
         {(!place || expanded || (errorKey && state === 'selected')) && <PillAction label={t('ar.more')} variant="outline" onPress={onDetails} disabled={!canRequest} busy={detailsLoading} />}
         <PillAction label={t('map.closePlace')} variant="secondary" onPress={onClosePlace} />
       </>}
-      {state === 'route-loading' && <Message busy>{t('map.routeLoading')}</Message>}
-      {route && <>
-        <Message>{t('map.routeSummary', { meters: route.distanceMeters, minutes: Math.ceil(route.durationSeconds / 60) })}</Message>
-        <Message>{t('map.walkingCaution')}</Message>
-        {route.warnings.map((warning, index) => <Message key={index}>{warning}</Message>)}
-      </>}
+      {!hasSelection && routeContent}
       {(expanded || !hasSelection) && <Text style={styles.metadata}>{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>}
       {attributions}
     </ScrollView>
@@ -66,7 +70,7 @@ function Message({ children, busy, error }: { children: ReactNode; busy?: boolea
 }
 const styles = StyleSheet.create({
   sheet: { borderTopLeftRadius: radii.sheet, borderTopRightRadius: radii.sheet, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, flexShrink: 1, paddingTop: space.md },
-  heading: { paddingHorizontal: space.lg, flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center', justifyContent: 'space-between' },
+  heading: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, alignItems: 'center', justifyContent: 'space-between' },
   section: { ...typeScale.card, color: colors.brandStrong, flexShrink: 1 },
   scroll: { flexGrow: 0, flexShrink: 1 }, content: { padding: space.lg, gap: space.md },
   title: { ...typeScale.title, color: colors.text }, body: { ...typeScale.body, color: colors.textSecondary },
