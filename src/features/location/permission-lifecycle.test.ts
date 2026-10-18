@@ -188,3 +188,12 @@ it('honors Retry while a foreground permission read is still pending after its d
   expect(ExpoLocation.requestForegroundPermissionsAsync).toHaveBeenCalledOnce();
   expect(location().status).toBe('ready');
 });
+
+it('allows the AR owner to receive stationary GPS updates while preserving the map movement threshold', async () => {
+  await mount();
+  expect(ExpoLocation.watchPositionAsync).toHaveBeenLastCalledWith(expect.objectContaining({ distanceInterval: 5 }), expect.any(Function), expect.any(Function));
+  await act(async () => { tree!.unmount(); });
+  function ArProbe() { useDeviceLocation({ heading: true, distanceIntervalMeters: 0 }); return null; }
+  await act(async () => { tree = create(React.createElement(ArProbe)); });
+  expect(ExpoLocation.watchPositionAsync).toHaveBeenLastCalledWith(expect.objectContaining({ distanceInterval: 0, timeInterval: 3000 }), expect.any(Function), expect.any(Function));
+});
