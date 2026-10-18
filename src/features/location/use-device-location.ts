@@ -13,11 +13,12 @@ type DeviceState = {
   watcherStatus: 'pending' | 'ready' | 'error';
   errorCode: LocationErrorCode | null;
   position: Coordinate | null; accuracy: number | null; heading: Heading | null;
+  positionTimestamp: number | null; watcherTimestamp: number | null; headingTimestamp: number | null;
   headingStatus: 'pending' | 'ready' | 'unavailable'; canAskAgain: boolean; error: string | null;
 };
-const initial: DeviceState = { phase: 'waiting', status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, headingStatus: 'pending', canAskAgain: true, error: null };
+const initial: DeviceState = { phase: 'waiting', status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, positionTimestamp: null, watcherTimestamp: null, headingTimestamp: null, headingStatus: 'pending', canAskAgain: true, error: null };
 
-export function useDeviceLocation({ heading: needsHeading = false } = {}) {
+export function useDeviceLocation({ heading: needsHeading = false, distanceIntervalMeters = LOCATION.distanceIntervalMeters }: { heading?: boolean; distanceIntervalMeters?: number } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
   const [attempt, setAttempt] = useState(0);
   const promptedAttempt = useRef<number | null>(null);
@@ -66,7 +67,8 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
           const watcherStatus = fromWatcher ? 'ready' : previous.watcherStatus;
           return { ...previous, watcherStatus, status: watcherStatus === 'error' ? 'error' : 'ready',
             position: { latitude: position.coords.latitude, longitude: position.coords.longitude },
-            accuracy: position.coords.accuracy, error: watcherStatus === 'error' ? previous.error : null,
+            accuracy: position.coords.accuracy, positionTimestamp: position.timestamp,
+            watcherTimestamp: fromWatcher ? position.timestamp : previous.watcherTimestamp, error: watcherStatus === 'error' ? previous.error : null,
             errorCode: watcherStatus === 'error' ? previous.errorCode : null };
         });
       };
@@ -74,12 +76,12 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
         clearTimeout(startupTimer);
         patch({ watcherStatus: 'error', status: 'error', ...locationFailure(error, 'updates-unavailable') });
       };
-      stops.push(manageSubscription(() => subscribeToLocation((position) => receive(position, true), watcherFailed),
+      stops.push(manageSubscription(() => subscribeToLocation((position) => receive(position, true), watcherFailed, distanceIntervalMeters),
         watcherFailed));
       if (needsHeading) {
         headingTimer = setTimeout(() => patch({ headingStatus: 'unavailable', heading: null }), 10000);
         stops.push(manageSubscription(() => subscribeToHeading((heading) => {
-          clearTimeout(headingTimer); patch({ heading, headingStatus: heading ? 'ready' : 'unavailable' });
+          clearTimeout(headingTimer); patch({ heading, headingTimestamp: heading ? Date.now() : null, headingStatus: heading ? 'ready' : 'unavailable' });
         }, () => patch({ headingStatus: 'unavailable', heading: null })), () => patch({ headingStatus: 'unavailable', heading: null })));
       }
       try { receive(await getCurrentCoordinates()); }
@@ -87,7 +89,7 @@ export function useDeviceLocation({ heading: needsHeading = false } = {}) {
     }
     void start().catch((error: unknown) => { clearTimeout(startupTimer); patch({ status: 'error', ...locationFailure(error) }); });
     return stop;
-  }, [active, focused, attempt, needsHeading]);
+  }, [active, focused, attempt, needsHeading, distanceIntervalMeters]);
   return { ...state, retry: () => setAttempt((value) => value + 1),
     debug: { sensorDebug: 3, active, focused, phase: state.phase, status: state.status, watcherStatus: state.watcherStatus, errorCode: state.errorCode } };
 }

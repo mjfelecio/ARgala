@@ -34,8 +34,8 @@ export async function getCurrentCoordinates() {
   if (!isCoordinate(position.coords)) throw new LocationError('invalid-position', 'The device returned invalid coordinates.');
   return position;
 }
-export function subscribeToLocation(onPosition: (position: ExpoLocation.LocationObject) => void, onError: (error: LocationError) => void) {
-  return ExpoLocation.watchPositionAsync({ accuracy: ExpoLocation.Accuracy.High, distanceInterval: LOCATION.distanceIntervalMeters, timeInterval: LOCATION.timeIntervalMs },
+export function subscribeToLocation(onPosition: (position: ExpoLocation.LocationObject) => void, onError: (error: LocationError) => void, distanceIntervalMeters: number = LOCATION.distanceIntervalMeters) {
+  return ExpoLocation.watchPositionAsync({ accuracy: ExpoLocation.Accuracy.High, distanceInterval: distanceIntervalMeters, timeInterval: LOCATION.timeIntervalMs },
     (position) => { if (isCoordinate(position.coords)) onPosition(position); else onError(new LocationError('invalid-position', 'The device returned invalid coordinates.')); },
     (message) => onError(new LocationError('updates-unavailable', message)));
 }

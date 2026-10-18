@@ -69,6 +69,45 @@ The adapter now reads current permission before prompting, skips existing grants
 
 After commit `1d23b22`, the owner confirmed that the app is working on the previously identified Samsung A53 5G / Android 16. This is owner-reported recovery of the reported startup problem. Individual GPS/camera scenarios, test duration and a native crash stack were not supplied; this confirmation does not establish broader field/UAT coverage or a native crash diagnosis.
 
+## Camera POI overlays — 2026-10-18
+
+Branch `feat/ar-poi-overlays` starts from `origin/main` at `f01fdbf` and extends the
+verified foundation. It adds explicit nearby scans, three approximate portrait
+camera labels, nearest-in-radius information, stable manual selection, a compact
+list, on-demand details and a Place ID handoff to the existing map/Walk flow.
+No backend, database, dependency or native configuration changes were made.
+Existing local EAS edits in `app.json` are excluded from the feature commits.
+
+Agent-run checks:
+
+| Check | Result |
+| --- | --- |
+| `npm run check` | Strict TypeScript, zero-warning ESLint and 169 tests across 24 files passed |
+| `npx expo install --check` | Dependencies up to date for SDK 57 |
+| `npx expo-doctor` | 21/21 checks passed |
+| `npm run check:android` | Android-only SDK/config/permissions/Maps injection/EAS APK profile assertions passed |
+| `npm run export:android` | Metro/React Compiler/Hermes Android export passed, including official attribution image variants |
+
+Focused tests exercise bearing wraparound/FOV, inclusive activation boundaries,
+distance/direction priority and label collisions, actual camera screen selection,
+manual selection through rotation, extra details and map handoff, denied camera
+and location, uncertain/stale heading and GPS, independent watcher freshness,
+stationary update configuration, empty/loading/failure/retry states and actual
+EN/KO/JA resources. Request-cost coverage uses production query defaults and
+covers movement, focus, foreground, remount, language change and invalidation.
+Existing installed-SDK focus/startup and watcher cleanup regressions still pass.
+Independent review identified missing provider credits on map handoff; a failing
+regression drove forwarding handoff attributions. Its watcher-freshness concern
+also received separate native sample timestamps and screen regressions.
+
+All sensor, network and map UI boundaries in these tests are mocked. Configuration
+introspection and Hermes export are not an APK build. No live Places/details,
+walking route, phone camera/GPS/compass or visual layout test was performed for
+this feature. The configured local environment was used by Expo tooling without
+printing or committing credential values. See the [device checklist](ar-device-testing.md)
+for field scenarios and the exact MVP sensor/projection limitations. Developer
+device testing remains the next acceptance gate; client UAT is not established.
+
 ## Original external-validation limits and remaining field checks
 
 - Supabase and Google credentials were not supplied (`.env` is absent). Hosted migrations, Edge deployment, real sign-in/registration/email delivery, Places/details, Maps tiles/native POI taps, and real walking routes have not been exercised.
@@ -85,6 +124,6 @@ npm's suggested direct-package changes include Expo/React Native downgrades or a
 
 ## Deliberately later work
 
-No curated tourist catalog/restriction, verified destination assets/daytime previews, complete reviewed translations, floating AR POI cards, spatial tracking, 3D engine, comprehensive POI database, admin portal or turn-by-turn navigation is implemented. The shared arbitrary-center Places contract and documented catalog integration point preserve both general discovery and future destination-centered supporting establishments. A future 500-meter destination filter remains separate from the 100-meter initial activation setting.
+No curated tourist catalog/restriction, verified destination assets/daytime previews, complete reviewed translations, spatial tracking, 3D engine, comprehensive POI database, admin portal or turn-by-turn navigation is implemented. The shared arbitrary-center Places contract and documented catalog integration point preserve both general discovery and future destination-centered supporting establishments. A future 500-meter destination filter remains separate from the 100-meter initial activation setting.
 
 The corrected camera screen was exported after the regression fix. Subsequent backend-only key selection passed its tests, full TypeScript/lint suite and Deno checks. CI is configured to repeat the available checks on the PR; its result should be read from GitHub rather than inferred from this local report.

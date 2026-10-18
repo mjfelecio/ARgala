@@ -75,3 +75,18 @@ it('preserves a watcher failure when the one-shot request also fails', async () 
   expect(current.errorCode).toBe('updates-unavailable');
   expect(current.status).toBe('error');
 });
+
+it('exposes native sample time for stale GPS detection and receipt time for heading', async () => {
+  await act(async () => { tree = create(React.createElement(Probe)); });
+  await act(async () => { oneShot.resolve(fix); });
+  expect(current.positionTimestamp).toBe(1);
+  expect(current.headingTimestamp).toBeNull();
+});
+
+it('keeps watcher sample freshness independent of a newer one-shot fix', async () => {
+  await act(async () => { tree = create(React.createElement(Probe)); });
+  const receive = vi.mocked(subscribeToLocation).mock.calls[0][0];
+  await act(async () => { receive(fix); oneShot.resolve({ ...fix, timestamp: 100 }); });
+  expect(current.positionTimestamp).toBe(100);
+  expect(current.watcherTimestamp).toBe(1);
+});

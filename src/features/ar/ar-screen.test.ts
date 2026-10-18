@@ -84,3 +84,8 @@ it('opens the preview immediately after granting camera permission', async () =>
   await act(async () => { tree!.root.findAllByType('button').find((button) => button.props.title === 'camera.allow')!.props.onPress(); });
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
 });
+
+vi.mock('@/features/ar/ar-discovery', async () => {
+  const { createElement, Fragment } = await import('react');
+  return { ArDiscovery: ({ preview, cameraStatus }: { preview: React.ReactNode; cameraStatus: React.ReactNode }) => createElement(Fragment, null, preview, cameraStatus) };
+});

@@ -31,3 +31,15 @@ Client Google web-service calls expose server credentials. A custom backend adds
 ## Exclusions
 
 No comprehensive POI database, nine-destination restriction, catalog content, admin portal, elaborate AR, 3D tracking, complete translations, turn-by-turn navigation or automatic PR merge.
+
+## Camera discovery extension — 2026-10-18
+
+The camera POI discovery brief supersedes the original foundation exclusions for
+floating labels and non-map Places content. The extension keeps the existing
+camera/sensor owners and authenticated provider services. It uses pure geographic
+projection, explicit paid actions, short in-memory reuse, separate activation and
+discovery radii, a fallback list and the existing map walking-route flow. Google
+Maps' official attribution asset and returned third-party credits accompany this
+non-map content. See the [implementation plan](../plans/2026-10-18-ar-poi-overlays.md)
+and [device testing limits](../../ar-device-testing.md). Spatial tracking, a 3D
+engine and turn-by-turn navigation remain excluded.
