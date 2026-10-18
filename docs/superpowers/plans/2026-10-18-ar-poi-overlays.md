@@ -26,3 +26,11 @@
 - Baseline: `origin/main` at `f01fdbf`. Existing local `app.json` EAS changes are preserved and excluded from commits.
 - Existing feature branch provides isolation in the requested repository; no worktree relocation.
 - Follow the user-authorized implementation continuously, using focused red/green tests and incremental commits.
+
+## Completion evidence
+
+- Projection, explicit discovery UI, sensor freshness and map handoff implemented in separate Conventional Commits.
+- Full check: 169 tests / 24 files, strict TypeScript and zero-warning lint passed.
+- Expo compatibility, Doctor (21/21), Android config and Hermes export passed.
+- Review fixes: map handoff provider credits; separate watcher freshness; stationary AR GPS threshold. Each behavior has regression coverage.
+- Detailed thresholds and remaining physical-device/live-provider checks: `docs/ar-device-testing.md` and `docs/validation.md`.
