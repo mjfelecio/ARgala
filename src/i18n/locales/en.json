@@ -197,6 +197,14 @@
     "contentPending": "Verified visitor information is not yet available.",
     "centerMissing": "Nearby places will be available once the destination location is verified.",
     "entranceMissing": "Directions will be available once an accessible visitor entrance is verified.",
-    "unavailable": "This destination is unavailable. Return to Featured Destinations."
+    "unavailable": "This destination is unavailable. Return to Featured Destinations.",
+    "daytime": "Daytime Preview",
+    "notLive": "Approved daytime photos — not live camera imagery.",
+    "previewMissing": "Daytime preview not yet available.",
+    "imageFailed": "This preview image could not be displayed.",
+    "englishFallback": "Shown in English",
+    "highlights": "Highlights",
+    "photoCount_one": "{{count}} approved photo",
+    "photoCount_other": "{{count}} approved photos"
   }
 }

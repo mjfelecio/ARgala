@@ -147,6 +147,13 @@
     "contentPending": "確認済みの訪問情報はまだありません。",
     "centerMissing": "目的地の位置が確認されると、周辺の場所を検索できます。",
     "entranceMissing": "利用可能な入口が確認されると、経路を表示できます。",
-    "unavailable": "この目的地は利用できません。おすすめの目的地に戻ってください。"
+    "unavailable": "この目的地は利用できません。おすすめの目的地に戻ってください。",
+    "daytime": "昼間のプレビュー",
+    "notLive": "承認済みの昼間の写真です。ライブカメラ映像ではありません。",
+    "previewMissing": "昼間のプレビューはまだありません。",
+    "imageFailed": "このプレビュー画像を表示できません。",
+    "englishFallback": "英語で表示",
+    "highlights": "見どころ",
+    "photoCount_other": "承認済み写真 {{count}}枚"
   }
 }

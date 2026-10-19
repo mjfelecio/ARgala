@@ -69,3 +69,11 @@ it('uses history for Back and translates missing states with actual resources on
   }
   expect(placesService.nearby).not.toHaveBeenCalled();
 });
+it('shows approved overview and highlights independently with visible English fallback only when needed', async () => {
+ const catalog = await import('./catalog');
+ const fixture = catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic fixture', copy: { en: { overview: { value: 'Approved test overview', approvalReference: 'Test' }, highlights: { value: ['Approved test highlight'], approvalReference: 'Test' } }, ja: { overview: { value: '日本語テスト', approvalReference: 'Test' } } } });
+ vi.spyOn(catalog, 'getDestination').mockReturnValue(fixture);
+ await mount(); expect(output()).toContain('Approved test overview'); expect(output()).toContain('Approved test highlight'); expect(output()).not.toContain(translations.t('destinations.englishFallback'));
+ controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); tree!.update(render()); });
+ expect(output()).toContain('日本語テスト'); expect(output()).toContain('Approved test highlight'); expect(output()).toContain(translations.t('destinations.englishFallback')); expect(output()).not.toContain(translations.t('destinations.contentPending'));
+});
