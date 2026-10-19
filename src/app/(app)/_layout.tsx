@@ -13,6 +13,7 @@ export default function AppLayout() {
   const headerTintColor = useThemeColor('accent');
   return <Stack screenOptions={{ headerStyle, headerTitleStyle, headerTintColor, headerShadowVisible: false }}>
     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    <Stack.Screen name="place/[providerId]" options={{ headerShown: false }} />
     <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
   </Stack>;
 }

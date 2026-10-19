@@ -89,7 +89,7 @@ it('hands an AR selection to the existing Explore route without replacing its ro
 });
 it('keeps Settings outside the tabs and Back restores the originating tab state', async () => {
  await mount(React.createElement(AppLayout));
- expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.name)).toEqual(['(tabs)', 'settings']);
+ expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.name)).toEqual(['(tabs)', 'place/[providerId]', 'settings']);
  const reducer = StackRouter({ initialRouteName: '(tabs)' });
  const config = { routeNames: ['(tabs)', 'settings'], routeParamList: {}, routeGetIdList: {} };
  const initial = reducer.getInitialState(config);
@@ -121,4 +121,30 @@ it.each([
  expect(router.push).toHaveBeenCalledWith('/settings');
  expect(router.navigate).toHaveBeenCalledWith('/');
  expect(tree!.root.findAllByType('ar-camera-screen' as React.ElementType)).toHaveLength(1);
+});
+it.each(['index', 'ar'])('keeps the %s tab context below Details and returns to the existing tab navigator', async origin => {
+ await mount(React.createElement(AppLayout));
+ const routes = tree!.root.findAllByType('route' as React.ElementType);
+ expect(routes.find(r => r.props.name === 'place/[providerId]')!.props.options.headerShown).toBe(false);
+ const stack = StackRouter({ initialRouteName: '(tabs)' });
+ const config = { routeNames: routes.map(r => r.props.name), routeParamList: {}, routeGetIdList: {} };
+ const tabs = TabRouter({ initialRouteName: 'index', backBehavior: 'initialRoute' });
+ const tabConfig = { routeNames: ['index', 'ar', 'profile'], routeParamList: {}, routeGetIdList: {} };
+ const initialTabs = tabs.getInitialState(tabConfig);
+ const sourceTabs = tabs.getStateForAction(initialTabs, { type: 'NAVIGATE', payload: { name: origin } }, tabConfig);
+ const base = stack.getInitialState(config);
+ const original = { ...base, routes: [{ ...base.routes[0], state: sourceTabs }] };
+ const opened = stack.getStateForAction(original, { type: 'PUSH', payload: { name: 'place/[providerId]', params: { providerId: 'north' } } }, config);
+ expect(opened.routes[opened.index].params.providerId).toBe('north');
+ expect(stack.getStateForAction(opened, { type: 'GO_BACK' }, config).routes[0].state).toEqual(sourceTabs);
+ const { findDivergentState, getPayloadFromStateRoute } = require('expo-router/build/global-state/stateUtils');
+ for (const name of ['index', 'ar']) {
+  const target = { routes: [{ name: '(tabs)', state: { routes: [{ name, params: { placeId: 'north' } }] } }] };
+  const { navigationState, actionStateRoute } = findDivergentState(target, opened);
+  expect(navigationState.key).toBe(opened.key);
+  const payload = getPayloadFromStateRoute(actionStateRoute);
+  const returned = stack.getStateForAction(opened, { type: 'POP_TO', payload: { name: payload.screen, params: payload.params } }, config);
+  expect(returned.routes).toHaveLength(1); expect(returned.routes[0].key).toBe(original.routes[0].key);
+  expect(returned.routes[0].params).toMatchObject({ screen: name, params: { placeId: 'north' } });
+ }
 });

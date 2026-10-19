@@ -1,6 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { placeSelectionOptions } from '@/features/places/selection';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
+import { placesService } from '@/features/places/service';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +24,19 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
   const { language, activationRadiusMeters } = useSettings();
   const [now, setNow] = useState(Date.now);
   const [width, setWidth] = useState(0);
-  const [manualId, setManualId] = useState<string | null>(null);
+  const params = useLocalSearchParams();
+  const parsed = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
+  const incomingId = parsed.success ? parsed.data.providerId : null;
+  const [manualId, setManualId] = useState<string | null>(incomingId);
+  const [lastIncomingId, setLastIncomingId] = useState(incomingId);
+  if (incomingId !== lastIncomingId) {
+    setLastIncomingId(incomingId);
+    if (incomingId) setManualId(incomingId);
+  }
+  const handoff = useQuery(placeSelectionOptions(manualId));
+  useEffect(() => {
+    if (incomingId && running) router.setParams({ placeId: undefined });
+  }, [incomingId, running]);
   useEffect(() => {
     if (!running) return;
     let alive = true;
@@ -40,12 +54,15 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
   const data = useArPlaces(location.position, language);
   const places = data.nearby.data ?? [];
   const ranked = tracking && location.position ? rankPlaces(places, location.position, heading, activationRadiusMeters) : [];
-  const selectedId = selectedPlaceId(ranked, manualId) ?? (places.some((p) => p.providerId === manualId) ? manualId : null);
+  const manualAvailable = manualId && (places.some(p => p.providerId === manualId) || handoff.data?.providerId === manualId);
+  const selectedId = manualAvailable ? manualId : selectedPlaceId(ranked, manualId);
   useQuery(placeSelectionOptions(selectedId));
   const nearest = ranked.find((p) => p.eligible);
   const summary = places.find((p) => p.providerId === selectedId);
-  const detail = data.details.data?.providerId === selectedId ? data.details.data : null;
-  const selected = detail ?? summary;
+  const cachedDetails = useQuery({ queryKey: ['place-details', selectedId, language],
+    queryFn: () => placesService.details(selectedId!, language), enabled: false, gcTime: AR.nearbyReuseMs });
+  const detail = cachedDetails.data?.providerId === selectedId ? cachedDetails.data : null;
+  const selected = detail ?? summary ?? (handoff.data?.providerId === selectedId ? handoff.data : null);
   const distance = ranked.find((p) => p.place.providerId === selectedId)?.distance;
   const labels = cameraReady && running ? layoutLabels(ranked, width, selectedId) : [];
   const select = (id: string) => setManualId(id);
@@ -89,7 +106,12 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
           {detail?.description && <Text>{detail.description}</Text>}
           {data.detailRequest?.providerId === selectedId && data.details.isFetching && <Notice busy>{t('map.details')}</Notice>}
           {data.detailRequest?.providerId === selectedId && data.details.error && <Notice>{t(edgeErrorMessageKey(data.details.error))}</Notice>}
-          {(!detail || data.detailRequest?.language !== language) && <Action title={t('ar.more')} onPress={() => { if (running) data.more(selected.providerId); }} disabled={!running || data.details.isFetching} />}
+          {!detail && <Action title={t('ar.more')} onPress={() => { if (running) data.more(selected.providerId); }} disabled={!running || data.details.isFetching} />}
+          <Action title={t('placeDetails.view')} onPress={() => {
+            if (!running) return;
+            client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
+            router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
+          }} disabled={!running} />
           <Action title={t('ar.directions')} onPress={directions} disabled={!running} />
         </View>}
         <Text>{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>
@@ -101,9 +123,9 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
             <Text style={styles.rowName}>{place.name}</Text><Text>{distanceText(distance)}</Text>
           </Pressable>)}
       </ScrollView>
-      {places.length > 0 && <View style={styles.attribution}>
+      {(places.length > 0 || selected) && <View style={styles.attribution}>
         <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" style={styles.google} resizeMode="contain" />
-        <ScrollView style={styles.credits}><ProviderAttributions places={[...places, ...(detail ? [detail] : [])]} /></ScrollView>
+        <ScrollView style={styles.credits}><ProviderAttributions places={[...places, ...(selected ? [selected] : [])]} /></ScrollView>
       </View>}
     </View>
   </View>;

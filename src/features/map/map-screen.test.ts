@@ -14,7 +14,7 @@ import { localizationOptions } from '@/i18n/options';
 import MapScreen from './map-screen';
 
 const controls = vi.hoisted(() => ({
-  fit: vi.fn(), active: true, focused: true,
+  fit: vi.fn(), animate: vi.fn(), active: true, focused: true,
   language: 'en' as 'en' | 'ko' | 'ja',
   position: { latitude: 38.5, longitude: -120.2 },
   params: {} as { placeId?: string },
@@ -25,7 +25,7 @@ vi.mock('expo-router', () => ({ router: { navigate: vi.fn(), push: vi.fn(), setP
 vi.mock('react-native-maps', async () => {
   const { createElement, forwardRef, useImperativeHandle } = await import('react');
   const MapView = forwardRef((props: Record<string, unknown>, ref) => {
-    useImperativeHandle(ref, () => ({ fitToCoordinates: controls.fit }));
+    useImperativeHandle(ref, () => ({ fitToCoordinates: controls.fit, animateToRegion: controls.animate }));
     return createElement('map', props);
   });
   return { default: MapView, Circle: 'circle', Marker: 'marker', Polyline: 'polyline', PROVIDER_GOOGLE: 'google' };
@@ -71,7 +71,7 @@ async function startRoute(laidOut = true) {
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   controls.hasLocation = true; controls.locationStatus = 'ready'; controls.accuracy = 8;
-  controls.params = {}; controls.fit.mockReset(); controls.active = true; controls.focused = true;
+  controls.params = {}; controls.fit.mockReset(); controls.animate.mockReset(); controls.active = true; controls.focused = true;
   controls.language = 'en';
   translations = createInstance();
   await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
@@ -461,4 +461,22 @@ it('keeps the expanded sheet and Google credits within the smaller scene above t
  expect(tree!.root.findAllByType('aside')).toHaveLength(1);
  expect(placesService.nearby).toHaveBeenCalledTimes(1);
  expect(routeService.walking).toHaveBeenCalledTimes(1);
+});
+it('opens the protected Details page from a selected Map POI with its cached summary and no extra request', async () => {
+  client.setQueryData(['place-selection', destination.providerId], destination); controls.params = { placeId: destination.providerId };
+  await act(async () => { tree = create(renderMap()); });
+  await press('placeDetails.view');
+  expect(router.navigate).toHaveBeenLastCalledWith({ pathname: '/place/[providerId]', params: { providerId: destination.providerId } });
+  expect(client.getQueryData(['place-selection', destination.providerId])).toEqual(destination);
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+  controls.focused = false; await act(async () => tree!.update(renderMap())); controls.focused = true; await act(async () => tree!.update(renderMap()));
+  expect(JSON.stringify(tree!.toJSON())).toContain(destination.name); expect(placesService.details).not.toHaveBeenCalled();
+});
+it('centers a Details handoff only when the existing native map is ready without a provider call', async () => {
+  client.setQueryData(['place-selection', destination.providerId], destination); controls.params = { placeId: destination.providerId };
+  await act(async () => { tree = create(renderMap()); }); expect(controls.animate).not.toHaveBeenCalled();
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  expect(controls.animate).toHaveBeenCalledExactlyOnceWith({ ...destination.coordinates, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400);
+  controls.focused = false; await act(async () => tree!.update(renderMap())); controls.focused = true; await act(async () => tree!.update(renderMap()));
+  expect(controls.animate).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
 });

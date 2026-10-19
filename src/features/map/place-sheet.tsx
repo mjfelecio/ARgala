@@ -25,10 +25,10 @@ export type HomePlaceSheetProps = {
   selectionSummary?: string; locationStatus?: ReactNode; mapLoading?: boolean;
   route?: { distanceMeters: number; durationSeconds: number; warnings: string[] };
   attributions: ReactNode; onRetrySearch(): void; onClosePlace(): void; onDetails(): void;
-  onWalk(): void; onOpenGoogle?(): void; onMeasuredHeight(height: number): void;
+  onViewDetails?(): void; onWalk(): void; onOpenGoogle?(): void; onMeasuredHeight(height: number): void;
   onSettledHeight?(height: number): void; maxHeight?: number; containerHeight?: number;
 };
-export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, selectionSummary, locationStatus, mapLoading, route, attributions, onRetrySearch, onClosePlace, onDetails, onWalk, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight }: HomePlaceSheetProps) {
+export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, selectionSummary, locationStatus, mapLoading, route, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onWalk, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight }: HomePlaceSheetProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [settledIndex, setSettledIndex] = useState(0);
@@ -112,7 +112,7 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
               {place.mapsUri && onOpenGoogle && <Button variant="outline" accessibilityLabel={t('map.openGoogle')} onPress={onOpenGoogle}><Button.Label>{t('map.openGoogle')}</Button.Label></Button>}
             </>}
           </Card.Body>
-          <Card.Footer><Button accessibilityLabel={t('map.walk')} onPress={onWalk} isDisabled={!canRequest || state === 'route-loading'} accessibilityState={{ busy: state === 'route-loading', disabled: !canRequest || state === 'route-loading' }}>
+          <Card.Footer className="flex-col gap-2">{onViewDetails && <Button variant="secondary" className="w-full" accessibilityLabel={t('placeDetails.view')} onPress={onViewDetails}><Button.Label>{t('placeDetails.view')}</Button.Label></Button>}<Button className="w-full" accessibilityLabel={t('map.walk')} onPress={onWalk} isDisabled={!canRequest || state === 'route-loading'} accessibilityState={{ busy: state === 'route-loading', disabled: !canRequest || state === 'route-loading' }}>
             {state === 'route-loading' && <Spinner size="sm" color={onAccent} />}<Button.Label>{t('map.walk')}</Button.Label>
           </Button></Card.Footer>
         </Card>}

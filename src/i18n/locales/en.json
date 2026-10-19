@@ -144,5 +144,24 @@
     "backToMap": "Back to map",
     "openSettings": "Open settings",
     "profilePlaceholder": "Profile features are not available yet. You can manage language and AR preferences in Settings."
+  },
+  "placeDetails": {
+    "title": "Place Details",
+    "unavailable": "This place is not available in memory.",
+    "load": "Load Details",
+    "loading": "Loading place details…",
+    "back": "Back",
+    "overview": "Overview",
+    "essentials": "Essential Details",
+    "address": "Street address",
+    "coordinates": "Geographic coordinates",
+    "coordinateValue": "Latitude {{latitude}}, longitude {{longitude}}",
+    "source": "Place data & credits",
+    "distanceUnavailable": "Your distance is available on Map or AR with a current location.",
+    "view": "View Details",
+    "directions": "Get Directions",
+    "map": "View on Map",
+    "ar": "Open AR",
+    "directionsHint": "Opens Map. Tap “{{action}}” there to request directions."
   }
 }

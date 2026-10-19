@@ -355,3 +355,78 @@ executing the Android Java code.
 - The existing development APK can load this JavaScript fix. Repeated cold
   launches and navigation back to the map still need a phone retest; no native
   crash recovery or live Google integration result is claimed from these checks.
+
+### POI Details screen — 2026-10-19
+
+Implemented from latest upstream `main` (`da2ef4e`, PR #9 merged), using the
+owner-supplied implementation package and both exported P01/P02 PNG/HTML
+references. See [the execution plan](superpowers/plans/2026-10-19-poi-details.md)
+and [presentation decisions](design/clean-explorer/PLACE_DETAILS.md).
+
+One protected parent-stack Details screen is reachable through explicit View
+Details actions on Map and AR. It reads the existing in-memory selection and
+language-keyed details queries. Only explicit Load Details recovers missing or
+evicted full content. Back preserves the source tab. Directions / Map / AR
+return through the existing tab navigator, and Map centers a handoff only after
+native readiness. Directions still requires a second, explicit **Get walking
+route** tap on Map; this PR does not implement one-tap route preview.
+
+The presentation uses HeroUI Native, UniWind and the existing `global.css`
+tokens. It shows real name, optional address/description, destination coordinates,
+Google Maps branding and supplied third-party credits. It owns no location
+watcher and asserts no user distance from retained Map/AR samples. A future
+approved-image slot is tested with clearly synthetic fixtures; no runtime
+photograph or unsupported provider metadata was added. AR also retains credits
+when displaying a handoff without nearby results.
+
+Validation performed:
+
+- Baseline `npm run check`: **221 tests / 30 files**, typecheck and lint passed.
+- Task-specific failing tests were observed for the missing page, sparse content,
+  entry actions, navigation, incoming AR selection, Map readiness/centering and
+  handoff-only AR attribution, followed by passing targeted suites.
+- Final `npm run check`: **264 tests / 31 files**, typecheck and zero-warning lint
+  passed.
+- `npm run check:android`: passed configuration introspection.
+- `npm run export:android -- --max-workers 2`: passed Android Metro/Hermes export.
+  Metro printed the existing NO_COLOR/FORCE_COLOR environment warning.
+- `git diff --check`: passed.
+
+Regressions use real HeroUI components, actual EN/KO/JA resources, the shared
+QueryClient defaults and real error mapping; native and network boundaries are
+mocked. They cover cached/cold/evicted content, malformed IDs, optional media
+and image failure, long names, optional sections, summary retention during
+loading/failure, duplicate action guards, localized known/unknown errors and
+recovery, third-party links and sanitized link failures, refocus, foreground
+return, reconnect, invalidation, locale changes and remount without incidental
+paid requests. Installed SDK Stack/Tab reducers and route payload traversal
+verify source-tab Back behavior and returning to the existing parent tabs.
+Existing permission, sensor startup/readiness, camera and routing suites remain
+part of the full check.
+
+Android device verification **was not performed**: `adb` is unavailable and no
+Android handset appeared in the local USB inventory. No new APK was built or
+installed. No GPS, compass, camera, native Maps, live Google/Supabase, TalkBack,
+large-system-text or pixel-level rendering result is claimed. The exported
+references were compared to the component hierarchy and supported data, not to
+an Android screenshot of this implementation.
+
+Outstanding device acceptance, using configured providers and a real account:
+
+- Map → selected POI → Details → Back; AR → selected POI → Details → Back.
+- Name-only, address/description, cold/evicted data, loading and error recovery;
+  EN/KO/JA, long names, enlarged font, TalkBack order and at least 48-unit targets.
+- Directions → Map → explicit Walk; Map/AR switching and foreground return with
+  no duplicated scan/details/route calls; selected remote POI centering.
+- Permission denial/revocation, stale GPS and heading, camera lifecycle and
+  off-map Google/third-party attribution visibility and links.
+
+No dependency, provider schema/field mask, Edge function, limiter migration,
+native configuration or persistent provider-content storage changed. Edge,
+limiter, dependency doctor and APK checks were therefore not rerun for this
+JavaScript feature; CI still runs the repository's configured checks.
+
+Independent read-only whole-branch review approved the PR with no findings and
+separately passed typecheck, zero-warning lint and **109 tests** across Details,
+AR, Map and app-shell suites. [PR #10](https://github.com/mjfelecio/ARgala/pull/10)
+is open against `main`; native acceptance remains pending and no merge was done.

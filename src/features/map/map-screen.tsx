@@ -56,6 +56,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const parsedId = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
   const incomingId = parsedId.success ? parsedId.data.providerId : null;
   const active = useAppActive(); const focused = useIsFocused(); const map = useRef<MapView>(null);
+  const pendingHandoffCenter = useRef<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -103,6 +104,12 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     });
   }, [enabled, mapSize.width, mapSize.height, headerHeight, settledSheetHeight, fitGap, route.data]);
   const place = details.data ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
+  useEffect(() => {
+    if (incomingId) pendingHandoffCenter.current = incomingId;
+    if (!enabled || !place || pendingHandoffCenter.current !== place.providerId) return;
+    map.current?.animateToRegion({ ...place.coordinates, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400);
+    pendingHandoffCenter.current = null;
+  }, [incomingId, enabled, place]);
   const open = useOpenProviderLink();
   function select(providerId: string | null) {
     if (providerId && !enabled) return;
@@ -145,6 +152,11 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady} route={route.data}
       locationStatus={<>{locationStatus}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
       selectionSummary={place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
+      onViewDetails={place ? () => {
+        if (!active || !focused) return;
+        queryClient.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+        router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
+      } : undefined}
       onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onWalk={walk}
       onOpenGoogle={place?.mapsUri ? () => open(place.mapsUri!) : undefined}
       onMeasuredHeight={setSheetHeight} onSettledHeight={setSettledSheetHeight} containerHeight={mapSize.height} maxHeight={mapSize.height > 0 ? Math.max(0, mapSize.height - headerHeight - Math.min(fitMargin * 2, mapSize.height / 10)) : undefined}
