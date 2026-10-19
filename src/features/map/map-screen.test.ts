@@ -61,7 +61,7 @@ async function startRoute(laidOut = true) {
   if (laidOut) await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } }); });
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
   await act(async () => {
-    const sheet=tree!.root.findByType('dialog'); sheet.props.onChange(0, sheet.props.containerHeight - 120);
+    const sheet=tree!.root.findByType('dialog'); sheet.props.onChange(0, sheet.props.containerLayoutState.get().height - 120);
     tree!.root.findAllByType('view').find(n => n.props.testID === 'home-map-controls')!.props.onLayout({ nativeEvent: { layout: { height: 96 } } });
   });
   await press('map.search');
@@ -277,7 +277,7 @@ it('frames routes above measured overlays without double-counting Android paddin
  expect(panel).toBeDefined(); expect(header).toBeDefined();
  await act(async()=>{
   tree!.root.findByType('map').props.onLayout({nativeEvent:{layout:{width:360,height:720}}});
-  panel!.props.onChange(0, panel!.props.containerHeight - 240);
+  panel!.props.onChange(0, panel!.props.containerLayoutState.get().height - 240);
   header!.props.onLayout({nativeEvent:{layout:{height:180}}});
  });
  await act(async()=>request.resolve(walkingRoute));
@@ -287,7 +287,7 @@ it('frames routes above measured overlays without double-counting Android paddin
  expect(padding.top+fitPadding.top+padding.bottom+fitPadding.bottom).toBeLessThan(720);
  expect(fitPadding.bottom).toBeLessThan(240);
  const calls=controls.fit.mock.calls.length;
- await act(async()=>panel!.props.onChange(1, panel!.props.containerHeight - 320));
+ await act(async()=>panel!.props.onChange(1, panel!.props.containerLayoutState.get().height - 320));
  expect(controls.fit.mock.calls.length).toBeGreaterThan(calls);
  expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).toHaveBeenCalledTimes(1); expect(routeService.walking).toHaveBeenCalledTimes(1);
 });
@@ -358,7 +358,7 @@ it('keeps summary-only details recovery explicit through failure, expansion and 
 it('retains expanded route geometry when header size changes without a new native snap-index event', async () => {
  await startRoute(); await act(async()=>request.resolve(walkingRoute));
  let sheet=tree!.root.findByType('dialog');
- await act(async()=>sheet.props.onChange(1,sheet.props.containerHeight-sheet.props.snapPoints[1]));
+ await act(async()=>sheet.props.onChange(1,sheet.props.containerLayoutState.get().height-sheet.props.snapPoints[1]));
  await act(async()=>tree!.root.findByProps({testID:'home-map-controls'}).props.onLayout({nativeEvent:{layout:{height:180}}}));
  sheet=tree!.root.findByType('dialog');
  expect(sheet.props.snapPoints[1]).toBe(476);

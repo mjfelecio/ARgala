@@ -18,6 +18,20 @@ afterEach(async () => { await act(async () => tree?.unmount()); });
 async function render() { await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(HomePlaceSheet, props)))); }); }
 function content() { return JSON.stringify(tree.toJSON()); }
 async function press(key: string) { const button=tree.root.findAllByType('button').find(b=>b.props.accessibilityLabel===translations.t(key)); expect(button).toBeDefined(); await act(async()=>button!.props.onPress()); }
+it('satisfies the installed bottom-sheet prop contract and updates layout without losing native offsets', async () => {
+ props.containerHeight=720; await render();
+ const nativeSheet=tree.root.findByType('dialog');
+ expect(nativeSheet.props.containerHeight).toBeUndefined();
+ expect(nativeSheet.props.containerOffset).toBeUndefined();
+ const layout=nativeSheet.props.containerLayoutState;
+ expect(layout.get().height).toBe(720);
+ // Native measurement supplies offsets; changing height must preserve them.
+ await act(async()=>layout.set({height:720,offset:{top:32,bottom:16,left:0,right:0}}));
+ props.containerHeight=480;
+ await act(async()=>tree.update(React.createElement(I18nextProvider,{i18n:translations},withHeroUI(React.createElement(HomePlaceSheet,props)))));
+ expect(tree.root.findByType('dialog').props.containerLayoutState).toBe(layout);
+ expect(layout.get()).toEqual({height:480,offset:{top:32,bottom:16,left:0,right:0}});
+});
 it.each(['unsearched','loading','empty','results'] as const)('renders truthful %s state with visible provider credits', async (state) => {
  props.state=state; props.resultCount=2; await render();
  const keys={unsearched:'map.start',loading:'map.searching',empty:'map.empty',results:'map.results'};
@@ -44,7 +58,7 @@ it('translates an error key at render time, supports retry and reports measured 
  await act(async()=>{ await translations.changeLanguage('ko'); }); expect(content()).toContain(translations.t('service.rateLimited'));
  await press('common.retry'); expect(props.onRetrySearch).toHaveBeenCalledOnce();
  const measured=tree.root.findByType('dialog');
- await act(async()=>measured.props.onChange(0, measured.props.containerHeight - 234));
+ await act(async()=>measured.props.onChange(0, measured.props.containerLayoutState.get().height - 234));
  expect(props.onMeasuredHeight).toHaveBeenCalledWith(234);
 });
 it('shows unavailable route and expired selection without inventing data', async () => {

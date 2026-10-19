@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { vi } from 'vitest';
 import { HeroUINativeProviderRaw } from 'heroui-native/provider-raw';
+import type { BottomSheetProps } from '@gorhom/bottom-sheet';
 
 const nativeUi = vi.hoisted(() => ({ reactions: new Set<() => void>() }));
 
@@ -22,7 +23,7 @@ vi.mock('react-native-reanimated', async () => {
   const chain = { duration() { return this; }, springify() { return this; }, delay() { return this; }, easing() { return this; }, withInitialValues() { return this; } };
   return {
     default: { View: 'view', Text: 'text', createAnimatedComponent: (component: unknown) => component },
-    useSharedValue: (value: unknown) => React.useRef({ value, get() { return this.value; }, set(next: unknown) { this.value = next; } }).current,
+    useSharedValue: (value: unknown) => React.useRef({ value, get() { return this.value; }, set(next: unknown) { this.value = typeof next === 'function' ? next(this.value) : next; } }).current,
     useAnimatedStyle: () => ({}), useAnimatedProps: () => ({}), useAnimatedRef: () => React.useRef(null),
     useDerivedValue: () => ({ value: 0 }), useAnimatedReaction: (prepare: () => unknown, react: (next: unknown, previous: unknown) => void) => {
       React.useEffect(() => {
@@ -46,9 +47,12 @@ export function withHeroUI(children: React.ReactNode) {
 // The native sheet driver exposes gesture/position events; application composition stays real.
 vi.mock('@gorhom/bottom-sheet', async () => {
   const { createElement, forwardRef, useImperativeHandle } = await import('react');
-  return { default: forwardRef((props: Record<string, unknown>, ref) => {
+  const { usePropsValidator } = await vi.importActual<typeof import('@gorhom/bottom-sheet/lib/typescript/hooks/usePropsValidator')>('@gorhom/bottom-sheet/lib/module/hooks/usePropsValidator.js');
+  return { default: forwardRef((props: BottomSheetProps, ref) => {
+    // Keep the installed library's JS prop contract; mock only the native driver.
+    usePropsValidator(props);
     useImperativeHandle(ref, () => ({ snapToIndex: (index: number) => {
-      (props.onChange as (index: number, position: number) => void)?.(index, (props.containerHeight as number) - (props.snapPoints as number[])[index]);
+      (props.onChange as (index: number, position: number) => void)?.(index, props.containerLayoutState!.get().height - (props.snapPoints as number[])[index]);
     } }));
     return createElement('dialog', props, createElement((props.handleComponent as React.ElementType) ?? 'header', { accessible: true, animatedIndex: props.animatedIndex, animatedPosition: props.animatedPosition }), props.children as React.ReactNode);
   }), BottomSheetScrollView: 'section', BottomSheetHandle: 'header' };

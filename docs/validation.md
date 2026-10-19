@@ -271,3 +271,32 @@ without utility candidates omitted both route tokens; the static theme retains
 them. `npm run check` passed typecheck, zero-warning lint and **206 tests / 29
 files**. `npm run export:android -- --max-workers 2` passed again. Device retesting
 of the corrected bundle remains pending.
+
+### Bottom-sheet development invariant — 2026-10-19
+
+After PR #8 was merged, the owner reported PR #6 failing with
+`'containerHeight' is deprecated, please use 'containerLayoutState'.`
+Gorhom 5.2.14 still types the deprecated prop, but its development validator
+throws when it is supplied. The native sheet test double previously skipped
+that validator and concealed the incompatibility.
+
+HomePlaceSheet now supplies the supported shared `containerLayoutState`.
+Map-height changes update the height while retaining SDK-measured offsets.
+The test boundary runs the installed library's actual JavaScript prop validator,
+with gesture/animation drivers mocked. A new regression reproduced the exact
+invariant before the fix and passes afterwards, covering layout-state identity,
+height changes and offset preservation. Existing map geometry tests now consume
+the current layout API.
+
+The reported duplicate-details review case is already guarded by
+`detailsLoaded={!!details.data}`, the hidden recovery action after success and
+the `onDetails` data guard. Existing real-screen regressions pass for expansion
+without another paid request, explicit recovery after cache reset, and recovery
+from a failed summary-only selection. No request-policy change was needed here.
+
+- Targeted sheet/map regressions: **42 tests / 2 files** passed.
+- `npm run check`: typecheck, zero-warning lint and **207 tests / 29 files** passed.
+- `npm run export:android -- --max-workers 2`: Android Metro/Hermes export passed.
+- No dependency or native configuration changes; another APK build is unnecessary
+  for this fix. Android rendering, sheet drag/resize, attribution placement and
+  live provider interactions still need an owner retest of the corrected bundle.

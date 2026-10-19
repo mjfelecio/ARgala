@@ -36,6 +36,11 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
   const sheet = useRef<BottomSheet>(null);
   const window = useWindowDimensions();
   const height = containerHeight || window.height;
+  const containerLayoutState = useSharedValue({ height, offset: { top: 0, bottom: 0, left: 0, right: 0 } });
+  useEffect(() => {
+    // Gorhom also writes measured offsets; retain them when the map resizes.
+    containerLayoutState.set(current => ({ ...current, height }));
+  }, [containerLayoutState, height]);
   const gutter = useResolveClassNames('p-4').padding as number;
   const cap = Math.max(1, Math.min(height, maxHeight ?? height * 0.6));
   const peek = Math.min(cap, Math.max(gutter * 10, cap * 0.65));
@@ -72,7 +77,7 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
       {route.warnings.map((warning, index) => <Message key={index}>{warning}</Message>)}
     </>}
   </>;
-  return <BottomSheet ref={sheet} containerHeight={height} snapPoints={snapPoints}
+  return <BottomSheet ref={sheet} containerLayoutState={containerLayoutState} snapPoints={snapPoints}
     index={0} enableDynamicSizing={false} enablePanDownToClose={false} animateOnMount={false}
     animatedPosition={position} animatedIndex={animatedIndex} handleComponent={MapSheetHandle} backgroundStyle={backgroundStyle} handleIndicatorStyle={indicatorStyle}
     accessible={false} accessibilityLabel={t('map.title')}
