@@ -1,3 +1,4 @@
+import { withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
@@ -25,9 +26,6 @@ vi.mock('expo-camera', async () => {
   return { CameraView: (props: Record<string, unknown>) => createElement('video', props),
     useCameraPermissions: () => [{ granted: controls.granted, canAskAgain: true }, controls.getPermission, controls.getPermission] };
 });
-vi.mock('react-native', () => ({ View: 'view', Text: 'text', Image: 'img', Pressable: 'pressable', ScrollView: 'scroll',
-  Alert: { alert: vi.fn() }, Linking: { openSettings: vi.fn(), openURL: vi.fn() },
-  StyleSheet: { create: (styles: unknown) => styles, absoluteFill: {} } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language, activationRadiusMeters: controls.radius }) }));
 vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => controls.location }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
@@ -40,11 +38,11 @@ const north: Place = { id: 'google:north', providerId: 'north', provider: 'googl
   coordinates: { latitude: 0.0001, longitude: 0 }, attributions: [{ name: 'Local Provider', uri: 'https://example.com/credits' }] };
 const south: Place = { ...north, id: 'google:south', providerId: 'south', name: 'South Park', coordinates: { latitude: -0.002, longitude: 0 } };
 let client: QueryClient; let translations: i18n; let tree: ReactTestRenderer | undefined;
-const render = () => React.createElement(I18nextProvider, { i18n: translations }, React.createElement(QueryClientProvider, { client }, React.createElement(ArScreen)));
+const render = () => React.createElement(I18nextProvider, { i18n: translations }, React.createElement(QueryClientProvider, { client }, withHeroUI(React.createElement(ArScreen))));
 const output = () => JSON.stringify(tree!.toJSON());
 async function mount() { await act(async () => { tree = create(render()); }); }
 async function press(key: string) {
-  const button = tree!.root.findAllByType('button').find((b) => b.props.title === translations.t(key));
+  const button = tree!.root.findAllByType('button').find((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t(key));
   expect(button, key).toBeDefined(); expect(button!.props.disabled).not.toBe(true);
   await act(async () => { button!.props.onPress(); });
 }
@@ -110,7 +108,7 @@ it('retains a list with denied camera permission and suppresses overlays for bad
 it('blocks scans with denied location and retains cached places without claiming fresh distance', async () => {
   client.setQueryData(['places', { latitude: 0, longitude: 0 }, 'en'], [north]); await mount();
   controls.location.status = 'denied'; controls.location.position = null; await update();
-  const button = tree!.root.findAllByType('button').find((b) => b.props.title === translations.t('ar.scan'))!;
+  const button = tree!.root.findAllByType('button').find((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('ar.scan'))!;
   expect(button.props.disabled).toBe(true); expect(output()).toContain(translations.t('ar.trackingFallback'));
   expect(output()).toContain('North Cafe'); expect(placesService.nearby).not.toHaveBeenCalled();
 });
@@ -264,4 +262,16 @@ it('does not offer another paid load when complete details already exist for the
 it('shows Google and third-party credits for a Details handoff even without nearby results', async () => {
   client.setQueryData(['place-selection', south.providerId], south); controls.params = { placeId: south.providerId }; await mount();
   expect(output()).toContain('Google Maps'); expect(output()).toContain('Local Provider'); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+
+it('renders one compact AR heading with honest compass state and accessible Map and Scan controls', async () => {
+  await mount();
+  expect(output()).toContain(translations.t('ar.title'));
+  expect(output()).toContain(translations.t('ar.bearing', { degrees: 0 }));
+  expect(tree!.root.findAllByType('button').filter(b => b.props.accessibilityLabel === translations.t('navigation.backToMap'))).toHaveLength(1);
+  await press('navigation.backToMap'); expect(controls.navigate).toHaveBeenCalledWith('/');
+  controls.location.heading = { degrees: 20, accuracy: 1, reference: 'magnetic' }; await update();
+  expect(output()).toContain(translations.t('ar.compassUnavailable'));
+  expect(output()).not.toContain(translations.t('ar.bearing', { degrees: 20 }));
+  expect(placesService.nearby).not.toHaveBeenCalled();
 });

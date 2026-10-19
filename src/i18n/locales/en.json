@@ -120,7 +120,11 @@
     "nearby": "Nearby places",
     "more": "Load additional details",
     "directions": "Get Directions on map",
-    "addressUnknown": "Address unavailable"
+    "addressUnknown": "Address unavailable",
+    "title": "AR Explore",
+    "map": "Map",
+    "compassUnavailable": "Compass unavailable",
+    "bearing": "{{degrees}}° · approximate heading"
   },
   "showcase": {
     "title": "Clean Explorer components",

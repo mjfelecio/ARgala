@@ -16,6 +16,7 @@ import { edgeErrorMessageKey } from '@/lib/edge-error';
 import { Action, Notice } from '@/ui/shared';
 import { layoutLabels, rankPlaces, selectedPlaceId } from './projection';
 import { useArPlaces } from './use-ar-places';
+import { ArChrome } from './ar-chrome';
 
 type Props = { location: ReturnType<typeof useDeviceLocation>; running: boolean; cameraReady: boolean; preview: ReactNode; cameraStatus: ReactNode };
 export function ArDiscovery({ location, running, cameraReady, preview, cameraStatus }: Props) {
@@ -76,6 +77,8 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
   return <View style={styles.container}>
     <View testID="ar-viewport" style={styles.preview} onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
       {preview}
+      <View className="absolute left-3 right-3 top-3"><ArChrome headingDegrees={heading} onMap={() => router.navigate('/')}
+        onScan={() => { if (tracking) data.scan(); }} scanDisabled={!tracking || data.nearby.isFetching} scanBusy={data.nearby.isFetching} /></View>
       <View style={styles.cameraStatus}>{cameraStatus}</View>
       {labels.map((label) => <Pressable key={label.place.providerId} testID={`ar-label-${label.place.providerId}`}
         accessibilityRole="button" accessibilityState={{ selected: selectedId === label.place.providerId }}
@@ -88,7 +91,6 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
       </Pressable>)}
     </View>
     <View style={styles.content}>
-      <View style={styles.toolbar}><Action title={t('ar.scan')} disabled={!tracking || data.nearby.isFetching} onPress={() => { if (tracking) data.scan(); }} /></View>
       <Text style={styles.hint}>{t('ar.approximate', { degrees: AR.horizontalFovDegrees })}</Text>
       <ScrollView style={styles.panel} contentContainerStyle={styles.panelContent}>
         <LocationStatus location={location} />

@@ -70,7 +70,11 @@
     "nearby": "近くの場所",
     "more": "追加情報を読み込む",
     "directions": "地図で道順を表示",
-    "addressUnknown": "住所情報がありません"
+    "addressUnknown": "住所情報がありません",
+    "title": "AR探索",
+    "map": "地図",
+    "compassUnavailable": "コンパスを利用できません",
+    "bearing": "{{degrees}}° · おおよその方角"
   },
   "showcase": {
     "title": "Clean Explorer コンポーネント",
