@@ -44,7 +44,7 @@ async function layout() { await act(async () => {
   tree!.root.findByProps({ testID: 'route-preview-dock' }).props.onLayout({ nativeEvent: { layout: { height: 280 } } });
 }); }
 beforeEach(async () => {
-  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false }); vi.clearAllMocks();
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false }); vi.clearAllMocks(); vi.spyOn(Date, 'now').mockReturnValue(1800000000000);
   Object.assign(controls, { token: undefined, active: true, focused: true, mapsConfigured: true, language: 'en', canBack: true });
   Object.assign(controls.location, { status: 'ready', watcherStatus: 'ready', errorCode: null, position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8 });
   vi.mocked(routeService.walking).mockReset().mockResolvedValue(route); nativeUi.openURL.mockReset().mockResolvedValue(undefined);
@@ -79,4 +79,61 @@ it('returns to Map with selection or to the selected Place Details without provi
 });
 it('shows honest Maps configuration guidance without spending quota', async () => {
   controls.mapsConfigured = false; handoff(false); await mount(); expect(output()).toContain(translations.t('map.missingKey')); expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('spends one intent only when delayed foreground GPS becomes fresh, with no repeat on lifecycle or locale changes', async () => {
+  const { focusManager, onlineManager } = await import('@tanstack/react-query');
+  handoff(false); controls.location.status = 'loading'; controls.location.position = null; await mount(); expect(routeService.walking).not.toHaveBeenCalled();
+  Object.assign(controls.location, { status: 'ready', position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now() }); await update();
+  expect(routeService.walking).toHaveBeenCalledExactlyOnceWith({ origin, destination: place.coordinates, language: 'en' });
+  controls.active = false; controls.focused = false; await update(); controls.active = true; controls.focused = true; await update();
+  await act(async () => { await translations.changeLanguage('ja'); controls.language = 'ja'; await client.invalidateQueries(); focusManager.setFocused(false); focusManager.setFocused(true); onlineManager.setOnline(false); onlineManager.setOnline(true); });
+  await update(); await act(async () => { tree!.unmount(); }); await mount();
+  expect(routeService.walking).toHaveBeenCalledTimes(1); expect(output()).toContain(place.name); expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
+});
+it.each(['stale-position', 'stale-watcher', 'watcher-error', 'denied', 'disabled', 'timeout', 'inaccurate', 'unknown-accuracy'])('does not spend quota with %s GPS', async failure => {
+  handoff(false);
+  if (failure === 'stale-position') controls.location.positionTimestamp = Date.now() - 60000;
+  if (failure === 'stale-watcher') controls.location.watcherTimestamp = Date.now() - 60000;
+  if (failure === 'watcher-error') controls.location.watcherStatus = 'error';
+  if (failure === 'denied' || failure === 'disabled') controls.location.status = failure;
+  if (failure === 'timeout') { controls.location.status = 'error'; controls.location.errorCode = 'timeout'; }
+  if (failure === 'inaccurate') controls.location.accuracy = 1000;
+  if (failure === 'unknown-accuracy') controls.location.accuracy = Number.NaN;
+  await mount(); expect(routeService.walking).not.toHaveBeenCalled(); expect(tree!.root.findAllByType('polyline')).toHaveLength(0); expect(button('location.retry')).toBeDefined();
+});
+it('does not use the previous foreground owner’s retained fix on resume', async () => {
+  handoff(false); controls.active = false; await mount();
+  const oldTime = controls.location.watcherTimestamp;
+  vi.spyOn(Date, 'now').mockReturnValue(oldTime + 1000); controls.active = true; await update(); expect(routeService.walking).not.toHaveBeenCalled();
+  Object.assign(controls.location, { watcherTimestamp: oldTime + 1000, positionTimestamp: oldTime + 1000 }); await update(); expect(routeService.walking).toHaveBeenCalledOnce();
+});
+it('requires a new explicit retry after error and guards rapid double retry', async () => {
+  vi.mocked(routeService.walking).mockRejectedValueOnce(new Error('Private provider diagnostic')); handoff(false); await mount(); expect(routeService.walking).toHaveBeenCalledOnce();
+  expect(output()).toContain(translations.t('service.failed')); expect(output()).not.toContain('Private provider diagnostic');
+  controls.active = false; await update(); controls.active = true; await update(); await act(async () => { await client.invalidateQueries(); }); expect(routeService.walking).toHaveBeenCalledOnce();
+  const retry = button('directions.retry')!; expect(retry).toBeDefined(); await act(async () => { retry.props.onPress(); retry.props.onPress(); }); expect(routeService.walking).toHaveBeenCalledTimes(2); expect(output()).toContain(place.name);
+});
+it('never re-arms a waiting intent after remount; an explicit retry creates new intent', async () => {
+  handoff(false); controls.location.status = 'loading'; await mount(); await act(async () => { tree!.unmount(); });
+  controls.location.status = 'ready'; await mount(); expect(routeService.walking).not.toHaveBeenCalled(); await press('directions.retry'); expect(routeService.walking).toHaveBeenCalledOnce();
+});
+it('revokes waiting authorization and ignores late paid results after QueryClient auth clear', async () => {
+  handoff(false); controls.location.status = 'loading'; await mount(); await act(async () => { client.clear(); }); controls.location.status = 'ready'; await update(); expect(routeService.walking).not.toHaveBeenCalled();
+  handoff(false); await act(async () => { tree!.unmount(); }); const pending = Promise.withResolvers<WalkingRoute>(); vi.mocked(routeService.walking).mockReturnValue(pending.promise); await mount(); expect(routeService.walking).toHaveBeenCalledOnce();
+  await act(async () => { client.clear(); pending.resolve(route); }); expect(client.getQueryCache().getAll().every(q => !q.state.data)).toBe(true);
+});
+it('bounds waiting intent lifetime and never spends an expired lease', async () => {
+  handoff(false); controls.location.status = 'loading'; await mount();
+  vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 120001); controls.location.status = 'ready'; controls.location.positionTimestamp = Date.now(); controls.location.watcherTimestamp = Date.now(); await update(); expect(routeService.walking).not.toHaveBeenCalled(); expect(output()).toContain(translations.t('directions.unavailable'));
+});
+it.each(['ROUTE_UNAVAILABLE', 'RATE_LIMITED', 'UNAUTHORIZED', 'UPSTREAM_INVALID', 'FUTURE', null])('translates %s along the real error-to-UI path and recovers explicitly', async code => {
+  const { EdgeRequestError } = await import('@/lib/edge-error'); const { edgeErrorMessageKey } = await import('@/lib/edge-error');
+  const failure = code ? new EdgeRequestError(code) : new Error('Private route diagnostic'); vi.mocked(routeService.walking).mockRejectedValueOnce(failure); handoff(false); await mount();
+  for (const language of ['en', 'ko', 'ja']) {
+    await act(async () => { await translations.changeLanguage(language); }); expect(output()).toContain(translations.t(edgeErrorMessageKey(failure))); expect(output()).not.toContain(failure.message);
+  }
+  await press('directions.retry'); expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates); expect(routeService.walking).toHaveBeenCalledTimes(2);
+});
+it.each(['?', '??', 'malformed'])('rejects invalid/degenerate returned polyline %s without inventing a route', async encodedPolyline => {
+  vi.mocked(routeService.walking).mockResolvedValue({ ...route, encodedPolyline }); handoff(false); await mount(); expect(routeService.walking).toHaveBeenCalledOnce(); expect(tree!.root.findAllByType('polyline')).toHaveLength(0); expect(output()).toContain(translations.t('service.unavailable')); expect(button('directions.retry')).toBeDefined();
 });

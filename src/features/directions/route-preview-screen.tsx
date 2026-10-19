@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import Constants from 'expo-constants';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -11,12 +11,10 @@ import { Chip } from 'heroui-native/chip';
 import { useThemeColor } from 'heroui-native/hooks';
 import { useTranslation } from 'react-i18next';
 import { withUniwind } from 'uniwind';
-import { useDeviceLocation } from '@/features/location/use-device-location';
+import { RoutePreviewLocationStatus } from './route-preview-location-status';
 import { ProviderAttributions } from '@/features/map/attributions';
 import { placeSelectionOptions } from '@/features/places/selection';
-import { useAppActive } from '@/lib/use-app-active';
-import { claimRoutePreviewIntent, type RoutePreviewIntent } from './route-preview-intent';
-import { decodePolyline } from './polyline';
+import { useRoutePreview } from './use-route-preview';
 import { RoutePreviewMap } from './route-preview-map';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
@@ -28,17 +26,14 @@ export default function RoutePreviewScreen() {
 function Preview({ token }: { token: unknown }) {
   const { t } = useTranslation();
   const client = useQueryClient();
-  const active = useAppActive(); const focused = useIsFocused();
-  const location = useDeviceLocation();
-  const claimed = useRef(false);
-  const [intent, setIntent] = useState<RoutePreviewIntent | null>(null);
-  useEffect(() => { if (!claimed.current) { claimed.current = true; setIntent(claimRoutePreviewIntent(client, token)); } }, [client, token]);
+  const configured = !!Constants.expoConfig?.extra?.mapsConfigured;
+  const preview = useRoutePreview(token, configured);
+  const { data, result, location, usable, running } = preview;
   const [dockHeight, setDockHeight] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
   const accent = useThemeColor('accent');
-  const result = intent?.existing;
-  const coordinates = useMemo(() => { try { return result ? decodePolyline(result.route.encodedPolyline) : []; } catch { return []; } }, [result]);
-  const place = intent?.place;
+  const coordinates = result?.coordinates ?? [];
+  const place = data?.intent.place;
   function toMap() {
     if (place) client.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
     router.dismissTo(place ? { pathname: '/', params: { placeId: place.providerId } } : '/');
@@ -50,8 +45,8 @@ function Preview({ token }: { token: unknown }) {
     </View>
     <View className="flex-1">
       {place && Constants.expoConfig?.extra?.mapsConfigured && <RoutePreviewMap place={place} origin={result?.origin} coordinates={coordinates}
-        currentPosition={active && focused && location.status === 'ready' ? location.position : null} dockHeight={dockHeight}
-        enabled={active && focused} onViewportHeight={setViewportHeight} />}
+        currentPosition={usable ? location.position : null} dockHeight={dockHeight}
+        enabled={running} onViewportHeight={setViewportHeight} />}
       <View testID="route-preview-dock" className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-surface"
         style={viewportHeight > 0 ? { maxHeight: viewportHeight * 0.55 } : undefined} onLayout={event => setDockHeight(event.nativeEvent.layout.height)}>
         <ScrollView contentContainerClassName="gap-3 p-4 pb-6">
@@ -62,6 +57,12 @@ function Preview({ token }: { token: unknown }) {
             <Text className="font-sans text-title font-bold text-foreground">{t('map.routeSummary', { meters: result.route.distanceMeters, minutes: Math.ceil(result.route.durationSeconds / 60) })}</Text>
             <Text className="font-sans text-sm text-muted">{t('directions.snapshot')}</Text>
           </>}
+          {place && configured && data?.status === 'waiting' && !preview.expired && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('directions.waiting')}</Text>}
+          {place && configured && !usable && <><RoutePreviewLocationStatus location={location} />{location.status === 'ready' && <><Text className="font-sans text-sm text-muted">{t('directions.stale')}</Text><Button variant="outline" accessibilityLabel={t('location.retry')} onPress={location.retry}><Button.Label>{t('location.retry')}</Button.Label></Button></>}</>}
+          {data?.status === 'waiting' && preview.expired && <Text className="font-sans text-sm text-muted">{t('directions.unavailable')}</Text>}
+          {data?.status === 'pending' && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('map.routeLoading')}</Text>}
+          {data?.errorKey && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(data.errorKey)}</Text>}
+          {preview.needsRetry && <Button variant="outline" accessibilityLabel={t('directions.retry')} isDisabled={!running || !configured} onPress={preview.retry}><Button.Label>{t('directions.retry')}</Button.Label></Button>}
           {place && <Card variant="secondary" className="gap-1 p-4"><Card.Body className="gap-1">
             <Text className="font-sans text-xs font-semibold text-brand-strong">{t('directions.destination')}</Text>
             <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{place.name}</Text>
