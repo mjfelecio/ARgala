@@ -480,3 +480,16 @@ it('centers a Details handoff only when the existing native map is ready without
   controls.focused = false; await act(async () => tree!.update(renderMap())); controls.focused = true; await act(async () => tree!.update(renderMap()));
   expect(controls.animate).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
 });
+
+it('opens View Route with the completed result and captured origin, without spending again, and preserves Home route on Back', async () => {
+  const { claimRoutePreviewIntent } = await import('@/features/directions/route-preview-intent');
+  await startRoute(); await act(async () => { request.resolve(walkingRoute); });
+  const action = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('directions.view'));
+  expect(action).toBeDefined(); controls.position = { latitude: 10, longitude: 124 }; await act(async () => { tree!.update(renderMap()); });
+  await act(async () => { action!.props.onPress(); action!.props.onPress(); });
+  expect(router.push).toHaveBeenCalledOnce(); const opened = vi.mocked(router.push).mock.calls[0][0] as { pathname: string; params: { token: string } };
+  expect(opened.pathname).toBe('/directions'); expect(claimRoutePreviewIntent(client, opened.params.token)).toMatchObject({ source: 'map', place: destination, existing: { origin: { latitude: 38.5, longitude: -120.2 }, route: walkingRoute } });
+  expect(routeService.walking).toHaveBeenCalledOnce(); controls.focused = false; await act(async () => { tree!.update(renderMap()); });
+  controls.params = { placeId: destination.providerId }; controls.focused = true; await act(async () => { tree!.update(renderMap()); });
+  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates); expect(routeService.walking).toHaveBeenCalledOnce();
+});

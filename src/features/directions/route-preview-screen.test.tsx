@@ -12,15 +12,18 @@ import type { Place } from '@/features/places/service';
 import { createRoutePreviewIntent } from './route-preview-intent';
 import { routeService, type WalkingRoute } from './service';
 import RoutePreviewScreen from './route-preview-screen';
+import PlaceDetailsScreen from '@/features/places/place-details-screen';
+import { placeSelectionOptions } from '@/features/places/selection';
 
-const controls = vi.hoisted(() => ({ token: undefined as unknown, active: true, focused: true, mapsConfigured: true, language: 'en' as 'en' | 'ko' | 'ja', fit: vi.fn(), animate: vi.fn(), retry: vi.fn(), canBack: true,
+const controls = vi.hoisted(() => ({ token: undefined as unknown, details: false, providerId: 'north', active: true, focused: true, mapsConfigured: true, language: 'en' as 'en' | 'ko' | 'ja', fit: vi.fn(), animate: vi.fn(), retry: vi.fn(), canBack: true,
   location: { status: 'ready', watcherStatus: 'ready', errorCode: null as string | null, position: { latitude: 38.5, longitude: -120.2 } as { latitude: number; longitude: number } | null, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8, canAskAgain: true } }));
-vi.mock('expo-router', () => ({ useLocalSearchParams: () => ({ token: controls.token }), useIsFocused: () => controls.focused,
+vi.mock('expo-router', () => ({ useLocalSearchParams: () => ({ token: controls.token, providerId: controls.providerId }), useIsFocused: () => controls.focused,
   router: { back: vi.fn(), canGoBack: () => controls.canBack, push: vi.fn(), navigate: vi.fn(), dismissTo: vi.fn(), setParams: vi.fn() } }));
 vi.mock('expo-constants', () => ({ default: { get expoConfig() { return { extra: { mapsConfigured: controls.mapsConfigured } }; } } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language }) }));
 vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ ...controls.location, retry: controls.retry }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
+vi.mock('@/features/places/service', () => ({ placesService: { details: vi.fn(), nearby: vi.fn() } }));
 vi.mock('./service', () => ({ routeService: { walking: vi.fn() } }));
 vi.mock('react-native-maps', async () => {
   const { createElement, forwardRef, useImperativeHandle } = await import('react');
@@ -32,7 +35,7 @@ const origin = { latitude: 38.5, longitude: -120.2 };
 const route: WalkingRoute = { distanceMeters: 867, durationSeconds: 301, encodedPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@', warnings: ['Actual provider warning'] };
 const coordinates = [origin, { latitude: 40.7, longitude: -120.95 }, place.coordinates];
 let tree: ReactTestRenderer | undefined; let client: QueryClient; let translations: i18n;
-function render() { return <I18nextProvider i18n={translations}><QueryClientProvider client={client}>{withHeroUI(<RoutePreviewScreen />)}</QueryClientProvider></I18nextProvider>; }
+function render() { return <I18nextProvider i18n={translations}><QueryClientProvider client={client}>{withHeroUI(controls.details ? <PlaceDetailsScreen /> : <RoutePreviewScreen />)}</QueryClientProvider></I18nextProvider>; }
 async function mount() { await act(async () => { tree = create(render()); }); }
 async function update() { await act(async () => { tree!.update(render()); }); }
 function output() { return JSON.stringify(tree!.toJSON()); }
@@ -45,7 +48,7 @@ async function layout() { await act(async () => {
 }); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false }); vi.clearAllMocks(); vi.spyOn(Date, 'now').mockReturnValue(1800000000000);
-  Object.assign(controls, { token: undefined, active: true, focused: true, mapsConfigured: true, language: 'en', canBack: true });
+  Object.assign(controls, { token: undefined, details: false, active: true, focused: true, mapsConfigured: true, language: 'en', canBack: true });
   Object.assign(controls.location, { status: 'ready', watcherStatus: 'ready', errorCode: null, position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8 });
   vi.mocked(routeService.walking).mockReset().mockResolvedValue(route); nativeUi.openURL.mockReset().mockResolvedValue(undefined);
   client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() }); notifyManager.setScheduler(cb => cb());
@@ -136,4 +139,13 @@ it.each(['ROUTE_UNAVAILABLE', 'RATE_LIMITED', 'UNAUTHORIZED', 'UPSTREAM_INVALID'
 });
 it.each(['?', '??', 'malformed'])('rejects invalid/degenerate returned polyline %s without inventing a route', async encodedPolyline => {
   vi.mocked(routeService.walking).mockResolvedValue({ ...route, encodedPolyline }); handoff(false); await mount(); expect(routeService.walking).toHaveBeenCalledOnce(); expect(tree!.root.findAllByType('polyline')).toHaveLength(0); expect(output()).toContain(translations.t('service.unavailable')); expect(button('directions.retry')).toBeDefined();
+});
+
+it('connects one Details tap through the actual intent handoff to a single delayed-GPS preview request', async () => {
+  controls.details = true; controls.location.status = 'loading'; client.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+  vi.mocked(router.push).mockImplementationOnce(href => { if (typeof href !== 'string' && href.params && 'token' in href.params) controls.token = href.params.token; });
+  await mount(); await act(async () => { const action = button('placeDetails.directions')!; action.props.onPress(); action.props.onPress(); });
+  expect(router.push).toHaveBeenCalledOnce(); controls.details = false; await update(); expect(routeService.walking).not.toHaveBeenCalled();
+  controls.location.status = 'ready'; await update(); expect(routeService.walking).toHaveBeenCalledExactlyOnceWith({ origin, destination: place.coordinates, language: 'en' });
+  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
 });

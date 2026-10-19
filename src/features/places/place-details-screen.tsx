@@ -14,6 +14,7 @@ import { useSettings } from '@/features/settings/provider';
 import { useAppActive } from '@/lib/use-app-active';
 import { edgeErrorMessageKey } from '@/lib/edge-error';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
+import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
 import { placeSelectionOptions } from './selection';
 import { placesService } from './service';
 import { PlaceDetailsContent } from './place-details-content';
@@ -51,11 +52,16 @@ export default function PlaceDetailsScreen() {
     // destination tab. This also handles a direct link without duplicating tabs.
     router.dismissTo({ pathname, params: { placeId: place.providerId } });
   }
+  function directions() {
+    if (!place || !active || !focused || navigating.current) return;
+    navigating.current = true;
+    const token = createRoutePreviewIntent(client, place);
+    router.push({ pathname: '/directions', params: { token } });
+  }
   const actions = <View className="gap-2">
-    <Button size="lg" accessibilityLabel={t('placeDetails.directions')} onPress={() => navigateTo('/')}>
+    <Button size="lg" accessibilityLabel={t('placeDetails.directions')} onPress={directions}>
       <Ionicons name="navigate-outline" size={24} color={onAccent} /><Button.Label>{t('placeDetails.directions')}</Button.Label>
     </Button>
-    <Text className="font-sans text-sm text-muted">{t('placeDetails.directionsHint', { action: t('map.walk') })}</Text>
     <View className="flex-row flex-wrap gap-2">
       <Button variant="secondary" className="min-w-40 grow shrink" accessibilityLabel={t('placeDetails.map')} onPress={() => navigateTo('/')}>
         <Ionicons name="map-outline" size={24} color={accent} /><Button.Label>{t('placeDetails.map')}</Button.Label>
