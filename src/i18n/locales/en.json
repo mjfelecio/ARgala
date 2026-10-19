@@ -150,6 +150,13 @@
     "unavailable": "This place is no longer in memory. Load details to continue.",
     "load": "Load Details",
     "loading": "Loading place details…",
-    "back": "Back"
+    "back": "Back",
+    "overview": "Overview",
+    "essentials": "Essential Details",
+    "address": "Street address",
+    "coordinates": "Geographic coordinates",
+    "coordinateValue": "Latitude {{latitude}}, longitude {{longitude}}",
+    "source": "Place data & credits",
+    "distanceUnavailable": "Your distance is available on Map or AR with a current location."
   }
 }

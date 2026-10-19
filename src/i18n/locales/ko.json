@@ -100,6 +100,13 @@
     "unavailable": "메모리에 장소가 없습니다. 상세 정보를 불러와 계속하세요.",
     "load": "상세 정보 불러오기",
     "loading": "장소 정보를 불러오는 중…",
-    "back": "뒤로"
+    "back": "뒤로",
+    "overview": "개요",
+    "essentials": "주요 정보",
+    "address": "주소",
+    "coordinates": "지리 좌표",
+    "coordinateValue": "위도 {{latitude}}, 경도 {{longitude}}",
+    "source": "장소 데이터 및 출처",
+    "distanceUnavailable": "현재 위치가 있으면 지도 또는 AR에서 거리를 확인할 수 있습니다."
   }
 }

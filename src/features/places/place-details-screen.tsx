@@ -13,6 +13,7 @@ import { edgeErrorMessageKey } from '@/lib/edge-error';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
 import { placeSelectionOptions } from './selection';
 import { placesService } from './service';
+import { PlaceDetailsContent } from './place-details-content';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
 export default function PlaceDetailsScreen() {
@@ -42,7 +43,7 @@ export default function PlaceDetailsScreen() {
       <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('placeDetails.title')}</Text>
     </View>
     <ScrollView className="flex-1" contentContainerClassName="grow gap-4 px-4 pb-8">
-      {place ? <Text selectable accessibilityRole="header" className="font-sans text-hero font-bold text-foreground">{place.name}</Text>
+      {place ? <PlaceDetailsContent place={place} />
         : !details.isFetching && <Text className="font-sans text-base text-muted">{t('placeDetails.unavailable')}</Text>}
       {details.isFetching && <View accessibilityLiveRegion="polite" className="gap-2"><Spinner /><Text className="font-sans text-sm text-muted">{t('placeDetails.loading')}</Text></View>}
       {details.error && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(edgeErrorMessageKey(details.error))}</Text>}

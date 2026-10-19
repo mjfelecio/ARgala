@@ -7,7 +7,7 @@ const nativeUi = vi.hoisted(() => ({ reactions: new Set<() => void>(), insets: {
 
 // Keep HeroUI components real; only native runtime boundaries are replaced.
 vi.mock('react-native', () => ({
-  Easing: { bezier: () => (value: number) => value }, Animated: { Interpolation: class {}, Value: class { interpolate() { return 0; } } }, BackHandler: { addEventListener: () => ({ remove() {} }) }, TextInput: 'input', View: 'view', Text: 'text', Pressable: 'button', ScrollView: 'scroll',
+  Easing: { bezier: () => (value: number) => value }, Animated: { Interpolation: class {}, Value: class { interpolate() { return 0; } } }, BackHandler: { addEventListener: () => ({ remove() {} }) }, Image: 'img', TextInput: 'input', View: 'view', Text: 'text', Pressable: 'button', ScrollView: 'scroll',
   Platform: { OS: 'android', select: (values: Record<string, unknown>) => values.android ?? values.default },
   ActivityIndicator: 'progress', StyleSheet: { create: (styles: unknown) => styles, flatten: (styles: unknown) => styles, absoluteFillObject: {}, hairlineWidth: 1 },
   I18nManager: { isRTL: false }, PixelRatio: { get: () => 1 },

@@ -62,13 +62,13 @@
 
 **Interfaces:** Accept one `Place | null`, optional user-relative distance only from a valid/fresh device fix, detail-loading/error state, and callbacks for Load Details, Get Directions, View on Map, Open AR, and Back. The current `Place` DTO has no photo.
 
-- [ ] Write tests: minimal name-only and address-only fixtures; optional description; long translated text; no photo; loading and error with summary retained; missing distance; attributed place; no unsupported static badges.
-- [ ] Run red tests.
-- [ ] Build a **full-height scrollable page** using HeroUI Buttons/Card/Surface where semantically appropriate, UniWind classes, existing Ionicons and Plus Jakarta Sans. Use a compact neutral/mint media fallback, **not** a fake photo or giant empty hero.
-- [ ] Preserve the approved button hierarchy: full-width primary **Get Directions**; lighter **View on Map** and **Open AR** actions with consistent heights and icons. Only show buttons with real targets.
-- [ ] Show real name, optional address/description, user-relative straight-line distance if reliably available, provider/third-party credits; hide unsupported metadata rather than filling design placeholders. No fake Google rating, opening hours, photo, UNESCO tag, weather, tourist copy, or Google Place type label.
-- [ ] Preserve future rich presentation as an **optional approved-image slot** in the view model; no new Places photos API, schema, or media fetch in this PR. Tests may inject a labeled synthetic rich fixture; runtime defaults remain minimal.
-- [ ] Run focused tests, `npm run check`, and commit e.g. `feat(ui): render rich and sparse POI details with HeroUI`.
+- [x] Write tests: minimal name-only and address-only fixtures; optional description; long translated text; no photo; loading and error with summary retained; missing distance; attributed place; no unsupported static badges.
+- [x] Run red tests.
+- [x] Build a **full-height scrollable page** using HeroUI Buttons/Card/Surface where semantically appropriate, UniWind classes, existing Ionicons and Plus Jakarta Sans. Use a compact neutral/mint media fallback, **not** a fake photo or giant empty hero.
+- [x] Preserve the approved button hierarchy: full-width primary **Get Directions**; lighter **View on Map** and **Open AR** actions with consistent heights and icons. Only show buttons with real targets.
+- [x] Show real name, optional address/description, user-relative straight-line distance if reliably available, provider/third-party credits; hide unsupported metadata rather than filling design placeholders. No fake Google rating, opening hours, photo, UNESCO tag, weather, tourist copy, or Google Place type label.
+- [x] Preserve future rich presentation as an **optional approved-image slot** in the view model; no new Places photos API, schema, or media fetch in this PR. Tests may inject a labeled synthetic rich fixture; runtime defaults remain minimal.
+- [x] Run focused tests, `npm run check`, and commit e.g. `feat(ui): render rich and sparse POI details with HeroUI`.
 
 ## Task 3 — Enter Details from both Map and AR
 
@@ -133,3 +133,5 @@ The owner has approved the high-level sequence and already uses an agent. Have t
 - Baseline rechecked: origin/main `da2ef4e`; clean tracked checkout; supplied ZIP extracted outside Git. Baseline `npm run check`: 221 tests passed.
 - Task 1: missing-screen red observed; cached/cold-open/invalid-ID/error recovery plus shell tests green (17 tests). Disabled observers use existing keys and transient retention.
 - Decision: keep details location-independent and omit user distance when no reliable live fix is owned by this screen. This avoids starting another permission/sensor lifecycle merely to read a place; Map and AR retain ownership.
+
+- Task 2: sparse/description/credits and approved-image-slot RED→GREEN; pending request guard verified through native button disabled prop. `npm run check`: 237 tests / 31 files, typecheck and zero-warning lint passed. Device typography and pixel fidelity remain acceptance work.

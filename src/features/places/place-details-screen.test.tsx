@@ -25,7 +25,7 @@ function render() { return <I18nextProvider i18n={translations}><QueryClientProv
 async function mount() { await act(async () => { tree = create(render()); }); }
 function output() { return JSON.stringify(tree!.toJSON()); }
 function button(key: string) { return tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t(key)); }
-async function press(key: string) { const b = button(key); expect(b, key).toBeDefined(); expect(b!.props.isDisabled).not.toBe(true); await act(async () => { b!.props.onPress(); }); }
+async function press(key: string) { const b = button(key); expect(b, key).toBeDefined(); expect(b!.props.disabled).not.toBe(true); await act(async () => { b!.props.onPress(); }); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   Object.assign(controls, { params: { providerId: 'north' }, language: 'en', active: true, focused: true, back: true });
@@ -58,4 +58,35 @@ it('retains summary on a sanitized failure and recovers explicitly', async () =>
 it('ignores cached detail for another provider ID', async () => {
   client.setQueryData(['place-details', 'north', 'en'], { ...place, providerId: 'south', name: 'Wrong place' }); await mount();
   expect(output()).not.toContain('Wrong place'); expect(button('placeDetails.load')).toBeDefined();
+});
+it.each(['en', 'ko', 'ja'] as const)('renders real sparse content, full long text and credits in %s', async language => {
+  controls.language = language; await translations.changeLanguage(language);
+  const sparse = { ...place, name: 'A long name 日本語 한국어 '.repeat(12), address: 'Real supplied address', attributions: [{ name: 'Real provider credit' }] };
+  client.setQueryData(placeSelectionOptions('north').queryKey, sparse); await mount();
+  expect(output()).toContain(sparse.name); expect(output()).toContain(sparse.address); expect(output()).toContain('Real provider credit');
+  expect(output()).toContain('Google Maps'); expect(output()).toContain(translations.t('placeDetails.coordinates'));
+  expect(output()).not.toContain('GPS LOCKED'); expect(output()).not.toContain('UNESCO'); expect(output()).not.toContain('min walk');
+  expect(tree!.root.findAllByType('text').find(n => n.props.children === sparse.name)!.props.numberOfLines).toBeUndefined();
+});
+it('hides missing sections and never invents a distance from an old Map/AR position', async () => {
+  client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
+  expect(output()).not.toContain(translations.t('placeDetails.overview')); expect(output()).not.toContain(translations.t('placeDetails.address'));
+  expect(output()).toContain(translations.t('placeDetails.distanceUnavailable')); expect(tree!.root.findAllByProps({ testID: 'place-media-fallback' })).toHaveLength(1);
+});
+it('renders a genuine description when available', async () => {
+  client.setQueryData(['place-details', 'north', 'en'], { ...place, description: 'Provider-supplied overview', address: 'Provider address' }); await mount();
+  expect(output()).toContain('Provider-supplied overview'); expect(output()).toContain(translations.t('placeDetails.overview')); expect(button('placeDetails.load')).toBeUndefined();
+});
+it('keeps summary visible while details are loading, blocks repeated presses, and hides the completed recovery', async () => {
+  const pending = Promise.withResolvers<Place>(); vi.mocked(placesService.details).mockReturnValue(pending.promise);
+  client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount(); await press('placeDetails.load');
+  expect(output()).toContain(place.name); expect(output()).toContain(translations.t('placeDetails.loading')); expect(button('placeDetails.load')!.props.disabled).toBe(true);
+  await act(async () => { button('placeDetails.load')!.props.onPress(); }); expect(placesService.details).toHaveBeenCalledTimes(1);
+  await act(async () => { pending.resolve(place); }); expect(button('placeDetails.load')).toBeUndefined();
+});
+it('presents an approved image only when explicitly supplied to the presentation', async () => {
+  const { PlaceDetailsContent } = await import('./place-details-content');
+  await act(async () => { tree = create(<I18nextProvider i18n={translations}>{withHeroUI(<PlaceDetailsContent place={place} approvedImage={{ source: { uri: 'https://example.com/synthetic-fixture.png' }, accessibilityLabel: 'Synthetic test illustration', credit: 'Synthetic fixture credit' }} />)}</I18nextProvider>); });
+  expect(output()).toContain('Synthetic test illustration'); expect(output()).toContain('Synthetic fixture credit');
+  expect(tree!.root.findAllByProps({ testID: 'place-media-fallback' })).toHaveLength(0);
 });
