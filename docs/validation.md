@@ -128,6 +128,78 @@ No curated tourist catalog/restriction, verified destination assets/daytime prev
 
 The corrected camera screen was exported after the regression fix. Subsequent backend-only key selection passed its tests, full TypeScript/lint suite and Deno checks. CI is configured to repeat the available checks on the PR; its result should be read from GitHub rather than inferred from this local report.
 
+## Clean Explorer Home UI — 2026-10-18
+
+Branch `feat/ui-home-map` starts from verified `origin/main` at `87db710`.
+Work is isolated in `/tmp/argala-ui-home-map`; the owner's original checkout,
+uncommitted `app.json` change and supplied kickoff folder remain untouched.
+The [approved reference subset](design/clean-explorer/README.md) includes the
+unmodified handoff documents and H01 PNG (SHA-256
+`f9eedd8c3b5b8cfdd4b16635a975f787270fff0e2e91c927977df8290b1d47a5`).
+
+Home now uses shared Clean Explorer tokens and native pill/circle actions,
+floating Search Nearby/AR/Settings/Recenter controls, and a compact docked panel
+with an explicit Show more/Show less action. The native Google map remains
+mounted underneath. The panel displays actual selected-place and walking-route
+content, localized states, location guidance and provider credits. It adds no
+provider fields, backend changes, persistent result storage or dependencies.
+
+| Agent-run check | Result |
+| --- | --- |
+| Baseline `npm run check` | Typecheck, lint and 169 tests across 24 files passed |
+| Final `npm run check` | Typecheck, zero-warning lint and 193 tests across 28 files passed |
+| `npm run check:android` | SDK 57 Android-only configuration, permissions, Maps injection and EAS profile assertions passed with a nonfunctional marker |
+| `npm run export:android` | Metro/React Compiler/Hermes export passed; one Android bundle, approximately 4.5 MB |
+| `git diff --check` | Passed |
+| Reference comparison | H01 image opened and reviewed; copied PNG hash matches supplied source |
+
+The new tests first reproduced absent primitives/controls/panel and missing
+measured layout behavior, then passed with the implementation. Tests use the
+real screen, actions, panel, i18next resources and production Query defaults,
+mocking native/network boundaries. They cover action variants, busy/disabled
+semantics, accessible labels and declared hit targets; unsearched/loading/empty/
+error/retry/results states; long names and missing optional fields; route summary
+and walking warnings; live error-key translation; selection/AR handoff; no paid
+calls on expansion, collapse, pan, focus, foreground, locale changes, remount or
+invalidation; and denied/disabled/approximate location feedback. Existing tests
+cover explicit Search, POI selection, Walk, error fallbacks and recovery.
+
+Independent whole-branch review found two panel issues. Two failing regressions
+drove moving the heading/expansion action into the bounded ScrollView so a
+104-unit panel cap cannot allocate all height to a fixed heading, and moving the
+returned route summary/caution immediately after the destination before activation
+metadata, repeat Walk and Close. The short-height check verifies scroll containment
+and declared cap, not native layout at 150% font scale. Both regressions now pass.
+Review reported no Critical or Minor issues; the two Important findings were fixed.
+
+Android route fitting reserves the measured header and panel in `mapPadding`,
+which also lifts native Google legal controls above the panel. The installed
+`react-native-maps` Android implementation **adds** `fitToCoordinates` edge
+padding to `mapPadding`, so fit calls supply only a bounded extra margin.
+Changes in map/overlay dimensions refit an existing route without another paid
+request; GPS updates alone leave the viewport stable. These tests verify native
+props/commands, not the final Yoga geometry or Google camera animation.
+
+Intentional differences from H01: Android system font and CJK glyph fallback
+(no supplied Plus Jakarta Sans binary); existing protected-stack header and
+AR/Settings entry points (future three-destination shell is excluded); explicit
+expand/collapse instead of a decorative drag handle; actual Google tiles and
+provider data. No categories, microphone, Saved/avatar interactions, sample
+ratings/hours or static Lisbon artwork were added. The existing shared controls
+on other screens and their presentation remain outside this UI pass.
+
+**Device/visual acceptance remains pending.** Neither `adb` nor a local Android
+emulator is installed in this environment; no before/after device screenshots,
+configured APK build/install, live provider calls or outdoor tests were performed.
+H01 comparison at matching viewport, normal/150% text, Korean/Japanese long labels,
+short/multiwindow screens, insets, native Google attribution visibility and touch
+reachability requires a real Android run. Manually exercise Search/no results,
+native POI tap/details failure, AR return/selection, Walk/no route, panel expansion,
+location denied/disabled/approximate and background/foreground transitions before
+client demonstration. Passing tests and export do not establish UAT.
+
+Packages and native configuration did not change, so SDK dependency checks,
+Expo Doctor and Edge/limiter checks were not rerun for this UI-only change.
 ## UniWind / HeroUI infrastructure — 2026-10-18
 
 Phase 1 starts at stable main `69bebee`; PR #6 is unmerged. See [integration architecture and component mapping](ui-infrastructure.md). Product screen layouts, paid request flows, sensors and backend code remain unchanged.
@@ -168,3 +240,92 @@ No dependencies or native configuration changed, so the existing Phase 1
 development APK can load this fix after restarting Metro with a cleared cache.
 The reported Android crash still needs an owner retest of the corrected bundle;
 these compiler results do not establish successful device rendering.
+
+## Home Map HeroUI rework — 2026-10-19
+
+This is a review stack on infrastructure PR #8, continuing PR #6 without merging either PR. Home actions use actual HeroUI Native Button, Surface, Card, Chip and Spinner components with Ionicons and UniWind utilities. `global.css` owns the visual tokens, including the native route-area color; custom primitives and the TypeScript token theme are removed. The only sheet dependency added is JavaScript `@gorhom/bottom-sheet` 5.2.14 with its JavaScript portal dependency; existing native peers and font configuration match the successful Phase 1 development APK.
+
+Regressions use actual HeroUI components, actual EN/KO/JA resources and production Query defaults. Native sheet/animation/map drivers and provider requests are mocked. They cover:
+
+- Explicit Search/selection/Walk costs across focus, foreground, remount, language changes, invalidation and recovery; expansion makes no paid call.
+- Full-details action hidden after success, restored after cache reset or a failed/summary-only selection, and removed after explicit recovery. The equivalent AR action is guarded; a requested new language still works.
+- Accessible disabled/busy/expanded state, visible long names, truthful empty/loading/error/results/route states, warnings and attribution.
+- Native sheet positions update Google credit padding while route fitting waits for settled geometry. Resizing an expanded sheet at the same native index and returning to the same index inside the update interval both retain correct final padding.
+- The SDK's English handle node is excluded from TalkBack; Korean/Japanese expansion uses the translated real button. The entire heading/content remains scrollable in a short panel.
+
+The duplicate-details regressions failed before the guards. Independent review found the expanded-resize bug and untranslated SDK handle; focused regressions failed before fixes and passed afterwards. No Android runtime result is inferred from these mocks. Owner has agreed to install and check the development APK; no completed device result or screenshots have been supplied yet. Live Maps/provider/permission/GPS/camera/heading/routes field checks remain pending.
+
+Final local checks for this rework:
+
+- `npm run check`: typecheck, zero-warning lint and **205 tests / 28 files** passed.
+- `npx expo install --check`: dependencies up to date; `npx --yes expo-doctor`: **21/21** passed.
+- `npm run check:android`: SDK 57 Android-only config, permissions, native Maps injection and APK profiles passed.
+- `npm run export:android -- --max-workers 2`: final Android Metro/Hermes export passed (**2542 modules**, 6.9 MB bundle).
+- `git diff --check`: passed.
+
+The real EAS development APK success is recorded in the preceding infrastructure section. This rework adds no native module or native configuration, so it can run against that APK with current JavaScript from the Home branch's Metro server. No Edge changes were made; Edge/limiter-specific checks were not repeated. APK installation, device rendering, TalkBack, drag/scroll interaction, enlarged/CJK text and live integrations remain unverified until the owner supplies device results.
+
+After carrying the runtime color fix from PR #8, the compiler regression also
+checks the hook-only route-area color. Compiling the original declarations
+without utility candidates omitted both route tokens; the static theme retains
+them. `npm run check` passed typecheck, zero-warning lint and **206 tests / 29
+files**. `npm run export:android -- --max-workers 2` passed again. Device retesting
+of the corrected bundle remains pending.
+
+### Bottom-sheet development invariant — 2026-10-19
+
+After PR #8 was merged, the owner reported PR #6 failing with
+`'containerHeight' is deprecated, please use 'containerLayoutState'.`
+Gorhom 5.2.14 still types the deprecated prop, but its development validator
+throws when it is supplied. The native sheet test double previously skipped
+that validator and concealed the incompatibility.
+
+HomePlaceSheet now supplies the supported shared `containerLayoutState`.
+Map-height changes update the height while retaining SDK-measured offsets.
+The test boundary runs the installed library's actual JavaScript prop validator,
+with gesture/animation drivers mocked. A new regression reproduced the exact
+invariant before the fix and passes afterwards, covering layout-state identity,
+height changes and offset preservation. Existing map geometry tests now consume
+the current layout API.
+
+The reported duplicate-details review case is already guarded by
+`detailsLoaded={!!details.data}`, the hidden recovery action after success and
+the `onDetails` data guard. Existing real-screen regressions pass for expansion
+without another paid request, explicit recovery after cache reset, and recovery
+from a failed summary-only selection. No request-policy change was needed here.
+
+- Targeted sheet/map regressions: **42 tests / 2 files** passed.
+- `npm run check`: typecheck, zero-warning lint and **207 tests / 29 files** passed.
+- `npm run export:android -- --max-workers 2`: Android Metro/Hermes export passed.
+- No dependency or native configuration changes; another APK build is unnecessary
+  for this fix. Android rendering, sheet drag/resize, attribution placement and
+  live provider interactions still need an owner retest of the corrected bundle.
+
+### Android Maps padding startup race — 2026-10-19
+
+The owner supplied a recurring native `NullPointerException` in
+`MapView.applyBaseMapPadding` through the Fabric `setMapPadding` setter during
+map initialization. Installed Maps 1.27.2 forwards `mapPadding` before readiness;
+its Android method defers for zero-sized layout but dereferences `map` without a
+null check once layout has a size. Home supplied padding immediately, and local
+header/sheet measurements could update it before `GoogleMap` initialization.
+This matches the supplied stack and explains the startup ordering dependency.
+
+Home now omits the native padding prop until the current map instance reports
+`onMapReady`. Local measurements continue, and readiness applies their latest
+values. A location-driven map remount resets that gate. No timeout, paid request,
+native patch or dependency change is introduced.
+
+Two real-screen regressions failed before the fix because padding was sent
+before native readiness. They now pass for delayed initialization, header/sheet
+layout updates, foreground return, latest padding after readiness, continued
+padding updates and location-driven remounts. They assert no incidental paid
+requests. Native Maps is mocked, so they verify dispatch timing rather than
+executing the Android Java code.
+
+- Targeted map tests: **31 tests / 1 file** passed.
+- `npm run check`: typecheck, zero-warning lint and **209 tests / 29 files** passed.
+- `npm run export:android -- --max-workers 2`: Android Metro/Hermes export passed.
+- The existing development APK can load this JavaScript fix. Repeated cold
+  launches and navigation back to the map still need a phone retest; no native
+  crash recovery or live Google integration result is claimed from these checks.

@@ -22,6 +22,7 @@ it('emits HeroUI runtime colors even without matching utility classes', async ()
   expect(declarations.get('--color-brand-strong')).toBe('#174D38');
   expect(declarations.get('--color-mint')).toBe('#E7F4EC');
   expect(declarations.get('--color-route')).toBe('#2A72E5');
+  expect(declarations.get('--color-route-area')).toBe('color-mix(in srgb, var(--color-route) 8%, transparent)');
 
   // Button reads every variant's highlight color, even for primary buttons.
   for (const name of ['default-hover', 'danger-hover', 'danger-soft-hover', 'default-foreground', 'accent-foreground']) {

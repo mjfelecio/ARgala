@@ -18,6 +18,7 @@
   --color-white: #FFFFFF;
   --color-ink: #1C2923;
   --color-route: #2A72E5;
+  --color-route-area: color-mix(in srgb, var(--color-route) 8%, transparent);
   --color-page-mint: #EEFDF3;
   --color-ink-secondary: #3F4942;
   --color-outline: #E2EBE5;
