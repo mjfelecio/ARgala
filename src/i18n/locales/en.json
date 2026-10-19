@@ -147,7 +147,7 @@
   },
   "placeDetails": {
     "title": "Place Details",
-    "unavailable": "This place is no longer in memory. Load details to continue.",
+    "unavailable": "This place is not available in memory.",
     "load": "Load Details",
     "loading": "Loading place details…",
     "back": "Back",
@@ -162,6 +162,6 @@
     "directions": "Get Directions",
     "map": "View on Map",
     "ar": "Open AR",
-    "directionsHint": "Opens Map. Tap Get walking route there to request directions."
+    "directionsHint": "Opens Map. Tap “{{action}}” there to request directions."
   }
 }

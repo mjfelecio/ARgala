@@ -55,7 +55,7 @@ export default function PlaceDetailsScreen() {
     <Button size="lg" accessibilityLabel={t('placeDetails.directions')} onPress={() => navigateTo('/')}>
       <Ionicons name="navigate-outline" size={24} color={onAccent} /><Button.Label>{t('placeDetails.directions')}</Button.Label>
     </Button>
-    <Text className="font-sans text-sm text-muted">{t('placeDetails.directionsHint')}</Text>
+    <Text className="font-sans text-sm text-muted">{t('placeDetails.directionsHint', { action: t('map.walk') })}</Text>
     <View className="flex-row flex-wrap gap-2">
       <Button variant="secondary" className="min-w-40 grow shrink" accessibilityLabel={t('placeDetails.map')} onPress={() => navigateTo('/')}>
         <Ionicons name="map-outline" size={24} color={accent} /><Button.Label>{t('placeDetails.map')}</Button.Label>

@@ -261,3 +261,7 @@ it('does not offer another paid load when complete details already exist for the
   await mount(); expect(tree!.root.findAllByType('button').some(b => b.props.title === translations.t('ar.more'))).toBe(false);
   expect(placesService.details).not.toHaveBeenCalled();
 });
+it('shows Google and third-party credits for a Details handoff even without nearby results', async () => {
+  client.setQueryData(['place-selection', south.providerId], south); controls.params = { placeId: south.providerId }; await mount();
+  expect(output()).toContain('Google Maps'); expect(output()).toContain('Local Provider'); expect(placesService.nearby).not.toHaveBeenCalled();
+});

@@ -1,4 +1,4 @@
-import { withHeroUI } from '@/test/native-ui';
+import { nativeUi, withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { QueryClient, QueryClientProvider, notifyManager } from '@tanstack/react-query';
@@ -18,7 +18,6 @@ vi.mock('expo-router', () => ({ useLocalSearchParams: () => controls.params, use
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('./service', () => ({ placesService: { details: vi.fn(), nearby: vi.fn() } }));
-vi.mock('@/features/map/attributions', () => ({ ProviderAttributions: ({ places }: { places: Place[] }) => React.createElement('aside', {}, places.flatMap(p => p.attributions.map(a => a.name))), useOpenProviderLink: () => vi.fn() }));
 const place: Place = { id: 'google:north', provider: 'google', providerId: 'north', name: 'North place', coordinates: { latitude: 10, longitude: 124 }, attributions: [] };
 let tree: ReactTestRenderer | undefined; let client: QueryClient; let translations: i18n;
 function render() { return <I18nextProvider i18n={translations}><QueryClientProvider client={client}>{withHeroUI(<PlaceDetailsScreen />)}</QueryClientProvider></I18nextProvider>; }
@@ -29,7 +28,7 @@ async function press(key: string) { const b = button(key); expect(b, key).toBeDe
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   Object.assign(controls, { params: { providerId: 'north' }, language: 'en', active: true, focused: true, back: true });
-  vi.clearAllMocks(); vi.mocked(placesService.details).mockReset().mockResolvedValue(place);
+  vi.clearAllMocks(); nativeUi.openURL.mockReset().mockResolvedValue(undefined); vi.mocked(placesService.details).mockReset().mockResolvedValue(place);
   notifyManager.setScheduler(cb => cb());
   client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() });
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
@@ -84,7 +83,8 @@ it('keeps summary visible while details are loading, blocks repeated presses, an
   await act(async () => { button('placeDetails.load')!.props.onPress(); }); expect(placesService.details).toHaveBeenCalledTimes(1);
   await act(async () => { pending.resolve(place); }); expect(button('placeDetails.load')).toBeUndefined();
 });
-it('presents an approved image only when explicitly supplied to the presentation', async () => {
+it.each(['en', 'ko', 'ja'])('presents an approved image only when explicitly supplied to the %s presentation', async language => {
+  await translations.changeLanguage(language);
   const { PlaceDetailsContent } = await import('./place-details-content');
   await act(async () => { tree = create(<I18nextProvider i18n={translations}>{withHeroUI(<PlaceDetailsContent place={place} approvedImage={{ source: { uri: 'https://example.com/synthetic-fixture.png' }, accessibilityLabel: 'Synthetic test illustration', credit: 'Synthetic fixture credit' }} />)}</I18nextProvider>); });
   expect(output()).toContain('Synthetic test illustration'); expect(output()).toContain('Synthetic fixture credit');
@@ -93,7 +93,7 @@ it('presents an approved image only when explicitly supplied to the presentation
 it.each(['placeDetails.directions', 'placeDetails.map', 'placeDetails.ar'])('hands off the selection through %s without provider work', async key => {
   const { router } = await import('expo-router');
   client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
-  expect(output()).toContain(translations.t('placeDetails.directionsHint')); await press(key);
+  expect(output()).toContain(translations.t('placeDetails.directionsHint', { action: translations.t('map.walk') })); await press(key);
   expect(router.dismissTo).toHaveBeenCalledExactlyOnceWith({ pathname: key === 'placeDetails.ar' ? '/ar' : '/', params: { placeId: 'north' } });
   expect(client.getQueryData(placeSelectionOptions('north').queryKey)).toEqual(place); expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
@@ -117,4 +117,45 @@ it('retains full details through refocus, foreground, reconnect, invalidation, l
   await act(async () => { tree!.unmount(); }); await mount(); expect(button('placeDetails.load')).toBeUndefined();
   controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); tree!.update(render()); });
   expect(output()).toContain(place.name); expect(placesService.details).toHaveBeenCalledTimes(1); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it.each(['RATE_LIMITED', 'UPSTREAM_ERROR', 'UNAUTHORIZED', 'FUTURE_ERROR', null])('translates %s failures with actual locale resources and recovers without leaking diagnostics', async code => {
+  const failure = code === null ? new Error('Private provider diagnostic') : new EdgeRequestError(code);
+  vi.mocked(placesService.details).mockRejectedValueOnce(failure); client.setQueryData(placeSelectionOptions('north').queryKey, place);
+  await mount(); await press('placeDetails.load');
+  const key = code === 'RATE_LIMITED' ? 'service.rateLimited' : code === 'UPSTREAM_ERROR' ? 'service.unavailable' : code === 'UNAUTHORIZED' ? 'service.unauthorized' : 'service.failed';
+  for (const language of ['en', 'ko', 'ja']) {
+    await act(async () => { await translations.changeLanguage(language); });
+    expect(translations.t(key)).not.toBe(key); expect(output()).toContain(translations.t(key)); expect(output()).not.toContain(failure.message); expect(output()).toContain(place.name);
+  }
+  await press('placeDetails.load'); expect(output()).not.toContain(translations.t(key)); expect(button('placeDetails.load')).toBeUndefined(); expect(placesService.details).toHaveBeenCalledTimes(2);
+});
+it('does not retry a failed explicit request after remount, invalidation or foreground return', async () => {
+  vi.mocked(placesService.details).mockRejectedValueOnce(new Error('Private diagnostic')); await mount(); await press('placeDetails.load');
+  controls.active = false; controls.focused = false; await act(async () => tree!.update(render()));
+  controls.active = true; controls.focused = true; await act(async () => tree!.update(render()));
+  await act(async () => { await client.invalidateQueries(); tree!.unmount(); }); await mount(); expect(placesService.details).toHaveBeenCalledTimes(1);
+  await press('placeDetails.load'); expect(output()).toContain(place.name); expect(placesService.details).toHaveBeenCalledTimes(2);
+});
+it('falls back honestly when an approved presentation image fails', async () => {
+  const { PlaceDetailsContent } = await import('./place-details-content');
+  await act(async () => { tree = create(<I18nextProvider i18n={translations}>{withHeroUI(<PlaceDetailsContent place={place} approvedImage={{ source: { uri: 'https://example.com/synthetic-fixture.png' }, accessibilityLabel: 'Synthetic image', credit: 'Test credit' }} />)}</I18nextProvider>); });
+  await act(async () => { tree!.root.findAllByType('img').find(img => img.props.accessibilityLabel === 'Synthetic image')!.props.onError(); });
+  expect(tree!.root.findAllByProps({ testID: 'place-media-fallback' })).toHaveLength(1); expect(output()).toContain(place.name);
+});
+it('retains real linked third-party credits and translates provider-link failures at the UI boundary', async () => {
+  client.setQueryData(placeSelectionOptions('north').queryKey, { ...place, mapsUri: 'https://maps.google.com/?cid=1', attributions: [{ name: 'Actual supplied credit', uri: 'https://example.com/credit' }] });
+  await mount(); const credit = tree!.root.findAllByType('text').find(n => n.props.children === 'Actual supplied credit')!;
+  expect(credit.props.accessibilityRole).toBe('link'); await act(async () => { credit.props.onPress(); }); expect(nativeUi.openURL).toHaveBeenLastCalledWith('https://example.com/credit');
+  await press('map.openGoogle'); expect(nativeUi.openURL).toHaveBeenLastCalledWith('https://maps.google.com/?cid=1');
+  nativeUi.openURL.mockRejectedValue(new Error('Raw native diagnostics'));
+  for (const language of ['en', 'ko', 'ja']) {
+    await act(async () => { await translations.changeLanguage(language); }); await press('map.openGoogle');
+    expect(nativeUi.alert).toHaveBeenLastCalledWith(translations.t('map.linkFailed'));
+  }
+});
+it('offers explicit recovery after cached selection and full details have been evicted', async () => {
+  client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount(); await press('placeDetails.load');
+  await act(async () => { tree!.unmount(); }); client.removeQueries({ queryKey: ['place-selection'] }); client.removeQueries({ queryKey: ['place-details'] }); await mount();
+  expect(output()).not.toContain(place.name); expect(output()).toContain(translations.t('placeDetails.unavailable')); expect(placesService.details).toHaveBeenCalledTimes(1);
+  await press('placeDetails.load'); expect(output()).toContain(place.name); expect(placesService.details).toHaveBeenCalledTimes(2);
 });

@@ -123,9 +123,9 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
             <Text style={styles.rowName}>{place.name}</Text><Text>{distanceText(distance)}</Text>
           </Pressable>)}
       </ScrollView>
-      {places.length > 0 && <View style={styles.attribution}>
+      {(places.length > 0 || selected) && <View style={styles.attribution}>
         <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" style={styles.google} resizeMode="contain" />
-        <ScrollView style={styles.credits}><ProviderAttributions places={[...places, ...(detail ? [detail] : [])]} /></ScrollView>
+        <ScrollView style={styles.credits}><ProviderAttributions places={[...places, ...(selected ? [selected] : [])]} /></ScrollView>
       </View>}
     </View>
   </View>;
