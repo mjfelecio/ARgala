@@ -66,6 +66,10 @@ The duplicate-details action disappears after a full response, including when ex
 
 The Phase 2 pass preserves explicit Search/selection/Walk requests, transient cache lifecycle, Google Maps/Places/Routes boundaries, permission behavior, GPS/AR navigation, walking warnings and provider attribution. PR #6's TypeScript token theme and generic custom primitives have been removed. Other product screens remain out of scope.
 
+## Application shell
+
+The next shell pass adds the approved three-destination JavaScript Tabs navigator under the existing protected stack. `AppHeader` uses HeroUI Button, actual Ionicons and existing CSS tokens. Profile is a placeholder; Settings remains on the parent stack. AR hides conventional chrome and retains a visible map-return action. Explore's tab bar owns the bottom inset outside the map scene, and the map stays mounted during GPS restarts. No additional dependency, native configuration or theme object is introduced. See [app shell navigation](app-shell-navigation.md) and [validation evidence](validation.md).
+
 ## Documentation consulted
 
 - [UniWind official integration](https://docs.uniwind.dev/quickstart), plus installed 1.12.2 source.

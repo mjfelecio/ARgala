@@ -1,5 +1,25 @@
 # Foundation validation
 
+## App shell navigation — 2026-10-19
+
+Branch `feat/app-shell-navigation` starts from current main `b15a37d`, which includes the merged Home Map and UI infrastructure. The shell implementation is `8dc6226`. The [navigation guide](app-shell-navigation.md) records route structure, component reuse, layout ownership, visual deviations and the Android acceptance checklist.
+
+Agent-run checks after the implementation:
+
+- `npm run check`: typecheck, lint (zero warnings), **30 test files / 221 tests passed**; baseline was 29 files / 209 tests.
+- Focused shell/map/AR/SDK-hook run: 4 files / 71 tests passed before the final handoff reducer case; the complete check above includes that additional case.
+- `npx expo install --check`: dependencies up to date; no dependencies or native configuration changed.
+- `npx expo-doctor`: **21/21 checks passed**.
+- `npm run check:android`: passed SDK 57, Android-only configuration, foreground/camera permissions, blocked audio/background permissions, Maps injection and APK profiles.
+- `npm run export:android`: completed the Android Hermes export. The terminal emitted environment color-flag warnings; this is not a runtime failure. An export does not prove an APK build or device presentation.
+- `git diff --check`: passed.
+
+Regressions first reproduced duplicate map branding/actions, loss of the native map during a GPS restart, and a redundant map bottom inset. Coverage now exercises configured tab destinations and active icons/colors, native bottom-inset allocation, Settings/return actions, live English/Korean/Japanese labels, installed SDK tab/stack reducers for Back/direct AR entry/POI parameters, persistent selection/route/expanded sheet during GPS restarts, and credit/sheet geometry in the reduced scene. Existing actual-screen tests cover explicit Places/details/Routes requests, failure recovery, focus/foreground/remount cost guards, AR-to-map handoff, attribution and walking warnings. New sensor cases exercise the installed SDK focus hook with delayed navigation readiness, real AR screen/location hook, camera unmount, GPS/compass cleanup on blur, restart on return, and late native subscription disposal.
+
+Native rendering, hardware and network boundaries are replaced in the Node component tests. The local environment has no installed Android emulator/ADB or connected USB phone. EAS CLI authentication works, but `simulator:availability --json` returned `available: false` for the configured team. No cloud simulator session was started. Consequently the new shell has **not** been visually verified on an Android development build or physical device, and this work makes no new claim about live GPS, compass, camera, Maps, Supabase or paid Google integration. The guide's acceptance checklist remains required, including both Android navigation modes, larger text, permission revocation, direct links/Back, AR handoff, route framing and attribution above the expanded sheet.
+
+## Foundation baseline — 2026-10-17
+
 Local validation on 2026-10-17 used Node 22.19.0, Expo SDK 57.0.30, TypeScript 6.0.3, Vitest 5.0.5, Deno 2.9.6 and PostgreSQL 14. The existing ARgala root contains the project; no nested app or separate worktree was created.
 
 | Check | Evidence/result |
