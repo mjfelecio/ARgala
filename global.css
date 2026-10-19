@@ -3,7 +3,8 @@
 @import 'heroui-native/styles';
 
 /* Clean Explorer: authoritative visual tokens. Native rem is 16 logical units. */
-@theme {
+/* Retain project tokens for native consumers as well as className utilities. */
+@theme static {
   --spacing: 0.25rem;
   --font-sans: 'PlusJakartaSans';
   --font-normal: 'PlusJakartaSans';
@@ -82,7 +83,8 @@
   }
 }
 
-@theme inline {
+/* HeroUI animation hooks read these colors without matching utility classes. */
+@theme inline static {
   --color-accent-hover: var(--color-brand-strong);
   --color-accent-soft: var(--color-mint);
   --color-accent-soft-foreground: var(--color-brand-strong);

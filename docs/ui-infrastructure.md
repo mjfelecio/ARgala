@@ -26,6 +26,8 @@ The Expo Font config changes native resources and SVG adds native code, so an ol
 
 Only the approved light theme is selected with `Uniwind.setTheme('light')`. This does not assert an approved dark design. Screen code uses semantic utilities; native-only props can consume resolved CSS variables. Existing product screens retain their presentation until their own focused UI pass.
 
+Project tokens use `@theme static`, and HeroUI color overrides retain the library's `@theme inline static` declaration. The `static` flag is required for colors read by animation hooks or native props without a corresponding utility class; otherwise Tailwind can omit the variable and HeroUI can return an invalid color. The compiler regression exercises the actual CSS imports without utility candidates, independently of native component mocks. See [UniWind's runtime variable requirements](https://docs.uniwind.dev/api/use-css-variable).
+
 ## Development showcase
 
 Rebuild/install the development APK after the native changes, then run:

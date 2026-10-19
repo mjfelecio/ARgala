@@ -218,6 +218,29 @@ Phase 1 starts at stable main `69bebee`; PR #6 is unmerged. See [integration arc
 
 The successful development APK build establishes native compilation; it does not establish device layout, TalkBack, CJK fallback, 150% text, pressed animations or scrolling. Those showcase scenarios still need installation and runtime testing. Live Google/Supabase, Maps, permissions, GPS, camera, heading and routes also remain field-test work; the diagnostic does not exercise them. No Edge changes were made, so Edge/limiter-specific checks were not rerun.
 
+### Runtime color regression — 2026-10-19
+
+The owner reported a missing `--color-accent-hover` warning and Reanimated's
+`Invalid color value: "invalid"` error while testing PR #8. Installed HeroUI
+1.0.10 reads that variable in Button's highlight animation and returns `invalid`
+when UniWind cannot resolve it. Our non-static CSS override removed the imported
+theme's static flag, allowing Tailwind to omit the hook-only variable.
+
+A regression compiles the actual global CSS and library imports using UniWind's
+installed Tailwind compiler, without utility candidates. It failed before the
+fix because `--color-accent-hover` was absent. It now checks the approved pressed
+green, soft colors, dependent primitives, route blue and the other Button runtime
+color declarations. Project tokens use `@theme static`; HeroUI overrides use
+`@theme inline static`. Component/native mocks remain distinct from this real
+compiler check.
+
+`npm run check` passed typecheck, zero-warning lint and **180 tests / 27 files**.
+`npm run export:android -- --max-workers 2` passed Metro/Hermes compilation.
+No dependencies or native configuration changed, so the existing Phase 1
+development APK can load this fix after restarting Metro with a cleared cache.
+The reported Android crash still needs an owner retest of the corrected bundle;
+these compiler results do not establish successful device rendering.
+
 ## Home Map HeroUI rework — 2026-10-19
 
 This is a review stack on infrastructure PR #8, continuing PR #6 without merging either PR. Home actions use actual HeroUI Native Button, Surface, Card, Chip and Spinner components with Ionicons and UniWind utilities. `global.css` owns the visual tokens, including the native route-area color; custom primitives and the TypeScript token theme are removed. The only sheet dependency added is JavaScript `@gorhom/bottom-sheet` 5.2.14 with its JavaScript portal dependency; existing native peers and font configuration match the successful Phase 1 development APK.
@@ -240,4 +263,11 @@ Final local checks for this rework:
 - `npm run export:android -- --max-workers 2`: final Android Metro/Hermes export passed (**2542 modules**, 6.9 MB bundle).
 - `git diff --check`: passed.
 
-The real EAS development APK success is recorded in the preceding infrastructure section. This rework adds no native module or native configuration, so it can run against that APK with current JavaScript from the Home worktree's Metro server. No Edge changes were made; Edge/limiter-specific checks were not repeated. APK installation, device rendering, TalkBack, drag/scroll interaction, enlarged/CJK text and live integrations remain unverified until the owner supplies device results.
+The real EAS development APK success is recorded in the preceding infrastructure section. This rework adds no native module or native configuration, so it can run against that APK with current JavaScript from the Home branch's Metro server. No Edge changes were made; Edge/limiter-specific checks were not repeated. APK installation, device rendering, TalkBack, drag/scroll interaction, enlarged/CJK text and live integrations remain unverified until the owner supplies device results.
+
+After carrying the runtime color fix from PR #8, the compiler regression also
+checks the hook-only route-area color. Compiling the original declarations
+without utility candidates omitted both route tokens; the static theme retains
+them. `npm run check` passed typecheck, zero-warning lint and **206 tests / 29
+files**. `npm run export:android -- --max-workers 2` passed again. Device retesting
+of the corrected bundle remains pending.
