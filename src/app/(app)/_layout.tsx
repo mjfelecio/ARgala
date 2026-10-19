@@ -14,6 +14,7 @@ export default function AppLayout() {
   return <Stack screenOptions={{ headerStyle, headerTitleStyle, headerTintColor, headerShadowVisible: false }}>
     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     <Stack.Screen name="place/[providerId]" options={{ headerShown: false }} />
+    <Stack.Screen name="directions" options={{ headerShown: false }} />
     <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
   </Stack>;
 }

@@ -8,6 +8,7 @@ import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native
 import { useTranslation } from 'react-i18next';
 import { DISCOVERY } from '@/config/limits';
 import { routeService, type WalkingRequest } from '@/features/directions/service';
+import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
 import { decodePolyline } from '@/features/directions/polyline';
 import { distanceMeters, isWithinRadius, type Coordinate } from '@/features/location/geo';
 import { LocationStatus } from '@/features/location/status';
@@ -56,6 +57,8 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const parsedId = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
   const incomingId = parsedId.success ? parsedId.data.providerId : null;
   const active = useAppActive(); const focused = useIsFocused(); const map = useRef<MapView>(null);
+  const previewNavigation = useRef(false);
+  useEffect(() => { if (focused) previewNavigation.current = false; }, [focused]);
   const pendingHandoffCenter = useRef<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
@@ -73,7 +76,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const [lastIncomingId, setLastIncomingId] = useState(incomingId);
   if (incomingId !== lastIncomingId) {
     setLastIncomingId(incomingId);
-    if (incomingId) { setSelectedId(incomingId); setRouteRequest(null); }
+    if (incomingId && incomingId !== selectedId) { setSelectedId(incomingId); setRouteRequest(null); }
   }
   const handoff = useQuery(placeSelectionOptions(selectedId));
   useEffect(() => {
@@ -156,6 +159,12 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
         if (!active || !focused) return;
         queryClient.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
         router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
+      } : undefined}
+      onViewRoute={route.data && routeRequest && place ? () => {
+        if (!active || !focused || previewNavigation.current) return;
+        previewNavigation.current = true;
+        const token = createRoutePreviewIntent(queryClient, place, { origin: routeRequest.origin, destination: routeRequest.destination, route: route.data });
+        router.push({ pathname: '/directions', params: { token } });
       } : undefined}
       onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onWalk={walk}
       onOpenGoogle={place?.mapsUri ? () => open(place.mapsUri!) : undefined}

@@ -161,7 +161,23 @@
     "view": "View Details",
     "directions": "Get Directions",
     "map": "View on Map",
-    "ar": "Open AR",
-    "directionsHint": "Opens Map. Tap “{{action}}” there to request directions."
+    "ar": "Open AR"
+  },
+  "directions": {
+    "title": "Walking Directions",
+    "back": "Back",
+    "map": "Back to Map",
+    "details": "Place Details",
+    "walking": "Walking Route",
+    "destination": "Destination",
+    "origin": "Route starting point",
+    "recenter": "Recenter on your location",
+    "fit": "Fit route",
+    "unavailable": "This route preview has expired. Choose a place to get directions.",
+    "snapshot": "Preview from the route starting point. Your movement does not update this route.",
+    "waiting": "Waiting for a current location to plan your walk…",
+    "stale": "A fresh, accurate location is needed. Retry location to continue.",
+    "retry": "Try walking route again",
+    "view": "View Route"
   }
 }

@@ -430,3 +430,108 @@ Independent read-only whole-branch review approved the PR with no findings and
 separately passed typecheck, zero-warning lint and **109 tests** across Details,
 AR, Map and app-shell suites. [PR #10](https://github.com/mjfelecio/ARgala/pull/10)
 is open against `main`; native acceptance remains pending and no merge was done.
+
+### Walking Directions / Route Preview — 2026-10-19
+
+Implemented the owner-supplied compact R01 kickoff on
+`feat/walking-route-preview`, based on upstream `main` at `a84c215` (PR #10
+merged). See the [execution plan](superpowers/plans/2026-10-19-walking-route-preview.md)
+and [presentation/cost decisions](design/clean-explorer/ROUTE_PREVIEW.md).
+
+Details **Get Directions** now opens a protected parent-stack walking preview
+in one tap. A single-use transient intent authorizes one request only after a
+fresh foreground position and healthy continuous watcher sample. The session
+observer stays disabled for paid work; remount can reuse a result but cannot
+inherit acquisition authority. Explicit retries create a fresh intent. Auth
+clearing revokes sessions and prevents late responses from restoring results.
+Home **Get walking route** stays functional; **View Route** reuses the completed
+route and original submitted origin with zero new requests. Back to the same
+POI preserves Home's route. No Edge, provider schema, limiter, dependency, native
+configuration or persistent-storage changes were made.
+
+Checks performed:
+
+- Baseline `npm test`: **264 tests / 31 files** passed.
+- Test-first failures were observed for the absent handoff/map, delayed-GPS
+  acquisition, duplicate/lifecycle cost boundaries, retry/error recovery,
+  Details/Home navigation, native loading state and synchronous adapter failure;
+  targeted suites passed after implementation.
+- Final `npm run check`: typecheck, zero-warning lint and **322 tests / 34 files**
+  passed. The directions suites include **58 tests / 4 files**. The affected
+  Directions/Map/AR/Places run before final presentation additions passed
+  **183 tests / 12 files**.
+- `npm run check:android`: passed SDK 57/Android-only configuration introspection,
+  permission exclusions, Maps injection and EAS APK-profile checks.
+- `npx expo install --check`: passed, dependencies up to date.
+- `npm run export:android -- --max-workers 2`: passed Metro/Hermes Android export.
+  This is a JavaScript/assets export, not an APK build.
+- `git diff --check`: passed.
+
+Tests use actual locale resources, real HeroUI components and the application's
+QueryClient defaults. They exercise single-use/expired/invalid claims, clearing
+and changed-target handoffs, captured-origin reuse, delayed/stale/inaccurate GPS,
+watcher failure, permission denial/services/timeout, resume ownership, bare URLs,
+rapid duplicate actions, pending/success/error remounts, locale/invalidation/
+reconnect/refocus, explicit retries, known/unknown sanitized errors, malformed
+polylines, actual warnings/credits, missing address, long names, measured dock/
+short viewport/safe areas, native readiness/reset, Fit/Recenter and Back. A
+lifecycle suite uses the installed Expo SDK focus hooks, pending navigation
+readiness and real location hook with native/network boundaries replaced; it
+covers full startup timeout and permission-activity foreground transitions.
+
+The approved R01 PNG was inspected. The implementation follows its compact
+header/map/rounded-dock hierarchy, with intentional differences documented in
+ROUTE_PREVIEW.md: real map/native pins, no terrain claim or screenshot map
+artifacts, localized metric wording, actual caution/warnings, a fixed scrollable
+dock, and no Share/Profile controls. No native screenshot comparison is claimed.
+
+Android device/UAT: **NOT TESTED**. `adb` is unavailable; no APK was built or
+installed in this run. Live Google/Supabase calls, physical GPS/compass/camera,
+Android rendering, actual legal-label placement, native pin colors, TalkBack,
+rotation and 150% system-text usability remain unverified. Component geometry
+checks do not substitute for that evidence. Run the recorded Android acceptance
+scenarios with configured providers and a real account before demonstration.
+Edge/limiter checks and Expo Doctor were not rerun because no server, native
+configuration or dependencies changed.
+
+Independent whole-branch review identified two important issues, both corrected
+with regressions observed RED→GREEN: native padding could exceed a short
+viewport after actual controls measurement/resize, and later POI details could
+replace the submitted route destination. Controls now share a horizontal row,
+native padding is bounded, fitting waits for dock resize measurements, and the
+submitted destination is retained separately from current place metadata.
+Additional RED→GREEN tests enforce wall-clock freshness at the paid-call boundary
+and prevent an older waiting screen from spending a replacement owner's intent.
+The full check and Android export were rerun after this fix pass. No reviewer
+findings were deferred; device limitations above remain unchanged.
+
+[PR #11](https://github.com/mjfelecio/ARgala/pull/11) is open against `main`
+on `feat/walking-route-preview` and remains unmerged. Local final checks above
+passed; GitHub validation was queued at handoff. No credentials or supplied
+untracked kickoff packages were committed.
+
+### Walking preview review correction — session-gated GPS
+
+Confirmed that the unconditional location hook started permission/service work
+and high-accuracy GPS for missing, invalid, expired or consumed preview links,
+even though paid Routes calls were already prevented. Added an optional location
+hook enable gate (default true for existing Map/AR consumers) and derive it from
+the claimed preview session. Dead links, unconfigured Maps, expired waiting
+sessions and remounted unspent sessions now remain local without permission
+checks or watchers. Explicit route retry can re-enable sensors; pending/completed
+previews retain the live marker and Recenter. Inactive sessions no longer show
+misleading GPS loading/retry copy.
+
+Nine regressions were observed failing before their fixes, using the real
+location hook and installed Expo focus hooks with delayed navigation readiness:
+five dead-link forms across focus/resume/remount, missing Maps configuration,
+expiry with delayed native setup cleanup, unspent-session remount/retry, and
+fresh ownership after failed acquisition/retry. The latter prevents a retained
+pre-disable fix from bypassing renewed permission/watcher startup.
+
+Validation: `npm run check` passed typecheck, zero-warning lint and **331 tests /
+34 files**. The affected Directions/Location run passed **125 tests / 10 files**.
+`npm run export:android -- --max-workers 2` and `git diff --check` passed.
+No native configuration, dependencies, server contracts or translations changed.
+Physical Android permission activities, GPS, live providers and UAT remain
+**NOT TESTED**. The fix is a follow-up on unmerged PR #11.

@@ -9,6 +9,8 @@ Root protected Stack
     │   ├── index   /          Explore → existing MapScreen
     │   ├── ar      /ar        ImmersiveArScreen → existing ArScreen
     │   └── profile /profile   placeholder with an Open settings action
+    ├── place/[providerId] /place/:providerId — POI Details
+    ├── directions  /directions — compact walking preview
     └── settings    /settings  existing SettingsScreen
 ```
 
@@ -46,3 +48,5 @@ Install the current development APK and run `npx expo start --dev-client` from t
 6. Open `/ar`, `/profile` and `/settings` directly while signed in and signed out. Check protected routing and Android Back; sign out and verify the shell cannot be revisited through Back.
 
 Automated checks exercise the installed SDK's router reducers and focus hooks with native rendering/hardware/network boundaries replaced. They do not establish Android rendering, physical sensor behavior or live provider integration. See [validation evidence](validation.md).
+
+Details and Walking Directions use the protected parent stack without the tab bar or duplicate navigator headers. Get Directions owns a single-use transient request intent; Home View Route reuses its completed route. See [route preview](design/clean-explorer/ROUTE_PREVIEW.md).

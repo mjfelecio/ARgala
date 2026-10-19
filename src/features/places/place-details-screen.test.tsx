@@ -14,7 +14,7 @@ import PlaceDetailsScreen from './place-details-screen';
 
 const controls = vi.hoisted(() => ({ params: { providerId: 'north' } as Record<string, unknown>, language: 'en' as 'en' | 'ko' | 'ja', focused: true, active: true, back: true }));
 vi.mock('expo-router', () => ({ useLocalSearchParams: () => controls.params, useIsFocused: () => controls.focused,
-  router: { back: vi.fn(), canGoBack: () => controls.back, navigate: vi.fn(), dismissTo: vi.fn() } }));
+  router: { push: vi.fn(), back: vi.fn(), canGoBack: () => controls.back, navigate: vi.fn(), dismissTo: vi.fn() } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('./service', () => ({ placesService: { details: vi.fn(), nearby: vi.fn() } }));
@@ -90,10 +90,10 @@ it.each(['en', 'ko', 'ja'])('presents an approved image only when explicitly sup
   expect(output()).toContain('Synthetic test illustration'); expect(output()).toContain('Synthetic fixture credit');
   expect(tree!.root.findAllByProps({ testID: 'place-media-fallback' })).toHaveLength(0);
 });
-it.each(['placeDetails.directions', 'placeDetails.map', 'placeDetails.ar'])('hands off the selection through %s without provider work', async key => {
+it.each(['placeDetails.map', 'placeDetails.ar'])('hands off the selection through %s without provider work', async key => {
   const { router } = await import('expo-router');
   client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
-  expect(output()).toContain(translations.t('placeDetails.directionsHint', { action: translations.t('map.walk') })); await press(key);
+  await press(key);
   expect(router.dismissTo).toHaveBeenCalledExactlyOnceWith({ pathname: key === 'placeDetails.ar' ? '/ar' : '/', params: { placeId: 'north' } });
   expect(client.getQueryData(placeSelectionOptions('north').queryKey)).toEqual(place); expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
@@ -158,4 +158,13 @@ it('offers explicit recovery after cached selection and full details have been e
   await act(async () => { tree!.unmount(); }); client.removeQueries({ queryKey: ['place-selection'] }); client.removeQueries({ queryKey: ['place-details'] }); await mount();
   expect(output()).not.toContain(place.name); expect(output()).toContain(translations.t('placeDetails.unavailable')); expect(placesService.details).toHaveBeenCalledTimes(1);
   await press('placeDetails.load'); expect(output()).toContain(place.name); expect(placesService.details).toHaveBeenCalledTimes(2);
+});
+
+it('hands one Get Directions tap to the preview with a single-use intent and blocks rapid duplicate navigation', async () => {
+  const { router } = await import('expo-router'); const { claimRoutePreviewIntent } = await import('@/features/directions/route-preview-intent');
+  client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
+  await act(async () => { button('placeDetails.directions')!.props.onPress(); button('placeDetails.directions')!.props.onPress(); });
+  expect(router.push).toHaveBeenCalledOnce(); const destination = vi.mocked(router.push).mock.calls[0][0] as { pathname: string; params: { token: string } };
+  expect(destination.pathname).toBe('/directions'); expect(claimRoutePreviewIntent(client, destination.params.token)).toMatchObject({ source: 'details', place });
+  expect(claimRoutePreviewIntent(client, destination.params.token)).toBeNull(); expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
