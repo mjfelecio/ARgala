@@ -107,7 +107,7 @@
 - [x] Run `npm run check`, `npm run check:android`, and `npm run export:android`. Run other project checks if touched modules require them. Record commands, counts, and **whether** they actually passed; never infer pass from earlier CI.
 - [ ] Real Android smoke check: Map → Details → Back; AR → Details → Back; details optional data; no content; tap Get Directions to Map + Walk; return without scan/route duplication; visibility of provider attribution. Note if physical testing is unavailable.
 - [x] Review supplied PNG/HTML against component hierarchy and supported data (native screenshot comparison pending); document truthful differences (no photo, provider category, rating, hours). No fake content for visual parity.
-- [ ] Incremental commit for tests/docs. Push branch `feat/poi-details-screen`; open PR to latest `main` and **do not merge**. Ask for independent review; address only verified issues and keep cohesive commit history.
+- [x] Incremental commit for tests/docs. Push branch `feat/poi-details-screen`; open PR to latest `main` and **do not merge**. Ask for independent review; address only verified issues and keep cohesive commit history.
 
 ## Acceptance criteria
 
@@ -141,3 +141,7 @@ The owner has approved the high-level sequence and already uses an agent. Have t
 - Task 4: navigation/AR incoming selection/map centering tests failed before implementation. Actions hand off with SDK `dismissTo` to avoid duplicate parent tabs; installed Stack/Tab reducers and divergent-state payload mapping verify Back and return identity. Explicit paid request rules remain. `npm run check`: 252 tests / 31 files passed with typecheck and zero-warning lint. `npm run check:android` passed.
 
 - Task 5: real credits/link-error UI and all locale resources exercised; handoff-only AR credits reproduced RED and fixed GREEN. Final `npm run check` passed 264 tests / 31 files; Android config and Metro/Hermes export passed. Device acceptance unavailable: adb absent and no Android handset in USB inventory. Native visual/TalkBack/live-provider acceptance remains open, with scenarios in docs/validation.md.
+
+- Final independent review: approved for PR with no Critical, Important or Minor findings. Reviewer independently passed typecheck, zero-warning lint and 109 Details/AR/Map/app-shell tests.
+- Final review decisions: native visual/TalkBack/large-text/touch/physical Back behavior and live sensor/provider integration remain unverified until Android acceptance; code is reviewable but this is not device/UAT approval. Approved-image runtime content remains future work because no approved photo is supplied by the current contract. One-tap directions remains the next milestone; user distance stays in the existing Map/AR flows to preserve sensor ownership.
+- Delivery: [PR #10](https://github.com/mjfelecio/ARgala/pull/10) targets `main`, from `feat/poi-details-screen`; no merge or auto-merge requested. Owner ZIP and standalone source plan remain untouched and untracked.
