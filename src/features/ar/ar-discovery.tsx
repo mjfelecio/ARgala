@@ -3,7 +3,7 @@ import { placeSelectionOptions } from '@/features/places/selection';
 import { router, useLocalSearchParams } from 'expo-router';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
 import { placesService } from '@/features/places/service';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Image, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import googleMapsAttribution from '../../../assets/attribution/google-maps.png';
@@ -19,12 +19,15 @@ import { useArPlaces } from './use-ar-places';
 import { ArChrome } from './ar-chrome';
 import { ArLabels } from './ar-labels';
 import { ArNearbySheet } from './ar-nearby-sheet';
+import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 type Props = { location: ReturnType<typeof useDeviceLocation>; running: boolean; cameraReady: boolean; preview: ReactNode; cameraStatus: ReactNode };
 export function ArDiscovery({ location, running, cameraReady, preview, cameraStatus }: Props) {
   const { t } = useTranslation();
   const client = useQueryClient();
+  const navigating = useRef(false);
+  useEffect(() => { if (running) navigating.current = false; }, [running]);
   const { language, activationRadiusMeters } = useSettings();
   const [now, setNow] = useState(Date.now);
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
@@ -77,11 +80,19 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
   const distance = ranked.find((p) => p.place.providerId === selectedId)?.distance;
   const labels = cameraReady && running ? layoutLabels(ranked, viewport.width, selectedId) : [];
   const select = (id: string) => { if (running) { setManualId(id); setSelectionRevision(value => value + 1); } };
-  function directions() {
-    if (!running || !selected) return;
+  function toMap() {
+    if (!running || !selected || navigating.current) return;
+    navigating.current = true;
     // Carry the selected summary without a provider request on map entry.
     client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
     router.navigate({ pathname: '/', params: { placeId: selected.providerId } });
+  }
+  function directions() {
+    if (!running || !selected || navigating.current) return;
+    navigating.current = true;
+    client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
+    const token = createRoutePreviewIntent(client, selected, undefined, 'ar');
+    router.push({ pathname: '/directions', params: { token } });
   }
   const state = data.nearby.isFetching ? 'scanning' : data.nearby.error ? 'failed' : !data.request ? 'unscanned' : places.length === 0 ? 'empty' : 'results';
   const status = <>
@@ -113,10 +124,11 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
         detailsLoaded={!!detail} detailsBusy={data.details.isFetching}
         onSelect={select} onMore={() => { if (running && selected) data.more(selected.providerId); }}
         onDetails={() => {
-          if (!running || !selected) return;
+          if (!running || !selected || navigating.current) return;
+          navigating.current = true;
           client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
           router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
-        }} onDirections={directions} onMap={directions} />
+        }} onDirections={directions} onMap={toMap} />
     </View>
     {(places.length > 0 || selected) && <View testID="ar-attributions" className="gap-1 border-t border-outline bg-surface px-4 py-2">
       <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" className="h-5 w-28" resizeMode="contain" />

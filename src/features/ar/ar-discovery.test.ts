@@ -12,15 +12,18 @@ import { EdgeRequestError } from '@/lib/edge-error';
 import { placesService, type Place } from '@/features/places/service';
 import { AR } from '@/config/limits';
 import ArScreen from './ar-screen';
+import { claimRoutePreviewIntent } from '@/features/directions/route-preview-intent';
+import { useRoutePreview } from '@/features/directions/use-route-preview';
+import { routeService } from '@/features/directions/service';
 
 const controls = vi.hoisted(() => ({ active: true, focused: true, granted: true,
   language: 'en' as 'en' | 'ko' | 'ja', radius: 100,
   location: { status: 'ready', watcherStatus: 'ready', position: { latitude: 0, longitude: 0 } as { latitude: number; longitude: number } | null,
     accuracy: 5 as number | null, positionTimestamp: 0, watcherTimestamp: 0, headingTimestamp: 0,
     headingStatus: 'ready', heading: { degrees: 0, accuracy: 3, reference: 'true' } as { degrees: number; accuracy: number; reference: string } | null, retry: vi.fn() },
-  navigate: vi.fn(), getPermission: vi.fn(), params: {} as { placeId?: string },
+  navigate: vi.fn(), push: vi.fn(), getPermission: vi.fn(), params: {} as { placeId?: string },
 }));
-vi.mock('expo-router', () => ({ useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params, router: { navigate: controls.navigate, setParams: vi.fn(() => { controls.params = {}; }) } }));
+vi.mock('expo-router', () => ({ useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params, router: { navigate: controls.navigate, push: controls.push, setParams: vi.fn(() => { controls.params = {}; }) } }));
 vi.mock('expo-camera', async () => {
   const { createElement } = await import('react');
   return { CameraView: (props: Record<string, unknown>) => createElement('video', props),
@@ -29,6 +32,7 @@ vi.mock('expo-camera', async () => {
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language, activationRadiusMeters: controls.radius }) }));
 vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => controls.location }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
+vi.mock('@/features/directions/service', () => ({ routeService: { walking: vi.fn() } }));
 vi.mock('@/features/places/service', () => ({ placesService: { nearby: vi.fn(), details: vi.fn() } }));
 vi.mock('@/ui/shared', async () => {
   const { createElement } = await import('react');
@@ -37,7 +41,7 @@ vi.mock('@/ui/shared', async () => {
 const north: Place = { id: 'google:north', providerId: 'north', provider: 'google', name: 'North Cafe', address: 'First Street',
   coordinates: { latitude: 0.0001, longitude: 0 }, attributions: [{ name: 'Local Provider', uri: 'https://example.com/credits' }] };
 const south: Place = { ...north, id: 'google:south', providerId: 'south', name: 'South Park', coordinates: { latitude: -0.002, longitude: 0 } };
-let client: QueryClient; let translations: i18n; let tree: ReactTestRenderer | undefined;
+let client: QueryClient; let translations: i18n; let tree: ReactTestRenderer | undefined; let previewTree: ReactTestRenderer | undefined;
 const render = () => React.createElement(I18nextProvider, { i18n: translations }, React.createElement(QueryClientProvider, { client }, withHeroUI(React.createElement(ArScreen))));
 const output = () => JSON.stringify(tree!.toJSON());
 async function mount() {
@@ -60,16 +64,17 @@ beforeEach(async () => {
   controls.active = true; controls.focused = true; controls.granted = true; controls.language = 'en'; controls.radius = 100;
   Object.assign(controls.location, { status: 'ready', watcherStatus: 'ready', position: { latitude: 0, longitude: 0 }, accuracy: 5,
     positionTimestamp: Date.now(), watcherTimestamp: Date.now(), headingTimestamp: Date.now(), headingStatus: 'ready', heading: { degrees: 0, accuracy: 3, reference: 'true' } });
-  controls.params = {}; controls.navigate.mockReset(); controls.getPermission.mockReset().mockResolvedValue({ granted: true });
+  controls.params = {}; controls.navigate.mockReset(); controls.push.mockReset(); controls.getPermission.mockReset().mockResolvedValue({ granted: true });
   vi.mocked(placesService.nearby).mockReset().mockResolvedValue([north, south]);
   vi.mocked(placesService.details).mockReset().mockResolvedValue({ ...north, description: 'Provider description' });
+  vi.mocked(routeService.walking).mockReset().mockResolvedValue({ encodedPolyline: '??AA', distanceMeters: 100, durationSeconds: 80, warnings: [] });
   notifyManager.setScheduler((callback) => callback());
   client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() });
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
   const original = console.error;
   vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
-afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; client.clear(); notifyManager.setScheduler((callback) => setTimeout(callback, 0)); vi.useRealTimers(); vi.restoreAllMocks(); });
+afterEach(async () => { await act(async () => { tree?.unmount(); previewTree?.unmount(); }); tree = undefined; previewTree = undefined; client.clear(); notifyManager.setScheduler((callback) => setTimeout(callback, 0)); vi.useRealTimers(); vi.restoreAllMocks(); });
 it('scans at current GPS only on action, selects camera labels, and requests details explicitly', async () => {
   await mount(); expect(placesService.nearby).not.toHaveBeenCalled();
   await scan();
@@ -82,7 +87,7 @@ it('scans at current GPS only on action, selects camera labels, and requests det
   expect(output()).toContain('First Street'); expect(output()).toContain(translations.t('ar.distance', { meters: 11 }));
   expect(placesService.details).not.toHaveBeenCalled();
   await press('ar.more'); await settle(); expect(output()).toContain('Provider description');
-  await press('ar.directions'); expect(controls.navigate).toHaveBeenCalledWith({ pathname: '/', params: { placeId: 'north' } });
+  await press('placeDetails.map'); expect(controls.navigate).toHaveBeenCalledWith({ pathname: '/', params: { placeId: 'north' } });
   expect(output()).toContain('Google Maps'); expect(output()).toContain('Local Provider');
 });
 it('keeps manual selection through heading changes and offers inspection outside activation range', async () => {
@@ -297,5 +302,49 @@ it('docks a compact panel over the camera and keeps credits outside its scrollin
   await press('ar.expand');
   await act(async () => { tree!.root.findByProps({ testID: 'ar-list-south' }).props.onPress(); });
   expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name);
+  expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
+});
+
+it('creates exactly one single-use AR route intent on Directions and preserves the selected summary', async () => {
+  await mount(); await scan();
+  expect(routeService.walking).not.toHaveBeenCalled();
+  const button = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('ar.directions'))!;
+  await act(async () => { button.props.onPress(); button.props.onPress(); });
+  expect(controls.push).toHaveBeenCalledTimes(1);
+  const target = controls.push.mock.calls[0][0];
+  expect(target).toMatchObject({ pathname: '/directions', params: { token: expect.any(String) } });
+  expect(claimRoutePreviewIntent(client, target.params.token)).toMatchObject({ place: north, source: 'ar' });
+  expect(claimRoutePreviewIntent(client, target.params.token)).toBeNull();
+  expect(client.getQueryData(['place-selection', north.providerId])).toEqual(north);
+  expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('spends one route call through the real preview hook and never renews intent on AR lifecycle or preview remount', async () => {
+  await mount(); await scan();
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-list-south' }).props.onPress(); });
+  controls.focused = false; await update(); controls.focused = true; await update();
+  controls.active = false; await update(); controls.active = true; await update();
+  controls.location.heading = { degrees: 180, accuracy: 3, reference: 'true' }; await update();
+  await act(async () => { await client.invalidateQueries(); });
+  await act(async () => { tree!.unmount(); }); await mount();
+  controls.language = 'ko';
+  await act(async () => { await translations.changeLanguage('ko'); }); await update();
+  expect(routeService.walking).not.toHaveBeenCalled(); expect(controls.push).not.toHaveBeenCalled();
+  expect(client.getQueryCache().findAll({ queryKey: ['route-preview-intent'] })).toHaveLength(0);
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-list-south' }).props.onPress(); });
+  await press('ar.directions'); const token = controls.push.mock.calls[0][0].params.token;
+  controls.focused = false; await update(); controls.focused = true;
+  function Probe() { useRoutePreview(token, true); return null; }
+  const preview = () => React.createElement(QueryClientProvider, { client }, React.createElement(Probe));
+  await act(async () => { previewTree = create(preview()); });
+  controls.location.positionTimestamp = Date.now(); controls.location.watcherTimestamp = Date.now();
+  await act(async () => { previewTree!.update(preview()); }); await settle();
+  expect(routeService.walking).toHaveBeenCalledTimes(1);
+  expect(routeService.walking).toHaveBeenLastCalledWith({ origin: { latitude: 0, longitude: 0 }, destination: south.coordinates, language: 'ko' });
+  controls.focused = false; await act(async () => { previewTree!.update(preview()); });
+  controls.focused = true; controls.active = false; await act(async () => { previewTree!.update(preview()); });
+  controls.active = true; await act(async () => { previewTree!.update(preview()); });
+  await act(async () => { previewTree!.unmount(); previewTree = create(preview()); }); await settle();
+  expect(routeService.walking).toHaveBeenCalledTimes(1);
+  await update(); expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name);
   expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
 });

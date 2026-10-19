@@ -69,7 +69,7 @@
     "nearest": "활성화 범위에서 가장 가까운 장소: {{name}} · {{meters}} m",
     "nearby": "주변 장소",
     "more": "추가 정보 불러오기",
-    "directions": "지도에서 길찾기",
+    "directions": "도보 길찾기",
     "addressUnknown": "주소 정보가 없습니다",
     "title": "AR 탐색",
     "map": "지도",

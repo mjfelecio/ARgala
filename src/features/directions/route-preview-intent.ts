@@ -6,19 +6,19 @@ import type { WalkingRoute } from './service';
 
 export type RoutePreviewResult = { origin: Coordinate; destination: Coordinate; route: WalkingRoute };
 export type RoutePreviewIntent = {
-  place: Place; source: 'details' | 'map'; createdAt: number; existing?: RoutePreviewResult;
+  place: Place; source: 'details' | 'map' | 'ar'; createdAt: number; existing?: RoutePreviewResult;
 };
 export const routePreviewLifetimeMs = AR.nearbyReuseMs;
 const prefix = ['route-preview-intent'] as const;
 let sequence = 0;
 
 /** Local navigation handle, never a credential. A new handoff retires an older target. */
-export function createRoutePreviewIntent(client: QueryClient, place: Place, existing?: RoutePreviewResult): string {
+export function createRoutePreviewIntent(client: QueryClient, place: Place, existing?: RoutePreviewResult, source: RoutePreviewIntent['source'] = existing ? 'map' : 'details'): string {
   client.removeQueries({ queryKey: prefix });
   client.setQueryDefaults(prefix, { gcTime: routePreviewLifetimeMs });
   const token = `${Date.now().toString(36)}-${(++sequence).toString(36)}`;
   client.setQueryData<RoutePreviewIntent>([...prefix, token], {
-    place, source: existing ? 'map' : 'details', createdAt: Date.now(), ...(existing ? { existing } : {}),
+    place, source, createdAt: Date.now(), ...(existing ? { existing } : {}),
   });
   return token;
 }

@@ -99,7 +99,7 @@ export function useRoutePreview(token: unknown, configured: boolean) {
   function retry() {
     const current = client.getQueryData<Session>(key);
     if (!running || !configured || !current || current.status === 'pending' || current.status === 'success' || (current.status === 'waiting' && current.owner === owner && authorized.current && !expired)) return;
-    const nextToken = createRoutePreviewIntent(client, current.intent.place);
+    const nextToken = createRoutePreviewIntent(client, current.intent.place, undefined, current.intent.source);
     const next = claimRoutePreviewIntent(client, nextToken);
     if (!next) return;
     authorized.current = true;

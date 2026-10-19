@@ -69,7 +69,7 @@
     "nearest": "範囲内で最も近い場所: {{name}} · {{meters}} m",
     "nearby": "近くの場所",
     "more": "追加情報を読み込む",
-    "directions": "地図で道順を表示",
+    "directions": "徒歩ルート",
     "addressUnknown": "住所情報がありません",
     "title": "AR探索",
     "map": "地図",
