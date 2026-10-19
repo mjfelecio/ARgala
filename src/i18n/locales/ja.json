@@ -86,5 +86,13 @@
     "typography": "文字と経路のアクセント",
     "routeAccent": "青色は経路案内に使用します。",
     "languages": "English · 한국어 · 日本語"
+  },
+  "navigation": {
+    "explore": "探索",
+    "ar": "ARビュー",
+    "profile": "プロフィール",
+    "backToMap": "地図に戻る",
+    "openSettings": "設定を開く",
+    "profilePlaceholder": "プロフィール機能はまだ利用できません。設定で言語とARの設定を変更できます。"
   }
 }

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { getCurrentCoordinates, requestLocationPermission } from './service';
+import { getCurrentCoordinates, requestLocationPermission, subscribeToLocation, subscribeToHeading } from './service';
 import { useDeviceLocation } from './use-device-location';
 import ArScreen from '@/features/ar/ar-screen';
 
@@ -9,7 +9,7 @@ const navigation = vi.hoisted(() => ({
   active: true, focused: true, ref: { current: null as object | null },
   context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
   value: { isFocused: () => true, addListener: () => () => {} },
-  remove: vi.fn(), cameraGranted: false, cameraQueries: vi.fn(),
+  remove: vi.fn(), headingRemove: vi.fn(), cameraGranted: false, cameraQueries: vi.fn(),
 }));
 
 vi.mock('expo-router', async () => {
@@ -48,7 +48,7 @@ vi.mock('./service', () => ({
   requestLocationPermission: vi.fn(async () => ({ granted: true, canAskAgain: true })),
   isLocationEnabled: vi.fn(async () => true), getCurrentCoordinates: vi.fn(),
   subscribeToLocation: vi.fn(async () => ({ remove: navigation.remove })),
-  subscribeToHeading: vi.fn(async () => ({ remove: vi.fn() })),
+  subscribeToHeading: vi.fn(async () => ({ remove: navigation.headingRemove })),
 }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => navigation.active }));
 vi.mock('expo-camera', async () => {
@@ -94,7 +94,9 @@ beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   vi.useFakeTimers();
   navigation.active = true; navigation.focused = true; navigation.ref.current = null;
-  navigation.remove.mockClear(); navigation.cameraQueries.mockClear(); navigation.cameraGranted = false;
+  navigation.remove.mockClear(); navigation.headingRemove.mockClear(); navigation.cameraQueries.mockClear(); navigation.cameraGranted = false;
+  vi.mocked(subscribeToLocation).mockReset().mockResolvedValue({ remove: navigation.remove });
+  vi.mocked(subscribeToHeading).mockReset().mockResolvedValue({ remove: navigation.headingRemove });
   vi.mocked(requestLocationPermission).mockClear();
   vi.mocked(getCurrentCoordinates).mockReset().mockResolvedValue(fix);
   const original = console.error;
@@ -134,6 +136,39 @@ it('refreshes camera permission after foreground return without a ready containe
   await act(async () => { tree!.update(render(React.createElement(ArScreen))); });
   expect(navigation.cameraQueries).toHaveBeenCalledTimes(2);
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
+});
+
+it('retires camera, GPS and compass on tab blur, then restarts on return with pending navigation readiness', async () => {
+  navigation.cameraGranted = true;
+  await act(async () => { tree = create(render(React.createElement(ArScreen))); });
+  expect(tree!.root.findAllByType('video')).toHaveLength(1);
+  navigation.focused = false;
+  await act(async () => { tree!.update(render(React.createElement(ArScreen))); });
+  expect(tree!.root.findAllByType('video')).toHaveLength(0);
+  expect(navigation.remove).toHaveBeenCalledOnce();
+  expect(navigation.headingRemove).toHaveBeenCalledOnce();
+  navigation.focused = true;
+  await act(async () => { tree!.update(render(React.createElement(ArScreen))); });
+  expect(tree!.root.findAllByType('video')).toHaveLength(1);
+  expect(subscribeToLocation).toHaveBeenCalledTimes(2);
+  expect(subscribeToHeading).toHaveBeenCalledTimes(2);
+  await act(async () => { tree!.unmount(); }); tree = undefined;
+  expect(navigation.remove).toHaveBeenCalledTimes(2);
+  expect(navigation.headingRemove).toHaveBeenCalledTimes(2);
+});
+
+it('cleans up GPS and compass even when native subscription setup finishes after leaving the AR tab', async () => {
+  const gps = Promise.withResolvers<Awaited<ReturnType<typeof subscribeToLocation>>>();
+  const compass = Promise.withResolvers<Awaited<ReturnType<typeof subscribeToHeading>>>();
+  vi.mocked(subscribeToLocation).mockReturnValue(gps.promise);
+  vi.mocked(subscribeToHeading).mockReturnValue(compass.promise);
+  await act(async () => { tree = create(render(React.createElement(ArScreen))); });
+  navigation.focused = false;
+  await act(async () => { tree!.update(render(React.createElement(ArScreen))); });
+  await act(async () => { gps.resolve({ remove: navigation.remove }); compass.resolve({ remove: navigation.headingRemove }); });
+  expect(navigation.remove).toHaveBeenCalledOnce();
+  expect(navigation.headingRemove).toHaveBeenCalledOnce();
+  expect(tree!.root.findAllByType('video')).toHaveLength(0);
 });
 
 vi.mock('@/features/ar/ar-discovery', async () => {

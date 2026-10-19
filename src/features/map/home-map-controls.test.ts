@@ -9,13 +9,14 @@ import { HomeMapControls } from './home-map-controls';
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
 let tree: ReactTestRenderer;
 afterEach(async () => { await act(async () => tree?.unmount()); });
-it('exposes only four genuine actions and disables Search while unavailable or busy', async () => {
+it('keeps Search, AR and Recenter without duplicating shell branding or Settings', async () => {
  const translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
- const callbacks = { onSearchNearby: vi.fn(), onRecenter: vi.fn(), onOpenAr: vi.fn(), onOpenSettings: vi.fn() };
+ const callbacks = { onSearchNearby: vi.fn(), onRecenter: vi.fn(), onOpenAr: vi.fn() };
  const render = (canSearch: boolean, searching: boolean) => React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(HomeMapControls, { ...callbacks, canSearch, searching })));
  await act(async () => { tree = create(render(true, false)); });
- const buttons = tree.root.findAllByType('button'); expect(buttons).toHaveLength(4);
- expect(buttons.map(b => b.props.accessibilityLabel)).toEqual(expect.arrayContaining(['Search Nearby', 'Open AR', 'Settings', 'Recenter']));
+ const buttons = tree.root.findAllByType('button'); expect(buttons).toHaveLength(3);
+ expect(buttons.map(b => b.props.accessibilityLabel)).toEqual(['Search Nearby', 'Open AR', 'Recenter']);
+ expect(JSON.stringify(tree.toJSON())).not.toContain('ARgala');
  await act(async () => { buttons.forEach(b => b.props.onPress()); });
  Object.values(callbacks).forEach(callback => expect(callback).toHaveBeenCalledOnce());
  for (const [canSearch, searching] of [[false, false], [true, true]]) {
