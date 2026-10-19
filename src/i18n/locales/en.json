@@ -119,8 +119,18 @@
     "nearest": "Nearest in activation range: {{name}} · {{meters}} m",
     "nearby": "Nearby places",
     "more": "Load additional details",
-    "directions": "Get Directions on map",
-    "addressUnknown": "Address unavailable"
+    "directions": "Directions",
+    "addressUnknown": "Address unavailable",
+    "title": "AR Explore",
+    "map": "Map",
+    "compassUnavailable": "Compass unavailable",
+    "bearing": "{{degrees}}° · approximate heading",
+    "selected": "Selected",
+    "nearbyCount": "Nearby places · {{count}}",
+    "expand": "Show more",
+    "collapse": "Show less",
+    "scanRetry": "Search failed. Use Scan to try again.",
+    "cameraFallback": "Camera unavailable. You can still browse nearby places."
   },
   "showcase": {
     "title": "Clean Explorer components",

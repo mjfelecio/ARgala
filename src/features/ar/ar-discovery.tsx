@@ -3,11 +3,11 @@ import { placeSelectionOptions } from '@/features/places/selection';
 import { router, useLocalSearchParams } from 'expo-router';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
 import { placesService } from '@/features/places/service';
-import { useEffect, useState, type ReactNode } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Image, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import googleMapsAttribution from '../../../assets/attribution/google-maps.png';
-import { AR, DISCOVERY } from '@/config/limits';
+import { AR } from '@/config/limits';
 import type { useDeviceLocation } from '@/features/location/use-device-location';
 import { LocationStatus } from '@/features/location/status';
 import { useSettings } from '@/features/settings/provider';
@@ -16,14 +16,28 @@ import { edgeErrorMessageKey } from '@/lib/edge-error';
 import { Action, Notice } from '@/ui/shared';
 import { layoutLabels, rankPlaces, selectedPlaceId } from './projection';
 import { useArPlaces } from './use-ar-places';
+import { ArChrome } from './ar-chrome';
+import { ArLabels } from './ar-labels';
+import { ArNearbySheet } from './ar-nearby-sheet';
+import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 type Props = { location: ReturnType<typeof useDeviceLocation>; running: boolean; cameraReady: boolean; preview: ReactNode; cameraStatus: ReactNode };
 export function ArDiscovery({ location, running, cameraReady, preview, cameraStatus }: Props) {
   const { t } = useTranslation();
   const client = useQueryClient();
+  const navigating = useRef(false);
+  useEffect(() => { if (running) navigating.current = false; }, [running]);
   const { language, activationRadiusMeters } = useSettings();
   const [now, setNow] = useState(Date.now);
-  const [width, setWidth] = useState(0);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  const [chromeHeight, setChromeHeight] = useState(0);
+  const { fontScale = 1 } = useWindowDimensions();
+  const [occupation, setOccupation] = useState(0);
+  const [selectionRevision, setSelectionRevision] = useState(0);
+  const sheetPosition = useSharedValue(0);
+  // Clip badges on the UI thread during a drag, including their hit regions.
+  const labelClip = useAnimatedStyle(() => ({ height: Math.max(0, sheetPosition.get() - 8) }));
   const params = useLocalSearchParams();
   const parsed = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
   const incomingId = parsed.success ? parsed.data.providerId : null;
@@ -64,81 +78,61 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
   const detail = cachedDetails.data?.providerId === selectedId ? cachedDetails.data : null;
   const selected = detail ?? summary ?? (handoff.data?.providerId === selectedId ? handoff.data : null);
   const distance = ranked.find((p) => p.place.providerId === selectedId)?.distance;
-  const labels = cameraReady && running ? layoutLabels(ranked, width, selectedId) : [];
-  const select = (id: string) => setManualId(id);
-  const distanceText = (meters: number | undefined) => meters === undefined ? t('ar.distanceUnknown') : t('ar.distance', { meters: Math.round(meters) });
-  function directions() {
-    if (!running || !selected) return;
+  const labels = cameraReady && running ? layoutLabels(ranked, viewport.width, selectedId) : [];
+  const select = (id: string) => { if (running) { setManualId(id); setSelectionRevision(value => value + 1); } };
+  function toMap() {
+    if (!running || !selected || navigating.current) return;
+    navigating.current = true;
     // Carry the selected summary without a provider request on map entry.
     client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
     router.navigate({ pathname: '/', params: { placeId: selected.providerId } });
   }
-  return <View style={styles.container}>
-    <View testID="ar-viewport" style={styles.preview} onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
-      {preview}
-      <View style={styles.cameraStatus}>{cameraStatus}</View>
-      {labels.map((label) => <Pressable key={label.place.providerId} testID={`ar-label-${label.place.providerId}`}
-        accessibilityRole="button" accessibilityState={{ selected: selectedId === label.place.providerId }}
-        accessibilityLabel={`${label.place.name}, ${distanceText(label.distance)}`}
-        onPress={() => select(label.place.providerId)}
-        style={[styles.label, label.eligible && styles.eligible, selectedId === label.place.providerId && styles.selected,
-          { left: label.left, top: 12 + label.lane * 76, width: label.width }]}>
-        <Text numberOfLines={1} style={styles.labelName}>{label.place.name}</Text>
-        <Text numberOfLines={1}>{distanceText(label.distance)}</Text>
-      </Pressable>)}
+  function directions() {
+    if (!running || !selected || navigating.current) return;
+    navigating.current = true;
+    client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
+    const token = createRoutePreviewIntent(client, selected, undefined, 'ar');
+    router.push({ pathname: '/directions', params: { token } });
+  }
+  const state = data.nearby.isFetching ? 'scanning' : data.nearby.error ? 'failed' : !data.request ? 'unscanned' : places.length === 0 ? 'empty' : 'results';
+  const status = <>
+    {cameraStatus}
+    {!cameraReady && <Notice>{t('ar.cameraFallback')}</Notice>}
+    <LocationStatus location={location} />
+    {!tracking && <><Notice>{t('ar.trackingFallback')}</Notice>{location.status === 'ready' && <Action title={t('location.retry')} onPress={location.retry} />}</>}
+    {heading === null && <Notice>{t('ar.headingFallback')}</Notice>}
+    {data.nearby.error && <Notice>{t(edgeErrorMessageKey(data.nearby.error))}</Notice>}
+    {places.length > 0 && tracking && <Notice>{nearest ? t('ar.nearest', { name: nearest.place.name, meters: Math.round(nearest.distance) }) : t('ar.noneActive', { meters: activationRadiusMeters })}</Notice>}
+    {data.detailRequest?.providerId === selectedId && data.details.isFetching && <Notice busy>{t('map.details')}</Notice>}
+    {data.detailRequest?.providerId === selectedId && data.details.error && <Notice>{t(edgeErrorMessageKey(data.details.error))}</Notice>}
+    <Text className="font-sans text-xs text-muted">{t('ar.approximate', { degrees: AR.horizontalFovDegrees })}</Text>
+  </>;
+  return <View className="flex-1 bg-ink">
+    <View className="absolute inset-0">{preview}</View>
+    <View testID="ar-chrome" className="px-3 pb-2 pt-3" onLayout={event => setChromeHeight(event.nativeEvent.layout.height)}>
+      <ArChrome headingDegrees={heading} onMap={() => router.navigate('/')}
+        onScan={() => { if (tracking) data.scan(); }} scanDisabled={!tracking || data.nearby.isFetching} scanBusy={data.nearby.isFetching} />
     </View>
-    <View style={styles.content}>
-      <View style={styles.toolbar}><Action title={t('ar.scan')} disabled={!tracking || data.nearby.isFetching} onPress={() => { if (tracking) data.scan(); }} /></View>
-      <Text style={styles.hint}>{t('ar.approximate', { degrees: AR.horizontalFovDegrees })}</Text>
-      <ScrollView style={styles.panel} contentContainerStyle={styles.panelContent}>
-        <LocationStatus location={location} />
-        {!tracking && <><Notice>{t('ar.trackingFallback')}</Notice>{location.status === 'ready' && <Action title={t('location.retry')} onPress={location.retry} />}</>}
-        {heading === null && <Notice>{t('ar.headingFallback')}</Notice>}
-        {!data.request && <Notice>{t('ar.start')}</Notice>}
-        {data.nearby.isFetching && <Notice busy>{t('ar.scanning')}</Notice>}
-        {data.nearby.error && <Notice>{t(edgeErrorMessageKey(data.nearby.error))}</Notice>}
-        {data.nearby.data?.length === 0 && !data.nearby.isFetching && <Notice>{t('ar.empty')}</Notice>}
-        {places.length > 0 && tracking && <Notice>{nearest ? t('ar.nearest', { name: nearest.place.name, meters: Math.round(nearest.distance) }) : t('ar.noneActive', { meters: activationRadiusMeters })}</Notice>}
-        {selected && <View style={styles.details}>
-          <Text testID="ar-selected-name" style={styles.title}>{selected.name}</Text>
-          <Text>{selected.address ?? t('ar.addressUnknown')}</Text>
-          <Text>{distanceText(distance)}</Text>
-          {detail?.description && <Text>{detail.description}</Text>}
-          {data.detailRequest?.providerId === selectedId && data.details.isFetching && <Notice busy>{t('map.details')}</Notice>}
-          {data.detailRequest?.providerId === selectedId && data.details.error && <Notice>{t(edgeErrorMessageKey(data.details.error))}</Notice>}
-          {!detail && <Action title={t('ar.more')} onPress={() => { if (running) data.more(selected.providerId); }} disabled={!running || data.details.isFetching} />}
-          <Action title={t('placeDetails.view')} onPress={() => {
-            if (!running) return;
-            client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
-            router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
-          }} disabled={!running} />
-          <Action title={t('ar.directions')} onPress={directions} disabled={!running} />
-        </View>}
-        <Text>{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>
-        {places.length > 0 && <Text style={styles.title}>{t('ar.nearby')}</Text>}
-        {(ranked.length ? ranked.map((p) => ({ place: p.place, distance: p.distance })) : places.map((place) => ({ place, distance: undefined }))).map(({ place, distance }) =>
-          <Pressable key={place.providerId} testID={`ar-list-${place.providerId}`} accessibilityRole="button"
-            accessibilityState={{ selected: selectedId === place.providerId }} disabled={!running} onPress={() => select(place.providerId)}
-            style={[styles.row, nearest?.place.providerId === place.providerId && styles.eligible, selectedId === place.providerId && styles.selected]}>
-            <Text style={styles.rowName}>{place.name}</Text><Text>{distanceText(distance)}</Text>
-          </Pressable>)}
-      </ScrollView>
-      {(places.length > 0 || selected) && <View style={styles.attribution}>
-        <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" style={styles.google} resizeMode="contain" />
-        <ScrollView style={styles.credits}><ProviderAttributions places={[...places, ...(selected ? [selected] : [])]} /></ScrollView>
-      </View>}
+    <View testID="ar-viewport" className="flex-1" onLayout={event => setViewport(event.nativeEvent.layout)}>
+      <Animated.View pointerEvents="box-none" className="absolute left-0 right-0 top-0 overflow-hidden" style={labelClip}>
+        <ArLabels labels={chromeHeight ? labels : []} selectedId={selectedId} onSelect={select}
+          top={8} bottom={viewport.height - occupation - 8} fontScale={fontScale} />
+      </Animated.View>
+      <ArNearbySheet rows={ranked.length ? ranked.map(p => ({ place: p.place, distance: p.distance })) : places.map(place => ({ place, distance: undefined }))}
+        selected={selected} distance={distance} state={state} status={status} running={running}
+        height={viewport.height} fontScale={fontScale} selectionRevision={selectionRevision} position={sheetPosition} onOccupation={setOccupation}
+        detailsLoaded={!!detail} detailsBusy={data.details.isFetching}
+        onSelect={select} onMore={() => { if (running && selected) data.more(selected.providerId); }}
+        onDetails={() => {
+          if (!running || !selected || navigating.current) return;
+          navigating.current = true;
+          client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
+          router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
+        }} onDirections={directions} onMap={toMap} />
     </View>
+    {(places.length > 0 || selected) && <View testID="ar-attributions" className="gap-1 border-t border-outline bg-surface px-4 py-2">
+      <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" className="h-5 w-28" resizeMode="contain" />
+      <ScrollView className="max-h-14"><ProviderAttributions places={[...places, ...(selected ? [selected] : [])]} /></ScrollView>
+    </View>}
   </View>;
 }
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#111' }, preview: { flex: 1, minHeight: 240, overflow: 'hidden' },
-  cameraStatus: { position: 'absolute', bottom: 0, left: 8, right: 8, backgroundColor: '#fff' },
-  content: { flex: 1, backgroundColor: '#fff', paddingBottom: 16 }, toolbar: { alignItems: 'center' },
-  hint: { paddingHorizontal: 12, fontSize: 12, color: '#444' }, panel: { flex: 1 }, panelContent: { padding: 12, gap: 8 },
-  label: { position: 'absolute', height: 64, padding: 8, borderRadius: 8, backgroundColor: '#fff', borderWidth: 2, borderColor: '#777' },
-  labelName: { fontWeight: '600', fontSize: 16 }, eligible: { backgroundColor: '#e3f3e4', borderColor: '#24752c' },
-  selected: { borderColor: '#125fac', borderWidth: 2 }, row: { padding: 10, gap: 4, borderWidth: 1, borderColor: '#ddd', borderRadius: 6 },
-  rowName: { fontWeight: '600' }, details: { padding: 12, gap: 8, borderWidth: 1, borderColor: '#125fac', borderRadius: 8 },
-  title: { fontSize: 18, fontWeight: '600' }, attribution: { paddingHorizontal: 12, paddingTop: 10, paddingBottom: 5, gap: 8 },
-  google: { width: 98, height: 18 }, credits: { maxHeight: 56 },
-});

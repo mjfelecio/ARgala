@@ -69,8 +69,18 @@
     "nearest": "範囲内で最も近い場所: {{name}} · {{meters}} m",
     "nearby": "近くの場所",
     "more": "追加情報を読み込む",
-    "directions": "地図で道順を表示",
-    "addressUnknown": "住所情報がありません"
+    "directions": "徒歩ルート",
+    "addressUnknown": "住所情報がありません",
+    "title": "AR探索",
+    "map": "地図",
+    "compassUnavailable": "コンパスを利用できません",
+    "bearing": "{{degrees}}° · おおよその方角",
+    "selected": "選択中",
+    "nearbyCount": "近くの場所 · {{count}}",
+    "expand": "もっと見る",
+    "collapse": "折りたたむ",
+    "scanRetry": "検索に失敗しました。スキャンで再試行してください。",
+    "cameraFallback": "カメラを利用できません。近くの場所の一覧は利用できます。"
   },
   "showcase": {
     "title": "Clean Explorer コンポーネント",

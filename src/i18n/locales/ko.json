@@ -69,8 +69,18 @@
     "nearest": "활성화 범위에서 가장 가까운 장소: {{name}} · {{meters}} m",
     "nearby": "주변 장소",
     "more": "추가 정보 불러오기",
-    "directions": "지도에서 길찾기",
-    "addressUnknown": "주소 정보가 없습니다"
+    "directions": "도보 길찾기",
+    "addressUnknown": "주소 정보가 없습니다",
+    "title": "AR 탐색",
+    "map": "지도",
+    "compassUnavailable": "나침반을 사용할 수 없습니다",
+    "bearing": "{{degrees}}° · 대략적인 방향",
+    "selected": "선택됨",
+    "nearbyCount": "주변 장소 · {{count}}",
+    "expand": "더 보기",
+    "collapse": "간단히 보기",
+    "scanRetry": "검색에 실패했습니다. 스캔을 눌러 다시 시도하세요.",
+    "cameraFallback": "카메라를 사용할 수 없습니다. 주변 장소 목록은 이용할 수 있습니다."
   },
   "showcase": {
     "title": "Clean Explorer 구성 요소",

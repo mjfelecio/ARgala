@@ -11,6 +11,7 @@ import AppLayout from '@/app/(app)/_layout';
 import { AppTabs } from './app-tabs';
 import { AppHeader } from './app-header';
 import { ImmersiveArScreen } from './immersive-ar-screen';
+import { ArChrome } from '@/features/ar/ar-chrome';
 import ProfileScreen from './profile-screen';
 
 // Exercise this app's navigator configuration with the installed SDK's real
@@ -110,7 +111,7 @@ it.each([
  ['ko', ['탐색', 'AR 보기', '프로필'], '지도로 돌아가기', '설정 열기'],
  ['ja', ['探索', 'ARビュー', 'プロフィール'], '地図に戻る', '設定を開く'],
 ])('updates navigation and recovery actions from actual %s resources', async (locale, labels, back, settings) => {
- await mount(React.createElement(React.Fragment, null, React.createElement(AppTabs), React.createElement(ProfileScreen), React.createElement(ImmersiveArScreen)));
+ await mount(React.createElement(React.Fragment, null, React.createElement(AppTabs), React.createElement(ProfileScreen), React.createElement(ImmersiveArScreen), React.createElement(ArChrome, { headingDegrees: null, onMap: () => router.navigate('/'), onScan: () => {}, scanDisabled: true, scanBusy: false })));
  await act(async () => { await translations.changeLanguage(locale); });
  expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.options.title)).toEqual(labels);
  const buttons = tree!.root.findAllByType('button');

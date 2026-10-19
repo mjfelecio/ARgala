@@ -535,3 +535,47 @@ Validation: `npm run check` passed typecheck, zero-warning lint and **331 tests 
 No native configuration, dependencies, server contracts or translations changed.
 Physical Android permission activities, GPS, live providers and UAT remain
 **NOT TESTED**. The fix is a follow-up on unmerged PR #11.
+
+### AR Camera Clean Explorer presentation — 2026-10-19
+
+Base: merged Walking Directions on `origin/main` (`3210fe6`), branch
+`feat/ar-camera-ui`. Immersive header, bounded selected/unselected badges and a
+compact expandable nearby dock retain the existing camera/location owner and
+explicit Places actions. Details/Map preserve transient selection; Directions
+creates one single-use intent and reuses the existing fresh-GPS route preview.
+[Design notes](design/clean-explorer/AR_CAMERA.md) document reference deviations,
+component boundaries and native geometry styles.
+
+Focused tests exercise the real AR screen, HeroUI components, TanStack Query
+production defaults and locale resources. Native camera, GPS, sheet driver and
+network boundaries are mocked. Regressions cover the sole header/Map return,
+true-heading fallback, font-scaled bounded labels and stable CJK IDs, compact
+peek/gesture/explicit expansion, selection changes and delayed measurement,
+credits outside the sheet, camera failure/retry, short viewport resize, loaded
+and failed details, single-use Directions/double-press gating, and no paid calls
+on focus/resume/movement/language changes/remount. The AR-to-route integration
+executes the real preview hook and verifies exactly one walking request; existing
+installed-SDK focus-hook and delayed navigation-readiness regressions also run.
+
+`npm run check` passed typecheck, zero-warning lint and **346 tests / 36 files**.
+The targeted AR run passed **62 tests / 5 files**. `npm run check:android`,
+`npm run export:android -- --max-workers 2` and `git diff --check` passed.
+Compact unselected-badge geometry was observed RED→GREEN before this final run.
+
+Android device/UAT: **NOT TESTED**. No `adb` executable is available; no APK was
+built or installed, and no native render screenshot was captured. Live providers,
+physical GPS/compass/camera, TalkBack, native gesture/hit behavior, rotation,
+large text and outdoor direction accuracy remain pending the acceptance cases
+in AR_CAMERA.md. Metro/Hermes export and mocked layout checks are distinct from
+that evidence. No server contract, native configuration, dependency or SDK
+changes were made; Edge/limiter checks, Expo install compatibility and Doctor
+are left to the PR workflow rather than rerun locally for this UI pass.
+
+Independent review found a native sheet startup race and loss of expanded state
+when a short viewport temporarily has one detent. Both were reproduced RED→GREEN.
+The sheet now carries its requested index through the native prop, preserving
+logical expansion independently of geometric clamping. The native test driver
+uses the installed SDK's reactive-index hook and drops pre-readiness imperative
+requests, which the previous immediate driver masked. The corrected AR/navigation
+run passed **72 tests / 6 files**; full checks and Android export were rerun.
+No review findings were deferred. Physical-device limitations above remain.
