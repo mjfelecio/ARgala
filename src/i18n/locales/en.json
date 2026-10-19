@@ -125,7 +125,12 @@
     "map": "Map",
     "compassUnavailable": "Compass unavailable",
     "bearing": "{{degrees}}° · approximate heading",
-    "selected": "Selected"
+    "selected": "Selected",
+    "nearbyCount": "Nearby places · {{count}}",
+    "expand": "Show more",
+    "collapse": "Show less",
+    "scanRetry": "Search failed. Use Scan to try again.",
+    "cameraFallback": "Camera unavailable. You can still browse nearby places."
   },
   "showcase": {
     "title": "Clean Explorer components",

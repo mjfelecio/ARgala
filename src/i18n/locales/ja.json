@@ -75,7 +75,12 @@
     "map": "地図",
     "compassUnavailable": "コンパスを利用できません",
     "bearing": "{{degrees}}° · おおよその方角",
-    "selected": "選択中"
+    "selected": "選択中",
+    "nearbyCount": "近くの場所 · {{count}}",
+    "expand": "もっと見る",
+    "collapse": "折りたたむ",
+    "scanRetry": "検索に失敗しました。スキャンで再試行してください。",
+    "cameraFallback": "カメラを利用できません。近くの場所の一覧は利用できます。"
   },
   "showcase": {
     "title": "Clean Explorer コンポーネント",

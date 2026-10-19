@@ -40,7 +40,13 @@ const south: Place = { ...north, id: 'google:south', providerId: 'south', name: 
 let client: QueryClient; let translations: i18n; let tree: ReactTestRenderer | undefined;
 const render = () => React.createElement(I18nextProvider, { i18n: translations }, React.createElement(QueryClientProvider, { client }, withHeroUI(React.createElement(ArScreen))));
 const output = () => JSON.stringify(tree!.toJSON());
-async function mount() { await act(async () => { tree = create(render()); }); }
+async function mount() {
+  await act(async () => { tree = create(render()); });
+  await act(async () => {
+    tree!.root.findByProps({ testID: 'ar-viewport' }).props.onLayout({ nativeEvent: { layout: { width: 360, height: 640 } } });
+    tree!.root.findByProps({ testID: 'ar-chrome' }).props.onLayout({ nativeEvent: { layout: { height: 120 } } });
+  });
+}
 async function press(key: string) {
   const button = tree!.root.findAllByType('button').find((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t(key));
   expect(button, key).toBeDefined(); expect(button!.props.disabled).not.toBe(true);
@@ -157,6 +163,7 @@ it('retains selection when twenty colocated labels compete for three slots', asy
   vi.mocked(placesService.nearby).mockResolvedValue(places); await mount(); await scan();
   await act(async () => { tree!.root.findByProps({ testID: 'ar-viewport' }).props.onLayout({ nativeEvent: { layout: { width: 320, height: 760 } } }); });
   await act(async () => { tree!.root.findByProps({ testID: 'ar-list-place19' }).props.onPress(); });
+  await press('ar.collapse');
   await act(async () => { tree!.root.findByProps({ testID: 'ar-chrome' }).props.onLayout({ nativeEvent: { layout: { height: 120 } } }); });
   const labels = tree!.root.findAllByType(Pressable).filter((p) => p.props.testID?.startsWith('ar-label-'));
   expect(labels).toHaveLength(3); expect(labels.some((p) => p.props.testID === 'ar-label-place19')).toBe(true);
@@ -258,7 +265,7 @@ it('adopts a new Details selection on an already mounted AR screen and retains e
 });
 it('does not offer another paid load when complete details already exist for the handed-off place', async () => {
   client.setQueryData(['place-selection', south.providerId], south); client.setQueryData(['place-details', south.providerId, 'en'], south); controls.params = { placeId: south.providerId };
-  await mount(); expect(tree!.root.findAllByType('button').some(b => b.props.title === translations.t('ar.more'))).toBe(false);
+  await mount(); expect(tree!.root.findAllByType('button').some(b => (b.props.title ?? b.props.accessibilityLabel) === translations.t('ar.more'))).toBe(false);
   expect(placesService.details).not.toHaveBeenCalled();
 });
 it('shows Google and third-party credits for a Details handoff even without nearby results', async () => {
@@ -276,4 +283,19 @@ it('renders one compact AR heading with honest compass state and accessible Map 
   expect(output()).toContain(translations.t('ar.compassUnavailable'));
   expect(output()).not.toContain(translations.t('ar.bearing', { degrees: 20 }));
   expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('docks a compact panel over the camera and keeps credits outside its scrolling content', async () => {
+  await mount();
+  expect(tree!.root.findAllByType('dialog')).toHaveLength(1);
+  await scan();
+  const credits = tree!.root.findByProps({ testID: 'ar-attributions' });
+  expect(credits.findByProps({ accessibilityLabel: 'Google Maps' })).toBeDefined();
+  expect(credits.parent!.findAllByType('dialog')).toHaveLength(1);
+  expect(tree!.root.findByType('dialog').findAllByProps({ testID: 'ar-attributions' })).toHaveLength(0);
+  await press('ar.collapse'); expect(output()).toContain('Local Provider');
+  controls.granted = false; controls.location.heading = null; await update();
+  await press('ar.expand');
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-list-south' }).props.onPress(); });
+  expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name);
+  expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
 });
