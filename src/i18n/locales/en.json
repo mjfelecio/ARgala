@@ -144,5 +144,12 @@
     "backToMap": "Back to map",
     "openSettings": "Open settings",
     "profilePlaceholder": "Profile features are not available yet. You can manage language and AR preferences in Settings."
+  },
+  "placeDetails": {
+    "title": "Place Details",
+    "unavailable": "This place is no longer in memory. Load details to continue.",
+    "load": "Load Details",
+    "loading": "Loading place details…",
+    "back": "Back"
   }
 }

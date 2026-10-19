@@ -94,5 +94,12 @@
     "backToMap": "지도로 돌아가기",
     "openSettings": "설정 열기",
     "profilePlaceholder": "프로필 기능은 아직 제공되지 않습니다. 설정에서 언어와 AR 환경설정을 관리할 수 있습니다."
+  },
+  "placeDetails": {
+    "title": "장소 상세 정보",
+    "unavailable": "메모리에 장소가 없습니다. 상세 정보를 불러와 계속하세요.",
+    "load": "상세 정보 불러오기",
+    "loading": "장소 정보를 불러오는 중…",
+    "back": "뒤로"
   }
 }

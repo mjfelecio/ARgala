@@ -94,5 +94,12 @@
     "backToMap": "地図に戻る",
     "openSettings": "設定を開く",
     "profilePlaceholder": "プロフィール機能はまだ利用できません。設定で言語とARの設定を変更できます。"
+  },
+  "placeDetails": {
+    "title": "場所の詳細",
+    "unavailable": "この場所はメモリにありません。詳細を読み込んで続けてください。",
+    "load": "詳細を読み込む",
+    "loading": "場所の詳細を読み込み中…",
+    "back": "戻る"
   }
 }
