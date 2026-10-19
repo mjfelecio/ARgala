@@ -28,7 +28,7 @@ General location-based discovery and a future curated tourist catalog must coexi
 - Paid Places/details/routes requests require an explicit user action: Search, POI selection or Walk. Mounting, refocusing, foreground return, language changes and query invalidation must not silently initiate paid requests. Discovery starts with Search. Any future movement-triggered refresh needs a deliberate distance/cost policy. Expansion is local; hide details-recovery actions when a complete response is already present, while retaining explicit recovery for missing, failed or evicted details.
 - Never fabricate tourist descriptions or verified preview assets.
 
-- For map docks, track animated occupation separately from settled geometry: credits follow the current sheet position, while route fitting uses settled geometry. Preserve the current snap index when viewport/header dimensions change; native callbacks may not fire again for the same index.
+- For map docks, track animated occupation separately from settled geometry: credits follow the current sheet position, while route fitting uses settled geometry. Preserve the current snap index when viewport/header dimensions change; native callbacks may not fire again for the same index. Layout measurements and provider readiness are separate signals: omit native map padding until the current map instance fires `onMapReady`, and reset readiness when that instance is remounted.
 
 ## Internationalization and error contracts
 

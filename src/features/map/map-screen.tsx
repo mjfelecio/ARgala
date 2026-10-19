@@ -86,6 +86,8 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   const route = useQuery({ ...routeOptions(routeRequest), enabled: false });
   // Android adds fit edgePadding to mapPadding. Reserve measured chrome once,
   // keeping Google logo/legal controls above the sheet even between route fits.
+  // Maps 1.27.2's native padding setter can dereference a null GoogleMap after
+  // layout but before onMapReady. Omit the prop until this instance is ready.
   const mapPadding = { top: headerHeight, bottom: sheetHeight, left: gutter, right: gutter };
   const fitGap = Math.max(0, Math.min(fitMargin, (mapSize.height - headerHeight - settledSheetHeight) / 4, (mapSize.width - gutter * 2) / 4));
   useEffect(() => {
@@ -120,7 +122,7 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right', 'bottom']}>
     <View className="flex-1">
     <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
-      mapPadding={mapPadding} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
+      {...(mapReady ? { mapPadding } : {})} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
       onLayout={(event) => setMapSize({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height })}
       onPoiClick={(event) => select(event.nativeEvent.placeId)}>
       <Circle center={position} radius={activationRadiusMeters} strokeColor={routeColor} fillColor={routeArea} />

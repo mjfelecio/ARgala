@@ -91,6 +91,52 @@ afterEach(async () => {
   notifyManager.setScheduler((callback) => setTimeout(callback, 0));
   vi.restoreAllMocks();
 });
+it('withholds native map padding through layout and lifecycle updates until Google Maps is ready', async () => {
+  await act(async () => { tree = create(renderMap()); });
+  expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding');
+  // Android can have nonzero layout while its GoogleMap reference is still null.
+  await act(async () => {
+    tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } });
+    tree!.root.findByProps({ testID: 'home-map-controls' }).props.onLayout({ nativeEvent: { layout: { height: 96 } } });
+  });
+  await act(async () => {
+    const sheet = tree!.root.findByType('dialog');
+    sheet.props.onChange(0, sheet.props.containerLayoutState.get().height - 240);
+  });
+  controls.active = false;
+  await act(async () => { tree!.update(renderMap()); });
+  controls.active = true;
+  await act(async () => { tree!.update(renderMap()); });
+  expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding');
+  expect(controls.fit).not.toHaveBeenCalled();
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  expect(tree!.root.findByType('map').props.mapPadding).toEqual({ top: 96, bottom: 240, left: 8, right: 8 });
+  await act(async () => {
+    const sheet = tree!.root.findByType('dialog');
+    sheet.props.onChange(0, sheet.props.containerLayoutState.get().height - 280);
+  });
+  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(280);
+  expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(placesService.details).not.toHaveBeenCalled();
+  expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('requires fresh native readiness after location loss removes and remounts the map', async () => {
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  expect(tree!.root.findByType('map').props.mapPadding).toBeDefined();
+  controls.hasLocation = false;
+  await act(async () => { tree!.update(renderMap()); });
+  expect(tree!.root.findAllByType('map')).toHaveLength(0);
+  controls.hasLocation = true;
+  await act(async () => { tree!.update(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } }); });
+  expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding');
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  expect(tree!.root.findByType('map').props.mapPadding).toBeDefined();
+  expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(placesService.details).not.toHaveBeenCalled();
+  expect(routeService.walking).not.toHaveBeenCalled();
+});
 it('fits the loaded walking polyline with padding and keeps the viewport stable on GPS updates', async () => {
   await startRoute();
   expect(controls.fit).not.toHaveBeenCalled();

@@ -300,3 +300,32 @@ from a failed summary-only selection. No request-policy change was needed here.
 - No dependency or native configuration changes; another APK build is unnecessary
   for this fix. Android rendering, sheet drag/resize, attribution placement and
   live provider interactions still need an owner retest of the corrected bundle.
+
+### Android Maps padding startup race — 2026-10-19
+
+The owner supplied a recurring native `NullPointerException` in
+`MapView.applyBaseMapPadding` through the Fabric `setMapPadding` setter during
+map initialization. Installed Maps 1.27.2 forwards `mapPadding` before readiness;
+its Android method defers for zero-sized layout but dereferences `map` without a
+null check once layout has a size. Home supplied padding immediately, and local
+header/sheet measurements could update it before `GoogleMap` initialization.
+This matches the supplied stack and explains the startup ordering dependency.
+
+Home now omits the native padding prop until the current map instance reports
+`onMapReady`. Local measurements continue, and readiness applies their latest
+values. A location-driven map remount resets that gate. No timeout, paid request,
+native patch or dependency change is introduced.
+
+Two real-screen regressions failed before the fix because padding was sent
+before native readiness. They now pass for delayed initialization, header/sheet
+layout updates, foreground return, latest padding after readiness, continued
+padding updates and location-driven remounts. They assert no incidental paid
+requests. Native Maps is mocked, so they verify dispatch timing rather than
+executing the Android Java code.
+
+- Targeted map tests: **31 tests / 1 file** passed.
+- `npm run check`: typecheck, zero-warning lint and **209 tests / 29 files** passed.
+- `npm run export:android -- --max-workers 2`: Android Metro/Hermes export passed.
+- The existing development APK can load this JavaScript fix. Repeated cold
+  launches and navigation back to the map still need a phone retest; no native
+  crash recovery or live Google integration result is claimed from these checks.

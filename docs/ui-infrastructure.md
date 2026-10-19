@@ -60,6 +60,8 @@ The map dock stays open with no backdrop and no pan-down dismissal. Its content 
 
 Gorhom 5.2.14 receives a shared `containerLayoutState`; its deprecated native `containerHeight` and `containerOffset` props throw in development even though their types remain available. Map-height changes update the shared layout while retaining offsets measured by the SDK. Tests retain the installed library's JavaScript prop validator while replacing its native gesture/animation driver.
 
+Native `mapPadding` is omitted until the current map instance reports `onMapReady`. Header and sheet measurements continue locally during initialization, so the first ready update applies the latest geometry. This avoids Maps 1.27.2's Android padding setter dereferencing a null `GoogleMap` when layout completes before provider initialization. A location-driven map remount requires a fresh readiness event.
+
 The duplicate-details action disappears after a full response, including when expanded. Summary-only, failed or evicted selections retain explicit recovery. The matching AR action receives the same minimal behavior correction without restyling AR, and an explicit new-language request remains available. The custom `PillAction`, `CircleAction`, `FloatingSurface` and `src/ui/theme.ts` files are removed.
 
 The Phase 2 pass preserves explicit Search/selection/Walk requests, transient cache lifecycle, Google Maps/Places/Routes boundaries, permission behavior, GPS/AR navigation, walking warnings and provider attribution. PR #6's TypeScript token theme and generic custom primitives have been removed. Other product screens remain out of scope.
