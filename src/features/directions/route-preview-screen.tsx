@@ -6,6 +6,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Button } from 'heroui-native/button';
+import { Spinner } from 'heroui-native/spinner';
 import { Card } from 'heroui-native/card';
 import { Chip } from 'heroui-native/chip';
 import { useThemeColor } from 'heroui-native/hooks';
@@ -43,7 +44,7 @@ function Preview({ token }: { token: unknown }) {
       <Button variant="secondary" isIconOnly accessibilityLabel={t('directions.back')} onPress={() => { if (router.canGoBack()) router.back(); else toMap(); }}><Ionicons name="arrow-back" size={24} color={accent} /></Button>
       <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('directions.title')}</Text>
     </View>
-    <View className="flex-1">
+    <View className="flex-1" onLayout={event => setViewportHeight(event.nativeEvent.layout.height)}>
       {place && Constants.expoConfig?.extra?.mapsConfigured && <RoutePreviewMap place={place} origin={result?.origin} coordinates={coordinates}
         currentPosition={usable ? location.position : null} dockHeight={dockHeight}
         enabled={running} onViewportHeight={setViewportHeight} />}
@@ -60,7 +61,7 @@ function Preview({ token }: { token: unknown }) {
           {place && configured && data?.status === 'waiting' && !preview.expired && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('directions.waiting')}</Text>}
           {place && configured && !usable && <><RoutePreviewLocationStatus location={location} />{location.status === 'ready' && <><Text className="font-sans text-sm text-muted">{t('directions.stale')}</Text><Button variant="outline" accessibilityLabel={t('location.retry')} onPress={location.retry}><Button.Label>{t('location.retry')}</Button.Label></Button></>}</>}
           {data?.status === 'waiting' && preview.expired && <Text className="font-sans text-sm text-muted">{t('directions.unavailable')}</Text>}
-          {data?.status === 'pending' && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('map.routeLoading')}</Text>}
+          {data?.status === 'pending' && <View className="gap-2"><Spinner size="sm" /><Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('map.routeLoading')}</Text></View>}
           {data?.errorKey && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(data.errorKey)}</Text>}
           {preview.needsRetry && <Button variant="outline" accessibilityLabel={t('directions.retry')} isDisabled={!running || !configured} onPress={preview.retry}><Button.Label>{t('directions.retry')}</Button.Label></Button>}
           {place && <Card variant="secondary" className="gap-1 p-4"><Card.Body className="gap-1">
@@ -74,7 +75,7 @@ function Preview({ token }: { token: unknown }) {
           </>}
           {place && <ProviderAttributions places={[place]} />}
           <View className="flex-row flex-wrap gap-2">
-            <Button variant="secondary" className="min-w-36 grow shrink" accessibilityLabel={t('directions.map')} onPress={toMap}><Button.Label>{t('directions.map')}</Button.Label></Button>
+            <Button variant="secondary" className="min-w-36 grow shrink" accessibilityLabel={t('directions.map')} onPress={toMap}><Ionicons name="map-outline" size={22} color={accent} /><Button.Label>{t('directions.map')}</Button.Label></Button>
             {place && <Button className="min-w-36 grow shrink" accessibilityLabel={t('directions.details')} onPress={() => {
               client.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
               router.dismissTo({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });

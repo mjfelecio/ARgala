@@ -79,7 +79,8 @@ export function useRoutePreview(token: unknown, configured: boolean) {
       const current = client.getQueryData<Session>(key);
       if (current?.status === 'pending' && current.attempt === pending.attempt) client.setQueryData(key, next);
     };
-    void routeService.walking({ origin, destination: data.intent.place.coordinates, language }).then(route => {
+    const acquire = async () => routeService.walking({ origin, destination: data.intent.place.coordinates, language });
+    void acquire().then(route => {
       let result: Result;
       try { result = validated({ origin, route }); }
       catch { throw new EdgeRequestError('UPSTREAM_INVALID'); }

@@ -149,3 +149,38 @@ it('connects one Details tap through the actual intent handoff to a single delay
   controls.location.status = 'ready'; await update(); expect(routeService.walking).toHaveBeenCalledExactlyOnceWith({ origin, destination: place.coordinates, language: 'en' });
   expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
 });
+it('shows map loading until native readiness and resets readiness for a new intent/map instance', async () => {
+  handoff(); await mount(); expect(output()).toContain(translations.t('map.loading')); await layout();
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); }); expect(output()).not.toContain(translations.t('map.loading'));
+  handoff(); await update(); expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding'); expect(output()).toContain(translations.t('map.loading'));
+});
+it.each(['en', 'ko', 'ja'] as const)('renders actual %s resources, long names, no address and scrollable short-height geometry without fabricated metadata', async language => {
+  controls.language = language; await translations.changeLanguage(language);
+  const target = { ...place, name: 'A long destination 日本語 한국어 '.repeat(15), address: undefined }; handoff(true, target); await mount();
+  expect(output()).toContain(target.name); expect(output()).not.toContain(place.address); expect(output()).toContain(translations.t('directions.title')); expect(output()).toContain(translations.t('directions.snapshot'));
+  expect(output()).toContain('Returned credit'); expect(output()).not.toContain('Flat Terrain'); expect(output()).not.toContain('Start Navigation'); expect(output()).not.toContain('directions.');
+  expect(tree!.root.findAllByType('text').find(n => n.props.children === target.name)!.props.numberOfLines).toBeUndefined();
+  expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['top', 'bottom', 'left', 'right']);
+  await act(async () => {
+    tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 640, height: 240 } } });
+    tree!.root.findByProps({ testID: 'route-preview-dock' }).props.onLayout({ nativeEvent: { layout: { height: 132 } } });
+    tree!.root.findByType('map').props.onMapReady();
+  });
+  expect(tree!.root.findByProps({ testID: 'route-preview-dock' }).props.style.maxHeight).toBe(132); expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(132);
+  expect(tree!.root.findAllByType('scroll' as React.ElementType)).toHaveLength(1); expect(controls.fit).toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('has a working Back fallback and real attribution link with sanitized link failures', async () => {
+  controls.canBack = false; handoff(); await mount(); await press('directions.back'); expect(router.dismissTo).toHaveBeenCalledWith({ pathname: '/', params: { placeId: place.providerId } });
+  const credit = tree!.root.findAllByType('text').find(n => n.props.children === 'Returned credit')!;
+  await act(async () => { credit.props.onPress(); }); expect(nativeUi.openURL).toHaveBeenCalledWith('https://example.com/credit');
+  nativeUi.openURL.mockRejectedValue(new Error('Private link diagnostic')); await act(async () => { credit.props.onPress(); }); expect(nativeUi.alert).toHaveBeenLastCalledWith(translations.t('map.linkFailed'));
+});
+it('keeps a pending request stable through remount and never duplicates it', async () => {
+  const pending = Promise.withResolvers<WalkingRoute>(); vi.mocked(routeService.walking).mockReturnValue(pending.promise); handoff(false); await mount(); expect(output()).toContain(translations.t('map.routeLoading'));
+  await act(async () => { tree!.unmount(); }); await mount(); expect(routeService.walking).toHaveBeenCalledOnce();
+  await act(async () => { pending.resolve(route); }); expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates); expect(routeService.walking).toHaveBeenCalledOnce();
+});
+it('handles a synchronous adapter failure through the localized error path', async () => {
+  vi.mocked(routeService.walking).mockImplementationOnce(() => { throw new Error('Private adapter diagnostic'); }); handoff(false); await mount();
+  expect(output()).toContain(translations.t('service.failed')); expect(output()).not.toContain('Private adapter diagnostic'); await press('directions.retry'); expect(routeService.walking).toHaveBeenCalledTimes(2);
+});

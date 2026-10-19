@@ -430,3 +430,66 @@ Independent read-only whole-branch review approved the PR with no findings and
 separately passed typecheck, zero-warning lint and **109 tests** across Details,
 AR, Map and app-shell suites. [PR #10](https://github.com/mjfelecio/ARgala/pull/10)
 is open against `main`; native acceptance remains pending and no merge was done.
+
+### Walking Directions / Route Preview — 2026-10-19
+
+Implemented the owner-supplied compact R01 kickoff on
+`feat/walking-route-preview`, based on upstream `main` at `a84c215` (PR #10
+merged). See the [execution plan](superpowers/plans/2026-10-19-walking-route-preview.md)
+and [presentation/cost decisions](design/clean-explorer/ROUTE_PREVIEW.md).
+
+Details **Get Directions** now opens a protected parent-stack walking preview
+in one tap. A single-use transient intent authorizes one request only after a
+fresh foreground position and healthy continuous watcher sample. The session
+observer stays disabled for paid work; remount can reuse a result but cannot
+inherit acquisition authority. Explicit retries create a fresh intent. Auth
+clearing revokes sessions and prevents late responses from restoring results.
+Home **Get walking route** stays functional; **View Route** reuses the completed
+route and original submitted origin with zero new requests. Back to the same
+POI preserves Home's route. No Edge, provider schema, limiter, dependency, native
+configuration or persistent-storage changes were made.
+
+Checks performed:
+
+- Baseline `npm test`: **264 tests / 31 files** passed.
+- Test-first failures were observed for the absent handoff/map, delayed-GPS
+  acquisition, duplicate/lifecycle cost boundaries, retry/error recovery,
+  Details/Home navigation, native loading state and synchronous adapter failure;
+  targeted suites passed after implementation.
+- Final `npm run check`: typecheck, zero-warning lint and **317 tests / 34 files**
+  passed. The directions suites include **54 tests / 4 files**. The affected
+  Directions/Map/AR/Places run before final presentation additions passed
+  **183 tests / 12 files**.
+- `npm run check:android`: passed SDK 57/Android-only configuration introspection,
+  permission exclusions, Maps injection and EAS APK-profile checks.
+- `npx expo install --check`: passed, dependencies up to date.
+- `npm run export:android -- --max-workers 2`: passed Metro/Hermes Android export.
+  This is a JavaScript/assets export, not an APK build.
+- `git diff --check`: passed.
+
+Tests use actual locale resources, real HeroUI components and the application's
+QueryClient defaults. They exercise single-use/expired/invalid claims, clearing
+and changed-target handoffs, captured-origin reuse, delayed/stale/inaccurate GPS,
+watcher failure, permission denial/services/timeout, resume ownership, bare URLs,
+rapid duplicate actions, pending/success/error remounts, locale/invalidation/
+reconnect/refocus, explicit retries, known/unknown sanitized errors, malformed
+polylines, actual warnings/credits, missing address, long names, measured dock/
+short viewport/safe areas, native readiness/reset, Fit/Recenter and Back. A
+lifecycle suite uses the installed Expo SDK focus hooks, pending navigation
+readiness and real location hook with native/network boundaries replaced; it
+covers full startup timeout and permission-activity foreground transitions.
+
+The approved R01 PNG was inspected. The implementation follows its compact
+header/map/rounded-dock hierarchy, with intentional differences documented in
+ROUTE_PREVIEW.md: real map/native pins, no terrain claim or screenshot map
+artifacts, localized metric wording, actual caution/warnings, a fixed scrollable
+dock, and no Share/Profile controls. No native screenshot comparison is claimed.
+
+Android device/UAT: **NOT TESTED**. `adb` is unavailable; no APK was built or
+installed in this run. Live Google/Supabase calls, physical GPS/compass/camera,
+Android rendering, actual legal-label placement, native pin colors, TalkBack,
+rotation and 150% system-text usability remain unverified. Component geometry
+checks do not substitute for that evidence. Run the recorded Android acceptance
+scenarios with configured providers and a real account before demonstration.
+Edge/limiter checks and Expo Doctor were not rerun because no server, native
+configuration or dependencies changed.
