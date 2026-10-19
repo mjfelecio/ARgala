@@ -16,7 +16,9 @@ The viewport is the space below the measured header and above pinned provider
 credits. The nearby dock starts at a compact, font-scaled peek and supports
 swiping and translated Show more/less controls. An eligible/selected place opens
 the expanded dock; manual selection opens it even outside activation/FOV. It
-preserves selection across heading changes and navigation. Header Scan remains
+preserves selection across heading changes and navigation. Requested expansion
+is carried by the controlled native index so early selection survives delayed
+native readiness; a one-detent viewport does not erase the expansion preference. Header Scan remains
 visible while the panel scrolls. All returned places are available in the list.
 
 Badges use the existing pure bearing/FOV ranking and provider IDs, with at most

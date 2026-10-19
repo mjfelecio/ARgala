@@ -1,4 +1,4 @@
-import { withHeroUI } from '@/test/native-ui';
+import { nativeUi, withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createInstance, type i18n } from 'i18next';
@@ -26,7 +26,7 @@ beforeEach(async () => {
     onSelect: vi.fn(), onMore: vi.fn(), onDetails: vi.fn(), onDirections: vi.fn(), onMap: vi.fn(), onOccupation: vi.fn() };
   await act(async () => { tree = create(render()); });
 });
-afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; });
+afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; nativeUi.sheetReady = true; });
 it('starts compact, supports explicit and gesture expansion, and selects by unchanged provider ID', async () => {
   let sheet = tree!.root.findByType('dialog');
   expect(sheet.props.snapPoints[0]).toBeLessThan(640 * 0.4);
@@ -60,4 +60,28 @@ it('keeps fallback list and unknown-distance copy without inventing missing plac
   expect(JSON.stringify(tree!.toJSON())).not.toMatch(/5 min|rating|Historic Landmark/);
   props = { ...props, detailsLoaded: true }; await update();
   expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('ar.more'))).toBe(false);
+});
+
+it('retains a cached selection expansion when viewport measurement precedes native readiness', async () => {
+  await act(async () => { tree!.unmount(); });
+  nativeUi.sheetReady = false;
+  props = { ...props, selected: place, height: 0 };
+  await act(async () => { tree = create(render()); });
+  props = { ...props, height: 640 }; await update();
+  nativeUi.sheetReady = true; await update();
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(1);
+  await press('ar.collapse');
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(0);
+});
+it('restores the expanded preference after a one-detent viewport and keeps manual collapse stable', async () => {
+  props = { ...props, selected: place }; await update();
+  props = { ...props, height: 180 }; await update();
+  // A native clamping callback reflects available geometry, not user collapse.
+  await act(async () => { tree!.root.findByType('dialog').props.onChange(0, 0); });
+  props = { ...props, height: 640 }; await update();
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(1);
+  await press('ar.collapse');
+  props = { ...props, height: 180 }; await update();
+  props = { ...props, height: 640 }; await update();
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(0);
 });

@@ -557,8 +557,8 @@ on focus/resume/movement/language changes/remount. The AR-to-route integration
 executes the real preview hook and verifies exactly one walking request; existing
 installed-SDK focus-hook and delayed navigation-readiness regressions also run.
 
-`npm run check` passed typecheck, zero-warning lint and **344 tests / 36 files**.
-The targeted AR run passed **60 tests / 5 files**. `npm run check:android`,
+`npm run check` passed typecheck, zero-warning lint and **346 tests / 36 files**.
+The targeted AR run passed **62 tests / 5 files**. `npm run check:android`,
 `npm run export:android -- --max-workers 2` and `git diff --check` passed.
 Compact unselected-badge geometry was observed RED→GREEN before this final run.
 
@@ -570,3 +570,12 @@ in AR_CAMERA.md. Metro/Hermes export and mocked layout checks are distinct from
 that evidence. No server contract, native configuration, dependency or SDK
 changes were made; Edge/limiter checks, Expo install compatibility and Doctor
 are left to the PR workflow rather than rerun locally for this UI pass.
+
+Independent review found a native sheet startup race and loss of expanded state
+when a short viewport temporarily has one detent. Both were reproduced RED→GREEN.
+The sheet now carries its requested index through the native prop, preserving
+logical expansion independently of geometric clamping. The native test driver
+uses the installed SDK's reactive-index hook and drops pre-readiness imperative
+requests, which the previous immediate driver masked. The corrected AR/navigation
+run passed **72 tests / 6 files**; full checks and Android export were rerun.
+No review findings were deferred. Physical-device limitations above remain.
