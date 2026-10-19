@@ -66,5 +66,20 @@
     "more": "추가 정보 불러오기",
     "directions": "지도에서 길찾기",
     "addressUnknown": "주소 정보가 없습니다"
+  },
+  "showcase": {
+    "title": "Clean Explorer 구성 요소",
+    "description": "개발용 미리보기 · HeroUI Native 및 UniWind",
+    "actions": "동작 및 상태",
+    "select": "샘플 선택",
+    "reset": "샘플 초기화",
+    "disabled": "비활성화된 동작",
+    "loading": "불러오는 중",
+    "idle": "선택된 샘플 없음",
+    "selected": "기기에서 샘플 선택됨",
+    "localOnly": "이 컨트롤은 샘플 상태만 변경합니다. 위치, 카메라 또는 유료 요청을 사용하지 않습니다.",
+    "typography": "글꼴 및 경로 강조색",
+    "routeAccent": "파란색은 경로 안내에 사용됩니다.",
+    "languages": "English · 한국어 · 日本語"
   }
 }
