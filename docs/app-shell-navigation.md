@@ -40,7 +40,7 @@ Install the current development APK and run `npx expo start --dev-client` from t
 
 1. Sign in; confirm Explore is initially selected with one branded header and one Settings action. Check all three tabs and labels in English, Korean and Japanese.
 2. Search once, select a POI and request a walking route. Expand the sheet; visit Profile and Settings, then return with both visible controls and Android Back. Confirm map selection, results, route, sheet expansion and Google credits remain usable without new provider requests.
-3. Repeat with gesture and three-button Android navigation, a smaller viewport/rotation and larger text. Check touch targets, header insets, marker visibility, route framing, scrollable sheet content, attribution and walking warnings.
+3. Repeat with gesture and three-button Android navigation, a smaller viewport/split screen and larger text. Check touch targets, header insets, marker visibility, route framing, scrollable sheet content, attribution and walking warnings. The existing portrait orientation setting remains unchanged.
 4. Open AR from the tab and Open AR control. Confirm the conventional shell is hidden and Back to map is always available, including permission-denied/loading states. Check camera and sensors stop on blur/background, resume correctly, and respect permission revocation and explicit Retry.
 5. Select a POI in AR and use its directions action. Confirm it returns to the retained Explore map with that POI selected, without an automatic details or route request. Walk remains explicit.
 6. Open `/ar`, `/profile` and `/settings` directly while signed in and signed out. Check protected routing and Android Back; sign out and verify the shell cannot be revisited through Back.
