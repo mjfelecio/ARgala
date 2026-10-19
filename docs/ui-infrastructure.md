@@ -40,7 +40,7 @@ The showcase uses actual HeroUI Button, Card, Surface, Chip and Spinner. Select/
 
 The only custom components are `ShowcaseScreen` (diagnostic composition) and `DevelopmentShowcase` (development access gate). There is no custom Button/Card/Surface wrapper library.
 
-## Phase 2 Home Map mapping
+## Phase 2 Home Map mapping (implemented on the PR #6 branch)
 
 | PR #6 implementation | Replacement |
 | --- | --- |
@@ -49,12 +49,16 @@ The only custom components are `ShowcaseScreen` (diagnostic composition) and `De
 | `FloatingSurface` | HeroUI `Surface` |
 | Selected place summary | HeroUI `Card` composition; no fabricated metadata |
 | Selection/context metadata | HeroUI `Chip` where appropriate |
-| Context panel | Established persistent sheet implementation, retaining map interaction and measured viewport padding |
+| Context panel | Map-local, non-modal `@gorhom/bottom-sheet` 5.2.14 with scrollable content and separate animated/settled map padding |
 | Details reload on expansion | Show recovery only when the full details response is absent/failed/evicted |
 
-HeroUI 1.0.10's documented BottomSheet composition uses a portal, optional screen overlay and `@gorhom/bottom-sheet` internally. Installed source confirms the Android portal is `box-none` and its content wraps Gorhom's ordinary sheet rather than `BottomSheetModal`. Therefore do not assume it always blocks the map: explicitly test an overlay-free composition, back behavior, docked sizing, map gestures, scrollable content, attribution and route padding before choosing between HeroUI composition and direct non-modal Gorhom. The optional Gorhom peer is intentionally deferred until that Home Map interaction is implemented. No sheet library or wrapper was added speculatively in Phase 1.
+HeroUI 1.0.10's documented BottomSheet composition uses a portal, optional screen overlay and `@gorhom/bottom-sheet` internally. Installed source confirms the Android portal is `box-none` and its content wraps Gorhom's ordinary sheet rather than `BottomSheetModal`. Direct Gorhom was selected to keep sheet measurements inside the map scene rather than reconciling an application-root portal with that scene's dimensions. It introduces no native module: its native peers are already in the successful Phase 1 APK.
 
-The Phase 2 pass must preserve explicit Search/selection/Walk requests, transient cache lifecycle, Google Maps/Places/Routes boundaries, permission behavior, GPS/AR navigation, walking warnings and provider attribution. Do not carry forward PR #6's TypeScript token theme or generic custom primitives. Other product screens remain out of scope.
+The map dock stays open with no backdrop and no pan-down dismissal. Its content scrolls, including the heading and expansion button. During gestures, bounded animated-position updates move native Google credit padding; route fitting responds to settled geometry instead. Geometry changes retain the current snap index, and same-index bounces still publish their exact final padding. The SDK handle is rendered through a four-line feature adapter with `accessible={false}`; TalkBack uses the real translated expand/collapse action, avoiding the SDK's hardcoded English instructions. This adapter, `HomeMapControls` and `HomePlaceSheet` are feature compositions, not a generic design-system abstraction.
+
+The duplicate-details action disappears after a full response, including when expanded. Summary-only, failed or evicted selections retain explicit recovery. The matching AR action receives the same minimal behavior correction without restyling AR, and an explicit new-language request remains available. The custom `PillAction`, `CircleAction`, `FloatingSurface` and `src/ui/theme.ts` files are removed.
+
+The Phase 2 pass preserves explicit Search/selection/Walk requests, transient cache lifecycle, Google Maps/Places/Routes boundaries, permission behavior, GPS/AR navigation, walking warnings and provider attribution. PR #6's TypeScript token theme and generic custom primitives have been removed. Other product screens remain out of scope.
 
 ## Documentation consulted
 

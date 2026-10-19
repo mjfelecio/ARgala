@@ -217,3 +217,27 @@ Phase 1 starts at stable main `69bebee`; PR #6 is unmerged. See [integration arc
 - Android runtime verification is **pending**: EAS Simulator reports unavailable for this account. A temporary local Android 15/API 35 AOSP emulator setup was attempted, but boot failed before installation because the emulator required a 7372.80 MB userdata partition with only 5708.46 MB available. The temporary SDK/AVD/downloads were removed. No Android screenshots or successful installation/interaction are claimed.
 
 The successful development APK build establishes native compilation; it does not establish device layout, TalkBack, CJK fallback, 150% text, pressed animations or scrolling. Those showcase scenarios still need installation and runtime testing. Live Google/Supabase, Maps, permissions, GPS, camera, heading and routes also remain field-test work; the diagnostic does not exercise them. No Edge changes were made, so Edge/limiter-specific checks were not rerun.
+
+## Home Map HeroUI rework — 2026-10-19
+
+This is a review stack on infrastructure PR #8, continuing PR #6 without merging either PR. Home actions use actual HeroUI Native Button, Surface, Card, Chip and Spinner components with Ionicons and UniWind utilities. `global.css` owns the visual tokens, including the native route-area color; custom primitives and the TypeScript token theme are removed. The only sheet dependency added is JavaScript `@gorhom/bottom-sheet` 5.2.14 with its JavaScript portal dependency; existing native peers and font configuration match the successful Phase 1 development APK.
+
+Regressions use actual HeroUI components, actual EN/KO/JA resources and production Query defaults. Native sheet/animation/map drivers and provider requests are mocked. They cover:
+
+- Explicit Search/selection/Walk costs across focus, foreground, remount, language changes, invalidation and recovery; expansion makes no paid call.
+- Full-details action hidden after success, restored after cache reset or a failed/summary-only selection, and removed after explicit recovery. The equivalent AR action is guarded; a requested new language still works.
+- Accessible disabled/busy/expanded state, visible long names, truthful empty/loading/error/results/route states, warnings and attribution.
+- Native sheet positions update Google credit padding while route fitting waits for settled geometry. Resizing an expanded sheet at the same native index and returning to the same index inside the update interval both retain correct final padding.
+- The SDK's English handle node is excluded from TalkBack; Korean/Japanese expansion uses the translated real button. The entire heading/content remains scrollable in a short panel.
+
+The duplicate-details regressions failed before the guards. Independent review found the expanded-resize bug and untranslated SDK handle; focused regressions failed before fixes and passed afterwards. No Android runtime result is inferred from these mocks. Owner has agreed to install and check the development APK; no completed device result or screenshots have been supplied yet. Live Maps/provider/permission/GPS/camera/heading/routes field checks remain pending.
+
+Final local checks for this rework:
+
+- `npm run check`: typecheck, zero-warning lint and **205 tests / 28 files** passed.
+- `npx expo install --check`: dependencies up to date; `npx --yes expo-doctor`: **21/21** passed.
+- `npm run check:android`: SDK 57 Android-only config, permissions, native Maps injection and APK profiles passed.
+- `npm run export:android -- --max-workers 2`: final Android Metro/Hermes export passed (**2542 modules**, 6.9 MB bundle).
+- `git diff --check`: passed.
+
+The real EAS development APK success is recorded in the preceding infrastructure section. This rework adds no native module or native configuration, so it can run against that APK with current JavaScript from the Home worktree's Metro server. No Edge changes were made; Edge/limiter-specific checks were not repeated. APK installation, device rendering, TalkBack, drag/scroll interaction, enlarged/CJK text and live integrations remain unverified until the owner supplies device results.
