@@ -13,7 +13,7 @@ import { decodePolyline } from '@/features/directions/polyline';
 import { distanceMeters, isWithinRadius, type Coordinate } from '@/features/location/geo';
 import { LocationStatus } from '@/features/location/status';
 import { useDeviceLocation } from '@/features/location/use-device-location';
-import { placeSelectionOptions } from '@/features/places/selection';
+import { placeSelectionOptions, setPlaceSelection } from '@/features/places/selection';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
 import { placesService } from '@/features/places/service';
 import { useSettings } from '@/features/settings/provider';
@@ -158,7 +158,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       selectionSummary={place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
       onViewDetails={place ? () => {
         if (!active || !focused) return;
-        queryClient.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+        setPlaceSelection(queryClient, place);
         router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
       } : undefined}
       onViewRoute={route.data && routeRequest && place ? () => {

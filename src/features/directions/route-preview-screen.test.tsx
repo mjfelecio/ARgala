@@ -83,6 +83,13 @@ it('returns to Map with selection or to the selected Place Details without provi
 it('shows honest Maps configuration guidance without spending quota', async () => {
   controls.mapsConfigured = false; handoff(false); await mount(); expect(output()).toContain(translations.t('map.missingKey')); expect(routeService.walking).not.toHaveBeenCalled();
 });
+it('retains its Google selection until details mounts after a navigation delay', async () => {
+  handoff(); await mount(); await press('directions.details');
+  await act(async () => { tree!.unmount(); }); tree = undefined;
+  await new Promise(resolve => setTimeout(resolve, 10));
+  controls.details = true; await mount();
+  expect(output()).toContain(place.name);
+});
 it('spends one intent only when delayed foreground GPS becomes fresh, with no repeat on lifecycle or locale changes', async () => {
   const { focusManager, onlineManager } = await import('@tanstack/react-query');
   handoff(false); controls.location.status = 'loading'; controls.location.position = null; await mount(); expect(routeService.walking).not.toHaveBeenCalled();
