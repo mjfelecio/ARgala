@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
 import { placesService } from '@/features/places/service';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import googleMapsAttribution from '../../../assets/attribution/google-maps.png';
 import { AR, DISCOVERY } from '@/config/limits';
@@ -17,6 +17,7 @@ import { Action, Notice } from '@/ui/shared';
 import { layoutLabels, rankPlaces, selectedPlaceId } from './projection';
 import { useArPlaces } from './use-ar-places';
 import { ArChrome } from './ar-chrome';
+import { ArLabels } from './ar-labels';
 
 type Props = { location: ReturnType<typeof useDeviceLocation>; running: boolean; cameraReady: boolean; preview: ReactNode; cameraStatus: ReactNode };
 export function ArDiscovery({ location, running, cameraReady, preview, cameraStatus }: Props) {
@@ -24,7 +25,9 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
   const client = useQueryClient();
   const { language, activationRadiusMeters } = useSettings();
   const [now, setNow] = useState(Date.now);
-  const [width, setWidth] = useState(0);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  const [chromeHeight, setChromeHeight] = useState(0);
+  const { fontScale = 1 } = useWindowDimensions();
   const params = useLocalSearchParams();
   const parsed = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
   const incomingId = parsed.success ? parsed.data.providerId : null;
@@ -65,7 +68,7 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
   const detail = cachedDetails.data?.providerId === selectedId ? cachedDetails.data : null;
   const selected = detail ?? summary ?? (handoff.data?.providerId === selectedId ? handoff.data : null);
   const distance = ranked.find((p) => p.place.providerId === selectedId)?.distance;
-  const labels = cameraReady && running ? layoutLabels(ranked, width, selectedId) : [];
+  const labels = cameraReady && running ? layoutLabels(ranked, viewport.width, selectedId) : [];
   const select = (id: string) => setManualId(id);
   const distanceText = (meters: number | undefined) => meters === undefined ? t('ar.distanceUnknown') : t('ar.distance', { meters: Math.round(meters) });
   function directions() {
@@ -75,20 +78,13 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
     router.navigate({ pathname: '/', params: { placeId: selected.providerId } });
   }
   return <View style={styles.container}>
-    <View testID="ar-viewport" style={styles.preview} onLayout={(event) => setWidth(event.nativeEvent.layout.width)}>
+    <View testID="ar-viewport" style={styles.preview} onLayout={(event) => setViewport(event.nativeEvent.layout)}>
       {preview}
-      <View className="absolute left-3 right-3 top-3"><ArChrome headingDegrees={heading} onMap={() => router.navigate('/')}
+      <View testID="ar-chrome" className="absolute left-3 right-3 top-3" onLayout={event => setChromeHeight(event.nativeEvent.layout.height)}><ArChrome headingDegrees={heading} onMap={() => router.navigate('/')}
         onScan={() => { if (tracking) data.scan(); }} scanDisabled={!tracking || data.nearby.isFetching} scanBusy={data.nearby.isFetching} /></View>
       <View style={styles.cameraStatus}>{cameraStatus}</View>
-      {labels.map((label) => <Pressable key={label.place.providerId} testID={`ar-label-${label.place.providerId}`}
-        accessibilityRole="button" accessibilityState={{ selected: selectedId === label.place.providerId }}
-        accessibilityLabel={`${label.place.name}, ${distanceText(label.distance)}`}
-        onPress={() => select(label.place.providerId)}
-        style={[styles.label, label.eligible && styles.eligible, selectedId === label.place.providerId && styles.selected,
-          { left: label.left, top: 12 + label.lane * 76, width: label.width }]}>
-        <Text numberOfLines={1} style={styles.labelName}>{label.place.name}</Text>
-        <Text numberOfLines={1}>{distanceText(label.distance)}</Text>
-      </Pressable>)}
+      <ArLabels labels={chromeHeight ? labels : []} selectedId={selectedId} onSelect={select}
+        top={chromeHeight + 24} bottom={viewport.height - 8} fontScale={fontScale} />
     </View>
     <View style={styles.content}>
       <Text style={styles.hint}>{t('ar.approximate', { degrees: AR.horizontalFovDegrees })}</Text>

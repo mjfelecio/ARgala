@@ -68,7 +68,8 @@ it('scans at current GPS only on action, selects camera labels, and requests det
   await mount(); expect(placesService.nearby).not.toHaveBeenCalled();
   await scan();
   expect(placesService.nearby).toHaveBeenCalledWith({ center: { latitude: 0, longitude: 0 }, radiusMeters: 1000, language: 'en' });
-  await act(async () => { tree!.root.findByProps({ testID: 'ar-viewport' }).props.onLayout({ nativeEvent: { layout: { width: 360 } } }); });
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-viewport' }).props.onLayout({ nativeEvent: { layout: { width: 360, height: 760 } } }); });
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-chrome' }).props.onLayout({ nativeEvent: { layout: { height: 120 } } }); });
   const labels = tree!.root.findAllByType(Pressable).filter((p) => p.props.testID?.startsWith('ar-label-'));
   expect(labels).toHaveLength(1);
   await act(async () => { labels[0].props.onPress(); });
@@ -154,8 +155,9 @@ it('expires GPS and compass samples on the clock and removes its freshness timer
 it('retains selection when twenty colocated labels compete for three slots', async () => {
   const places = Array.from({ length: 20 }, (_, i) => ({ ...north, providerId: `place${i}`, id: `google:place${i}`, name: `Place ${i}` }));
   vi.mocked(placesService.nearby).mockResolvedValue(places); await mount(); await scan();
-  await act(async () => { tree!.root.findByProps({ testID: 'ar-viewport' }).props.onLayout({ nativeEvent: { layout: { width: 320 } } }); });
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-viewport' }).props.onLayout({ nativeEvent: { layout: { width: 320, height: 760 } } }); });
   await act(async () => { tree!.root.findByProps({ testID: 'ar-list-place19' }).props.onPress(); });
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-chrome' }).props.onLayout({ nativeEvent: { layout: { height: 120 } } }); });
   const labels = tree!.root.findAllByType(Pressable).filter((p) => p.props.testID?.startsWith('ar-label-'));
   expect(labels).toHaveLength(3); expect(labels.some((p) => p.props.testID === 'ar-label-place19')).toBe(true);
   expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe('Place 19');

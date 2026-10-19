@@ -74,7 +74,8 @@
     "title": "AR探索",
     "map": "地図",
     "compassUnavailable": "コンパスを利用できません",
-    "bearing": "{{degrees}}° · おおよその方角"
+    "bearing": "{{degrees}}° · おおよその方角",
+    "selected": "選択中"
   },
   "showcase": {
     "title": "Clean Explorer コンポーネント",

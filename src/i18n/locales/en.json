@@ -124,7 +124,8 @@
     "title": "AR Explore",
     "map": "Map",
     "compassUnavailable": "Compass unavailable",
-    "bearing": "{{degrees}}° · approximate heading"
+    "bearing": "{{degrees}}° · approximate heading",
+    "selected": "Selected"
   },
   "showcase": {
     "title": "Clean Explorer components",

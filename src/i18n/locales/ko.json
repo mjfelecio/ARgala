@@ -74,7 +74,8 @@
     "title": "AR 탐색",
     "map": "지도",
     "compassUnavailable": "나침반을 사용할 수 없습니다",
-    "bearing": "{{degrees}}° · 대략적인 방향"
+    "bearing": "{{degrees}}° · 대략적인 방향",
+    "selected": "선택됨"
   },
   "showcase": {
     "title": "Clean Explorer 구성 요소",
