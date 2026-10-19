@@ -42,7 +42,7 @@ export function useArPlaces(position: Coordinate | null, language: NonNullable<N
   function more(providerId: string) {
     if (details.isFetching) return;
     const next = { providerId, language }; setDetailRequest(next);
-    void client.fetchQuery(detailsOptions(next)).catch(() => {});
+    if (!client.getQueryData(detailsOptions(next).queryKey)) void client.fetchQuery(detailsOptions(next)).catch(() => {});
   }
   return { nearby, details, detailRequest, request, scan, more };
 }

@@ -1,3 +1,4 @@
+import { withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createInstance, type i18n } from 'i18next';
@@ -5,8 +6,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { HomePlaceSheet, type HomePlaceSheetProps } from './place-sheet';
-vi.mock('react-native', () => ({ Pressable: 'button', Text: 'text', View: 'view', ScrollView: 'section', ActivityIndicator: 'progress', StyleSheet: { create: (s: unknown) => s } }));
-Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
 let tree: ReactTestRenderer; let translations: i18n;
 const place = { id: 'google:one', provider: 'google' as const, providerId: 'one', name: 'A very long returned destination name 日本語 한국어 '.repeat(4), coordinates: { latitude: 10, longitude: 20 }, attributions: [] };
 let props: HomePlaceSheetProps;
@@ -15,7 +15,7 @@ beforeEach(async () => {
  props = { state: 'unsearched', selectedPlace: null, hasSelection: false, canRequest: true, resultCount: 0, attributions: React.createElement('aside', {}, 'Provider credit'), onRetrySearch: vi.fn(), onClosePlace: vi.fn(), onDetails: vi.fn(), onWalk: vi.fn(), onMeasuredHeight: vi.fn() };
 });
 afterEach(async () => { await act(async () => tree?.unmount()); });
-async function render() { await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n: translations }, React.createElement(HomePlaceSheet, props))); }); }
+async function render() { await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(HomePlaceSheet, props)))); }); }
 function content() { return JSON.stringify(tree.toJSON()); }
 async function press(key: string) { const button=tree.root.findAllByType('button').find(b=>b.props.accessibilityLabel===translations.t(key)); expect(button).toBeDefined(); await act(async()=>button!.props.onPress()); }
 it.each(['unsearched','loading','empty','results'] as const)('renders truthful %s state with visible provider credits', async (state) => {
@@ -43,8 +43,8 @@ it('translates an error key at render time, supports retry and reports measured 
  expect(content()).toContain(translations.t('service.rateLimited'));
  await act(async()=>{ await translations.changeLanguage('ko'); }); expect(content()).toContain(translations.t('service.rateLimited'));
  await press('common.retry'); expect(props.onRetrySearch).toHaveBeenCalledOnce();
- const measured=tree.root.findAllByType('view').find(n=>n.props.onLayout);
- await act(async()=>measured!.props.onLayout({nativeEvent:{layout:{height:234}}}));
+ const measured=tree.root.findByType('dialog');
+ await act(async()=>measured.props.onChange(0, measured.props.containerHeight - 234));
  expect(props.onMeasuredHeight).toHaveBeenCalledWith(234);
 });
 it('shows unavailable route and expired selection without inventing data', async () => {
@@ -58,7 +58,7 @@ it('keeps the heading and expansion action scrollable when a short viewport caps
  props.maxHeight=104; props.hasSelection=true; props.selectedPlace=place; props.state='selected'; await render();
  const scroll=tree.root.findByType('section');
  expect(scroll.findAllByType('button').some(b=>b.props.accessibilityLabel===translations.t('map.expand'))).toBe(true);
- expect(tree.root.findAllByType('view').find(n=>n.props.testID==='home-place-sheet')!.props.style.flat(Infinity)).toEqual(expect.arrayContaining([expect.objectContaining({maxHeight:104})]));
+ expect(tree.root.findByType('dialog').props.snapPoints).toEqual([104]);
  expect(scroll.findAllByType('text').some(n=>n.props.children===place.name)).toBe(true);
 });
 it('prioritizes a returned route summary and caution before repeat-request and close actions', async () => {
@@ -69,4 +69,13 @@ it('prioritizes a returned route summary and caution before repeat-request and c
  expect(json.indexOf(summary)).toBeLessThan(json.indexOf('Activation metadata'));
  expect(json.indexOf(summary)).toBeLessThan(json.indexOf(translations.t('map.walk')));
  expect(json.indexOf(translations.t('map.walkingCaution'))).toBeLessThan(json.indexOf(translations.t('map.walk')));
+});
+
+it.each(['ko','ja'])('keeps the native drag handle out of TalkBack and exposes localized expansion in %s', async language=>{
+ await translations.changeLanguage(language); await render();
+ expect(tree.root.findByType('header').props.accessible).toBe(false);
+ const expand=tree.root.findAllByType('button').find(b=>b.props.accessibilityLabel===translations.t('map.expand'));
+ expect(expand).toBeDefined();
+ await press('map.expand');
+ expect(tree.root.findAllByType('button').find(b=>b.props.accessibilityLabel===translations.t('map.collapse'))!.props.accessibilityState.expanded).toBe(true);
 });

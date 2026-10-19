@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
@@ -18,15 +18,20 @@ import { placesService } from '@/features/places/service';
 import { useSettings } from '@/features/settings/provider';
 import { useAppActive } from '@/lib/use-app-active';
 import { edgeErrorMessageKey } from '@/lib/edge-error';
-import { Action, Notice, Screen } from '@/ui/shared';
-import { colors, space } from '@/ui/theme';
+import { Notice, Screen } from '@/ui/shared';
+import { Button } from 'heroui-native/button';
+import { useCSSVariable, useResolveClassNames, withUniwind } from 'uniwind';
+
 import { HomePlaceSheet, type HomePlaceSheetState } from './place-sheet';
 import { HomeMapControls } from './home-map-controls';
 import { ProviderAttributions, useOpenProviderLink } from './attributions';
 
+const StyledSafeAreaView = withUniwind(SafeAreaView);
+const StyledMapView = withUniwind(MapView);
+
 function LaunchControls() {
   const { t } = useTranslation();
-  return <View style={local.controls}><Action title={t('map.camera')} onPress={() => router.push('/ar')} /><Action title={t('map.settings')} onPress={() => router.push('/settings')} /></View>;
+  return <View className="flex-row flex-wrap justify-evenly gap-2 px-2"><Button accessibilityLabel={t('map.camera')} onPress={() => router.push('/ar')}><Button.Label>{t('map.camera')}</Button.Label></Button><Button variant="secondary" accessibilityLabel={t('map.settings')} onPress={() => router.push('/settings')}><Button.Label>{t('map.settings')}</Button.Label></Button></View>;
 }
 export default function MapScreen() {
   const { t } = useTranslation();
@@ -49,6 +54,11 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
   const [headerHeight, setHeaderHeight] = useState(0);
   const [sheetHeight, setSheetHeight] = useState(0);
+  const [settledSheetHeight, setSettledSheetHeight] = useState(0);
+  const gutter = useResolveClassNames('p-2').padding as number;
+  const fitMargin = useResolveClassNames('p-8').padding as number;
+  const routeColor = useCSSVariable('--color-route') as string;
+  const routeArea = useCSSVariable('--color-route-area') as string;
   const [center, setCenter] = useState(position);
   const [selectedId, setSelectedId] = useState<string | null>(incomingId);
   const [routeRequest, setRouteRequest] = useState<WalkingRequest | null>(null);
@@ -76,14 +86,14 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   const route = useQuery({ ...routeOptions(routeRequest), enabled: false });
   // Android adds fit edgePadding to mapPadding. Reserve measured chrome once,
   // keeping Google logo/legal controls above the sheet even between route fits.
-  const mapPadding = { top: headerHeight, bottom: sheetHeight, left: space.sm, right: space.sm };
-  const fitGap = Math.max(0, Math.min(space.xxl, (mapSize.height - headerHeight - sheetHeight) / 4, (mapSize.width - space.lg) / 4));
+  const mapPadding = { top: headerHeight, bottom: sheetHeight, left: gutter, right: gutter };
+  const fitGap = Math.max(0, Math.min(fitMargin, (mapSize.height - headerHeight - settledSheetHeight) / 4, (mapSize.width - gutter * 2) / 4));
   useEffect(() => {
-    if (!enabled || mapSize.width <= 0 || mapSize.height <= 0 || headerHeight <= 0 || sheetHeight <= 0 || !route.data) return;
+    if (!enabled || mapSize.width <= 0 || mapSize.height <= 0 || headerHeight <= 0 || settledSheetHeight <= 0 || !route.data) return;
     map.current?.fitToCoordinates(route.data.coordinates, {
       edgePadding: { top: fitGap, right: fitGap, bottom: fitGap, left: fitGap }, animated: true,
     });
-  }, [enabled, mapSize.width, mapSize.height, headerHeight, sheetHeight, fitGap, route.data]);
+  }, [enabled, mapSize.width, mapSize.height, headerHeight, settledSheetHeight, fitGap, route.data]);
   const place = details.data ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
   const open = useOpenProviderLink();
   function select(providerId: string | null) {
@@ -107,37 +117,30 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   const state: HomePlaceSheetState = route.isFetching ? 'route-loading' : route.error ? 'route-failed' : route.data ? 'route-ready'
     : selectedId ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';
   const error = route.error ?? (selectedId ? details.error : nearby.error);
-  return <SafeAreaView style={local.container} edges={['left', 'right', 'bottom']}>
-    <View style={local.container}>
-    <MapView ref={map} style={local.map} provider={PROVIDER_GOOGLE} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
+  return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right', 'bottom']}>
+    <View className="flex-1">
+    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       mapPadding={mapPadding} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
       onLayout={(event) => setMapSize({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height })}
       onPoiClick={(event) => select(event.nativeEvent.placeId)}>
-      <Circle center={position} radius={activationRadiusMeters} strokeColor={colors.routeBlue} fillColor="rgba(42,114,229,0.08)" />
+      <Circle center={position} radius={activationRadiusMeters} strokeColor={routeColor} fillColor={routeArea} />
       {nearby.data?.map((item) => <Marker key={item.id} coordinate={item.coordinates} title={item.name} onPress={() => select(item.providerId)} />)}
       {place && !nearby.data?.some((item) => item.providerId === place.providerId) && <Marker coordinate={place.coordinates} title={place.name} />}
-      {route.data && <Polyline coordinates={route.data.coordinates} strokeColor={colors.routeBlue} strokeWidth={5} />}
-    </MapView>
+      {route.data && <Polyline coordinates={route.data.coordinates} strokeColor={routeColor} strokeWidth={5} />}
+    </StyledMapView>
     <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
       onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
       onRecenter={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)}
       onOpenAr={() => router.push('/ar')} onOpenSettings={() => router.push('/settings')} />
-    <View pointerEvents="none" style={local.mapSpace} />
     <HomePlaceSheet key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
       canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
-      detailsLoading={details.isFetching} mapLoading={!mapReady} route={route.data}
+      detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady} route={route.data}
       locationStatus={<>{locationStatus}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
       selectionSummary={place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
-      onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => select(selectedId)} onWalk={walk}
+      onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onWalk={walk}
       onOpenGoogle={place?.mapsUri ? () => open(place.mapsUri!) : undefined}
-      onMeasuredHeight={setSheetHeight} maxHeight={mapSize.height > 0 ? Math.max(0, mapSize.height - headerHeight - 64) : undefined}
+      onMeasuredHeight={setSheetHeight} onSettledHeight={setSettledSheetHeight} containerHeight={mapSize.height} maxHeight={mapSize.height > 0 ? Math.max(0, mapSize.height - headerHeight - Math.min(fitMargin * 2, mapSize.height / 10)) : undefined}
       attributions={<ProviderAttributions places={[...(nearby.data ?? []), ...(details.data ? [details.data] : []), ...(handoff.data ? [handoff.data] : [])]} />} />
     </View>
-  </SafeAreaView>;
+  </StyledSafeAreaView>;
 }
-const local = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.surface },
-  controls: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-evenly', paddingHorizontal: space.sm },
-  map: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 },
-  mapSpace: { flex: 1 },
-});

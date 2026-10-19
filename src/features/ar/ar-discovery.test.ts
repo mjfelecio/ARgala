@@ -216,3 +216,22 @@ it('does not reuse a distant or expired search and waits for explicit Scan', asy
   await mount(); expect(output()).not.toContain('North Cafe'); expect(placesService.nearby).not.toHaveBeenCalled();
   await scan(); expect(output()).toContain('North Cafe');
 });
+
+it('removes the additional-details action once the selected place has full details', async () => {
+ await mount(); await scan(); await press('ar.more'); await settle();
+ expect(output()).toContain('Provider description');
+ expect(tree!.root.findAllByType('button').filter(b=>b.props.title===translations.t('ar.more'))).toHaveLength(0);
+ expect(placesService.details).toHaveBeenCalledTimes(1);
+});
+
+it('allows an explicit details request in a new language after hiding the loaded-language action', async () => {
+ await mount(); await scan(); await press('ar.more'); await settle();
+ expect(tree!.root.findAllByType('button').some(b=>b.props.title===translations.t('ar.more'))).toBe(false);
+ controls.language='ja';
+ await act(async()=>{ await translations.changeLanguage('ja'); tree!.update(render()); });
+ expect(placesService.details).toHaveBeenCalledTimes(1);
+ await press('ar.more'); await settle();
+ expect(placesService.details).toHaveBeenLastCalledWith(north.providerId,'ja');
+ expect(placesService.details).toHaveBeenCalledTimes(2);
+ expect(tree!.root.findAllByType('button').some(b=>b.props.title===translations.t('ar.more'))).toBe(false);
+});
