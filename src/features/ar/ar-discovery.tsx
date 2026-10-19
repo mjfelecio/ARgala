@@ -90,6 +90,11 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
           {data.detailRequest?.providerId === selectedId && data.details.isFetching && <Notice busy>{t('map.details')}</Notice>}
           {data.detailRequest?.providerId === selectedId && data.details.error && <Notice>{t(edgeErrorMessageKey(data.details.error))}</Notice>}
           {(!detail || data.detailRequest?.language !== language) && <Action title={t('ar.more')} onPress={() => { if (running) data.more(selected.providerId); }} disabled={!running || data.details.isFetching} />}
+          <Action title={t('placeDetails.view')} onPress={() => {
+            if (!running) return;
+            client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
+            router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
+          }} disabled={!running} />
           <Action title={t('ar.directions')} onPress={directions} disabled={!running} />
         </View>}
         <Text>{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>

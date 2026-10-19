@@ -235,3 +235,12 @@ it('allows an explicit details request in a new language after hiding the loaded
  expect(placesService.details).toHaveBeenCalledTimes(2);
  expect(tree!.root.findAllByType('button').some(b=>b.props.title===translations.t('ar.more'))).toBe(false);
 });
+it('opens the same protected Details page from AR without a paid request and keeps the selected POI on return', async () => {
+  await mount(); await scan(); await press('placeDetails.view');
+  expect(controls.navigate).toHaveBeenLastCalledWith({ pathname: '/place/[providerId]', params: { providerId: north.providerId } });
+  expect(client.getQueryData(['place-selection', north.providerId])).toEqual(north);
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).toHaveBeenCalledTimes(1);
+  controls.focused = false; await update(); expect(tree!.root.findAllByType('video')).toHaveLength(0);
+  controls.focused = true; await update(); expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(north.name);
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).toHaveBeenCalledTimes(1);
+});

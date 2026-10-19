@@ -79,10 +79,10 @@
 
 **Interfaces:** Both entry points write the already selected `Place` into `queryClient.setQueryData(placeSelectionOptions(providerId).queryKey, place)` and navigate to the same protected Details route. Back returns to the originating Map or AR context; avoid introducing a new tab or parallel details screen.
 
-- [ ] Write tests: Map and AR each navigate to the **same** provider-ID route; handoff summary equals current selection; opening Details adds **no** paid requests; returning to AR retains appropriate focus/permission safety.
-- [ ] Run red tests, then wire explicit **View Details** actions for selected POIs. Do not force full-page navigation merely by tapping a map marker or AR floating label; preserve quick selection/summary interactions.
-- [ ] Preserve `MapScreen` route origin/POI state, AR sensor lifecycle, map attribution, the explicit Search/Scan/Walk request rules, and no-payment-on-refocus contract.
-- [ ] Verify tests and commit e.g. `feat(navigation): open POI details from map and AR`.
+- [x] Write tests: Map and AR each navigate to the **same** provider-ID route; handoff summary equals current selection; opening Details adds **no** paid requests; returning to AR retains appropriate focus/permission safety.
+- [x] Run red tests, then wire explicit **View Details** actions for selected POIs. Do not force full-page navigation merely by tapping a map marker or AR floating label; preserve quick selection/summary interactions.
+- [x] Preserve `MapScreen` route origin/POI state, AR sensor lifecycle, map attribution, the explicit Search/Scan/Walk request rules, and no-payment-on-refocus contract.
+- [x] Verify tests and commit e.g. `feat(navigation): open POI details from map and AR`.
 
 ## Task 4 — Action navigation and provider-budget semantics
 
@@ -135,3 +135,5 @@ The owner has approved the high-level sequence and already uses an agent. Have t
 - Decision: keep details location-independent and omit user distance when no reliable live fix is owned by this screen. This avoids starting another permission/sensor lifecycle merely to read a place; Map and AR retain ownership.
 
 - Task 2: sparse/description/credits and approved-image-slot RED→GREEN; pending request guard verified through native button disabled prop. `npm run check`: 237 tests / 31 files, typecheck and zero-warning lint passed. Device typography and pixel fidelity remain acceptance work.
+
+- Task 3: both absent entry actions failed first; Map/AR/sheet suites pass 73 tests. Typecheck passed after SDK-generated route types were refreshed using offline Metro. Exclude generated `.expo` artifacts from lint: SDK 57 emits a redundant eslint-disable in router.d.ts. No generated declarations are committed.

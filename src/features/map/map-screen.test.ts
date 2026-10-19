@@ -462,3 +462,13 @@ it('keeps the expanded sheet and Google credits within the smaller scene above t
  expect(placesService.nearby).toHaveBeenCalledTimes(1);
  expect(routeService.walking).toHaveBeenCalledTimes(1);
 });
+it('opens the protected Details page from a selected Map POI with its cached summary and no extra request', async () => {
+  client.setQueryData(['place-selection', destination.providerId], destination); controls.params = { placeId: destination.providerId };
+  await act(async () => { tree = create(renderMap()); });
+  await press('placeDetails.view');
+  expect(router.navigate).toHaveBeenLastCalledWith({ pathname: '/place/[providerId]', params: { providerId: destination.providerId } });
+  expect(client.getQueryData(['place-selection', destination.providerId])).toEqual(destination);
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+  controls.focused = false; await act(async () => tree!.update(renderMap())); controls.focused = true; await act(async () => tree!.update(renderMap()));
+  expect(JSON.stringify(tree!.toJSON())).toContain(destination.name); expect(placesService.details).not.toHaveBeenCalled();
+});

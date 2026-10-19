@@ -145,6 +145,11 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady} route={route.data}
       locationStatus={<>{locationStatus}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
       selectionSummary={place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
+      onViewDetails={place ? () => {
+        if (!active || !focused) return;
+        queryClient.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+        router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
+      } : undefined}
       onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onWalk={walk}
       onOpenGoogle={place?.mapsUri ? () => open(place.mapsUri!) : undefined}
       onMeasuredHeight={setSheetHeight} onSettledHeight={setSettledSheetHeight} containerHeight={mapSize.height} maxHeight={mapSize.height > 0 ? Math.max(0, mapSize.height - headerHeight - Math.min(fitMargin * 2, mapSize.height / 10)) : undefined}

@@ -107,6 +107,7 @@
     "coordinates": "地理座標",
     "coordinateValue": "緯度 {{latitude}}、経度 {{longitude}}",
     "source": "場所のデータとクレジット",
-    "distanceUnavailable": "現在地を取得すると、地図またはARで距離を確認できます。"
+    "distanceUnavailable": "現在地を取得すると、地図またはARで距離を確認できます。",
+    "view": "詳細を見る"
   }
 }

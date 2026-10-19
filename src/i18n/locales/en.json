@@ -157,6 +157,7 @@
     "coordinates": "Geographic coordinates",
     "coordinateValue": "Latitude {{latitude}}, longitude {{longitude}}",
     "source": "Place data & credits",
-    "distanceUnavailable": "Your distance is available on Map or AR with a current location."
+    "distanceUnavailable": "Your distance is available on Map or AR with a current location.",
+    "view": "View Details"
   }
 }

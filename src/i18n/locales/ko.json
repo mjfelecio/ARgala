@@ -107,6 +107,7 @@
     "coordinates": "지리 좌표",
     "coordinateValue": "위도 {{latitude}}, 경도 {{longitude}}",
     "source": "장소 데이터 및 출처",
-    "distanceUnavailable": "현재 위치가 있으면 지도 또는 AR에서 거리를 확인할 수 있습니다."
+    "distanceUnavailable": "현재 위치가 있으면 지도 또는 AR에서 거리를 확인할 수 있습니다.",
+    "view": "상세 정보 보기"
   }
 }
