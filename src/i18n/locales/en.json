@@ -189,5 +189,14 @@
     "stale": "A fresh, accurate location is needed. Retry location to continue.",
     "retry": "Try walking route again",
     "view": "View Route"
+  },
+  "destinations": {
+    "title": "Featured Destinations",
+    "intro": "Browse nine study destinations. Official names and visitor content are awaiting verification.",
+    "provisional": "Provisional name",
+    "contentPending": "Verified visitor information is not yet available.",
+    "centerMissing": "Nearby places will be available once the destination location is verified.",
+    "entranceMissing": "Directions will be available once an accessible visitor entrance is verified.",
+    "unavailable": "This destination is unavailable. Return to Featured Destinations."
   }
 }

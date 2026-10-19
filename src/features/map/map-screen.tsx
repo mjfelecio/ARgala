@@ -32,7 +32,8 @@ const StyledMapView = withUniwind(MapView);
 
 function LaunchControls() {
   const { t } = useTranslation();
-  return <View className="flex-row flex-wrap justify-evenly gap-2 px-2"><Button accessibilityLabel={t('map.camera')} onPress={() => router.navigate('/ar')}><Button.Label>{t('map.camera')}</Button.Label></Button></View>;
+  return <View className="flex-row flex-wrap justify-evenly gap-2 px-2"><Button accessibilityLabel={t('map.camera')} onPress={() => router.navigate('/ar')}><Button.Label>{t('map.camera')}</Button.Label></Button>
+    <Button variant="secondary" accessibilityLabel={t('destinations.title')} onPress={() => router.navigate('/destinations')}><Button.Label>{t('destinations.title')}</Button.Label></Button></View>;
 }
 export default function MapScreen() {
   const { t } = useTranslation();
@@ -149,7 +150,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
       onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
       onRecenter={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)}
-      onOpenAr={() => router.navigate('/ar')} />
+      onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')} />
     <HomePlaceSheet key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
       canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady} route={route.data}
