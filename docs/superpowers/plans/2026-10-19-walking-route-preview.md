@@ -1,6 +1,6 @@
 # ARgala — Walking Directions / Route Preview Implementation Plan
 
-> Execution: tasks 1–4 completed in separate validated commits; task 5 automated checks and documentation recorded in `docs/validation.md`. Physical Android acceptance remains NOT TESTED.
+> Execution: all five implementation tasks completed in separate validated commits; automated checks and independent-review corrections are recorded in `docs/validation.md`. PR #11 is open and unmerged. Physical Android acceptance remains NOT TESTED.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` or `superpowers:executing-plans` to implement this plan one task at a time. Track checkboxes, run red/green tests, and commit after each cohesive unit. Reconcile exact files with current main before editing.
 

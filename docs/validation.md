@@ -504,3 +504,8 @@ Additional RED→GREEN tests enforce wall-clock freshness at the paid-call bound
 and prevent an older waiting screen from spending a replacement owner's intent.
 The full check and Android export were rerun after this fix pass. No reviewer
 findings were deferred; device limitations above remain unchanged.
+
+[PR #11](https://github.com/mjfelecio/ARgala/pull/11) is open against `main`
+on `feat/walking-route-preview` and remains unmerged. Local final checks above
+passed; GitHub validation was queued at handoff. No credentials or supplied
+untracked kickoff packages were committed.
