@@ -48,6 +48,7 @@ export function DaytimeGallery({ media, children }: { media: readonly Destinatio
           onPress={() => { setSelectedId(item.id); setFullscreen(true); }}>
           {!failed.has(item.id) && <StyledImage source={item.source} accessibilityLabel={itemAlt.value} className="h-24 w-full rounded-card" resizeMode="cover" onError={() => setFailed(previous => new Set([...previous, item.id]))} />}
           <Button.Label className="shrink text-left">{failed.has(item.id) ? t('destinations.imageFailed') : itemCaption?.value ?? itemAlt.value}</Button.Label>
+          {!failed.has(item.id) && (itemCaption?.englishFallback || itemAlt.englishFallback) && <Text className="font-sans text-xs text-muted">{t('destinations.englishFallback')}</Text>}
         </Button>;
       })}
     </ScrollView>}

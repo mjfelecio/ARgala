@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
@@ -19,6 +20,8 @@ import ProfileScreen from './profile-screen';
 const require = createRequire(import.meta.url);
 const { TabRouter } = require('expo-router/build/react-navigation/routers/TabRouter');
 const { StackRouter } = require('expo-router/build/react-navigation/routers/StackRouter');
+const routeFiles = import.meta.glob('../../app/**/*.tsx');
+const layoutModules = import.meta.glob('../../app/**/_layout.tsx');
 vi.mock('expo-router', async () => {
  const { createElement } = await import('react');
  const screen = (props: Record<string, unknown>) => createElement('route', props);
@@ -41,6 +44,42 @@ beforeEach(async () => {
  vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.restoreAllMocks(); });
+it.each(['D01', 'D09', 'unknown'])('anchors direct destination %s Back through catalog then Explore with the installed router', async destinationId => {
+ const { getRoutes } = require('expo-router/build/getRoutesCore');
+ const { getReactNavigationConfig } = require('expo-router/build/getReactNavigationConfig');
+ const layouts = Object.fromEntries(await Promise.all(Object.entries(layoutModules).filter(([path]) => path.startsWith('../../app/(app)/')).map(async ([path, load]) => [path, await load()])));
+ const files = Object.fromEntries(Object.keys(routeFiles).filter(path => path.startsWith('../../app/(app)/')).map(path => [path.replace('../../app/', './'), layouts[path] ?? { default: () => null }]));
+ files['./_layout.tsx'] = { default: () => null };
+ const context = Object.assign((key: string) => files[key], { keys: () => Object.keys(files) });
+ const routes = getRoutes(context, { platform: 'android', importMode: 'sync', skipGenerated: true, getSystemRoute: () => { throw new Error('Unexpected system route'); } });
+ const config = getReactNavigationConfig(routes, true);
+ // Keep the installed parser and its validator; replace only the native barrel import.
+ const validator = require('expo-router/build/react-navigation/core/validatePathConfig');
+ const loader = require('node:module'); const original = loader._load;
+ let parser;
+ try {
+  loader._load = function(this: unknown, id: string, parent: { filename?: string }, ...rest: unknown[]) {
+   if (id === '../react-navigation/native' && parent?.filename?.endsWith('/fork/getStateFromPath.js')) return validator;
+   return original.call(this, id, parent, ...rest);
+  };
+  parser = require('expo-router/build/fork/getStateFromPath').getStateFromPath;
+ } finally { loader._load = original; }
+ const parsed = parser(`/destinations/${destinationId}`, config);
+ expect(parsed, JSON.stringify(config)).toBeDefined();
+ const app = parsed.routes[0].state;
+ const destination = app.routes[app.index];
+ expect(destination.state?.routes.map((route: { name: string }) => route.name)).toEqual(['index', '[destinationId]']);
+ const childRouter = StackRouter({ initialRouteName: 'index' });
+ const childOptions = { routeNames: ['index', '[destinationId]'], routeParamList: {}, routeGetIdList: {} };
+ const entered = childRouter.getRehydratedState(destination.state, childOptions);
+ const catalog = childRouter.getStateForAction(entered, { type: 'GO_BACK' }, childOptions);
+ expect(catalog.routes[catalog.index].name).toBe('index');
+ expect(childRouter.getStateForAction(catalog, { type: 'GO_BACK' }, childOptions)).toBeNull();
+ const parent = StackRouter({ initialRouteName: '(tabs)' });
+ const options = { routeNames: Object.keys(config.screens['(app)'].screens), routeParamList: {}, routeGetIdList: {} };
+ const home = parent.getStateForAction(parent.getRehydratedState(app, options), { type: 'GO_BACK' }, options);
+ expect(home.routes[home.index].name).toBe('(tabs)');
+});
 it('registers exactly Explore, AR View and Profile, with Explore selected and persistent scenes', async () => {
  await mount(React.createElement(AppTabs));
  const tabs = tree!.root.findByType('tabs' as React.ElementType);
@@ -90,7 +129,7 @@ it('hands an AR selection to the existing Explore route without replacing its ro
 });
 it('keeps Settings outside the tabs and Back restores the originating tab state', async () => {
  await mount(React.createElement(AppLayout));
- expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.name)).toEqual(['(tabs)', 'place/[providerId]', 'directions', 'destinations/index', 'destinations/[destinationId]', 'settings']);
+ expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.name)).toEqual(['(tabs)', 'place/[providerId]', 'directions', 'destinations', 'settings']);
  const reducer = StackRouter({ initialRouteName: '(tabs)' });
  const config = { routeNames: ['(tabs)', 'settings'], routeParamList: {}, routeGetIdList: {} };
  const initial = reducer.getInitialState(config);

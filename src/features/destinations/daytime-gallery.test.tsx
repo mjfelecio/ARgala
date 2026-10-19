@@ -54,6 +54,14 @@ it('uses the same approved imagery during daytime and nighttime', async () => {
  vi.spyOn(Date, 'now').mockReturnValue(Date.UTC(2026, 9, 20, 4)); await act(async () => { tree = create(render([photo])); }); const day = output();
  vi.mocked(Date.now).mockReturnValue(Date.UTC(2026, 9, 20, 16)); await act(async () => tree!.update(render([photo]))); expect(output()).toEqual(day);
 });
+it('labels an English-only unselected thumbnail beside a fully Japanese selected photo', async () => {
+ controls.language = 'ja'; await translations.changeLanguage('ja');
+ const translated = { ...photo, alt: { ...photo.alt, ja: { value: '日本語の画像', approvalReference: 'Test' } }, caption: { ja: { value: '日本語の説明', approvalReference: 'Test' } } };
+ const english = { ...photo, id: 'english-only', source: 2 };
+ await act(async () => { tree = create(render([translated, english])); });
+ const thumbnail = tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === photo.alt.en.value)!;
+ expect(thumbnail.findAllByType('text').some(text => text.props.children === translations.t('destinations.englishFallback'))).toBe(true);
+});
 it('selects another approved thumbnail without changing the approved count or clipping its full caption', async () => {
  const second = { ...photo, id: 'second', source: 2, caption: { en: { value: 'Long synthetic caption 日本語 한국어 '.repeat(10), approvalReference: 'Test' } }, alt: { en: { value: 'Second synthetic test image', approvalReference: 'Test' } } };
  await act(async () => { tree = create(render([photo, second])); });
