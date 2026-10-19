@@ -25,4 +25,4 @@ PR #8 owns infrastructure. PR #6 must stay unmerged. No custom token theme, fake
 - [x] Share native test shims while retaining actual HeroUI components; keep the established lifecycle suite.
 - [x] Replace controls/panel, add persistent sheet and native padding integration, and remove custom primitives/token files.
 - [x] Validate focused regressions/full check, Expo dependencies/Doctor, Android config/export; review the complete diff.
-- [ ] Update validation and component mapping; push the reworked branch to PR #6 without force, set its base to the infrastructure branch and report remaining runtime work.
+- [x] Update validation and component mapping; push the reworked branch to PR #6 without force, set its base to the infrastructure branch and report remaining runtime work.
