@@ -18,7 +18,7 @@ type DeviceState = {
 };
 const initial: DeviceState = { phase: 'waiting', status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, positionTimestamp: null, watcherTimestamp: null, headingTimestamp: null, headingStatus: 'pending', canAskAgain: true, error: null };
 
-export function useDeviceLocation({ heading: needsHeading = false, distanceIntervalMeters = LOCATION.distanceIntervalMeters }: { heading?: boolean; distanceIntervalMeters?: number } = {}) {
+export function useDeviceLocation({ enabled = true, heading: needsHeading = false, distanceIntervalMeters = LOCATION.distanceIntervalMeters }: { enabled?: boolean; heading?: boolean; distanceIntervalMeters?: number } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
   const [attempt, setAttempt] = useState(0);
   const promptedAttempt = useRef<number | null>(null);
@@ -30,7 +30,7 @@ export function useDeviceLocation({ heading: needsHeading = false, distanceInter
     });
   }, [active, focused, state.phase, state.status, state.watcherStatus, state.errorCode]);
   useEffect(() => {
-    if (!active || !focused) return;
+    if (!enabled || !active || !focused) return;
     let disposed = false;
     const stops: (() => void)[] = [];
     let headingTimer: ReturnType<typeof setTimeout> | undefined;
@@ -89,7 +89,7 @@ export function useDeviceLocation({ heading: needsHeading = false, distanceInter
     }
     void start().catch((error: unknown) => { clearTimeout(startupTimer); patch({ status: 'error', ...locationFailure(error) }); });
     return stop;
-  }, [active, focused, attempt, needsHeading, distanceIntervalMeters]);
+  }, [enabled, active, focused, attempt, needsHeading, distanceIntervalMeters]);
   return { ...state, retry: () => setAttempt((value) => value + 1),
     debug: { sensorDebug: 3, active, focused, phase: state.phase, status: state.status, watcherStatus: state.watcherStatus, errorCode: state.errorCode } };
 }

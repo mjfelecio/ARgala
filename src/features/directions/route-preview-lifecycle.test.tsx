@@ -47,18 +47,18 @@ vi.mock('@/features/location/service', () => ({ requestLocationPermission: vi.fn
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => navigation.active }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: 'en' }) }));
 vi.mock('./service', () => ({ routeService: { walking: vi.fn() } }));
-let client: QueryClient; let token: string; let tree: ReactTestRenderer | undefined;
+let client: QueryClient; let token: unknown; let configured: boolean; let tree: ReactTestRenderer | undefined;
 let state: ReturnType<typeof useRoutePreview>;
 const permissionGrant: Awaited<ReturnType<typeof requestLocationPermission>> = { granted: true, canAskAgain: true, status: 'granted' as Awaited<ReturnType<typeof requestLocationPermission>>['status'], expires: 'never' };
 const place = { id: 'google:north', provider: 'google', providerId: 'north', name: 'North', coordinates: { latitude: 11, longitude: 124 }, attributions: [] };
-function Probe() { const value = useRoutePreview(token, true); React.useEffect(() => { state = value; }, [value]); return null; }
+function Probe() { const value = useRoutePreview(token, configured); React.useEffect(() => { state = value; }, [value]); return null; }
 function render() { const NavigationProvider = navigation.context!.Provider; const FocusProvider = navigation.focusContext!.Provider;
   return <QueryClientProvider client={client}><NavigationProvider value={navigation.value}><FocusProvider value={navigation.focused}><Probe /></FocusProvider></NavigationProvider></QueryClientProvider>; }
 
 function fix() { return { coords: { latitude: 11.01, longitude: 124.61, accuracy: 8, altitude: null, altitudeAccuracy: null, heading: null, speed: null }, timestamp: Date.now() }; }
 beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false }); vi.useFakeTimers(); vi.clearAllMocks(); navigation.active = true; navigation.focused = true; navigation.ref.current = null;
-  client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() }); token = createRoutePreviewIntent(client, place); notifyManager.setScheduler(cb => cb());
+  configured = true; client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() }); token = createRoutePreviewIntent(client, place); notifyManager.setScheduler(cb => cb());
   vi.mocked(getCurrentCoordinates).mockImplementation(async () => fix()); vi.mocked(subscribeToLocation).mockResolvedValue({ remove: navigation.remove });
   vi.mocked(requestLocationPermission).mockResolvedValue(permissionGrant);
   vi.mocked(routeService.walking).mockResolvedValue({ encodedPolyline: '??AA', distanceMeters: 100, durationSeconds: 80, warnings: [] });
@@ -83,4 +83,44 @@ it('waits across a permission activity foreground transition, then spends only o
   await act(async () => { permission.resolve(permissionGrant); }); expect(subscribeToLocation).not.toHaveBeenCalled();
   navigation.active = true; await act(async () => { tree!.update(render()); }); expect(requestLocationPermission).toHaveBeenLastCalledWith({ prompt: 'never' });
   await act(async () => { vi.mocked(subscribeToLocation).mock.calls[0][0](fix()); }); expect(routeService.walking).toHaveBeenCalledOnce();
+});
+it.each(['missing', 'invalid', 'unknown', 'expired', 'consumed'])('keeps %s preview entries local without starting permission work or GPS', async entry => {
+  if (entry === 'missing') token = undefined;
+  if (entry === 'invalid') token = ['bad'];
+  if (entry === 'unknown') token = 'unknown-token';
+  if (entry === 'expired') vi.setSystemTime(Date.now() + 120001);
+  if (entry === 'consumed') { const { claimRoutePreviewIntent } = await import('./route-preview-intent'); claimRoutePreviewIntent(client, token); }
+  await act(async () => { tree = create(render()); });
+  navigation.active = false; navigation.focused = false; await act(async () => { tree!.update(render()); });
+  navigation.active = true; navigation.focused = true; await act(async () => { tree!.update(render()); });
+  await act(async () => { tree!.unmount(); }); await act(async () => { tree = create(render()); });
+  expect(state.data).toBeFalsy(); expect(requestLocationPermission).not.toHaveBeenCalled();
+  expect(getCurrentCoordinates).not.toHaveBeenCalled(); expect(subscribeToLocation).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('keeps a valid intent local while native Maps is unconfigured', async () => {
+  configured = false; await act(async () => { tree = create(render()); });
+  expect(state.data?.intent.place).toEqual(place); expect(requestLocationPermission).not.toHaveBeenCalled(); expect(subscribeToLocation).not.toHaveBeenCalled();
+});
+it('retires pending sensor setup when the claimed waiting session expires, then restarts only on explicit retry', async () => {
+  const setup = Promise.withResolvers<Awaited<ReturnType<typeof subscribeToLocation>>>(); vi.mocked(subscribeToLocation).mockReturnValueOnce(setup.promise);
+  await act(async () => { tree = create(render()); }); expect(requestLocationPermission).toHaveBeenCalledOnce();
+  await act(async () => { await vi.advanceTimersByTimeAsync(120001); setup.resolve({ remove: navigation.remove }); });
+  expect(navigation.remove).toHaveBeenCalledOnce(); expect(routeService.walking).not.toHaveBeenCalled();
+  navigation.active = false; await act(async () => { tree!.update(render()); }); navigation.active = true; await act(async () => { tree!.update(render()); }); expect(requestLocationPermission).toHaveBeenCalledOnce();
+  await act(async () => { state.retry(); }); expect(requestLocationPermission).toHaveBeenCalledTimes(2);
+  await act(async () => { vi.mocked(subscribeToLocation).mock.calls.at(-1)![0](fix()); }); expect(routeService.walking).toHaveBeenCalledOnce();
+});
+it('does not restart location for a remounted waiting session until its new owner explicitly retries', async () => {
+  await act(async () => { tree = create(render()); }); await act(async () => { tree!.unmount(); });
+  await act(async () => { tree = create(render()); }); expect(requestLocationPermission).toHaveBeenCalledOnce(); expect(subscribeToLocation).toHaveBeenCalledOnce();
+  await act(async () => { state.retry(); }); expect(requestLocationPermission).toHaveBeenCalledTimes(2); expect(subscribeToLocation).toHaveBeenCalledTimes(2);
+});
+it('waits for a new sensor owner sample when retry re-enables location after a route failure', async () => {
+  vi.mocked(routeService.walking).mockRejectedValueOnce(new Error('Private route diagnostic'));
+  await act(async () => { tree = create(render()); });
+  await act(async () => { vi.mocked(subscribeToLocation).mock.calls[0][0](fix()); });
+  expect(routeService.walking).toHaveBeenCalledOnce(); expect(state.data?.status).toBe('failed'); expect(navigation.remove).toHaveBeenCalledOnce();
+  vi.setSystemTime(Date.now() + 1000); vi.mocked(getCurrentCoordinates).mockImplementation(() => new Promise(() => {}));
+  await act(async () => { state.retry(); }); expect(routeService.walking).toHaveBeenCalledOnce();
+  await act(async () => { vi.mocked(subscribeToLocation).mock.calls.at(-1)![0](fix()); }); expect(routeService.walking).toHaveBeenCalledTimes(2);
 });

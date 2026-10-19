@@ -118,7 +118,7 @@ it('requires a new explicit retry after error and guards rapid double retry', as
 });
 it('never re-arms a waiting intent after remount; an explicit retry creates new intent', async () => {
   handoff(false); controls.location.status = 'loading'; await mount(); await act(async () => { tree!.unmount(); });
-  controls.location.status = 'ready'; await mount(); expect(routeService.walking).not.toHaveBeenCalled(); await press('directions.retry'); expect(routeService.walking).toHaveBeenCalledOnce();
+  controls.location.status = 'ready'; await mount(); expect(routeService.walking).not.toHaveBeenCalled(); expect(output()).not.toContain(translations.t('directions.waiting')); expect(button('location.retry')).toBeUndefined(); await press('directions.retry'); expect(routeService.walking).toHaveBeenCalledOnce();
 });
 it('revokes waiting authorization and ignores late paid results after QueryClient auth clear', async () => {
   handoff(false); controls.location.status = 'loading'; await mount(); await act(async () => { client.clear(); }); controls.location.status = 'ready'; await update(); expect(routeService.walking).not.toHaveBeenCalled();
@@ -127,7 +127,7 @@ it('revokes waiting authorization and ignores late paid results after QueryClien
 });
 it('bounds waiting intent lifetime and never spends an expired lease', async () => {
   handoff(false); controls.location.status = 'loading'; await mount();
-  vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 120001); controls.location.status = 'ready'; controls.location.positionTimestamp = Date.now(); controls.location.watcherTimestamp = Date.now(); await update(); expect(routeService.walking).not.toHaveBeenCalled(); expect(output()).toContain(translations.t('directions.unavailable'));
+  vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 120001); controls.location.status = 'ready'; controls.location.positionTimestamp = Date.now(); controls.location.watcherTimestamp = Date.now(); await update(); expect(routeService.walking).not.toHaveBeenCalled(); expect(output()).toContain(translations.t('directions.unavailable')); expect(button('location.retry')).toBeUndefined(); expect(output()).not.toContain(translations.t('directions.waiting'));
 });
 it.each(['ROUTE_UNAVAILABLE', 'RATE_LIMITED', 'UNAUTHORIZED', 'UPSTREAM_INVALID', 'FUTURE', null])('translates %s along the real error-to-UI path and recovers explicitly', async code => {
   const { EdgeRequestError } = await import('@/lib/edge-error'); const { edgeErrorMessageKey } = await import('@/lib/edge-error');

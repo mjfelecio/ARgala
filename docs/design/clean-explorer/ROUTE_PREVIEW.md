@@ -28,6 +28,14 @@ intent. Rapid duplicate presses are guarded synchronously. Auth changes clear
 pending handoffs and sessions; late responses cannot restore cleared data.
 Nothing is stored on disk.
 
+The location hook is disabled until a claimed, configured preview session needs
+GPS. Missing, invalid, expired and consumed links never check/request location
+permission or start a position watcher. Expired or remounted unspent sessions
+stay local until explicit route Retry; failed acquisition also stops its owner.
+Pending/completed previews retain location for their live marker and Recenter.
+Re-enabling GPS creates a new sensor ownership interval, so a retained sample
+cannot bypass permission rechecks or authorize the retry's route request.
+
 Home Map's **Get walking route** continues to request and display its own route.
 After success, **View Route** passes that result and its original submitted
 origin and destination to the preview with zero additional Routes requests. Returning to the

@@ -24,15 +24,28 @@ export function useRoutePreview(token: unknown, configured: boolean) {
   const client = useQueryClient(); const { language } = useSettings();
   const active = useAppActive(); const focused = useIsFocused();
   const running = active && focused;
-  const location = useDeviceLocation();
-  const [ownership, setOwnership] = useState(() => ({ running, since: Date.now() }));
   const [now, setNow] = useState(Date.now);
+  const key = useMemo(() => ['route-preview-session', typeof token === 'string' ? token : null] as const, [token]);
+  const session = useQuery<Session | null>({ queryKey: key, queryFn: async () => null, enabled: false, gcTime: routePreviewLifetimeMs });
+  const attemptedClaim = useRef(false);
+  const authorized = useRef(false);
+  const [owner] = useState(Symbol);
+  const data = session.data;
+  const expired = !!data && now - data.intent.createdAt >= routePreviewLifetimeMs;
+  // A dead link cannot authorize even permission checks or a native GPS owner.
+  // Completed previews still use location for the live marker/Recenter; waiting
+  // sessions need this screen's unexpired claim, or an explicit retry first.
+  const locationEnabled = configured && !!data && (data.status === 'success' || data.status === 'pending' ||
+    (data.status === 'waiting' && data.owner === owner && !expired));
+  const location = useDeviceLocation({ enabled: locationEnabled });
+  const tracking = running && locationEnabled;
+  const [ownership, setOwnership] = useState(() => ({ running: tracking, since: Date.now() }));
   useEffect(() => {
     let alive = true;
     const since = Date.now();
-    void Promise.resolve().then(() => { if (alive) setOwnership({ running, since }); });
+    void Promise.resolve().then(() => { if (alive) setOwnership({ running: tracking, since }); });
     return () => { alive = false; };
-  }, [running]);
+  }, [tracking]);
   useEffect(() => {
     if (!running) return;
     let alive = true;
@@ -40,11 +53,6 @@ export function useRoutePreview(token: unknown, configured: boolean) {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => { alive = false; clearInterval(timer); };
   }, [running, location.positionTimestamp, location.watcherTimestamp]);
-  const key = useMemo(() => ['route-preview-session', typeof token === 'string' ? token : null] as const, [token]);
-  const session = useQuery<Session | null>({ queryKey: key, queryFn: async () => null, enabled: false, gcTime: routePreviewLifetimeMs });
-  const attemptedClaim = useRef(false);
-  const authorized = useRef(false);
-  const [owner] = useState(Symbol);
   useEffect(() => {
     if (attemptedClaim.current) return;
     attemptedClaim.current = true;
@@ -61,11 +69,9 @@ export function useRoutePreview(token: unknown, configured: boolean) {
   // foreground owner must receive its own sample, not a retained pre-resume fix.
   const timestamp = now;
   const fresh = (time: number | null) => time !== null && Number.isFinite(time) && time >= ownership.since && time <= timestamp + 1000 && timestamp - time <= AR.positionMaxAgeMs;
-  const usable = running && ownership.running === running && location.status === 'ready' && location.watcherStatus === 'ready' && isCoordinate(location.position) &&
+  const usable = tracking && ownership.running === tracking && location.status === 'ready' && location.watcherStatus === 'ready' && isCoordinate(location.position) &&
     fresh(location.positionTimestamp) && fresh(location.watcherTimestamp) && location.accuracy !== null &&
     Number.isFinite(location.accuracy) && location.accuracy >= 0 && location.accuracy <= AR.maxPositionAccuracyMeters;
-  const data = session.data;
-  const expired = !!data && timestamp - data.intent.createdAt >= routePreviewLifetimeMs;
   useEffect(() => {
     if (!configured || !usable || !data || data.status !== 'waiting' || data.owner !== owner || !authorized.current || expired) return;
     // Cache presence is also a revocable lease. Auth clear can retire the session
@@ -99,6 +105,6 @@ export function useRoutePreview(token: unknown, configured: boolean) {
     authorized.current = true;
     client.setQueryData<Session>(key, { owner, attempt: nextToken, intent: next, status: 'waiting' });
   }
-  return { data, location, usable, running, expired, result: data?.result,
+  return { data, location, locationEnabled, usable, running, expired, result: data?.result,
     needsRetry: data?.status === 'failed' || (data?.status === 'waiting' && (data.owner !== owner || expired)), retry };
 }

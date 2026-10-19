@@ -509,3 +509,29 @@ findings were deferred; device limitations above remain unchanged.
 on `feat/walking-route-preview` and remains unmerged. Local final checks above
 passed; GitHub validation was queued at handoff. No credentials or supplied
 untracked kickoff packages were committed.
+
+### Walking preview review correction — session-gated GPS
+
+Confirmed that the unconditional location hook started permission/service work
+and high-accuracy GPS for missing, invalid, expired or consumed preview links,
+even though paid Routes calls were already prevented. Added an optional location
+hook enable gate (default true for existing Map/AR consumers) and derive it from
+the claimed preview session. Dead links, unconfigured Maps, expired waiting
+sessions and remounted unspent sessions now remain local without permission
+checks or watchers. Explicit route retry can re-enable sensors; pending/completed
+previews retain the live marker and Recenter. Inactive sessions no longer show
+misleading GPS loading/retry copy.
+
+Nine regressions were observed failing before their fixes, using the real
+location hook and installed Expo focus hooks with delayed navigation readiness:
+five dead-link forms across focus/resume/remount, missing Maps configuration,
+expiry with delayed native setup cleanup, unspent-session remount/retry, and
+fresh ownership after failed acquisition/retry. The latter prevents a retained
+pre-disable fix from bypassing renewed permission/watcher startup.
+
+Validation: `npm run check` passed typecheck, zero-warning lint and **331 tests /
+34 files**. The affected Directions/Location run passed **125 tests / 10 files**.
+`npm run export:android -- --max-workers 2` and `git diff --check` passed.
+No native configuration, dependencies, server contracts or translations changed.
+Physical Android permission activities, GPS, live providers and UAT remain
+**NOT TESTED**. The fix is a follow-up on unmerged PR #11.
