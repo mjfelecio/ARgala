@@ -8,6 +8,7 @@ import { Card } from 'heroui-native/card';
 import { useSettings } from '@/features/settings/provider';
 import { destinationName, getDestination, localizedContent } from './catalog';
 import { DaytimeGallery } from './daytime-gallery';
+import { NearbyEstablishments } from './nearby-establishments';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
 export default function DestinationScreen() {
@@ -40,7 +41,7 @@ export default function DestinationScreen() {
         </Card>}
         <Button isDisabled accessibilityLabel={t('placeDetails.directions')}><Button.Label>{t('placeDetails.directions')}</Button.Label></Button>
         <Text className="font-sans text-sm text-muted">{t('destinations.entranceMissing')}</Text>
-        <Text className="font-sans text-sm text-muted">{t('destinations.centerMissing')}</Text>
+        <NearbyEstablishments key={destination.id} destination={destination} />
       </> : <Text className="font-sans text-base text-muted">{t('destinations.unavailable')}</Text>}
     </ScrollView>
   </StyledSafeAreaView>;

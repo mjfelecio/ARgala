@@ -154,6 +154,14 @@
     "imageFailed": "미리보기 이미지를 표시할 수 없습니다.",
     "englishFallback": "영어로 표시됨",
     "highlights": "주요 정보",
-    "photoCount_other": "승인된 사진 {{count}}장"
+    "photoCount_other": "승인된 사진 {{count}}장",
+    "exploreNearby": "주변 탐색",
+    "nearbyTitle": "주변 장소",
+    "nearbyRadius": "이 여행지에서 500m 이내를 검색합니다. 거리는 여행지에서의 직선거리입니다.",
+    "centerInvalid": "주변 검색에 사용할 여행지 위치가 확인되지 않았습니다.",
+    "nearbyUnsearched": "주변 탐색을 눌러 이 여행지 주변을 검색하세요.",
+    "nearbyEmpty": "이 여행지에서 500m 이내에 검색된 장소가 없습니다.",
+    "fromDestination": "여행지에서 {{meters}}m",
+    "nearbyLimit": "최대 {{count}}곳이 검색되며 모든 주변 시설이 포함되지는 않을 수 있습니다."
   }
 }

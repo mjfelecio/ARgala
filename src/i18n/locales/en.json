@@ -205,6 +205,14 @@
     "englishFallback": "Shown in English",
     "highlights": "Highlights",
     "photoCount_one": "{{count}} approved photo",
-    "photoCount_other": "{{count}} approved photos"
+    "photoCount_other": "{{count}} approved photos",
+    "exploreNearby": "Explore Nearby",
+    "nearbyTitle": "Nearby Places",
+    "nearbyRadius": "Search within 500 m of this destination. Distances are straight-line distances from the destination.",
+    "centerInvalid": "The destination location is not verified for nearby search.",
+    "nearbyUnsearched": "Tap Explore Nearby to search around this destination.",
+    "nearbyEmpty": "No places were returned within 500 m of this destination.",
+    "fromDestination": "{{meters}} m from destination",
+    "nearbyLimit": "Search returns up to {{count}} places and may not include every nearby establishment."
   }
 }
