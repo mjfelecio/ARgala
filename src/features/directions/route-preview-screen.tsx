@@ -1,7 +1,86 @@
-import { Text } from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
+import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
+import Constants from 'expo-constants';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Button } from 'heroui-native/button';
+import { Card } from 'heroui-native/card';
+import { Chip } from 'heroui-native/chip';
+import { useThemeColor } from 'heroui-native/hooks';
 import { useTranslation } from 'react-i18next';
+import { withUniwind } from 'uniwind';
+import { useDeviceLocation } from '@/features/location/use-device-location';
+import { ProviderAttributions } from '@/features/map/attributions';
+import { placeSelectionOptions } from '@/features/places/selection';
+import { useAppActive } from '@/lib/use-app-active';
+import { claimRoutePreviewIntent, type RoutePreviewIntent } from './route-preview-intent';
+import { decodePolyline } from './polyline';
+import { RoutePreviewMap } from './route-preview-map';
 
+const StyledSafeAreaView = withUniwind(SafeAreaView);
 export default function RoutePreviewScreen() {
+  const { token } = useLocalSearchParams();
+  // Different URL intents have independent leases and native map readiness.
+  return <Preview key={typeof token === 'string' ? token : ''} token={token} />;
+}
+function Preview({ token }: { token: unknown }) {
   const { t } = useTranslation();
-  return <Text>{t('map.start')}</Text>;
+  const client = useQueryClient();
+  const active = useAppActive(); const focused = useIsFocused();
+  const location = useDeviceLocation();
+  const claimed = useRef(false);
+  const [intent, setIntent] = useState<RoutePreviewIntent | null>(null);
+  useEffect(() => { if (!claimed.current) { claimed.current = true; setIntent(claimRoutePreviewIntent(client, token)); } }, [client, token]);
+  const [dockHeight, setDockHeight] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  const accent = useThemeColor('accent');
+  const result = intent?.existing;
+  const coordinates = useMemo(() => { try { return result ? decodePolyline(result.route.encodedPolyline) : []; } catch { return []; } }, [result]);
+  const place = intent?.place;
+  function toMap() {
+    if (place) client.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+    router.dismissTo(place ? { pathname: '/', params: { placeId: place.providerId } } : '/');
+  }
+  return <StyledSafeAreaView className="flex-1 bg-surface" edges={['top', 'bottom', 'left', 'right']}>
+    <View className="flex-row items-center gap-3 px-4 py-3">
+      <Button variant="secondary" isIconOnly accessibilityLabel={t('directions.back')} onPress={() => { if (router.canGoBack()) router.back(); else toMap(); }}><Ionicons name="arrow-back" size={24} color={accent} /></Button>
+      <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('directions.title')}</Text>
+    </View>
+    <View className="flex-1">
+      {place && Constants.expoConfig?.extra?.mapsConfigured && <RoutePreviewMap place={place} origin={result?.origin} coordinates={coordinates}
+        currentPosition={active && focused && location.status === 'ready' ? location.position : null} dockHeight={dockHeight}
+        enabled={active && focused} onViewportHeight={setViewportHeight} />}
+      <View testID="route-preview-dock" className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-surface"
+        style={viewportHeight > 0 ? { maxHeight: viewportHeight * 0.55 } : undefined} onLayout={event => setDockHeight(event.nativeEvent.layout.height)}>
+        <ScrollView contentContainerClassName="gap-3 p-4 pb-6">
+          <Chip variant="secondary" className="self-start"><Ionicons name="walk-outline" size={20} color={accent} /><Chip.Label>{t('directions.walking')}</Chip.Label></Chip>
+          {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
+          {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}
+          {result && coordinates.length > 1 && <>
+            <Text className="font-sans text-title font-bold text-foreground">{t('map.routeSummary', { meters: result.route.distanceMeters, minutes: Math.ceil(result.route.durationSeconds / 60) })}</Text>
+            <Text className="font-sans text-sm text-muted">{t('directions.snapshot')}</Text>
+          </>}
+          {place && <Card variant="secondary" className="gap-1 p-4"><Card.Body className="gap-1">
+            <Text className="font-sans text-xs font-semibold text-brand-strong">{t('directions.destination')}</Text>
+            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{place.name}</Text>
+            {place.address && <Text className="font-sans text-sm text-muted">{place.address}</Text>}
+          </Card.Body></Card>}
+          {result && <>
+            <Text className="font-sans text-sm text-muted">{t('map.walkingCaution')}</Text>
+            {result.route.warnings.map((warning, index) => <Text key={index} className="font-sans text-sm text-muted">{warning}</Text>)}
+          </>}
+          {place && <ProviderAttributions places={[place]} />}
+          <View className="flex-row flex-wrap gap-2">
+            <Button variant="secondary" className="min-w-36 grow shrink" accessibilityLabel={t('directions.map')} onPress={toMap}><Button.Label>{t('directions.map')}</Button.Label></Button>
+            {place && <Button className="min-w-36 grow shrink" accessibilityLabel={t('directions.details')} onPress={() => {
+              client.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+              router.dismissTo({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
+            }}><Button.Label>{t('directions.details')}</Button.Label></Button>}
+          </View>
+        </ScrollView>
+      </View>
+    </View>
+  </StyledSafeAreaView>;
 }
