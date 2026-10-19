@@ -17,9 +17,9 @@ const controls = vi.hoisted(() => ({ active: true, focused: true, granted: true,
   location: { status: 'ready', watcherStatus: 'ready', position: { latitude: 0, longitude: 0 } as { latitude: number; longitude: number } | null,
     accuracy: 5 as number | null, positionTimestamp: 0, watcherTimestamp: 0, headingTimestamp: 0,
     headingStatus: 'ready', heading: { degrees: 0, accuracy: 3, reference: 'true' } as { degrees: number; accuracy: number; reference: string } | null, retry: vi.fn() },
-  navigate: vi.fn(), getPermission: vi.fn(),
+  navigate: vi.fn(), getPermission: vi.fn(), params: {} as { placeId?: string },
 }));
-vi.mock('expo-router', () => ({ useIsFocused: () => controls.focused, router: { navigate: controls.navigate } }));
+vi.mock('expo-router', () => ({ useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params, router: { navigate: controls.navigate, setParams: vi.fn(() => { controls.params = {}; }) } }));
 vi.mock('expo-camera', async () => {
   const { createElement } = await import('react');
   return { CameraView: (props: Record<string, unknown>) => createElement('video', props),
@@ -56,7 +56,7 @@ beforeEach(async () => {
   controls.active = true; controls.focused = true; controls.granted = true; controls.language = 'en'; controls.radius = 100;
   Object.assign(controls.location, { status: 'ready', watcherStatus: 'ready', position: { latitude: 0, longitude: 0 }, accuracy: 5,
     positionTimestamp: Date.now(), watcherTimestamp: Date.now(), headingTimestamp: Date.now(), headingStatus: 'ready', heading: { degrees: 0, accuracy: 3, reference: 'true' } });
-  controls.navigate.mockReset(); controls.getPermission.mockReset().mockResolvedValue({ granted: true });
+  controls.params = {}; controls.navigate.mockReset(); controls.getPermission.mockReset().mockResolvedValue({ granted: true });
   vi.mocked(placesService.nearby).mockReset().mockResolvedValue([north, south]);
   vi.mocked(placesService.details).mockReset().mockResolvedValue({ ...north, description: 'Provider description' });
   notifyManager.setScheduler((callback) => callback());
@@ -243,4 +243,21 @@ it('opens the same protected Details page from AR without a paid request and kee
   controls.focused = false; await update(); expect(tree!.root.findAllByType('video')).toHaveLength(0);
   controls.focused = true; await update(); expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(north.name);
   expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).toHaveBeenCalledTimes(1);
+});
+it('accepts a Details selection outside nearby results without scanning or claiming a fresh distance', async () => {
+  client.setQueryData(['place-selection', south.providerId], south); controls.params = { placeId: south.providerId }; controls.location.position = null;
+  await mount(); expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name);
+  expect(output()).toContain(translations.t('ar.distanceUnknown')); expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
+  controls.focused = false; await update(); controls.focused = true; await update();
+  expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('adopts a new Details selection on an already mounted AR screen and retains explicit selection priority', async () => {
+  await mount(); await scan(); client.setQueryData(['place-selection', south.providerId], south); controls.params = { placeId: south.providerId }; await update();
+  expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name);
+  expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
+});
+it('does not offer another paid load when complete details already exist for the handed-off place', async () => {
+  client.setQueryData(['place-selection', south.providerId], south); client.setQueryData(['place-details', south.providerId, 'en'], south); controls.params = { placeId: south.providerId };
+  await mount(); expect(tree!.root.findAllByType('button').some(b => b.props.title === translations.t('ar.more'))).toBe(false);
+  expect(placesService.details).not.toHaveBeenCalled();
 });

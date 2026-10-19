@@ -56,6 +56,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const parsedId = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
   const incomingId = parsedId.success ? parsedId.data.providerId : null;
   const active = useAppActive(); const focused = useIsFocused(); const map = useRef<MapView>(null);
+  const pendingHandoffCenter = useRef<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -103,6 +104,12 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     });
   }, [enabled, mapSize.width, mapSize.height, headerHeight, settledSheetHeight, fitGap, route.data]);
   const place = details.data ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
+  useEffect(() => {
+    if (incomingId) pendingHandoffCenter.current = incomingId;
+    if (!enabled || !place || pendingHandoffCenter.current !== place.providerId) return;
+    map.current?.animateToRegion({ ...place.coordinates, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400);
+    pendingHandoffCenter.current = null;
+  }, [incomingId, enabled, place]);
   const open = useOpenProviderLink();
   function select(providerId: string | null) {
     if (providerId && !enabled) return;

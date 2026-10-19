@@ -158,6 +158,10 @@
     "coordinateValue": "Latitude {{latitude}}, longitude {{longitude}}",
     "source": "Place data & credits",
     "distanceUnavailable": "Your distance is available on Map or AR with a current location.",
-    "view": "View Details"
+    "view": "View Details",
+    "directions": "Get Directions",
+    "map": "View on Map",
+    "ar": "Open AR",
+    "directionsHint": "Opens Map. Tap Get walking route there to request directions."
   }
 }

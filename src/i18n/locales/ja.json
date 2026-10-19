@@ -108,6 +108,10 @@
     "coordinateValue": "緯度 {{latitude}}、経度 {{longitude}}",
     "source": "場所のデータとクレジット",
     "distanceUnavailable": "現在地を取得すると、地図またはARで距離を確認できます。",
-    "view": "詳細を見る"
+    "view": "詳細を見る",
+    "directions": "ルートを検索",
+    "map": "地図で見る",
+    "ar": "ARを開く",
+    "directionsHint": "地図を開きます。地図で徒歩ルートを取得するボタンを押してください。"
   }
 }

@@ -90,3 +90,31 @@ it('presents an approved image only when explicitly supplied to the presentation
   expect(output()).toContain('Synthetic test illustration'); expect(output()).toContain('Synthetic fixture credit');
   expect(tree!.root.findAllByProps({ testID: 'place-media-fallback' })).toHaveLength(0);
 });
+it.each(['placeDetails.directions', 'placeDetails.map', 'placeDetails.ar'])('hands off the selection through %s without provider work', async key => {
+  const { router } = await import('expo-router');
+  client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
+  expect(output()).toContain(translations.t('placeDetails.directionsHint')); await press(key);
+  expect(router.dismissTo).toHaveBeenCalledExactlyOnceWith({ pathname: key === 'placeDetails.ar' ? '/ar' : '/', params: { placeId: 'north' } });
+  expect(client.getQueryData(placeSelectionOptions('north').queryKey)).toEqual(place); expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('returns to its originating screen with Back, with a safe direct-entry fallback', async () => {
+  const { router } = await import('expo-router'); await mount(); await press('placeDetails.back'); expect(router.back).toHaveBeenCalledOnce();
+  controls.back = false; await press('placeDetails.back'); expect(router.navigate).toHaveBeenCalledWith('/'); expect(placesService.details).not.toHaveBeenCalled();
+});
+it('has no destination actions without a cached place and ignores loading when no longer focused', async () => {
+  await mount(); for (const key of ['placeDetails.directions', 'placeDetails.map', 'placeDetails.ar']) expect(button(key)).toBeUndefined();
+  controls.focused = false; await act(async () => tree!.update(render())); await act(async () => { button('placeDetails.load')!.props.onPress(); }); expect(placesService.details).not.toHaveBeenCalled();
+});
+it('prevents duplicate navigation on rapid action presses', async () => {
+  const { router } = await import('expo-router'); client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
+  await act(async () => { button('placeDetails.map')!.props.onPress(); button('placeDetails.map')!.props.onPress(); }); expect(router.dismissTo).toHaveBeenCalledOnce();
+});
+it('retains full details through refocus, foreground, reconnect, invalidation, locale changes and remount without requests', async () => {
+  const { focusManager, onlineManager } = await import('@tanstack/react-query');
+  client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount(); await press('placeDetails.load');
+  controls.focused = false; controls.active = false; await act(async () => tree!.update(render())); controls.focused = true; controls.active = true; await act(async () => tree!.update(render()));
+  await act(async () => { await client.invalidateQueries(); focusManager.setFocused(false); focusManager.setFocused(true); onlineManager.setOnline(false); onlineManager.setOnline(true); });
+  await act(async () => { tree!.unmount(); }); await mount(); expect(button('placeDetails.load')).toBeUndefined();
+  controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); tree!.update(render()); });
+  expect(output()).toContain(place.name); expect(placesService.details).toHaveBeenCalledTimes(1); expect(placesService.nearby).not.toHaveBeenCalled();
+});

@@ -92,9 +92,9 @@
 
 **Interfaces:** `View on Map` opens Explore with `placeId` and a seeded in-memory handoff (no provider request). `Open AR` navigates to the real immersive AR screen, without promising remote anchoring or fake on-site recognition. **Get Directions** navigates to selected Map route UI where the **existing explicit Get walking route** action is available. This interim two-tap sequence must be documented; the next Walking Directions milestone can replace it with tested one-tap intent. Avoid adding an implicit Directions API request on navigation.
 
-- [ ] Write tests for each action and destination; ensure the correct selection and no route/details request on opening or Back/refocus. Ensure loading/error guards prevent double submits.
-- [ ] Run red tests; implement the smallest handoff to existing route screens. Validate route/selection can recover after cold open or cache eviction.
-- [ ] Validate and commit e.g. `feat(places): connect details actions to existing map and AR flows`.
+- [x] Write tests for each action and destination; ensure the correct selection and no route/details request on opening or Back/refocus. Ensure loading/error guards prevent double submits.
+- [x] Run red tests; implement the smallest handoff to existing route screens. Validate route/selection can recover after cold open or cache eviction.
+- [x] Validate and commit e.g. `feat(places): connect details actions to existing map and AR flows`.
 
 ## Task 5 — Regression, documentation and Android acceptance
 
@@ -137,3 +137,5 @@ The owner has approved the high-level sequence and already uses an agent. Have t
 - Task 2: sparse/description/credits and approved-image-slot RED→GREEN; pending request guard verified through native button disabled prop. `npm run check`: 237 tests / 31 files, typecheck and zero-warning lint passed. Device typography and pixel fidelity remain acceptance work.
 
 - Task 3: both absent entry actions failed first; Map/AR/sheet suites pass 73 tests. Typecheck passed after SDK-generated route types were refreshed using offline Metro. Exclude generated `.expo` artifacts from lint: SDK 57 emits a redundant eslint-disable in router.d.ts. No generated declarations are committed.
+
+- Task 4: navigation/AR incoming selection/map centering tests failed before implementation. Actions hand off with SDK `dismissTo` to avoid duplicate parent tabs; installed Stack/Tab reducers and divergent-state payload mapping verify Back and return identity. Explicit paid request rules remain. `npm run check`: 252 tests / 31 files passed with typecheck and zero-warning lint. `npm run check:android` passed.
