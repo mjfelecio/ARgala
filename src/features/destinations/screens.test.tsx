@@ -77,3 +77,18 @@ it('shows approved overview and highlights independently with visible English fa
  controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); tree!.update(render()); });
  expect(output()).toContain('日本語テスト'); expect(output()).toContain('Approved test highlight'); expect(output()).toContain(translations.t('destinations.englishFallback')); expect(output()).not.toContain(translations.t('destinations.contentPending'));
 });
+it('routes an approved visitor entrance exactly once without obtaining GPS on the catalog screen', async () => {
+ const catalog = await import('./catalog'); const { claimRoutePreviewIntent } = await import('@/features/directions/route-preview-intent');
+ const fixture = catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic fixture', routeEntrance: { latitude: 0.01, longitude: 0.01 }, routeEntranceApprovalReference: 'Test-only entrance' });
+ vi.spyOn(catalog, 'getDestination').mockReturnValue(fixture); await mount();
+ await act(async () => { button('placeDetails.directions')!.props.onPress(); button('placeDetails.directions')!.props.onPress(); });
+ expect(router.push).toHaveBeenCalledOnce(); const target = vi.mocked(router.push).mock.calls[0][0] as { pathname: string; params: { token: string } };
+ expect(target.pathname).toBe('/directions'); expect(claimRoutePreviewIntent(client, target.params.token)).toMatchObject({ place: { provider: 'curated', source: 'curated', id: 'destination:D01', providerId: 'curated_D01', coordinates: fixture.routeEntrance } });
+ expect(claimRoutePreviewIntent(client, target.params.token)).toBeNull(); expect(placesService.details).not.toHaveBeenCalled();
+ controls.focused = false; await act(async () => tree!.update(render())); controls.focused = true; await act(async () => tree!.update(render())); expect(router.push).toHaveBeenCalledOnce();
+});
+it('does not create directions intent from an inactive catalog owner', async () => {
+ const catalog = await import('./catalog');
+ vi.spyOn(catalog, 'getDestination').mockReturnValue(catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic fixture', routeEntrance: { latitude: 0, longitude: 0 }, routeEntranceApprovalReference: 'Test' }));
+ controls.active = false; await mount(); await act(async () => button('placeDetails.directions')!.props.onPress()); expect(router.push).not.toHaveBeenCalled();
+});

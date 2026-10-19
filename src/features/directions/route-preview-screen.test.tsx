@@ -220,3 +220,18 @@ it('does not let an older waiting screen spend a replacement screen’s retry in
   controls.location.status = 'ready'; await update(); expect(routeService.walking).not.toHaveBeenCalled();
   await press('directions.retry'); expect(routeService.walking).toHaveBeenCalledOnce();
 });
+it('returns curated routes to their catalog details and never hands a curated ID to Home Google selection', async () => {
+ const curated: Place = { id: 'destination:D01', providerId: 'curated_D01', provider: 'curated', source: 'curated', name: 'Synthetic catalog subject', coordinates: place.coordinates, attributions: [] };
+ handoff(true, curated); await mount();
+ await press('directions.details'); expect(router.dismissTo).toHaveBeenLastCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D01' } });
+ await press('directions.map'); expect(router.dismissTo).toHaveBeenLastCalledWith('/');
+ expect(client.getQueryData(placeSelectionOptions(curated.providerId).queryKey)).toBeUndefined(); expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('acquires one walking route to the approved curated entrance and does not repeat it after focus or language changes', async () => {
+ const curated: Place = { id: 'destination:D01', providerId: 'curated_D01', provider: 'curated', source: 'curated', name: 'Synthetic catalog subject', coordinates: place.coordinates, attributions: [] };
+ handoff(false, curated); await mount();
+ expect(routeService.walking).toHaveBeenCalledExactlyOnceWith({ origin, destination: curated.coordinates, language: 'en' });
+ controls.focused = false; controls.active = false; await update(); controls.focused = true; controls.active = true; await update();
+ controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); }); await update(); expect(routeService.walking).toHaveBeenCalledOnce();
+ await press('directions.details'); expect(router.dismissTo).toHaveBeenLastCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D01' } });
+});
