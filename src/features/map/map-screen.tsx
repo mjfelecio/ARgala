@@ -31,7 +31,7 @@ const StyledMapView = withUniwind(MapView);
 
 function LaunchControls() {
   const { t } = useTranslation();
-  return <View className="flex-row flex-wrap justify-evenly gap-2 px-2"><Button accessibilityLabel={t('map.camera')} onPress={() => router.push('/ar')}><Button.Label>{t('map.camera')}</Button.Label></Button><Button variant="secondary" accessibilityLabel={t('map.settings')} onPress={() => router.push('/settings')}><Button.Label>{t('map.settings')}</Button.Label></Button></View>;
+  return <View className="flex-row flex-wrap justify-evenly gap-2 px-2"><Button accessibilityLabel={t('map.camera')} onPress={() => router.navigate('/ar')}><Button.Label>{t('map.camera')}</Button.Label></Button></View>;
 }
 export default function MapScreen() {
   const { t } = useTranslation();
@@ -40,10 +40,16 @@ export default function MapScreen() {
 }
 function LocatedMap() {
   const location = useDeviceLocation();
-  if (!location.position) return <Screen><LaunchControls /><LocationStatus location={location} /></Screen>;
-  return <MapContent position={location.position} accuracy={location.accuracy} locationStatus={<LocationStatus location={location} />} />;
+  // A tab refocus rechecks permissions and starts GPS again. Keep the existing
+  // map/selection/route mounted while awaiting its next fix, without enabling
+  // provider actions based on a retained position after a permission revocation.
+  const [retainedPosition, setRetainedPosition] = useState(location.position);
+  if (location.position && location.position !== retainedPosition) setRetainedPosition(location.position);
+  const position = location.position ?? retainedPosition;
+  if (!position) return <Screen><LaunchControls /><LocationStatus location={location} /></Screen>;
+  return <MapContent position={position} locationReady={Boolean(location.position)} accuracy={location.accuracy} locationStatus={<LocationStatus location={location} />} />;
 }
-function MapContent({ position, accuracy, locationStatus }: { position: Coordinate; accuracy: number | null; locationStatus: React.ReactNode }) {
+function MapContent({ position, locationReady, accuracy, locationStatus }: { position: Coordinate; locationReady: boolean; accuracy: number | null; locationStatus: React.ReactNode }) {
   const { t } = useTranslation(); const { language, activationRadiusMeters } = useSettings();
   const queryClient = useQueryClient();
   const params = useLocalSearchParams<{ placeId?: string }>();
@@ -62,7 +68,7 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   const [center, setCenter] = useState(position);
   const [selectedId, setSelectedId] = useState<string | null>(incomingId);
   const [routeRequest, setRouteRequest] = useState<WalkingRequest | null>(null);
-  const enabled = active && focused && mapReady;
+  const enabled = active && focused && mapReady && locationReady;
   const [lastIncomingId, setLastIncomingId] = useState(incomingId);
   if (incomingId !== lastIncomingId) {
     setLastIncomingId(incomingId);
@@ -119,7 +125,7 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
   const state: HomePlaceSheetState = route.isFetching ? 'route-loading' : route.error ? 'route-failed' : route.data ? 'route-ready'
     : selectedId ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';
   const error = route.error ?? (selectedId ? details.error : nearby.error);
-  return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right', 'bottom']}>
+  return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
     <View className="flex-1">
     <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       {...(mapReady ? { mapPadding } : {})} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
@@ -133,7 +139,7 @@ function MapContent({ position, accuracy, locationStatus }: { position: Coordina
     <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
       onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
       onRecenter={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)}
-      onOpenAr={() => router.push('/ar')} onOpenSettings={() => router.push('/settings')} />
+      onOpenAr={() => router.navigate('/ar')} />
     <HomePlaceSheet key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
       canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady} route={route.data}

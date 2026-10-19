@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { HeroUINativeProviderRaw } from 'heroui-native/provider-raw';
 import type { BottomSheetProps } from '@gorhom/bottom-sheet';
 
-const nativeUi = vi.hoisted(() => ({ reactions: new Set<() => void>() }));
+const nativeUi = vi.hoisted(() => ({ reactions: new Set<() => void>(), insets: { top: 24, bottom: 24, left: 0, right: 0 } }));
 
 // Keep HeroUI components real; only native runtime boundaries are replaced.
 vi.mock('react-native', () => ({
@@ -13,8 +13,8 @@ vi.mock('react-native', () => ({
   I18nManager: { isRTL: false }, PixelRatio: { get: () => 1 },
   useWindowDimensions: () => ({ width: 360, height: 800 }),
 }));
-vi.mock('react-native-safe-area-context', () => ({ SafeAreaView: 'safe-area', SafeAreaListener: 'safe-area-listener', useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) }));
-vi.mock('uniwind', () => ({ useUniwind: () => ({ theme: 'light', hasAdaptiveThemes: false }), useResolveClassNames: (classes: string) => ({ padding: classes.includes('p-8') ? 32 : classes.includes('p-4') ? 16 : 8, borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: '#FFFFFF', borderRadius: 0 }), useCSSVariable: (name: string | string[]) => Array.isArray(name) ? name.map(() => '#247A53') : '#247A53', withUniwind: (component: unknown) => component }));
+vi.mock('react-native-safe-area-context', () => ({ SafeAreaView: 'safe-area', SafeAreaListener: 'safe-area-listener', useSafeAreaInsets: () => nativeUi.insets }));
+vi.mock('uniwind', () => ({ useUniwind: () => ({ theme: 'light', hasAdaptiveThemes: false }), useResolveClassNames: (classes: string) => ({ padding: classes.includes('p-8') ? 32 : classes.includes('p-4') ? 16 : 8, ...(classes.includes('h-16') ? { height: 64 } : {}), borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: '#FFFFFF', borderRadius: 0 }), useCSSVariable: (name: string | string[]) => Array.isArray(name) ? name.map(value => value === '--color-muted' ? '#3F4942' : '#247A53') : '#247A53', withUniwind: (component: unknown) => component }));
 vi.mock('@expo/vector-icons/Ionicons', () => ({ default: 'icon' }));
 vi.mock('react-native-svg', () => ({ default: 'svg', Svg: 'svg', Path: 'path', Circle: 'circle', Defs: 'defs', LinearGradient: 'gradient', Stop: 'stop', Rect: 'rect', G: 'g' }));
 vi.mock('react-native-gesture-handler', () => ({ GestureDetector: 'gesture', Gesture: { Tap: () => ({ enabled() { return this; }, onBegin() { return this; }, onFinalize() { return this; } }) } }));

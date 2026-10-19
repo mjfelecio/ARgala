@@ -136,5 +136,13 @@
     "typography": "Typography and route accent",
     "routeAccent": "Route blue is reserved for navigation.",
     "languages": "English · 한국어 · 日本語"
+  },
+  "navigation": {
+    "explore": "Explore",
+    "ar": "AR View",
+    "profile": "Profile",
+    "backToMap": "Back to map",
+    "openSettings": "Open settings",
+    "profilePlaceholder": "Profile features are not available yet. You can manage language and AR preferences in Settings."
   }
 }
