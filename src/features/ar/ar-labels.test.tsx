@@ -29,6 +29,7 @@ it('bounds labels to three measured lanes, retains stable IDs and full accessibl
   const labels = tree!.root.findAllByType('button');
   expect(labels).toHaveLength(3);
   expect(labels[0].props.accessibilityState.selected).toBe(true);
+  expect(labels[1].props.style.height).toBeLessThan(labels[0].props.style.height);
   expect(labels[0].props.accessibilityLabel).toContain(name);
   expect(labels[0].props.accessibilityLabel).toContain('11 m away');
   for (const label of labels) {

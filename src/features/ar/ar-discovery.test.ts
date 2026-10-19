@@ -348,3 +348,36 @@ it('spends one route call through the real preview hook and never renews intent 
   await update(); expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name);
   expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
 });
+it.each(['en', 'ko', 'ja'] as const)('keeps actual %s camera failure, fallback list and recovery copy live across a language change', async language => {
+  await mount(); await scan();
+  await act(async () => { tree!.root.findByType('video').props.onMountError({ message: 'private camera diagnostic' }); });
+  expect(output()).toContain(translations.t('camera.mountFailed'));
+  expect(output()).toContain(translations.t('ar.cameraFallback'));
+  expect(tree!.root.findAllByType('video')).toHaveLength(0);
+  controls.language = language;
+  await act(async () => { await translations.changeLanguage(language); }); await update();
+  expect(output()).toContain(translations.t('camera.mountFailed'));
+  expect(output()).toContain(translations.t('ar.title'));
+  expect(output()).toContain(translations.t('ar.cameraFallback'));
+  expect(output()).not.toContain('private camera diagnostic');
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-list-south' }).props.onPress(); });
+  expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name);
+  await press('camera.retry'); expect(tree!.root.findAllByType('video')).toHaveLength(1);
+  expect(output()).not.toContain(translations.t('camera.mountFailed'));
+  expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('retains collapsed selection through short viewport changes and suppresses labels without room', async () => {
+  const places = Array.from({ length: 5 }, (_, i) => ({ ...north, providerId: `cjk${i}`, id: `google:cjk${i}`, name: '아주 긴 장소 이름 とても長い場所の名前' }));
+  vi.mocked(placesService.nearby).mockResolvedValue(places); await mount(); await scan();
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-list-cjk4' }).props.onPress(); });
+  await press('ar.collapse');
+  const resize = async (width: number, height: number) => act(async () => { tree!.root.findByProps({ testID: 'ar-viewport' }).props.onLayout({ nativeEvent: { layout: { width, height } } }); });
+  await resize(320, 180);
+  expect(tree!.root.findAllByType(Pressable).filter(p => p.props.testID?.startsWith('ar-label-'))).toHaveLength(0);
+  expect(output()).toContain('Google Maps');
+  await resize(360, 640);
+  expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('ar.expand'))).toBe(true);
+  expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(places[4].name);
+  expect(tree!.root.findAllByType(Pressable).filter(p => p.props.testID?.startsWith('ar-label-'))).toHaveLength(3);
+  expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+});
