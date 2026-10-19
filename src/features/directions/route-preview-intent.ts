@@ -4,7 +4,7 @@ import type { Coordinate } from '@/features/location/geo';
 import type { Place } from '@/features/places/service';
 import type { WalkingRoute } from './service';
 
-export type RoutePreviewResult = { origin: Coordinate; route: WalkingRoute };
+export type RoutePreviewResult = { origin: Coordinate; destination: Coordinate; route: WalkingRoute };
 export type RoutePreviewIntent = {
   place: Place; source: 'details' | 'map'; createdAt: number; existing?: RoutePreviewResult;
 };

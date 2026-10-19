@@ -163,7 +163,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       onViewRoute={route.data && routeRequest && place ? () => {
         if (!active || !focused || previewNavigation.current) return;
         previewNavigation.current = true;
-        const token = createRoutePreviewIntent(queryClient, place, { origin: routeRequest.origin, route: route.data });
+        const token = createRoutePreviewIntent(queryClient, place, { origin: routeRequest.origin, destination: routeRequest.destination, route: route.data });
         router.push({ pathname: '/directions', params: { token } });
       } : undefined}
       onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onWalk={walk}

@@ -41,7 +41,7 @@ async function update() { await act(async () => { tree!.update(render()); }); }
 function output() { return JSON.stringify(tree!.toJSON()); }
 function button(key: string) { return tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t(key)); }
 async function press(key: string) { const b = button(key); expect(b, key).toBeDefined(); expect(b!.props.disabled).not.toBe(true); await act(async () => { b!.props.onPress(); }); }
-function handoff(existing = true, target = place) { controls.token = createRoutePreviewIntent(client, target, existing ? { origin, route } : undefined); }
+function handoff(existing = true, target = place) { controls.token = createRoutePreviewIntent(client, target, existing ? { origin, destination: target.coordinates, route } : undefined); }
 async function layout() { await act(async () => {
   tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } });
   tree!.root.findByProps({ testID: 'route-preview-dock' }).props.onLayout({ nativeEvent: { layout: { height: 280 } } });
@@ -183,4 +183,33 @@ it('keeps a pending request stable through remount and never duplicates it', asy
 it('handles a synchronous adapter failure through the localized error path', async () => {
   vi.mocked(routeService.walking).mockImplementationOnce(() => { throw new Error('Private adapter diagnostic'); }); handoff(false); await mount();
   expect(output()).toContain(translations.t('service.failed')); expect(output()).not.toContain('Private adapter diagnostic'); await press('directions.retry'); expect(routeService.walking).toHaveBeenCalledTimes(2);
+});
+it('bounds native padding and fitting through actual controls measurements and short-height resize ordering', async () => {
+  handoff(); await mount(); await layout();
+  const controlsView = tree!.root.findAllByType('view').find(n => typeof n.props.className === 'string' && n.props.className.includes('right-4') && n.props.className.includes('top-4'))!;
+  await act(async () => { controlsView.props.onLayout({ nativeEvent: { layout: { height: 104 } } }); tree!.root.findByType('map').props.onMapReady(); }); controls.fit.mockClear();
+  // Native viewport callback can precede the dock's new measurement.
+  await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 640, height: 240 } } }); });
+  let padding = tree!.root.findByType('map').props.mapPadding; expect(padding.top + padding.bottom).toBeLessThan(240); expect(controls.fit).not.toHaveBeenCalled();
+  await act(async () => { tree!.root.findByProps({ testID: 'route-preview-dock' }).props.onLayout({ nativeEvent: { layout: { height: 132 } } }); });
+  padding = tree!.root.findByType('map').props.mapPadding; expect(padding.top + padding.bottom).toBeLessThan(240);
+  expect(controlsView.props.className).toContain('flex-row');
+  await act(async () => { controlsView.props.onLayout({ nativeEvent: { layout: { height: 48 } } }); });
+  padding = tree!.root.findByType('map').props.mapPadding; expect(padding.top + padding.bottom).toBeLessThan(240);
+  expect(controls.fit).toHaveBeenCalled(); const fitPadding = controls.fit.mock.calls.at(-1)![1].edgePadding;
+  expect(padding.top + padding.bottom + fitPadding.top + fitPadding.bottom).toBeLessThan(240);
+});
+it('rechecks wall-clock freshness at the paid-call boundary even before the periodic clock catches up', async () => {
+  handoff(false); controls.location.status = 'loading'; await mount();
+  vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 60000); controls.location.status = 'ready'; await update(); expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('marks the submitted destination separately from later place metadata coordinates', async () => {
+  controls.token = createRoutePreviewIntent(client, { ...place, coordinates: { latitude: 43.3, longitude: -126.5 } }, { origin, destination: place.coordinates, route });
+  await mount(); expect(tree!.root.findAllByType('marker').find(m => m.props.title === place.name)!.props.coordinate).toEqual(place.coordinates); expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('does not let an older waiting screen spend a replacement screen’s retry intent', async () => {
+  handoff(false); controls.location.status = 'loading'; await mount(); const older = tree!;
+  await mount(); await press('directions.retry'); await act(async () => { tree!.unmount(); }); tree = older;
+  controls.location.status = 'ready'; await update(); expect(routeService.walking).not.toHaveBeenCalled();
+  await press('directions.retry'); expect(routeService.walking).toHaveBeenCalledOnce();
 });

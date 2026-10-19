@@ -67,10 +67,13 @@ export function useRoutePreview(token: unknown, configured: boolean) {
   const data = session.data;
   const expired = !!data && timestamp - data.intent.createdAt >= routePreviewLifetimeMs;
   useEffect(() => {
-    if (!configured || !usable || !data || data.status !== 'waiting' || !authorized.current || expired) return;
+    if (!configured || !usable || !data || data.status !== 'waiting' || data.owner !== owner || !authorized.current || expired) return;
     // Cache presence is also a revocable lease. Auth clear can retire the session
     // between a rendered GPS update and this effect (or while the request runs).
-    if (client.getQueryData(key) !== data || Date.now() - data.intent.createdAt >= routePreviewLifetimeMs) return;
+    const requestTime = Date.now();
+    const requestFresh = (time: number | null) => time !== null && time <= requestTime + 1000 && requestTime - time <= AR.positionMaxAgeMs;
+    if (client.getQueryData(key) !== data || requestTime - data.intent.createdAt >= routePreviewLifetimeMs ||
+      !requestFresh(location.positionTimestamp) || !requestFresh(location.watcherTimestamp)) return;
     authorized.current = false;
     const origin = { ...location.position! };
     const pending: Session = { owner, attempt: data.attempt, intent: data.intent, status: 'pending' };
@@ -82,14 +85,14 @@ export function useRoutePreview(token: unknown, configured: boolean) {
     const acquire = async () => routeService.walking({ origin, destination: data.intent.place.coordinates, language });
     void acquire().then(route => {
       let result: Result;
-      try { result = validated({ origin, route }); }
+      try { result = validated({ origin, destination: data.intent.place.coordinates, route }); }
       catch { throw new EdgeRequestError('UPSTREAM_INVALID'); }
       finish({ owner, attempt: data.attempt, intent: data.intent, status: 'success', result });
     }).catch((error: unknown) => finish({ owner, attempt: data.attempt, intent: data.intent, status: 'failed', errorKey: edgeErrorMessageKey(error) }));
-  }, [client, key, data, configured, usable, expired, location.position, language, owner]);
+  }, [client, key, data, configured, usable, expired, location.position, location.positionTimestamp, location.watcherTimestamp, language, owner]);
   function retry() {
     const current = client.getQueryData<Session>(key);
-    if (!running || !configured || !current || current.status === 'pending' || current.status === 'success' || (current.status === 'waiting' && authorized.current && !expired)) return;
+    if (!running || !configured || !current || current.status === 'pending' || current.status === 'success' || (current.status === 'waiting' && current.owner === owner && authorized.current && !expired)) return;
     const nextToken = createRoutePreviewIntent(client, current.intent.place);
     const next = claimRoutePreviewIntent(client, nextToken);
     if (!next) return;

@@ -30,7 +30,7 @@ Nothing is stored on disk.
 
 Home Map's **Get walking route** continues to request and display its own route.
 After success, **View Route** passes that result and its original submitted
-origin to the preview with zero additional Routes requests. Returning to the
+origin and destination to the preview with zero additional Routes requests. Returning to the
 same selected POI preserves Home's route. Selecting a different POI clears its
 route as before.
 
@@ -41,7 +41,8 @@ There is no rerouting, navigation guidance or successful-route refresh action.
 ## Presentation and intentional R01 differences
 
 - A real native Google map renders the provider polyline in the existing CSS
-  route blue, with the captured origin and green destination markers. The live
+  route blue, with the captured origin and submitted destination markers. Later POI metadata
+  changes do not move the route destination. The live
   user marker/Recenter requires usable current GPS. A moving user marker never
   changes the captured origin or reroutes the preview.
 - The white header sits inside Android safe areas, with Back and the localized
@@ -49,8 +50,10 @@ There is no rerouting, navigation guidance or successful-route refresh action.
 - The compact white rounded dock is measured and scrollable, capped at 55% of
   the measured map scene. The header and safe areas are outside that scene.
   Google map padding is omitted until the current map instance is ready, then
-  reserves the measured dock for legal attribution. Fit padding is added once,
-  matching the Android Maps implementation. Fit/Recenter use accessible buttons.
+  reserves the measured dock for legal attribution. Padding is bounded during
+  resize callbacks; fitting waits for the dock to catch up to its current cap. Fit padding is added once,
+  matching the Android Maps implementation. Fit/Recenter use accessible buttons
+  arranged horizontally to preserve space on short scenes.
 - The dock uses HeroUI Chip/Card/Button/Spinner, UniWind, Plus Jakarta Sans and
   the existing `global.css` palette. It shows returned distance/duration,
   destination name, optional address, the snapshot explanation, standard walking

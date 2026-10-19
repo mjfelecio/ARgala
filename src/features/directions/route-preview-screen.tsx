@@ -45,7 +45,7 @@ function Preview({ token }: { token: unknown }) {
       <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('directions.title')}</Text>
     </View>
     <View className="flex-1" onLayout={event => setViewportHeight(event.nativeEvent.layout.height)}>
-      {place && Constants.expoConfig?.extra?.mapsConfigured && <RoutePreviewMap place={place} origin={result?.origin} coordinates={coordinates}
+      {place && Constants.expoConfig?.extra?.mapsConfigured && <RoutePreviewMap place={place} origin={result?.origin} destination={result?.destination ?? place.coordinates} coordinates={coordinates}
         currentPosition={usable ? location.position : null} dockHeight={dockHeight}
         enabled={running} onViewportHeight={setViewportHeight} />}
       <View testID="route-preview-dock" className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-surface"

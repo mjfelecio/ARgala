@@ -493,3 +493,14 @@ it('opens View Route with the completed result and captured origin, without spen
   controls.params = { placeId: destination.providerId }; controls.focused = true; await act(async () => { tree!.update(renderMap()); });
   expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates); expect(routeService.walking).toHaveBeenCalledOnce();
 });
+it('hands off the submitted destination even when details update while the route is pending', async () => {
+  const { claimRoutePreviewIntent } = await import('@/features/directions/route-preview-intent');
+  const details = Promise.withResolvers<Place>(); vi.mocked(placesService.details).mockReturnValue(details.promise);
+  await startRoute(); const updated = { ...destination, coordinates: { latitude: 43.3, longitude: -126.5 } };
+  await act(async () => { details.resolve(updated); request.resolve(walkingRoute); });
+  await press('directions.view'); const opened = vi.mocked(router.push).mock.calls[0][0];
+  if (typeof opened === 'string') throw new Error('Expected a structured preview route');
+  const intent = claimRoutePreviewIntent(client, opened.params?.token);
+  expect(intent?.existing).toMatchObject({ destination: destination.coordinates, origin: { latitude: 38.5, longitude: -120.2 }, route: walkingRoute });
+  expect(routeService.walking).toHaveBeenCalledOnce();
+});

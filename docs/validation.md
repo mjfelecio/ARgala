@@ -456,8 +456,8 @@ Checks performed:
   acquisition, duplicate/lifecycle cost boundaries, retry/error recovery,
   Details/Home navigation, native loading state and synchronous adapter failure;
   targeted suites passed after implementation.
-- Final `npm run check`: typecheck, zero-warning lint and **317 tests / 34 files**
-  passed. The directions suites include **54 tests / 4 files**. The affected
+- Final `npm run check`: typecheck, zero-warning lint and **322 tests / 34 files**
+  passed. The directions suites include **58 tests / 4 files**. The affected
   Directions/Map/AR/Places run before final presentation additions passed
   **183 tests / 12 files**.
 - `npm run check:android`: passed SDK 57/Android-only configuration introspection,
@@ -493,3 +493,14 @@ checks do not substitute for that evidence. Run the recorded Android acceptance
 scenarios with configured providers and a real account before demonstration.
 Edge/limiter checks and Expo Doctor were not rerun because no server, native
 configuration or dependencies changed.
+
+Independent whole-branch review identified two important issues, both corrected
+with regressions observed RED→GREEN: native padding could exceed a short
+viewport after actual controls measurement/resize, and later POI details could
+replace the submitted route destination. Controls now share a horizontal row,
+native padding is bounded, fitting waits for dock resize measurements, and the
+submitted destination is retained separately from current place metadata.
+Additional RED→GREEN tests enforce wall-clock freshness at the paid-call boundary
+and prevent an older waiting screen from spending a replacement owner's intent.
+The full check and Android export were rerun after this fix pass. No reviewer
+findings were deferred; device limitations above remain unchanged.

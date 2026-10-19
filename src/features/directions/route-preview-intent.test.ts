@@ -20,7 +20,7 @@ it('expires pending intents even before unused query garbage collection', () => 
   vi.setSystemTime(Date.now() + 120001); expect(claimRoutePreviewIntent(c, token)).toBeNull();
 });
 it('retains the exact existing route and captured origin', () => {
-  const c = client(); const existing = { origin: { latitude: 11, longitude: 125 }, route: { distanceMeters: 900, durationSeconds: 750, encodedPolyline: '??AA', warnings: ['Returned warning'] } };
+  const c = client(); const existing = { origin: { latitude: 11, longitude: 125 }, destination: place.coordinates, route: { distanceMeters: 900, durationSeconds: 750, encodedPolyline: '??AA', warnings: ['Returned warning'] } };
   const token = createRoutePreviewIntent(c, place, existing);
   expect(claimRoutePreviewIntent(c, token)).toMatchObject({ place, source: 'map', existing });
 });
