@@ -11,10 +11,15 @@ Root protected Stack
     │   └── profile /profile   placeholder with an Open settings action
     ├── place/[providerId] /place/:providerId — POI Details
     ├── directions  /directions — compact walking preview
+    ├── destinations Stack — catalog anchor for direct links
+    │   ├── index  /destinations — featured catalog
+    │   └── [destinationId] /destinations/:destinationId — daytime preview
     └── settings    /settings  existing SettingsScreen
 ```
 
 Route files remain thin exports. `src/features/navigation/` owns `AppTabs`, `AppHeader`, the AR shell and the Profile placeholder. There are no duplicate `/` or `/ar` route files. The group layouts declare their initial routes for direct entry; `Tabs` also uses `initialRouteName="index"` and `backBehavior="initialRoute"`. Android Back from AR or Profile returns to Explore; Back at Explore propagates to the parent. Settings pushes onto the parent stack so Back restores the originating tab and its state.
+
+Featured Destinations also uses the protected parent stack, reached through Explore's controls and no-location/no-Maps fallback. Its catalog and detail screens mount no device sensors. Direct-entry Back returns to the catalog, then Explore. A gallery modal handles Android Back locally. Verified-entrance directions reuse the single-use preview intent; curated Place Details returns to the destination page. Curated Back to map returns to Explore without passing catalog identifiers into Google's selection path. A destination-centered Home-map handoff remains a separate implementation gate.
 
 Explore and Profile use one compact branded header with Android top safe area, an Ionicons compass mark, ARgala, a translated context label and a circular Settings action. AR hides both the branded header and tab bar. Its safe-area shell adds a visible Back to map button without changing camera, tracking, permission or discovery logic. Existing Open AR and AR-to-map POI actions navigate to the same public paths as before.
 

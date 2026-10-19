@@ -39,3 +39,35 @@ selection path fetches Google details. A follow-up needs a namespaced local
 selection, permission-free remote viewport and provider-safe sheet. There is no
 inert View on Map action. Verified-entrance directions use the existing walking
 preview's map and single-use intent. No curated ID may reach Google details.
+
+The approved hierarchy is adapted to real content: one Back control, labeled
+daytime hero or mint empty state, destination heading, horizontal thumbnails,
+overview/highlights, Directions and nearby search. The gallery has actual
+approved counts, source credits, a scrollable fullscreen viewer and Android Back.
+No location subtitle, landscape photo, altitude, temperature, duration, road
+access claim, AR distance gate or tourist highlight is invented to fill the design.
+All product controls use existing HeroUI/UniWind; short viewports and long text
+scroll instead of imposing fixed screen heights or single-line captions.
+
+| ID | Provisional SRS name | Name / center / entrance / copy / media approval |
+| --- | --- | --- |
+| D01 | Lake Danao Natural Park | All pending |
+| D02 | Lake Kasudsuran | All pending |
+| D03 | Lake Janagdan | All pending; Hanagdan alias unresolved |
+| D04 | Ormoc Mangrove Eco Park | All pending |
+| D05 | Pineapple Farm | All pending |
+| D06 | Leyte Golf and Country Club | All pending |
+| D07 | Alto Peak | All pending; Alta alias unresolved |
+| D08 | Heaven’s Peak | All pending |
+| D09 | Sabin Resort Hotel | All pending |
+
+With this manifest, all nine pages open and all destination Google actions are
+disabled with reasons. Automated complete-content scenarios use explicitly
+synthetic fixtures; those coordinates, text and asset IDs never enter runtime
+catalog records. Client-approved content is needed to exercise live destination
+searches and walking entrances in UAT.
+
+Local POI navigation uses `setPlaceSelection` to configure transient retention
+before storing an unobserved query. This avoids a zero-cache-lifetime race while
+the next screen mounts. Retention expires when unused and auth clear still
+removes the data. It does not grant details or route-request authority.

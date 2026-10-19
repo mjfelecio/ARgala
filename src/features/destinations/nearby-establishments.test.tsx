@@ -89,3 +89,9 @@ it('fails an offline explicit attempt without queueing a paid request for reconn
  await mount(); await search(); expect(placesService.nearby).toHaveBeenCalledOnce();
  await act(async () => onlineManager.setOnline(true)); expect(placesService.nearby).toHaveBeenCalledOnce(); expect(output()).toContain(translations.t('service.failed'));
 });
+it('drops transient results on authentication cache clear without inheriting new request authority', async () => {
+ await mount(); await search(); expect(output()).toContain(place(499).name);
+ await act(async () => { client.clear(); tree!.update(render()); });
+ expect(placesService.nearby).toHaveBeenCalledOnce();
+ expect(client.getQueryCache().findAll({ queryKey: ['destination-nearby'] }).every(query => query.state.data === undefined)).toBe(true);
+});

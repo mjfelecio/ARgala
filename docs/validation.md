@@ -579,3 +579,69 @@ uses the installed SDK's reactive-index hook and drops pre-readiness imperative
 requests, which the previous immediate driver masked. The corrected AR/navigation
 run passed **72 tests / 6 files**; full checks and Android export were rerun.
 No review findings were deferred. Physical-device limitations above remain.
+
+### Featured Destinations — 2026-10-20
+
+Base: `origin/main` `be3971b` (merged AR Camera PR #12). Branch:
+`feat/featured-destinations`. The supplied kickoff SRS §3 was inspected directly;
+D01–D09 are provisional names, with no approved geographic or tourist content.
+[Destination notes](design/clean-explorer/DESTINATIONS.md) record the per-field
+approval contract, readiness table, visual deviations and Home-map handoff gate.
+
+The protected catalog and destination pages browse without location/camera
+ownership. Approved bundled photos support credits, exact photo counts,
+fullscreen close/Android Back and translated empty/error states. Approved copy
+and photo metadata fall back per field to visibly labeled English. Actual
+runtime records have no media or copy, so all nine show honest empty states.
+
+Explicit nearby search uses the independently approved destination center and
+fixed 500 m radius, filtering exact unrounded distances before display rounding.
+Results retain provider IDs, linked attribution and the 20-result limitation.
+No optional user GPS distance is added. Directions requires an independently
+approved visitor entrance, creates one transient intent and uses the existing
+fresh-GPS walking preview. Curated details return to the catalog; curated IDs
+never enter Google details or Home's Google selection path. Destination-centered
+Home-map handoff is deferred, with no inert action in the UI.
+
+Automated coverage uses the real screens/components, actual EN/KO/JA resources,
+production Query defaults, route-preview hook, and installed Router route-tree,
+path parser, validator and stack reducer. Native rendering, sensors and network
+are mocked. Synthetic complete-content fixtures are test-only. Regressions cover
+all nine deep links, invalid IDs, no-GPS/no-Maps Home entry, 499/500/500.1/501 m
+eligibility, disabled paid-query observers, errors/explicit recovery, language
+changes, foreground/refocus, reconnect, invalidation, remount, cache eviction,
+offline attempts and authentication cache clear. Rapid navigation/search/direction
+presses do not duplicate their respective actions.
+
+Nearby selection exposed a shared zero-cache-lifetime race before details
+mounted. Both Nearby and Route Preview reproduced it; `setPlaceSelection` now
+sets transient retention before storage for all producers. Delayed navigation,
+expiry and auth clear are tested. Independent review then found direct-detail
+Back skipping the catalog and missing English fallback markers on unselected
+thumbnails. Both were reproduced RED→GREEN. The catalog now has its own anchored
+stack, testing native Back through catalog to Explore even for unknown IDs.
+No review findings remain deferred.
+
+`npm run check` passed typecheck, zero-warning lint and **425 tests / 43 files**.
+The review-fix run passed **83 targeted tests / 4 files**. `npm run check:android`
+and `git diff --check` passed. `npm run export:android -- --max-workers 2` passed
+the final Metro/Hermes export after both review fixes. One earlier suite run overlapped Metro export and
+hit default test timeouts in existing Map/AR/Edge tests; the isolated 421-test run
+and subsequent final 425-test run passed without changing timeout settings.
+`npx expo customize tsconfig.json` regenerated ignored local route declarations;
+it produced no tracked config change. No SDK, dependency, native configuration,
+Edge implementation or migration changed, so install compatibility/Doctor and
+Edge/limiter-specific commands were not rerun locally.
+
+Android device/UAT: **NOT TESTED**. No `adb` executable is available; no APK was
+built or installed and no Android render screenshot was captured. Physical
+Back/gallery interaction, long text/CJK at 150% font scale, sign-out navigation,
+permissions, live credited Places results, real visitor entrances, GPS freshness
+and live Google/Supabase integration still require a configured device and
+client-approved content. Native Map/camera/compass behavior is not established
+by a component mock, configuration introspection or Metro export.
+
+All nine sites still need approved names, centers, accessible entrances, copy,
+daytime assets/rights and content translations. Name variants Janagdan/Hanagdan
+and Alto/Alta remain unresolved. The application journey is reviewable, but
+content-complete nine-site field UAT remains blocked on those approvals.
