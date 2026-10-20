@@ -83,6 +83,13 @@ it('returns to Map with selection or to the selected Place Details without provi
 it('shows honest Maps configuration guidance without spending quota', async () => {
   controls.mapsConfigured = false; handoff(false); await mount(); expect(output()).toContain(translations.t('map.missingKey')); expect(routeService.walking).not.toHaveBeenCalled();
 });
+it('retains its Google selection until details mounts after a navigation delay', async () => {
+  handoff(); await mount(); await press('directions.details');
+  await act(async () => { tree!.unmount(); }); tree = undefined;
+  await new Promise(resolve => setTimeout(resolve, 10));
+  controls.details = true; await mount();
+  expect(output()).toContain(place.name);
+});
 it('spends one intent only when delayed foreground GPS becomes fresh, with no repeat on lifecycle or locale changes', async () => {
   const { focusManager, onlineManager } = await import('@tanstack/react-query');
   handoff(false); controls.location.status = 'loading'; controls.location.position = null; await mount(); expect(routeService.walking).not.toHaveBeenCalled();
@@ -212,4 +219,19 @@ it('does not let an older waiting screen spend a replacement screen’s retry in
   await mount(); await press('directions.retry'); await act(async () => { tree!.unmount(); }); tree = older;
   controls.location.status = 'ready'; await update(); expect(routeService.walking).not.toHaveBeenCalled();
   await press('directions.retry'); expect(routeService.walking).toHaveBeenCalledOnce();
+});
+it('returns curated routes to their catalog details and never hands a curated ID to Home Google selection', async () => {
+ const curated: Place = { id: 'destination:D01', providerId: 'curated_D01', provider: 'curated', source: 'curated', name: 'Synthetic catalog subject', coordinates: place.coordinates, attributions: [] };
+ handoff(true, curated); await mount();
+ await press('directions.details'); expect(router.dismissTo).toHaveBeenLastCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D01' } });
+ await press('directions.map'); expect(router.dismissTo).toHaveBeenLastCalledWith('/');
+ expect(client.getQueryData(placeSelectionOptions(curated.providerId).queryKey)).toBeUndefined(); expect(routeService.walking).not.toHaveBeenCalled();
+});
+it('acquires one walking route to the approved curated entrance and does not repeat it after focus or language changes', async () => {
+ const curated: Place = { id: 'destination:D01', providerId: 'curated_D01', provider: 'curated', source: 'curated', name: 'Synthetic catalog subject', coordinates: place.coordinates, attributions: [] };
+ handoff(false, curated); await mount();
+ expect(routeService.walking).toHaveBeenCalledExactlyOnceWith({ origin, destination: curated.coordinates, language: 'en' });
+ controls.focused = false; controls.active = false; await update(); controls.focused = true; controls.active = true; await update();
+ controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); }); await update(); expect(routeService.walking).toHaveBeenCalledOnce();
+ await press('directions.details'); expect(router.dismissTo).toHaveBeenLastCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D01' } });
 });

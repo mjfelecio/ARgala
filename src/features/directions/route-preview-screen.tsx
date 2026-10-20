@@ -14,9 +14,10 @@ import { useTranslation } from 'react-i18next';
 import { withUniwind } from 'uniwind';
 import { RoutePreviewLocationStatus } from './route-preview-location-status';
 import { ProviderAttributions } from '@/features/map/attributions';
-import { placeSelectionOptions } from '@/features/places/selection';
+import { setPlaceSelection } from '@/features/places/selection';
 import { useRoutePreview } from './use-route-preview';
 import { RoutePreviewMap } from './route-preview-map';
+import { destinationIdForRoutePlace } from '@/features/destinations/routing';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
 export default function RoutePreviewScreen() {
@@ -36,7 +37,9 @@ function Preview({ token }: { token: unknown }) {
   const coordinates = result?.coordinates ?? [];
   const place = data?.intent.place;
   function toMap() {
-    if (place) client.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+    // Curated Home-map selection is deferred; never forward catalog IDs to Google's selection path.
+    if (place?.provider === 'curated') { router.dismissTo('/'); return; }
+    if (place) setPlaceSelection(client, place);
     router.dismissTo(place ? { pathname: '/', params: { placeId: place.providerId } } : '/');
   }
   return <StyledSafeAreaView className="flex-1 bg-surface" edges={['top', 'bottom', 'left', 'right']}>
@@ -77,7 +80,12 @@ function Preview({ token }: { token: unknown }) {
           <View className="flex-row flex-wrap gap-2">
             <Button variant="secondary" className="min-w-36 grow shrink" accessibilityLabel={t('directions.map')} onPress={toMap}><Ionicons name="map-outline" size={22} color={accent} /><Button.Label>{t('directions.map')}</Button.Label></Button>
             {place && <Button className="min-w-36 grow shrink" accessibilityLabel={t('directions.details')} onPress={() => {
-              client.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+              if (place.provider === 'curated') {
+                const destinationId = destinationIdForRoutePlace(place);
+                router.dismissTo(destinationId ? { pathname: '/destinations/[destinationId]', params: { destinationId } } : '/destinations');
+                return;
+              }
+              setPlaceSelection(client, place);
               router.dismissTo({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
             }}><Button.Label>{t('directions.details')}</Button.Label></Button>}
           </View>

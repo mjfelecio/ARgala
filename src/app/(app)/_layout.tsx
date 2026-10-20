@@ -15,6 +15,7 @@ export default function AppLayout() {
     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     <Stack.Screen name="place/[providerId]" options={{ headerShown: false }} />
     <Stack.Screen name="directions" options={{ headerShown: false }} />
+    <Stack.Screen name="destinations" options={{ headerShown: false }} />
     <Stack.Screen name="settings" options={{ title: t('settings.title') }} />
   </Stack>;
 }

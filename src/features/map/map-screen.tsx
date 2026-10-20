@@ -13,7 +13,7 @@ import { decodePolyline } from '@/features/directions/polyline';
 import { distanceMeters, isWithinRadius, type Coordinate } from '@/features/location/geo';
 import { LocationStatus } from '@/features/location/status';
 import { useDeviceLocation } from '@/features/location/use-device-location';
-import { placeSelectionOptions } from '@/features/places/selection';
+import { placeSelectionOptions, setPlaceSelection } from '@/features/places/selection';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
 import { placesService } from '@/features/places/service';
 import { useSettings } from '@/features/settings/provider';
@@ -32,7 +32,8 @@ const StyledMapView = withUniwind(MapView);
 
 function LaunchControls() {
   const { t } = useTranslation();
-  return <View className="flex-row flex-wrap justify-evenly gap-2 px-2"><Button accessibilityLabel={t('map.camera')} onPress={() => router.navigate('/ar')}><Button.Label>{t('map.camera')}</Button.Label></Button></View>;
+  return <View className="flex-row flex-wrap justify-evenly gap-2 px-2"><Button accessibilityLabel={t('map.camera')} onPress={() => router.navigate('/ar')}><Button.Label>{t('map.camera')}</Button.Label></Button>
+    <Button variant="secondary" accessibilityLabel={t('destinations.title')} onPress={() => router.navigate('/destinations')}><Button.Label>{t('destinations.title')}</Button.Label></Button></View>;
 }
 export default function MapScreen() {
   const { t } = useTranslation();
@@ -149,7 +150,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
       onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
       onRecenter={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)}
-      onOpenAr={() => router.navigate('/ar')} />
+      onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')} />
     <HomePlaceSheet key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
       canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady} route={route.data}
@@ -157,7 +158,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       selectionSummary={place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
       onViewDetails={place ? () => {
         if (!active || !focused) return;
-        queryClient.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+        setPlaceSelection(queryClient, place);
         router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
       } : undefined}
       onViewRoute={route.data && routeRequest && place ? () => {

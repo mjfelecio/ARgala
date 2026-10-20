@@ -15,7 +15,7 @@ import { useAppActive } from '@/lib/use-app-active';
 import { edgeErrorMessageKey } from '@/lib/edge-error';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
 import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
-import { placeSelectionOptions } from './selection';
+import { placeSelectionOptions, setPlaceSelection } from './selection';
 import { placesService } from './service';
 import { PlaceDetailsContent } from './place-details-content';
 
@@ -47,7 +47,7 @@ export default function PlaceDetailsScreen() {
   function navigateTo(pathname: '/' | '/ar') {
     if (!place || !active || !focused || navigating.current) return;
     navigating.current = true;
-    client.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+    setPlaceSelection(client, place);
     // Pop the details page back to the existing tab navigator, selecting its
     // destination tab. This also handles a direct link without duplicating tabs.
     router.dismissTo({ pathname, params: { placeId: place.providerId } });

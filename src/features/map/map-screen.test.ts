@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider, notifyManager } from '@tanstack/react
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { router } from 'expo-router';
+import Constants from 'expo-constants';
 import { routeService, type WalkingRoute } from '@/features/directions/service';
 import { placesService, type Place } from '@/features/places/service';
 import { queryClient } from '@/lib/query';
@@ -46,6 +47,16 @@ vi.mock('@/ui/shared', async () => {
 const destination: Place = { id: 'google:destination', provider: 'google', providerId: 'destination', name: 'Destination', coordinates: { latitude: 43.252, longitude: -126.453 }, attributions: [] };
 const walkingRoute: WalkingRoute = { encodedPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@', distanceMeters: 800000, durationSeconds: 600000, warnings: [] };
 const coordinates = [{ latitude: 38.5, longitude: -120.2 }, { latitude: 40.7, longitude: -120.95 }, { latitude: 43.252, longitude: -126.453 }];
+it.each(['denied', 'no-maps', 'ready'])('opens the catalog from the %s Home state without provider calls', async state => {
+  controls.hasLocation = state !== 'denied';
+  Constants.expoConfig!.extra!.mapsConfigured = state !== 'no-maps';
+  try {
+    await act(async () => { tree = create(renderMap()); });
+    await press('destinations.title');
+    expect(router.navigate).toHaveBeenCalledWith('/destinations');
+    expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
+  } finally { Constants.expoConfig!.extra!.mapsConfigured = true; }
+});
 let client: QueryClient;
 let translations: i18n;
 let tree: ReactTestRenderer | undefined;
@@ -304,7 +315,7 @@ it('offers an explicit details request when the handoff has expired', async () =
 it('offers floating Home controls and spends nothing on mount, pan, locale, navigation or invalidation', async () => {
  await act(async () => { tree = create(renderMap()); });
  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
- expect(tree!.root.findAllByType('button').filter(b => b.props.accessibilityRole === 'button')).toHaveLength(4);
+ expect(tree!.root.findAllByType('button').filter(b => b.props.accessibilityRole === 'button')).toHaveLength(5);
  // Native region changes have no paid-refresh handler.
  await act(async () => { tree!.root.findByType('map').props.onRegionChangeComplete?.({ latitude: 10, longitude: 20 }); });
  await press('map.camera'); expect(router.navigate).toHaveBeenLastCalledWith('/ar');

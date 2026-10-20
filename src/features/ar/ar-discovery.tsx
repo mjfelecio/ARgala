@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { placeSelectionOptions } from '@/features/places/selection';
+import { placeSelectionOptions, setPlaceSelection } from '@/features/places/selection';
 import { router, useLocalSearchParams } from 'expo-router';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
 import { placesService } from '@/features/places/service';
@@ -84,13 +84,13 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
     if (!running || !selected || navigating.current) return;
     navigating.current = true;
     // Carry the selected summary without a provider request on map entry.
-    client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
+    setPlaceSelection(client, selected);
     router.navigate({ pathname: '/', params: { placeId: selected.providerId } });
   }
   function directions() {
     if (!running || !selected || navigating.current) return;
     navigating.current = true;
-    client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
+    setPlaceSelection(client, selected);
     const token = createRoutePreviewIntent(client, selected, undefined, 'ar');
     router.push({ pathname: '/directions', params: { token } });
   }
@@ -126,7 +126,7 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
         onDetails={() => {
           if (!running || !selected || navigating.current) return;
           navigating.current = true;
-          client.setQueryData(placeSelectionOptions(selected.providerId).queryKey, selected);
+          setPlaceSelection(client, selected);
           router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
         }} onDirections={directions} onMap={toMap} />
     </View>

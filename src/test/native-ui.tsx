@@ -10,7 +10,7 @@ vi.mock('react-native', () => ({
   Alert: { alert: nativeUi.alert }, Linking: { openURL: nativeUi.openURL, openSettings: vi.fn() },
   Easing: { bezier: () => (value: number) => value }, Animated: { Interpolation: class {}, Value: class { interpolate() { return 0; } } }, BackHandler: { addEventListener: () => ({ remove() {} }) }, Image: 'img', TextInput: 'input', View: 'view', Text: 'text', Pressable: 'button', ScrollView: 'scroll',
   Platform: { OS: 'android', select: (values: Record<string, unknown>) => values.android ?? values.default },
-  ActivityIndicator: 'progress', StyleSheet: { create: (styles: unknown) => styles, flatten: (styles: unknown) => styles, absoluteFillObject: {}, hairlineWidth: 1 },
+  Modal: 'modal', ActivityIndicator: 'progress', StyleSheet: { create: (styles: unknown) => styles, flatten: (styles: unknown) => styles, absoluteFillObject: {}, hairlineWidth: 1 },
   I18nManager: { isRTL: false }, PixelRatio: { get: () => 1 },
   useWindowDimensions: () => ({ width: 360, height: 800 }),
 }));

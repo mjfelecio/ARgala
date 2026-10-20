@@ -139,5 +139,29 @@
     "stale": "新しい正確な位置情報が必要です。位置情報を再取得してください。",
     "retry": "徒歩ルートを再試行",
     "view": "ルートを見る"
+  },
+  "destinations": {
+    "title": "おすすめの目的地",
+    "intro": "調査対象の9か所をご覧ください。正式名称と訪問情報は確認中です。",
+    "provisional": "仮の名称",
+    "contentPending": "確認済みの訪問情報はまだありません。",
+    "centerMissing": "目的地の位置が確認されると、周辺の場所を検索できます。",
+    "entranceMissing": "利用可能な入口が確認されると、経路を表示できます。",
+    "unavailable": "この目的地は利用できません。おすすめの目的地に戻ってください。",
+    "daytime": "昼間のプレビュー",
+    "notLive": "承認済みの昼間の写真です。ライブカメラ映像ではありません。",
+    "previewMissing": "昼間のプレビューはまだありません。",
+    "imageFailed": "このプレビュー画像を表示できません。",
+    "englishFallback": "英語で表示",
+    "highlights": "見どころ",
+    "photoCount_other": "承認済み写真 {{count}}枚",
+    "exploreNearby": "周辺を探索",
+    "nearbyTitle": "周辺の場所",
+    "nearbyRadius": "この目的地から500m以内を検索します。距離は目的地からの直線距離です。",
+    "centerInvalid": "周辺検索に使用する目的地の位置が確認されていません。",
+    "nearbyUnsearched": "「周辺を探索」をタップして、この目的地の周辺を検索してください。",
+    "nearbyEmpty": "この目的地から500m以内に検索結果がありませんでした。",
+    "fromDestination": "目的地から{{meters}}m",
+    "nearbyLimit": "検索結果は最大{{count}}件です。周辺のすべての施設が含まれるとは限りません。"
   }
 }

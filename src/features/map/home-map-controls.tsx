@@ -6,10 +6,10 @@ import { Spinner } from 'heroui-native/spinner';
 import { useThemeColor } from 'heroui-native/hooks';
 
 export type HomeMapControlsProps = {
-  onSearchNearby(): void; onRecenter(): void; onOpenAr(): void;
+  onSearchNearby(): void; onRecenter(): void; onOpenAr(): void; onOpenDestinations(): void;
   canSearch: boolean; searching: boolean; onLayout?(event: LayoutChangeEvent): void;
 };
-export function HomeMapControls({ onSearchNearby, onRecenter, onOpenAr, canSearch, searching, onLayout }: HomeMapControlsProps) {
+export function HomeMapControls({ onSearchNearby, onRecenter, onOpenAr, onOpenDestinations, canSearch, searching, onLayout }: HomeMapControlsProps) {
   const { t } = useTranslation();
   const [ink, onAccent] = useThemeColor(['default-foreground', 'accent-foreground']);
   return <View testID="home-map-controls" className="max-h-[40%] shrink px-4 py-2" onLayout={onLayout} pointerEvents="box-none">
@@ -27,6 +27,9 @@ export function HomeMapControls({ onSearchNearby, onRecenter, onOpenAr, canSearc
           <Ionicons name="locate-outline" size={24} color={ink} /><Button.Label>{t('map.recenter')}</Button.Label>
         </Button>
       </View>
+      <Button variant="secondary" accessibilityLabel={t('destinations.title')} onPress={onOpenDestinations}>
+        <Ionicons name="compass-outline" size={24} color={ink} /><Button.Label>{t('destinations.title')}</Button.Label>
+      </Button>
     </ScrollView>
   </View>;
 }

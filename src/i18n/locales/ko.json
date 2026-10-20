@@ -139,5 +139,29 @@
     "stale": "최신의 정확한 위치가 필요합니다. 위치 확인을 다시 시도하세요.",
     "retry": "도보 경로 다시 시도",
     "view": "경로 보기"
+  },
+  "destinations": {
+    "title": "추천 여행지",
+    "intro": "연구 대상 여행지 9곳을 둘러보세요. 공식 명칭과 방문 정보는 확인 중입니다.",
+    "provisional": "임시 명칭",
+    "contentPending": "확인된 방문 정보가 아직 없습니다.",
+    "centerMissing": "여행지 위치가 확인되면 주변 장소를 검색할 수 있습니다.",
+    "entranceMissing": "방문객이 이용할 수 있는 입구가 확인되면 길 안내를 이용할 수 있습니다.",
+    "unavailable": "이 여행지를 찾을 수 없습니다. 추천 여행지로 돌아가세요.",
+    "daytime": "낮 시간 미리보기",
+    "notLive": "승인된 낮 사진입니다. 실시간 카메라 영상이 아닙니다.",
+    "previewMissing": "낮 시간 미리보기가 아직 없습니다.",
+    "imageFailed": "미리보기 이미지를 표시할 수 없습니다.",
+    "englishFallback": "영어로 표시됨",
+    "highlights": "주요 정보",
+    "photoCount_other": "승인된 사진 {{count}}장",
+    "exploreNearby": "주변 탐색",
+    "nearbyTitle": "주변 장소",
+    "nearbyRadius": "이 여행지에서 500m 이내를 검색합니다. 거리는 여행지에서의 직선거리입니다.",
+    "centerInvalid": "주변 검색에 사용할 여행지 위치가 확인되지 않았습니다.",
+    "nearbyUnsearched": "주변 탐색을 눌러 이 여행지 주변을 검색하세요.",
+    "nearbyEmpty": "이 여행지에서 500m 이내에 검색된 장소가 없습니다.",
+    "fromDestination": "여행지에서 {{meters}}m",
+    "nearbyLimit": "최대 {{count}}곳이 검색되며 모든 주변 시설이 포함되지는 않을 수 있습니다."
   }
 }
