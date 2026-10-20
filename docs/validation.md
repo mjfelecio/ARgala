@@ -924,3 +924,17 @@ Follow-up checks: `npm run check` passed TypeScript, ESLint with zero warnings a
 ## Fixed-scene refinement — AR camera
 
 Moved camera ownership out of the discovery overlay into a separately measured, full-screen scene. Safe areas now apply only to overlays; the camera mounts only with positive explicit dimensions and preserves those bounds through blur/refocus and transient zero layouts. Regression coverage exercises expanded navigation return, independent overlay measurements, attribution appearance, background return and real scene resizing while preserving request counts and permission behavior. The earlier screen tests did not assert native camera dimensions. The Android-native cause of the reported squashing has not been reproduced locally; these tests guard the new sizing contract rather than prove physical preview rendering.
+
+## Fixed-scene refinement — maps
+
+Home and Directions now measure their full scene independently from the shorter native MapView. Each scene shares one collapsed peek calculation with its dock, and native map height is scene height minus that peek. Expanded occupation changes only overlay placement and overlap-based Google attribution padding, avoiding double reservation of the peek. Directions no longer fits on sheet settlement or refocus; automatic fitting is keyed to route identity and actual native layout, while explicit Fit retains settled visible-area geometry. Readiness, cached route snapshots, selection and paid-request authority remain unchanged.
+
+Regressions failed before the change for the missing fixed-frame contract and unwanted settlement-triggered route fitting. Focused map, dock and preview suites pass (104 tests), including both detents, native map identity, measurement-loop prevention, focus return, explicit Fit, large fonts, short screens and attribution padding. A short-screen regression also reproduced top padding beyond the new map frame; padding is now bounded. The accepted JavaScript-only limit is that SDK attribution padding can still shift the map's visual center slightly. No native patch, dependency or configuration change is included.
+
+### Fixed-scene batch verification
+
+- `npm run check`: passed TypeScript, ESLint with zero warnings and **559 tests in 52 files**.
+- `npm run check:android`: passed; `npm run export:android`: passed Metro/Hermes export (**2,640 modules**).
+- Targeted AR/navigation coverage passed (62 tests); map/dock/preview coverage passed (104 tests); the real installed Router startup suite passed (6 tests) after supplying scene layout events, retaining delayed navigation readiness and GPS/compass cleanup assertions.
+- `git diff --check` passed. Fresh-context whole-change review found no confirmed important regressions.
+- Still required on Android: expand AR, navigate to Home/Details/Directions and return repeatedly; compare camera proportions before/after, background/resume and permission recovery; inspect both maps through drag/expand/collapse, initial and manual Fit/Recenter, attribution, small screens and large fonts. Camera preview proportions, native map pixels/zoom and gesture smoothness are not verified by renderer tests or export. No APK was built/installed; the accepted attribution-padding center-shift limit remains.

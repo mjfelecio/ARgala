@@ -42,10 +42,17 @@ function output() { return JSON.stringify(tree!.toJSON()); }
 function button(key: string) { return tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t(key)); }
 async function press(key: string) { if (['directions.map','directions.details'].includes(key) && !button(key)) await expand(); const b = button(key); expect(b, key).toBeDefined(); expect(b!.props.disabled).not.toBe(true); await act(async () => { b!.props.onPress(); }); }
 function handoff(existing = true, target = place) { controls.token = createRoutePreviewIntent(client, target, existing ? { origin, destination: target.coordinates, route } : undefined, existing ? 'map' : 'details', controls.language); }
-async function layout() { await act(async () => {
-  tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } });
-  tree!.root.findByProps({ testID: 'route-preview-header' }).props.onLayout({ nativeEvent: { layout: { height: 88 } } });
+async function nativeLayout(width: number) { await act(async()=>{
+ const map=tree!.root.findByType('map');map.props.onLayout({nativeEvent:{layout:{width,height:map.props.style.height}}});
 }); }
+async function sceneLayout(width: number,height: number) {
+ await act(async()=>tree!.root.findByProps({testID:'route-preview-scene'}).props.onLayout({nativeEvent:{layout:{width,height}}}));
+ await nativeLayout(width);
+}
+async function layout() { await act(async () => {
+  tree!.root.findByProps({testID:'route-preview-scene'}).props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } });
+  tree!.root.findByProps({ testID: 'route-preview-header' }).props.onLayout({ nativeEvent: { layout: { height: 88 } } });
+}); await nativeLayout(360); }
 async function expand() { if (button('map.expand')) await press('map.expand'); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false }); vi.clearAllMocks(); vi.spyOn(Date, 'now').mockReturnValue(1800000000000);
@@ -72,7 +79,7 @@ it('renders the exact existing route, captured origin, destination and real warn
 it('withholds native padding and fitting until this map instance is ready and measures its dock', async () => {
   handoff(); await mount(); await layout(); expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding'); expect(controls.fit).not.toHaveBeenCalled();
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
-  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(192); expect(controls.fit).toHaveBeenCalledWith(coordinates, expect.any(Object));
+  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(0); expect(controls.fit).toHaveBeenCalledWith(coordinates, expect.any(Object));
   controls.fit.mockClear(); controls.location.position = { latitude: 10, longitude: 124 }; await update(); expect(controls.fit).not.toHaveBeenCalled();
   await press('directions.fit'); expect(controls.fit).toHaveBeenCalledOnce(); await press('directions.recenter'); expect(controls.animate).toHaveBeenCalledWith(expect.objectContaining(controls.location.position), expect.any(Number));
 });
@@ -170,11 +177,12 @@ it.each(['en', 'ko', 'ja'] as const)('renders actual %s resources, long names, n
   expect(tree!.root.findAllByType('text').find(n => n.props.children === target.name)!.props.numberOfLines).toBeUndefined();
   expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left', 'right']);
   await act(async () => {
-    tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 640, height: 240 } } });
+    tree!.root.findByProps({testID:'route-preview-scene'}).props.onLayout({ nativeEvent: { layout: { width: 640, height: 240 } } });
     tree!.root.findByProps({ testID: 'route-preview-header' }).props.onLayout({ nativeEvent: { layout: { height: 88 } } });
     tree!.root.findByType('map').props.onMapReady();
   });
-  expect(tree!.root.findByType('dialog').props.snapPoints.every((height:number)=>height<=88)).toBe(true); expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(88);
+  await nativeLayout(640);
+  expect(tree!.root.findByType('dialog').props.snapPoints.every((height:number)=>height<=88)).toBe(true); expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(0);
   expect(tree!.root.findAllByType('section' as React.ElementType)).toHaveLength(1); expect(controls.fit).toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
 });
 it('has a working Back fallback and real attribution link with sanitized link failures', async () => {
@@ -192,17 +200,17 @@ it('handles a synchronous adapter failure through the localized error path', asy
   vi.mocked(routeService.walking).mockImplementationOnce(() => { throw new Error('Private adapter diagnostic'); }); handoff(false); await mount();
   expect(output()).toContain(translations.t('service.failed')); expect(output()).not.toContain('Private adapter diagnostic'); await press('directions.retry'); expect(routeService.walking).toHaveBeenCalledTimes(2);
 });
-it('moves credit padding during drag but fits only settled geometry, including short-height resize', async () => {
+it('moves credit padding without refitting on drag or settlement and handles real resizing', async () => {
   handoff(); await mount(); await layout();
   await act(async()=>tree!.root.findByType('map').props.onMapReady());
   const fits=controls.fit.mock.calls.length;
   const dock=tree!.root.findByType('dialog');
   await act(async()=>{dock.props.animatedPosition.set(400);nativeUi.reactions.forEach(tick=>tick());});
-  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(320);
+  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(128);
   expect(controls.fit).toHaveBeenCalledTimes(fits);
   await act(async()=>dock.props.onChange(1,720-dock.props.snapPoints[1]));
-  expect(controls.fit.mock.calls.length).toBeGreaterThan(fits);
-  await act(async()=>tree!.root.findByType('map').props.onLayout({nativeEvent:{layout:{width:640,height:240}}}));
+  expect(controls.fit).toHaveBeenCalledTimes(fits);
+  await sceneLayout(640,240);
   const padding=tree!.root.findByType('map').props.mapPadding;
   expect(padding.top+padding.bottom).toBeLessThan(240);
   expect(tree!.root.findByType('dialog').props.snapPoints).toEqual([88]);
@@ -274,7 +282,7 @@ it('retains its route and native map through expansion, collapse and large-font 
  expect(tree!.root.findByType('map')).toBe(map);
  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(polyline);
  nativeUi.fontScale=2;
- await act(async()=>tree!.root.findByType('map').props.onLayout({nativeEvent:{layout:{width:640,height:240}}}));
+ await sceneLayout(640,240);
  expect(tree!.root.findByType('dialog').props.snapPoints).toEqual([88]);
  expect(nativeUi.mutableValueWrites.length).toBe(writes);
  expect(routeService.walking).not.toHaveBeenCalled();
@@ -299,18 +307,39 @@ it('caches the language used after delayed GPS, rather than the intent creation 
  expect(routeService.walking).toHaveBeenCalledOnce();
 });
 
-it('waits for native settlement after the accessible expand toggle before fitting the route',async()=>{
+it('leaves framing unchanged throughout an accessible toggle and native settlement',async()=>{
  handoff();await mount();await layout();await act(async()=>tree!.root.findByType('map').props.onMapReady());
  const dock=tree!.root.findByType('dialog');const start=dock.props.animatedPosition.get();
  const fits=controls.fit.mock.calls.length;
  await expand();
  expect(dock.props.index).toBe(1);
  expect(dock.props.animatedPosition.get()).toBe(start);
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(192);
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(0);
  expect(controls.fit).toHaveBeenCalledTimes(fits);
  await act(async()=>{dock.props.animatedPosition.set(400);nativeUi.reactions.forEach(tick=>tick());});
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(320);
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(128);
  expect(controls.fit).toHaveBeenCalledTimes(fits);
  await act(async()=>dock.props.onChange(1,720-dock.props.snapPoints[1]));
- expect(controls.fit).toHaveBeenCalledTimes(fits+1);
+ expect(controls.fit).toHaveBeenCalledTimes(fits);
+});
+
+it('keeps its collapsed map height and zoom framing through both sheet detents',async()=>{
+ handoff();await mount();await layout();await act(async()=>tree!.root.findByType('map').props.onMapReady());
+ const scene=tree!.root.findByProps({testID:'route-preview-scene'});
+ await act(async()=>scene.props.onLayout({nativeEvent:{layout:{width:360,height:720}}}));
+ const map=tree!.root.findByType('map');const sheet=tree!.root.findByType('dialog');
+ const height=720-sheet.props.snapPoints[0];expect(map.props.style.height).toBe(height);
+ const fits=controls.fit.mock.calls.length;
+ expect(sheet.props.containerLayoutState.get().height).toBe(720);
+ await nativeLayout(360);expect(sheet.props.containerLayoutState.get().height).toBe(720);
+ await expand();await act(async()=>sheet.props.onChange(1,720-sheet.props.snapPoints[1]));
+ expect(map.props.style.height).toBe(height);expect(controls.fit).toHaveBeenCalledTimes(fits);
+ await press('map.collapse');await act(async()=>sheet.props.onChange(0,720-sheet.props.snapPoints[0]));
+ expect(map.props.style.height).toBe(height);expect(controls.fit).toHaveBeenCalledTimes(fits);
+ controls.focused=false;controls.active=false;await update();
+ controls.focused=true;controls.active=true;await update();
+ expect(tree!.root.findByType('map')).toBe(map);expect(map.props.style.height).toBe(height);
+ expect(controls.fit).toHaveBeenCalledTimes(fits);
+ await press('directions.fit');expect(controls.fit).toHaveBeenCalledTimes(fits+1);
+ expect(routeService.walking).not.toHaveBeenCalled();
 });

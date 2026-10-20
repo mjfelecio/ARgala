@@ -128,6 +128,7 @@ it('stops GPS immediately when the SDK route context loses focus', async () => {
 });
 it('refreshes camera permission after foreground return without a ready container ref', async () => {
   await act(async () => { tree = create(render(React.createElement(ArScreen))); });
+  await act(async()=>tree!.root.findByProps({testID:'ar-scene'}).props.onLayout({nativeEvent:{layout:{width:360,height:800}}}));
   expect(navigation.cameraQueries).toHaveBeenCalledOnce();
   expect(tree!.root.findAllByType('video')).toHaveLength(0);
   navigation.active = false;
@@ -136,20 +137,24 @@ it('refreshes camera permission after foreground return without a ready containe
   await act(async () => { tree!.update(render(React.createElement(ArScreen))); });
   expect(navigation.cameraQueries).toHaveBeenCalledTimes(2);
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
+  expect(tree!.root.findByType('video').props.style).toMatchObject({width:360,height:800});
 });
 
 it('retires camera, GPS and compass on tab blur, then restarts on return with pending navigation readiness', async () => {
   navigation.cameraGranted = true;
   await act(async () => { tree = create(render(React.createElement(ArScreen))); });
+  await act(async()=>tree!.root.findByProps({testID:'ar-scene'}).props.onLayout({nativeEvent:{layout:{width:360,height:800}}}));
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
   navigation.focused = false;
   await act(async () => { tree!.update(render(React.createElement(ArScreen))); });
   expect(tree!.root.findAllByType('video')).toHaveLength(0);
   expect(navigation.remove).toHaveBeenCalledOnce();
   expect(navigation.headingRemove).toHaveBeenCalledOnce();
+  await act(async()=>tree!.root.findByProps({testID:'ar-scene'}).props.onLayout({nativeEvent:{layout:{width:0,height:0}}}));
   navigation.focused = true;
   await act(async () => { tree!.update(render(React.createElement(ArScreen))); });
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
+  expect(tree!.root.findByType('video').props.style).toMatchObject({width:360,height:800});
   expect(subscribeToLocation).toHaveBeenCalledTimes(2);
   expect(subscribeToHeading).toHaveBeenCalledTimes(2);
   await act(async () => { tree!.unmount(); }); tree = undefined;
@@ -163,6 +168,7 @@ it('cleans up GPS and compass even when native subscription setup finishes after
   vi.mocked(subscribeToLocation).mockReturnValue(gps.promise);
   vi.mocked(subscribeToHeading).mockReturnValue(compass.promise);
   await act(async () => { tree = create(render(React.createElement(ArScreen))); });
+  await act(async()=>tree!.root.findByProps({testID:'ar-scene'}).props.onLayout({nativeEvent:{layout:{width:360,height:800}}}));
   navigation.focused = false;
   await act(async () => { tree!.update(render(React.createElement(ArScreen))); });
   await act(async () => { gps.resolve({ remove: navigation.remove }); compass.resolve({ remove: navigation.headingRemove }); });
@@ -173,5 +179,5 @@ it('cleans up GPS and compass even when native subscription setup finishes after
 
 vi.mock('@/features/ar/ar-discovery', async () => {
   const { createElement, Fragment } = await import('react');
-  return { ArDiscovery: ({ preview, cameraStatus }: { preview: React.ReactNode; cameraStatus: React.ReactNode }) => createElement(Fragment, null, preview, cameraStatus) };
+  return { ArDiscovery: ({ cameraStatus }: { cameraStatus: React.ReactNode }) => createElement(Fragment, null, cameraStatus) };
 });

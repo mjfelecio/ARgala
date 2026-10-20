@@ -68,7 +68,7 @@ async function press(title: string) {
 }
 async function selectPlace(laidOut = true) {
   await act(async () => { tree = create(renderMap()); });
-  if (laidOut) await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } }); });
+  if (laidOut) await act(async () => { tree!.root.findByProps({testID:'home-map-scene'}).props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } }); });
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
   await act(async () => {
     const sheet=tree!.root.findByType('dialog'); sheet.props.onChange(0, sheet.props.containerLayoutState.get().height - 120);
@@ -105,7 +105,7 @@ it('withholds native map padding through layout and lifecycle updates until Goog
   expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding');
   // Android can have nonzero layout while its GoogleMap reference is still null.
   await act(async () => {
-    tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } });
+    tree!.root.findByProps({testID:'home-map-scene'}).props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } });
     tree!.root.findByProps({ testID: 'home-map-controls' }).props.onLayout({ nativeEvent: { layout: { height: 96 } } });
   });
   await act(async () => {
@@ -119,12 +119,12 @@ it('withholds native map padding through layout and lifecycle updates until Goog
   expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding');
   expect(controls.fit).not.toHaveBeenCalled();
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
-  expect(tree!.root.findByType('map').props.mapPadding).toEqual({ top: 120, bottom: 240, left: 8, right: 8 });
+  expect(tree!.root.findByType('map').props.mapPadding).toEqual({ top: 120, bottom: 84, left: 8, right: 8 });
   await act(async () => {
     const sheet = tree!.root.findByType('dialog');
     sheet.props.onChange(0, sheet.props.containerLayoutState.get().height - 280);
   });
-  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(280);
+  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(124);
   expect(placesService.nearby).not.toHaveBeenCalled();
   expect(placesService.details).not.toHaveBeenCalled();
   expect(routeService.walking).not.toHaveBeenCalled();
@@ -138,7 +138,7 @@ it('retains the map through a focus-driven GPS restart without requiring new nat
   expect(tree!.root.findAllByType('map')).toHaveLength(1);
   controls.hasLocation = true;
   await act(async () => { tree!.update(renderMap()); });
-  await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } }); });
+  await act(async () => { tree!.root.findByProps({testID:'home-map-scene'}).props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } }); });
   expect(tree!.root.findByType('map').props).toHaveProperty('mapPadding');
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
   expect(tree!.root.findByType('map').props.mapPadding).toBeDefined();
@@ -322,7 +322,7 @@ it('updates Google credit padding during a sheet gesture without fitting on Home
  const calls=controls.fit.mock.calls.length;
  const sheet=tree!.root.findByType('dialog');
  await act(async()=>{ sheet.props.animatedPosition.set(440); nativeUi.reactions.forEach(tick=>tick()); });
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(280);
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(16);
  expect(controls.fit).toHaveBeenCalledTimes(calls);
  await act(async()=>sheet.props.onChange(1,440));
  expect(controls.fit.mock.calls.length).toBe(calls);
@@ -351,15 +351,15 @@ it('retains expanded sheet geometry when header size changes without a new nativ
  await act(async()=>tree!.root.findByProps({testID:'home-map-controls'}).props.onLayout({nativeEvent:{layout:{height:180}}}));
  sheet=tree!.root.findByType('dialog');
  expect(sheet.props.snapPoints[1]).toBe(452);
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(452);
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(188);
 });
 it('publishes the final same-index bounce position even inside the gesture update interval', async () => {
  await selectPlace();
  const sheet=tree!.root.findByType('dialog'); const peek=sheet.props.snapPoints[0];
  await act(async()=>{ sheet.props.animatedPosition.set(720-peek-40); nativeUi.reactions.forEach(tick=>tick()); });
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBeCloseTo(peek+40);
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBeCloseTo(40);
  await act(async()=>{ sheet.props.animatedPosition.set(720-peek); nativeUi.reactions.forEach(tick=>tick()); });
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBeCloseTo(peek);
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBeCloseTo(0);
 });
 
 // Focus changes restart GPS before the next fix. The retained map must keep
@@ -390,14 +390,14 @@ it('keeps the expanded sheet and Google credits within the smaller scene above t
  await press('map.expand');
  // The navigator owns the bottom inset; the map must not reserve it again.
  expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left', 'right']);
- await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 580 } } }); });
+ await act(async () => { tree!.root.findByProps({testID:'home-map-scene'}).props.onLayout({ nativeEvent: { layout: { width: 360, height: 580 } } }); });
  const sheet = tree!.root.findByType('dialog');
  expect(tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('map.collapse'))!.props.accessibilityState.expanded).toBe(true);
  expect(sheet.props.containerLayoutState.get().height).toBe(580);
  const padding = tree!.root.findByType('map').props.mapPadding;
- expect(padding.bottom).toBe(sheet.props.snapPoints[1]);
+ expect(padding.bottom).toBe(sheet.props.snapPoints[1]-sheet.props.snapPoints[0]);
  expect(padding.bottom).toBeGreaterThan(0);
- expect(padding.top + padding.bottom).toBeLessThan(580);
+ expect(padding.top + padding.bottom).toBeLessThan(tree!.root.findByType('map').props.style.height);
  expect(tree!.root.findAllByType('aside')).toHaveLength(1);
  expect(placesService.nearby).toHaveBeenCalledTimes(1);
  expect(routeService.walking).not.toHaveBeenCalled();
@@ -457,7 +457,10 @@ it('uses the shared light map style and reserves the status inset for controls r
  // Keep the reported userInterfaceStyle initial-prop crash path inactive.
  expect(map.props).not.toHaveProperty('userInterfaceStyle');
  expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left','right']);
- await act(async()=>tree!.root.findByProps({testID:'home-map-controls'}).props.onLayout({nativeEvent:{layout:{height:100}}}));
+ await act(async()=>{
+  tree!.root.findByProps({testID:'home-map-scene'}).props.onLayout({nativeEvent:{layout:{width:360,height:720}}});
+  tree!.root.findByProps({testID:'home-map-controls'}).props.onLayout({nativeEvent:{layout:{height:100}}});
+ });
  await act(async()=>map.props.onMapReady());
  expect(tree!.root.findByType('map').props.mapPadding.top).toBe(100+nativeUi.insets.top);
 });
@@ -472,4 +475,29 @@ it('opens Directions in one action from Home and never calculates a route on Hom
  expect(router.push).toHaveBeenCalledTimes(1);
  expect(router.push).toHaveBeenCalledWith({pathname:'/directions',params:{token:expect.any(String)}});
  expect(routeService.walking).not.toHaveBeenCalled();
+});
+
+it('holds the collapsed map frame while the sheet expands and returns from focus', async()=>{
+ await selectPlace();
+ const scene=tree!.root.findByProps({testID:'home-map-scene'});
+ await act(async()=>scene.props.onLayout({nativeEvent:{layout:{width:360,height:720}}}));
+ const map=tree!.root.findByType('map');const sheet=tree!.root.findByType('dialog');
+ const height=720-sheet.props.snapPoints[0];expect(map.props.style.height).toBe(height);
+ await press('map.expand');expect(map.props.style.height).toBe(height);
+ await act(async()=>sheet.props.onChange(1,720-sheet.props.snapPoints[1]));
+ expect(map.props.style.height).toBe(height);
+ expect(map.props.mapPadding.bottom).toBe(sheet.props.snapPoints[1]-sheet.props.snapPoints[0]);
+ controls.focused=false;await act(async()=>tree!.update(renderMap()));
+ controls.focused=true;await act(async()=>tree!.update(renderMap()));
+ expect(tree!.root.findByType('map')).toBe(map);expect(map.props.style.height).toBe(height);
+ expect(controls.fit).not.toHaveBeenCalled();
+});
+
+it('bounds native padding in very short scenes and ignores transient zero scene layouts',async()=>{
+ await selectPlace();const map=tree!.root.findByType('map');
+ await act(async()=>tree!.root.findByProps({testID:'home-map-scene'}).props.onLayout({nativeEvent:{layout:{width:360,height:80}}}));
+ expect(map.props.mapPadding.top+map.props.mapPadding.bottom).toBeLessThan(map.props.style.height);
+ const height=map.props.style.height;
+ await act(async()=>tree!.root.findByProps({testID:'home-map-scene'}).props.onLayout({nativeEvent:{layout:{width:0,height:0}}}));
+ expect(map.props.style.height).toBe(height);expect(tree!.root.findByType('map')).toBe(map);
 });
