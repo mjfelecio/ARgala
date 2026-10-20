@@ -241,7 +241,8 @@ it('acquires one walking route to the approved curated entrance and does not rep
 it('applies the shared light Clean Explorer map treatment without affecting its route', async()=>{
  handoff();await mount();
  const map=tree!.root.findByType('map');
- expect(map.props.userInterfaceStyle).toBe('light');
+ // Keep the reported userInterfaceStyle initial-prop crash path inactive.
+ expect(map.props).not.toHaveProperty('userInterfaceStyle');
  expect(map.props.customMapStyle.some((style:{featureType?:string})=>style.featureType==='water')).toBe(true);
  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
  expect(routeService.walking).not.toHaveBeenCalled();

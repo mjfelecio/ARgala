@@ -454,7 +454,8 @@ it('uses the shared light map style and reserves the status inset for controls r
  await act(async()=>{ tree=create(renderMap()); });
  const map=tree!.root.findByType('map');
  expect(map.props.customMapStyle).toBeDefined();
- expect(map.props.userInterfaceStyle).toBe('light');
+ // Keep the reported userInterfaceStyle initial-prop crash path inactive.
+ expect(map.props).not.toHaveProperty('userInterfaceStyle');
  expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left','right']);
  await act(async()=>tree!.root.findByProps({testID:'home-map-controls'}).props.onLayout({nativeEvent:{layout:{height:100}}}));
  await act(async()=>map.props.onMapReady());

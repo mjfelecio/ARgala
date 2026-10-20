@@ -40,7 +40,7 @@ export function RoutePreviewMap({ place, origin, destination, coordinates, curre
   }, [canFit, coordinates, gap]);
   useEffect(() => { fit(); }, [fit, size.width, size.height, settledDockHeight, headerHeight]);
   return <>
-    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle} userInterfaceStyle="light"
+    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle}
       initialRegion={{ ...(origin ?? place.coordinates), latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       {...(ready ? { mapPadding: { top, bottom, left: gutter, right: gutter } } : {})}
       showsUserLocation={!!currentPosition} showsMyLocationButton={false} onMapReady={() => setReady(true)}

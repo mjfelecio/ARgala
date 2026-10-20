@@ -131,7 +131,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
     <FocusedStatusBar style="dark" />
     <View className="flex-1">
-    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle} userInterfaceStyle="light" initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
+    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       {...(mapReady ? { mapPadding } : {})} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
       onLayout={(event) => setMapSize({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height })}
       onPoiClick={(event) => select(event.nativeEvent.placeId)}>
