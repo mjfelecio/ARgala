@@ -102,7 +102,7 @@ Status: **review draft**. Reference IDs match `export-manifest.json`. [C/E/R/P] 
 
 **Layout [P]:** full-height page, not floating sheet. Remove decorative drag handle on this non-draggable page. Native system bars, no imitation clock/battery. All three languages have clear selected states. It must remain scrollable on a small/enlarged-text device.
 
-**Integration [P]:** first-launch language flow is additive routing work. Persist through existing settings and introduce a completion marker only if this onboarding behavior is approved. Do not reset a signed-in returning user or force onboarding at every auth event. Selecting a language does not require GPS, camera or a paid provider call. Confirm persistence before completing Continue; show failure/retry if saving fails.
+**Integration [R]:** first-launch language flow is implemented with protected `/welcome` routing, existing settings persistence and a dedicated completion marker. See [Welcome implementation](WELCOME.md) for partial-write recovery and legacy migration. Do not reset a signed-in returning user or force onboarding at every auth event. Selecting a language does not require GPS, camera or a paid provider call. Confirm persistence before completing Continue; show failure/retry if saving fails.
 
 **Acceptance:** request replacement PNG before claiming exact visual parity, but do not block Home/AR restyling while waiting. Assets must be approved, not assumed genuine Lake Danao photography because the HTML alt text says so.
 

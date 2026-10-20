@@ -163,5 +163,21 @@
     "nearbyEmpty": "この目的地から500m以内に検索結果がありませんでした。",
     "fromDestination": "目的地から{{meters}}m",
     "nearbyLimit": "検索結果は最大{{count}}件です。周辺のすべての施設が含まれるとは限りません。"
+  },
+  "onboarding": {
+    "tagline": "周辺の場所を見つけよう。",
+    "title": "言語を選んでください",
+    "description": "希望する言語を選んで探索を始めましょう。",
+    "languageLabel": "アプリの言語を選択",
+    "continue": "次へ進む",
+    "saving": "保存中…",
+    "settingsNote": "言語はいつでも「設定」から変更できます。",
+    "saveFailed": "言語を保存できませんでした。もう一度お試しください。",
+    "loadFailed": "初回設定を読み込めませんでした。もう一度お試しください。",
+    "languageNames": {
+      "en": "英語",
+      "ko": "韓国語",
+      "ja": "日本語"
+    }
   }
 }

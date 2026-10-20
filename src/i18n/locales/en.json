@@ -214,5 +214,21 @@
     "nearbyEmpty": "No places were returned within 500 m of this destination.",
     "fromDestination": "{{meters}} m from destination",
     "nearbyLimit": "Search returns up to {{count}} places and may not include every nearby establishment."
+  },
+  "onboarding": {
+    "tagline": "Discover places around you.",
+    "title": "Choose your language",
+    "description": "Select your preferred language to begin exploring.",
+    "languageLabel": "Select app language",
+    "continue": "Continue",
+    "saving": "Saving…",
+    "settingsNote": "You can change your language anytime in Settings.",
+    "saveFailed": "Your language could not be saved. Please try again.",
+    "loadFailed": "Your welcome preferences could not be loaded. Please try again.",
+    "languageNames": {
+      "en": "English",
+      "ko": "Korean",
+      "ja": "Japanese"
+    }
   }
 }
