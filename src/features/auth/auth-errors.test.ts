@@ -1,3 +1,4 @@
+import { withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { AuthApiError, AuthRetryableFetchError, AuthWeakPasswordError } from '@supabase/supabase-js';
 import { createInstance, type i18n } from 'i18next';
@@ -15,7 +16,6 @@ const auth = vi.hoisted(() => ({
   startAutoRefresh: vi.fn(), stopAutoRefresh: vi.fn(),
 }));
 vi.mock('@/lib/supabase', () => ({ getSupabase: () => ({ auth }) }));
-vi.mock('react-native', () => ({ Text: 'span', AppState: { currentState: 'active', addEventListener: () => ({ remove: vi.fn() }) } }));
 vi.mock('@/ui/shared', async () => {
   const { createElement } = await import('react');
   return {
@@ -27,7 +27,7 @@ vi.mock('@/ui/shared', async () => {
 let tree: ReactTestRenderer | undefined;
 let translations: i18n;
 beforeEach(async () => {
-  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   auth.signInWithPassword.mockReset().mockResolvedValue({ data: { session: null }, error: null });
   auth.signUp.mockReset().mockResolvedValue({ data: { session: null }, error: null });
   auth.signOut.mockReset().mockResolvedValue({ error: null });
@@ -39,18 +39,18 @@ beforeEach(async () => {
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.restoreAllMocks(); });
 async function render(component: React.ReactNode) {
-  await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n: translations }, component)); });
+  await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(component))); });
 }
 async function press(key: string) {
-  const action = tree!.root.findAllByType('button').find((button) => button.props.title === translations.t(key));
+  const action = tree!.root.findAllByType('button').find((button) => (button.props.accessibilityLabel ?? button.props.title) === translations.t(key));
   expect(action).toBeDefined();
   await act(async () => { action!.props.onPress(); });
 }
 async function fillCredentials() {
   await act(async () => {
     const fields = tree!.root.findAllByType('input');
-    fields.find((field) => field.props.label === translations.t('auth.email'))!.props.onChangeText('test@example.com');
-    fields.find((field) => field.props.label === translations.t('auth.password'))!.props.onChangeText('password123');
+    fields.find((field) => field.props.accessibilityLabel === translations.t('auth.email'))!.props.onChangeText('test@example.com');
+    fields.find((field) => field.props.accessibilityLabel === translations.t('auth.password'))!.props.onChangeText('password123');
   });
 }
 it.each([
@@ -72,15 +72,15 @@ it.each([
   if (mode === 'signUp') await press('auth.newAccount');
   await fillCredentials();
   await press(mode === 'signUp' ? 'auth.register' : 'auth.signIn');
-  expect(tree!.root.findByType('output').props.children).toBe(message);
-  expect(tree!.root.findByType('output').props.children).not.toBe(failure.message);
+  expect(JSON.stringify(tree!.toJSON())).toContain(message);
+  expect(JSON.stringify(tree!.toJSON())).not.toContain(failure.message);
 });
 it('updates an existing authentication error when the selected language changes', async () => {
   auth.signInWithPassword.mockResolvedValue({ data: { session: null }, error: new AuthApiError('Invalid credentials', 400, 'invalid_credentials') });
   await render(React.createElement(SignInScreen));
   await fillCredentials(); await press('auth.signIn');
   await act(async () => { await translations.changeLanguage('ja'); });
-  expect(tree!.root.findByType('output').props.children).toBe('メールアドレスまたはパスワードが正しくありません。');
+  expect(JSON.stringify(tree!.toJSON())).toContain('メールアドレスまたはパスワードが正しくありません。');
 });
 it.each([
   { language: 'ko', message: '로그아웃하지 못했습니다. 다시 시도하세요.' },
@@ -90,7 +90,7 @@ it.each([
   auth.signOut.mockResolvedValue({ error: new Error('SDK logout English') });
   await render(React.createElement(SignOutAction));
   await press('auth.signOut');
-  expect(tree!.root.findByType('output').props.children).toBe(message);
+  expect(JSON.stringify(tree!.toJSON())).toContain(message);
 });
 function SessionProbe() { return React.createElement('output', null, useAuth().error); }
 it.each(['returned', 'thrown'])('exposes a translation key for a %s session restoration error', async (failure) => {
@@ -98,4 +98,15 @@ it.each(['returned', 'thrown'])('exposes a translation key for a %s session rest
   else auth.getSession.mockRejectedValue(new Error('SDK session English'));
   await render(React.createElement(AuthProvider, null, React.createElement(SessionProbe)));
   expect(tree!.root.findByType('output').props.children).toBe('auth.restoreFailed');
+});
+
+it('deduplicates two submit presses from the same render before React flushes busy state', async () => {
+  let resolve!: (value: unknown) => void;
+  auth.signInWithPassword.mockReturnValue(new Promise(done => { resolve = done; }));
+  await render(React.createElement(SignInScreen)); await fillCredentials();
+  const button = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('auth.signIn'))!;
+  await act(async () => { button.props.onPress(); button.props.onPress(); });
+  const count = auth.signInWithPassword.mock.calls.length;
+  await act(async () => { resolve({ data: { session: null }, error: null }); });
+  expect(count).toBe(1);
 });

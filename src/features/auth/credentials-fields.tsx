@@ -30,7 +30,7 @@ export function CredentialsFields({ email, password, registering, disabled, onEm
       <View className="justify-center">
         <Input variant="primary" value={email} onChangeText={onEmailChange} accessibilityLabel={t('auth.email')}
           keyboardType="email-address" autoComplete="email" autoCapitalize="none" autoCorrect={false}
-          className="min-h-14 rounded-input bg-surface py-4 pl-12 font-sans text-base" />
+          className={`min-h-14 rounded-input bg-surface py-4 pl-12 font-sans text-base ${invalidEmail ? '' : 'android:border-outline'}`} />
         <View pointerEvents="none" accessible={false} importantForAccessibility="no-hide-descendants" className="absolute left-4">
           <Ionicons name="mail-outline" size={20} color={muted} />
         </View>
@@ -41,7 +41,7 @@ export function CredentialsFields({ email, password, registering, disabled, onEm
       <View className="justify-center">
         <Input variant="primary" value={password} onChangeText={onPasswordChange} accessibilityLabel={t('auth.password')}
           secureTextEntry={!visible} autoCapitalize="none" autoCorrect={false} autoComplete={registering ? 'new-password' : 'current-password'}
-          className="min-h-14 rounded-input bg-surface py-4 pl-12 pr-16 font-sans text-base" />
+          className={`min-h-14 rounded-input bg-surface py-4 pl-12 pr-16 font-sans text-base ${invalidPassword ? '' : 'android:border-outline'}`} />
         <View pointerEvents="none" accessible={false} importantForAccessibility="no-hide-descendants" className="absolute left-4">
           <Ionicons name="lock-closed-outline" size={20} color={muted} />
         </View>
