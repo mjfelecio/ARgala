@@ -17,7 +17,10 @@
     "accountExists": "このメールアドレスのアカウントは既に存在します。ログインしてください。",
     "rateLimited": "試行回数が多すぎます。しばらく待ってから再試行してください。",
     "restoreFailed": "セッションを復元できませんでした。再試行してください。",
-    "logoutFailed": "ログアウトできませんでした。再試行してください。"
+    "logoutFailed": "ログアウトできませんでした。再試行してください。",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを非表示",
+    "passwordHint": "8文字以上で入力してください。"
   },
   "settings": {
     "title": "設定",

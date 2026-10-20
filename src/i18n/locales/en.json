@@ -32,7 +32,10 @@
     "weakPassword": "Choose a stronger password.",
     "accountExists": "An account already exists with this email. Try signing in.",
     "rateLimited": "Too many attempts. Please wait and try again.",
-    "restoreFailed": "Unable to restore your session. Please try again."
+    "restoreFailed": "Unable to restore your session. Please try again.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordHint": "Use at least 8 characters."
   },
   "location": {
     "loading": "Finding your location…",

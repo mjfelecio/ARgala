@@ -17,7 +17,10 @@
     "accountExists": "이 이메일로 등록된 계정이 있습니다. 로그인해 보세요.",
     "rateLimited": "시도 횟수가 너무 많습니다. 잠시 후 다시 시도하세요.",
     "restoreFailed": "세션을 복원하지 못했습니다. 다시 시도하세요.",
-    "logoutFailed": "로그아웃하지 못했습니다. 다시 시도하세요."
+    "logoutFailed": "로그아웃하지 못했습니다. 다시 시도하세요.",
+    "showPassword": "비밀번호 표시",
+    "hidePassword": "비밀번호 숨기기",
+    "passwordHint": "8자 이상 입력하세요."
   },
   "settings": {
     "title": "설정",
