@@ -123,7 +123,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   function directions() {
     if (!enabled || !place || previewNavigation.current) return;
     previewNavigation.current = true;
-    const token = createRoutePreviewIntent(queryClient, place, undefined, 'map');
+    const token = createRoutePreviewIntent(queryClient, place, undefined, 'map', language);
     router.push({ pathname: '/directions', params: { token } });
   }
   const state: HomePlaceSheetState = selectedId ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';

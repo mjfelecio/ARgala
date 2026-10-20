@@ -91,7 +91,7 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
     if (!running || !selected || navigating.current) return;
     navigating.current = true;
     setPlaceSelection(client, selected);
-    const token = createRoutePreviewIntent(client, selected, undefined, 'ar');
+    const token = createRoutePreviewIntent(client, selected, undefined, 'ar', language);
     router.push({ pathname: '/directions', params: { token } });
   }
   const state = data.nearby.isFetching ? 'scanning' : data.nearby.error ? 'failed' : !data.request ? 'unscanned' : places.length === 0 ? 'empty' : 'results';

@@ -31,7 +31,14 @@ it('revokes pending intents on auth clear and when a new target is handed off', 
 
 it('reuses a completed matching preview through a new explicit handoff without granting request authority from cache',()=>{
  const c=client(); const result={origin:{latitude:11,longitude:125},destination:place.coordinates,route:{distanceMeters:900,durationSeconds:750,encodedPolyline:'??AA',warnings:['Warning']}};
- c.setQueryData(['route-preview-session','old'],{status:'success',intent:{place,createdAt:Date.now(),source:'ar'},result});
+ c.setQueryData(['route-preview-session','old'],{status:'success',language:'en',intent:{place,createdAt:Date.now(),source:'ar'},result});
  const token=createRoutePreviewIntent(c,place,undefined,'map');
  expect(claimRoutePreviewIntent(c,token)?.existing).toEqual(result);
+});
+
+it.each(['pending','failed','expired','different-provider','different-destination','different-language'])('does not reuse %s sessions as a completed route',kind=>{
+ const c=client();const target=kind==='different-provider'?{...place,providerId:'other'}:place;
+ const result={origin:{latitude:11,longitude:125},destination:kind==='different-destination'?{latitude:12,longitude:124}:place.coordinates,route:{distanceMeters:1,durationSeconds:1,encodedPolyline:'??AA',warnings:[]}};
+ c.setQueryData(['route-preview-session','old'],{status:['pending','failed'].includes(kind)?kind:'success',language:kind==='different-language'?'ja':'en',intent:{place:target,createdAt:Date.now()-(kind==='expired'?120001:0),source:'ar'},result});
+ expect(claimRoutePreviewIntent(c,createRoutePreviewIntent(c,place))?.existing).toBeUndefined();
 });

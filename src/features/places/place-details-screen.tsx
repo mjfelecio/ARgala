@@ -55,7 +55,7 @@ export default function PlaceDetailsScreen() {
   function directions() {
     if (!place || !active || !focused || navigating.current) return;
     navigating.current = true;
-    const token = createRoutePreviewIntent(client, place);
+    const token = createRoutePreviewIntent(client, place, undefined, 'details', language);
     router.push({ pathname: '/directions', params: { token } });
   }
   const actions = <View className="gap-2">

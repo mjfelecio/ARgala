@@ -12,7 +12,7 @@ import { decodePolyline } from './polyline';
 import { routeService } from './service';
 
 type Result = RoutePreviewResult & { coordinates: Coordinate[] };
-type Session = { owner: symbol; attempt: string; intent: RoutePreviewIntent; status: 'waiting' | 'pending' | 'success' | 'failed'; result?: Result; errorKey?: string };
+type Session = { language?: RoutePreviewIntent['language']; owner: symbol; attempt: string; intent: RoutePreviewIntent; status: 'waiting' | 'pending' | 'success' | 'failed'; result?: Result; errorKey?: string };
 function validated(result: RoutePreviewResult): Result {
   const coordinates = decodePolyline(result.route.encodedPolyline);
   if (coordinates.length < 2) throw new EdgeRequestError('UPSTREAM_INVALID');
@@ -60,7 +60,7 @@ export function useRoutePreview(token: unknown, configured: boolean) {
     if (!intent) return;
     let initial: Session = { owner, attempt: String(token), intent, status: 'waiting' };
     if (intent.existing) {
-      try { initial = { owner, attempt: String(token), intent, status: 'success', result: validated(intent.existing) }; }
+      try { initial = { owner, attempt: String(token), intent, status: 'success', language: intent.language, result: validated(intent.existing) }; }
       catch { initial = { owner, attempt: String(token), intent, status: 'failed', errorKey: 'service.unavailable' }; }
     } else { authorized.current = true; }
     client.setQueryData(key, initial);
@@ -82,7 +82,7 @@ export function useRoutePreview(token: unknown, configured: boolean) {
       !requestFresh(location.positionTimestamp) || !requestFresh(location.watcherTimestamp)) return;
     authorized.current = false;
     const origin = { ...location.position! };
-    const pending: Session = { owner, attempt: data.attempt, intent: data.intent, status: 'pending' };
+    const pending: Session = { owner, attempt: data.attempt, intent: data.intent, status: 'pending', language };
     client.setQueryData(key, pending);
     const finish = (next: Session) => {
       const current = client.getQueryData<Session>(key);
@@ -93,19 +93,19 @@ export function useRoutePreview(token: unknown, configured: boolean) {
       let result: Result;
       try { result = validated({ origin, destination: data.intent.place.coordinates, route }); }
       catch { throw new EdgeRequestError('UPSTREAM_INVALID'); }
-      finish({ owner, attempt: data.attempt, intent: data.intent, status: 'success', result });
+      finish({ owner, attempt: data.attempt, intent: data.intent, status: 'success', language, result });
     }).catch((error: unknown) => finish({ owner, attempt: data.attempt, intent: data.intent, status: 'failed', errorKey: edgeErrorMessageKey(error) }));
   }, [client, key, data, configured, usable, expired, location.position, location.positionTimestamp, location.watcherTimestamp, language, owner]);
   function retry() {
     const current = client.getQueryData<Session>(key);
     if (!running || !configured || !current || current.status === 'pending' || current.status === 'success' || (current.status === 'waiting' && current.owner === owner && authorized.current && !expired)) return;
-    const nextToken = createRoutePreviewIntent(client, current.intent.place, undefined, current.intent.source);
+    const nextToken = createRoutePreviewIntent(client, current.intent.place, undefined, current.intent.source, language);
     const next = claimRoutePreviewIntent(client, nextToken);
     if (!next) return;
     if (next.existing) {
       try {
         authorized.current = false;
-        client.setQueryData<Session>(key, { owner, attempt: nextToken, intent: next, status: 'success', result: validated(next.existing) });
+        client.setQueryData<Session>(key, { owner, attempt: nextToken, intent: next, status: 'success', language: next.language, result: validated(next.existing) });
         return;
       } catch { /* An invalid saved snapshot cannot authorize a provider request. */
         authorized.current = false;
