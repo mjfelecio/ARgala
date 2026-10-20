@@ -20,7 +20,19 @@ vi.mock('react-native-safe-area-context', () => ({ SafeAreaView: 'safe-area', Sa
 vi.mock('uniwind', () => ({ useUniwind: () => ({ theme: 'light', hasAdaptiveThemes: false }), useResolveClassNames: (classes: string) => ({ padding: classes.includes('p-8') ? 32 : classes.includes('p-4') ? 16 : 8, ...(classes.includes('h-16') ? { height: 64 } : {}), borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: '#FFFFFF', borderRadius: 0 }), useCSSVariable: (name: string | string[]) => Array.isArray(name) ? name.map(value => value === '--color-muted' ? '#3F4942' : '#247A53') : '#247A53', withUniwind: (component: unknown) => component }));
 vi.mock('@expo/vector-icons/Ionicons', () => ({ default: 'icon' }));
 vi.mock('react-native-svg', () => ({ default: 'svg', Svg: 'svg', Path: 'path', Circle: 'circle', Defs: 'defs', LinearGradient: 'gradient', Stop: 'stop', Rect: 'rect', G: 'g' }));
-vi.mock('react-native-gesture-handler', () => ({ GestureDetector: 'gesture', Gesture: { Tap: () => ({ runOnJS() { return this; }, enabled() { return this; }, onBegin() { return this; }, onEnd() { return this; }, onFinalize() { return this; } }), Pan: () => ({ runOnJS() { return this; }, enabled() { return this; }, onBegin() { return this; }, onUpdate() { return this; }, onFinalize() { return this; } }) } }));
+vi.mock('react-native-gesture-handler', () => {
+  function gesture(kind: string) {
+    const handlers: Record<string, (...args: unknown[]) => void> = {};
+    return { kind, handlers,
+      runOnJS() { return this; }, enabled() { return this; },
+      onBegin(callback: (...args: unknown[]) => void) { handlers.begin = callback; return this; },
+      onUpdate(callback: (...args: unknown[]) => void) { handlers.update = callback; return this; },
+      onEnd(callback: (...args: unknown[]) => void) { handlers.end = callback; return this; },
+      onFinalize(callback: (...args: unknown[]) => void) { handlers.finalize = callback; return this; },
+    };
+  }
+  return { GestureDetector: 'gesture', Gesture: { Tap: () => gesture('tap'), Pan: () => gesture('pan') } };
+});
 vi.mock('react-native-worklets', () => ({ scheduleOnRN: (callback: (...args: unknown[]) => unknown, ...args: unknown[]) => callback(...args) }));
 vi.mock('react-native-reanimated', async () => {
   const chain = { duration() { return this; }, springify() { return this; }, delay() { return this; }, easing() { return this; }, withInitialValues() { return this; } };

@@ -13,6 +13,7 @@ import { AuthApiError } from '@supabase/supabase-js';
 import { AppState, Linking } from 'react-native';
 import { requestForegroundPermissionsAsync, watchPositionAsync, watchHeadingAsync, getCurrentPositionAsync } from 'expo-location';
 import { Camera } from 'expo-camera';
+import { Slider } from 'heroui-native/slider';
 import { router } from 'expo-router';
 import RootNavigation from '@/features/navigation/root-navigation';
 import { queryClient } from '@/lib/query';
@@ -234,4 +235,35 @@ it('keeps mount, drafts, locale changes, refocus, foreground return and remount 
   expect(fetch).not.toHaveBeenCalled(); expect(requestForegroundPermissionsAsync).not.toHaveBeenCalled();
   expect(watchPositionAsync).not.toHaveBeenCalled(); expect(watchHeadingAsync).not.toHaveBeenCalled(); expect(getCurrentPositionAsync).not.toHaveBeenCalled();
   expect(Camera.requestCameraPermissionsAsync).not.toHaveBeenCalled(); expect(boundary.setItem).not.toHaveBeenCalled();
+});
+
+it('commits a drag to the draft only on release, requires Save, and restores the saved radius', async () => {
+  await mount();
+  const gesture = () => tree!.root.findAllByType('gesture' as React.ElementType).find(node => node.props.gesture.kind === 'pan')!.props.gesture;
+  await act(async () => {
+    tree!.root.findByType(Slider.Track).findAllByType('view').find(node => node.props.onLayout)!.props.onLayout({ nativeEvent: { layout: { width: 300, height: 20 } } });
+    tree!.root.findAllByType('view').find(node => node.props.role === 'slider')!.props.onLayout({ nativeEvent: { layout: { width: 20, height: 20 } } });
+  });
+  await act(async () => gesture().handlers.begin());
+  await act(async () => gesture().handlers.update({ translationX: 28, translationY: 0 }));
+  expect(input().props.value).toBe('200');
+  expect(button('common.save').props.accessibilityState.disabled).toBe(true);
+  expect(boundary.setItem).not.toHaveBeenCalled();
+  await act(async () => gesture().handlers.finalize());
+  expect(button('common.save').props.accessibilityState.disabled).toBe(false);
+  expect(committed.activationRadiusMeters).toBe(100);
+  await save();
+  expect(committed.activationRadiusMeters).toBe(200);
+  await act(async () => tree!.unmount()); tree = undefined; await mount();
+  expect(input().props.value).toBe('200');
+});
+it('abandons an unfinished slider interaction on blur even when the parent draft never changed', async () => {
+  await mount();
+  const slider = () => tree!.root.findByType(Slider);
+  await act(async () => slider().props.onChange(500));
+  expect(input().props.value).toBe('500');
+  boundary.focused = false; await redraw(); boundary.focused = true; await redraw();
+  expect(input().props.value).toBe('100');
+  expect(button('common.save').props.accessibilityState.disabled).toBe(true);
+  expect(boundary.setItem).not.toHaveBeenCalled();
 });
