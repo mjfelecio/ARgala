@@ -649,7 +649,7 @@ content-complete nine-site field UAT remains blocked on those approvals.
 ## W01 Welcome and language selection (2026-10-20)
 
 PR #13 was confirmed merged before branching from `origin/main` at `81965ff`.
-The supplied kickoff design, implementation plan and unchanged corrected HTML
+The supplied kickoff design, implementation plan and corrected HTML (trailing whitespace normalized)
 are preserved in `docs/design/clean-explorer/WELCOME.md`,
 `docs/superpowers/plans/2026-10-20-welcome-language.md` and
 `docs/design/clean-explorer/references/welcome-stitch-reference.html`.
