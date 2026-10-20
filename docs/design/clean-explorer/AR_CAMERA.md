@@ -3,7 +3,7 @@
 This presentation pass follows the approved selected-state reference in
 `ARgala_AR_Camera_Implementation_Kickoff.zip` and [A01](SCREEN_SPECIFICATIONS.md).
 The screen uses a real rear-camera preview, a compact high-contrast AR/compass
-header, one Map return and an explicit Scan / Refresh control. The generic tab
+control row, one Map return and an explicit Scan / Refresh control. The generic tab
 bar and duplicate wrapper Back button are absent in AR.
 
 `ArScreen` still owns focus/foreground camera permission and GPS/heading
@@ -14,15 +14,17 @@ existing `global.css`; there is no additional palette or dependency.
 
 The viewport is the space below the measured header and above pinned provider
 credits. The nearby dock starts at a compact, font-scaled peek and supports
-swiping and translated Show more/less controls. An eligible/selected place opens
-the expanded dock; manual selection opens it even outside activation/FOV. It
-preserves selection across heading changes and navigation. Requested expansion
+swiping and translated Show more/less controls. Automatic nearest-place selection
+keeps the dock compact so the camera remains visible. A manual selection or an
+incoming selected-place handoff opens the expanded dock, including places outside
+activation/FOV. It preserves selection across heading changes and navigation. Requested expansion
 is carried by the controlled native index so early selection survives delayed
 native readiness; a one-detent viewport does not erase the expansion preference. Header Scan remains
 visible while the panel scrolls. All returned places are available in the list.
 
 Badges use the existing pure bearing/FOV ranking and provider IDs, with at most
-three font-scaled lanes. Badge dimensions and hit areas match the lanes. The
+three font-scaled lanes. Opaque dark surfaces, white text and a dark green selected
+state keep labels readable against camera imagery. Badge dimensions and hit areas match the lanes. The
 controller reserves settled sheet occupation and omits lanes that cannot fit.
 A UI-thread clip follows the sheet position during native dragging, keeping
 labels out of the dock's visual and touch region without per-frame React state.

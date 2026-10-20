@@ -32,6 +32,10 @@ it('bounds labels to three measured lanes, retains stable IDs and full accessibl
   expect(labels[1].props.style.height).toBeLessThan(labels[0].props.style.height);
   expect(labels[0].props.accessibilityLabel).toContain(name);
   expect(labels[0].props.accessibilityLabel).toContain('11 m away');
+  expect(labels[0].props.className).toContain('bg-brand-strong');
+  expect(labels[0].props.className).toContain('border-white');
+  expect(labels[1].props.className).toContain('bg-ink/95');
+  expect(labels.every(label => label.props.style.height >= 48)).toBe(true);
   for (const label of labels) {
     expect(label.props.style.top).toBeGreaterThanOrEqual(130);
     expect(label.props.style.top + label.props.style.height).toBeLessThanOrEqual(700);
