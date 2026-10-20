@@ -1,0 +1,19 @@
+{
+  "package": "react-native-maps",
+  "version": "1.27.2",
+  "files": [
+    {
+      "path": "android/src/main/java/com/rnmaps/maps/MapView.java",
+      "changes": [
+        {
+          "before": "    public void applyBaseMapPadding(int left, int top, int right, int bottom) {\n        if (super.getHeight() <= 0 || super.getWidth() <= 0) {\n            // the map is not laid out yet and calling setPadding() now has no effect\n            baseLeftMapPadding = left;\n            baseRightMapPadding = right;\n            baseTopMapPadding = top;\n            baseBottomMapPadding = bottom;\n            setPaddingDeferred = true;\n            return;\n        }\n\n        // retrieve current camera with current edge paddings configured\n        map.setPadding(edgeLeftPadding + baseLeftMapPadding,\n                edgeTopPadding + baseTopMapPadding,\n                edgeRightPadding + baseRightMapPadding,\n                edgeBottomPadding + baseBottomMapPadding);\n        CameraUpdate cu = CameraUpdateFactory.newCameraPosition(map.getCameraPosition());\n\n        baseLeftMapPadding = left;\n        baseRightMapPadding = right;\n        baseTopMapPadding = top;\n        baseBottomMapPadding = bottom;\n\n        // apply base paddings and restore center position of the map\n        map.setPadding(edgeLeftPadding + left,\n                edgeTopPadding + top,\n                edgeRightPadding + right,\n                edgeBottomPadding + bottom);\n        map.moveCamera(cu);\n\n        // Move the google logo to the default base padding value.\n        map.setPadding(left, top, right, bottom);\n        setPaddingDeferred = false;\n    }\n\n",
+          "after": "    public void applyBaseMapPadding(int left, int top, int right, int bottom) {\n        baseLeftMapPadding = left;\n        baseRightMapPadding = right;\n        baseTopMapPadding = top;\n        baseBottomMapPadding = bottom;\n        if (map == null || super.getHeight() <= 0 || super.getWidth() <= 0) {\n            setPaddingDeferred = true;\n            return;\n        }\n\n        // ARgala: padding moves SDK credits/controls, not the map content.\n        // Restoring the old camera target here shifts the projection on every\n        // sheet frame. Explicit camera and fit commands own camera movement.\n        map.setPadding(left, top, right, bottom);\n        setPaddingDeferred = false;\n    }\n\n"
+        },
+        {
+          "before": "        if (setPaddingDeferred && super.getHeight() > 0 && super.getWidth() > 0) {\n            CameraUpdate cu = CameraUpdateFactory.newCameraPosition(map.getCameraPosition());\n\n            map.setPadding(edgeLeftPadding + baseLeftMapPadding,\n                    edgeTopPadding + baseTopMapPadding,\n                    edgeRightPadding + baseRightMapPadding,\n                    edgeBottomPadding + baseBottomMapPadding);\n            map.moveCamera(cu);\n\n            // Move the google logo to the default base padding value.\n            map.setPadding(baseLeftMapPadding, baseTopMapPadding, baseRightMapPadding, baseBottomMapPadding);\n\n            setPaddingDeferred = false;\n        }\n\n",
+          "after": "        if (setPaddingDeferred && map != null && super.getHeight() > 0 && super.getWidth() > 0) {\n            // Match the ready setter: applying deferred credits padding must\n            // not move the camera or reuse a previous fit's temporary padding.\n            map.setPadding(baseLeftMapPadding, baseTopMapPadding, baseRightMapPadding, baseBottomMapPadding);\n            setPaddingDeferred = false;\n        }\n\n"
+        }
+      ]
+    }
+  ]
+}
