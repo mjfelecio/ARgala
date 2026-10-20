@@ -59,17 +59,16 @@ it('starts GPS without reopening after a foreground subscription race', async ()
   expect(tree!.root.findByType(LocationStatus).props.location.status).toBe('ready');
   expect(tree!.root.findAllByType('output')).toHaveLength(0);
 });
-it('shows the developer startup marker with focus and phase without location data', async () => {
+it('keeps development GPS guidance free of sensor diagnostics', async () => {
   Object.assign(globalThis, { __DEV__: true });
-  const trace = vi.spyOn(console, 'info').mockImplementation(() => {});
   const i18n = createInstance();
   await i18n.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
   await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n }, React.createElement(Probe))); });
-  const debug = JSON.parse(tree!.root.findByType('text').props.children);
-  expect(debug).toEqual({ sensorDebug: 3, active: true, focused: true, phase: 'position', status: 'loading', watcherStatus: 'pending', errorCode: null });
-  expect(trace).toHaveBeenCalledWith('[ARgala sensor startup v3]', expect.objectContaining({ active: true, focused: true, phase: 'position' }));
-  expect(JSON.stringify(trace.mock.calls)).not.toContain('latitude');
-  expect(JSON.stringify(trace.mock.calls)).not.toContain('longitude');
+  expect(tree!.root.findByType('output').props.children).toBe(i18n.t('location.loading'));
+  expect(JSON.stringify(tree!.toJSON())).not.toMatch(/sensorDebug|watcherStatus|latitude|longitude/);
+  await act(async () => { await vi.advanceTimersByTimeAsync(15000); });
+  expect(tree!.root.findByType('output').props.children).toBe(i18n.t('location.timeout'));
+  expect(tree!.root.findAllByType('button')).toHaveLength(1);
 });
 afterEach(async () => {
   await act(async () => tree?.unmount()); tree = undefined;

@@ -843,3 +843,7 @@ native layout and cannot establish visual fit. See the concrete Android checklis
 and intentional Stitch differences in
 [Profile & Settings](design/clean-explorer/PROFILE_SETTINGS.md). Completion of
 screen implementation does not establish integrated field readiness or UAT.
+
+## UAT refinement — sensor diagnostics (2026-10-20)
+
+Removed development-only camera/location JSON panels and the temporary sensor-startup trace. User-facing GPS, permission, accuracy, compass and tracking recovery remain in their existing paths. Regression tests exercise development-mode camera permission guidance and GPS loading/timeout without diagnostic fields. Targeted camera, AR discovery and location tests pass (72 tests); lint/typecheck are recorded with the batch results below. Camera/GPS behavior on an Android device remains unverified in this refinement session.

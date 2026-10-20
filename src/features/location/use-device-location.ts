@@ -25,11 +25,6 @@ export function useDeviceLocation({ enabled = true, heading: needsHeading = fals
   const active = useAppActive();
   const focused = useIsFocused();
   useEffect(() => {
-    if (typeof __DEV__ !== 'undefined' && __DEV__) console.info('[ARgala sensor startup v3]', {
-      active, focused, phase: state.phase, status: state.status, watcherStatus: state.watcherStatus, errorCode: state.errorCode,
-    });
-  }, [active, focused, state.phase, state.status, state.watcherStatus, state.errorCode]);
-  useEffect(() => {
     if (!enabled || !active || !focused) return;
     let disposed = false;
     const stops: (() => void)[] = [];
@@ -90,6 +85,5 @@ export function useDeviceLocation({ enabled = true, heading: needsHeading = fals
     void start().catch((error: unknown) => { clearTimeout(startupTimer); patch({ status: 'error', ...locationFailure(error) }); });
     return stop;
   }, [enabled, active, focused, attempt, needsHeading, distanceIntervalMeters]);
-  return { ...state, retry: () => setAttempt((value) => value + 1),
-    debug: { sensorDebug: 3, active, focused, phase: state.phase, status: state.status, watcherStatus: state.watcherStatus, errorCode: state.errorCode } };
+  return { ...state, retry: () => setAttempt((value) => value + 1) };
 }
