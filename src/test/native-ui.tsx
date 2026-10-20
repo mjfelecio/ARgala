@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { HeroUINativeProviderRaw } from 'heroui-native/provider-raw';
 import type { BottomSheetProps } from '@gorhom/bottom-sheet';
 
-const nativeUi = vi.hoisted(() => ({ sheetReady: true, mutableValueWrites: [] as unknown[], reactions: new Set<() => void>(), openURL: vi.fn(), alert: vi.fn(), insets: { top: 24, bottom: 24, left: 0, right: 0 } }));
+const nativeUi = vi.hoisted(() => ({ sheetReady: true, fontScale: 1, mutableValueWrites: [] as unknown[], animatedStyles: new WeakMap<object, () => Record<string, unknown>>(), reactions: new Set<() => void>(), openURL: vi.fn(), alert: vi.fn(), insets: { top: 24, bottom: 24, left: 0, right: 0 } }));
 
 // Keep HeroUI components real; only native runtime boundaries are replaced.
 vi.mock('react-native', () => ({
@@ -14,7 +14,7 @@ vi.mock('react-native', () => ({
   Platform: { OS: 'android', select: (values: Record<string, unknown>) => values.android ?? values.default },
   Modal: 'modal', ActivityIndicator: 'progress', StyleSheet: { create: (styles: unknown) => styles, flatten: (styles: unknown) => styles, absoluteFillObject: {}, hairlineWidth: 1 },
   I18nManager: { isRTL: false }, PixelRatio: { get: () => 1 },
-  useWindowDimensions: () => ({ width: 360, height: 800 }),
+  useWindowDimensions: () => ({ width: 360, height: 800, fontScale: nativeUi.fontScale }),
 }));
 vi.mock('react-native-safe-area-context', () => ({ SafeAreaView: 'safe-area', SafeAreaListener: 'safe-area-listener', useSafeAreaInsets: () => nativeUi.insets }));
 vi.mock('uniwind', () => ({ useUniwind: () => ({ theme: 'light', hasAdaptiveThemes: false }), useResolveClassNames: (classes: string) => ({ padding: classes.includes('p-8') ? 32 : classes.includes('p-4') ? 16 : 8, ...(classes.includes('h-16') ? { height: 64 } : {}), borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: '#FFFFFF', borderRadius: 0 }), useCSSVariable: (name: string | string[]) => Array.isArray(name) ? name.map(value => value === '--color-muted' ? '#3F4942' : '#247A53') : '#247A53', withUniwind: (component: unknown) => component }));
@@ -48,7 +48,11 @@ vi.mock('react-native-reanimated', async () => {
     },
     default: { View: 'view', Text: 'text', createAnimatedComponent: (component: unknown) => component },
     useSharedValue: (value: unknown) => React.useRef({ value, get() { return this.value; }, set(next: unknown) { this.value = typeof next === 'function' ? next(this.value) : next; } }).current,
-    useAnimatedStyle: () => ({}), useAnimatedProps: () => ({}), useAnimatedRef: () => React.useRef(null),
+    useAnimatedStyle: (factory: () => Record<string, unknown>) => {
+      const style = React.useRef({}).current;
+      nativeUi.animatedStyles.set(style, factory);
+      return style;
+    }, useAnimatedProps: () => ({}), useAnimatedRef: () => React.useRef(null),
     useDerivedValue: () => ({ value: 0 }), useAnimatedReaction: (prepare: () => unknown, react: (next: unknown, previous: unknown) => void) => {
       React.useEffect(() => {
         let previous: unknown = null;

@@ -10,7 +10,6 @@ import { router } from 'expo-router';
 import { localizationOptions } from '@/i18n/options';
 import AppLayout from '@/app/(app)/_layout';
 import { AppTabs } from './app-tabs';
-import { AppHeader } from './app-header';
 import { ImmersiveArScreen } from './immersive-ar-screen';
 import { ArChrome } from '@/features/ar/ar-chrome';
 import ProfileScreen from './profile-screen';
@@ -144,27 +143,18 @@ it('keeps Settings outside the tabs and Back restores the originating tab state'
  const returned = reducer.getStateForAction(opened, { type: 'GO_BACK' }, config);
  expect(returned.routes[0].state).toEqual(original.routes[0].state);
 });
-it('opens Settings from the branded header and preserves Android top safe area', async () => {
- await mount(React.createElement(AppHeader, { label: 'Explore' }));
- expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['top', 'left', 'right']);
- expect(JSON.stringify(tree!.toJSON())).toContain('ARgala');
- await act(async () => { tree!.root.findByType('button').props.onPress(); });
- expect(router.push).toHaveBeenCalledWith('/settings');
-});
 it.each([
  ['en', ['Explore', 'AR View', 'Profile'], 'Back to map', 'Open settings'],
  ['ko', ['탐색', 'AR 보기', '프로필'], '지도로 돌아가기', '설정 열기'],
  ['ja', ['探索', 'ARビュー', 'プロフィール'], '地図に戻る', '設定を開く'],
 ])('updates navigation and recovery actions from actual %s resources', async (locale, labels, back) => {
- await mount(React.createElement(React.Fragment, null, React.createElement(AppTabs), React.createElement(AppHeader, { label: 'Explore' }), React.createElement(ImmersiveArScreen), React.createElement(ArChrome, { headingDegrees: null, onMap: () => router.navigate('/'), onScan: () => {}, scanDisabled: true, scanBusy: false })));
+ await mount(React.createElement(React.Fragment, null, React.createElement(AppTabs), React.createElement(ImmersiveArScreen), React.createElement(ArChrome, { headingDegrees: null, onMap: () => router.navigate('/'), onScan: () => {}, scanDisabled: true, scanBusy: false })));
  await act(async () => { await translations.changeLanguage(locale); });
  expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.options.title)).toEqual(labels);
  const buttons = tree!.root.findAllByType('button');
- const profile = buttons.find(b => b.props.accessibilityLabel === translations.t('settings.title'));
  const map = buttons.find(b => b.props.accessibilityLabel === back);
- expect(profile).toBeDefined(); expect(map).toBeDefined();
- await act(async () => { profile!.props.onPress(); map!.props.onPress(); });
- expect(router.push).toHaveBeenCalledWith('/settings');
+ expect(map).toBeDefined();
+ await act(async () => { map!.props.onPress(); });
  expect(router.navigate).toHaveBeenCalledWith('/');
  expect(tree!.root.findAllByType('ar-camera-screen' as React.ElementType)).toHaveLength(1);
 });
@@ -198,4 +188,11 @@ it.each(['index', 'ar'])('keeps the %s tab context below Details and returns to 
 it('shares settings content between the Profile tab and parent Settings route', async () => {
  await mount(React.createElement(React.Fragment, null, React.createElement(ProfileScreen), React.createElement(SettingsScreen)));
  expect(tree!.root.findAllByType('settings-content' as React.ElementType).map(node => node.props.entry)).toEqual(['tab', 'stack']);
+});
+
+it('lets Explore own its floating search bar without a navigator header', async () => {
+ await mount(React.createElement(AppTabs));
+ const tabs=tree!.root.findByType('tabs' as React.ElementType);
+ expect(tabs.props.screenOptions.headerShown).toBe(false);
+ expect(tabs.props.screenOptions.header).toBeUndefined();
 });

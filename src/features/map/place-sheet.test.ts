@@ -1,4 +1,4 @@
-import { withHeroUI } from '@/test/native-ui';
+import { nativeUi, withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createInstance, type i18n } from 'i18next';
@@ -14,7 +14,7 @@ beforeEach(async () => {
  translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
  props = { state: 'unsearched', selectedPlace: null, hasSelection: false, canRequest: true, resultCount: 0, attributions: React.createElement('aside', {}, 'Provider credit'), onRetrySearch: vi.fn(), onClosePlace: vi.fn(), onDetails: vi.fn(), onWalk: vi.fn(), onMeasuredHeight: vi.fn() };
 });
-afterEach(async () => { await act(async () => tree?.unmount()); });
+afterEach(async () => { await act(async () => tree?.unmount()); nativeUi.fontScale=1; });
 async function render() { await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(HomePlaceSheet, props)))); }); }
 function content() { return JSON.stringify(tree.toJSON()); }
 async function press(key: string) { const button=tree.root.findAllByType('button').find(b=>b.props.accessibilityLabel===translations.t(key)); expect(button).toBeDefined(); await act(async()=>button!.props.onPress()); }
@@ -92,4 +92,24 @@ it.each(['ko','ja'])('keeps the native drag handle out of TalkBack and exposes l
  expect(expand).toBeDefined();
  await press('map.expand');
  expect(tree.root.findAllByType('button').find(b=>b.props.accessibilityLabel===translations.t('map.collapse'))!.props.accessibilityState.expanded).toBe(true);
+});
+
+it('starts with a shallow nearby peek and keeps request limits behind explicit expansion', async () => {
+ props.containerHeight=720; props.maxHeight=540; await render();
+ const sheet=tree.root.findByType('dialog');
+ expect(sheet.props.snapPoints[0]).toBeLessThanOrEqual(176);
+ expect(content()).toContain(translations.t('map.start'));
+ expect(content()).not.toContain(translations.t('map.limit',{count:20,meters:1000}));
+ await press('map.expand');
+ expect(content()).toContain(translations.t('map.limit',{count:20,meters:1000}));
+ expect(props.onRetrySearch).not.toHaveBeenCalled();
+});
+
+it('scales the compact peek for large text and caps it to a short viewport', async () => {
+ nativeUi.fontScale=2; props.containerHeight=720; props.maxHeight=540; await render();
+ expect(tree.root.findByType('dialog').props.snapPoints[0]).toBe(312);
+ props.maxHeight=120;
+ await act(async()=>tree.update(React.createElement(I18nextProvider,{i18n:translations},withHeroUI(React.createElement(HomePlaceSheet,props)))));
+ expect(tree.root.findByType('dialog').props.snapPoints).toEqual([120]);
+ expect(tree.root.findAllByType('button').some(b=>b.props.accessibilityLabel===translations.t('map.expand'))).toBe(true);
 });

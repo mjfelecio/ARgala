@@ -9,14 +9,15 @@ import { HomeMapControls } from './home-map-controls';
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
 let tree: ReactTestRenderer;
 afterEach(async () => { await act(async () => tree?.unmount()); });
-it('keeps Search, AR and Recenter without duplicating shell branding or Settings', async () => {
+it('integrates the brand mark with Search and keeps shortcuts free of Recenter and Settings', async () => {
  const translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
- const callbacks = { onSearchNearby: vi.fn(), onRecenter: vi.fn(), onOpenAr: vi.fn(), onOpenDestinations: vi.fn() };
+ const callbacks = { onSearchNearby: vi.fn(), onOpenAr: vi.fn(), onOpenDestinations: vi.fn() };
  const render = (canSearch: boolean, searching: boolean) => React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(HomeMapControls, { ...callbacks, canSearch, searching })));
  await act(async () => { tree = create(render(true, false)); });
- const buttons = tree.root.findAllByType('button'); expect(buttons).toHaveLength(4);
- expect(buttons.map(b => b.props.accessibilityLabel)).toEqual(['Search Nearby', 'Recenter', 'Open AR', 'Featured Destinations']);
- expect(JSON.stringify(tree.toJSON())).not.toContain('ARgala');
+ const buttons = tree.root.findAllByType('button'); expect(buttons).toHaveLength(3);
+ expect(buttons.map(b => b.props.accessibilityLabel)).toEqual(['Search Nearby', 'Open AR', 'Featured Destinations']);
+ expect(tree.root.findAllByType('icon' as React.ElementType).some(node=>node.props.name==='compass-outline')).toBe(true);
+ expect(buttons.some(b=>b.props.accessibilityLabel===translations.t('settings.title'))).toBe(false);
  await act(async () => { buttons.forEach(b => b.props.onPress()); });
  Object.values(callbacks).forEach(callback => expect(callback).toHaveBeenCalledOnce());
  for (const [canSearch, searching] of [[false, false], [true, true]]) {

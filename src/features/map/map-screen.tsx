@@ -3,6 +3,7 @@ import Constants from 'expo-constants';
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
+import { useSharedValue } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +26,7 @@ import { useCSSVariable, useResolveClassNames, withUniwind } from 'uniwind';
 
 import { HomePlaceSheet, type HomePlaceSheetState } from './place-sheet';
 import { HomeMapControls } from './home-map-controls';
+import { MapRecenter } from './map-recenter';
 import { ProviderAttributions, useOpenProviderLink } from './attributions';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
@@ -64,6 +66,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const [mapReady, setMapReady] = useState(false);
   const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
   const [headerHeight, setHeaderHeight] = useState(0);
+  const sheetPosition = useSharedValue(0);
   const [sheetHeight, setSheetHeight] = useState(0);
   const [settledSheetHeight, setSettledSheetHeight] = useState(0);
   const gutter = useResolveClassNames('p-2').padding as number;
@@ -136,7 +139,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const state: HomePlaceSheetState = route.isFetching ? 'route-loading' : route.error ? 'route-failed' : route.data ? 'route-ready'
     : selectedId ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';
   const error = route.error ?? (selectedId ? details.error : nearby.error);
-  return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
+  return <StyledSafeAreaView className="flex-1 bg-surface" edges={['top', 'left', 'right']}>
     <View className="flex-1">
     <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       {...(mapReady ? { mapPadding } : {})} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
@@ -149,9 +152,9 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     </StyledMapView>
     <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
       onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
-      onRecenter={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)}
       onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')} />
-    <HomePlaceSheet key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
+    <MapRecenter position={sheetPosition} onPress={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
+    <HomePlaceSheet animatedPosition={sheetPosition} key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
       canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady} route={route.data}
       locationStatus={<>{locationStatus}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
@@ -169,7 +172,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       } : undefined}
       onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onWalk={walk}
       onOpenGoogle={place?.mapsUri ? () => open(place.mapsUri!) : undefined}
-      onMeasuredHeight={setSheetHeight} onSettledHeight={setSettledSheetHeight} containerHeight={mapSize.height} maxHeight={mapSize.height > 0 ? Math.max(0, mapSize.height - headerHeight - Math.min(fitMargin * 2, mapSize.height / 10)) : undefined}
+      onMeasuredHeight={setSheetHeight} onSettledHeight={setSettledSheetHeight} containerHeight={mapSize.height} maxHeight={mapSize.height > 0 ? Math.max(0, mapSize.height - headerHeight - Math.min(fitMargin * 2, mapSize.height)) : undefined}
       attributions={<ProviderAttributions places={[...(nearby.data ?? []), ...(details.data ? [details.data] : []), ...(handoff.data ? [handoff.data] : [])]} />} />
     </View>
   </StyledSafeAreaView>;

@@ -13,6 +13,7 @@ import { queryClient } from '@/lib/query';
 import { EdgeRequestError } from '@/lib/edge-error';
 import { localizationOptions } from '@/i18n/options';
 import MapScreen from './map-screen';
+import { MapRecenter } from './map-recenter';
 
 const controls = vi.hoisted(() => ({
   fit: vi.fn(), animate: vi.fn(), active: true, focused: true,
@@ -460,7 +461,7 @@ it('keeps the expanded sheet and Google credits within the smaller scene above t
  await act(async () => { request.resolve(walkingRoute); });
  await press('map.expand');
  // The navigator owns the bottom inset; the map must not reserve it again.
- expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left', 'right']);
+ expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['top', 'left', 'right']);
  await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 580 } } }); });
  const sheet = tree!.root.findByType('dialog');
  expect(tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('map.collapse'))!.props.accessibilityState.expanded).toBe(true);
@@ -514,4 +515,33 @@ it('hands off the submitted destination even when details update while the route
   const intent = claimRoutePreviewIntent(client, opened.params?.token);
   expect(intent?.existing).toMatchObject({ destination: destination.coordinates, origin: { latitude: 38.5, longitude: -120.2 }, route: walkingRoute });
   expect(routeService.walking).toHaveBeenCalledOnce();
+});
+
+it('separates Recenter from the search bar and keeps it attached to the native sheet position', async () => {
+ await act(async()=>{ tree=create(renderMap()); });
+ const top=tree!.root.findByProps({testID:'home-map-controls'});
+ expect(top.findAllByType('button').some(b=>b.props.accessibilityLabel===translations.t('map.recenter'))).toBe(false);
+ const floating=tree!.root.findByType(MapRecenter);
+ expect(floating.props.position).toBe(tree!.root.findByType('dialog').props.animatedPosition);
+ const button=floating.findAllByType('button')[0];
+ await act(async()=>button.props.onPress());
+ expect(controls.animate).toHaveBeenCalledWith({...controls.position,latitudeDelta:0.02,longitudeDelta:0.02},400);
+ expect(placesService.nearby).not.toHaveBeenCalled();
+ expect(routeService.walking).not.toHaveBeenCalled();
+ expect(tree!.root.findAllByType('safe-area' as React.ElementType).at(-1)!.props.edges).toEqual(['top','left','right']);
+});
+
+it('moves the floating Recenter on the UI thread with the sheet while route fitting waits for settle', async () => {
+ await startRoute(); await act(async()=>request.resolve(walkingRoute));
+ const sheet=tree!.root.findByType('dialog');
+ const floating=tree!.root.findByProps({testID:'map-recenter'});
+ const style=()=>nativeUi.animatedStyles.get(floating.props.style)!();
+ const fits=controls.fit.mock.calls.length;
+ await act(async()=>sheet.props.animatedPosition.set(440));
+ expect(style()).toMatchObject({transform:[{translateY:376}],opacity:1});
+ await act(async()=>sheet.props.animatedPosition.set(380));
+ expect(style()).toMatchObject({transform:[{translateY:316}],opacity:1});
+ expect(controls.fit).toHaveBeenCalledTimes(fits);
+ expect(placesService.nearby).toHaveBeenCalledTimes(1);
+ expect(routeService.walking).toHaveBeenCalledTimes(1);
 });
