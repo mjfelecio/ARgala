@@ -36,7 +36,7 @@ Pending/completed previews retain location for their live marker and Recenter.
 Re-enabling GPS creates a new sensor ownership interval, so a retained sample
 cannot bypass permission rechecks or authorize the retry's route request.
 
-Home, Place Details and AR open this dedicated preview from one explicit Directions action. Home no longer calculates or presents a separate route. A new explicit handoff reuses a recent successful preview matching the provider ID and submitted destination when available. Reuse carries the original origin/destination snapshot and never grants authority for a new paid call. Different or expired destinations require the existing fresh foreground GPS/watcher gate.
+Home, Place Details and AR open this dedicated preview from one explicit Directions action. Home no longer calculates or presents a separate route. A new explicit handoff reuses a recent successful preview matching the provider ID, submitted destination and actual request language when available. Reuse carries the original origin/destination snapshot and never grants authority for a new paid call. Different or expired destinations require the existing fresh foreground GPS/watcher gate.
 
 Bare/dead URLs, tab changes, remounts, refocus, foreground return, locale changes,
 query invalidation and reconnect do not independently authorize paid calls.
@@ -49,16 +49,10 @@ There is no rerouting, navigation guidance or successful-route refresh action.
   changes do not move the route destination. The live
   user marker/Recenter requires usable current GPS. A moving user marker never
   changes the captured origin or reroutes the preview.
-- The white header sits inside Android safe areas, with Back and the localized
-  title. There are no Share/Profile extras or duplicate branded tab header.
-- The compact white rounded dock is measured and scrollable, capped at 55% of
-  the measured map scene. The header and safe areas are outside that scene.
-  Google map padding is omitted until the current map instance is ready, then
-  reserves the measured dock for legal attribution. Padding is bounded during
-  resize callbacks; fitting waits for the dock to catch up to its current cap. Fit padding is added once,
-  matching the Android Maps implementation. Fit/Recenter use accessible buttons
-  arranged horizontally to preserve space on short scenes.
-- The dock uses HeroUI Chip/Card/Button/Spinner, UniWind, Plus Jakarta Sans and
+- The map fills the scene behind the Android status bar. A compact white floating header reserves safe touch insets for Back and the localized title. Focus-owned dark system icons match the shared light map style; there are no Share/Profile extras.
+- A Gorhom dock has a font-scaled 168 dp peek plus the Android bottom inset, and an expanded detent up to 72% of the scene, capped below the header and a 64 dp control strip. Native over-drag is disabled to keep those controls clear. Expanded details scroll; an accessible translated toggle supplements the native drag handle. Logical expansion survives a one-detent viewport.
+- Google map padding is omitted until this native instance is ready. Legal credits follow the current sheet occupation; fitting uses settled geometry and adds only a bounded margin. A requested toggle does not synthesize a native settle or overwrite the animated position; geometry is synthesized only on initial layout or resize. Native map/route state persists across expansion and resizing. Fit/Recenter follow the sheet on the UI thread, with current GPS required only for Recenter.
+- The dock uses HeroUI Button/Spinner, UniWind, Plus Jakarta Sans and
   the existing `global.css` palette. It shows returned distance/duration,
   destination name, optional address, the snapshot explanation, standard walking
   caution and actual returned warnings/third-party credits. It never invents
@@ -67,9 +61,7 @@ There is no rerouting, navigation guidance or successful-route refresh action.
   triangle, sample time/distance and place-specific walkway claim are omitted.
   Native pins replace the illustrated landmark pin. Metrics use the existing
   localized meters/minutes wording rather than the screenshot's exact format.
-  Actual cautions and snapshot text make the dock denser; long names, warnings
-  and large fonts scroll rather than truncate. The dock is fixed, without a
-  decorative drag handle or extra expanded screen.
+  The compact summary shows the destination and returned duration/distance. Expand for full names, address/description, captured-origin context, actual warnings and Details/Map actions; long content scrolls.
 
 The supplied PNG was inspected and compared to the implemented hierarchy. No
 Android screenshot of this implementation was obtained; pixel parity, native
