@@ -847,3 +847,9 @@ screen implementation does not establish integrated field readiness or UAT.
 ## UAT refinement — sensor diagnostics (2026-10-20)
 
 Removed development-only camera/location JSON panels and the temporary sensor-startup trace. User-facing GPS, permission, accuracy, compass and tracking recovery remain in their existing paths. Regression tests exercise development-mode camera permission guidance and GPS loading/timeout without diagnostic fields. Targeted camera, AR discovery and location tests pass (72 tests); lint/typecheck are recorded with the batch results below. Camera/GPS behavior on an Android device remains unverified in this refinement session.
+
+## UAT refinement — compact Home chrome (2026-10-20)
+
+The brand header uses one line and a 56 dp minimum instead of 64 dp. Floating controls use two 48 dp rows with one 8 dp gap and 16 dp vertical padding (120 dp), replacing three rows with two gaps (176 dp). At default text size with both rows fitting, combined chrome drops from 240 to 176 dp: approximately **64 dp reclaimed**, excluding unchanged safe-area insets. This is a code-derived comparison, not a device measurement; long translations and scaled fonts can wrap. Recenter retains a localized accessibility label and a 48 dp icon target. Controls remain scrollable in short scenes. Existing measured padding, map-readiness gating, animated credit occupation and settled route-fit geometry are preserved.
+
+Home controls, map lifecycle/cost/geometry, sheet and app-shell suites pass (68 tests). Android checks still needed: compact/large text and Korean/Japanese layouts; Settings, Search, AR, Destinations and Recenter access; expanded/collapsed sheets, route visibility and Google logo/legal credits.
