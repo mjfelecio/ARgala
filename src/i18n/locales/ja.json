@@ -4,7 +4,10 @@
     "save": "設定を保存",
     "saved": "設定を保存しました。",
     "close": "閉じる",
-    "connecting": "接続中…"
+    "connecting": "接続中…",
+    "back": "戻る",
+    "openSettings": "端末の設定を開く",
+    "settingsError": "設定を開けません。Androidの設定から直接開いてください。"
   },
   "auth": {
     "signIn": "ログイン",

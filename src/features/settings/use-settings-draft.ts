@@ -3,30 +3,30 @@ import { useEffect, useRef, useState } from 'react';
 import { preferencesSchema, type Preferences } from './preferences';
 import { useSettings } from './provider';
 
-function initialDraft(preferences: Preferences) {
+function initialDraft(preferences: Preferences, focused: boolean) {
   return { radius: String(preferences.activationRadiusMeters), language: preferences.language,
-    baselineRadius: preferences.activationRadiusMeters, baselineLanguage: preferences.language };
+    baselineRadius: preferences.activationRadiusMeters, baselineLanguage: preferences.language, focused };
 }
 export function useSettingsDraft() {
   const settings = useSettings();
   const focused = useIsFocused();
   const focusedRef = useRef(focused);
-  focusedRef.current = focused;
+  useEffect(() => { focusedRef.current = focused; }, [focused]);
   const alive = useRef(true);
   const submitting = useRef(false);
-  const [draft, setDraft] = useState(() => initialDraft(settings));
+  const [draft, setDraft] = useState(() => initialDraft(settings, focused));
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<'common.saved' | 'settings.saveFailed' | null>(null);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const { activationRadiusMeters, language } = settings;
-  useEffect(() => {
-    setDraft(previous => {
-      const pristine = previous.radius === String(previous.baselineRadius) && previous.language === previous.baselineLanguage;
-      if (!focused || pristine) return initialDraft({ activationRadiusMeters, language });
-      return { ...previous, baselineRadius: activationRadiusMeters, baselineLanguage: language };
-    });
-    if (!focused) setMessage(null);
-  }, [activationRadiusMeters, language, focused]);
+  // Adjust the draft before rendering children when its saved baseline or focus
+  // changes. Dirty edits survive external saves; leaving the route abandons them.
+  if (draft.baselineRadius !== activationRadiusMeters || draft.baselineLanguage !== language || draft.focused !== focused) {
+    const pristine = draft.radius === String(draft.baselineRadius) && draft.language === draft.baselineLanguage;
+    setDraft(!focused || pristine ? initialDraft({ activationRadiusMeters, language }, focused)
+      : { ...draft, baselineRadius: activationRadiusMeters, baselineLanguage: language, focused });
+    if (!focused && message !== null) setMessage(null);
+  }
   const dirty = draft.radius !== String(activationRadiusMeters) || draft.language !== language;
   const parsed = preferencesSchema.safeParse({ activationRadiusMeters: draft.radius.trim() === '' ? NaN : Number(draft.radius), language: draft.language });
   function changeRadius(radius: string) {
@@ -43,7 +43,7 @@ export function useSettingsDraft() {
     try {
       await settings.save(parsed.data);
       if (alive.current) {
-        setDraft(initialDraft(parsed.data));
+        setDraft(initialDraft(parsed.data, focusedRef.current));
         if (focusedRef.current) setMessage('common.saved');
       }
     } catch {

@@ -3,7 +3,7 @@ import { Input } from 'heroui-native/input';
 import { Label } from 'heroui-native/label';
 import { Slider } from 'heroui-native/slider';
 import { TextField } from 'heroui-native/text-field';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { ACTIVATION } from '@/config/limits';
@@ -16,7 +16,7 @@ export function RadiusControl({ value, onChange, disabled = false }: {
   const parsed = activationRadiusSchema.safeParse(value.trim() === '' ? NaN : Number(value));
   const validValue = parsed.success ? parsed.data : null;
   const [lastValid, setLastValid] = useState(validValue ?? ACTIVATION.defaultMeters);
-  useEffect(() => { if (validValue !== null) setLastValid(validValue); }, [validValue]);
+  if (validValue !== null && validValue !== lastValid) setLastValid(validValue);
   const current = validValue ?? lastValid;
   function select(next: number) {
     if (!disabled) onChange(String(Math.min(ACTIVATION.maxMeters, Math.max(ACTIVATION.minMeters, Math.round(next)))));

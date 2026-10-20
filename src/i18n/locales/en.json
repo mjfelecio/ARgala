@@ -7,7 +7,8 @@
     "openSettings": "Open device settings",
     "settingsError": "Unable to open settings. Please open them from Android settings.",
     "close": "Close",
-    "connecting": "Connecting…"
+    "connecting": "Connecting…",
+    "back": "Back"
   },
   "auth": {
     "title": "Sign in to ARgala",
