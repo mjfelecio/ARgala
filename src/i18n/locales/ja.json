@@ -4,7 +4,10 @@
     "save": "設定を保存",
     "saved": "設定を保存しました。",
     "close": "閉じる",
-    "connecting": "接続中…"
+    "connecting": "接続中…",
+    "back": "戻る",
+    "openSettings": "端末の設定を開く",
+    "settingsError": "設定を開けません。Androidの設定から直接開いてください。"
   },
   "auth": {
     "signIn": "ログイン",
@@ -40,7 +43,24 @@
     "language": "言語",
     "radius": "AR有効範囲（メートル）",
     "invalid": "対応する言語と有効なAR有効範囲を選んでください。",
-    "saveFailed": "設定を保存できませんでした。再試行してください。"
+    "saveFailed": "設定を保存できませんでした。再試行してください。",
+    "profileTitle": "プロフィールと設定",
+    "activationRadius": "AR有効範囲",
+    "radiusDescription": "場所に近づくと詳しい情報を表示します。",
+    "meters": "{{count}} m",
+    "languageDescription": "アプリの表示言語を選んでください。",
+    "arLocation": "ARと位置情報",
+    "deviceLocal": "この範囲はこの端末のスポットに適用されます。GPSの精度や周辺検索の距離は変わりません。",
+    "myAccount": "マイアカウント",
+    "signedIn": "ログイン中",
+    "emailUnavailable": "メールアドレス情報なし",
+    "about": "ARgalaについて",
+    "aboutDescription": "周辺の場所を探し、徒歩ルートを確認し、カメラのオーバーレイで探索できます。",
+    "version": "アプリのバージョン",
+    "versionUnavailable": "情報なし",
+    "unsaved": "保存されていない変更があります。",
+    "unchanged": "設定は最新の状態です。",
+    "saving": "設定を保存中…"
   },
   "map": {
     "title": "近くの場所",

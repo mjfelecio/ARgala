@@ -780,3 +780,66 @@ the shared scenery file's extra EOF blank line was removed. After these changes,
 Metro/Hermes Android export passed again (7.1 MB), and the whole-branch whitespace
 check passed. No findings were deferred. The reviewer did not rerun the suite
 or claim native device validation.
+
+## Profile & Settings — 20 October 2026
+
+Implemented S01 from the owner's kickoff against `main` at `3a3f770` (PR #15
+confirmed merged). The Profile tab and parent `/settings` route share one content
+surface. Navigator reducers retain the originating tab through stack Back, while
+Profile and stack Settings each suppress their redundant native header. Existing
+SettingsProvider persistence, preferences schema, auth/session provider and
+protected navigation remain authoritative. No dependency, native configuration,
+Edge function or provider request path changed.
+
+The real HeroUI controls share an explicit draft, including non-preset integer
+radii such as 123 m. Save is disabled for pristine/invalid/pending drafts and
+suppresses repeated presses synchronously. Tests cover actual storage writes,
+success after completion, failure/retry, locale changes, abandonment on blur,
+external preference changes, pending Save across blur/refocus and route unmount,
+known/unknown sign-out failures, real account/version and missing-data fallbacks,
+cache clearing/protected Sign In after sign-out, device Settings failure/recovery,
+localized Back, and zero network/sensor/permission work through local lifecycle
+events. Tests use actual locale resources, HeroUI components, SettingsProvider,
+AuthProvider, RootNavigation and the installed Expo Router focus hook, with
+native/storage/Supabase/navigation-renderer boundaries replaced.
+
+TDD evidence: route tests failed on the missing shared entries and duplicate
+headers; old-screen integration tests failed on pristine/invalid Save, repeated
+writes, external-save synchronization, retained success after new edits and
+abandoned tab drafts. Account/actions tests initially had 7 failures; literal
+Korean/Japanese Back and device-error assertions exposed missing resources.
+These now pass. The original settings locale tests were moved/expanded into
+`profile-settings-flow.test.tsx`.
+
+Independent review found one important regression: icon/theme imports in shared
+location status prevented two existing native lifecycle suites from collecting.
+The themed device-settings rendering now lives in the settings feature, with an
+optional render callback reusing the existing action. The reviewer reran both
+location suites: **39 tests passed**, with no remaining Critical/Important
+findings. Its suggested delayed-save coverage was added. Full lint also caught
+React compiler purity/effect violations; draft synchronization now uses conditional
+derived state, and ref/fixture writes occur outside rendering.
+
+Final verification:
+
+- `npm run check`: passed TypeScript, zero-warning ESLint and **534 tests / 51 files**.
+- `npx vitest run src/features/settings src/features/location/location-status.test.ts src/features/location/permission-lifecycle.test.ts`:
+  **80 tests / 6 files passed**.
+- `npx expo install --check`: passed; dependencies are up to date.
+- `npx expo-doctor`: **21/21 passed**.
+- `npm run check:android`: passed the existing Android configuration assertions.
+- `npm run export:android`: passed Metro/Hermes export. Repeated after the final
+  code corrections with `npm run export:android -- --max-workers 2`: passed,
+  **7.2 MB** Android bundle. This is an export, not an APK build.
+- `git diff --check origin/main`: passed, including supplied-reference whitespace
+  normalization. The root checkout and its untracked kickoff archives are unchanged.
+
+No Edge/limiter/migration changes were made, so those checks were not rerun.
+No Android APK was built/installed, no native screenshot captured and no live
+Supabase/Google/GPS/compass/camera/route testing performed. `adb` is unavailable.
+Native layout, keyboard, TalkBack, 150% fonts, small-screen/CJK wrapping and
+system insets remain **unverified on device**. The renderer tests do not run
+native layout and cannot establish visual fit. See the concrete Android checklist
+and intentional Stitch differences in
+[Profile & Settings](design/clean-explorer/PROFILE_SETTINGS.md). Completion of
+screen implementation does not establish integrated field readiness or UAT.

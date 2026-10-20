@@ -7,7 +7,8 @@
     "openSettings": "Open device settings",
     "settingsError": "Unable to open settings. Please open them from Android settings.",
     "close": "Close",
-    "connecting": "Connecting…"
+    "connecting": "Connecting…",
+    "back": "Back"
   },
   "auth": {
     "title": "Sign in to ARgala",
@@ -75,7 +76,24 @@
     "language": "Language",
     "invalid": "Choose a supported language and a valid activation radius.",
     "loadFailed": "Saved preferences could not be restored; using defaults.",
-    "saveFailed": "Settings could not be saved. Please try again."
+    "saveFailed": "Settings could not be saved. Please try again.",
+    "profileTitle": "Profile & Settings",
+    "activationRadius": "AR activation radius",
+    "radiusDescription": "Show expanded place information when you’re nearby.",
+    "meters": "{{count}} m",
+    "languageDescription": "Choose your preferred app language.",
+    "arLocation": "AR & Location",
+    "deviceLocal": "This radius applies to POIs on this device. It does not change GPS accuracy or nearby search distance.",
+    "myAccount": "My account",
+    "signedIn": "Signed in",
+    "emailUnavailable": "Email unavailable",
+    "about": "About ARgala",
+    "aboutDescription": "Discover nearby places, preview walking routes and explore with camera overlays.",
+    "version": "App version",
+    "versionUnavailable": "Unavailable",
+    "unsaved": "You have unsaved changes.",
+    "unchanged": "Your settings are up to date.",
+    "saving": "Saving settings…"
   },
   "map": {
     "title": "Nearby places",
