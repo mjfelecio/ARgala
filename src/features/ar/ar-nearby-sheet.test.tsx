@@ -36,7 +36,7 @@ it('starts compact, supports explicit and gesture expansion, and selects by unch
   await press('ar.expand');
   const row = tree!.root.findByProps({ testID: 'ar-list-a' }); await act(async () => { row.props.onPress(); });
   expect(props.onSelect).toHaveBeenCalledWith('a');
-  props = { ...props, selected: place, distance: 12 }; await update();
+  props = { ...props, selected: place, distance: 12, selectionRevision: 1 }; await update();
   expect(JSON.stringify(tree!.toJSON())).toContain('Provider Street');
   expect(JSON.stringify(tree!.toJSON())).toContain('12 m away');
   await press('placeDetails.view'); expect(props.onDetails).toHaveBeenCalledOnce();
@@ -47,8 +47,8 @@ it('starts compact, supports explicit and gesture expansion, and selects by unch
   expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('ar.collapse'))).toBe(true);
 });
 it('retains expansion through viewport resize, caps snaps and permits reselecting the same collapsed place', async () => {
-  props = { ...props, selected: place }; await update(); await press('ar.collapse');
-  props = { ...props, selectionRevision: 1 }; await update();
+  props = { ...props, selected: place, selectionRevision: 1 }; await update(); await press('ar.collapse');
+  props = { ...props, selectionRevision: 2 }; await update();
   expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityState?.expanded)).toBe(true);
   props = { ...props, height: 180, fontScale: 1.5 }; await update();
   expect(tree!.root.findByType('dialog').props.snapPoints.every((n: number) => n <= 180)).toBe(true);
@@ -66,7 +66,7 @@ it('keeps fallback list and unknown-distance copy without inventing missing plac
 it('retains a cached selection expansion when viewport measurement precedes native readiness', async () => {
   await act(async () => { tree!.unmount(); });
   nativeUi.sheetReady = false;
-  props = { ...props, selected: place, height: 0 };
+  props = { ...props, selected: place, height: 0, selectionRevision: 1 };
   await act(async () => { tree = create(render()); });
   props = { ...props, height: 640 }; await update();
   nativeUi.sheetReady = true; await update();
@@ -75,7 +75,7 @@ it('retains a cached selection expansion when viewport measurement precedes nati
   expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(0);
 });
 it('restores the expanded preference after a one-detent viewport and keeps manual collapse stable', async () => {
-  props = { ...props, selected: place }; await update();
+  props = { ...props, selected: place, selectionRevision: 1 }; await update();
   props = { ...props, height: 180 }; await update();
   // A native clamping callback reflects available geometry, not user collapse.
   await act(async () => { tree!.root.findByType('dialog').props.onChange(0, 0); });
@@ -89,9 +89,29 @@ it('restores the expanded preference after a one-detent viewport and keeps manua
 
 it('changes controlled expansion without render-time shared-value writes in the installed SDK hook', async () => {
   await press('ar.expand'); await press('ar.collapse');
-  props = { ...props, selected: place }; await update();
+  props = { ...props, selected: place, selectionRevision: 1 }; await update();
   props = { ...props, height: 180 }; await update();
   props = { ...props, height: 640 }; await update();
   expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(1);
   expect(nativeUi.mutableValueWrites).toEqual([]);
+});
+
+it('keeps automatic selections compact and expands only after an explicit selection revision', async () => {
+  props = { ...props, selected: place }; await update();
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(0);
+  expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('ar.collapse'))).toBe(false);
+  props = { ...props, selectionRevision: 1 }; await update();
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(1);
+  expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('ar.collapse'))).toBe(true);
+});
+
+it('leaves animated clipping position to the native sheet when expansion is requested', async () => {
+  const sheet=tree!.root.findByType('dialog');const start=sheet.props.animatedPosition.get();
+  vi.mocked(props.onOccupation).mockClear();
+  await press('ar.expand');
+  expect(sheet.props.index).toBe(1);
+  expect(sheet.props.animatedPosition.get()).toBe(start);
+  expect(props.onOccupation).not.toHaveBeenCalled();
+  await act(async()=>sheet.props.onChange(1,640-sheet.props.snapPoints[1]));
+  expect(props.onOccupation).toHaveBeenLastCalledWith(sheet.props.snapPoints[1]);
 });

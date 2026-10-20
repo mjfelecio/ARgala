@@ -25,7 +25,7 @@ const layoutModules = import.meta.glob('../../app/**/_layout.tsx');
 vi.mock('expo-router', async () => {
  const { createElement } = await import('react');
  const screen = (props: Record<string, unknown>) => createElement('route', props);
- return { router: { push: vi.fn(), navigate: vi.fn() },
+ return { useIsFocused: () => true, router: { push: vi.fn(), navigate: vi.fn() },
   Stack: Object.assign((props: Record<string, unknown>) => createElement('stack', props), { Screen: screen }),
   Tabs: Object.assign((props: Record<string, unknown>) => createElement('tabs', props), { Screen: screen }),
  };

@@ -34,18 +34,21 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
   const [chromeHeight, setChromeHeight] = useState(0);
   const { fontScale = 1 } = useWindowDimensions();
   const [occupation, setOccupation] = useState(0);
-  const [selectionRevision, setSelectionRevision] = useState(0);
   const sheetPosition = useSharedValue(0);
   // Clip badges on the UI thread during a drag, including their hit regions.
   const labelClip = useAnimatedStyle(() => ({ height: Math.max(0, sheetPosition.get() - 8) }));
   const params = useLocalSearchParams();
   const parsed = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
   const incomingId = parsed.success ? parsed.data.providerId : null;
+  const [selectionRevision, setSelectionRevision] = useState(incomingId ? 1 : 0);
   const [manualId, setManualId] = useState<string | null>(incomingId);
   const [lastIncomingId, setLastIncomingId] = useState(incomingId);
   if (incomingId !== lastIncomingId) {
     setLastIncomingId(incomingId);
-    if (incomingId) setManualId(incomingId);
+    if (incomingId) {
+      setManualId(incomingId);
+      setSelectionRevision(value => value + 1);
+    }
   }
   const handoff = useQuery(placeSelectionOptions(manualId));
   useEffect(() => {

@@ -180,7 +180,7 @@ it('retains selection when twenty colocated labels compete for three slots', asy
 it.each(['RATE_LIMITED', 'unknown'] as const)('renders details failure %s in Japanese and recovers without automatic retries', async (code) => {
   controls.language = 'ja'; await translations.changeLanguage('ja');
   vi.mocked(placesService.details).mockRejectedValueOnce(code === 'unknown' ? new Error('native raw error') : new EdgeRequestError(code));
-  await mount(); await scan(); await press('ar.more'); await settle();
+  await mount(); await scan(); await press('ar.expand'); await press('ar.more'); await settle();
   expect(output()).toContain(translations.t(code === 'unknown' ? 'service.failed' : 'service.rateLimited'));
   expect(output()).not.toContain('native raw error');
   controls.focused = false; await update(); controls.focused = true; await update();
@@ -230,14 +230,14 @@ it('does not reuse a distant or expired search and waits for explicit Scan', asy
 });
 
 it('removes the additional-details action once the selected place has full details', async () => {
- await mount(); await scan(); await press('ar.more'); await settle();
+ await mount(); await scan(); await press('ar.expand'); await press('ar.more'); await settle();
  expect(output()).toContain('Provider description');
  expect(tree!.root.findAllByType('button').filter(b=>b.props.title===translations.t('ar.more'))).toHaveLength(0);
  expect(placesService.details).toHaveBeenCalledTimes(1);
 });
 
 it('allows an explicit details request in a new language after hiding the loaded-language action', async () => {
- await mount(); await scan(); await press('ar.more'); await settle();
+ await mount(); await scan(); await press('ar.expand'); await press('ar.more'); await settle();
  expect(tree!.root.findAllByType('button').some(b=>b.props.title===translations.t('ar.more'))).toBe(false);
  controls.language='ja';
  await act(async()=>{ await translations.changeLanguage('ja'); tree!.update(render()); });
@@ -248,7 +248,7 @@ it('allows an explicit details request in a new language after hiding the loaded
  expect(tree!.root.findAllByType('button').some(b=>b.props.title===translations.t('ar.more'))).toBe(false);
 });
 it('opens the same protected Details page from AR without a paid request and keeps the selected POI on return', async () => {
-  await mount(); await scan(); await press('placeDetails.view');
+  await mount(); await scan(); await press('ar.expand'); await press('placeDetails.view');
   expect(controls.navigate).toHaveBeenLastCalledWith({ pathname: '/place/[providerId]', params: { providerId: north.providerId } });
   expect(client.getQueryData(['place-selection', north.providerId])).toEqual(north);
   expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).toHaveBeenCalledTimes(1);
@@ -259,6 +259,7 @@ it('opens the same protected Details page from AR without a paid request and kee
 it('accepts a Details selection outside nearby results without scanning or claiming a fresh distance', async () => {
   client.setQueryData(['place-selection', south.providerId], south); controls.params = { placeId: south.providerId }; controls.location.position = null;
   await mount(); expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name);
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(1);
   expect(output()).toContain(translations.t('ar.distanceUnknown')); expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
   controls.focused = false; await update(); controls.focused = true; await update();
   expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name); expect(placesService.nearby).not.toHaveBeenCalled();
@@ -266,6 +267,7 @@ it('accepts a Details selection outside nearby results without scanning or claim
 it('adopts a new Details selection on an already mounted AR screen and retains explicit selection priority', async () => {
   await mount(); await scan(); client.setQueryData(['place-selection', south.providerId], south); controls.params = { placeId: south.providerId }; await update();
   expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(south.name);
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(1);
   expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
 });
 it('does not offer another paid load when complete details already exist for the handed-off place', async () => {
@@ -282,12 +284,24 @@ it('renders one compact AR heading with honest compass state and accessible Map 
   await mount();
   expect(output()).toContain(translations.t('ar.title'));
   expect(output()).toContain(translations.t('ar.bearing', { degrees: 0 }));
-  expect(tree!.root.findAllByType('button').filter(b => b.props.accessibilityLabel === translations.t('navigation.backToMap'))).toHaveLength(1);
+  const buttons = tree!.root.findAllByType('button');
+  const mapButton = buttons.find(b => b.props.accessibilityLabel === translations.t('navigation.backToMap'));
+  const scanButton = buttons.find(b => b.props.accessibilityLabel === translations.t('ar.scan'));
+  expect(mapButton).toBeDefined(); expect(scanButton).toBeDefined();
+  expect(mapButton!.props.className).toContain('min-h-12'); expect(scanButton!.props.className).toContain('min-h-12');
   await press('navigation.backToMap'); expect(controls.navigate).toHaveBeenCalledWith('/');
   controls.location.heading = { degrees: 20, accuracy: 1, reference: 'magnetic' }; await update();
   expect(output()).toContain(translations.t('ar.compassUnavailable'));
   expect(output()).not.toContain(translations.t('ar.bearing', { degrees: 20 }));
   expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('keeps a nearest eligible selection compact until the user opens the sheet', async () => {
+  await mount(); await scan();
+  expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(north.name);
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(0);
+  expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('ar.collapse'))).toBe(false);
+  await press('ar.expand');
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(1);
 });
 it('docks a compact panel over the camera and keeps credits outside its scrolling content', async () => {
   await mount();
@@ -297,7 +311,7 @@ it('docks a compact panel over the camera and keeps credits outside its scrollin
   expect(credits.findByProps({ accessibilityLabel: 'Google Maps' })).toBeDefined();
   expect(credits.parent!.findAllByType('dialog')).toHaveLength(1);
   expect(tree!.root.findByType('dialog').findAllByProps({ testID: 'ar-attributions' })).toHaveLength(0);
-  await press('ar.collapse'); expect(output()).toContain('Local Provider');
+  await press('ar.expand'); await press('ar.collapse'); expect(output()).toContain('Local Provider');
   controls.granted = false; controls.location.heading = null; await update();
   await press('ar.expand');
   await act(async () => { tree!.root.findByProps({ testID: 'ar-list-south' }).props.onPress(); });
@@ -307,6 +321,7 @@ it('docks a compact panel over the camera and keeps credits outside its scrollin
 
 it('creates exactly one single-use AR route intent on Directions and preserves the selected summary', async () => {
   await mount(); await scan();
+  await press('ar.expand');
   expect(routeService.walking).not.toHaveBeenCalled();
   const button = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('ar.directions'))!;
   await act(async () => { button.props.onPress(); button.props.onPress(); });
