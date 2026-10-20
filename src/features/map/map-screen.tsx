@@ -7,12 +7,10 @@ import { useSharedValue } from 'react-native-reanimated';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
 import { useExplorerMapStyle } from './map-style';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
 import { DISCOVERY } from '@/config/limits';
-import { routeService, type WalkingRequest } from '@/features/directions/service';
 import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
-import { decodePolyline } from '@/features/directions/polyline';
 import { distanceMeters, isWithinRadius, type Coordinate } from '@/features/location/geo';
 import { LocationStatus } from '@/features/location/status';
 import { useDeviceLocation } from '@/features/location/use-device-location';
@@ -47,7 +45,7 @@ export default function MapScreen() {
 function LocatedMap() {
   const location = useDeviceLocation();
   // A tab refocus rechecks permissions and starts GPS again. Keep the existing
-  // map/selection/route mounted while awaiting its next fix, without enabling
+  // map and selection mounted while awaiting its next fix, without enabling
   // provider actions based on a retained position after a permission revocation.
   const [retainedPosition, setRetainedPosition] = useState(location.position);
   if (location.position && location.position !== retainedPosition) setRetainedPosition(location.position);
@@ -72,19 +70,17 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const [headerHeight, setHeaderHeight] = useState(0);
   const sheetPosition = useSharedValue(0);
   const [sheetHeight, setSheetHeight] = useState(0);
-  const [settledSheetHeight, setSettledSheetHeight] = useState(0);
   const gutter = useResolveClassNames('p-2').padding as number;
   const fitMargin = useResolveClassNames('p-8').padding as number;
   const routeColor = useCSSVariable('--color-route') as string;
   const routeArea = useCSSVariable('--color-route-area') as string;
   const [center, setCenter] = useState(position);
   const [selectedId, setSelectedId] = useState<string | null>(incomingId);
-  const [routeRequest, setRouteRequest] = useState<WalkingRequest | null>(null);
   const enabled = active && focused && mapReady && locationReady;
   const [lastIncomingId, setLastIncomingId] = useState(incomingId);
   if (incomingId !== lastIncomingId) {
     setLastIncomingId(incomingId);
-    if (incomingId && incomingId !== selectedId) { setSelectedId(incomingId); setRouteRequest(null); }
+    if (incomingId && incomingId !== selectedId) { setSelectedId(incomingId); }
   }
   const handoff = useQuery(placeSelectionOptions(selectedId));
   useEffect(() => {
@@ -96,24 +92,14 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     queryFn: () => placesService.nearby({ center: searchCenter, radiusMeters: DISCOVERY.radiusMeters, language }) });
   const detailsOptions = (providerId: string | null) => ({ queryKey: ['place-details', providerId, language], staleTime: 0,
     queryFn: () => placesService.details(providerId!, language) });
-  const routeOptions = (request: WalkingRequest | null) => ({ queryKey: ['walking-route', request], staleTime: 0,
-    queryFn: async () => { const result = await routeService.walking(request!); return { ...result, coordinates: decodePolyline(result.encodedPolyline) }; } });
   // Observe transient results without allowing focus, remounts or invalidation to spend provider calls.
   const nearby = useQuery({ ...nearbyOptions(center), enabled: false });
   const details = useQuery({ ...detailsOptions(selectedId), enabled: false });
-  const route = useQuery({ ...routeOptions(routeRequest), enabled: false });
   // Android adds fit edgePadding to mapPadding. Reserve measured chrome once,
-  // keeping Google logo/legal controls above the sheet even between route fits.
+  // keeping Google logo/legal controls above the sheet through native sheet gestures.
   // Maps 1.27.2's native padding setter can dereference a null GoogleMap after
   // layout but before onMapReady. Omit the prop until this instance is ready.
   const mapPadding = { top: headerHeight, bottom: sheetHeight, left: gutter, right: gutter };
-  const fitGap = Math.max(0, Math.min(fitMargin, (mapSize.height - headerHeight - settledSheetHeight) / 4, (mapSize.width - gutter * 2) / 4));
-  useEffect(() => {
-    if (!enabled || mapSize.width <= 0 || mapSize.height <= 0 || headerHeight <= 0 || settledSheetHeight <= 0 || !route.data) return;
-    map.current?.fitToCoordinates(route.data.coordinates, {
-      edgePadding: { top: fitGap, right: fitGap, bottom: fitGap, left: fitGap }, animated: true,
-    });
-  }, [enabled, mapSize.width, mapSize.height, headerHeight, settledSheetHeight, fitGap, route.data]);
   const place = details.data ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
   useEffect(() => {
     if (incomingId) pendingHandoffCenter.current = incomingId;
@@ -124,7 +110,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const open = useOpenProviderLink();
   function select(providerId: string | null) {
     if (providerId && !enabled) return;
-    setSelectedId(providerId); setRouteRequest(null);
+    setSelectedId(providerId);
     if (providerId) void queryClient.fetchQuery(detailsOptions(providerId)).catch(() => {});
   }
   function discover() {
@@ -134,15 +120,14 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     setCenter(searchCenter);
     void queryClient.fetchQuery(nearbyOptions(searchCenter)).catch(() => {});
   }
-  function walk() {
-    if (!enabled || !place || route.isFetching) return;
-    const request = { origin: { ...position }, destination: place.coordinates, language };
-    setRouteRequest(request);
-    void queryClient.fetchQuery(routeOptions(request)).catch(() => {});
+  function directions() {
+    if (!enabled || !place || previewNavigation.current) return;
+    previewNavigation.current = true;
+    const token = createRoutePreviewIntent(queryClient, place, undefined, 'map');
+    router.push({ pathname: '/directions', params: { token } });
   }
-  const state: HomePlaceSheetState = route.isFetching ? 'route-loading' : route.error ? 'route-failed' : route.data ? 'route-ready'
-    : selectedId ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';
-  const error = route.error ?? (selectedId ? details.error : nearby.error);
+  const state: HomePlaceSheetState = selectedId ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';
+  const error = selectedId ? details.error : nearby.error;
   return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
     <FocusedStatusBar style="dark" />
     <View className="flex-1">
@@ -153,7 +138,6 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       <Circle center={position} radius={activationRadiusMeters} strokeColor={routeColor} fillColor={routeArea} />
       {nearby.data?.map((item) => <Marker key={item.id} coordinate={item.coordinates} title={item.name} onPress={() => select(item.providerId)} />)}
       {place && !nearby.data?.some((item) => item.providerId === place.providerId) && <Marker coordinate={place.coordinates} title={place.name} />}
-      {route.data && <Polyline coordinates={route.data.coordinates} strokeColor={routeColor} strokeWidth={5} />}
     </StyledMapView>
     <View style={{ paddingTop: insets.top }} pointerEvents="box-none">
     <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
@@ -163,7 +147,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     <MapRecenter position={sheetPosition} onPress={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
     <HomePlaceSheet animatedPosition={sheetPosition} key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
       canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
-      detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady} route={route.data}
+      detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady}
       locationStatus={<>{locationStatus}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
       selectionSummary={place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
       onViewDetails={place ? () => {
@@ -171,15 +155,9 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
         setPlaceSelection(queryClient, place);
         router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
       } : undefined}
-      onViewRoute={route.data && routeRequest && place ? () => {
-        if (!active || !focused || previewNavigation.current) return;
-        previewNavigation.current = true;
-        const token = createRoutePreviewIntent(queryClient, place, { origin: routeRequest.origin, destination: routeRequest.destination, route: route.data });
-        router.push({ pathname: '/directions', params: { token } });
-      } : undefined}
-      onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onWalk={walk}
+      onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onDirections={directions}
       onOpenGoogle={place?.mapsUri ? () => open(place.mapsUri!) : undefined}
-      onMeasuredHeight={setSheetHeight} onSettledHeight={setSettledSheetHeight} containerHeight={mapSize.height} maxHeight={mapSize.height > 0 ? Math.max(0, mapSize.height - headerHeight - Math.min(fitMargin * 2, mapSize.height)) : undefined}
+      onMeasuredHeight={setSheetHeight} containerHeight={mapSize.height} maxHeight={mapSize.height > 0 ? Math.max(0, mapSize.height - headerHeight - Math.min(fitMargin * 2, mapSize.height)) : undefined}
       attributions={<ProviderAttributions places={[...(nearby.data ?? []), ...(details.data ? [details.data] : []), ...(handoff.data ? [handoff.data] : [])]} />} />
     </View>
   </StyledSafeAreaView>;

@@ -26,11 +26,7 @@ their existing location and permission flows; the page explains where a current
 user distance can be seen. This also avoids a new permission request merely to
 read cached place information.
 
-Get Directions and View on Map both hand the selected Place back to Explore.
-Get Directions explains that the existing **Get walking route** action must
-then be pressed. No route is requested by entering Map. Open AR opens the real
-immersive camera/list experience, retaining the selected ID through an in-memory
-handoff; it does not promise building recognition or remote anchoring.
+Get Directions opens the dedicated Walking Directions preview through a single-use transient intent; the preview requests only after its own fresh foreground GPS/watcher sample, or reuses a matching completed snapshot. View on Map returns the selected Place to Explore. Open AR opens the real immersive camera/list experience with an in-memory selection handoff, without recognition or anchoring claims.
 
 Opening, returning, remounting, foregrounding, changing locale and invalidating
 queries never authorize a paid request. Load Details is offered only when the

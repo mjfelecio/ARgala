@@ -107,7 +107,6 @@
     "loading": "Loading Google map…",
     "details": "Loading place details…",
     "detailsFailed": "Place details are unavailable.",
-    "walk": "Get walking route",
     "routeLoading": "Finding a walking route…",
     "routeSummary": "{{meters}} meters · about {{minutes}} minutes",
     "walkingCaution": "Walking routes may lack sidewalks or pedestrian paths. Use caution and check local conditions.",
@@ -214,8 +213,7 @@
     "snapshot": "Preview from the route starting point. Your movement does not update this route.",
     "waiting": "Waiting for a current location to plan your walk…",
     "stale": "A fresh, accurate location is needed. Retry location to continue.",
-    "retry": "Try walking route again",
-    "view": "View Route"
+    "retry": "Try walking route again"
   },
   "destinations": {
     "title": "Featured Destinations",

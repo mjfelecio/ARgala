@@ -54,4 +54,4 @@ Install the current development APK and run `npx expo start --dev-client` from t
 
 Automated checks exercise the installed SDK's router reducers and focus hooks with native rendering/hardware/network boundaries replaced. They do not establish Android rendering, physical sensor behavior or live provider integration. See [validation evidence](validation.md).
 
-Details and Walking Directions use the protected parent stack without the tab bar or duplicate navigator headers. Get Directions owns a single-use transient request intent; Home View Route reuses its completed route. See [route preview](design/clean-explorer/ROUTE_PREVIEW.md).
+Details and Walking Directions use the protected parent stack without the tab bar or duplicate navigator headers. Home, Details and AR open Directions with a single-use transient intent; matching completed preview snapshots are reused without another request. See [route preview](design/clean-explorer/ROUTE_PREVIEW.md).

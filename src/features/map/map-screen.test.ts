@@ -47,7 +47,6 @@ vi.mock('@/ui/shared', async () => {
 });
 const destination: Place = { id: 'google:destination', provider: 'google', providerId: 'destination', name: 'Destination', coordinates: { latitude: 43.252, longitude: -126.453 }, attributions: [] };
 const walkingRoute: WalkingRoute = { encodedPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@', distanceMeters: 800000, durationSeconds: 600000, warnings: [] };
-const coordinates = [{ latitude: 38.5, longitude: -120.2 }, { latitude: 40.7, longitude: -120.95 }, { latitude: 43.252, longitude: -126.453 }];
 it.each(['denied', 'no-maps', 'ready'])('opens the catalog from the %s Home state without provider calls', async state => {
   controls.hasLocation = state !== 'denied';
   Constants.expoConfig!.extra!.mapsConfigured = state !== 'no-maps';
@@ -61,14 +60,13 @@ it.each(['denied', 'no-maps', 'ready'])('opens the catalog from the %s Home stat
 let client: QueryClient;
 let translations: i18n;
 let tree: ReactTestRenderer | undefined;
-let request: PromiseWithResolvers<WalkingRoute>;
 function renderMap() { return React.createElement(I18nextProvider, { i18n: translations }, React.createElement(QueryClientProvider, { client }, withHeroUI(React.createElement(MapScreen)))); }
 async function press(title: string) {
   const action = tree!.root.findAllByType('button').find((button) => (button.props.title ?? button.props.accessibilityLabel) === translations.t(title));
   expect(action).toBeDefined();
   await act(async () => { action!.props.onPress(); });
 }
-async function startRoute(laidOut = true) {
+async function selectPlace(laidOut = true) {
   await act(async () => { tree = create(renderMap()); });
   if (laidOut) await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } }); });
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
@@ -78,11 +76,11 @@ async function startRoute(laidOut = true) {
   });
   await press('map.search');
   await act(async () => { tree!.root.findByType('marker').props.onPress(); });
-  await press('map.walk');
 }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   controls.hasLocation = true; controls.locationStatus = 'ready'; controls.accuracy = 8;
+  vi.mocked(router.push).mockClear();
   controls.params = {}; controls.fit.mockReset(); controls.animate.mockReset(); controls.active = true; controls.focused = true;
   controls.language = 'en';
   translations = createInstance();
@@ -93,8 +91,7 @@ beforeEach(async () => {
   client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() });
   vi.mocked(placesService.nearby).mockReset().mockResolvedValue([destination]);
   vi.mocked(placesService.details).mockReset().mockResolvedValue(destination);
-  request = Promise.withResolvers<WalkingRoute>();
-  vi.mocked(routeService.walking).mockReset().mockReturnValue(request.promise);
+  vi.mocked(routeService.walking).mockReset().mockResolvedValue(walkingRoute);
   const original = console.error;
   vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
@@ -149,49 +146,8 @@ it('retains the map through a focus-driven GPS restart without requiring new nat
   expect(placesService.details).not.toHaveBeenCalled();
   expect(routeService.walking).not.toHaveBeenCalled();
 });
-it('fits the loaded walking polyline with padding and keeps the viewport stable on GPS updates', async () => {
-  await startRoute();
-  expect(controls.fit).not.toHaveBeenCalled();
-  expect(routeService.walking).toHaveBeenCalledWith({ origin: { latitude: 38.5, longitude: -120.2 }, destination: destination.coordinates, language: 'en' });
-  await act(async () => { request.resolve(walkingRoute); });
-  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
-  expect(controls.fit).toHaveBeenCalledTimes(1);
-  const [fitted, options] = controls.fit.mock.calls[0];
-  expect(fitted).toEqual(coordinates);
-  expect(options.animated).toBe(true);
-  for (const side of ['top', 'right', 'bottom', 'left']) expect(options.edgePadding[side]).toBeGreaterThanOrEqual(32);
-  controls.position = { latitude: 38.501, longitude: -120.201 };
-  await act(async () => { tree!.update(renderMap()); });
-  expect(controls.fit).toHaveBeenCalledTimes(1);
-});
-it('does not update the viewport when a walking request fails', async () => {
-  await startRoute();
-  await act(async () => { request.reject(new Error('Route unavailable')); });
-  expect(tree!.root.findAllByType('polyline')).toHaveLength(0);
-  expect(controls.fit).not.toHaveBeenCalled();
-});
-it('defers fitting an in-flight result until the map regains focus', async () => {
-  await startRoute();
-  controls.focused = false;
-  await act(async () => { tree!.update(renderMap()); });
-  await act(async () => { request.resolve(walkingRoute); });
-  expect(controls.fit).not.toHaveBeenCalled();
-  controls.focused = true;
-  await act(async () => { tree!.update(renderMap()); });
-  expect(controls.fit).toHaveBeenCalledWith(coordinates, expect.any(Object));
-});
-it('waits for a nonzero Android map layout before fitting a loaded route', async () => {
-  await startRoute(false);
-  await act(async () => { request.resolve(walkingRoute); });
-  expect(controls.fit).not.toHaveBeenCalled();
-  await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 0 } } }); });
-  expect(controls.fit).not.toHaveBeenCalled();
-  await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 320 } } }); });
-  expect(controls.fit).toHaveBeenCalledWith(coordinates, expect.any(Object));
-});
 it.each(['focused', 'active'] as const)('does not repeat paid queries after %s changes or location-driven remounts', async (lifecycle) => {
-  await startRoute();
-  await act(async () => { request.resolve(walkingRoute); });
+  await selectPlace();
   for (let navigation = 0; navigation < 2; navigation++) {
     controls[lifecycle] = false;
     await act(async () => { tree!.update(renderMap()); });
@@ -200,7 +156,7 @@ it.each(['focused', 'active'] as const)('does not repeat paid queries after %s c
   }
   expect(placesService.nearby).toHaveBeenCalledTimes(1);
   expect(placesService.details).toHaveBeenCalledTimes(1);
-  expect(routeService.walking).toHaveBeenCalledTimes(1);
+  expect(routeService.walking).not.toHaveBeenCalled();
   await act(async () => { tree!.unmount(); });
   // Location restarts can remove the map observer; production immediately discards unused data.
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -209,7 +165,7 @@ it.each(['focused', 'active'] as const)('does not repeat paid queries after %s c
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
   expect(placesService.nearby).toHaveBeenCalledTimes(1);
   expect(placesService.details).toHaveBeenCalledTimes(1);
-  expect(routeService.walking).toHaveBeenCalledTimes(1);
+  expect(routeService.walking).not.toHaveBeenCalled();
   await press('map.search');
   expect(placesService.nearby).toHaveBeenCalledTimes(2);
   expect(placesService.nearby).toHaveBeenLastCalledWith({ center: { latitude: 38.51, longitude: -120.21 }, radiusMeters: 1000, language: 'en' });
@@ -246,28 +202,24 @@ it('does not retry a failed nearby request on refocus and allows an explicit Sea
 it.each([
   { stage: 'nearby', code: 'RATE_LIMITED', language: 'ko', message: '요청이 너무 많습니다. 1분 후에 다시 시도하세요.' },
   { stage: 'details', code: 'UPSTREAM_ERROR', language: 'ja', message: 'サービスを利用できません。接続を確認して再試行してください。' },
-  { stage: 'route', code: 'ROUTE_UNAVAILABLE', language: 'ko', message: '이 목적지로 가는 도보 경로가 없습니다.' },
   { stage: 'nearby', code: 'FUTURE_ERROR', language: 'ja', message: 'リクエストを完了できませんでした。再試行してください。' },
   { stage: 'details', code: 'toString', language: 'ko', message: '요청을 완료하지 못했습니다. 다시 시도하세요.' },
-  { stage: 'route', code: null, language: 'ja', message: 'リクエストを完了できませんでした。再試行してください。' },
 ] as const)('translates $stage failures in $language ($code) without displaying provider text', async ({ stage, code, language, message }) => {
   controls.language = language;
   await translations.changeLanguage(language);
   const failure = code === null ? new Error('Raw provider English') : new EdgeRequestError(code);
   if (stage === 'nearby') vi.mocked(placesService.nearby).mockRejectedValue(failure);
   if (stage === 'details') vi.mocked(placesService.details).mockRejectedValue(failure);
-  if (stage === 'route') vi.mocked(routeService.walking).mockRejectedValue(failure);
   await act(async () => { tree = create(renderMap()); });
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
   await press('map.search');
   if (stage !== 'nearby') await act(async () => { tree!.root.findByType('marker').props.onPress(); });
-  if (stage === 'route') await press('map.walk');
   const content = JSON.stringify(tree!.toJSON());
   expect(content).toContain(message);
   expect(content).not.toContain(failure.message);
 });
 
-it('accepts an AR Place ID from memory without paid calls and reuses the walking route flow', async () => {
+it('accepts an AR Place ID from memory without paid calls and reuses the Directions handoff', async () => {
   client.setQueryData(['place-selection', destination.providerId], destination);
   controls.params = { placeId: destination.providerId };
   await act(async () => { tree = create(renderMap()); });
@@ -276,10 +228,10 @@ it('accepts an AR Place ID from memory without paid calls and reuses the walking
   expect(placesService.nearby).not.toHaveBeenCalled();
   expect(placesService.details).not.toHaveBeenCalled();
   expect(tree!.root.findByType('aside').props.places).toContainEqual(destination);
-  await press('map.walk');
-  expect(routeService.walking).toHaveBeenCalledWith({ origin: controls.position, destination: destination.coordinates, language: 'en' });
-  await act(async () => { request.resolve(walkingRoute); });
-  expect(tree!.root.findAllByType('polyline')).toHaveLength(1);
+  await press('placeDetails.directions');
+  expect(router.push).toHaveBeenCalledWith({pathname:'/directions',params:{token:expect.any(String)}});
+  expect(routeService.walking).not.toHaveBeenCalled();
+  expect(tree!.root.findAllByType('polyline')).toHaveLength(0);
 });
 it('consumes a new AR selection on an existing map without automatic details calls', async () => {
   await act(async () => { tree = create(renderMap()); });
@@ -289,7 +241,7 @@ it('consumes a new AR selection on an existing map without automatic details cal
   await act(async () => { tree!.update(renderMap()); });
   expect(JSON.stringify(tree!.toJSON())).toContain(destination.name);
   expect(placesService.details).not.toHaveBeenCalled();
-  await press('map.walk'); expect(routeService.walking).toHaveBeenCalledTimes(1);
+  await press('placeDetails.directions'); expect(routeService.walking).not.toHaveBeenCalled();
 });
 it('reopens the same consumed AR Place ID after closing the selection', async () => {
   client.setQueryData(['place-selection', destination.providerId], destination);
@@ -297,10 +249,10 @@ it('reopens the same consumed AR Place ID after closing the selection', async ()
   await act(async () => { tree = create(renderMap()); });
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
   await press('map.closePlace');
-  expect(tree!.root.findAllByType('button').some((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('map.walk'))).toBe(false);
+  expect(tree!.root.findAllByType('button').some((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('placeDetails.directions'))).toBe(false);
   controls.params = { placeId: destination.providerId };
   await act(async () => { tree!.update(renderMap()); });
-  expect(tree!.root.findAllByType('button').some((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('map.walk'))).toBe(true);
+  expect(tree!.root.findAllByType('button').some((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('placeDetails.directions'))).toBe(true);
   expect(placesService.details).not.toHaveBeenCalled();
 });
 it('offers an explicit details request when the handoff has expired', async () => {
@@ -310,7 +262,7 @@ it('offers an explicit details request when the handoff has expired', async () =
   expect(JSON.stringify(tree!.toJSON())).toContain(translations.t('map.selectionUnavailable'));
   expect(placesService.details).not.toHaveBeenCalled();
   await press('ar.more'); expect(placesService.details).toHaveBeenCalledWith(destination.providerId, 'en');
-  expect(tree!.root.findAllByType('button').some((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('map.walk'))).toBe(true);
+  expect(tree!.root.findAllByType('button').some((b) => (b.props.title ?? b.props.accessibilityLabel) === translations.t('placeDetails.directions'))).toBe(true);
 });
 
 it('offers floating Home controls and spends nothing on mount, pan, locale, navigation or invalidation', async () => {
@@ -328,33 +280,12 @@ it('offers floating Home controls and spends nothing on mount, pan, locale, navi
  expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
  await press('map.search'); expect(placesService.nearby).toHaveBeenCalledTimes(1);
 });
-it('frames routes above measured overlays without double-counting Android padding', async () => {
- await startRoute();
- const panel=tree!.root.findByType('dialog');
- const header=tree!.root.findAllByType('view').find(n=>n.props.testID==='home-map-controls');
- expect(panel).toBeDefined(); expect(header).toBeDefined();
- await act(async()=>{
-  tree!.root.findByType('map').props.onLayout({nativeEvent:{layout:{width:360,height:720}}});
-  panel!.props.onChange(0, panel!.props.containerLayoutState.get().height - 240);
-  header!.props.onLayout({nativeEvent:{layout:{height:180}}});
- });
- await act(async()=>request.resolve(walkingRoute));
- const padding=tree!.root.findByType('map').props.mapPadding;
- expect(padding.top).toBeGreaterThanOrEqual(180); expect(padding.bottom).toBeGreaterThanOrEqual(240);
- const fitPadding=controls.fit.mock.lastCall![1].edgePadding;
- expect(padding.top+fitPadding.top+padding.bottom+fitPadding.bottom).toBeLessThan(720);
- expect(fitPadding.bottom).toBeLessThan(240);
- const calls=controls.fit.mock.calls.length;
- await act(async()=>panel!.props.onChange(1, panel!.props.containerLayoutState.get().height - 320));
- expect(controls.fit.mock.calls.length).toBeGreaterThan(calls);
- expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).toHaveBeenCalledTimes(1); expect(routeService.walking).toHaveBeenCalledTimes(1);
-});
 it('expands and collapses selected content without fetching and preserves Google credits', async () => {
- await startRoute(); await act(async()=>request.resolve({...walkingRoute,warnings:['Returned warning']}));
+ await selectPlace();
  await press('map.expand'); await press('map.collapse');
- expect(JSON.stringify(tree!.toJSON())).toContain('Returned warning');
+ expect(JSON.stringify(tree!.toJSON())).toContain(destination.name);
  expect(tree!.root.findByType('aside').props.places).toContainEqual(destination);
- expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).toHaveBeenCalledTimes(1); expect(routeService.walking).toHaveBeenCalledTimes(1);
+ expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).toHaveBeenCalledTimes(1); expect(routeService.walking).not.toHaveBeenCalled();
 });
 
 it.each(['denied','disabled'])('keeps %s location guidance and recovery visible with no active Search', async (status) => {
@@ -373,7 +304,7 @@ it('retains approximate-location feedback alongside usable discovery controls', 
 });
 
 it('hides the paid details action after success, including expansion, and recovers explicitly after cache reset', async () => {
- await startRoute();
+ await selectPlace();
  await press('map.expand');
  const detailButtons=()=>tree!.root.findAllByType('button').filter(b=>(b.props.title??b.props.accessibilityLabel)===translations.t('ar.more'));
  expect(detailButtons()).toHaveLength(0);
@@ -386,16 +317,16 @@ it('hides the paid details action after success, including expansion, and recove
  expect(detailButtons()).toHaveLength(0);
 });
 
-it('updates Google credit padding during a sheet gesture and fits a route only after settling', async () => {
- await startRoute(); await act(async()=>request.resolve(walkingRoute));
+it('updates Google credit padding during a sheet gesture without fitting on Home', async () => {
+ await selectPlace();
  const calls=controls.fit.mock.calls.length;
  const sheet=tree!.root.findByType('dialog');
  await act(async()=>{ sheet.props.animatedPosition.set(440); nativeUi.reactions.forEach(tick=>tick()); });
  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(280);
  expect(controls.fit).toHaveBeenCalledTimes(calls);
  await act(async()=>sheet.props.onChange(1,440));
- expect(controls.fit.mock.calls.length).toBeGreaterThan(calls);
- expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).toHaveBeenCalledTimes(1); expect(routeService.walking).toHaveBeenCalledTimes(1);
+ expect(controls.fit.mock.calls.length).toBe(calls);
+ expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).toHaveBeenCalledTimes(1); expect(routeService.walking).not.toHaveBeenCalled();
 });
 it('keeps summary-only details recovery explicit through failure, expansion and language changes', async () => {
  vi.mocked(placesService.details).mockRejectedValueOnce(new EdgeRequestError('RATE_LIMITED'));
@@ -413,18 +344,17 @@ it('keeps summary-only details recovery explicit through failure, expansion and 
  expect(tree!.root.findAllByType('button').some(b=>b.props.accessibilityLabel===translations.t('ar.more'))).toBe(false);
 });
 
-it('retains expanded route geometry when header size changes without a new native snap-index event', async () => {
- await startRoute(); await act(async()=>request.resolve(walkingRoute));
+it('retains expanded sheet geometry when header size changes without a new native snap-index event', async () => {
+ await selectPlace();
  let sheet=tree!.root.findByType('dialog');
  await act(async()=>sheet.props.onChange(1,sheet.props.containerLayoutState.get().height-sheet.props.snapPoints[1]));
  await act(async()=>tree!.root.findByProps({testID:'home-map-controls'}).props.onLayout({nativeEvent:{layout:{height:180}}}));
  sheet=tree!.root.findByType('dialog');
  expect(sheet.props.snapPoints[1]).toBe(452);
  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(452);
- expect(controls.fit.mock.lastCall![1].edgePadding.top).toBe(16);
 });
 it('publishes the final same-index bounce position even inside the gesture update interval', async () => {
- await startRoute();
+ await selectPlace();
  const sheet=tree!.root.findByType('dialog'); const peek=sheet.props.snapPoints[0];
  await act(async()=>{ sheet.props.animatedPosition.set(720-peek-40); nativeUi.reactions.forEach(tick=>tick()); });
  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBeCloseTo(peek+40);
@@ -434,9 +364,8 @@ it('publishes the final same-index bounce position even inside the gesture updat
 
 // Focus changes restart GPS before the next fix. The retained map must keep
 // selection, route observers and native readiness through that interval.
-it('preserves selected POI, route and expanded sheet through tab switches and GPS startup', async () => {
- await startRoute();
- await act(async () => { request.resolve(walkingRoute); });
+it('preserves selected POI and expanded sheet through tab switches and GPS startup', async () => {
+ await selectPlace();
  await press('map.expand');
  const mapInstance = tree!.root.findByType('map');
  expect(tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('map.collapse'))!.props.accessibilityState.expanded).toBe(true);
@@ -444,7 +373,7 @@ it('preserves selected POI, route and expanded sheet through tab switches and GP
   controls.focused = focused; controls.hasLocation = false;
   await act(async () => { tree!.update(renderMap()); });
   expect(tree!.root.findByType('map')).toBe(mapInstance);
-  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
+  expect(tree!.root.findAllByType('polyline')).toHaveLength(0);
   expect(tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('map.collapse'))!.props.accessibilityState.expanded).toBe(true);
   expect(tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === 'Search Nearby')!.props.disabled).toBe(true);
  }
@@ -453,12 +382,11 @@ it('preserves selected POI, route and expanded sheet through tab switches and GP
  expect(tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === 'Search Nearby')!.props.disabled).toBe(false);
  expect(placesService.nearby).toHaveBeenCalledTimes(1);
  expect(placesService.details).toHaveBeenCalledTimes(1);
- expect(routeService.walking).toHaveBeenCalledTimes(1);
+ expect(routeService.walking).not.toHaveBeenCalled();
 });
 
 it('keeps the expanded sheet and Google credits within the smaller scene above the tab bar', async () => {
- await startRoute();
- await act(async () => { request.resolve(walkingRoute); });
+ await selectPlace();
  await press('map.expand');
  // The navigator owns the bottom inset; the map must not reserve it again.
  expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left', 'right']);
@@ -472,7 +400,7 @@ it('keeps the expanded sheet and Google credits within the smaller scene above t
  expect(padding.top + padding.bottom).toBeLessThan(580);
  expect(tree!.root.findAllByType('aside')).toHaveLength(1);
  expect(placesService.nearby).toHaveBeenCalledTimes(1);
- expect(routeService.walking).toHaveBeenCalledTimes(1);
+ expect(routeService.walking).not.toHaveBeenCalled();
 });
 it('opens the protected Details page from a selected Map POI with its cached summary and no extra request', async () => {
   client.setQueryData(['place-selection', destination.providerId], destination); controls.params = { placeId: destination.providerId };
@@ -493,30 +421,6 @@ it('centers a Details handoff only when the existing native map is ready without
   expect(controls.animate).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
 });
 
-it('opens View Route with the completed result and captured origin, without spending again, and preserves Home route on Back', async () => {
-  const { claimRoutePreviewIntent } = await import('@/features/directions/route-preview-intent');
-  await startRoute(); await act(async () => { request.resolve(walkingRoute); });
-  const action = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('directions.view'));
-  expect(action).toBeDefined(); controls.position = { latitude: 10, longitude: 124 }; await act(async () => { tree!.update(renderMap()); });
-  await act(async () => { action!.props.onPress(); action!.props.onPress(); });
-  expect(router.push).toHaveBeenCalledOnce(); const opened = vi.mocked(router.push).mock.calls[0][0] as { pathname: string; params: { token: string } };
-  expect(opened.pathname).toBe('/directions'); expect(claimRoutePreviewIntent(client, opened.params.token)).toMatchObject({ source: 'map', place: destination, existing: { origin: { latitude: 38.5, longitude: -120.2 }, route: walkingRoute } });
-  expect(routeService.walking).toHaveBeenCalledOnce(); controls.focused = false; await act(async () => { tree!.update(renderMap()); });
-  controls.params = { placeId: destination.providerId }; controls.focused = true; await act(async () => { tree!.update(renderMap()); });
-  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates); expect(routeService.walking).toHaveBeenCalledOnce();
-});
-it('hands off the submitted destination even when details update while the route is pending', async () => {
-  const { claimRoutePreviewIntent } = await import('@/features/directions/route-preview-intent');
-  const details = Promise.withResolvers<Place>(); vi.mocked(placesService.details).mockReturnValue(details.promise);
-  await startRoute(); const updated = { ...destination, coordinates: { latitude: 43.3, longitude: -126.5 } };
-  await act(async () => { details.resolve(updated); request.resolve(walkingRoute); });
-  await press('directions.view'); const opened = vi.mocked(router.push).mock.calls[0][0];
-  if (typeof opened === 'string') throw new Error('Expected a structured preview route');
-  const intent = claimRoutePreviewIntent(client, opened.params?.token);
-  expect(intent?.existing).toMatchObject({ destination: destination.coordinates, origin: { latitude: 38.5, longitude: -120.2 }, route: walkingRoute });
-  expect(routeService.walking).toHaveBeenCalledOnce();
-});
-
 it('separates Recenter from the search bar and keeps it attached to the native sheet position', async () => {
  await act(async()=>{ tree=create(renderMap()); });
  const top=tree!.root.findByProps({testID:'home-map-controls'});
@@ -531,8 +435,8 @@ it('separates Recenter from the search bar and keeps it attached to the native s
  expect(tree!.root.findAllByType('safe-area' as React.ElementType).at(-1)!.props.edges).toEqual(['left','right']);
 });
 
-it('moves the floating Recenter on the UI thread with the sheet while route fitting waits for settle', async () => {
- await startRoute(); await act(async()=>request.resolve(walkingRoute));
+it('moves the floating Recenter on the UI thread with the sheet without calculating or fitting a Home route', async () => {
+ await selectPlace();
  const sheet=tree!.root.findByType('dialog');
  const floating=tree!.root.findByProps({testID:'map-recenter'});
  const style=()=>nativeUi.animatedStyles.get(floating.props.style)!();
@@ -543,7 +447,7 @@ it('moves the floating Recenter on the UI thread with the sheet while route fitt
  expect(style()).toMatchObject({transform:[{translateY:316}],opacity:1});
  expect(controls.fit).toHaveBeenCalledTimes(fits);
  expect(placesService.nearby).toHaveBeenCalledTimes(1);
- expect(routeService.walking).toHaveBeenCalledTimes(1);
+ expect(routeService.walking).not.toHaveBeenCalled();
 });
 
 it('uses the shared light map style and reserves the status inset for controls rather than the map', async () => {
@@ -555,4 +459,16 @@ it('uses the shared light map style and reserves the status inset for controls r
  await act(async()=>tree!.root.findByProps({testID:'home-map-controls'}).props.onLayout({nativeEvent:{layout:{height:100}}}));
  await act(async()=>map.props.onMapReady());
  expect(tree!.root.findByType('map').props.mapPadding.top).toBe(100+nativeUi.insets.top);
+});
+
+it('opens Directions in one action from Home and never calculates a route on Home',async()=>{
+ await act(async()=>{tree=create(renderMap());});
+ await act(async()=>tree!.root.findByType('map').props.onMapReady());
+ await press('map.search');await act(async()=>tree!.root.findByType('marker').props.onPress());
+ const action=tree!.root.findAllByType('button').find(b=>b.props.accessibilityLabel===translations.t('placeDetails.directions'));
+ expect(action).toBeDefined();
+ await act(async()=>{action!.props.onPress();action!.props.onPress();});
+ expect(router.push).toHaveBeenCalledTimes(1);
+ expect(router.push).toHaveBeenCalledWith({pathname:'/directions',params:{token:expect.any(String)}});
+ expect(routeService.walking).not.toHaveBeenCalled();
 });
