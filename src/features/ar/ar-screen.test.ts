@@ -38,6 +38,11 @@ vi.mock('@/ui/shared', async () => {
   return { Screen: 'screen', Notice: 'notice', Action: ({ title, onPress }: { title: string; onPress: () => void }) => createElement('button', { title, onPress }) };
 });
 let tree: ReactTestRenderer | undefined;
+async function mount() {
+ await act(async()=>{tree=create(React.createElement(ArScreen));});
+ await act(async()=>tree!.root.findByProps({testID:'ar-scene'}).props.onLayout({nativeEvent:{layout:{width:360,height:800}}}));
+}
+
 beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   controls.permission = { granted: true, canAskAgain: true }; controls.active = true; controls.focused = true;
@@ -48,12 +53,12 @@ beforeEach(() => {
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.restoreAllMocks(); });
 it('mounts the Android preview when permission is granted without a web availability API', async () => {
-  await act(async () => { tree = create(React.createElement(ArScreen)); });
+  await mount();
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
 });
 it('shows and recovers from an initial camera permission lookup failure', async () => {
   controls.permission = null; controls.getPermission.mockRejectedValue(new Error('native permission lookup failed'));
-  await act(async () => { tree = create(React.createElement(ArScreen)); });
+  await mount();
   const retry = tree!.root.findAllByType('button').find((button) => button.props.title === 'common.retry');
   expect(retry).toBeDefined();
   controls.getPermission.mockImplementation(async () => { controls.permission = { granted: true, canAskAgain: true }; return controls.permission; });
@@ -63,7 +68,7 @@ it('shows and recovers from an initial camera permission lookup failure', async 
 });
 it('unmounts preview while backgrounded or unfocused', async () => {
   controls.active = false;
-  await act(async () => { tree = create(React.createElement(ArScreen)); });
+  await mount();
   expect(tree!.root.findAllByType('video')).toHaveLength(0);
   controls.active = true; await act(async () => { controls.listeners.forEach((listener) => listener('active')); });
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
@@ -72,14 +77,14 @@ it('unmounts preview while backgrounded or unfocused', async () => {
 });
 it('opens an already-permitted camera without reopening after a foreground subscription race', async () => {
   controls.active = false; controls.activateDuringSubscribe = true;
-  await act(async () => { tree = create(React.createElement(ArScreen)); });
+  await mount();
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
   expect(controls.getPermission).toHaveBeenCalledOnce();
 });
 it('opens the preview immediately after granting camera permission', async () => {
   controls.permission = { granted: false, canAskAgain: true };
   controls.requestPermission.mockImplementation(async () => { controls.permission = { granted: true, canAskAgain: true }; return controls.permission; });
-  await act(async () => { tree = create(React.createElement(ArScreen)); });
+  await mount();
   expect(tree!.root.findAllByType('video')).toHaveLength(0);
   await act(async () => { tree!.root.findAllByType('button').find((button) => button.props.title === 'camera.allow')!.props.onPress(); });
   expect(tree!.root.findAllByType('video')).toHaveLength(1);
@@ -87,14 +92,24 @@ it('opens the preview immediately after granting camera permission', async () =>
 
 vi.mock('@/features/ar/ar-discovery', async () => {
   const { createElement, Fragment } = await import('react');
-  return { ArDiscovery: ({ preview, cameraStatus }: { preview: React.ReactNode; cameraStatus: React.ReactNode }) => createElement(Fragment, null, preview, cameraStatus) };
+  return { ArDiscovery: ({ cameraStatus }: { cameraStatus: React.ReactNode }) => createElement(Fragment, null, cameraStatus) };
 });
 
 it('keeps development camera UI free of raw sensor state while retaining permission guidance', async () => {
   Object.assign(globalThis, { __DEV__: true });
   controls.permission = { granted: false, canAskAgain: true };
-  await act(async () => { tree = create(React.createElement(ArScreen)); });
+  await mount();
   const output = JSON.stringify(tree!.toJSON());
   expect(output).toContain('camera.permission');
   expect(output).not.toMatch(/sensorDebug|permissionGranted|headingStatus|activationRadiusMeters/);
+});
+
+it('waits for positive root bounds before mounting the native camera', async()=>{
+ await act(async()=>{tree=create(React.createElement(ArScreen));});
+ expect(tree!.root.findAllByType('video')).toHaveLength(0);
+ const scene=tree!.root.findByProps({testID:'ar-scene'});
+ await act(async()=>scene.props.onLayout({nativeEvent:{layout:{width:360,height:0}}}));
+ expect(tree!.root.findAllByType('video')).toHaveLength(0);
+ await act(async()=>scene.props.onLayout({nativeEvent:{layout:{width:360,height:800}}}));
+ expect(tree!.root.findByType('video').props.style).toMatchObject({width:360,height:800});
 });

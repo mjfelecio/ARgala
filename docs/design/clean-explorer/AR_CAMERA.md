@@ -61,3 +61,7 @@ return, long Korean/Japanese names, 150% text, small/landscape viewports,
 TalkBack, scrolling credits, Details/Map handoff and exactly one Directions
 request. Record device model, Android version, font scale, configuration,
 screenshots and results in [validation](../../validation.md).
+
+## Fixed camera scene
+
+The native camera belongs to the full-screen AR scene, outside the safe-area overlay tree. It receives explicit positive scene dimensions before mounting. Controls, sheet, labels and provider credits reserve insets and occupation independently; neither expansion nor attribution height changes the preview bounds. The outer scene retains its last positive measurement through hidden-screen zero layouts, and actual resizing updates it. Focus/foreground and permission gates still unmount the camera when inactive, while selection and logical sheet expansion survive navigation.
