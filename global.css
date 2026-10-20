@@ -18,6 +18,12 @@
   --color-white: #FFFFFF;
   --color-ink: #1C2923;
   --color-route: #2A72E5;
+  --color-map-land: #F4F6F2;
+  --color-map-park: #DEECD9;
+  --color-map-water: #BBDCE8;
+  --color-map-road: #FFFFFF;
+  --color-map-road-major: #F8ECD2;
+  --color-map-road-outline: #D5DDD2;
   --color-route-area: color-mix(in srgb, var(--color-route) 8%, transparent);
   --color-page-mint: #EEFDF3;
   --color-ink-secondary: #3F4942;

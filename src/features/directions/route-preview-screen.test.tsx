@@ -235,3 +235,12 @@ it('acquires one walking route to the approved curated entrance and does not rep
  controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); }); await update(); expect(routeService.walking).toHaveBeenCalledOnce();
  await press('directions.details'); expect(router.dismissTo).toHaveBeenLastCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D01' } });
 });
+
+it('applies the shared light Clean Explorer map treatment without affecting its route', async()=>{
+ handoff();await mount();
+ const map=tree!.root.findByType('map');
+ expect(map.props.userInterfaceStyle).toBe('light');
+ expect(map.props.customMapStyle.some((style:{featureType?:string})=>style.featureType==='water')).toBe(true);
+ expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
+ expect(routeService.walking).not.toHaveBeenCalled();
+});

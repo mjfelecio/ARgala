@@ -1,4 +1,5 @@
 import '../../global.css';
+import { StatusBar } from 'expo-status-bar';
 import { Uniwind, withUniwind } from 'uniwind';
 import { HeroUINativeProvider } from 'heroui-native/provider';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -23,6 +24,7 @@ const StyledGestureHandlerRootView = withUniwind(GestureHandlerRootView);
 export default function RootLayout() {
   const { t } = useTranslation();
   return <StyledGestureHandlerRootView className="flex-1">
+    <StatusBar style="dark" hidden={false} />
     <SafeAreaProvider>
       <HeroUINativeProvider>
         <DevelopmentShowcase>

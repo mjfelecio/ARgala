@@ -16,6 +16,7 @@ vi.mock('react-native', () => ({
   I18nManager: { isRTL: false }, PixelRatio: { get: () => 1 },
   useWindowDimensions: () => ({ width: 360, height: 800, fontScale: nativeUi.fontScale }),
 }));
+vi.mock('expo-status-bar', () => ({ StatusBar: 'status-bar' }));
 vi.mock('react-native-safe-area-context', () => ({ SafeAreaView: 'safe-area', SafeAreaListener: 'safe-area-listener', useSafeAreaInsets: () => nativeUi.insets }));
 vi.mock('uniwind', () => ({ useUniwind: () => ({ theme: 'light', hasAdaptiveThemes: false }), useResolveClassNames: (classes: string) => ({ padding: classes.includes('p-8') ? 32 : classes.includes('p-4') ? 16 : 8, ...(classes.includes('h-16') ? { height: 64 } : {}), borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: '#FFFFFF', borderRadius: 0 }), useCSSVariable: (name: string | string[]) => Array.isArray(name) ? name.map(value => value === '--color-muted' ? '#3F4942' : '#247A53') : '#247A53', withUniwind: (component: unknown) => component }));
 vi.mock('@expo/vector-icons/Ionicons', () => ({ default: 'icon' }));

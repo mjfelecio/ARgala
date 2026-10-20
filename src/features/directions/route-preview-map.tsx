@@ -6,6 +6,7 @@ import { Spinner } from 'heroui-native/spinner';
 import { Button } from 'heroui-native/button';
 import { useTranslation } from 'react-i18next';
 import { useCSSVariable, useResolveClassNames, withUniwind } from 'uniwind';
+import { useExplorerMapStyle } from '@/features/map/map-style';
 import type { Coordinate } from '@/features/location/geo';
 import type { Place } from '@/features/places/service';
 
@@ -15,6 +16,7 @@ export function RoutePreviewMap({ place, origin, destination, coordinates, curre
   dockHeight: number; enabled: boolean; onViewportHeight(height: number): void;
 }) {
   const { t } = useTranslation();
+  const customMapStyle = useExplorerMapStyle();
   const map = useRef<MapView>(null);
   const [ready, setReady] = useState(false);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -40,7 +42,7 @@ export function RoutePreviewMap({ place, origin, destination, coordinates, curre
   }, [canFit, coordinates, gap]);
   useEffect(() => { fit(); }, [fit, size.width, size.height, dockHeight, controlsHeight]);
   return <>
-    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE}
+    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle} userInterfaceStyle="light"
       initialRegion={{ ...(origin ?? place.coordinates), latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       {...(ready ? { mapPadding: { top, bottom, left: gutter, right: gutter } } : {})}
       showsUserLocation={!!currentPosition} showsMyLocationButton={false} onMapReady={() => setReady(true)}
