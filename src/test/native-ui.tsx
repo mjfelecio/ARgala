@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { HeroUINativeProviderRaw } from 'heroui-native/provider-raw';
 import type { BottomSheetProps } from '@gorhom/bottom-sheet';
 
-const nativeUi = vi.hoisted(() => ({ sheetReady: true, reactions: new Set<() => void>(), openURL: vi.fn(), alert: vi.fn(), insets: { top: 24, bottom: 24, left: 0, right: 0 } }));
+const nativeUi = vi.hoisted(() => ({ sheetReady: true, mutableValueWrites: [] as unknown[], reactions: new Set<() => void>(), openURL: vi.fn(), alert: vi.fn(), insets: { top: 24, bottom: 24, left: 0, right: 0 } }));
 
 // Keep HeroUI components real; only native runtime boundaries are replaced.
 vi.mock('react-native', () => ({
@@ -37,7 +37,15 @@ vi.mock('react-native-worklets', () => ({ scheduleOnRN: (callback: (...args: unk
 vi.mock('react-native-reanimated', async () => {
   const chain = { duration() { return this; }, springify() { return this; }, delay() { return this; }, easing() { return this; }, withInitialValues() { return this; } };
   return {
-    makeMutable: (value: unknown) => ({ value, get() { return this.value; }, set(next: unknown) { this.value = next; } }),
+    makeMutable: (value: unknown) => {
+      let current = value;
+      return {
+        get value() { return current; },
+        // The installed useReactiveSharedValue assigns .value during render.
+        set value(next: unknown) { nativeUi.mutableValueWrites.push(next); current = next; },
+        get() { return current; }, set(next: unknown) { current = next; },
+      };
+    },
     default: { View: 'view', Text: 'text', createAnimatedComponent: (component: unknown) => component },
     useSharedValue: (value: unknown) => React.useRef({ value, get() { return this.value; }, set(next: unknown) { this.value = typeof next === 'function' ? next(this.value) : next; } }).current,
     useAnimatedStyle: () => ({}), useAnimatedProps: () => ({}), useAnimatedRef: () => React.useRef(null),
@@ -66,13 +74,14 @@ vi.mock('@gorhom/bottom-sheet', async () => {
   const { usePropsValidator } = await vi.importActual<typeof import('@gorhom/bottom-sheet/lib/typescript/hooks/usePropsValidator')>('@gorhom/bottom-sheet/lib/module/hooks/usePropsValidator.js');
   const { useReactiveSharedValue } = await vi.importActual<typeof import('@gorhom/bottom-sheet/lib/typescript/hooks/useReactiveSharedValue')>('@gorhom/bottom-sheet/lib/module/hooks/useReactiveSharedValue.js');
   return { default: forwardRef((props: BottomSheetProps, ref) => {
-    const nativeIndex = useReactiveSharedValue(props.index ?? 0);
-    // Model the SDK's index-prop effect as well as its reactive current index.
-    useEffect(() => { if (nativeUi.sheetReady) nativeIndex.set(props.index ?? 0); }, [nativeIndex, props.index]);
+    const nativeIndex = useReactiveSharedValue(props.animateOnMount ? -1 : props.index ?? 0);
+    const sheetReady = nativeUi.sheetReady;
+    // Model the index-prop effect and the native layout-ready reaction.
+    useEffect(() => { if (sheetReady) nativeIndex.set(props.index ?? 0); }, [nativeIndex, props.index, sheetReady]);
     // Keep the installed library's JS prop contract; mock only the native driver.
     usePropsValidator(props);
     useImperativeHandle(ref, () => ({ snapToIndex: (index: number) => {
-      // SDK 5.2.9 discards imperative requests before native layout is ready.
+      // SDK 5.2.14 discards imperative requests before native layout is ready.
       if (!nativeUi.sheetReady) return;
       nativeIndex.set(index);
       (props.onChange as (index: number, position: number) => void)?.(index, props.containerLayoutState!.get().height - (props.snapPoints as number[])[index]);

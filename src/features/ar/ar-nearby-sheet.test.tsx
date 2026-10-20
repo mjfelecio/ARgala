@@ -20,6 +20,7 @@ async function press(key: string) {
 }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
+  nativeUi.mutableValueWrites.length = 0;
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en' });
   props = { rows: [{ place, distance: 12 }], selected: null, distance: undefined, state: 'results', status: <span>sensor fallback</span>,
     running: true, height: 640, fontScale: 1, selectionRevision: 0, detailsLoaded: false, detailsBusy: false,
@@ -84,4 +85,13 @@ it('restores the expanded preference after a one-detent viewport and keeps manua
   props = { ...props, height: 180 }; await update();
   props = { ...props, height: 640 }; await update();
   expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(0);
+});
+
+it('changes controlled expansion without render-time shared-value writes in the installed SDK hook', async () => {
+  await press('ar.expand'); await press('ar.collapse');
+  props = { ...props, selected: place }; await update();
+  props = { ...props, height: 180 }; await update();
+  props = { ...props, height: 640 }; await update();
+  expect(tree!.root.findByType('dialog').props.nativeIndex.get()).toBe(1);
+  expect(nativeUi.mutableValueWrites).toEqual([]);
 });

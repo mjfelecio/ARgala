@@ -49,8 +49,11 @@ export function ArNearbySheet({ rows, selected, distance, state, status, running
     if (selectedId && measured) setExpanded(true);
   }
   const distanceText = (value: number | undefined) => value === undefined ? t('ar.distanceUnknown') : t('ar.distance', { meters: Math.round(value) });
+  // SDK 5.2.14 writes its reactive initial index during render when
+  // animateOnMount is false and this controlled index changes. Keep the mount
+  // seed at -1; its native layout/effect path still applies the requested index.
   return <BottomSheet index={index} snapPoints={snapPoints} containerLayoutState={containerLayoutState}
-    enableDynamicSizing={false} enablePanDownToClose={false} animateOnMount={false}
+    enableDynamicSizing={false} enablePanDownToClose={false} animateOnMount
     animatedPosition={position} handleComponent={ArSheetHandle} accessible={false} accessibilityLabel={t('ar.nearby')}
     backgroundStyle={backgroundStyle} handleIndicatorStyle={indicatorStyle}
     onChange={(next, top) => { if (snapPoints.length > 1) setExpanded(next > 0); onOccupation(Math.max(0, cap - top)); }}>
