@@ -4,7 +4,9 @@ import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { useSharedValue } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
+import { useExplorerMapStyle } from './map-style';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Circle, Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
 import { DISCOVERY } from '@/config/limits';
@@ -54,6 +56,8 @@ function LocatedMap() {
   return <MapContent position={position} locationReady={Boolean(location.position)} accuracy={location.accuracy} locationStatus={<LocationStatus location={location} />} />;
 }
 function MapContent({ position, locationReady, accuracy, locationStatus }: { position: Coordinate; locationReady: boolean; accuracy: number | null; locationStatus: React.ReactNode }) {
+  const insets = useSafeAreaInsets();
+  const customMapStyle = useExplorerMapStyle();
   const { t } = useTranslation(); const { language, activationRadiusMeters } = useSettings();
   const queryClient = useQueryClient();
   const params = useLocalSearchParams<{ placeId?: string }>();
@@ -139,9 +143,10 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const state: HomePlaceSheetState = route.isFetching ? 'route-loading' : route.error ? 'route-failed' : route.data ? 'route-ready'
     : selectedId ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';
   const error = route.error ?? (selectedId ? details.error : nearby.error);
-  return <StyledSafeAreaView className="flex-1 bg-surface" edges={['top', 'left', 'right']}>
+  return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
+    <FocusedStatusBar style="dark" />
     <View className="flex-1">
-    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
+    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle} userInterfaceStyle="light" initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       {...(mapReady ? { mapPadding } : {})} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
       onLayout={(event) => setMapSize({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height })}
       onPoiClick={(event) => select(event.nativeEvent.placeId)}>
@@ -150,9 +155,11 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       {place && !nearby.data?.some((item) => item.providerId === place.providerId) && <Marker coordinate={place.coordinates} title={place.name} />}
       {route.data && <Polyline coordinates={route.data.coordinates} strokeColor={routeColor} strokeWidth={5} />}
     </StyledMapView>
+    <View style={{ paddingTop: insets.top }} pointerEvents="box-none">
     <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
-      onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height)}
+      onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height + insets.top)}
       onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')} />
+    </View>
     <MapRecenter position={sheetPosition} onPress={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
     <HomePlaceSheet animatedPosition={sheetPosition} key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
       canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}

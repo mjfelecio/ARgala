@@ -122,7 +122,7 @@ it('withholds native map padding through layout and lifecycle updates until Goog
   expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding');
   expect(controls.fit).not.toHaveBeenCalled();
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
-  expect(tree!.root.findByType('map').props.mapPadding).toEqual({ top: 96, bottom: 240, left: 8, right: 8 });
+  expect(tree!.root.findByType('map').props.mapPadding).toEqual({ top: 120, bottom: 240, left: 8, right: 8 });
   await act(async () => {
     const sheet = tree!.root.findByType('dialog');
     sheet.props.onChange(0, sheet.props.containerLayoutState.get().height - 280);
@@ -419,8 +419,8 @@ it('retains expanded route geometry when header size changes without a new nativ
  await act(async()=>sheet.props.onChange(1,sheet.props.containerLayoutState.get().height-sheet.props.snapPoints[1]));
  await act(async()=>tree!.root.findByProps({testID:'home-map-controls'}).props.onLayout({nativeEvent:{layout:{height:180}}}));
  sheet=tree!.root.findByType('dialog');
- expect(sheet.props.snapPoints[1]).toBe(476);
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(476);
+ expect(sheet.props.snapPoints[1]).toBe(452);
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(452);
  expect(controls.fit.mock.lastCall![1].edgePadding.top).toBe(16);
 });
 it('publishes the final same-index bounce position even inside the gesture update interval', async () => {
@@ -461,7 +461,7 @@ it('keeps the expanded sheet and Google credits within the smaller scene above t
  await act(async () => { request.resolve(walkingRoute); });
  await press('map.expand');
  // The navigator owns the bottom inset; the map must not reserve it again.
- expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['top', 'left', 'right']);
+ expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left', 'right']);
  await act(async () => { tree!.root.findByType('map').props.onLayout({ nativeEvent: { layout: { width: 360, height: 580 } } }); });
  const sheet = tree!.root.findByType('dialog');
  expect(tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('map.collapse'))!.props.accessibilityState.expanded).toBe(true);
@@ -528,7 +528,7 @@ it('separates Recenter from the search bar and keeps it attached to the native s
  expect(controls.animate).toHaveBeenCalledWith({...controls.position,latitudeDelta:0.02,longitudeDelta:0.02},400);
  expect(placesService.nearby).not.toHaveBeenCalled();
  expect(routeService.walking).not.toHaveBeenCalled();
- expect(tree!.root.findAllByType('safe-area' as React.ElementType).at(-1)!.props.edges).toEqual(['top','left','right']);
+ expect(tree!.root.findAllByType('safe-area' as React.ElementType).at(-1)!.props.edges).toEqual(['left','right']);
 });
 
 it('moves the floating Recenter on the UI thread with the sheet while route fitting waits for settle', async () => {
@@ -544,4 +544,15 @@ it('moves the floating Recenter on the UI thread with the sheet while route fitt
  expect(controls.fit).toHaveBeenCalledTimes(fits);
  expect(placesService.nearby).toHaveBeenCalledTimes(1);
  expect(routeService.walking).toHaveBeenCalledTimes(1);
+});
+
+it('uses the shared light map style and reserves the status inset for controls rather than the map', async () => {
+ await act(async()=>{ tree=create(renderMap()); });
+ const map=tree!.root.findByType('map');
+ expect(map.props.customMapStyle).toBeDefined();
+ expect(map.props.userInterfaceStyle).toBe('light');
+ expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left','right']);
+ await act(async()=>tree!.root.findByProps({testID:'home-map-controls'}).props.onLayout({nativeEvent:{layout:{height:100}}}));
+ await act(async()=>map.props.onMapReady());
+ expect(tree!.root.findByType('map').props.mapPadding.top).toBe(100+nativeUi.insets.top);
 });
