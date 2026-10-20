@@ -1,0 +1,15 @@
+{
+  "package": "expo-camera",
+  "version": "57.0.6",
+  "files": [
+    {
+      "path": "android/src/main/java/expo/modules/camera/ExpoCameraView.kt",
+      "changes": [
+        {
+          "before": "  private var previewView = PreviewView(context).apply {\n    elevation = 0f\n  }",
+          "after": "  private var previewView = PreviewView(context).apply {\n    // ARgala: SurfaceView distorts its crop when reattached during stack Back.\n    // TextureView composes correctly with native navigation and AR overlays.\n    implementationMode = PreviewView.ImplementationMode.COMPATIBLE\n    elevation = 0f\n  }"
+        }
+      ]
+    }
+  ]
+}
