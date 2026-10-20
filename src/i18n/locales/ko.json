@@ -3,7 +3,8 @@
     "retry": "다시 시도",
     "save": "설정 저장",
     "saved": "설정이 저장되었습니다.",
-    "close": "닫기"
+    "close": "닫기",
+    "connecting": "연결 중…"
   },
   "auth": {
     "signIn": "로그인",
@@ -17,7 +18,22 @@
     "accountExists": "이 이메일로 등록된 계정이 있습니다. 로그인해 보세요.",
     "rateLimited": "시도 횟수가 너무 많습니다. 잠시 후 다시 시도하세요.",
     "restoreFailed": "세션을 복원하지 못했습니다. 다시 시도하세요.",
-    "logoutFailed": "로그아웃하지 못했습니다. 다시 시도하세요."
+    "logoutFailed": "로그아웃하지 못했습니다. 다시 시도하세요.",
+    "showPassword": "비밀번호 표시",
+    "hidePassword": "비밀번호 숨기기",
+    "passwordHint": "8자 이상 입력하세요.",
+    "welcomeBack": "다시 오신 것을 환영해요",
+    "signInSubtitle": "로그인하고 계속 둘러보세요.",
+    "startExploring": "탐험을 시작하세요",
+    "registerSubtitle": "계정을 만들고 주변의 장소를 발견하세요.",
+    "newHere": "ARgala가 처음이신가요?",
+    "alreadyMember": "이미 계정이 있으신가요?",
+    "register": "계정 만들기",
+    "existing": "로그인",
+    "newAccount": "계정 만들기",
+    "invalid": "올바른 이메일과 비밀번호를 입력하세요.",
+    "invalidRegistration": "올바른 이메일과 8~128자의 비밀번호를 입력하세요.",
+    "confirm": "이메일에서 계정을 인증한 후 로그인하세요."
   },
   "settings": {
     "title": "설정",

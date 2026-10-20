@@ -7,6 +7,8 @@ const nativeUi = vi.hoisted(() => ({ sheetReady: true, reactions: new Set<() => 
 
 // Keep HeroUI components real; only native runtime boundaries are replaced.
 vi.mock('react-native', () => ({
+  Button: (props: { title: string }) => React.createElement('button', { accessibilityLabel: props.title, ...props }),
+  AppState: { currentState: 'active', addEventListener: () => ({ remove: vi.fn() }) }, KeyboardAvoidingView: 'keyboard-avoiding',
   Alert: { alert: nativeUi.alert }, Linking: { openURL: nativeUi.openURL, openSettings: vi.fn() },
   Easing: { bezier: () => (value: number) => value }, Animated: { Interpolation: class {}, Value: class { interpolate() { return 0; } } }, BackHandler: { addEventListener: () => ({ remove() {} }) }, Image: 'img', TextInput: 'input', View: 'view', Text: 'text', Pressable: 'button', ScrollView: 'scroll',
   Platform: { OS: 'android', select: (values: Record<string, unknown>) => values.android ?? values.default },

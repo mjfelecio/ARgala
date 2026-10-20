@@ -9,6 +9,7 @@ import { useSettings } from '@/features/settings/provider';
 import { useOnboarding } from './provider';
 import { onboardingStorageKey } from './completion';
 import WelcomeScreen from './welcome-screen';
+import { ScenicLandscape } from '@/ui/scenic-landscape';
 
 const boundaries = vi.hoisted(() => ({ permission: vi.fn(), watch: vi.fn(), provider: vi.fn() }));
 vi.mock('expo-location', () => ({ requestForegroundPermissionsAsync: boundaries.permission, getForegroundPermissionsAsync: boundaries.permission, watchPositionAsync: boundaries.watch, watchHeadingAsync: boundaries.watch }));
@@ -108,4 +109,14 @@ it('has no sensor, network, or query side effects on mount, focus, foreground, l
   await act(async () => { tree!.unmount(); }); tree = undefined; await mount();
   expect(state.queries).toBe(0); expect(fetch).not.toHaveBeenCalled();
   expect(boundaries.permission).not.toHaveBeenCalled(); expect(boundaries.watch).not.toHaveBeenCalled(); expect(boundaries.provider).not.toHaveBeenCalled();
+});
+
+it('retains the shared local scenic hero while language selection stays functional', async () => {
+  await mount();
+  expect(tree!.root.findAllByType(ScenicLandscape)).toHaveLength(1);
+  expect(tree!.root.findAllByType('svg' as React.ElementType)).toHaveLength(1);
+  await select('ko');
+  expect(copy()).toContain(localizationOptions.resources.ko.translation.onboarding.title);
+  expect(boundaries.permission).not.toHaveBeenCalled();
+  expect(boundaries.provider).not.toHaveBeenCalled();
 });
