@@ -2,7 +2,12 @@ import { useMemo } from 'react';
 import type { MapStyleElement } from 'react-native-maps';
 import { useCSSVariable } from 'uniwind';
 
-/** Google style values resolve from the same CSS tokens as the application UI. */
+/**
+ * Google style values resolve from the same CSS tokens as the application UI.
+ * Keep MapView.userInterfaceStyle unset on Android: explicit overrides hit the
+ * crashing Fabric initial-props enum path. Native GoogleMapOptions defaults to
+ * light; this custom style supplies the Clean Explorer appearance.
+ */
 export function useExplorerMapStyle(): MapStyleElement[] {
   const [land, park, water, road, major, outline, text, muted] = useCSSVariable([
     '--color-map-land', '--color-map-park', '--color-map-water', '--color-map-road',
