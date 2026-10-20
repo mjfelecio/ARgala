@@ -14,6 +14,7 @@ import { AppHeader } from './app-header';
 import { ImmersiveArScreen } from './immersive-ar-screen';
 import { ArChrome } from '@/features/ar/ar-chrome';
 import ProfileScreen from './profile-screen';
+import SettingsScreen from '@/features/settings/settings-screen';
 
 // Exercise this app's navigator configuration with the installed SDK's real
 // reducers. Only native navigator rendering is replaced in this Node suite.
@@ -30,6 +31,9 @@ vi.mock('expo-router', async () => {
   Tabs: Object.assign((props: Record<string, unknown>) => createElement('tabs', props), { Screen: screen }),
  };
 });
+vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: 'en', activationRadiusMeters: 100, storageError: null, save: vi.fn() }) }));
+vi.mock('@/features/auth/sign-out-action', () => ({ SignOutAction: () => null }));
+vi.mock('@/features/settings/profile-settings-content', () => ({ ProfileSettingsContent: (props: { entry: string }) => React.createElement('settings-content', props) }));
 vi.mock('@/features/ar/ar-screen', () => ({ default: 'ar-camera-screen' }));
 let tree: ReactTestRenderer | undefined;
 let translations: i18n;
@@ -103,6 +107,7 @@ it('registers exactly Explore, AR View and Profile, with Explore selected and pe
  expect(tabs.props.screenOptions.tabBarStyle.height).toBe(88); // 64-unit bar + Android's 24-unit bottom inset.
  expect(tabs.props.screenOptions.tabBarActiveTintColor).toBe('#247A53');
  expect(tabs.props.screenOptions.tabBarInactiveTintColor).toBe('#3F4942');
+ expect(routes[2].props.options.headerShown).toBe(false);
  expect(routes[1].props.options).toMatchObject({ headerShown: false, tabBarStyle: { display: 'none' } });
 });
 it('returns Android Back from either secondary tab or direct AR entry to Explore', async () => {
@@ -130,6 +135,7 @@ it('hands an AR selection to the existing Explore route without replacing its ro
 it('keeps Settings outside the tabs and Back restores the originating tab state', async () => {
  await mount(React.createElement(AppLayout));
  expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.name)).toEqual(['(tabs)', 'place/[providerId]', 'directions', 'destinations', 'settings']);
+ expect(tree!.root.findAllByType('route' as React.ElementType).find(r => r.props.name === 'settings')!.props.options.headerShown).toBe(false);
  const reducer = StackRouter({ initialRouteName: '(tabs)' });
  const config = { routeNames: ['(tabs)', 'settings'], routeParamList: {}, routeGetIdList: {} };
  const initial = reducer.getInitialState(config);
@@ -149,12 +155,12 @@ it.each([
  ['en', ['Explore', 'AR View', 'Profile'], 'Back to map', 'Open settings'],
  ['ko', ['탐색', 'AR 보기', '프로필'], '지도로 돌아가기', '설정 열기'],
  ['ja', ['探索', 'ARビュー', 'プロフィール'], '地図に戻る', '設定を開く'],
-])('updates navigation and recovery actions from actual %s resources', async (locale, labels, back, settings) => {
- await mount(React.createElement(React.Fragment, null, React.createElement(AppTabs), React.createElement(ProfileScreen), React.createElement(ImmersiveArScreen), React.createElement(ArChrome, { headingDegrees: null, onMap: () => router.navigate('/'), onScan: () => {}, scanDisabled: true, scanBusy: false })));
+])('updates navigation and recovery actions from actual %s resources', async (locale, labels, back) => {
+ await mount(React.createElement(React.Fragment, null, React.createElement(AppTabs), React.createElement(AppHeader, { label: 'Explore' }), React.createElement(ImmersiveArScreen), React.createElement(ArChrome, { headingDegrees: null, onMap: () => router.navigate('/'), onScan: () => {}, scanDisabled: true, scanBusy: false })));
  await act(async () => { await translations.changeLanguage(locale); });
  expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.options.title)).toEqual(labels);
  const buttons = tree!.root.findAllByType('button');
- const profile = buttons.find(b => b.props.accessibilityLabel === settings);
+ const profile = buttons.find(b => b.props.accessibilityLabel === translations.t('settings.title'));
  const map = buttons.find(b => b.props.accessibilityLabel === back);
  expect(profile).toBeDefined(); expect(map).toBeDefined();
  await act(async () => { profile!.props.onPress(); map!.props.onPress(); });
@@ -187,4 +193,9 @@ it.each(['index', 'ar'])('keeps the %s tab context below Details and returns to 
   expect(returned.routes).toHaveLength(1); expect(returned.routes[0].key).toBe(original.routes[0].key);
   expect(returned.routes[0].params).toMatchObject({ screen: name, params: { placeId: 'north' } });
  }
+});
+
+it('shares settings content between the Profile tab and parent Settings route', async () => {
+ await mount(React.createElement(React.Fragment, null, React.createElement(ProfileScreen), React.createElement(SettingsScreen)));
+ expect(tree!.root.findAllByType('settings-content' as React.ElementType).map(node => node.props.entry)).toEqual(['tab', 'stack']);
 });

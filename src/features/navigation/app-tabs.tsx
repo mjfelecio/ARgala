@@ -27,7 +27,7 @@ export function AppTabs() {
     <Tabs.Screen name="ar" options={{ title: t('navigation.ar'), tabBarButtonTestID: 'tab-ar', headerShown: false,
       tabBarStyle: { display: 'none' },
       tabBarIcon: ({ color, size }) => <Ionicons name="scan-outline" color={color} size={size} /> }} />
-    <Tabs.Screen name="profile" options={{ title: t('navigation.profile'), tabBarButtonTestID: 'tab-profile',
+    <Tabs.Screen name="profile" options={{ title: t('navigation.profile'), headerShown: false, tabBarButtonTestID: 'tab-profile',
       tabBarIcon: ({ focused, color, size }) => <Ionicons name={focused ? 'person' : 'person-outline'} color={color} size={size} /> }} />
   </Tabs>;
 }
