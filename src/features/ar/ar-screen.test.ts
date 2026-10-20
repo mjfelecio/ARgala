@@ -89,3 +89,12 @@ vi.mock('@/features/ar/ar-discovery', async () => {
   const { createElement, Fragment } = await import('react');
   return { ArDiscovery: ({ preview, cameraStatus }: { preview: React.ReactNode; cameraStatus: React.ReactNode }) => createElement(Fragment, null, preview, cameraStatus) };
 });
+
+it('keeps development camera UI free of raw sensor state while retaining permission guidance', async () => {
+  Object.assign(globalThis, { __DEV__: true });
+  controls.permission = { granted: false, canAskAgain: true };
+  await act(async () => { tree = create(React.createElement(ArScreen)); });
+  const output = JSON.stringify(tree!.toJSON());
+  expect(output).toContain('camera.permission');
+  expect(output).not.toMatch(/sensorDebug|permissionGranted|headingStatus|activationRadiusMeters/);
+});

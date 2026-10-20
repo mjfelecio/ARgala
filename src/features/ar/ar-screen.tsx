@@ -1,9 +1,8 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useIsFocused } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useSettings } from '@/features/settings/provider';
 import { useDeviceLocation } from '@/features/location/use-device-location';
 import { SystemSettingsAction } from '@/features/location/status';
 import { useAppActive } from '@/lib/use-app-active';
@@ -13,15 +12,10 @@ import { ArDiscovery } from './ar-discovery';
 
 export default function ArScreen() {
   const { t } = useTranslation();
-  const { activationRadiusMeters } = useSettings();
   const [permission, requestPermission, getPermission] = useCameraPermissions({ get: false });
   const [error, setError] = useState<string | null>(null);
   const active = useAppActive(); const focused = useIsFocused();
   const location = useDeviceLocation({ heading: true, distanceIntervalMeters: 0 });
-  const diagnostics = typeof __DEV__ !== 'undefined' && __DEV__ ? <Notice><Text selectable>{JSON.stringify({
-    sensorDebug: 3, feature: 'camera', active, focused, permissionGranted: permission?.granted ?? null, error,
-    hasPosition: Boolean(location.position), headingStatus: location.headingStatus, activationRadiusMeters,
-  })}</Text></Notice> : null;
   const checkPermission = useCallback(async () => {
     try { await getPermission(); setError(null); }
     catch { setError('camera.permissionCheckFailed'); }
@@ -46,5 +40,5 @@ export default function ArScreen() {
       error ? <><Notice>{t(error)}</Notice><Action title={t('camera.retry')} onPress={() => { if (error === 'camera.permissionCheckFailed') void checkPermission(); else setError(null); }} /></> : null;
   return <ArDiscovery location={location} running={running} cameraReady={cameraReady}
     preview={cameraReady ? <CameraView style={StyleSheet.absoluteFill} facing="back" onMountError={() => setError('camera.mountFailed')} /> : null}
-    cameraStatus={<>{cameraStatus}{diagnostics}</>} />;
+    cameraStatus={cameraStatus} />;
 }
