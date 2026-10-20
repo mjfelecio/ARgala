@@ -859,3 +859,17 @@ Home controls, map lifecycle/cost/geometry, sheet and app-shell suites pass (68 
 Confirmed installed HeroUI Native 1.0.10 supports `step`, `onChange` and `onChangeEnd`, preserves unsnapped controlled numeric values, and fires completion for both drags and track taps. Previously every 1 m update changed the Settings draft and rerendered its parent. The slider now uses 10 m detents and locally updates its displayed value/input, committing to the parent only at interaction end. A regression drives the real installed Slider gestures: three drag updates produce zero parent renders, and release produces one. Presets and numeric edits still update the unsaved draft immediately; exact integers such as 123/127 remain valid. Accessibility steps move to the next/previous 10 m detent. A focus-keyed control discards unfinished local gestures when leaving Settings. Save/persistence and focus restoration remain explicit.
 
 Targeted radius and real Settings screen/provider suites pass (41 tests), including taps, endpoints, presets, invalid input/recovery, precise entry, delayed/failed Save, saved-state restoration and abandoning a drag on blur. Android smoothness, track tapping inside the ScrollView, numeric keyboard, TalkBack increments and persistence after app restart still require device testing.
+
+## UAT refinement — Reanimated render warning (2026-10-20)
+
+The installed Gorhom 5.2.14 `useReactiveSharedValue` writes `.value` during render when its primitive input changes. With `animateOnMount={false}`, AR's controlled index is that input, so expanding to index 1 reproduced three direct render-path writes across expand/collapse/resize. Enabling the SDK's default layout-aware mount behavior keeps its initial seed at -1 and applies controlled index updates through native layout/effects. No logger suppression or dependency patch is used. The AR dock can now animate into view on entry; controlled expansion and logical preference across one-detent viewports are retained.
+
+The native test driver imports the installed JS hook and records direct `.value` assignments. The regression fails before the change and records zero such writes afterward; delayed-readiness, viewport and expansion tests pass. AR dock/discovery and Home map/sheet targeted suites pass (97 tests). This does not exercise Reanimated's real UI runtime; confirm the warning is absent during AR entry, POI selection, expand/collapse and rotation on Android, including cold entry with a cached selection.
+
+### Final refinement batch validation
+
+- `npm run check`: passed strict TypeScript, ESLint with zero warnings, and **540 tests in 51 files**.
+- `npm run export:android`: passed Metro compilation and Android Hermes bundle export (2,634 modules). This is not an APK build or device validation.
+- `git diff --check`: passed. Independent code review found no confirmed runtime regression; the installed Gorhom version reference was corrected to 5.2.14.
+- No dependencies, native configuration, Edge Functions or provider request authority changed. Original untracked kickoff artifacts were left untouched.
+- Still required on a real Android device: Home controls and Google credits with both dock detents, long translations and large text; radius drag/tap smoothness, keyboard and TalkBack, Save/restart restoration; clean camera/GPS fallback UI, AR cold entry with cached selection and delayed native layout, expansion/rotation, and absence of Reanimated render warnings. No physical-device, GPS/compass accuracy or live provider-integration claim is made for this batch.
