@@ -13,7 +13,7 @@ import { useSettingsDraft } from './use-settings-draft';
 
 export default function SettingsForm() {
   const { t } = useTranslation();
-  const { radius, language, changeRadius, changeLanguage, busy, message, dirty, valid, save, storageError } = useSettingsDraft();
+  const { focused, radius, language, changeRadius, changeLanguage, busy, message, dirty, valid, save, storageError } = useSettingsDraft();
   return <ScrollView className="flex-1" keyboardShouldPersistTaps="handled" contentContainerClassName="gap-6 px-5 pb-8 pt-2">
     <AccountSummary />
     <View className="gap-2">
@@ -24,7 +24,8 @@ export default function SettingsForm() {
     <View className="gap-3">
       <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{t('settings.arLocation')}</Text>
       <Surface className="gap-4 p-5">
-        <RadiusControl value={radius} onChange={changeRadius} disabled={busy} />
+        {/* Discard an unfinished local drag when leaving this screen. */}
+        <RadiusControl key={String(focused)} value={radius} onChange={changeRadius} disabled={busy} />
         <Text className="rounded-input bg-mint p-4 font-sans text-sm text-brand-strong">{t('settings.deviceLocal')}</Text>
         <Text className="font-sans text-xs text-muted">{t('settings.radiusHelp', { meters: DISCOVERY.radiusMeters, min: ACTIVATION.minMeters, max: ACTIVATION.maxMeters })}</Text>
         <DeviceSettingsAction />

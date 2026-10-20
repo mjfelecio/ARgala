@@ -53,6 +53,6 @@ export function useSettingsDraft() {
       if (alive.current) setBusy(false);
     }
   }
-  return { radius: draft.radius, language: draft.language, changeRadius, changeLanguage, busy, message,
+  return { focused: draft.focused, radius: draft.radius, language: draft.language, changeRadius, changeLanguage, busy, message,
     dirty, valid: parsed.success, save, storageError: settings.storageError };
 }

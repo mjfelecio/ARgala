@@ -13,13 +13,21 @@ export function RadiusControl({ value, onChange, disabled = false }: {
   value: string; onChange(value: string): void; disabled?: boolean;
 }) {
   const { t } = useTranslation();
-  const parsed = activationRadiusSchema.safeParse(value.trim() === '' ? NaN : Number(value));
+  const initial = activationRadiusSchema.safeParse(value.trim() === '' ? NaN : Number(value));
+  const [draft, setDraft] = useState({ source: value, text: value, lastValid: initial.success ? initial.data : ACTIVATION.defaultMeters });
+  // Saved/restored drafts replace local interaction state before children render.
+  if (draft.source !== value) setDraft({ source: value, text: value, lastValid: initial.success ? initial.data : draft.lastValid });
+  const parsed = activationRadiusSchema.safeParse(draft.text.trim() === '' ? NaN : Number(draft.text));
   const validValue = parsed.success ? parsed.data : null;
-  const [lastValid, setLastValid] = useState(validValue ?? ACTIVATION.defaultMeters);
-  if (validValue !== null && validValue !== lastValid) setLastValid(validValue);
-  const current = validValue ?? lastValid;
-  function select(next: number) {
-    if (!disabled) onChange(String(Math.min(ACTIVATION.maxMeters, Math.max(ACTIVATION.minMeters, Math.round(next)))));
+  const current = validValue ?? draft.lastValid;
+  function edit(next: string, commit: boolean) {
+    if (disabled) return;
+    const result = activationRadiusSchema.safeParse(next.trim() === '' ? NaN : Number(next));
+    setDraft(previous => ({ ...previous, text: next, lastValid: result.success ? result.data : previous.lastValid }));
+    if (commit) onChange(next);
+  }
+  function select(next: number, commit = true) {
+    edit(String(Math.min(ACTIVATION.maxMeters, Math.max(ACTIVATION.minMeters, Math.round(next)))), commit);
   }
   return <View className="gap-4">
     <View className="flex-row flex-wrap items-center justify-between gap-2">
@@ -27,14 +35,15 @@ export function RadiusControl({ value, onChange, disabled = false }: {
       <Text className="rounded-pill bg-accent px-3 py-1 font-sans text-sm font-semibold text-accent-foreground">{t('settings.meters', { count: current })}</Text>
     </View>
     <Text className="font-sans text-sm text-muted">{t('settings.radiusDescription')}</Text>
-    <Slider value={current} minValue={ACTIVATION.minMeters} maxValue={ACTIVATION.maxMeters} step={1} isDisabled={disabled}
-      onChange={next => { if (typeof next === 'number') select(next); }}>
+    <Slider value={current} minValue={ACTIVATION.minMeters} maxValue={ACTIVATION.maxMeters} step={10} isDisabled={disabled}
+      onChange={next => { if (typeof next === 'number') select(next, false); }}
+      onChangeEnd={next => { if (typeof next === 'number') select(next); }}>
       <Slider.Track><Slider.Fill /><Slider.Thumb accessibilityLabel={t('settings.activationRadius')}
         accessibilityValue={{ min: ACTIVATION.minMeters, max: ACTIVATION.maxMeters, now: current, text: t('settings.meters', { count: current }) }}
         accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
         onAccessibilityAction={event => {
-          if (event.nativeEvent.actionName === 'increment') select(current + 1);
-          if (event.nativeEvent.actionName === 'decrement') select(current - 1);
+          if (event.nativeEvent.actionName === 'increment') select((Math.floor(current / 10) + 1) * 10);
+          if (event.nativeEvent.actionName === 'decrement') select((Math.ceil(current / 10) - 1) * 10);
         }} /></Slider.Track>
     </Slider>
     <View className="flex-row justify-between gap-2">
@@ -49,7 +58,7 @@ export function RadiusControl({ value, onChange, disabled = false }: {
     </View>
     <TextField isDisabled={disabled} isInvalid={!parsed.success}>
       <Label><Label.Text className="font-sans text-sm font-semibold">{t('settings.radius')}</Label.Text></Label>
-      <Input value={value} keyboardType="number-pad" accessibilityLabel={t('settings.radius')} onChangeText={next => { if (!disabled) onChange(next); }}
+      <Input value={draft.text} keyboardType="number-pad" accessibilityLabel={t('settings.radius')} onChangeText={next => edit(next, true)}
         className="min-h-14 font-sans text-base" />
     </TextField>
     {!parsed.success && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('settings.invalid')}</Text>}
