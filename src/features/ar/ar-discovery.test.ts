@@ -46,6 +46,7 @@ const render = () => React.createElement(I18nextProvider, { i18n: translations }
 const output = () => JSON.stringify(tree!.toJSON());
 async function mount() {
   await act(async () => { tree = create(render()); });
+  await act(async()=>tree!.root.findByProps({testID:'ar-scene'}).props.onLayout({nativeEvent:{layout:{width:360,height:800}}}));
   await act(async () => {
     tree!.root.findByProps({ testID: 'ar-viewport' }).props.onLayout({ nativeEvent: { layout: { width: 360, height: 640 } } });
     tree!.root.findByProps({ testID: 'ar-chrome' }).props.onLayout({ nativeEvent: { layout: { height: 120 } } });
@@ -395,4 +396,35 @@ it('retains collapsed selection through short viewport changes and suppresses la
   expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(places[4].name);
   expect(tree!.root.findAllByType(Pressable).filter(p => p.props.testID?.startsWith('ar-label-'))).toHaveLength(3);
   expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+});
+
+it('restores a full-screen camera behind a retained expanded sheet after navigation', async () => {
+ await mount();
+ const scene=tree!.root.findByProps({testID:'ar-scene'});
+ await act(async()=>scene.props.onLayout({nativeEvent:{layout:{width:360,height:800}}}));
+ await scan();await press('ar.expand');
+ const sheet=tree!.root.findByType('dialog');
+ const camera=tree!.root.findByType('video');
+ expect(camera.props.style).toMatchObject({width:360,height:800,position:'absolute'});
+ expect(tree!.root.findByType('safe-area' as React.ElementType).findAllByType('video')).toHaveLength(0);
+ controls.focused=false;await update();expect(tree!.root.findAllByType('video')).toHaveLength(0);
+ controls.focused=true;await update();
+ expect(tree!.root.findByType('dialog')).toBe(sheet);
+ expect(sheet.props.index).toBe(1);
+ expect(tree!.root.findByType('video').props.style).toMatchObject({width:360,height:800});
+ await act(async()=>tree!.root.findByProps({testID:'ar-viewport'}).props.onLayout({nativeEvent:{layout:{width:360,height:300}}}));
+ expect(tree!.root.findByType('video').props.style).toMatchObject({width:360,height:800});
+ expect(placesService.nearby).toHaveBeenCalledOnce();
+});
+
+it('keeps positive camera bounds through hidden layouts and updates only for a real scene resize', async () => {
+ await mount();const camera=tree!.root.findByType('video');
+ await act(async()=>tree!.root.findByProps({testID:'ar-scene'}).props.onLayout({nativeEvent:{layout:{width:0,height:0}}}));
+ expect(tree!.root.findByType('video')).toBe(camera);
+ expect(camera.props.style).toMatchObject({width:360,height:800});
+ controls.active=false;await update();expect(tree!.root.findAllByType('video')).toHaveLength(0);
+ controls.active=true;await update();expect(tree!.root.findByType('video').props.style).toMatchObject({width:360,height:800});
+ await act(async()=>tree!.root.findByProps({testID:'ar-scene'}).props.onLayout({nativeEvent:{layout:{width:640,height:360}}}));
+ expect(tree!.root.findByType('video').props.style).toMatchObject({width:640,height:360});
+ expect(placesService.nearby).not.toHaveBeenCalled();
 });

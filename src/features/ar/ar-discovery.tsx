@@ -6,6 +6,8 @@ import { placesService } from '@/features/places/service';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Image, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { withUniwind } from 'uniwind';
 import googleMapsAttribution from '../../../assets/attribution/google-maps.png';
 import { AR } from '@/config/limits';
 import type { useDeviceLocation } from '@/features/location/use-device-location';
@@ -22,8 +24,9 @@ import { ArNearbySheet } from './ar-nearby-sheet';
 import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
-type Props = { location: ReturnType<typeof useDeviceLocation>; running: boolean; cameraReady: boolean; preview: ReactNode; cameraStatus: ReactNode };
-export function ArDiscovery({ location, running, cameraReady, preview, cameraStatus }: Props) {
+const OverlaySafeArea = withUniwind(SafeAreaView);
+type Props = { location: ReturnType<typeof useDeviceLocation>; running: boolean; cameraReady: boolean; cameraStatus: ReactNode };
+export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Props) {
   const { t } = useTranslation();
   const client = useQueryClient();
   const navigating = useRef(false);
@@ -110,8 +113,7 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
     {data.detailRequest?.providerId === selectedId && data.details.error && <Notice>{t(edgeErrorMessageKey(data.details.error))}</Notice>}
     <Text className="font-sans text-xs text-muted">{t('ar.approximate', { degrees: AR.horizontalFovDegrees })}</Text>
   </>;
-  return <View className="flex-1 bg-ink">
-    <View className="absolute inset-0">{preview}</View>
+  return <OverlaySafeArea className="flex-1" edges={['top', 'left', 'right', 'bottom']}>
     <View testID="ar-chrome" className="px-3 pb-2 pt-3" onLayout={event => setChromeHeight(event.nativeEvent.layout.height)}>
       <ArChrome headingDegrees={heading} onMap={() => router.navigate('/')}
         onScan={() => { if (tracking) data.scan(); }} scanDisabled={!tracking || data.nearby.isFetching} scanBusy={data.nearby.isFetching} />
@@ -137,5 +139,5 @@ export function ArDiscovery({ location, running, cameraReady, preview, cameraSta
       <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" className="h-5 w-28" resizeMode="contain" />
       <ScrollView className="max-h-14"><ProviderAttributions places={[...places, ...(selected ? [selected] : [])]} /></ScrollView>
     </View>}
-  </View>;
+  </OverlaySafeArea>;
 }
