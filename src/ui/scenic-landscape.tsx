@@ -15,4 +15,3 @@ export function ScenicLandscape() {
     </Svg>
   </View>;
 }
-

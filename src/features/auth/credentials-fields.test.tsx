@@ -61,3 +61,11 @@ it.each(['en', 'ko', 'ja'] as const)('shows registration guidance from actual %s
   await render(false);
   expect(JSON.stringify(tree!.toJSON())).not.toContain(translations.t('auth.passwordHint'));
 });
+it('applies approved typography to the actual HeroUI label text', async () => {
+  await render();
+  for (const key of ['auth.email', 'auth.password']) {
+    const label = tree!.root.findAllByType('text' as React.ElementType).find(node => node.children.includes(translations.t(key)))!;
+    expect(label.props.className).toContain('text-sm');
+    expect(label.props.className).toContain('font-semibold');
+  }
+});

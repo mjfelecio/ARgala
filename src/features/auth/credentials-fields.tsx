@@ -26,7 +26,7 @@ export function CredentialsFields({ email, password, registering, disabled, onEm
   const muted = useThemeColor('muted');
   return <View className="gap-5">
     <TextField isDisabled={disabled} isInvalid={invalidEmail}>
-      <Label className="font-sans text-sm font-semibold">{t('auth.email')}</Label>
+      <Label><Label.Text className="font-sans text-sm font-semibold">{t('auth.email')}</Label.Text></Label>
       <View className="justify-center">
         <Input variant="primary" value={email} onChangeText={onEmailChange} accessibilityLabel={t('auth.email')}
           keyboardType="email-address" autoComplete="email" autoCapitalize="none" autoCorrect={false}
@@ -37,7 +37,7 @@ export function CredentialsFields({ email, password, registering, disabled, onEm
       </View>
     </TextField>
     <TextField isDisabled={disabled} isInvalid={invalidPassword}>
-      <Label className="font-sans text-sm font-semibold">{t('auth.password')}</Label>
+      <Label><Label.Text className="font-sans text-sm font-semibold">{t('auth.password')}</Label.Text></Label>
       <View className="justify-center">
         <Input variant="primary" value={password} onChangeText={onPasswordChange} accessibilityLabel={t('auth.password')}
           secureTextEntry={!visible} autoCapitalize="none" autoCorrect={false} autoComplete={registering ? 'new-password' : 'current-password'}
