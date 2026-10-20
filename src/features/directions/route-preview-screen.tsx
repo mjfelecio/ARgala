@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import Constants from 'expo-constants';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Button } from 'heroui-native/button';
@@ -15,6 +15,7 @@ import { ProviderAttributions } from '@/features/map/attributions';
 import { setPlaceSelection } from '@/features/places/selection';
 import { useRoutePreview } from './use-route-preview';
 import { RoutePreviewMap } from './route-preview-map';
+import { routeSheetGeometry } from '@/features/map/sheet-geometry';
 import { RoutePreviewSheet } from './route-preview-sheet';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
 import { useSharedValue } from 'react-native-reanimated';
@@ -38,6 +39,8 @@ function Preview({ token }: { token: unknown }) {
   const [settledDockHeight, setSettledDockHeight] = useState(0);
   const [dockHeight, setDockHeight] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
+  const { fontScale = 1 } = useWindowDimensions();
+  const sheetGeometry = routeSheetGeometry(viewportHeight, headerHeight, insets.bottom, fontScale);
   const accent = useThemeColor('accent');
   const coordinates = result?.coordinates ?? [];
   const place = data?.intent.place;
@@ -49,10 +52,10 @@ function Preview({ token }: { token: unknown }) {
   }
   return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
     <FocusedStatusBar style="dark" />
-    <View className="flex-1" onLayout={event => setViewportHeight(event.nativeEvent.layout.height)}>
+    <View testID="route-preview-scene" className="flex-1" onLayout={event => { if (event.nativeEvent.layout.height > 0) setViewportHeight(event.nativeEvent.layout.height); }}>
       {place && configured && <RoutePreviewMap place={place} origin={result?.origin} destination={result?.destination ?? place.coordinates} coordinates={coordinates}
         currentPosition={usable ? location.position : null} dockHeight={dockHeight} settledDockHeight={settledDockHeight}
-        headerHeight={headerHeight} position={sheetPosition} enabled={running} onViewportHeight={setViewportHeight} />}
+        headerHeight={headerHeight} position={sheetPosition} enabled={running} sceneHeight={viewportHeight} collapsedHeight={sheetGeometry.peek} />}
       <View testID="route-preview-header" className="absolute inset-x-0 top-0 px-4 pb-2" style={{ paddingTop: insets.top + 8 }} onLayout={event => setHeaderHeight(event.nativeEvent.layout.height)}>
         <View className="min-h-14 flex-row items-center gap-2 rounded-pill bg-surface px-1 pr-4 shadow-sm">
           <Button variant="ghost" className="size-12" isIconOnly accessibilityLabel={t('directions.back')} onPress={() => { if (router.canGoBack()) router.back(); else toMap(); }}><Ionicons name="arrow-back" size={22} color={accent} /></Button>
@@ -60,7 +63,7 @@ function Preview({ token }: { token: unknown }) {
         </View>
       </View>
       <View testID="route-preview-dock" className="absolute inset-0" pointerEvents="box-none">
-      <RoutePreviewSheet height={viewportHeight} headerHeight={headerHeight} bottomInset={insets.bottom} position={sheetPosition}
+      <RoutePreviewSheet geometry={sheetGeometry} height={viewportHeight} headerHeight={headerHeight} bottomInset={insets.bottom} position={sheetPosition}
         onOccupation={setDockHeight} onSettledHeight={setSettledDockHeight}>
         {(expanded, toggle) => <>
           <View className="flex-row items-center justify-between gap-2">

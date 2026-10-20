@@ -2,9 +2,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
+import { View, useWindowDimensions } from 'react-native';
 import { useSharedValue } from 'react-native-reanimated';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
+import { homeSheetGeometry } from './sheet-geometry';
 import { useExplorerMapStyle } from './map-style';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -66,7 +67,8 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   useEffect(() => { if (focused) previewNavigation.current = false; }, [focused]);
   const pendingHandoffCenter = useRef<string | null>(null);
   const [mapReady, setMapReady] = useState(false);
-  const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
+  const window = useWindowDimensions();
+  const [sceneSize, setSceneSize] = useState({ width: 0, height: 0 });
   const [headerHeight, setHeaderHeight] = useState(0);
   const sheetPosition = useSharedValue(0);
   const [sheetHeight, setSheetHeight] = useState(0);
@@ -95,11 +97,15 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   // Observe transient results without allowing focus, remounts or invalidation to spend provider calls.
   const nearby = useQuery({ ...nearbyOptions(center), enabled: false });
   const details = useQuery({ ...detailsOptions(selectedId), enabled: false });
+  const maxSheetHeight = sceneSize.height > 0 ? Math.max(0, sceneSize.height - headerHeight - Math.min(fitMargin * 2, sceneSize.height)) : undefined;
+  const sheetGeometry = homeSheetGeometry(sceneSize.height || window.height, maxSheetHeight, !!selectedId, window.fontScale ?? 1);
+  const frameHeight = Math.max(1, sceneSize.height - sheetGeometry.peek);
   // Android adds fit edgePadding to mapPadding. Reserve measured chrome once,
   // keeping Google logo/legal controls above the sheet through native sheet gestures.
   // Maps 1.27.2's native padding setter can dereference a null GoogleMap after
   // layout but before onMapReady. Omit the prop until this instance is ready.
-  const mapPadding = { top: headerHeight, bottom: sheetHeight, left: gutter, right: gutter };
+  const topPadding = Math.min(headerHeight, Math.max(0, frameHeight - gutter));
+  const mapPadding = { top: topPadding, bottom: Math.max(0, Math.min(sheetHeight - sheetGeometry.peek, frameHeight - topPadding - gutter)), left: gutter, right: gutter };
   const place = details.data ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
   useEffect(() => {
     if (incomingId) pendingHandoffCenter.current = incomingId;
@@ -130,10 +136,12 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const error = selectedId ? details.error : nearby.error;
   return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
     <FocusedStatusBar style="dark" />
-    <View className="flex-1">
-    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
+    <View testID="home-map-scene" className="flex-1" onLayout={event => {
+      const { width, height } = event.nativeEvent.layout;
+      if (width > 0 && height > 0) setSceneSize(previous => previous.width === width && previous.height === height ? previous : { width, height });
+    }}>
+    <StyledMapView ref={map} className="absolute inset-x-0 top-0" style={{ height: sceneSize.height > 0 ? frameHeight : '100%' }} provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       {...(mapReady ? { mapPadding } : {})} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
-      onLayout={(event) => setMapSize({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height })}
       onPoiClick={(event) => select(event.nativeEvent.placeId)}>
       <Circle center={position} radius={activationRadiusMeters} strokeColor={routeColor} fillColor={routeArea} />
       {nearby.data?.map((item) => <Marker key={item.id} coordinate={item.coordinates} title={item.name} onPress={() => select(item.providerId)} />)}
@@ -145,7 +153,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')} />
     </View>
     <MapRecenter position={sheetPosition} onPress={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
-    <HomePlaceSheet animatedPosition={sheetPosition} key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
+    <HomePlaceSheet geometry={sheetGeometry} animatedPosition={sheetPosition} key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
       canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady}
       locationStatus={<>{locationStatus}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
@@ -157,7 +165,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       } : undefined}
       onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onDirections={directions}
       onOpenGoogle={place?.mapsUri ? () => open(place.mapsUri!) : undefined}
-      onMeasuredHeight={setSheetHeight} containerHeight={mapSize.height} maxHeight={mapSize.height > 0 ? Math.max(0, mapSize.height - headerHeight - Math.min(fitMargin * 2, mapSize.height)) : undefined}
+      onMeasuredHeight={setSheetHeight} containerHeight={sceneSize.height} maxHeight={maxSheetHeight}
       attributions={<ProviderAttributions places={[...(nearby.data ?? []), ...(details.data ? [details.data] : []), ...(handoff.data ? [handoff.data] : [])]} />} />
     </View>
   </StyledSafeAreaView>;

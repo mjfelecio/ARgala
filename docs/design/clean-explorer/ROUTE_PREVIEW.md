@@ -49,9 +49,9 @@ There is no rerouting, navigation guidance or successful-route refresh action.
   changes do not move the route destination. The live
   user marker/Recenter requires usable current GPS. A moving user marker never
   changes the captured origin or reroutes the preview.
-- The map fills the scene behind the Android status bar. A compact white floating header reserves safe touch insets for Back and the localized title. Focus-owned dark system icons match the shared light map style; there are no Share/Profile extras.
+- The map extends behind the Android status bar and ends at the collapsed sheet baseline; its height stays fixed while the sheet expands over it. A compact white floating header reserves safe touch insets for Back and the localized title. Focus-owned dark system icons match the shared light map style; there are no Share/Profile extras.
 - A Gorhom dock has a font-scaled 168 dp peek plus the Android bottom inset, and an expanded detent up to 72% of the scene, capped below the header and a 64 dp control strip. Native over-drag is disabled to keep those controls clear. Expanded details scroll; an accessible translated toggle supplements the native drag handle. Logical expansion survives a one-detent viewport.
-- Google map padding is omitted until this native instance is ready. Legal credits follow the current sheet occupation; fitting uses settled geometry and adds only a bounded margin. A requested toggle does not synthesize a native settle or overwrite the animated position; geometry is synthesized only on initial layout or resize. Native map/route state persists across expansion and resizing. Fit/Recenter follow the sheet on the UI thread, with current GPS required only for Recenter.
+- Google map padding is omitted until this native instance is ready. Legal credits reserve only the overlap above the collapsed baseline. Explicit Fit uses settled geometry and adds only a bounded margin; automatic fitting happens for a new route or actual layout changes, never sheet transitions or refocus. A requested toggle does not synthesize a native settle or overwrite the animated position; geometry is synthesized only on initial layout or resize. Native map/route state persists across expansion and resizing. Full scene height is measured independently from the shorter native map, avoiding a measurement feedback loop. Fit/Recenter follow the sheet on the UI thread, with current GPS required only for Recenter.
 - The dock uses HeroUI Button/Spinner, UniWind, Plus Jakarta Sans and
   the existing `global.css` palette. It shows returned distance/duration,
   destination name, optional address, the snapshot explanation, standard walking
@@ -86,3 +86,5 @@ mode, font scale, build/configuration and results before UAT:
    labels remain visible/reachable. Route remains a snapshot while moving.
 5. Open bare/expired directions URLs signed in and signed out; sign out while
    waiting or requesting and verify protected routing/data clearing.
+
+The JavaScript-only implementation retains SDK padding for required Google credits. That can shift the visual camera center slightly, but sheet movement does not change the native map frame or invoke automatic route zooming. The user explicitly accepted that limit instead of adding a native patch/rebuild.

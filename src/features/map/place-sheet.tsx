@@ -11,6 +11,7 @@ import { Card } from 'heroui-native/card';
 import { Chip } from 'heroui-native/chip';
 import { useThemeColor } from 'heroui-native/hooks';
 import { Spinner } from 'heroui-native/spinner';
+import { homeSheetGeometry } from './sheet-geometry';
 import { DISCOVERY } from '@/config/limits';
 import type { Place } from '@/features/places/service';
 
@@ -21,6 +22,7 @@ function MapSheetHandle(props: ComponentProps<typeof BottomSheetHandle>) {
 }
 export type HomePlaceSheetState = 'unsearched' | 'loading' | 'empty' | 'failed' | 'results' | 'selected';
 export type HomePlaceSheetProps = {
+  geometry?: ReturnType<typeof homeSheetGeometry>;
   state: HomePlaceSheetState; selectedPlace: Place | null; hasSelection: boolean;
   canRequest: boolean; resultCount: number; errorKey?: string; detailsLoading?: boolean; detailsLoaded?: boolean;
   selectionSummary?: string; locationStatus?: ReactNode; mapLoading?: boolean;
@@ -29,7 +31,7 @@ export type HomePlaceSheetProps = {
   animatedPosition?: SharedValue<number>;
   onSettledHeight?(height: number): void; maxHeight?: number; containerHeight?: number;
 };
-export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, selectionSummary, locationStatus, mapLoading, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onDirections, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight, animatedPosition }: HomePlaceSheetProps) {
+export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, selectionSummary, locationStatus, mapLoading, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onDirections, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight, animatedPosition }: HomePlaceSheetProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [settledIndex, setSettledIndex] = useState(0);
@@ -42,8 +44,7 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
     // Gorhom also writes measured offsets; retain them when the map resizes.
     containerLayoutState.set(current => ({ ...current, height }));
   }, [containerLayoutState, height]);
-  const cap = Math.max(1, Math.min(height, maxHeight ?? height * 0.6));
-  const peek = Math.min(cap, (hasSelection ? 264 : 156) * Math.max(1, window.fontScale ?? 1));
+  const { cap, peek } = geometry ?? homeSheetGeometry(height, maxHeight, hasSelection, window.fontScale ?? 1);
   const snapPoints = useMemo(() => peek < cap ? [peek, cap] : [cap], [peek, cap]);
   const localPosition = useSharedValue(height - peek);
   const position = animatedPosition ?? localPosition;

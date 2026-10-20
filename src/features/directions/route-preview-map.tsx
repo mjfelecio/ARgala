@@ -12,9 +12,9 @@ import type { Coordinate } from '@/features/location/geo';
 import type { Place } from '@/features/places/service';
 
 const StyledMapView = withUniwind(MapView);
-export function RoutePreviewMap({ place, origin, destination, coordinates, currentPosition, dockHeight, settledDockHeight, headerHeight, position, enabled, onViewportHeight }: {
+export function RoutePreviewMap({ place, origin, destination, coordinates, currentPosition, dockHeight, settledDockHeight, headerHeight, position, enabled, sceneHeight, collapsedHeight }: {
   place: Place; origin?: Coordinate; destination: Coordinate; coordinates: Coordinate[]; currentPosition: Coordinate | null;
-  dockHeight: number; settledDockHeight: number; headerHeight: number; position: SharedValue<number>; enabled: boolean; onViewportHeight(height: number): void;
+  dockHeight: number; settledDockHeight: number; headerHeight: number; position: SharedValue<number>; enabled: boolean; sceneHeight: number; collapsedHeight: number;
 }) {
   const { t } = useTranslation();
   const customMapStyle = useExplorerMapStyle();
@@ -24,27 +24,35 @@ export function RoutePreviewMap({ place, origin, destination, coordinates, curre
   const gutter = useResolveClassNames('p-4').padding as number;
   const routeColor = useCSSVariable('--color-route') as string;
   const destinationColor = useCSSVariable('--color-brand-primary') as string;
-  const cap = Math.max(0, size.height - headerHeight - 64);
-  const settledBottom = Math.min(settledDockHeight, cap);
-  const top = Math.min(headerHeight + gutter, Math.max(0, size.height - settledBottom - gutter));
-  const bottom = Math.min(dockHeight, Math.max(0, size.height - top - gutter));
-  const drawableHeight = size.height - settledBottom - top;
+  const frameHeight = Math.max(1, sceneHeight - collapsedHeight);
+  const top = Math.min(headerHeight + gutter, Math.max(0, frameHeight - gutter));
+  const bottomLimit = Math.max(0, frameHeight - top - gutter);
+  const bottom = Math.max(0, Math.min(dockHeight - collapsedHeight, bottomLimit));
+  const settledBottom = Math.max(0, Math.min(settledDockHeight - collapsedHeight, bottomLimit));
+  const drawableHeight = frameHeight - settledBottom - top;
   const drawableWidth = size.width - gutter * 2;
-  const canFit = ready && enabled && headerHeight > 0 && drawableWidth > 0 && drawableHeight > 0 && settledDockHeight > 0 &&
-    settledDockHeight <= cap + 1 && coordinates.length > 1;
+  const canFit = ready && enabled && headerHeight > 0 && sceneHeight > 0 &&
+    Math.abs(size.height - frameHeight) < 1 && drawableWidth > 0 && drawableHeight > 0 && coordinates.length > 1;
   const gap = Math.max(0, Math.min(gutter, drawableHeight / 4, drawableWidth / 4));
   const controlsStyle = useAnimatedStyle(() => ({ transform: [{ translateY: Math.max(0, position.get() - 64) }] }));
   const fit = useCallback(() => {
     if (!canFit) return;
     map.current?.fitToCoordinates(coordinates, { edgePadding: { top: gap, bottom: gap, left: gap, right: gap }, animated: true });
   }, [canFit, coordinates, gap]);
-  useEffect(() => { fit(); }, [fit, size.width, size.height, settledDockHeight, headerHeight]);
+  const lastAutoFit = useRef<{ coordinates: Coordinate[]; width: number; height: number; header: number } | null>(null);
+  useEffect(() => {
+    if (!canFit) return;
+    const previous = lastAutoFit.current;
+    if (previous?.coordinates === coordinates && previous.width === size.width && previous.height === frameHeight && previous.header === headerHeight) return;
+    lastAutoFit.current = { coordinates, width: size.width, height: frameHeight, header: headerHeight };
+    fit();
+  }, [canFit, coordinates, size.width, frameHeight, headerHeight, fit]);
   return <>
-    <StyledMapView ref={map} className="absolute inset-0" provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle}
+    <StyledMapView ref={map} className="absolute inset-x-0 top-0" style={{ height: sceneHeight > 0 ? frameHeight : '100%' }} provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle}
       initialRegion={{ ...(origin ?? place.coordinates), latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       {...(ready ? { mapPadding: { top, bottom, left: gutter, right: gutter } } : {})}
       showsUserLocation={!!currentPosition} showsMyLocationButton={false} onMapReady={() => setReady(true)}
-      onLayout={event => { const { width, height } = event.nativeEvent.layout; setSize({ width, height }); onViewportHeight(height); }}>
+      onLayout={event => { const { width, height } = event.nativeEvent.layout; if (width > 0 && height > 0) setSize(previous => previous.width === width && previous.height === height ? previous : { width, height }); }}>
       {origin && <Marker coordinate={origin} title={t('directions.origin')} pinColor={routeColor} />}
       <Marker coordinate={destination} title={place.name} pinColor={destinationColor} />
       {coordinates.length > 1 && <Polyline coordinates={coordinates} strokeColor={routeColor} strokeWidth={5} />}

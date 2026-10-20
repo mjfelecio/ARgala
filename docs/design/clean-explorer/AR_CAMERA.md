@@ -12,7 +12,7 @@ selected-place state. Three presentation components own chrome, directional
 badges and a Gorhom nearby dock. HeroUI Native components and UniWind use the
 existing `global.css`; there is no additional palette or dependency.
 
-The viewport is the space below the measured header and above pinned provider
+The label/sheet viewport is the space below the measured header and above pinned provider
 credits. The nearby dock starts at a compact, font-scaled peek and supports
 swiping and translated Show more/less controls. Automatic nearest-place selection
 keeps the dock compact so the camera remains visible. A manual selection or an

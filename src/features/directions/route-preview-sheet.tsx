@@ -3,18 +3,18 @@ import { useWindowDimensions } from 'react-native';
 import BottomSheet, { BottomSheetHandle, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useAnimatedReaction, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
+import { routeSheetGeometry } from '@/features/map/sheet-geometry';
 import { useResolveClassNames, withUniwind } from 'uniwind';
 const Scroll = withUniwind(BottomSheetScrollView);
 function Handle(props: ComponentProps<typeof BottomSheetHandle>) { return <BottomSheetHandle {...props} accessible={false} />; }
-export function RoutePreviewSheet({ height, headerHeight, bottomInset, position, onOccupation, onSettledHeight, children }: {
+export function RoutePreviewSheet({ geometry, height, headerHeight, bottomInset, position, onOccupation, onSettledHeight, children }: {
+  geometry?: ReturnType<typeof routeSheetGeometry>;
   height: number; headerHeight: number; bottomInset: number; position: SharedValue<number>;
   onOccupation(height: number): void; onSettledHeight(height: number): void; children(expanded: boolean, toggle: () => void): ReactNode;
 }) {
   const { fontScale = 1 } = useWindowDimensions();
   const [expanded, setExpanded] = useState(false);
-  const cap = Math.max(1, height - headerHeight - 64);
-  const peek = Math.min(cap, 168 * Math.max(1, fontScale) + bottomInset);
-  const full = Math.max(peek, Math.min(cap, height * 0.72));
+  const { peek, full } = geometry ?? routeSheetGeometry(height, headerHeight, bottomInset, fontScale);
   const snapPoints = useMemo(() => peek < full ? [peek, full] : [peek], [peek, full]);
   const containerLayoutState = useSharedValue({ height: Math.max(1, height), offset: { top: 0, bottom: 0, left: 0, right: 0 } });
   useEffect(() => { containerLayoutState.set(previous => ({ ...previous, height: Math.max(1, height) })); }, [height, containerLayoutState]);
