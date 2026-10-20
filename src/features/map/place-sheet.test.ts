@@ -12,7 +12,7 @@ const place = { id: 'google:one', provider: 'google' as const, providerId: 'one'
 let props: HomePlaceSheetProps;
 beforeEach(async () => {
  translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
- props = { state: 'unsearched', selectedPlace: null, hasSelection: false, canRequest: true, resultCount: 0, attributions: React.createElement('aside', {}, 'Provider credit'), onRetrySearch: vi.fn(), onClosePlace: vi.fn(), onDetails: vi.fn(), onWalk: vi.fn(), onMeasuredHeight: vi.fn() };
+ props = { state: 'unsearched', selectedPlace: null, hasSelection: false, canRequest: true, resultCount: 0, attributions: React.createElement('aside', {}, 'Provider credit'), onRetrySearch: vi.fn(), onClosePlace: vi.fn(), onDetails: vi.fn(), onDirections: vi.fn(), onMeasuredHeight: vi.fn() };
 });
 afterEach(async () => { await act(async () => tree?.unmount()); nativeUi.fontScale=1; });
 async function render() { await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(HomePlaceSheet, props)))); }); }
@@ -42,15 +42,9 @@ it('preserves long names, hides absent fields and expands only by an actual acti
  expect(content()).toContain(place.name); expect(content()).not.toContain('4.8');
  expect(tree.root.findAllByType('text').find(n=>n.props.children===place.name)!.props.numberOfLines).toBeUndefined();
  await press('map.expand'); expect(content()).toContain(translations.t('map.collapse'));
- await press('map.walk'); expect(props.onWalk).toHaveBeenCalledOnce();
+ await press('placeDetails.directions'); expect(props.onDirections).toHaveBeenCalledOnce();
  await press('map.closePlace'); expect(props.onClosePlace).toHaveBeenCalledOnce();
  expect(props.onDetails).not.toHaveBeenCalled();
-});
-it('keeps route destination, summary and every warning accessible in compact mode', async () => {
- props.state='route-ready'; props.hasSelection=true; props.selectedPlace=place;
- props.route={distanceMeters:250,durationSeconds:180,warnings:['Provider walking warning']}; await render();
- expect(content()).toContain(place.name); expect(content()).toContain(translations.t('map.routeSummary',{meters:250,minutes:3}));
- expect(content()).toContain(translations.t('map.walkingCaution')); expect(content()).toContain('Provider walking warning');
 });
 it('translates an error key at render time, supports retry and reports measured height', async () => {
  props.state='failed'; props.errorKey='service.rateLimited'; await render();
@@ -61,8 +55,8 @@ it('translates an error key at render time, supports retry and reports measured 
  await act(async()=>measured.props.onChange(0, measured.props.containerLayoutState.get().height - 234));
  expect(props.onMeasuredHeight).toHaveBeenCalledWith(234);
 });
-it('shows unavailable route and expired selection without inventing data', async () => {
- props.state='route-failed'; props.hasSelection=true; props.errorKey='service.routeUnavailable'; await render();
+it('shows expired selection without inventing data', async () => {
+ props.state='selected'; props.hasSelection=true; props.errorKey='service.routeUnavailable'; await render();
  expect(content()).toContain(translations.t('service.routeUnavailable'));
  expect(content()).toContain(translations.t('map.selectionUnavailable'));
  await press('ar.more'); expect(props.onDetails).toHaveBeenCalledOnce();
@@ -75,16 +69,6 @@ it('keeps the heading and expansion action scrollable when a short viewport caps
  expect(tree.root.findByType('dialog').props.snapPoints).toEqual([104]);
  expect(scroll.findAllByType('text').some(n=>n.props.children===place.name)).toBe(true);
 });
-it('prioritizes a returned route summary and caution before repeat-request and close actions', async () => {
- props.state='route-ready'; props.hasSelection=true; props.selectedPlace=place;
- props.route={distanceMeters:250,durationSeconds:180,warnings:['Returned warning']}; props.selectionSummary='Activation metadata'; await render();
- const json=content(); const summary=translations.t('map.routeSummary',{meters:250,minutes:3});
- expect(json.indexOf(summary)).toBeGreaterThan(json.indexOf(place.name));
- expect(json.indexOf(summary)).toBeLessThan(json.indexOf('Activation metadata'));
- expect(json.indexOf(summary)).toBeLessThan(json.indexOf(translations.t('map.walk')));
- expect(json.indexOf(translations.t('map.walkingCaution'))).toBeLessThan(json.indexOf(translations.t('map.walk')));
-});
-
 it.each(['ko','ja'])('keeps the native drag handle out of TalkBack and exposes localized expansion in %s', async language=>{
  await translations.changeLanguage(language); await render();
  expect(tree.root.findByType('header').props.accessible).toBe(false);

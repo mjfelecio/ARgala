@@ -14,6 +14,7 @@ let sequence = 0;
 
 /** Local navigation handle, never a credential. A new handoff retires an older target. */
 export function createRoutePreviewIntent(client: QueryClient, place: Place, existing?: RoutePreviewResult, source: RoutePreviewIntent['source'] = existing ? 'map' : 'details'): string {
+  existing ??= completedPreview(client, place);
   client.removeQueries({ queryKey: prefix });
   client.setQueryDefaults(prefix, { gcTime: routePreviewLifetimeMs });
   const token = `${Date.now().toString(36)}-${(++sequence).toString(36)}`;
@@ -31,4 +32,17 @@ export function claimRoutePreviewIntent(client: QueryClient, token: unknown): Ro
   client.removeQueries({ queryKey: key, exact: true });
   if (!intent || Date.now() < intent.createdAt || Date.now() - intent.createdAt >= routePreviewLifetimeMs) return null;
   return intent;
+}
+
+/** A completed snapshot is display data, never permission to calculate a new route. */
+function completedPreview(client: QueryClient, place: Place): RoutePreviewResult | undefined {
+  type Completed = { status: string; intent: RoutePreviewIntent; result?: RoutePreviewResult };
+  const now = Date.now();
+  const sessions = client.getQueriesData<Completed>({ queryKey: ['route-preview-session'] })
+    .map(([, value]) => value).filter((value): value is Completed => !!value)
+    .sort((a, b) => b.intent.createdAt - a.intent.createdAt);
+  return sessions.find(session => session.status === 'success' && session.result &&
+    now >= session.intent.createdAt && now - session.intent.createdAt < routePreviewLifetimeMs &&
+    session.intent.place.provider === place.provider && session.intent.place.providerId === place.providerId &&
+    session.result.destination.latitude === place.coordinates.latitude && session.result.destination.longitude === place.coordinates.longitude)?.result;
 }

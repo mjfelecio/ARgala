@@ -28,3 +28,10 @@ it('revokes pending intents on auth clear and when a new target is handed off', 
   const c = client(); const first = createRoutePreviewIntent(c, place); const second = createRoutePreviewIntent(c, { ...place, providerId: 'other' });
   expect(claimRoutePreviewIntent(c, first)).toBeNull(); c.clear(); expect(claimRoutePreviewIntent(c, second)).toBeNull();
 });
+
+it('reuses a completed matching preview through a new explicit handoff without granting request authority from cache',()=>{
+ const c=client(); const result={origin:{latitude:11,longitude:125},destination:place.coordinates,route:{distanceMeters:900,durationSeconds:750,encodedPolyline:'??AA',warnings:['Warning']}};
+ c.setQueryData(['route-preview-session','old'],{status:'success',intent:{place,createdAt:Date.now(),source:'ar'},result});
+ const token=createRoutePreviewIntent(c,place,undefined,'map');
+ expect(claimRoutePreviewIntent(c,token)?.existing).toEqual(result);
+});

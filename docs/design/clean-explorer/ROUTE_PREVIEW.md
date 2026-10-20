@@ -36,11 +36,7 @@ Pending/completed previews retain location for their live marker and Recenter.
 Re-enabling GPS creates a new sensor ownership interval, so a retained sample
 cannot bypass permission rechecks or authorize the retry's route request.
 
-Home Map's **Get walking route** continues to request and display its own route.
-After success, **View Route** passes that result and its original submitted
-origin and destination to the preview with zero additional Routes requests. Returning to the
-same selected POI preserves Home's route. Selecting a different POI clears its
-route as before.
+Home, Place Details and AR open this dedicated preview from one explicit Directions action. Home no longer calculates or presents a separate route. A new explicit handoff reuses a recent successful preview matching the provider ID and submitted destination when available. Reuse carries the original origin/destination snapshot and never grants authority for a new paid call. Different or expired destinations require the existing fresh foreground GPS/watcher gate.
 
 Bare/dead URLs, tab changes, remounts, refocus, foreground return, locale changes,
 query invalidation and reconnect do not independently authorize paid calls.
@@ -88,9 +84,7 @@ mode, font scale, build/configuration and results before UAT:
    one live Routes request; Place Details and hardware/visible Back restore the
    source journey. Change locale, background/resume, refocus and revisit without
    new paid calls.
-2. Home Search → POI → Get walking route → View Route: verify zero new Routes
-   calls, matching origin/destination/geometry, and preserved Home selection and
-   route on return. Keep AR selection, tab state and Settings Back intact.
+2. Home Search → POI → Get Directions: verify one preview acquisition, then zero additional Routes calls when reopening its completed snapshot from Home, Details or AR within its lifetime. Keep origin/destination/geometry, Home selection, tab state and Settings Back intact.
 3. Deny/revoke GPS, disable services, stall startup, use stale/inaccurate samples,
    and exercise explicit Retry. Check no-route, timeout, upstream/rate-limited
    responses and malformed route recovery without raw diagnostics or fake paths.

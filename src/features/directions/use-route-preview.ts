@@ -102,6 +102,17 @@ export function useRoutePreview(token: unknown, configured: boolean) {
     const nextToken = createRoutePreviewIntent(client, current.intent.place, undefined, current.intent.source);
     const next = claimRoutePreviewIntent(client, nextToken);
     if (!next) return;
+    if (next.existing) {
+      try {
+        authorized.current = false;
+        client.setQueryData<Session>(key, { owner, attempt: nextToken, intent: next, status: 'success', result: validated(next.existing) });
+        return;
+      } catch { /* An invalid saved snapshot cannot authorize a provider request. */
+        authorized.current = false;
+        client.setQueryData<Session>(key, { owner, attempt: nextToken, intent: next, status: 'failed', errorKey: 'service.unavailable' });
+        return;
+      }
+    }
     authorized.current = true;
     client.setQueryData<Session>(key, { owner, attempt: nextToken, intent: next, status: 'waiting' });
   }
