@@ -15,7 +15,7 @@ it('keeps Search, AR and Recenter without duplicating shell branding or Settings
  const render = (canSearch: boolean, searching: boolean) => React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(HomeMapControls, { ...callbacks, canSearch, searching })));
  await act(async () => { tree = create(render(true, false)); });
  const buttons = tree.root.findAllByType('button'); expect(buttons).toHaveLength(4);
- expect(buttons.map(b => b.props.accessibilityLabel)).toEqual(['Search Nearby', 'Open AR', 'Recenter', 'Featured Destinations']);
+ expect(buttons.map(b => b.props.accessibilityLabel)).toEqual(['Search Nearby', 'Recenter', 'Open AR', 'Featured Destinations']);
  expect(JSON.stringify(tree.toJSON())).not.toContain('ARgala');
  await act(async () => { buttons.forEach(b => b.props.onPress()); });
  Object.values(callbacks).forEach(callback => expect(callback).toHaveBeenCalledOnce());
