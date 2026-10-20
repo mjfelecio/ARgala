@@ -703,3 +703,80 @@ small phone and 150% font scale with CJK; TalkBack selection/busy/errors; contin
 bottom safe area and native system bars. Check no camera/GPS prompt or paid
 provider request while interacting with Welcome. Live Supabase/Google, GPS,
 compass, Maps, camera and routes remain subject to the existing field UAT needs.
+
+## AU01/AU02 authentication UI — 2026-10-20
+
+Implemented on `feat/auth-clean-explorer-ui` from latest `origin/main` at
+`84d1dee` (merged PR #14). The supplied approved design, implementation plan,
+HTML and valid 706×1600 Sign In/Create Account PNGs are preserved under
+`docs/design/clean-explorer/auth-kickoff/`. See
+[authentication design and deliberate variations](design/clean-explorer/AUTHENTICATION.md).
+
+Both modes retain the existing `/sign-in` route and use real installed HeroUI
+Native fields and buttons with UniWind utilities and existing CSS tokens. The
+original Welcome SVG is shared without changing its language/persistence flow.
+A modest mint scenic hero sits above a growing white Surface through the bottom
+safe area; there is no floating mint gap. Native logical-unit typography,
+scrollable keyboard-aware composition and wrapping content replace reference
+pixel measurements. The generated sample photograph, populated sample email,
+Create Account drag handle and back affordance are deliberately absent; Welcome
+completion removes the only plausible unauthenticated return destination.
+
+Supabase submission, schemas, auth-error codes, restoration provider, root guard,
+onboarding provider, route files, native config and dependencies remain intact.
+Only email is trimmed; passwords remain unchanged, including spaces. Sign-in
+accepts any nonempty password; registration retains 8–128 characters. A new
+synchronous guard prevents repeated calls and mode changes during pending submit.
+Successful signup without a session clears password and displays localized email
+confirmation; actual session state remains responsible for protected navigation.
+Busy/errors/validation/confirmation and new labels render from EN/KO/JA resources.
+
+TDD evidence: shared scenic/credential interfaces first failed before their files
+existed. A behavioral test against the old real screen demonstrated **two auth
+calls from two presses before React flushed busy state**, then passed with the
+ref guard. Expanded real-screen tests first failed on duplicated sign-in/signup
+calls and missing field error styles; layout tests first failed on missing locale
+headings and keyboard composition. Tests use real HeroUI Native, actual SDK
+AuthApiError/AuthWeakPasswordError/AuthRetryableFetchError classes, actual locale
+resources and i18next. Native rendering and Supabase are mocked boundaries.
+Coverage includes normalization, registration length limits, failed credential
+retention, busy inputs/toggle/mode switch, explicit retry, known/unknown failure
+localization and language changes, no-session confirmation and re-entry, session
+response handling, mode-specific copy, safe-area/scroll composition and no auth
+submission on mount/language change/remount. Existing Welcome and root navigation
+regressions pass. Pre-review focused auth/onboarding run: **87 tests / 8 files passed**.
+The review-fix credential-field run passed **8 tests**, including the new
+regression for typography on actual HeroUI Label.Text.
+
+Final checks:
+
+- `npm run check`: passed typecheck, zero-warning lint, **497 tests / 49 files**.
+- `npx expo install --check`: passed, dependencies up to date.
+- `npx expo-doctor`: passed **21/21** checks.
+- `npm run check:android`: passed existing Android configuration assertions.
+- `npm run export:android -- --max-workers 2`: passed Metro/Hermes Android export,
+  **7.1 MB** bundle. This is not an APK build.
+- `git diff --check` and `git diff --check 84d1dee..HEAD`: passed.
+
+No Edge function, limiter or migration changed, so Edge/limiter checks were not
+rerun for this UI work. No additional network or paid provider path was added.
+
+Android APK/device/UAT: **NOT TESTED**. No `adb` executable is available; no APK
+was built or installed, no native screenshot captured, and no live Supabase auth
+was exercised. The reference PNGs were inspected, and composition was checked
+against the approved spec; no rendered Android pixel comparison is claimed.
+Before client UAT, verify keyboard and action reachability on both modes; short
+screen and 150% text; EN/KO/JA glyphs/wrapping; TalkBack labels/status/busy state;
+show/hide and autofill; rapid presses; offline error/retry; live signup/no-session
+email confirmation; restoration, protected Back and sign-out; safe areas and
+system bars. Existing Google/GPS/compass/camera/routes field-validation needs
+remain unchanged.
+
+Independent review of `84d1dee..6f63147` found no Critical/Important defects and
+two minor issues. Both were corrected before publication: font classes now target
+HeroUI Label.Text, with a regression that failed before the fix and passed after;
+the shared scenery file's extra EOF blank line was removed. After these changes,
+`npm run check` passed **497 tests / 49 files**, typecheck and lint; the
+Metro/Hermes Android export passed again (7.1 MB), and the whole-branch whitespace
+check passed. No findings were deferred. The reviewer did not rerun the suite
+or claim native device validation.
