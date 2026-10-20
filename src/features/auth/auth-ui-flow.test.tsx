@@ -99,3 +99,36 @@ it('does not infer a session from a successful response or make auth calls on mo
   expect(copy()).not.toContain(translations.t('auth.confirm'));
   expect(button('auth.register')).toBeDefined(); // Root session guard alone owns navigation.
 });
+it.each(['en', 'ko', 'ja'] as const)('renders both approved modes and all new labels from %s resources', async language => {
+  await translations.changeLanguage(language); await mount();
+  for (const key of ['welcomeBack', 'signInSubtitle', 'newHere', 'showPassword'] as const) {
+    expect(translations.exists(`auth.${key}`, { lng: language, fallbackLng: false })).toBe(true);
+    expect(copy()).toContain(translations.t(`auth.${key}`));
+  }
+  expect(copy()).not.toContain(translations.t('auth.passwordHint'));
+  await press('auth.newAccount');
+  for (const key of ['startExploring', 'registerSubtitle', 'alreadyMember', 'passwordHint'] as const) {
+    expect(translations.exists(`auth.${key}`, { lng: language, fallbackLng: false })).toBe(true);
+    expect(copy()).toContain(translations.t(`auth.${key}`));
+  }
+  expect(copy()).not.toContain(translations.t('auth.welcomeBack'));
+  expect(button('auth.register')).toBeDefined();
+  await press('auth.existing'); expect(button('auth.signIn')).toBeDefined();
+});
+it('keeps white content growing through safe areas inside a keyboard-friendly scroll container', async () => {
+  await mount();
+  expect(tree!.root.findAllByType('keyboard-avoiding' as React.ElementType)).toHaveLength(1);
+  const scroll = tree!.root.findByType('scroll' as React.ElementType);
+  expect(scroll.props).toMatchObject({ keyboardShouldPersistTaps: 'handled', keyboardDismissMode: 'on-drag', contentContainerClassName: 'grow' });
+  const bottom = tree!.root.findAllByType('safe-area' as React.ElementType).find(node => node.props.edges.includes('bottom'))!;
+  expect(bottom.props.className).toContain('grow');
+  const content = bottom.parent!;
+  expect(content.props.className).toContain('grow');
+  expect(content.props.className).toContain('rounded-b-none');
+  expect(tree!.root.findAllByType('svg' as React.ElementType)).toHaveLength(1);
+  expect(tree!.root.findAllByType('img' as React.ElementType)).toHaveLength(0);
+  expect(copy()).not.toContain('alex.explorer'); expect(copy()).not.toContain('googleusercontent');
+  expect(tree!.root.findAllByType('button').some(node => /back|戻る|뒤로/i.test(node.props.accessibilityLabel ?? ''))).toBe(false);
+  expect(tree!.root.findAll(node => node.props.accessibilityRole === 'tablist')).toHaveLength(0);
+  expect(tree!.root.findAllByType('input').every(input => input.props.allowFontScaling !== false)).toBe(true);
+});

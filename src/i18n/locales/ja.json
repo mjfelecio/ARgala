@@ -3,7 +3,8 @@
     "retry": "再試行",
     "save": "設定を保存",
     "saved": "設定を保存しました。",
-    "close": "閉じる"
+    "close": "閉じる",
+    "connecting": "接続中…"
   },
   "auth": {
     "signIn": "ログイン",
@@ -20,7 +21,19 @@
     "logoutFailed": "ログアウトできませんでした。再試行してください。",
     "showPassword": "パスワードを表示",
     "hidePassword": "パスワードを非表示",
-    "passwordHint": "8文字以上で入力してください。"
+    "passwordHint": "8文字以上で入力してください。",
+    "welcomeBack": "おかえりなさい",
+    "signInSubtitle": "ログインして、探索を続けましょう。",
+    "startExploring": "探索を始めましょう",
+    "registerSubtitle": "アカウントを作成して、周辺のスポットを見つけましょう。",
+    "newHere": "ARgalaは初めてですか？",
+    "alreadyMember": "すでにアカウントをお持ちですか？",
+    "register": "アカウントを作成",
+    "existing": "ログイン",
+    "newAccount": "アカウントを作成",
+    "invalid": "有効なメールアドレスとパスワードを入力してください。",
+    "invalidRegistration": "有効なメールアドレスと8〜128文字のパスワードを入力してください。",
+    "confirm": "確認メールでアカウントを認証してからログインしてください。"
   },
   "settings": {
     "title": "設定",
