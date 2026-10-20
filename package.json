@@ -53,6 +53,8 @@
     "vitest": "^5.0.5"
   },
   "scripts": {
+    "postinstall": "node scripts/apply-native-patches.mjs",
+    "check:native-patches": "node scripts/apply-native-patches.mjs --check",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
@@ -69,6 +71,13 @@
     "lint:edge": "npx --yes deno@2.9.6 lint --config supabase/functions/deno.json supabase/functions"
   },
   "private": true,
+  "expo": {
+    "autolinking": {
+      "android": {
+        "buildFromSource": ["expo-camera"]
+      }
+    }
+  },
   "engines": {
     "node": ">=22.13.0"
   }
