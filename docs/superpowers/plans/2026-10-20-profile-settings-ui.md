@@ -8,7 +8,7 @@
 
 **Tech Stack:** Expo SDK 57, Expo Router, TypeScript, UniWind, Tailwind CSS v4, HeroUI Native 1.0.10, i18next, AsyncStorage via `SettingsProvider`, Supabase Auth, Ionicons, Vitest.
 
-**Spec:** `docs/design/clean-explorer/SCREEN_SPECIFICATIONS.md` (S01) and the accompanying `ARgala_Profile_Settings_Design_Spec.md`. Stitch reference: `references/profile-settings-stitch.png` and `.html`.
+**Spec:** `docs/design/clean-explorer/SCREEN_SPECIFICATIONS.md` (S01) and `docs/superpowers/specs/2026-10-20-profile-settings-design.md`. Stitch reference: `docs/design/clean-explorer/profile-settings/references/profile-settings-stitch.png` and `.html`.
 
 ## Global constraints
 
@@ -123,6 +123,18 @@
 - Precision: non-preset radius 123 must survive; state validation uses existing schema; no duplicate language source.
 - Content: screenshot's fictitious email/status/version/legal terms are excluded or derived from real state.
 - Safety: explicit Save, proper sign out, no new sensor activity/provider costs.
+
+## Execution record
+
+Implemented on `feat/profile-settings-ui`. Tasks 1–4 are complete; the resulting
+screen behavior, review corrections, validation commands and remaining physical
+Android acceptance work are recorded in
+`docs/design/clean-explorer/PROFILE_SETTINGS.md` and `docs/validation.md`.
+The original task checklists below/above are retained as the supplied handoff;
+they are not evidence that device tests were performed. The existing settings
+locale tests now live in `profile-settings-flow.test.tsx`, and device settings
+presentation uses an optional action render callback to keep shared location
+status free of theme/icon dependencies.
 
 ## Execution handoff
 

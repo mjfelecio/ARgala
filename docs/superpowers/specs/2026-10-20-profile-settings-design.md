@@ -1,8 +1,8 @@
 # ARgala — Profile & Settings (S01) Design Specification
 
-**Status:** implementation design handoff, awaiting owner review of the task plan.  
-**Baseline inspected:** `mjfelecio/ARgala` `main` at `3a3f7708fcfbea992699094bb9bc46bff9981268` (20 October 2026). PR #15 is merged.  
-**Visual reference:** `references/profile-settings-stitch.png` and `references/profile-settings-stitch.html`, copied from the owner-approved Stitch export.  
+**Status:** implemented for PR review; Android device acceptance remains pending.
+**Baseline inspected:** `mjfelecio/ARgala` `main` at `3a3f7708fcfbea992699094bb9bc46bff9981268` (20 October 2026). PR #15 is merged.
+**Visual reference:** `../../design/clean-explorer/profile-settings/references/profile-settings-stitch.png` and `../../design/clean-explorer/profile-settings/references/profile-settings-stitch.html`, copied from the owner-approved Stitch export.
 **Existing authority:** `AGENTS.md`, `docs/design/clean-explorer/SCREEN_SPECIFICATIONS.md` (S01), existing `SettingsProvider`, the app's actual auth/session state, and the confirmed client requirements. Generated Stitch data are visual samples, not factual app data.
 
 ## Goal and scope
@@ -37,9 +37,9 @@ Replace the Profile tab placeholder and basic Settings form with **one shared, f
 
 ## Data and behavioral contract
 
-`src/features/settings/preferences.ts`: **existing** strict `Preferences = { language: 'en'|'ko'|'ja'; activationRadiusMeters: integer 10..1000 }`. Default radius **100 m**; **1000 m** is an independent discovery default.  
-`src/features/settings/provider.tsx`: **existing** `useSettings()` and `settings.save(value: Preferences): Promise<void>`, backed by `argala.preferences.v1` and i18next. Continue to use this atomic pair-save; never introduce a second persistence path.  
-`src/features/auth/provider.tsx`: **existing** `useAuth().session` is the account source.  
+`src/features/settings/preferences.ts`: **existing** strict `Preferences = { language: 'en'|'ko'|'ja'; activationRadiusMeters: integer 10..1000 }`. Default radius **100 m**; **1000 m** is an independent discovery default.
+`src/features/settings/provider.tsx`: **existing** `useSettings()` and `settings.save(value: Preferences): Promise<void>`, backed by `argala.preferences.v1` and i18next. Continue to use this atomic pair-save; never introduce a second persistence path.
+`src/features/auth/provider.tsx`: **existing** `useAuth().session` is the account source.
 `src/features/auth/sign-out-action.tsx`: **existing** sign-out semantics and translated error contract remain authoritative.
 
 - Initialize an editable draft **once per current settings context** from loaded preferences; synchronize after a confirmed save and on external changes only when no unsaved edits exist. Avoid clobbering changes on unrelated component rerenders or locale updates.
