@@ -4,7 +4,6 @@ import { useThemeColor } from 'heroui-native/hooks';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useResolveClassNames } from 'uniwind';
-import { AppHeader } from './app-header';
 
 export function AppTabs() {
   const { t } = useTranslation();
@@ -13,7 +12,7 @@ export function AppTabs() {
   const barStyle = useResolveClassNames('h-16 border-t-0 bg-page-mint shadow-none');
   const labelStyle = useResolveClassNames('font-sans text-xs font-medium');
   return <Tabs initialRouteName="index" backBehavior="initialRoute" screenOptions={{
-    header: ({ options }) => <AppHeader label={options.title ?? t('navigation.explore')} />,
+    headerShown: false,
     tabBarActiveTintColor: active,
     tabBarInactiveTintColor: inactive,
     tabBarLabelStyle: labelStyle,

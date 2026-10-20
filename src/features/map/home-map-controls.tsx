@@ -6,32 +6,28 @@ import { Spinner } from 'heroui-native/spinner';
 import { useThemeColor } from 'heroui-native/hooks';
 
 export type HomeMapControlsProps = {
-  onSearchNearby(): void; onRecenter(): void; onOpenAr(): void; onOpenDestinations(): void;
+  onSearchNearby(): void; onOpenAr(): void; onOpenDestinations(): void;
   canSearch: boolean; searching: boolean; onLayout?(event: LayoutChangeEvent): void;
 };
-export function HomeMapControls({ onSearchNearby, onRecenter, onOpenAr, onOpenDestinations, canSearch, searching, onLayout }: HomeMapControlsProps) {
+export function HomeMapControls({ onSearchNearby, onOpenAr, onOpenDestinations, canSearch, searching, onLayout }: HomeMapControlsProps) {
   const { t } = useTranslation();
-  const [ink, onAccent] = useThemeColor(['default-foreground', 'accent-foreground']);
-  return <View testID="home-map-controls" className="max-h-[40%] shrink px-4 py-2" onLayout={onLayout} pointerEvents="box-none">
-    <ScrollView className="grow-0" contentContainerClassName="gap-2">
-      <View className="flex-row items-center gap-2">
-        <Button className="h-auto min-h-12 flex-1 px-3 py-2" accessibilityLabel={t('map.search')} isDisabled={!canSearch || searching}
-          accessibilityState={{ disabled: !canSearch || searching, busy: searching }} onPress={onSearchNearby}>
-          {searching ? <Spinner size="sm" color={onAccent} /> : <Ionicons name="search-outline" size={20} color={onAccent} />}
-          <Button.Label className="shrink text-center">{t('map.search')}</Button.Label>
-        </Button>
-        <Button variant="secondary" className="size-12" isIconOnly accessibilityLabel={t('map.recenter')} onPress={onRecenter}>
-          <Ionicons name="locate-outline" size={24} color={ink} />
-        </Button>
+  const [ink, accent, onAccent] = useThemeColor(['default-foreground', 'accent', 'accent-foreground']);
+  return <View testID="home-map-controls" className="gap-2 px-4 pb-2 pt-3" onLayout={onLayout} pointerEvents="box-none">
+    <Button variant="secondary" className="h-auto min-h-14 justify-start rounded-pill bg-surface px-3 py-2 shadow-sm" accessibilityLabel={t('map.search')} isDisabled={!canSearch || searching}
+      accessibilityState={{ disabled: !canSearch || searching, busy: searching }} onPress={onSearchNearby}>
+      <View className="size-8 items-center justify-center rounded-xl bg-accent" accessible={false}>
+        <Ionicons name="compass-outline" size={22} color={onAccent} />
       </View>
-      <View className="flex-row flex-wrap gap-2">
-        <Button variant="outline" className="h-auto min-h-12 min-w-28 grow bg-surface px-3 py-2" accessibilityLabel={t('map.camera')} onPress={onOpenAr}>
-          <Ionicons name="scan-outline" size={20} color={ink} /><Button.Label>{t('map.camera')}</Button.Label>
-        </Button>
-        <Button variant="outline" className="h-auto min-h-12 min-w-40 grow bg-surface px-3 py-2" accessibilityLabel={t('destinations.title')} onPress={onOpenDestinations}>
-          <Button.Label className="shrink text-center">{t('destinations.title')}</Button.Label>
-        </Button>
-      </View>
+      <Button.Label className="flex-1 font-medium">{t('map.search')}</Button.Label>
+      {searching ? <Spinner size="sm" color={accent} /> : <Ionicons name="search-outline" size={22} color={ink} />}
+    </Button>
+    <ScrollView className="grow-0" horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 py-1">
+      <Button size="sm" variant="secondary" className="h-auto min-h-10 bg-surface px-4 py-2 shadow-sm" hitSlop={4} accessibilityLabel={t('map.camera')} onPress={onOpenAr}>
+        <Ionicons name="scan-outline" size={18} color={ink} /><Button.Label>{t('map.camera')}</Button.Label>
+      </Button>
+      <Button size="sm" variant="secondary" className="h-auto min-h-10 bg-surface px-4 py-2 shadow-sm" hitSlop={4} accessibilityLabel={t('destinations.title')} onPress={onOpenDestinations}>
+        <Button.Label>{t('destinations.title')}</Button.Label>
+      </Button>
     </ScrollView>
   </View>;
 }

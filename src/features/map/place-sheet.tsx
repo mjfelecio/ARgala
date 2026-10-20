@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type ComponentProps } from 'react';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import BottomSheet, { BottomSheetHandle, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated';
+import { useAnimatedReaction, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useResolveClassNames, withUniwind } from 'uniwind';
 import { Button } from 'heroui-native/button';
@@ -26,13 +27,14 @@ export type HomePlaceSheetProps = {
   route?: { distanceMeters: number; durationSeconds: number; warnings: string[] };
   attributions: ReactNode; onRetrySearch(): void; onClosePlace(): void; onDetails(): void;
   onViewRoute?(): void; onViewDetails?(): void; onWalk(): void; onOpenGoogle?(): void; onMeasuredHeight(height: number): void;
+  animatedPosition?: SharedValue<number>;
   onSettledHeight?(height: number): void; maxHeight?: number; containerHeight?: number;
 };
-export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, selectionSummary, locationStatus, mapLoading, route, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onViewRoute, onWalk, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight }: HomePlaceSheetProps) {
+export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, selectionSummary, locationStatus, mapLoading, route, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onViewRoute, onWalk, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight, animatedPosition }: HomePlaceSheetProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [settledIndex, setSettledIndex] = useState(0);
-  const onAccent = useThemeColor('accent-foreground');
+  const [onAccent, ink] = useThemeColor(['accent-foreground', 'default-foreground']);
   const sheet = useRef<BottomSheet>(null);
   const window = useWindowDimensions();
   const height = containerHeight || window.height;
@@ -41,11 +43,11 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
     // Gorhom also writes measured offsets; retain them when the map resizes.
     containerLayoutState.set(current => ({ ...current, height }));
   }, [containerLayoutState, height]);
-  const gutter = useResolveClassNames('p-4').padding as number;
   const cap = Math.max(1, Math.min(height, maxHeight ?? height * 0.6));
-  const peek = Math.min(cap, Math.max(gutter * 10, cap * 0.65));
+  const peek = Math.min(cap, (hasSelection ? 264 : 156) * Math.max(1, window.fontScale ?? 1));
   const snapPoints = useMemo(() => peek < cap ? [peek, cap] : [cap], [peek, cap]);
-  const position = useSharedValue(height - peek);
+  const localPosition = useSharedValue(height - peek);
+  const position = animatedPosition ?? localPosition;
   const animatedIndex = useSharedValue(0);
   const lastReportedAt = useSharedValue(0);
   const backgroundStyle = useResolveClassNames('bg-surface rounded-t-sheet rounded-b-none');
@@ -65,9 +67,10 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
   }, [height, snapPoints, reportPosition]);
   const settledHeight = snapPoints[Math.min(settledIndex, snapPoints.length - 1)];
   useEffect(() => {
+    position.set(height - settledHeight);
     onMeasuredHeight(settledHeight);
     onSettledHeight?.(settledHeight);
-  }, [settledHeight, onMeasuredHeight, onSettledHeight]);
+  }, [height, position, settledHeight, onMeasuredHeight, onSettledHeight]);
   const busy = state === 'loading' || state === 'route-loading';
   const routeContent = <>
     {state === 'route-loading' && <Message busy>{t('map.routeLoading')}</Message>}
@@ -82,12 +85,12 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
     animatedPosition={position} animatedIndex={animatedIndex} handleComponent={MapSheetHandle} backgroundStyle={backgroundStyle} handleIndicatorStyle={indicatorStyle}
     accessible={false} accessibilityLabel={t('map.title')}
     onChange={(index, top) => { setSettledIndex(index); if (snapPoints.length > 1) setExpanded(index > 0); reportPosition(top); onSettledHeight?.(Math.max(0, height - top)); }}>
-    <SheetScrollView className="flex-1" contentContainerClassName="gap-3 p-4 pb-8">
+    <SheetScrollView className="flex-1" contentContainerClassName="gap-3 px-5 pb-6">
       <View className="flex-row flex-wrap items-center justify-between gap-2">
-        <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-brand-strong">{t('map.title')}</Text>
-        <Button variant="secondary" accessibilityLabel={t(expanded ? 'map.collapse' : 'map.expand')} accessibilityState={{ expanded }}
+        <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-foreground">{t('map.title')}</Text>
+        <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t(expanded ? 'map.collapse' : 'map.expand')} accessibilityState={{ expanded }}
           onPress={() => { const next = !expanded; setExpanded(next); sheet.current?.snapToIndex(next ? snapPoints.length - 1 : 0); }}>
-          <Button.Label>{t(expanded ? 'map.collapse' : 'map.expand')}</Button.Label>
+          <Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={ink} />
         </Button>
       </View>
       {locationStatus}
@@ -112,15 +115,15 @@ export function HomePlaceSheet({ state, selectedPlace: place, hasSelection, canR
               {place.mapsUri && onOpenGoogle && <Button variant="outline" accessibilityLabel={t('map.openGoogle')} onPress={onOpenGoogle}><Button.Label>{t('map.openGoogle')}</Button.Label></Button>}
             </>}
           </Card.Body>
-          <Card.Footer className="flex-col gap-2">{route && onViewRoute && <Button variant="secondary" className="w-full" accessibilityLabel={t('directions.view')} onPress={onViewRoute}><Button.Label>{t('directions.view')}</Button.Label></Button>}{onViewDetails && <Button variant="secondary" className="w-full" accessibilityLabel={t('placeDetails.view')} onPress={onViewDetails}><Button.Label>{t('placeDetails.view')}</Button.Label></Button>}<Button className="w-full" accessibilityLabel={t('map.walk')} onPress={onWalk} isDisabled={!canRequest || state === 'route-loading'} accessibilityState={{ busy: state === 'route-loading', disabled: !canRequest || state === 'route-loading' }}>
-            {state === 'route-loading' && <Spinner size="sm" color={onAccent} />}<Button.Label>{t('map.walk')}</Button.Label>
+          <Card.Footer className="flex-row flex-wrap gap-2">{route && onViewRoute && <Button variant="secondary" className="w-full" accessibilityLabel={t('directions.view')} onPress={onViewRoute}><Button.Label>{t('directions.view')}</Button.Label></Button>}{onViewDetails && <Button variant="secondary" className="h-auto min-h-12 min-w-28 flex-1 py-3" accessibilityLabel={t('placeDetails.view')} onPress={onViewDetails}><Button.Label className="shrink text-center">{t('placeDetails.view')}</Button.Label></Button>}<Button className="h-auto min-h-12 min-w-28 flex-1 py-3" accessibilityLabel={t('map.walk')} onPress={onWalk} isDisabled={!canRequest || state === 'route-loading'} accessibilityState={{ busy: state === 'route-loading', disabled: !canRequest || state === 'route-loading' }}>
+            {state === 'route-loading' && <Spinner size="sm" color={onAccent} />}<Button.Label className="shrink text-center">{t('map.walk')}</Button.Label>
           </Button></Card.Footer>
         </Card>}
         {!detailsLoaded && <Button variant="outline" accessibilityLabel={t('ar.more')} onPress={onDetails} isDisabled={!canRequest || detailsLoading} accessibilityState={{ busy: !!detailsLoading, disabled: !canRequest || !!detailsLoading }}><Button.Label>{t('ar.more')}</Button.Label></Button>}
-        <Button variant="secondary" accessibilityLabel={t('map.closePlace')} onPress={onClosePlace}><Button.Label>{t('map.closePlace')}</Button.Label></Button>
+        <Button variant="ghost" accessibilityLabel={t('map.closePlace')} onPress={onClosePlace}><Button.Label>{t('map.closePlace')}</Button.Label></Button>
       </>}
       {!hasSelection && routeContent}
-      {(expanded || !hasSelection) && <Text className="font-sans text-xs font-medium text-muted">{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>}
+      {expanded && <Text className="font-sans text-xs font-medium text-muted">{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>}
       {attributions}
     </SheetScrollView>
   </BottomSheet>;
