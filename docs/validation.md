@@ -645,3 +645,61 @@ All nine sites still need approved names, centers, accessible entrances, copy,
 daytime assets/rights and content translations. Name variants Janagdan/Hanagdan
 and Alto/Alta remain unresolved. The application journey is reviewable, but
 content-complete nine-site field UAT remains blocked on those approvals.
+
+## W01 Welcome and language selection (2026-10-20)
+
+PR #13 was confirmed merged before branching from `origin/main` at `81965ff`.
+The supplied kickoff design, implementation plan and unchanged corrected HTML
+are preserved in `docs/design/clean-explorer/WELCOME.md`,
+`docs/superpowers/plans/2026-10-20-welcome-language.md` and
+`docs/design/clean-explorer/references/welcome-stitch-reference.html`.
+
+New unauthenticated installs enter `/welcome`; returning users enter Sign In,
+and restored sessions retain the authenticated app. Root guard composition
+waits for restoration and preserves existing setup/auth recovery. Completion
+saves language through real SettingsProvider with the existing radius, then
+commits `argala.onboarding.v1`. An incomplete value in that same key prevents a
+partially saved language from becoming a false legacy migration on restart.
+Legacy migration leaves the old preferences bytes unchanged. Authenticated
+bypass survives same-process sign-out even if its best-effort marker write
+fails. Unauthenticated storage failures use localized explicit recovery.
+
+Automated onboarding coverage uses real SettingsProvider, i18next with actual
+EN/KO/JA resources, HeroUI components, production Query defaults, and installed
+Expo Router protected-child filtering, path parser, validator and stack reducer.
+Native rendering, storage and auth snapshots are mocked boundaries. Cases cover
+new/completed/legacy/corrupt records, pending-marker restarts, every write-failure
+stage, explicit retry, radius preservation, rapid presses, delayed auth/reads,
+stale results/unmount, selected radio semantics, local preview, localized error
+and recovery, sign-out, protected private deep links and removal of Welcome Back
+history. Mount/refocus/foreground/reconnect/locale/remount tests assert no query,
+network, sensor permission or watcher work. UI tests first failed against the
+empty route scaffold; provider and pure-helper tests first failed before their
+modules existed, then passed with implementation.
+
+`npm run check` passed typecheck, zero-warning lint and **471 tests / 47 files**.
+`npx expo install --check` passed (dependencies up to date), `npx expo-doctor`
+passed **21/21** checks, and `npm run check:android` passed. `npm run export:android -- --max-workers 2` passed the Metro/Hermes
+Android export (7.1 MB bundle). `git diff --check` passed. Independent
+whole-branch review of `81965ff..fdbf491` found no Critical, Important or Minor
+issues. The reviewer did not rerun checks or claim Android device verification. No SDK,
+dependency, native configuration, Edge implementation or SQL migration changed;
+Edge/limiter checks were not rerun for W01.
+
+Android APK/device/UAT: **NOT TESTED**. No `adb` executable/device is available;
+no APK was built or installed and no native render screenshot was captured.
+The screen uses deliberate original green/mint vector scenery. The reference's
+remote Google-generated image is not bundled or fetched, and the corrected PNG
+was invalid. Approved photo rights/provenance and a valid screenshot are still
+needed for photographic/pixel-parity work.
+
+Before client UAT, exercise on a configured Android build: clear storage/fresh
+install; all three choices then Continue; restart skips Welcome; legacy valid,
+empty and malformed preferences; restored session and later sign-out; preserve
+default/custom AR radius; offline launch; injected storage read/preference-write/
+marker-write failures and explicit retry; process restart after partial save;
+private destination/details/directions deep links; gesture and three-button Back;
+small phone and 150% font scale with CJK; TalkBack selection/busy/errors; continuous
+bottom safe area and native system bars. Check no camera/GPS prompt or paid
+provider request while interacting with Welcome. Live Supabase/Google, GPS,
+compass, Maps, camera and routes remain subject to the existing field UAT needs.

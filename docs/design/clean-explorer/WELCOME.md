@@ -1,6 +1,6 @@
 # ARgala — W01 Welcome & Language Selection Design
 
-Status: **Approved visual direction; implementation proposal for first-launch behavior.**
+Status: **Implemented for review; Android device and visual UAT pending.**
 
 ## Authority and target
 
@@ -49,3 +49,61 @@ Status: **Approved visual direction; implementation proposal for first-launch be
 ## Known fidelity and content limitations
 
 The corrected Welcome HTML has no valid paired PNG. It is useful for layout/typography, but exact screenshot parity cannot be asserted until an approved screenshot and actual Android comparison exist. Image licensing and genuine location provenance must be verified before production use. These do not block a functional first-pass welcome screen with honest fallback art.
+
+## Implementation and deliberate variations
+
+The supplied kickoff was implemented on `feat/welcome-language`, based on merged
+PR #13 (`81965ff`). The checked-in HTML is preserved as reference material; it
+is never rendered or downloaded by the native screen. No valid corrected PNG or
+approved photo was supplied. The hero therefore uses original abstract scenery
+in existing mint/green theme colors and the app shell's compass mark. It does
+not represent Lake Danao. A licensed, credited local photo and a corrected
+approved screenshot remain needed before claiming photographic or pixel parity.
+
+`src/features/onboarding/` owns lifecycle and UI; the root route re-exports the
+screen. `src/features/navigation/root-navigation.tsx` owns the root guard
+composition extracted from `_layout.tsx`, with existing auth loading/recovery
+and environment setup behavior preserved. Authenticated tabs remain unchanged.
+SDK 57 `Stack.Protected` removes Welcome history when completion makes it
+inaccessible; no imperative redirect or duplicate Sign In is added.
+
+Selection previews all Welcome copy locally using the selected locale. The
+shared i18next language and preferences change only through SettingsProvider on
+Continue. English is a supported choice, not an unconditional “Default” badge:
+the saved supported language/device locale determines initial selection.
+HeroUI RadioGroup, Radio, Surface and Button reuse `global.css` tokens. A
+minimum-height hero and scrolling content replace fixed viewport percentages;
+text rows and CTA may grow, and the white surface includes the bottom safe area.
+Native status/navigation bars replace the export's imitation controls.
+
+### Persistence and migration
+
+Only `argala.onboarding.v1` is new durable state. Only the literal `complete`
+commits onboarding. Continue first stores `pending` in that same key, then awaits
+`SettingsProvider.save({ activationRadiusMeters, language })`, then stores
+`complete`, then permits Sign In. This incomplete value is necessary because a
+failed final marker write leaves newly saved preferences on disk: on restart,
+those preferences must not be mistaken for pre-W01 usage. Rapid presses share
+one operation; failed writes stay retryable and raw errors never become copy.
+An unmounted or superseded owner cannot initiate a later completion write.
+
+A missing marker plus **any** preexisting preference record (including malformed
+or empty content) counts as legacy usage. Migration commits only the marker and
+never rewrites those preferences. A pending or invalid marker requires explicit
+completion even if preferences exist. Read failures and failed unauthenticated
+legacy-migration writes show translated recovery with explicit Retry.
+
+A restored authenticated session always bypasses Welcome, including storage
+failure, with a best-effort marker write. That bypass is retained in memory
+through sign-out. If persistent storage remains unavailable, durable recovery
+cannot be guaranteed across a later process restart; signed-in use remains
+available and signed-out read failures show recovery. Reinstall/clear-storage
+is the new-install boundary.
+
+### Review and UAT
+
+Automated evidence and remaining Android scenarios are recorded in
+[validation](../../validation.md). Mocked native rendering and installed Router
+reducers establish logic, not TalkBack, rendered CJK, physical Back behavior,
+font scaling or actual provider integration. No photograph was fabricated and
+no camera/location permission or paid provider request is added by Welcome.

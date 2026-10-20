@@ -8,7 +8,7 @@
 
 **Tech Stack:** Expo SDK 57, Expo Router `Stack.Protected`, TypeScript strict, AsyncStorage, existing SettingsProvider and i18next, UniWind/Tailwind v4, HeroUI Native, existing Vitest/React test renderer.
 
-**Spec:** `docs/design/clean-explorer/SCREEN_SPECIFICATIONS.md` W01, `ARgala_Welcome_Language_Design_Spec.md`, and `references/welcome-stitch-reference.html` in the supplied kickoff package.
+**Spec:** `docs/design/clean-explorer/SCREEN_SPECIFICATIONS.md` W01, [Welcome design](../../design/clean-explorer/WELCOME.md), and [source HTML](../../design/clean-explorer/references/welcome-stitch-reference.html) imported from the supplied kickoff package.
 
 ## Global Constraints
 
@@ -128,3 +128,24 @@ A new unauthenticated installation gets a beautiful, navigable, localized Welcom
 ## Execution handoff
 
 Present the agent with this plan, design spec and corrected source HTML. Implement on a dedicated `feat/welcome-language` branch from the current merged `main` after PR #13. Keep coherent commits and submit PR for review; do not merge or claim device validation without evidence.
+
+
+## Execution record (2026-10-20)
+
+Tasks 1–4 are implemented in four Conventional Commits on
+`feat/welcome-language` from merged PR #13 (`81965ff`). Task 5 records the
+verification and review evidence in [validation](../../validation.md).
+
+The completion protocol intentionally adds a `pending` value before saving
+preferences, within the same new marker key, so a failed final marker cannot
+cause a legacy bypass on restart. Root guard composition was extracted into
+`src/features/navigation/root-navigation.tsx` for direct SDK-backed regression
+coverage. Locale resources were added with route recovery before rendering
+Welcome. No new dependency, native configuration or backend change was needed.
+
+Typecheck, lint, 471 tests across 47 files, Expo compatibility, 21/21 Doctor
+checks, Android config and the Metro/Hermes Android export passed. Independent
+whole-branch review found no issues. Android device/screenshot comparison,
+TalkBack, enlarged CJK text and APK field UAT remain explicitly unperformed;
+the corresponding plan checkboxes are not claims of completed device work.
+The final PR is for review only and must remain unmerged.
