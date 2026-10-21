@@ -8,7 +8,12 @@ import ArScreen from '@/features/ar/ar-screen';
 const navigation = vi.hoisted(() => ({
   active: true, focused: true, ref: { current: null as object | null },
   context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
-  value: { isFocused: () => true, addListener: () => () => {} },
+  value: { isFocused: () => true, addListener: (name: string, callback: (event: { data: { closing: boolean } }) => void) => {
+    const listeners = navigation.transitions.get(name) ?? new Set();
+    navigation.transitions.set(name, listeners); listeners.add(callback);
+    return () => listeners.delete(callback);
+  } },
+  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(),
   remove: vi.fn(), headingRemove: vi.fn(), cameraGranted: false, cameraQueries: vi.fn(),
 }));
 
@@ -41,7 +46,7 @@ vi.mock('expo-router', async () => {
       require.cache[path] = replacement;
       restore.push(() => { if (previous) require.cache[path] = previous; else delete require.cache[path]; });
     }
-    return { useFocusEffect: require('expo-router/build/useFocusEffect').useFocusEffect, useIsFocused: focus.useIsFocused };
+    return { useNavigation: core.useNavigation, useFocusEffect: require('expo-router/build/useFocusEffect').useFocusEffect, useIsFocused: focus.useIsFocused };
   } finally { restore.reverse().forEach((undo) => undo()); }
 });
 vi.mock('./service', () => ({
@@ -94,6 +99,7 @@ beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   vi.useFakeTimers();
   navigation.active = true; navigation.focused = true; navigation.ref.current = null;
+  navigation.transitions.clear();
   navigation.remove.mockClear(); navigation.headingRemove.mockClear(); navigation.cameraQueries.mockClear(); navigation.cameraGranted = false;
   vi.mocked(subscribeToLocation).mockReset().mockResolvedValue({ remove: navigation.remove });
   vi.mocked(subscribeToHeading).mockReset().mockResolvedValue({ remove: navigation.headingRemove });
@@ -175,6 +181,21 @@ it('cleans up GPS and compass even when native subscription setup finishes after
   expect(navigation.remove).toHaveBeenCalledOnce();
   expect(navigation.headingRemove).toHaveBeenCalledOnce();
   expect(tree!.root.findAllByType('video')).toHaveLength(0);
+});
+
+it('waits for native stack appearance after SDK focus returns while navigation readiness is pending', async () => {
+  navigation.cameraGranted = true;
+  await act(async () => { tree = create(render(React.createElement(ArScreen))); });
+  await act(async () => tree!.root.findByProps({ testID: 'ar-scene' }).props.onLayout({ nativeEvent: { layout: { width: 360, height: 800 } } }));
+  navigation.focused = false;
+  await act(async () => tree!.update(render(React.createElement(ArScreen))));
+  await act(async () => navigation.transitions.get('transitionStart')?.forEach(listener => listener({ data: { closing: false } })));
+  navigation.focused = true;
+  await act(async () => tree!.update(render(React.createElement(ArScreen))));
+  expect(tree!.root.findAllByType('video')).toHaveLength(0);
+  await act(async () => navigation.transitions.get('transitionEnd')?.forEach(listener => listener({ data: { closing: false } })));
+  expect(tree!.root.findByType('video').props.style).toMatchObject({ width: 360, height: 800 });
+  expect(subscribeToLocation).toHaveBeenCalledTimes(2);
 });
 
 vi.mock('@/features/ar/ar-discovery', async () => {

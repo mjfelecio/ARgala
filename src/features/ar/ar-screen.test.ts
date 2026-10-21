@@ -3,7 +3,8 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import ArScreen from './ar-screen';
 const controls = vi.hoisted(() => ({ permission: { granted: true, canAskAgain: true } as { granted: boolean; canAskAgain: boolean } | null,
-  active: true, activateDuringSubscribe: false, focused: true, getPermission: vi.fn(), requestPermission: vi.fn(), listeners: new Set<(state: string) => void>() }));
+  active: true, activateDuringSubscribe: false, focused: true, getPermission: vi.fn(), requestPermission: vi.fn(), listeners: new Set<(state: string) => void>(),
+  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>() }));
 vi.mock('expo-camera', async () => {
   const { createElement, useCallback, useState } = await import('react');
   const CameraView = Object.assign((props: Record<string, unknown>) => createElement('video', props), {
@@ -19,7 +20,12 @@ vi.mock('expo-camera', async () => {
 });
 vi.mock('expo-router', async () => {
   const { useEffect } = await import('react');
-  return { useIsFocused: () => controls.focused, useFocusEffect: (callback: () => void) => useEffect(callback, [callback]) };
+  const stack = { addListener: (name: string, callback: (event: { data: { closing: boolean } }) => void) => {
+    const listeners = controls.transitions.get(name) ?? new Set();
+    controls.transitions.set(name, listeners); listeners.add(callback);
+    return () => listeners.delete(callback);
+  } };
+  return { useNavigation: () => stack, useIsFocused: () => controls.focused, useFocusEffect: (callback: () => void) => useEffect(callback, [callback]) };
 });
 vi.mock('react-native', () => ({ View: 'view', Text: 'text', StyleSheet: { create: (styles: unknown) => styles, absoluteFill: {} }, AppState: {
   get currentState() { return controls.active ? 'active' : 'background'; },
@@ -47,6 +53,7 @@ beforeEach(() => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   controls.permission = { granted: true, canAskAgain: true }; controls.active = true; controls.focused = true;
   controls.activateDuringSubscribe = false; controls.listeners.clear();
+  controls.transitions.clear();
   controls.getPermission.mockReset().mockImplementation(async () => controls.permission); controls.requestPermission.mockReset().mockImplementation(async () => controls.permission);
   const original = console.error;
   vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
@@ -112,4 +119,28 @@ it('waits for positive root bounds before mounting the native camera', async()=>
  expect(tree!.root.findAllByType('video')).toHaveLength(0);
  await act(async()=>scene.props.onLayout({nativeEvent:{layout:{width:360,height:800}}}));
  expect(tree!.root.findByType('video').props.style).toMatchObject({width:360,height:800});
+});
+
+it('keeps native preview unmounted until the parent stack finishes appearing', async () => {
+ await mount();
+ const event = { data: { closing: false } };
+ await act(async () => { controls.transitions.get('transitionStart')?.forEach(listener => listener(event)); });
+ expect(tree!.root.findAllByType('video')).toHaveLength(0);
+ controls.focused = false; await act(async () => tree!.update(React.createElement(ArScreen)));
+ controls.focused = true; await act(async () => tree!.update(React.createElement(ArScreen)));
+ expect(tree!.root.findAllByType('video')).toHaveLength(0);
+ await act(async () => { controls.transitions.get('transitionEnd')?.forEach(listener => listener(event)); });
+ expect(tree!.root.findByType('video').props.style).toMatchObject({ width: 360, height: 800 });
+});
+
+it('does not mount a camera for closing transitions or after foreground ownership ends', async () => {
+ await mount();
+ await act(async () => { controls.transitions.get('transitionStart')?.forEach(listener => listener({ data: { closing: false } })); });
+ await act(async () => { controls.transitions.get('transitionEnd')?.forEach(listener => listener({ data: { closing: true } })); });
+ expect(tree!.root.findAllByType('video')).toHaveLength(0);
+ controls.active = false; await act(async () => { controls.listeners.forEach(listener => listener('background')); });
+ await act(async () => { controls.transitions.get('transitionEnd')?.forEach(listener => listener({ data: { closing: false } })); });
+ expect(tree!.root.findAllByType('video')).toHaveLength(0);
+ await act(async () => tree!.unmount()); tree = undefined;
+ expect([...controls.transitions.values()].every(listeners => listeners.size === 0)).toBe(true);
 });

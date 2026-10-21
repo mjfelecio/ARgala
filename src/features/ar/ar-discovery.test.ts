@@ -22,8 +22,9 @@ const controls = vi.hoisted(() => ({ active: true, focused: true, granted: true,
     accuracy: 5 as number | null, positionTimestamp: 0, watcherTimestamp: 0, headingTimestamp: 0,
     headingStatus: 'ready', heading: { degrees: 0, accuracy: 3, reference: 'true' } as { degrees: number; accuracy: number; reference: string } | null, retry: vi.fn() },
   navigate: vi.fn(), push: vi.fn(), getPermission: vi.fn(), params: {} as { placeId?: string },
+  stack: { addListener: () => () => {} },
 }));
-vi.mock('expo-router', () => ({ useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params, router: { navigate: controls.navigate, push: controls.push, setParams: vi.fn(() => { controls.params = {}; }) } }));
+vi.mock('expo-router', () => ({ useNavigation: () => controls.stack, useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params, router: { navigate: controls.navigate, push: controls.push, setParams: vi.fn(() => { controls.params = {}; }) } }));
 vi.mock('expo-camera', async () => {
   const { createElement } = await import('react');
   return { CameraView: (props: Record<string, unknown>) => createElement('video', props),
