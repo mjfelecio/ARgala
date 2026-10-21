@@ -58,7 +58,7 @@ Original, unedited captures from the same Galaxy A53 at 1080×2400, 420 dpi over
 
 ### Device checks completed before ADB access ended
 
-Samsung Galaxy A53 SM-A536E, Android 16 / API 36, existing signed-in development APK with configured providers. USB resets intermittently removed port forwarding; work continued offline at the user's request. A later reconnect briefly exposed the launcher, then disconnected before restoring the app connection, so it added no further app acceptance evidence.
+Samsung Galaxy A53 SM-A536E, Android 16 / API 36, existing signed-in development APK with configured providers. USB resets intermittently removed port forwarding; work continued offline at the user's request. After another reconnect, the final bundle reopened, explicit Search returned 20 places, and AR rendered refreshed results and its compact nearest-place summary. The user confirmed the dark preview was the camera facing a surface. The phone then shut down on low battery; at the user's request, remaining work finished without ADB. This short follow-up did not complete another expanded-sheet/navigation/settings pass.
 
 - Explicit Search returned 20 real Google places. AR reused them, rendered camera/header, collapsed summary, expanded destination/actions/list and Google attribution. Redundant Load Additional Details was absent for the complete response.
 - AR opened the white Details screen with real address/coordinates and credits. Redundant Load Details was absent. Back returned to the AR sheet; this batch did not exhaustively remeasure native CameraX crop transforms.
@@ -67,6 +67,10 @@ Samsung Galaxy A53 SM-A536E, Android 16 / API 36, existing signed-in development
 - Profile showed white sections. A 50 m preset draft was exercised and restored to 500 m without saving. Final reload confirmed 500 m and the outlined numeric field; Save remained disabled/up to date. Session and persisted language/radius were preserved.
 
 Still unverified for this batch: outdoor GPS/compass accuracy, prolonged camera heat/performance, every navigation/permission timing, full TalkBack operation, other devices/viewport sizes and enlarged text/locales on physical hardware. Automated coverage is not substituted for those checks. Numerical entry, Save failures/recovery and language persistence were covered by existing focused tests rather than repeated live device changes. No standalone refinement APK was built or installed.
+
+### Pull request and clean CI
+
+[PR #20](https://github.com/mjfelecio/ARgala/pull/20) targets `main`; it has not been merged. [GitHub Actions run 39557606570](https://github.com/mjfelecio/ARgala/actions/runs/39557606570) passed against code/report commit `e7df32d`: clean `npm ci`, full check, Edge check/lint, Expo install compatibility, Expo Doctor, Android configuration/export and isolated PostgreSQL limiter tests. The subsequent change only records this CI result and the final device-session boundary.
 
 ## Presentation fallback build
 
