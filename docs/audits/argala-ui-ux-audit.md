@@ -59,3 +59,5 @@ Not completed: remediation, final independent review, broad device regression an
 - Japanese settings saved successfully and Japanese AR reproduced the same baseline truncated qualifier. Original English was restored using Save; the current cold-start bundle displays English.
 - The settled 1.6-scale tab bar remained legible with separated labels; R-02 was not reproduced reliably and is not treated as a confirmed defect.
 - **UX-01 implementation awaiting APK:** native default scheme patch replaces the failed app-level Appearance hypothesis; see `docs/validation.md`. The old APK correctly remains dark until rebuilt.
+
+- **UX-04 implemented/device spot-check passed:** shared HeroUI notices/actions replace legacy presentation. [Before](evidence/recovery-before.png) / [after](evidence/recovery-after.png) are cropped 1.6-scale recovery controls; full final permission/recovery sweep remains pending.
