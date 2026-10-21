@@ -83,3 +83,8 @@ All confirmed P1/P2 findings are addressed and the changed flows were exercised 
 - Header-only evidence: [Korean 1.6](evidence/ar-heading-ko.png), [Japanese 1.6](evidence/ar-heading-ja.png), [320 dp / 1.6 English](evidence/ar-heading-narrow.png). Normal 1.1 translated unavailable-heading guidance and enlarged approximate bearings were readable. Language changes persisted only after Save; English restored.
 - Before client acceptance, use a test account/fresh install for Welcome, authentication, keyboard/confirmation/sign-out and repeated permission denial/settings revocation. Supply approved catalog coordinates, entrances, descriptions and media before gallery/nearby/destination routing acceptance. Field-test GPS/heading calibration, walking safety, prolonged camera heat/performance, TalkBack spoken navigation and another Android device. Live failure/empty/no-route cases remain unverified rather than simulated as successes.
 - Delivery consists of the baseline audit plus four focused implementation commits and final evidence. No new product feature, provider permission, persistent provider storage or automatic paid-request trigger was introduced. Optional P3 catalog polish is left for a separate comparison.
+
+
+### Requested visual follow-up
+
+The owner's follow-up supersedes the earlier long AR-header wording: keep only degrees, with a compact dash for unavailable heading and the full translated accessibility label. Home now has a landmark icon on Featured Destinations and a tighter 48 dp Search Nearby surface. These changes were observed on the connected Galaxy A53 after reloading the current bundle; all 601 checks remain green. Earlier header screenshots record the historical audit correction, not the final requested wording.

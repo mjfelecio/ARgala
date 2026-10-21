@@ -293,7 +293,8 @@ it('renders one compact AR heading with honest compass state and accessible Map 
   expect(mapButton!.props.className).toContain('min-h-12'); expect(scanButton!.props.className).toContain('min-h-12');
   await press('navigation.backToMap'); expect(controls.navigate).toHaveBeenCalledWith('/');
   controls.location.heading = { degrees: 20, accuracy: 1, reference: 'magnetic' }; await update();
-  expect(output()).toContain(translations.t('ar.compassUnavailable'));
+  expect(output()).toContain(translations.t('ar.bearingUnavailable'));
+  expect(tree!.root.findAllByType('text').some(node => node.props.accessibilityLabel === translations.t('ar.compassUnavailable'))).toBe(true);
   expect(output()).not.toContain(translations.t('ar.bearing', { degrees: 20 }));
   expect(placesService.nearby).not.toHaveBeenCalled();
 });

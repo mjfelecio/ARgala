@@ -48,13 +48,14 @@ beforeEach(async () => {
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; nativeUi.fontScale = 1; vi.restoreAllMocks(); });
 
-it.each(['en', 'ko', 'ja'])('keeps the complete %s compass guidance readable with enlarged text and explicit Scan', async language => {
+it.each(['en', 'ko', 'ja'])('keeps the %s header compact with degree-only heading and an accessible unavailable state', async language => {
  await translations.changeLanguage(language);
  nativeUi.fontScale = 1.6;
  const scan = vi.fn(); const map = vi.fn();
  await mount(React.createElement(ArChrome, { headingDegrees: null, onMap: map, onScan: scan, scanDisabled: false, scanBusy: false }));
- const guidance = tree!.root.findAllByType('text').find(node => node.props.children === translations.t('ar.compassUnavailable'))!;
- expect(guidance.props.numberOfLines).toBeUndefined();
+ const guidance = tree!.root.findAllByType('text').find(node => node.props.accessibilityLabel === translations.t('ar.compassUnavailable'))!;
+ expect(guidance.props.children).toBe('—');
+ expect(guidance.props.numberOfLines).toBe(1);
  expect(guidance.parent!.props.className).toContain('w-full');
  const action = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('ar.scan'))!;
  expect(action.findAllByType('text').some(node => node.props.children === translations.t('ar.scanShort'))).toBe(true);
@@ -62,6 +63,8 @@ it.each(['en', 'ko', 'ja'])('keeps the complete %s compass guidance readable wit
  await act(async () => action.props.onPress());
  expect(scan).toHaveBeenCalledOnce();
  expect(map).not.toHaveBeenCalled();
+ await act(async () => tree!.update(render(React.createElement(ArChrome, { headingDegrees: 138, onMap: map, onScan: scan, scanDisabled: false, scanBusy: false }))));
+ expect(tree!.root.findAllByType('text').some(node => node.props.children === '138°')).toBe(true);
 });
 it.each(['D01', 'D09', 'unknown'])('anchors direct destination %s Back through catalog then Explore with the installed router', async destinationId => {
  const { getRoutes } = require('expo-router/build/getRoutesCore');
