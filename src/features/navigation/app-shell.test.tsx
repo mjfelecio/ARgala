@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { withHeroUI } from '@/test/native-ui';
+import { nativeUi, withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createRequire } from 'node:module';
@@ -46,7 +46,23 @@ beforeEach(async () => {
  const original = console.error;
  vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
-afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.restoreAllMocks(); });
+afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; nativeUi.fontScale = 1; vi.restoreAllMocks(); });
+
+it.each(['en', 'ko', 'ja'])('keeps the complete %s compass guidance readable with enlarged text and explicit Scan', async language => {
+ await translations.changeLanguage(language);
+ nativeUi.fontScale = 1.6;
+ const scan = vi.fn(); const map = vi.fn();
+ await mount(React.createElement(ArChrome, { headingDegrees: null, onMap: map, onScan: scan, scanDisabled: false, scanBusy: false }));
+ const guidance = tree!.root.findAllByType('text').find(node => node.props.children === translations.t('ar.compassUnavailable'))!;
+ expect(guidance.props.numberOfLines).toBeUndefined();
+ expect(guidance.parent!.props.className).toContain('w-full');
+ const action = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('ar.scan'))!;
+ expect(action.findAllByType('text').some(node => node.props.children === translations.t('ar.scanShort'))).toBe(true);
+ expect(scan).not.toHaveBeenCalled();
+ await act(async () => action.props.onPress());
+ expect(scan).toHaveBeenCalledOnce();
+ expect(map).not.toHaveBeenCalled();
+});
 it.each(['D01', 'D09', 'unknown'])('anchors direct destination %s Back through catalog then Explore with the installed router', async destinationId => {
  const { getRoutes } = require('expo-router/build/getRoutesCore');
  const { getReactNavigationConfig } = require('expo-router/build/getReactNavigationConfig');

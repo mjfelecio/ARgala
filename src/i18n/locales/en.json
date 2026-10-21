@@ -133,6 +133,7 @@
   },
   "ar": {
     "scan": "Scan / Refresh",
+    "scanShort": "Scan",
     "scanning": "Scanning nearby places…",
     "start": "Tap Scan to discover places around your current location.",
     "empty": "No nearby places found. Try Scan again from another location.",

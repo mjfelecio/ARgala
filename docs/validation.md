@@ -985,3 +985,8 @@ The new installed-source contract failed against the original branch, then passe
 ### Shared recovery presentation
 
 Shared bootstrap/location/camera notices and actions now use existing HeroUI/UniWind tokens rather than the old blue native Button/default-font styling. Polite announcements, callbacks, disabled state, translated children and scroll layout remain intact. The real LocationStatus/error mapping tests cover known timeout, unknown sanitized fallback, explicit Retry and recovery. Focused shared/location suites passed 43 tests; the whole remediation check passed 601 tests with typecheck/lint. On the Galaxy A53 at 1.6 text scale, disabled device location displayed the mint guidance and green Retry in the retained map dock. Location services and font scale were restored afterward. Camera denial/recovery is still part of the final device sweep.
+
+
+### AR heading readability
+
+The camera header preserves full title and compass/approximate-bearing guidance, uses a shorter translated visible Scan label, and moves guidance above Map/Scan when text scale/available width needs it. Accessibility retains the existing full Scan / Refresh label and busy/disabled semantics. Camera geometry, heading validation, projection and request handlers are unchanged. Three EN/KO/JA enlarged-guidance regressions failed with the old one-line clamp, then the shell/AR suites passed (67 tests). The Galaxy A53 showed complete English compass-unavailable and approximate-bearing text at 1.1 and 1.6 scale, with accessible Map/Scan controls; Back returned to Explore. The 1.6 tab-label spacing concern did not reproduce on the settled screen. Remaining final sweep includes smaller width and translated headers.

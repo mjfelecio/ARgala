@@ -61,3 +61,5 @@ Not completed: remediation, final independent review, broad device regression an
 - **UX-01 implementation awaiting APK:** native default scheme patch replaces the failed app-level Appearance hypothesis; see `docs/validation.md`. The old APK correctly remains dark until rebuilt.
 
 - **UX-04 implemented/device spot-check passed:** shared HeroUI notices/actions replace legacy presentation. [Before](evidence/recovery-before.png) / [after](evidence/recovery-after.png) are cropped 1.6-scale recovery controls; full final permission/recovery sweep remains pending.
+
+- **UX-03 implemented/device spot-check passed:** full English bearing/compass guidance at normal and enlarged text, with explicit Map/Scan controls. [Before](evidence/ar-heading-before.png), [after](evidence/ar-heading-after.png), [1.6 scale](evidence/ar-heading-large.png) are header crops with camera content omitted.
