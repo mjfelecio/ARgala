@@ -41,7 +41,7 @@ export default function DestinationScreen() {
     </View>
     <ScrollView contentContainerClassName="gap-5 px-4 pb-8">
       {destination ? <>
-        <DaytimeGallery key={destination.id} media={destination.media ?? []}><Card className="gap-3 p-5 shadow-none">
+        <DaytimeGallery key={`gallery:${destination.id}`} media={destination.media ?? []}><Card className="gap-3 p-5 shadow-none">
           {!destination.verifiedName && <Text className="font-sans text-xs text-muted">{t('destinations.provisional')}</Text>}
           <Text selectable accessibilityRole="header" className="font-sans text-hero font-bold text-foreground">{destinationName(destination)}</Text>
         </Card></DaytimeGallery>
@@ -57,7 +57,7 @@ export default function DestinationScreen() {
         </Card>}
         <Button isDisabled={!routePlace || !active || !focused} accessibilityLabel={t('placeDetails.directions')} onPress={directions}><Button.Label>{t('placeDetails.directions')}</Button.Label></Button>
         {!routePlace && <Text className="font-sans text-sm text-muted">{t('destinations.entranceMissing')}</Text>}
-        <NearbyEstablishments key={destination.id} destination={destination} />
+        <NearbyEstablishments key={`nearby:${destination.id}`} destination={destination} />
       </> : <Text className="font-sans text-base text-muted">{t('destinations.unavailable')}</Text>}
     </ScrollView>
   </StyledSafeAreaView>;
