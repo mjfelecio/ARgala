@@ -158,7 +158,9 @@
     "expand": "Show more",
     "collapse": "Show less",
     "scanRetry": "Search failed. Use Scan to try again.",
-    "cameraFallback": "Camera unavailable. You can still browse nearby places."
+    "cameraFallback": "Camera unavailable. You can still browse nearby places.",
+    "tracking": "Tracking & accuracy",
+    "otherNearby": "Nearby list"
   },
   "showcase": {
     "title": "Clean Explorer components",
@@ -199,7 +201,8 @@
     "view": "View Details",
     "directions": "Get Directions",
     "map": "View on Map",
-    "ar": "Open AR"
+    "ar": "Open AR",
+    "loaded": "Place details loaded."
   },
   "directions": {
     "title": "Walking Directions",
@@ -215,7 +218,11 @@
     "snapshot": "Preview from the route starting point. Your movement does not update this route.",
     "waiting": "Waiting for a current location to plan your walk…",
     "stale": "A fresh, accurate location is needed. Retry location to continue.",
-    "retry": "Try walking route again"
+    "retry": "Try walking route again",
+    "journey": "Journey",
+    "information": "Route information",
+    "estimated": "Estimated walking route",
+    "originDescription": "Your location when this route was requested."
   },
   "destinations": {
     "title": "Featured Destinations",

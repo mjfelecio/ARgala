@@ -41,7 +41,7 @@ export function NearbyEstablishments({ destination }: { destination: Destination
   function select(place: Place) {
     if (!active || !focused || navigating.current) return;
     navigating.current = true;
-    setPlaceSelection(client, place);
+    setPlaceSelection(client, place, language);
     router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
   }
   return <View className="gap-3">

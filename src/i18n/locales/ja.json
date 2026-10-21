@@ -118,7 +118,9 @@
     "expand": "もっと見る",
     "collapse": "折りたたむ",
     "scanRetry": "検索に失敗しました。スキャンで再試行してください。",
-    "cameraFallback": "カメラを利用できません。近くの場所の一覧は利用できます。"
+    "cameraFallback": "カメラを利用できません。近くの場所の一覧は利用できます。",
+    "tracking": "位置追跡と精度",
+    "otherNearby": "近くの場所の一覧"
   },
   "showcase": {
     "title": "Clean Explorer コンポーネント",
@@ -159,7 +161,8 @@
     "view": "詳細を見る",
     "directions": "ルートを検索",
     "map": "地図で見る",
-    "ar": "ARを開く"
+    "ar": "ARを開く",
+    "loaded": "場所の詳細を読み込みました。"
   },
   "directions": {
     "title": "徒歩ルート",
@@ -175,7 +178,11 @@
     "snapshot": "出発地点からのルートのプレビューです。移動してもルートは更新されません。",
     "waiting": "徒歩ルートのために現在地を確認中…",
     "stale": "新しい正確な位置情報が必要です。位置情報を再取得してください。",
-    "retry": "徒歩ルートを再試行"
+    "retry": "徒歩ルートを再試行",
+    "journey": "行程",
+    "information": "ルート情報",
+    "estimated": "推定の徒歩ルート",
+    "originDescription": "このルートをリクエストした時点の現在地です。"
   },
   "destinations": {
     "title": "おすすめの目的地",

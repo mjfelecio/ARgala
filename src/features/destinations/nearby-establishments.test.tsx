@@ -56,6 +56,18 @@ it('retains provider ID, selection and real credit on opening the existing detai
  expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/place/[providerId]', params: { providerId: place(499).providerId } });
  expect(client.getQueryData(placeSelectionOptions(place(499).providerId).queryKey)).toEqual(place(499)); expect(placesService.details).not.toHaveBeenCalled();
 });
+it('hands complete Google establishment fields to Details with their known language', async () => {
+ const complete = { ...place(499), source: 'discovery' as const };
+ vi.mocked(placesService.nearby).mockResolvedValue([complete]);
+ await mount(); await search();
+ const row = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === complete.name)!;
+ await act(async () => row.props.onPress());
+ await act(async () => tree!.unmount());
+ await new Promise(resolve => setTimeout(resolve, 10));
+ expect(client.getQueryData(['place-details', complete.providerId, 'en'])).toEqual(complete);
+ expect(client.getQueryData(['place-details', complete.providerId, 'ja'])).toBeUndefined();
+ expect(placesService.details).not.toHaveBeenCalled();
+});
 it('deduplicates rapid searches and shows real loading and empty states', async () => {
  const pending = Promise.withResolvers<Place[]>(); vi.mocked(placesService.nearby).mockReturnValue(pending.promise); await mount();
  await act(async () => { button()!.props.onPress(); button()!.props.onPress(); }); expect(placesService.nearby).toHaveBeenCalledOnce(); expect(button()!.props.disabled).toBe(true);

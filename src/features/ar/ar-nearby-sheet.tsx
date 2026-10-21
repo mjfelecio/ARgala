@@ -4,7 +4,9 @@ import BottomSheet, { BottomSheetHandle, BottomSheetScrollView } from '@gorhom/b
 import { useSharedValue, type SharedValue } from 'react-native-reanimated';
 import { useResolveClassNames, withUniwind } from 'uniwind';
 import { Button } from 'heroui-native/button';
-import { Card } from 'heroui-native/card';
+import { Spinner } from 'heroui-native/spinner';
+import { useThemeColor } from 'heroui-native/hooks';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 import { DISCOVERY } from '@/config/limits';
 import type { Place } from '@/features/places/service';
@@ -15,16 +17,18 @@ function ArSheetHandle(props: ComponentProps<typeof BottomSheetHandle>) {
 }
 export type ArNearbySheetProps = {
   rows: { place: Place; distance: number | undefined }[]; selected: Place | null; distance: number | undefined;
-  state: 'unscanned' | 'scanning' | 'empty' | 'failed' | 'results'; status: ReactNode;
+  state: 'unscanned' | 'scanning' | 'empty' | 'failed' | 'results'; status: ReactNode; guidance?: ReactNode;
   running: boolean; height: number; fontScale: number; selectionRevision: number;
   detailsLoaded: boolean; detailsBusy: boolean; position: SharedValue<number>;
   onSelect(id: string): void; onMore(): void; onDetails(): void; onDirections(): void; onMap(): void;
   onOccupation(height: number): void;
 };
 /** Camera dock: it owns presentation/gestures, never selection authority or provider calls. */
-export function ArNearbySheet({ rows, selected, distance, state, status, running, height, fontScale, selectionRevision,
+export function ArNearbySheet({ rows, selected, distance, state, status, guidance, running, height, fontScale, selectionRevision,
   detailsLoaded, detailsBusy, position, onSelect, onMore, onDetails, onDirections, onMap, onOccupation }: ArNearbySheetProps) {
   const { t } = useTranslation();
+  const accent = useThemeColor('accent');
+  const [showGuidance, setShowGuidance] = useState(false);
   const [expansionOverride, setExpansionOverride] = useState<{ revision: number; expanded: boolean } | null>(null);
   const expanded = expansionOverride?.revision === selectionRevision ? expansionOverride.expanded : selectionRevision > 0;
   const cap = Math.max(1, height);
@@ -48,6 +52,8 @@ export function ArNearbySheet({ rows, selected, distance, state, status, running
     position.set(cap - occupied); onOccupation(occupied);
   }, [cap, peek, full, occupied, position, onOccupation]);
   const distanceText = (value: number | undefined) => value === undefined ? t('ar.distanceUnknown') : t('ar.distance', { meters: Math.round(value) });
+  const compactPlace = selected ?? rows[0]?.place;
+  const compactDistance = selected ? distance : rows[0]?.distance;
   // SDK 5.2.14 writes its reactive initial index during render when
   // animateOnMount is false and this controlled index changes. Keep the mount
   // seed at -1; its native layout/effect path still applies the requested index.
@@ -61,47 +67,53 @@ export function ArNearbySheet({ rows, selected, distance, state, status, running
     }}>
     <SheetScrollView className="flex-1" contentContainerClassName="gap-3 px-4 pb-6">
       <View className="flex-row flex-wrap items-center justify-between gap-2">
-        <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-brand-strong">{t('ar.nearbyCount', { count: rows.length })}</Text>
-        <Button variant="secondary" size="sm" className="min-h-12" accessibilityLabel={t(expanded ? 'ar.collapse' : 'ar.expand')}
+        <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-foreground">{t('ar.nearby')}</Text>
+        <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t(expanded ? 'ar.collapse' : 'ar.expand')}
           accessibilityState={{ expanded }} onPress={() => {
             setExpansionOverride({ revision: selectionRevision, expanded: !expanded });
-          }}><Button.Label>{t(expanded ? 'ar.collapse' : 'ar.expand')}</Button.Label></Button>
+          }}><Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={accent} /></Button>
       </View>
       {state === 'unscanned' && <Text className="font-sans text-sm text-muted">{t('ar.start')}</Text>}
       {state === 'scanning' && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('ar.scanning')}</Text>}
       {state === 'empty' && <Text className="font-sans text-sm text-muted">{t('ar.empty')}</Text>}
       {state === 'failed' && <Text className="font-sans text-sm text-danger">{t('ar.scanRetry')}</Text>}
-      {selected && !expanded && <View className="min-h-12 flex-row items-center justify-between gap-3 rounded-card border border-outline bg-surface px-3 py-2">
-        <Text testID="ar-selected-name" accessibilityRole="header" numberOfLines={1} className="min-w-0 flex-1 font-sans text-sm font-semibold text-foreground">{selected.name}</Text>
-        <Text className="font-sans text-sm font-semibold text-muted">{distanceText(distance)}</Text>
+      {compactPlace && !expanded && <View className="min-h-12 flex-row items-center justify-between gap-3 pb-2">
+        <Text testID="ar-selected-name" accessibilityRole="header" numberOfLines={1} className="min-w-0 flex-1 font-sans text-sm font-semibold text-foreground">{compactPlace.name}</Text>
+        <Text className="font-sans text-sm font-semibold text-muted">{distanceText(compactDistance)}</Text>
       </View>}
-      {selected && expanded && <Card variant="transparent" className="gap-3 p-0 shadow-none">
-        <Card.Header className="gap-2">
-          <Text testID="ar-selected-name" accessibilityRole="header" numberOfLines={expanded ? undefined : 1} className="font-sans text-section font-bold text-foreground">{selected.name}</Text>
-          <Text className="font-sans text-sm text-muted">{distanceText(distance)}</Text>
-        </Card.Header>
-        <Card.Body className="gap-2">
+      {selected && expanded && <View className="gap-4 pb-2">
+        <View className="gap-2">
+          <Text testID="ar-selected-name" accessibilityRole="header" className="font-sans text-section font-bold text-foreground">{selected.name}</Text>
+          <Text className="font-sans text-base font-semibold text-brand-strong">{distanceText(distance)}</Text>
           {selected.address && <Text className="font-sans text-sm text-muted">{selected.address}</Text>}
           {selected.description && <Text className="font-sans text-sm text-foreground">{selected.description}</Text>}
-        </Card.Body>
-        <Card.Footer className="flex-col gap-2">
+        </View>
+        <View className="gap-1">
+          <Button accessibilityLabel={t('ar.directions')} isDisabled={!running} onPress={onDirections}><Button.Label>{t('ar.directions')}</Button.Label></Button>
           <View className="w-full flex-row flex-wrap gap-2">
-            <Button variant="secondary" className="min-w-32 grow shrink" accessibilityLabel={t('placeDetails.view')} isDisabled={!running} onPress={onDetails}><Button.Label>{t('placeDetails.view')}</Button.Label></Button>
-            <Button className="min-w-32 grow shrink" accessibilityLabel={t('ar.directions')} isDisabled={!running} onPress={onDirections}><Button.Label>{t('ar.directions')}</Button.Label></Button>
+            <Button variant="ghost" className="min-w-32 grow shrink" accessibilityLabel={t('placeDetails.view')} isDisabled={!running} onPress={onDetails}><Button.Label>{t('placeDetails.view')}</Button.Label></Button>
+            <Button variant="ghost" className="min-w-32 grow shrink" accessibilityLabel={t('placeDetails.map')} isDisabled={!running} onPress={onMap}><Button.Label>{t('placeDetails.map')}</Button.Label></Button>
           </View>
-          <Button variant="secondary" className="w-full" accessibilityLabel={t('placeDetails.map')} isDisabled={!running} onPress={onMap}><Button.Label>{t('placeDetails.map')}</Button.Label></Button>
           {!detailsLoaded && <Button variant="outline" className="w-full" accessibilityLabel={t('ar.more')} isDisabled={!running || detailsBusy}
-            accessibilityState={{ busy: detailsBusy }} onPress={onMore}><Button.Label>{t('ar.more')}</Button.Label></Button>}
-        </Card.Footer>
-      </Card>}
+            accessibilityState={{ busy: detailsBusy }} onPress={onMore}>{detailsBusy && <Spinner size="sm" />}<Button.Label>{t(detailsBusy ? 'placeDetails.loading' : 'ar.more')}</Button.Label></Button>}
+        </View>
+      </View>}
       {status}
-      <Text className="font-sans text-xs text-muted">{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>
+      {expanded && <View className="gap-1 border-t border-outline pt-3">
+        <Button variant="ghost" className="justify-start px-0" accessibilityLabel={t('ar.tracking')} accessibilityState={{ expanded: showGuidance }} onPress={() => setShowGuidance(value => !value)}>
+          <Ionicons name="information-circle-outline" size={20} color={accent} /><Button.Label className="grow">{t('ar.tracking')}</Button.Label>
+          <Ionicons name={showGuidance ? 'chevron-up-outline' : 'chevron-down-outline'} size={18} color={accent} />
+        </Button>
+        {showGuidance && <View className="gap-2 pb-3">{guidance}<Text className="font-sans text-xs text-muted">{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text></View>}
+      </View>}
+      {rows.length > 0 && <Text accessibilityRole="header" className="border-t border-outline pt-4 font-sans text-sm font-semibold text-foreground">{t('ar.otherNearby')}</Text>}
       {rows.map(({ place, distance }) => <Pressable key={place.providerId} testID={`ar-list-${place.providerId}`} accessibilityRole="button"
         accessibilityLabel={`${place.name}, ${distanceText(distance)}`} accessibilityState={{ selected: selected?.providerId === place.providerId }}
         disabled={!running} onPress={() => onSelect(place.providerId)}
-        className={selected?.providerId === place.providerId ? 'min-h-12 gap-1 rounded-card border border-brand-primary bg-mint p-3' : 'min-h-12 gap-1 rounded-card border border-outline bg-surface p-3'}>
-        <Text className="font-sans text-sm font-semibold text-foreground">{place.name}</Text>
-        <Text className="font-sans text-xs text-muted">{distanceText(distance)}</Text>
+        className="min-h-12 flex-row items-center gap-3 border-b border-outline py-3">
+        <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-sm font-semibold text-foreground">{place.name}</Text>
+        <Text className="font-sans text-xs text-muted">{distanceText(distance)}</Text></View>
+        <Ionicons name={selected?.providerId === place.providerId ? 'checkmark-circle' : 'chevron-forward-outline'} size={20} color={accent} />
       </Pressable>)}
     </SheetScrollView>
   </BottomSheet>;

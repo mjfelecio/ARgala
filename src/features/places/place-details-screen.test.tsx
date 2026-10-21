@@ -39,6 +39,18 @@ it('reads the cached selection and never requests details on entry', async () =>
   client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
   expect(output()).toContain(place.name); expect(placesService.details).not.toHaveBeenCalled();
 });
+it('reuses the complete configured Nearby response and hides a redundant paid Load Details action', async () => {
+  const complete: Place = { ...place, source: 'discovery' };
+  client.setQueryData(['places', { latitude: 10, longitude: 124 }, 'en'], [complete]);
+  client.setQueryData(placeSelectionOptions('north').queryKey, complete);
+  await mount();
+  expect(output()).toContain(place.name); expect(button('placeDetails.load')).toBeUndefined();
+  expect(placesService.details).not.toHaveBeenCalled();
+  // Optional address/URI omission in a completed response is not missing data.
+  expect(output()).not.toContain(translations.t('placeDetails.address'));
+  controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); tree!.update(render()); });
+  expect(button('placeDetails.load')).toBeDefined(); expect(placesService.details).not.toHaveBeenCalled();
+});
 it.each([undefined, '', '../bad', ['north', 'south'], 'x'.repeat(4097)])('handles invalid or missing provider ID %j without a request', async id => {
   controls.params = { providerId: id }; await mount();
   expect(output()).toContain(translations.t('placeDetails.unavailable')); expect(button('placeDetails.load')).toBeUndefined(); expect(placesService.details).not.toHaveBeenCalled();
@@ -82,6 +94,15 @@ it('keeps summary visible while details are loading, blocks repeated presses, an
   expect(output()).toContain(place.name); expect(output()).toContain(translations.t('placeDetails.loading')); expect(button('placeDetails.load')!.props.disabled).toBe(true);
   await act(async () => { button('placeDetails.load')!.props.onPress(); }); expect(placesService.details).toHaveBeenCalledTimes(1);
   await act(async () => { pending.resolve(place); }); expect(button('placeDetails.load')).toBeUndefined();
+});
+it.each(['en', 'ko', 'ja'] as const)('reports successful explicit recovery in %s even when optional fields are absent', async language => {
+  controls.language = language; await translations.changeLanguage(language);
+  client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
+  await press('placeDetails.load');
+  expect(output()).toContain(translations.t('placeDetails.loaded'));
+  expect(translations.t('placeDetails.loaded')).not.toBe('placeDetails.loaded');
+  expect(button('placeDetails.load')).toBeUndefined();
+  expect(placesService.details).toHaveBeenCalledExactlyOnceWith('north', language);
 });
 it.each(['en', 'ko', 'ja'])('presents an approved image only when explicitly supplied to the %s presentation', async language => {
   await translations.changeLanguage(language);

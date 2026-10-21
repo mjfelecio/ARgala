@@ -30,7 +30,7 @@ vi.mock('react-native-maps', async () => {
     useImperativeHandle(ref, () => ({ fitToCoordinates: controls.fit, animateToRegion: controls.animate }));
     return createElement('map', props);
   });
-  return { default: MapView, Circle: 'circle', Marker: 'marker', Polyline: 'polyline', PROVIDER_GOOGLE: 'google' };
+  return { default: MapView, Circle: 'circle', Marker: 'marker', Callout: 'callout', Polyline: 'polyline', PROVIDER_GOOGLE: 'google' };
 });
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ activationRadiusMeters: 100, language: controls.language }) }));
 vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ position: controls.hasLocation ? controls.position : null, accuracy: controls.accuracy, status: controls.locationStatus, retry: vi.fn() }) }));
@@ -169,6 +169,22 @@ it.each(['focused', 'active'] as const)('does not repeat paid queries after %s c
   await press('map.search');
   expect(placesService.nearby).toHaveBeenCalledTimes(2);
   expect(placesService.nearby).toHaveBeenLastCalledWith({ center: { latitude: 38.51, longitude: -120.21 }, radiusMeters: 1000, language: 'en' });
+});
+
+it('uses supported custom marker callouts and reuses complete Nearby data without a paid details request', async () => {
+  vi.mocked(placesService.nearby).mockResolvedValue([{ ...destination, source: 'discovery' }]);
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
+  await press('map.search');
+  const marker = tree!.root.findByType('marker');
+  expect(marker.props.title).toBe(destination.name);
+  expect(marker.findByType('callout' as React.ElementType).props.tooltip).toBe(true);
+  await act(async () => marker.props.onPress());
+  expect(placesService.details).not.toHaveBeenCalled();
+  expect(JSON.stringify(tree!.toJSON())).toContain(destination.name);
+  await press('map.expand'); await press('map.collapse');
+  expect(tree!.root.findByType('map')).toBeDefined();
+  expect(placesService.details).not.toHaveBeenCalled();
 });
 it('requests nearby results only on Search, including repeated searches at the same coordinates', async () => {
   await act(async () => { tree = create(renderMap()); });
