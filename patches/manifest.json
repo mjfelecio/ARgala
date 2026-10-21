@@ -1,4 +1,5 @@
 [
   "expo-camera+57.0.6.json",
-  "react-native-maps+1.27.2.json"
+  "react-native-maps+1.27.2.json",
+  "expo-router+57.0.28.json"
 ]

@@ -1,0 +1,23 @@
+{
+  "package": "expo-router",
+  "version": "57.0.28",
+  "files": [
+    {
+      "path": "build/fork/useLinking.native.js",
+      "changes": [
+        {
+          "before": "    const getInitialURLRef = (0, react_1.useRef)(getInitialURL);\n    const getStateFromPathRef = (0, react_1.useRef)(getStateFromPath);\n",
+          "after": "    const getInitialURLRef = (0, react_1.useRef)(getInitialURL);\n    // ARgala: render may be suspended or abandoned before this hook commits.\n    const initialLinkingRef = (0, react_1.useRef)();\n    const getStateFromPathRef = (0, react_1.useRef)(getStateFromPath);\n"
+        },
+        {
+          "before": "            if (url != null) {\n                if (typeof url !== 'string') {\n                    return url.then((url) => {\n                        const state = getStateFromURL(url);\n                        if (typeof url === 'string') {\n                            // If the link were handled, it gets cleared in NavigationContainer\n                            onUnhandledLinking((0, extractPathFromURL_1.extractExpoPathFromURL)(prefixes, url));\n                        }\n                        return state;\n                    });\n                }\n                else {\n                    onUnhandledLinking((0, extractPathFromURL_1.extractExpoPathFromURL)(prefixes, url));\n                }\n            }",
+          "after": "            if (url != null) {\n                initialLinkingRef.current = { url, handled: false };\n                if (typeof url !== 'string') {\n                    return url.then(getStateFromURL);\n                }\n            }"
+        },
+        {
+          "before": "    }, [getStateFromURL, onUnhandledLinking, prefixes]);\n    (0, react_1.useEffect)(() => {\n        const listener = (url) => {",
+          "after": "    }, [getStateFromURL, onUnhandledLinking, prefixes]);\n    (0, react_1.useEffect)(() => {\n        const initialLinking = initialLinkingRef.current;\n        if (!initialLinking || initialLinking.handled) {\n            return;\n        }\n        let cancelled = false;\n        const notify = (url) => {\n            if (!cancelled && !initialLinking.handled && typeof url === 'string') {\n                initialLinking.handled = true;\n                // If the link were handled, it gets cleared in NavigationContainer.\n                onUnhandledLinking((0, extractPathFromURL_1.extractExpoPathFromURL)(prefixes, url));\n            }\n        };\n        // Subscribe only after commit, and retire async callbacks on cleanup.\n        // Keep synchronous initial-state resolution in getInitialState unchanged.\n        if (typeof initialLinking.url === 'string') {\n            notify(initialLinking.url);\n        }\n        else {\n            initialLinking.url.then(notify, () => {});\n        }\n        return () => { cancelled = true; };\n    }, [onUnhandledLinking, prefixes]);\n    (0, react_1.useEffect)(() => {\n        const listener = (url) => {"
+        }
+      ]
+    }
+  ]
+}
