@@ -14,11 +14,11 @@ export function ArChrome({ headingDegrees, onMap, onScan, scanDisabled, scanBusy
   const { t } = useTranslation();
   const onAccent = useThemeColor('accent-foreground');
   const { width, fontScale } = useWindowDimensions();
-  // Give scaled guidance its own row before the two actions crowd it out.
+  // Keep the title and degree value clear when enlarged text needs its own row.
   const stacked = width / Math.max(1, fontScale) < 300;
   const guidance = <View className={stacked ? 'w-full items-center px-3 py-1' : 'min-w-0 flex-1 items-center px-1'}>
     <Text accessibilityRole="header" className="text-center font-sans text-sm font-bold text-white">{t('ar.title')}</Text>
-    <Text className="text-center font-sans text-xs font-semibold text-white">{headingDegrees === null ? t('ar.compassUnavailable') : t('ar.bearing', { degrees: Math.round(headingDegrees) % 360 })}</Text>
+    <Text numberOfLines={1} accessibilityLabel={headingDegrees === null ? t('ar.compassUnavailable') : undefined} className="text-center font-sans text-xs font-semibold text-white">{headingDegrees === null ? t('ar.bearingUnavailable') : t('ar.bearing', { degrees: Math.round(headingDegrees) % 360 })}</Text>
   </View>;
   return <View className="min-h-14 flex-row flex-wrap items-center justify-between gap-2 rounded-pill border border-white/20 bg-ink/95 px-2 py-1">
     {stacked && guidance}
