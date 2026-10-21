@@ -5,8 +5,8 @@ import { useCSSVariable } from 'uniwind';
 /**
  * Google style values resolve from the same CSS tokens as the application UI.
  * Keep MapView.userInterfaceStyle unset on Android: explicit overrides hit the
- * crashing Fabric initial-props enum path. Native GoogleMapOptions defaults to
- * light; this custom style supplies the Clean Explorer appearance.
+ * crashing Fabric initial-props enum path. The version-checked Android patch
+ * keeps the default map light; these CSS values supply its styling.
  */
 export function useExplorerMapStyle(): MapStyleElement[] {
   const [land, park, water, road, major, outline, text, muted] = useCSSVariable([

@@ -14,6 +14,15 @@
           "after": "        if (setPaddingDeferred && map != null && super.getHeight() > 0 && super.getWidth() > 0) {\n            // Match the ready setter: applying deferred credits padding must\n            // not move the camera or reuse a previous fit's temporary padding.\n            map.setPadding(baseLeftMapPadding, baseTopMapPadding, baseRightMapPadding, baseBottomMapPadding);\n            setPaddingDeferred = false;\n        }\n\n"
         }
       ]
+    },
+    {
+      "path": "android/src/main/java/com/rnmaps/fabric/MapViewManager.java",
+      "changes": [
+        {
+          "before": "                if (\"system\".equals(style)) {\n                    options.mapColorScheme(MapColorScheme.FOLLOW_SYSTEM);",
+          "after": "                if (\"system\".equals(style)) {\n                    // ARgala ships a light-only theme. Set the native default here:\n                    // an explicit JS light enum crashes this Fabric initial-props path.\n                    options.mapColorScheme(MapColorScheme.LIGHT);"
+        }
+      ]
     }
   ]
 }

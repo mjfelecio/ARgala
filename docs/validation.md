@@ -973,3 +973,10 @@ Verification: `npm run check` passed TypeScript, zero-warning ESLint and **584 t
 ### Rounded map-dock corner coverage — 2026-10-21
 
 Home and Directions share a 24 dp (about 1.5 rem) extension beneath the collapsed dock, replacing the initial 5 dp experiment after device feedback. Native attribution padding and explicit route-fit geometry reserve the same overlap; expansion still cannot resize the map or automatically refit a route. On the Galaxy A53, Home's native map measured 1080×1806 in both collapsed and expanded states. Screenshots showed the rounded corners backed by map content, visible Google credits following the dock and stationary map landmarks. The corresponding frame/padding regressions failed against 5 dp (13 failures), then all 91 map/route tests passed at 24 dp. The whole check again passed TypeScript, lint and 584 tests. Directions uses the same tested geometry; a live Directions corner/route-fit pass remains part of device UAT.
+
+
+## Application-wide UI audit — native light map (2026-10-21)
+
+The Galaxy A53 audit reproduced a dark Google renderer behind dark status icons on both Explore and Directions with Android in dark mode. A temporary React Native app-level Appearance override did not change Google Maps; that experiment and its bootstrap test were removed. Maps 1.27.2 explicitly selects `FOLLOW_SYSTEM` for the default system style. Its existing version-checked dependency patch now selects `MapColorScheme.LIGHT` for that default, matching the approved light-only application. JavaScript keeps `userInterfaceStyle` unset because the explicit light enum previously crashed Fabric initial-prop conversion.
+
+The new installed-source contract failed against the original branch, then passed after applying the patch. Native patch/install/destination regressions passed (35 tests); Expo install compatibility, Doctor (21/21), Android config and Android export passed. Whole-app validation on the current remediation tree passed TypeScript, zero-warning lint and 601 tests in 57 files. These source/export checks do not prove the new native map color. A rebuilt APK and dark-OS Explore/Directions/AR regression remain pending.
