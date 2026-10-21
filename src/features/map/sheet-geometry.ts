@@ -1,4 +1,6 @@
 /** Shared by each scene and its dock so the map baseline cannot drift from the peek. */
+export const MAP_SHEET_OVERLAP = 5;
+
 export function homeSheetGeometry(height: number, maxHeight: number | undefined, hasSelection: boolean, fontScale: number) {
   const cap = Math.max(1, Math.min(height, maxHeight ?? height * 0.6));
   return { cap, peek: Math.min(cap, (hasSelection ? 264 : 156) * Math.max(1, fontScale)) };

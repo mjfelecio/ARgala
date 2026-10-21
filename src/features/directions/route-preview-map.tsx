@@ -10,6 +10,7 @@ import { useCSSVariable, useResolveClassNames, withUniwind } from 'uniwind';
 import { useExplorerMapStyle } from '@/features/map/map-style';
 import type { Coordinate } from '@/features/location/geo';
 import type { Place } from '@/features/places/service';
+import { MAP_SHEET_OVERLAP } from '@/features/map/sheet-geometry';
 
 const StyledMapView = withUniwind(MapView);
 export function RoutePreviewMap({ place, origin, destination, coordinates, currentPosition, dockHeight, settledDockHeight, headerHeight, position, enabled, sceneHeight, collapsedHeight }: {
@@ -24,11 +25,11 @@ export function RoutePreviewMap({ place, origin, destination, coordinates, curre
   const gutter = useResolveClassNames('p-4').padding as number;
   const routeColor = useCSSVariable('--color-route') as string;
   const destinationColor = useCSSVariable('--color-brand-primary') as string;
-  const frameHeight = Math.max(1, sceneHeight - collapsedHeight);
+  const frameHeight = Math.max(1, Math.min(sceneHeight, sceneHeight - collapsedHeight + MAP_SHEET_OVERLAP));
   const top = Math.min(headerHeight + gutter, Math.max(0, frameHeight - gutter));
   const bottomLimit = Math.max(0, frameHeight - top - gutter);
-  const bottom = Math.max(0, Math.min(dockHeight - collapsedHeight, bottomLimit));
-  const settledBottom = Math.max(0, Math.min(settledDockHeight - collapsedHeight, bottomLimit));
+  const bottom = Math.max(0, Math.min(dockHeight - collapsedHeight + MAP_SHEET_OVERLAP, bottomLimit));
+  const settledBottom = Math.max(0, Math.min(settledDockHeight - collapsedHeight + MAP_SHEET_OVERLAP, bottomLimit));
   const drawableHeight = frameHeight - settledBottom - top;
   const drawableWidth = size.width - gutter * 2;
   const canFit = ready && enabled && headerHeight > 0 && sceneHeight > 0 &&

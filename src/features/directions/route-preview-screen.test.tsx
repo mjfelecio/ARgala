@@ -79,7 +79,7 @@ it('renders the exact existing route, captured origin, destination and real warn
 it('withholds native padding and fitting until this map instance is ready and measures its dock', async () => {
   handoff(); await mount(); await layout(); expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding'); expect(controls.fit).not.toHaveBeenCalled();
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
-  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(0); expect(controls.fit).toHaveBeenCalledWith(coordinates, expect.any(Object));
+  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(5); expect(controls.fit).toHaveBeenCalledWith(coordinates, expect.any(Object));
   controls.fit.mockClear(); controls.location.position = { latitude: 10, longitude: 124 }; await update(); expect(controls.fit).not.toHaveBeenCalled();
   await press('directions.fit'); expect(controls.fit).toHaveBeenCalledOnce(); await press('directions.recenter'); expect(controls.animate).toHaveBeenCalledWith(expect.objectContaining(controls.location.position), expect.any(Number));
 });
@@ -182,7 +182,7 @@ it.each(['en', 'ko', 'ja'] as const)('renders actual %s resources, long names, n
     tree!.root.findByType('map').props.onMapReady();
   });
   await nativeLayout(640);
-  expect(tree!.root.findByType('dialog').props.snapPoints.every((height:number)=>height<=88)).toBe(true); expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(0);
+  expect(tree!.root.findByType('dialog').props.snapPoints.every((height:number)=>height<=88)).toBe(true); expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(5);
   expect(tree!.root.findAllByType('section' as React.ElementType)).toHaveLength(1); expect(controls.fit).toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
 });
 it('has a working Back fallback and real attribution link with sanitized link failures', async () => {
@@ -206,7 +206,7 @@ it('moves credit padding without refitting on drag or settlement and handles rea
   const fits=controls.fit.mock.calls.length;
   const dock=tree!.root.findByType('dialog');
   await act(async()=>{dock.props.animatedPosition.set(400);nativeUi.reactions.forEach(tick=>tick());});
-  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(128);
+  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(133);
   expect(controls.fit).toHaveBeenCalledTimes(fits);
   await act(async()=>dock.props.onChange(1,720-dock.props.snapPoints[1]));
   expect(controls.fit).toHaveBeenCalledTimes(fits);
@@ -314,10 +314,10 @@ it('leaves framing unchanged throughout an accessible toggle and native settleme
  await expand();
  expect(dock.props.index).toBe(1);
  expect(dock.props.animatedPosition.get()).toBe(start);
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(0);
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(5);
  expect(controls.fit).toHaveBeenCalledTimes(fits);
  await act(async()=>{dock.props.animatedPosition.set(400);nativeUi.reactions.forEach(tick=>tick());});
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(128);
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(133);
  expect(controls.fit).toHaveBeenCalledTimes(fits);
  await act(async()=>dock.props.onChange(1,720-dock.props.snapPoints[1]));
  expect(controls.fit).toHaveBeenCalledTimes(fits);
@@ -328,7 +328,7 @@ it('keeps its collapsed map height and zoom framing through both sheet detents',
  const scene=tree!.root.findByProps({testID:'route-preview-scene'});
  await act(async()=>scene.props.onLayout({nativeEvent:{layout:{width:360,height:720}}}));
  const map=tree!.root.findByType('map');const sheet=tree!.root.findByType('dialog');
- const height=720-sheet.props.snapPoints[0];expect(map.props.style.height).toBe(height);
+ const height=Math.min(720,720-sheet.props.snapPoints[0]+5);expect(map.props.style.height).toBe(height);
  const fits=controls.fit.mock.calls.length;
  expect(sheet.props.containerLayoutState.get().height).toBe(720);
  await nativeLayout(360);expect(sheet.props.containerLayoutState.get().height).toBe(720);

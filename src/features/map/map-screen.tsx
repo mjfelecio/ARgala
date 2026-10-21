@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import { useSharedValue } from 'react-native-reanimated';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
-import { homeSheetGeometry } from './sheet-geometry';
+import { homeSheetGeometry, MAP_SHEET_OVERLAP } from './sheet-geometry';
 import { useExplorerMapStyle } from './map-style';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -99,13 +99,13 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const details = useQuery({ ...detailsOptions(selectedId), enabled: false });
   const maxSheetHeight = sceneSize.height > 0 ? Math.max(0, sceneSize.height - headerHeight - Math.min(fitMargin * 2, sceneSize.height)) : undefined;
   const sheetGeometry = homeSheetGeometry(sceneSize.height || window.height, maxSheetHeight, !!selectedId, window.fontScale ?? 1);
-  const frameHeight = Math.max(1, sceneSize.height - sheetGeometry.peek);
+  const frameHeight = Math.max(1, Math.min(sceneSize.height, sceneSize.height - sheetGeometry.peek + MAP_SHEET_OVERLAP));
   // Android adds fit edgePadding to mapPadding. Reserve measured chrome once,
   // keeping Google logo/legal controls above the sheet through native sheet gestures.
   // Maps 1.27.2's native padding setter can dereference a null GoogleMap after
   // layout but before onMapReady. Omit the prop until this instance is ready.
   const topPadding = Math.min(headerHeight, Math.max(0, frameHeight - gutter));
-  const mapPadding = { top: topPadding, bottom: Math.max(0, Math.min(sheetHeight - sheetGeometry.peek, frameHeight - topPadding - gutter)), left: gutter, right: gutter };
+  const mapPadding = { top: topPadding, bottom: Math.max(0, Math.min(sheetHeight - sheetGeometry.peek + MAP_SHEET_OVERLAP, frameHeight - topPadding - gutter)), left: gutter, right: gutter };
   const place = details.data ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
   useEffect(() => {
     if (incomingId) pendingHandoffCenter.current = incomingId;
