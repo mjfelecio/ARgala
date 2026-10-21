@@ -53,6 +53,12 @@ it.each(listDestinations())('opens $id directly, honestly representing incomplet
   expect(button('placeDetails.directions')?.props.disabled).toBe(true);
   expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
 });
+it.each(listDestinations())('does not emit duplicate sibling keys for $id', async destination => {
+  controls.params = { destinationId: destination.id }; await mount();
+  const keyWarnings = vi.mocked(console.error).mock.calls.filter(args =>
+    args.some(argument => String(argument).includes('same key')));
+  expect(keyWarnings).toEqual([]);
+});
 it.each([undefined, 'D10', ['D01'], '../D01'])('handles an invalid deep link %j and returns safely', async id => {
   controls.params = { destinationId: id }; controls.back = false; await mount();
   expect(output()).toContain(translations.t('destinations.unavailable'));
