@@ -24,7 +24,7 @@ export function SignOutAction({ appearance = 'default' }: { appearance?: 'defaul
   const title = t(busy ? 'auth.signingOut' : 'auth.signOut');
   if (appearance === 'settings') return <>
     {error && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(error)}</Text>}
-    <Button variant="ghost" className="bg-mint" accessibilityLabel={title} accessibilityState={{ disabled: busy, busy }} isDisabled={busy} onPress={() => void logout()}>
+    <Button variant="ghost" accessibilityLabel={title} accessibilityState={{ disabled: busy, busy }} isDisabled={busy} onPress={() => void logout()}>
       <Ionicons name="log-out-outline" color={danger} size={22} /><Button.Label className="text-danger">{title}</Button.Label>
     </Button>
   </>;

@@ -10,13 +10,14 @@ export function LanguageControl({ value, onChange, disabled = false }: {
   value: Preferences['language']; onChange(value: Preferences['language']): void; disabled?: boolean;
 }) {
   const { t } = useTranslation();
-  return <RadioGroup value={value} isDisabled={disabled} variant="primary" accessibilityLabel={t('settings.language')} className="gap-2" onValueChange={next => {
+  const options = [{ value: 'en', label: 'English' }, { value: 'ko', label: '한국어' }, { value: 'ja', label: '日本語' }] as const;
+  return <RadioGroup value={value} isDisabled={disabled} variant="primary" accessibilityLabel={t('settings.language')} className="gap-0" onValueChange={next => {
     const parsed = languageSchema.safeParse(next);
     if (!disabled && parsed.success) onChange(parsed.data);
   }}>
-    {([{ value: 'en', label: 'English' }, { value: 'ko', label: '한국어' }, { value: 'ja', label: '日本語' }] as const).map(option =>
+    {options.map((option, index) =>
       <RadioGroup.Item key={option.value} value={option.value} accessibilityLabel={option.label}
-        className={`min-h-16 rounded-input px-4 py-3 ${value === option.value ? 'bg-mint' : 'bg-surface'}`}>
+        className={`min-h-16 py-3 ${index < options.length - 1 ? 'border-b border-outline' : ''}`}>
         <View className="shrink grow gap-1">
           <Label><Label.Text className="font-sans text-base font-semibold">{option.label}</Label.Text></Label>
           <Text className="font-sans text-xs text-muted">{t(`onboarding.languageNames.${option.value}`)}</Text>

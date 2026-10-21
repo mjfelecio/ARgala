@@ -1,5 +1,4 @@
 import { Button } from 'heroui-native/button';
-import { Surface } from 'heroui-native/surface';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Text, View } from 'react-native';
 import { ACTIVATION, DISCOVERY } from '@/config/limits';
@@ -16,20 +15,18 @@ export default function SettingsForm() {
   const { focused, radius, language, changeRadius, changeLanguage, busy, message, dirty, valid, save, storageError } = useSettingsDraft();
   return <ScrollView className="flex-1" keyboardShouldPersistTaps="handled" contentContainerClassName="gap-6 px-5 pb-8 pt-2">
     <AccountSummary />
-    <View className="gap-2">
+    <View className="gap-2 border-t border-outline pt-5">
       <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{t('settings.language')}</Text>
       <Text className="font-sans text-sm text-muted">{t('settings.languageDescription')}</Text>
-      <Surface className="p-2"><LanguageControl value={language} onChange={changeLanguage} disabled={busy} /></Surface>
+      <LanguageControl value={language} onChange={changeLanguage} disabled={busy} />
     </View>
-    <View className="gap-3">
+    <View className="gap-3 border-t border-outline pt-5">
       <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{t('settings.arLocation')}</Text>
-      <Surface className="gap-4 p-5">
-        {/* Discard an unfinished local drag when leaving this screen. */}
-        <RadiusControl key={String(focused)} value={radius} onChange={changeRadius} disabled={busy} />
-        <Text className="rounded-input bg-mint p-4 font-sans text-sm text-brand-strong">{t('settings.deviceLocal')}</Text>
-        <Text className="font-sans text-xs text-muted">{t('settings.radiusHelp', { meters: DISCOVERY.radiusMeters, min: ACTIVATION.minMeters, max: ACTIVATION.maxMeters })}</Text>
-        <DeviceSettingsAction />
-      </Surface>
+      {/* Discard an unfinished local drag when leaving this screen. */}
+      <RadiusControl key={String(focused)} value={radius} onChange={changeRadius} disabled={busy} />
+      <Text className="font-sans text-sm text-foreground">{t('settings.deviceLocal')}</Text>
+      <Text className="font-sans text-xs text-muted">{t('settings.radiusHelp', { meters: DISCOVERY.radiusMeters, min: ACTIVATION.minMeters, max: ACTIVATION.maxMeters })}</Text>
+      <DeviceSettingsAction />
     </View>
     <AboutSettings />
     {storageError && <Text accessibilityRole="alert" className="font-sans text-sm text-danger">{t(storageError)}</Text>}
