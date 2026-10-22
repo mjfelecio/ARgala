@@ -79,7 +79,8 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
   useQuery(placeSelectionOptions(selectedId));
   const nearest = ranked.find((p) => p.eligible);
   const summary = places.find((p) => p.providerId === selectedId);
-  useQuery({ ...placeDetailsOptions(client, selectedId, language), enabled: false });
+  const detailsOptions = placeDetailsOptions(client, selectedId, language);
+  useQuery({ ...detailsOptions, enabled: false });
   const detail = availablePlaceDetails(client, selectedId, language);
   const selected = detail ?? summary ?? (handoff.data?.providerId === selectedId ? handoff.data : null);
   const distance = ranked.find((p) => p.place.providerId === selectedId)?.distance;
@@ -89,13 +90,13 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
     if (!running || !selected || navigating.current) return;
     navigating.current = true;
     // Carry the selected summary without a provider request on map entry.
-    setPlaceSelection(client, selected, detail ? language : undefined);
+    setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
     router.navigate({ pathname: '/', params: { placeId: selected.providerId } });
   }
   function directions() {
     if (!running || !selected || navigating.current) return;
     navigating.current = true;
-    setPlaceSelection(client, selected, detail ? language : undefined);
+    setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
     const token = createRoutePreviewIntent(client, selected, undefined, 'ar', language);
     router.push({ pathname: '/directions', params: { token } });
   }
@@ -133,7 +134,7 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
         onDetails={() => {
           if (!running || !selected || navigating.current) return;
           navigating.current = true;
-          setPlaceSelection(client, selected, detail ? language : undefined);
+          setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
           router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
         }} onDirections={directions} onMap={toMap} />
     </View>

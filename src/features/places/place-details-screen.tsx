@@ -48,7 +48,7 @@ export default function PlaceDetailsScreen() {
   function navigateTo(pathname: '/' | '/ar') {
     if (!place || !active || !focused || navigating.current) return;
     navigating.current = true;
-    setPlaceSelection(client, place, full ? language : undefined);
+    setPlaceSelection(client, place, full ? language : undefined, options.initialDataUpdatedAt);
     // Pop the details page back to the existing tab navigator, selecting its
     // destination tab. This also handles a direct link without duplicating tabs.
     router.dismissTo({ pathname, params: { placeId: place.providerId } });

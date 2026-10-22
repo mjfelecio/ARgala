@@ -162,7 +162,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       selectionSummary={place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
       onViewDetails={place ? () => {
         if (!active || !focused) return;
-        setPlaceSelection(queryClient, place, complete ? language : undefined);
+        setPlaceSelection(queryClient, place, complete ? language : undefined, detailsOptions(selectedId).initialDataUpdatedAt);
         router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
       } : undefined}
       onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!complete) select(selectedId); }} onDirections={directions}

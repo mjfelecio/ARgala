@@ -104,6 +104,21 @@ it('does not offer a second paid request for the complete configured discovery f
   await act(async () => tree!.unmount()); await mount();
   expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
 });
+it('recovers expired observed discovery details only on the explicit additional-details action', async () => {
+  const complete = { ...north, source: 'discovery' as const };
+  vi.mocked(placesService.nearby).mockResolvedValue([complete]);
+  await mount(); await scan(); await press('ar.expand');
+  const updatedAt = Date.now() - AR.nearbyReuseMs - 1;
+  await act(async () => {
+    client.setQueryData(['places', { latitude: 0, longitude: 0 }, 'en'], [complete], { updatedAt });
+    client.setQueryData(['place-details', 'north', 'en'], complete, { updatedAt });
+    tree!.update(render());
+  });
+  expect(placesService.details).not.toHaveBeenCalled();
+  await press('ar.more'); await settle();
+  expect(placesService.details).toHaveBeenCalledExactlyOnceWith('north', 'en');
+  expect(output()).toContain('Provider description');
+});
 it('keeps manual selection through heading changes and offers inspection outside activation range', async () => {
   controls.radius = 10; await mount(); await scan();
   expect(output()).toContain(translations.t('ar.noneActive', { meters: 10 }));

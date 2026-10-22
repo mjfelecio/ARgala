@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { AR, DISCOVERY } from '@/config/limits';
 import { distanceMeters, isCoordinate, type Coordinate } from '@/features/location/geo';
 import { placesService, type NearbySearch, type Place } from '@/features/places/service';
+import { availablePlaceDetails } from '@/features/places/details-cache';
 
 export const nearbyOptions = (request: NearbySearch) => ({
   queryKey: ['places', request.center, request.language ?? 'en'],
@@ -42,7 +43,7 @@ export function useArPlaces(position: Coordinate | null, language: NonNullable<N
   function more(providerId: string) {
     if (details.isFetching) return;
     const next = { providerId, language }; setDetailRequest(next);
-    if (!client.getQueryData(detailsOptions(next).queryKey)) void client.fetchQuery(detailsOptions(next)).catch(() => {});
+    if (!availablePlaceDetails(client, providerId, language)) void client.fetchQuery(detailsOptions(next)).catch(() => {});
   }
   return { nearby, details, detailRequest, request, scan, more };
 }

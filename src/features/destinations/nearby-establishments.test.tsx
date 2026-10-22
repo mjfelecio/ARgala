@@ -7,6 +7,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { router } from 'expo-router';
 import { queryClient } from '@/lib/query';
+import { AR } from '@/config/limits';
 import { localizationOptions } from '@/i18n/options';
 import { EdgeRequestError } from '@/lib/edge-error';
 import { placesService, type Place } from '@/features/places/service';
@@ -66,6 +67,17 @@ it('hands complete Google establishment fields to Details with their known langu
  await new Promise(resolve => setTimeout(resolve, 10));
  expect(client.getQueryData(['place-details', complete.providerId, 'en'])).toEqual(complete);
  expect(client.getQueryData(['place-details', complete.providerId, 'ja'])).toBeUndefined();
+ expect(placesService.details).not.toHaveBeenCalled();
+});
+it('does not promote expired observed establishment results into fresh Details', async () => {
+ const complete = { ...place(499), source: 'discovery' as const };
+ vi.mocked(placesService.nearby).mockResolvedValue([complete]);
+ await mount(); await search();
+ vi.spyOn(Date, 'now').mockReturnValue(Date.now() + AR.nearbyReuseMs + 1);
+ const row = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === complete.name)!;
+ await act(async () => row.props.onPress());
+ expect(client.getQueryData(placeSelectionOptions(complete.providerId).queryKey)).toEqual(complete);
+ expect(client.getQueryData(['place-details', complete.providerId, 'en'])).toBeUndefined();
  expect(placesService.details).not.toHaveBeenCalled();
 });
 it('deduplicates rapid searches and shows real loading and empty states', async () => {
