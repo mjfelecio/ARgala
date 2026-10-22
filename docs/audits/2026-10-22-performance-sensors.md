@@ -64,7 +64,7 @@ Coverage includes north wraparound, small noise, fast reversal/FOV exit, lane ch
 
 Final automated verification: `npm run check` passed TypeScript, zero-warning lint and **626 tests / 57 files**. Targeted AR/Directions/location passed **230 tests / 15 files**. Android configuration, native patch checks, Expo install compatibility, Expo Doctor (21/21), Android export and `git diff --check` passed. No Edge code changed. Independent review reported no important correctness issue. No temporary profiler/sensor diagnostics remain in source.
 
-Implementation commits: `d3fa7dc` (camera boundary, clocks and geographic work); label interpolation is a separate focused commit. A controlled release-like comparison remains necessary before attributing FPS, memory or battery changes to these commits.
+Implementation commits: `d3fa7dc` (camera boundary, clocks and geographic work); `42d1643` (UI-thread label interpolation). A controlled release-like comparison remains necessary before attributing FPS, memory or battery changes to these commits. [Draft PR #21](https://github.com/mjfelecio/ARgala/pull/21) is open and unmerged; [CI validation](https://github.com/mjfelecio/ARgala/actions/runs/39807910976) passed. The performance branch’s optimized APK is queued as [EAS preview e3adbf34](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/e3adbf34-2566-4a7d-8c63-4c4849ee06c4), from `d3b00f0` (same runtime changes).
 
 ## Remaining device acceptance
 
