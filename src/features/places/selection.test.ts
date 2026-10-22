@@ -16,3 +16,33 @@ it('retains a handoff through navigation delay, expires it while unused and perm
   expect(client.getQueryData(placeSelectionOptions(place.providerId).queryKey)).toBeUndefined();
   setPlaceSelection(client, place); client.clear(); expect(client.getQueryData(placeSelectionOptions(place.providerId).queryKey)).toBeUndefined();
 });
+
+it('retains complete same-language discovery details before the navigation handoff is observed', async () => {
+  vi.useFakeTimers();
+  const client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() });
+  const place: Place = { id: 'google:test', provider: 'google', providerId: 'test', source: 'discovery', name: 'Synthetic test', coordinates: { latitude: 0, longitude: 0 }, attributions: [] };
+  setPlaceSelection(client, place, 'en');
+  await vi.advanceTimersByTimeAsync(1000);
+  expect(client.getQueryData(['place-details', 'test', 'en'])).toEqual(place);
+  expect(client.getQueryData(['place-details', 'test', 'ja'])).toBeUndefined();
+  await vi.advanceTimersByTimeAsync(AR.nearbyReuseMs);
+  expect(client.getQueryData(['place-details', 'test', 'en'])).toBeUndefined();
+  setPlaceSelection(client, { ...place, source: undefined }, 'en');
+  expect(client.getQueryData(['place-details', 'test', 'en'])).toBeUndefined();
+  setPlaceSelection(client, place, 'en'); client.clear();
+  expect(client.getQueryData(['place-details', 'test', 'en'])).toBeUndefined();
+});
+
+it('preserves response age across navigation and accepts a genuinely newer response', () => {
+  const client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() });
+  const place: Place = { id: 'google:test', provider: 'google', providerId: 'test', source: 'discovery', name: 'Synthetic test', coordinates: { latitude: 0, longitude: 0 }, attributions: [] };
+  const updatedAt = Date.now() - 1000; const key = ['place-details', 'test', 'en'];
+  try {
+    setPlaceSelection(client, place, 'en', updatedAt);
+    setPlaceSelection(client, place, 'en');
+    expect(client.getQueryState(key)?.dataUpdatedAt).toBe(updatedAt);
+    setPlaceSelection(client, { ...place, name: 'Updated provider name' }, 'en', updatedAt + 500);
+    expect(client.getQueryData(key)).toMatchObject({ name: 'Updated provider name' });
+    expect(client.getQueryState(key)?.dataUpdatedAt).toBe(updatedAt + 500);
+  } finally { client.clear(); }
+});

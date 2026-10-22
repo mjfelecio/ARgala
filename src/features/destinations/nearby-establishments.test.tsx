@@ -7,6 +7,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { router } from 'expo-router';
 import { queryClient } from '@/lib/query';
+import { AR } from '@/config/limits';
 import { localizationOptions } from '@/i18n/options';
 import { EdgeRequestError } from '@/lib/edge-error';
 import { placesService, type Place } from '@/features/places/service';
@@ -55,6 +56,29 @@ it('retains provider ID, selection and real credit on opening the existing detai
  await act(async () => { row.props.onPress(); row.props.onPress(); });
  expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/place/[providerId]', params: { providerId: place(499).providerId } });
  expect(client.getQueryData(placeSelectionOptions(place(499).providerId).queryKey)).toEqual(place(499)); expect(placesService.details).not.toHaveBeenCalled();
+});
+it('hands complete Google establishment fields to Details with their known language', async () => {
+ const complete = { ...place(499), source: 'discovery' as const };
+ vi.mocked(placesService.nearby).mockResolvedValue([complete]);
+ await mount(); await search();
+ const row = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === complete.name)!;
+ await act(async () => row.props.onPress());
+ await act(async () => tree!.unmount());
+ await new Promise(resolve => setTimeout(resolve, 10));
+ expect(client.getQueryData(['place-details', complete.providerId, 'en'])).toEqual(complete);
+ expect(client.getQueryData(['place-details', complete.providerId, 'ja'])).toBeUndefined();
+ expect(placesService.details).not.toHaveBeenCalled();
+});
+it('does not promote expired observed establishment results into fresh Details', async () => {
+ const complete = { ...place(499), source: 'discovery' as const };
+ vi.mocked(placesService.nearby).mockResolvedValue([complete]);
+ await mount(); await search();
+ vi.spyOn(Date, 'now').mockReturnValue(Date.now() + AR.nearbyReuseMs + 1);
+ const row = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === complete.name)!;
+ await act(async () => row.props.onPress());
+ expect(client.getQueryData(placeSelectionOptions(complete.providerId).queryKey)).toEqual(complete);
+ expect(client.getQueryData(['place-details', complete.providerId, 'en'])).toBeUndefined();
+ expect(placesService.details).not.toHaveBeenCalled();
 });
 it('deduplicates rapid searches and shows real loading and empty states', async () => {
  const pending = Promise.withResolvers<Place[]>(); vi.mocked(placesService.nearby).mockReturnValue(pending.promise); await mount();

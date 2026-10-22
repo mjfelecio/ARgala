@@ -92,6 +92,33 @@ it('scans at current GPS only on action, selects camera labels, and requests det
   await press('placeDetails.map'); expect(controls.navigate).toHaveBeenCalledWith({ pathname: '/', params: { placeId: 'north' } });
   expect(output()).toContain('Google Maps'); expect(output()).toContain('Local Provider');
 });
+it('does not offer a second paid request for the complete configured discovery fields', async () => {
+  vi.mocked(placesService.nearby).mockResolvedValue([{ ...north, source: 'discovery' }]);
+  await mount(); await scan(); await press('ar.expand');
+  expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('ar.more'))).toBe(false);
+  expect(placesService.details).not.toHaveBeenCalled();
+  const { onlineManager } = await import('@tanstack/react-query');
+  controls.active = false; controls.focused = false; await update();
+  controls.active = true; controls.focused = true; await update();
+  await act(async () => { await client.invalidateQueries(); focusManager.setFocused(false); focusManager.setFocused(true); onlineManager.setOnline(false); onlineManager.setOnline(true); });
+  await act(async () => tree!.unmount()); await mount();
+  expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
+});
+it('recovers expired observed discovery details only on the explicit additional-details action', async () => {
+  const complete = { ...north, source: 'discovery' as const };
+  vi.mocked(placesService.nearby).mockResolvedValue([complete]);
+  await mount(); await scan(); await press('ar.expand');
+  const updatedAt = Date.now() - AR.nearbyReuseMs - 1;
+  await act(async () => {
+    client.setQueryData(['places', { latitude: 0, longitude: 0 }, 'en'], [complete], { updatedAt });
+    client.setQueryData(['place-details', 'north', 'en'], complete, { updatedAt });
+    tree!.update(render());
+  });
+  expect(placesService.details).not.toHaveBeenCalled();
+  await press('ar.more'); await settle();
+  expect(placesService.details).toHaveBeenCalledExactlyOnceWith('north', 'en');
+  expect(output()).toContain('Provider description');
+});
 it('keeps manual selection through heading changes and offers inspection outside activation range', async () => {
   controls.radius = 10; await mount(); await scan();
   expect(output()).toContain(translations.t('ar.noneActive', { meters: 10 }));

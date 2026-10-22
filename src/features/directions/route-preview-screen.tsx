@@ -56,8 +56,8 @@ function Preview({ token }: { token: unknown }) {
       {place && configured && <RoutePreviewMap place={place} origin={result?.origin} destination={result?.destination ?? place.coordinates} coordinates={coordinates}
         currentPosition={usable ? location.position : null} dockHeight={dockHeight} settledDockHeight={settledDockHeight}
         headerHeight={headerHeight} position={sheetPosition} enabled={running} sceneHeight={viewportHeight} collapsedHeight={sheetGeometry.peek} />}
-      <View testID="route-preview-header" className="absolute inset-x-0 top-0 px-4 pb-2" style={{ paddingTop: insets.top + 8 }} onLayout={event => setHeaderHeight(event.nativeEvent.layout.height)}>
-        <View className="min-h-14 flex-row items-center gap-2 rounded-pill bg-surface px-1 pr-4 shadow-sm">
+      <View testID="route-preview-header" className="absolute inset-x-0 top-0 px-4 pb-1" style={{ paddingTop: insets.top + 4 }} onLayout={event => setHeaderHeight(event.nativeEvent.layout.height)}>
+        <View className="min-h-12 flex-row items-center gap-2 rounded-pill bg-surface pr-4 shadow-sm">
           <Button variant="ghost" className="size-12" isIconOnly accessibilityLabel={t('directions.back')} onPress={() => { if (router.canGoBack()) router.back(); else toMap(); }}><Ionicons name="arrow-back" size={22} color={accent} /></Button>
           <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-foreground">{t('directions.title')}</Text>
         </View>
@@ -76,6 +76,7 @@ function Preview({ token }: { token: unknown }) {
           {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}
           {result && coordinates.length > 1 && <>
             <Text className="font-sans text-title font-bold text-foreground">{t('map.routeSummary', { meters: result.route.distanceMeters, minutes: Math.ceil(result.route.durationSeconds / 60) })}</Text>
+            <Text className="font-sans text-xs text-muted">{t('directions.estimated')}</Text>
           </>}
           {place && preview.locationEnabled && data?.status === 'waiting' && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('directions.waiting')}</Text>}
           {place && preview.locationEnabled && !usable && <><RoutePreviewLocationStatus location={location} />{location.status === 'ready' && <><Text className="font-sans text-sm text-muted">{t('directions.stale')}</Text><Button variant="outline" accessibilityLabel={t('location.retry')} onPress={location.retry}><Button.Label>{t('location.retry')}</Button.Label></Button></>}</>}
@@ -83,22 +84,30 @@ function Preview({ token }: { token: unknown }) {
           {data?.status === 'pending' && <View className="gap-2"><Spinner size="sm" /><Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('map.routeLoading')}</Text></View>}
           {data?.errorKey && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(data.errorKey)}</Text>}
           {preview.needsRetry && <Button variant="outline" accessibilityLabel={t('directions.retry')} isDisabled={!running || !configured} onPress={preview.retry}><Button.Label>{t('directions.retry')}</Button.Label></Button>}
-          {expanded && place && <View className="gap-2 border-t border-outline pt-3">
-            <Text className="font-sans text-xs font-semibold text-brand-strong">{t('directions.origin')}</Text>
-            <Text className="font-sans text-sm text-muted">{t('directions.snapshot')}</Text>
-            <Text className="font-sans text-xs font-semibold text-brand-strong">{t('directions.destination')}</Text>
-            <Text className="font-sans text-card font-semibold text-foreground">{place.name}</Text>
-            {place.address && <Text className="font-sans text-sm text-muted">{place.address}</Text>}
-            {place.description && <Text className="font-sans text-sm text-foreground">{place.description}</Text>}
+          {expanded && place && <View className="gap-4 border-t border-outline pt-4">
+            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.journey')}</Text>
+            <View className="flex-row items-start gap-3">
+              <Ionicons name="radio-button-on-outline" size={20} color={accent} />
+              <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-sm font-semibold text-foreground">{t('directions.origin')}</Text>
+                <Text className="font-sans text-sm text-muted">{t('directions.originDescription')}</Text></View>
+            </View>
+            <View className="flex-row items-start gap-3">
+              <Ionicons name="location-outline" size={20} color={accent} />
+              <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-xs text-muted">{t('directions.destination')}</Text>
+                <Text className="font-sans text-base font-semibold text-foreground">{place.name}</Text>
+                {place.address && <Text className="font-sans text-sm text-muted">{place.address}</Text>}</View>
+            </View>
           </View>}
-          {expanded && result && <>
+          {expanded && result && <View className="gap-3 border-t border-outline pt-4">
+            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.information')}</Text>
+            <Text className="font-sans text-sm text-muted">{t('directions.snapshot')}</Text>
+            {result.route.warnings.map((warning, index) => <View key={index} className="flex-row items-start gap-2"><Ionicons name="warning-outline" size={20} color={accent} /><Text className="min-w-0 flex-1 font-sans text-sm text-foreground">{warning}</Text></View>)}
             <Text className="font-sans text-sm text-muted">{t('map.walkingCaution')}</Text>
-            {result.route.warnings.map((warning, index) => <Text key={index} className="font-sans text-sm text-muted">{warning}</Text>)}
-          </>}
+          </View>}
           {place && <ProviderAttributions places={[place]} />}
-          {expanded && <View className="flex-row flex-wrap gap-2">
-            <Button variant="secondary" className="h-auto min-h-12 min-w-36 grow shrink py-3" accessibilityLabel={t('directions.map')} onPress={toMap}><Ionicons name="map-outline" size={22} color={accent} /><Button.Label className="shrink text-center">{t('directions.map')}</Button.Label></Button>
-            {place && <Button className="h-auto min-h-12 min-w-36 grow shrink py-3" accessibilityLabel={t('directions.details')} onPress={() => {
+          {expanded && <View className="flex-row flex-wrap gap-2 border-t border-outline pt-4">
+            <Button variant="outline" className="h-auto min-h-12 min-w-36 grow shrink py-3" accessibilityLabel={t('directions.map')} onPress={toMap}><Ionicons name="map-outline" size={22} color={accent} /><Button.Label className="shrink text-center">{t('directions.map')}</Button.Label></Button>
+            {place && <Button variant="ghost" className="h-auto min-h-12 min-w-36 grow shrink py-3" accessibilityLabel={t('directions.details')} onPress={() => {
               if (place.provider === 'curated') {
                 const destinationId = destinationIdForRoutePlace(place);
                 router.dismissTo(destinationId ? { pathname: '/destinations/[destinationId]', params: { destinationId } } : '/destinations');

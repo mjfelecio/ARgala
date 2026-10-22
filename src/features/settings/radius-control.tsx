@@ -59,7 +59,7 @@ export function RadiusControl({ value, onChange, disabled = false }: {
     <TextField isDisabled={disabled} isInvalid={!parsed.success}>
       <Label><Label.Text className="font-sans text-sm font-semibold">{t('settings.radius')}</Label.Text></Label>
       <Input value={draft.text} keyboardType="number-pad" accessibilityLabel={t('settings.radius')} onChangeText={next => edit(next, true)}
-        className="min-h-14 font-sans text-base" />
+        className="min-h-14 border border-outline bg-surface font-sans text-base android:border-outline" />
     </TextField>
     {!parsed.success && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('settings.invalid')}</Text>}
   </View>;

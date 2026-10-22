@@ -118,7 +118,9 @@
     "expand": "더 보기",
     "collapse": "간단히 보기",
     "scanRetry": "검색에 실패했습니다. 스캔을 눌러 다시 시도하세요.",
-    "cameraFallback": "카메라를 사용할 수 없습니다. 주변 장소 목록은 이용할 수 있습니다."
+    "cameraFallback": "카메라를 사용할 수 없습니다. 주변 장소 목록은 이용할 수 있습니다.",
+    "tracking": "위치 추적 및 정확도",
+    "otherNearby": "주변 장소 목록"
   },
   "showcase": {
     "title": "Clean Explorer 구성 요소",
@@ -159,7 +161,8 @@
     "view": "상세 정보 보기",
     "directions": "길찾기",
     "map": "지도에서 보기",
-    "ar": "AR 열기"
+    "ar": "AR 열기",
+    "loaded": "장소 정보를 불러왔습니다."
   },
   "directions": {
     "title": "도보 길찾기",
@@ -175,7 +178,11 @@
     "snapshot": "경로 출발 위치 기준 미리보기입니다. 이동해도 경로는 갱신되지 않습니다.",
     "waiting": "도보 경로를 위해 현재 위치를 확인하는 중…",
     "stale": "최신의 정확한 위치가 필요합니다. 위치 확인을 다시 시도하세요.",
-    "retry": "도보 경로 다시 시도"
+    "retry": "도보 경로 다시 시도",
+    "journey": "여정",
+    "information": "경로 안내",
+    "estimated": "예상 도보 경로",
+    "originDescription": "이 경로를 요청했을 때의 내 위치입니다."
   },
   "destinations": {
     "title": "추천 여행지",

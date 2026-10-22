@@ -12,7 +12,7 @@ const StyledSafeAreaView = withUniwind(SafeAreaView);
 export function ProfileSettingsContent({ entry }: { entry: 'tab' | 'stack' }) {
   const { t } = useTranslation();
   const accent = useThemeColor('accent');
-  return <StyledSafeAreaView className="flex-1 bg-page-mint" edges={entry === 'stack' ? ['top', 'bottom', 'left', 'right'] : ['top', 'left', 'right']}>
+  return <StyledSafeAreaView className="flex-1 bg-white" edges={entry === 'stack' ? ['top', 'bottom', 'left', 'right'] : ['top', 'left', 'right']}>
     <View className="flex-row items-center gap-3 px-4 py-3">
       {entry === 'stack' && <Button isIconOnly variant="ghost" accessibilityLabel={t('common.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }}><Ionicons name="arrow-back" color={accent} size={24} /></Button>}
       {entry === 'tab' && <Ionicons name="compass-outline" color={accent} size={28} accessible={false} />}

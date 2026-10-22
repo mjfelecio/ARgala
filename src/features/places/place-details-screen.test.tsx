@@ -1,11 +1,12 @@
 import { nativeUi, withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
-import { QueryClient, QueryClientProvider, notifyManager } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, QueryObserver, notifyManager } from '@tanstack/react-query';
 import { createInstance, type i18n } from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { queryClient } from '@/lib/query';
+import { AR } from '@/config/limits';
 import { localizationOptions } from '@/i18n/options';
 import { EdgeRequestError } from '@/lib/edge-error';
 import { placesService, type Place } from './service';
@@ -38,6 +39,51 @@ afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined
 it('reads the cached selection and never requests details on entry', async () => {
   client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
   expect(output()).toContain(place.name); expect(placesService.details).not.toHaveBeenCalled();
+});
+it('reuses the complete configured Nearby response and hides a redundant paid Load Details action', async () => {
+  const complete: Place = { ...place, source: 'discovery' };
+  client.setQueryData(['places', { latitude: 10, longitude: 124 }, 'en'], [complete]);
+  client.setQueryData(placeSelectionOptions('north').queryKey, complete);
+  await mount();
+  expect(output()).toContain(place.name); expect(button('placeDetails.load')).toBeUndefined();
+  expect(placesService.details).not.toHaveBeenCalled();
+  // Optional address/URI omission in a completed response is not missing data.
+  expect(output()).not.toContain(translations.t('placeDetails.address'));
+  controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); tree!.update(render()); });
+  expect(button('placeDetails.load')).toBeDefined(); expect(placesService.details).not.toHaveBeenCalled();
+});
+it('offers explicit recovery for expired Nearby data even while its source remains observed', async () => {
+  const complete: Place = { ...place, source: 'discovery' };
+  const key = ['places', { latitude: 10, longitude: 124 }, 'en'];
+  const observer = new QueryObserver(client, { queryKey: key, enabled: false });
+  const unsubscribe = observer.subscribe(() => {});
+  try {
+    client.setQueryData(key, [complete], { updatedAt: Date.now() - AR.nearbyReuseMs - 1 });
+    client.setQueryData(placeSelectionOptions('north').queryKey, complete);
+    await mount();
+    expect(output()).toContain(place.name); expect(button('placeDetails.load')).toBeDefined();
+    controls.active = false; controls.focused = false; await act(async () => tree!.update(render()));
+    controls.active = true; controls.focused = true; await act(async () => tree!.update(render()));
+    await act(async () => client.invalidateQueries());
+    await act(async () => tree!.unmount()); await mount();
+    expect(placesService.details).not.toHaveBeenCalled();
+    await press('placeDetails.load');
+    expect(placesService.details).toHaveBeenCalledExactlyOnceWith('north', 'en');
+    expect(button('placeDetails.load')).toBeUndefined();
+  } finally { unsubscribe(); }
+});
+it('does not renew the reuse window when a Nearby result seeds an observed Details query', async () => {
+  const now = Date.now(); const updatedAt = now - AR.nearbyReuseMs + 1;
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+  client.setQueryData(['places', { latitude: 10, longitude: 124 }, 'en'], [{ ...place, source: 'discovery' }], { updatedAt });
+  client.setQueryData(placeSelectionOptions('north').queryKey, place);
+  await mount(); expect(button('placeDetails.load')).toBeUndefined();
+  clock.mockReturnValue(now + 2);
+  await act(async () => tree!.update(render()));
+  expect(button('placeDetails.load')).toBeDefined();
+  expect(placesService.details).not.toHaveBeenCalled();
+  await press('placeDetails.load'); expect(placesService.details).toHaveBeenCalledExactlyOnceWith('north', 'en');
+  expect(button('placeDetails.load')).toBeUndefined();
 });
 it.each([undefined, '', '../bad', ['north', 'south'], 'x'.repeat(4097)])('handles invalid or missing provider ID %j without a request', async id => {
   controls.params = { providerId: id }; await mount();
@@ -82,6 +128,15 @@ it('keeps summary visible while details are loading, blocks repeated presses, an
   expect(output()).toContain(place.name); expect(output()).toContain(translations.t('placeDetails.loading')); expect(button('placeDetails.load')!.props.disabled).toBe(true);
   await act(async () => { button('placeDetails.load')!.props.onPress(); }); expect(placesService.details).toHaveBeenCalledTimes(1);
   await act(async () => { pending.resolve(place); }); expect(button('placeDetails.load')).toBeUndefined();
+});
+it.each(['en', 'ko', 'ja'] as const)('reports successful explicit recovery in %s even when optional fields are absent', async language => {
+  controls.language = language; await translations.changeLanguage(language);
+  client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
+  await press('placeDetails.load');
+  expect(output()).toContain(translations.t('placeDetails.loaded'));
+  expect(translations.t('placeDetails.loaded')).not.toBe('placeDetails.loaded');
+  expect(button('placeDetails.load')).toBeUndefined();
+  expect(placesService.details).toHaveBeenCalledExactlyOnceWith('north', language);
 });
 it.each(['en', 'ko', 'ja'])('presents an approved image only when explicitly supplied to the %s presentation', async language => {
   await translations.changeLanguage(language);

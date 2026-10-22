@@ -18,6 +18,7 @@ import { useDeviceLocation } from '@/features/location/use-device-location';
 import { placeSelectionOptions, setPlaceSelection } from '@/features/places/selection';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
 import { placesService } from '@/features/places/service';
+import { availablePlaceDetails, placeDetailsOptions } from '@/features/places/details-cache';
 import { useSettings } from '@/features/settings/provider';
 import { useAppActive } from '@/lib/use-app-active';
 import { edgeErrorMessageKey } from '@/lib/edge-error';
@@ -28,6 +29,7 @@ import { useCSSVariable, useResolveClassNames, withUniwind } from 'uniwind';
 import { HomePlaceSheet, type HomePlaceSheetState } from './place-sheet';
 import { HomeMapControls } from './home-map-controls';
 import { MapRecenter } from './map-recenter';
+import { PlaceCallout } from './place-callout';
 import { ProviderAttributions, useOpenProviderLink } from './attributions';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
@@ -92,8 +94,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   }, [incomingId, active, focused]);
   const nearbyOptions = (searchCenter: Coordinate) => ({ queryKey: ['places', searchCenter, language], staleTime: 0,
     queryFn: () => placesService.nearby({ center: searchCenter, radiusMeters: DISCOVERY.radiusMeters, language }) });
-  const detailsOptions = (providerId: string | null) => ({ queryKey: ['place-details', providerId, language], staleTime: 0,
-    queryFn: () => placesService.details(providerId!, language) });
+  const detailsOptions = (providerId: string | null) => ({ ...placeDetailsOptions(queryClient, providerId, language), staleTime: 0 });
   // Observe transient results without allowing focus, remounts or invalidation to spend provider calls.
   const nearby = useQuery({ ...nearbyOptions(center), enabled: false });
   const details = useQuery({ ...detailsOptions(selectedId), enabled: false });
@@ -106,7 +107,8 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   // layout but before onMapReady. Omit the prop until this instance is ready.
   const topPadding = Math.min(headerHeight, Math.max(0, frameHeight - gutter));
   const mapPadding = { top: topPadding, bottom: Math.max(0, Math.min(sheetHeight - sheetGeometry.peek + MAP_SHEET_OVERLAP, frameHeight - topPadding - gutter)), left: gutter, right: gutter };
-  const place = details.data ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
+  const complete = availablePlaceDetails(queryClient, selectedId, language);
+  const place = complete ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
   useEffect(() => {
     if (incomingId) pendingHandoffCenter.current = incomingId;
     if (!enabled || !place || pendingHandoffCenter.current !== place.providerId) return;
@@ -117,7 +119,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   function select(providerId: string | null) {
     if (providerId && !enabled) return;
     setSelectedId(providerId);
-    if (providerId) void queryClient.fetchQuery(detailsOptions(providerId)).catch(() => {});
+    if (providerId && !availablePlaceDetails(queryClient, providerId, language)) void queryClient.fetchQuery(detailsOptions(providerId)).catch(() => {});
   }
   function discover() {
     if (!enabled || nearby.isFetching) return;
@@ -133,7 +135,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     router.push({ pathname: '/directions', params: { token } });
   }
   const state: HomePlaceSheetState = selectedId ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';
-  const error = selectedId ? details.error : nearby.error;
+  const error = selectedId ? !complete && details.error : nearby.error;
   return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
     <FocusedStatusBar style="dark" />
     <View testID="home-map-scene" className="flex-1" onLayout={event => {
@@ -144,8 +146,8 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       {...(mapReady ? { mapPadding } : {})} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
       onPoiClick={(event) => select(event.nativeEvent.placeId)}>
       <Circle center={position} radius={activationRadiusMeters} strokeColor={routeColor} fillColor={routeArea} />
-      {nearby.data?.map((item) => <Marker key={item.id} coordinate={item.coordinates} title={item.name} onPress={() => select(item.providerId)} />)}
-      {place && !nearby.data?.some((item) => item.providerId === place.providerId) && <Marker coordinate={place.coordinates} title={place.name} />}
+      {nearby.data?.map((item) => <Marker key={item.id} coordinate={item.coordinates} title={item.name} onPress={() => select(item.providerId)}><PlaceCallout name={item.name} /></Marker>)}
+      {place && !nearby.data?.some((item) => item.providerId === place.providerId) && <Marker coordinate={place.coordinates} title={place.name}><PlaceCallout name={place.name} /></Marker>}
     </StyledMapView>
     <View style={{ paddingTop: insets.top }} pointerEvents="box-none">
     <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
@@ -155,15 +157,15 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     <MapRecenter position={sheetPosition} onPress={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
     <HomePlaceSheet geometry={sheetGeometry} animatedPosition={sheetPosition} key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
       canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
-      detailsLoaded={!!details.data} detailsLoading={details.isFetching} mapLoading={!mapReady}
+      detailsLoaded={!!complete} detailsLoading={details.isFetching} mapLoading={!mapReady}
       locationStatus={<>{locationStatus}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
       selectionSummary={place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
       onViewDetails={place ? () => {
         if (!active || !focused) return;
-        setPlaceSelection(queryClient, place);
+        setPlaceSelection(queryClient, place, complete ? language : undefined, detailsOptions(selectedId).initialDataUpdatedAt);
         router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
       } : undefined}
-      onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!details.data) select(selectedId); }} onDirections={directions}
+      onRetrySearch={discover} onClosePlace={() => select(null)} onDetails={() => { if (!complete) select(selectedId); }} onDirections={directions}
       onOpenGoogle={place?.mapsUri ? () => open(place.mapsUri!) : undefined}
       onMeasuredHeight={setSheetHeight} containerHeight={sceneSize.height} maxHeight={maxSheetHeight}
       attributions={<ProviderAttributions places={[...(nearby.data ?? []), ...(details.data ? [details.data] : []), ...(handoff.data ? [handoff.data] : [])]} />} />

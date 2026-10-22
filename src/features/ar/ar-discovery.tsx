@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { placeSelectionOptions, setPlaceSelection } from '@/features/places/selection';
 import { router, useLocalSearchParams } from 'expo-router';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
-import { placesService } from '@/features/places/service';
+import { availablePlaceDetails, placeDetailsOptions } from '@/features/places/details-cache';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Image, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -79,9 +79,9 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
   useQuery(placeSelectionOptions(selectedId));
   const nearest = ranked.find((p) => p.eligible);
   const summary = places.find((p) => p.providerId === selectedId);
-  const cachedDetails = useQuery({ queryKey: ['place-details', selectedId, language],
-    queryFn: () => placesService.details(selectedId!, language), enabled: false, gcTime: AR.nearbyReuseMs });
-  const detail = cachedDetails.data?.providerId === selectedId ? cachedDetails.data : null;
+  const detailsOptions = placeDetailsOptions(client, selectedId, language);
+  useQuery({ ...detailsOptions, enabled: false });
+  const detail = availablePlaceDetails(client, selectedId, language);
   const selected = detail ?? summary ?? (handoff.data?.providerId === selectedId ? handoff.data : null);
   const distance = ranked.find((p) => p.place.providerId === selectedId)?.distance;
   const labels = cameraReady && running ? layoutLabels(ranked, viewport.width, selectedId) : [];
@@ -90,13 +90,13 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
     if (!running || !selected || navigating.current) return;
     navigating.current = true;
     // Carry the selected summary without a provider request on map entry.
-    setPlaceSelection(client, selected);
+    setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
     router.navigate({ pathname: '/', params: { placeId: selected.providerId } });
   }
   function directions() {
     if (!running || !selected || navigating.current) return;
     navigating.current = true;
-    setPlaceSelection(client, selected);
+    setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
     const token = createRoutePreviewIntent(client, selected, undefined, 'ar', language);
     router.push({ pathname: '/directions', params: { token } });
   }
@@ -108,13 +108,16 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
     {!tracking && <><Notice>{t('ar.trackingFallback')}</Notice>{location.status === 'ready' && <Action title={t('location.retry')} onPress={location.retry} />}</>}
     {heading === null && <Notice>{t('ar.headingFallback')}</Notice>}
     {data.nearby.error && <Notice>{t(edgeErrorMessageKey(data.nearby.error))}</Notice>}
-    {places.length > 0 && tracking && <Notice>{nearest ? t('ar.nearest', { name: nearest.place.name, meters: Math.round(nearest.distance) }) : t('ar.noneActive', { meters: activationRadiusMeters })}</Notice>}
+    {places.length > 0 && tracking && !nearest && <Text className="font-sans text-sm text-muted">{t('ar.noneActive', { meters: activationRadiusMeters })}</Text>}
     {data.detailRequest?.providerId === selectedId && data.details.isFetching && <Notice busy>{t('map.details')}</Notice>}
-    {data.detailRequest?.providerId === selectedId && data.details.error && <Notice>{t(edgeErrorMessageKey(data.details.error))}</Notice>}
+    {!detail && data.detailRequest?.providerId === selectedId && data.details.error && <Notice>{t(edgeErrorMessageKey(data.details.error))}</Notice>}
+  </>;
+  const guidance = <>
+    {nearest && tracking && <Text className="font-sans text-sm text-muted">{t('ar.nearest', { name: nearest.place.name, meters: Math.round(nearest.distance) })}</Text>}
     <Text className="font-sans text-xs text-muted">{t('ar.approximate', { degrees: AR.horizontalFovDegrees })}</Text>
   </>;
   return <OverlaySafeArea className="flex-1" edges={['top', 'left', 'right', 'bottom']}>
-    <View testID="ar-chrome" className="px-3 pb-2 pt-3" onLayout={event => setChromeHeight(event.nativeEvent.layout.height)}>
+    <View testID="ar-chrome" className="px-3 pb-1 pt-1" onLayout={event => setChromeHeight(event.nativeEvent.layout.height)}>
       <ArChrome headingDegrees={heading} onMap={() => router.navigate('/')}
         onScan={() => { if (tracking) data.scan(); }} scanDisabled={!tracking || data.nearby.isFetching} scanBusy={data.nearby.isFetching} />
     </View>
@@ -124,14 +127,14 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
           top={8} bottom={viewport.height - occupation - 8} fontScale={fontScale} />
       </Animated.View>
       <ArNearbySheet rows={ranked.length ? ranked.map(p => ({ place: p.place, distance: p.distance })) : places.map(place => ({ place, distance: undefined }))}
-        selected={selected} distance={distance} state={state} status={status} running={running}
+        selected={selected} distance={distance} state={state} status={status} guidance={guidance} running={running}
         height={viewport.height} fontScale={fontScale} selectionRevision={selectionRevision} position={sheetPosition} onOccupation={setOccupation}
         detailsLoaded={!!detail} detailsBusy={data.details.isFetching}
         onSelect={select} onMore={() => { if (running && selected) data.more(selected.providerId); }}
         onDetails={() => {
           if (!running || !selected || navigating.current) return;
           navigating.current = true;
-          setPlaceSelection(client, selected);
+          setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
           router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
         }} onDirections={directions} onMap={toMap} />
     </View>

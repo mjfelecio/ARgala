@@ -76,6 +76,21 @@ it('renders the exact existing route, captured origin, destination and real warn
   expect(output()).toContain(translations.t('map.routeSummary', { meters: 867, minutes: 6 })); expect(output()).toContain('Actual provider warning'); expect(output()).toContain(place.address);
   expect(output()).toContain(translations.t('map.walkingCaution')); expect(output()).toContain('Returned credit');
 });
+
+it('discloses journey and route information with the sheet while keeping metrics and credits compact', async () => {
+  handoff(); await mount();
+  expect(output()).not.toContain(translations.t('directions.snapshot'));
+  expect(output()).toContain(translations.t('directions.estimated'));
+  await expand();
+  expect(output()).toContain(translations.t('directions.journey'));
+  expect(output()).toContain(translations.t('directions.information'));
+  expect(output()).toContain(translations.t('directions.originDescription'));
+  expect(output()).toContain(translations.t('directions.snapshot'));
+  expect(output()).toContain('Actual provider warning');
+  await press('map.collapse');
+  expect(output()).not.toContain(translations.t('directions.snapshot'));
+  expect(output()).toContain('Returned credit'); expect(routeService.walking).not.toHaveBeenCalled();
+});
 it('withholds native padding and fitting until this map instance is ready and measures its dock', async () => {
   handoff(); await mount(); await layout(); expect(tree!.root.findByType('map').props).not.toHaveProperty('mapPadding'); expect(controls.fit).not.toHaveBeenCalled();
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });

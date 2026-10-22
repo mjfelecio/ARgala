@@ -60,10 +60,10 @@ export function RoutePreviewMap({ place, origin, destination, coordinates, curre
     </StyledMapView>
     {!ready && <View pointerEvents="none" className="absolute left-4 gap-2 rounded-card bg-surface p-3" style={{ top: headerHeight + 8 }}><Spinner size="sm" /><Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('map.loading')}</Text></View>}
     <Animated.View testID="route-map-controls" className="absolute right-4 top-0 flex-row gap-2" style={controlsStyle}>
-      <Button variant="secondary" isIconOnly accessibilityLabel={t('directions.fit')} isDisabled={!canFit} onPress={fit}>
+      <Button variant="secondary" isIconOnly className="size-12 rounded-card bg-surface shadow-sm" accessibilityLabel={t('directions.fit')} isDisabled={!canFit} onPress={fit}>
         <Ionicons name="scan-outline" size={24} color={destinationColor} />
       </Button>
-      <Button variant="secondary" isIconOnly accessibilityLabel={t('directions.recenter')} isDisabled={!ready || !enabled || !currentPosition}
+      <Button variant="secondary" isIconOnly className="size-12 rounded-card bg-surface shadow-sm" accessibilityLabel={t('directions.recenter')} isDisabled={!ready || !enabled || !currentPosition}
         onPress={() => { if (ready && enabled && currentPosition) map.current?.animateToRegion({ ...currentPosition, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400); }}>
         <Ionicons name="locate-outline" size={24} color={destinationColor} />
       </Button>

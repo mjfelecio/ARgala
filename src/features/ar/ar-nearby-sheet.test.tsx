@@ -115,3 +115,16 @@ it('leaves animated clipping position to the native sheet when expansion is requ
   await act(async()=>sheet.props.onChange(1,640-sheet.props.snapPoints[1]));
   expect(props.onOccupation).toHaveBeenLastCalledWith(sheet.props.snapPoints[1]);
 });
+
+it('shows a nearest summary in the compact dock and discloses guidance independently of selection', async () => {
+  props = { ...props, guidance: <span>ordinary tracking explanation</span> }; await update();
+  expect(JSON.stringify(tree!.toJSON())).toContain(place.name);
+  expect(JSON.stringify(tree!.toJSON())).not.toContain('ordinary tracking explanation');
+  expect(tree!.root.findAllByType('text').some(n => n.props.children === translations.t('ar.nearby'))).toBe(true);
+  expect(tree!.root.findAllByType('text').some(n => n.props.children === translations.t('ar.nearbyCount', { count: 1 }))).toBe(false);
+  const expand = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t('ar.expand'))!;
+  expect(expand.findByType('icon' as React.ElementType).props.name).toBe('chevron-up-outline');
+  await press('ar.expand'); await press('ar.tracking');
+  expect(JSON.stringify(tree!.toJSON())).toContain('ordinary tracking explanation');
+  expect(props.onMore).not.toHaveBeenCalled(); expect(props.onSelect).not.toHaveBeenCalled();
+});
