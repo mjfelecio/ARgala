@@ -20,7 +20,7 @@ export function SystemSettingsAction({ renderAction }: { renderAction?: (onPress
   </>;
   return <Action title={t('common.openSettings')} onPress={openSettings} />;
 }
-export function LocationStatus({ location }: { location: ReturnType<typeof useDeviceLocation> }) {
+export function LocationStatus({ location }: { location: Pick<ReturnType<typeof useDeviceLocation>, 'status' | 'errorCode' | 'retry'> }) {
   const { t } = useTranslation();
   if (location.status === 'ready') return null;
   return <>

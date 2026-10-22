@@ -21,7 +21,7 @@ vi.mock('expo-router', () => ({ useLocalSearchParams: () => ({ token: controls.t
   router: { back: vi.fn(), canGoBack: () => controls.canBack, push: vi.fn(), navigate: vi.fn(), dismissTo: vi.fn(), setParams: vi.fn() } }));
 vi.mock('expo-constants', () => ({ default: { get expoConfig() { return { extra: { mapsConfigured: controls.mapsConfigured } }; } } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language }) }));
-vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ ...controls.location, retry: controls.retry }) }));
+vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ ...controls.location, sampleReceivedAt: Date.now(), retry: controls.retry }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('@/features/places/service', () => ({ placesService: { details: vi.fn(), nearby: vi.fn() } }));
 vi.mock('./service', () => ({ routeService: { walking: vi.fn() } }));
