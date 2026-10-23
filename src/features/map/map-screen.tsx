@@ -143,7 +143,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
       if (width > 0 && height > 0) setSceneSize(previous => previous.width === width && previous.height === height ? previous : { width, height });
     }}>
     <StyledMapView ref={map} className="absolute inset-x-0 top-0" style={{ height: sceneSize.height > 0 ? frameHeight : '100%' }} provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
-      {...(mapReady ? { mapPadding } : {})} showsUserLocation showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
+      {...(mapReady ? { mapPadding } : {})} showsUserLocation={enabled} showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
       onPoiClick={(event) => select(event.nativeEvent.placeId)}>
       <Circle center={position} radius={activationRadiusMeters} strokeColor={routeColor} fillColor={routeArea} />
       {nearby.data?.map((item) => <Marker key={item.id} coordinate={item.coordinates} title={item.name} onPress={() => select(item.providerId)}><PlaceCallout name={item.name} /></Marker>)}

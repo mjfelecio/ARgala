@@ -67,6 +67,18 @@ afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined
 it.each([undefined, '', 'unknown', ['bad']])('never requests a route from bare or invalid entry %j', async token => {
   controls.token = token; await mount(); expect(routeService.walking).not.toHaveBeenCalled(); expect(output()).toContain(translations.t('directions.unavailable')); expect(tree!.root.findAllByType('polyline')).toHaveLength(0);
 });
+it.each(['focused', 'active'] as const)('disables native route-map location while %s ownership is absent', async lifecycle => {
+  handoff(); await mount();
+  const map = tree!.root.findByType('map');
+  expect(map.props.showsUserLocation).toBe(true);
+  controls[lifecycle] = false; await update();
+  expect(tree!.root.findByType('map')).toBe(map);
+  expect(map.props.showsUserLocation).toBe(false);
+  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
+  controls[lifecycle] = true; await update();
+  expect(map.props.showsUserLocation).toBe(true);
+  expect(routeService.walking).not.toHaveBeenCalled();
+});
 it('renders the exact existing route, captured origin, destination and real warnings without requesting', async () => {
   handoff(); controls.location.position = { latitude: 10, longitude: 124 }; await mount(); await expand();
   expect(routeService.walking).not.toHaveBeenCalled(); expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);

@@ -129,6 +129,24 @@ it('withholds native map padding through layout and lifecycle updates until Goog
   expect(placesService.details).not.toHaveBeenCalled();
   expect(routeService.walking).not.toHaveBeenCalled();
 });
+it.each(['focused', 'active'] as const)('disables the retained native location layer when %s ownership ends', async lifecycle => {
+  await act(async () => { tree = create(renderMap()); });
+  const map = tree!.root.findByType('map');
+  await act(async () => map.props.onMapReady());
+  expect(map.props.showsUserLocation).toBe(true);
+  controls[lifecycle] = false;
+  await act(async () => tree!.update(renderMap()));
+  expect(tree!.root.findByType('map')).toBe(map);
+  expect(map.props.showsUserLocation).toBe(false);
+  controls[lifecycle] = true; controls.hasLocation = false;
+  await act(async () => tree!.update(renderMap()));
+  expect(map.props.showsUserLocation).toBe(false);
+  controls.hasLocation = true;
+  await act(async () => tree!.update(renderMap()));
+  expect(map.props.showsUserLocation).toBe(true);
+  expect(controls.fit).not.toHaveBeenCalled(); expect(controls.animate).not.toHaveBeenCalled();
+  expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
+});
 it('retains the map through a focus-driven GPS restart without requiring new native readiness', async () => {
   await act(async () => { tree = create(renderMap()); });
   await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
