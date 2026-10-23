@@ -64,7 +64,31 @@ it.each(['en', 'ko', 'ja'])('keeps the %s header compact with degree-only headin
  expect(scan).toHaveBeenCalledOnce();
  expect(map).not.toHaveBeenCalled();
  await act(async () => tree!.update(render(React.createElement(ArChrome, { headingDegrees: 138, onMap: map, onScan: scan, scanDisabled: false, scanBusy: false }))));
- expect(tree!.root.findAllByType('text').some(node => node.props.children === '138°')).toBe(true);
+ expect(tree!.root.findAllByType('text').some(node => node.props.children === '140°')).toBe(true);
+});
+it.each(['en', 'ko', 'ja'])('calms only the %s degree readout and clears invalid direction immediately', async language => {
+ await translations.changeLanguage(language);
+ const onMap = vi.fn(); const onScan = vi.fn();
+ const header = (headingDegrees: number | null) => React.createElement(ArChrome, { headingDegrees, onMap, onScan, scanDisabled: false, scanBusy: false });
+ const shown = () => tree!.root.findAllByType('text').map(node => node.props.children).find(text => typeof text === 'string' && /^\d+°$/.test(text));
+ const updateHeading = async (degrees: number | null) => { await act(async () => tree!.update(render(header(degrees)))); };
+ await mount(header(233));
+ expect(shown()).toBe('230°');
+ for (const degrees of [235, 231, 229, 234, 232]) {
+  await updateHeading(degrees);
+  expect(shown()).toBe('230°');
+  expect(tree!.root.findByType(ArChrome).props.headingDegrees).toBe(degrees);
+ }
+ await updateHeading(239); expect(shown()).toBe('240°');
+ await updateHeading(329); expect(shown()).toBe('330°');
+ await updateHeading(359); expect(shown()).toBe('0°');
+ for (const degrees of [1, 358, 2]) { await updateHeading(degrees); expect(shown()).toBe('0°'); }
+ await updateHeading(233); expect(shown()).toBe('230°');
+ await updateHeading(null);
+ expect(shown()).toBeUndefined();
+ expect(tree!.root.findAllByType('text').find(node => node.props.accessibilityLabel === translations.t('ar.compassUnavailable'))!.props.children).toBe('—');
+ await updateHeading(236); expect(shown()).toBe('240°');
+ expect(onScan).not.toHaveBeenCalled(); expect(onMap).not.toHaveBeenCalled();
 });
 it.each(['D01', 'D09', 'unknown'])('anchors direct destination %s Back through catalog then Explore with the installed router', async destinationId => {
  const { getRoutes } = require('expo-router/build/getRoutesCore');

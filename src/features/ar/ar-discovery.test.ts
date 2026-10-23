@@ -21,17 +21,24 @@ const controls = vi.hoisted(() => ({ active: true, focused: true, granted: true,
   location: { status: 'ready', watcherStatus: 'ready', position: { latitude: 0, longitude: 0 } as { latitude: number; longitude: number } | null,
     accuracy: 5 as number | null, positionTimestamp: 0, watcherTimestamp: 0, headingTimestamp: 0,
     headingStatus: 'ready', heading: { degrees: 0, accuracy: 3, reference: 'true' } as { degrees: number; accuracy: number; reference: string } | null, retry: vi.fn() },
-  navigate: vi.fn(), push: vi.fn(), getPermission: vi.fn(), params: {} as { placeId?: string },
+  receiptTime: null as number | null, notifyLocation: null as null | (() => void), cameraRender: vi.fn(), navigate: vi.fn(), push: vi.fn(), getPermission: vi.fn(), params: {} as { placeId?: string },
   stack: { addListener: () => () => {} },
 }));
 vi.mock('expo-router', () => ({ useNavigation: () => controls.stack, useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params, router: { navigate: controls.navigate, push: controls.push, setParams: vi.fn(() => { controls.params = {}; }) } }));
 vi.mock('expo-camera', async () => {
   const { createElement } = await import('react');
-  return { CameraView: (props: Record<string, unknown>) => createElement('video', props),
+  return { CameraView: (props: Record<string, unknown>) => { controls.cameraRender(); return createElement('video', props); },
     useCameraPermissions: () => [{ granted: controls.granted, canAskAgain: true }, controls.getPermission, controls.getPermission] };
 });
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language, activationRadiusMeters: controls.radius }) }));
-vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => controls.location }));
+vi.mock('@/features/location/use-device-location', async () => {
+  const { useEffect, useReducer } = await import('react');
+  return { useDeviceLocation: () => {
+    const [, notify] = useReducer(value => value + 1, 0);
+    useEffect(() => { controls.notifyLocation = notify; return () => { controls.notifyLocation = null; }; }, []);
+    return { ...controls.location, sampleReceivedAt: controls.receiptTime ?? Date.now() };
+  } };
+});
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('@/features/directions/service', () => ({ routeService: { walking: vi.fn() } }));
 vi.mock('@/features/places/service', () => ({ placesService: { nearby: vi.fn(), details: vi.fn() } }));
@@ -64,6 +71,7 @@ async function update() { await act(async () => { tree!.update(render()); }); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   controls.active = true; controls.focused = true; controls.granted = true; controls.language = 'en'; controls.radius = 100;
+  controls.receiptTime = null;
   Object.assign(controls.location, { status: 'ready', watcherStatus: 'ready', position: { latitude: 0, longitude: 0 }, accuracy: 5,
     positionTimestamp: Date.now(), watcherTimestamp: Date.now(), headingTimestamp: Date.now(), headingStatus: 'ready', heading: { degrees: 0, accuracy: 3, reference: 'true' } });
   controls.params = {}; controls.navigate.mockReset(); controls.push.mockReset(); controls.getPermission.mockReset().mockResolvedValue({ granted: true });
@@ -456,4 +464,113 @@ it('keeps positive camera bounds through hidden layouts and updates only for a r
  await act(async()=>tree!.root.findByProps({testID:'ar-scene'}).props.onLayout({nativeEvent:{layout:{width:640,height:360}}}));
  expect(tree!.root.findByType('video').props.style).toMatchObject({width:640,height:360});
  expect(placesService.nearby).not.toHaveBeenCalled();
+});
+
+it('keeps the freshness clock alive across heading samples without an extra commit per sample', async () => {
+  vi.useFakeTimers(); await mount();
+  const interval = vi.spyOn(globalThis, 'setInterval');
+  // Advance receipt time without firing the one-second freshness tick.
+  for (let i = 1; i <= 10; i++) {
+    vi.setSystemTime(Date.now() + 50);
+    controls.location.heading = { degrees: i * 2, accuracy: 3, reference: 'true' };
+    controls.location.headingTimestamp = Date.now();
+    await update();
+  }
+  expect(interval).not.toHaveBeenCalled();
+  expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+
+it('does not rerender the native camera when only live sensor samples change', async () => {
+  await mount();
+  controls.cameraRender.mockClear();
+  for (let i = 1; i <= 10; i++) {
+    controls.location.heading = { degrees: i * 2, accuracy: 3, reference: 'true' };
+    controls.location.headingTimestamp = Date.now();
+    await act(async () => { controls.notifyLocation!(); });
+  }
+  expect(tree!.root.findAllByType('video')).toHaveLength(1);
+  expect(controls.cameraRender).not.toHaveBeenCalled();
+  expect(placesService.nearby).not.toHaveBeenCalled();
+});
+
+it('does not repeat geographic distance work for compass-only updates', async () => {
+  await mount(); await scan();
+  const geo = await import('@/features/location/geo');
+  const distance = vi.spyOn(geo, 'distanceMeters');
+  for (let i = 1; i <= 10; i++) {
+    controls.location.heading = { degrees: i * 2, accuracy: 3, reference: 'true' };
+    await act(async () => { controls.notifyLocation!(); });
+  }
+  expect(distance).not.toHaveBeenCalled();
+  expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe('North Cafe');
+  controls.location.position = { latitude: 0.0001, longitude: 0 };
+  await act(async () => { controls.notifyLocation!(); });
+  expect(distance).toHaveBeenCalled();
+  expect(placesService.nearby).toHaveBeenCalledTimes(1);
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+
+it('keeps raw proximity and quality authority through noisy headings, movement and degraded GPS', async () => {
+  await mount(); await scan();
+  const labels = () => tree!.root.findAllByType(Pressable).filter(p => p.props.testID?.startsWith('ar-label-'));
+  for (const degrees of [359, 1, 358, 2, 0]) {
+    controls.location.heading = { degrees, accuracy: 3, reference: 'true' };
+    controls.location.headingTimestamp = Date.now();
+    await act(async () => { controls.notifyLocation!(); });
+    expect(labels().some(p => p.props.testID === 'ar-label-north')).toBe(true);
+  }
+  controls.location.heading = { degrees: 180, accuracy: 3, reference: 'true' };
+  await act(async () => { controls.notifyLocation!(); });
+  expect(labels().some(p => p.props.testID === 'ar-label-north')).toBe(false);
+  controls.location.heading = { degrees: 0, accuracy: 2, reference: 'true' };
+  controls.location.accuracy = 82;
+  controls.location.position = { latitude: -0.00075, longitude: 0 };
+  await act(async () => { controls.notifyLocation!(); });
+  expect(output()).not.toContain(translations.t('ar.noneActive', { meters: 100 }));
+  controls.location.position = { latitude: -0.00085, longitude: 0 };
+  await act(async () => { controls.notifyLocation!(); });
+  expect(output()).toContain(translations.t('ar.noneActive', { meters: 100 }));
+  controls.location.accuracy = 101;
+  await act(async () => { controls.notifyLocation!(); });
+  expect(labels()).toHaveLength(0);
+  expect(output()).toContain(translations.t('ar.trackingFallback'));
+  expect(tree!.root.findByProps({ testID: 'ar-list-north' })).toBeDefined();
+  controls.location.accuracy = 5;
+  controls.location.watcherTimestamp = Date.now() - AR.positionMaxAgeMs - 1;
+  await act(async () => { controls.notifyLocation!(); });
+  expect(labels()).toHaveLength(0);
+  expect(placesService.nearby).toHaveBeenCalledTimes(1);
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+
+it('expires raw GPS during continuous fresh heading traffic even before the next clock tick', async () => {
+  vi.useFakeTimers();
+  client.setQueryData(['places', { latitude: 0, longitude: 0 }, 'en'], [north]);
+  await mount();
+  const start = Date.now();
+  for (let index = 1; index <= 4; index++) {
+    // Advance event receipt without running the periodic clock. Neither raw GPS
+    // timestamp may be renewed by a live compass or by visual interpolation.
+    vi.setSystemTime(start + index * 8000);
+    controls.receiptTime = Date.now();
+    controls.location.headingTimestamp = Date.now();
+    controls.location.heading = { degrees: index, accuracy: 3, reference: 'true' };
+    await act(async () => { controls.notifyLocation!(); });
+  }
+  expect(output()).toContain(translations.t('ar.trackingFallback'));
+  expect(tree!.root.findAllByType(Pressable).filter(p => p.props.testID?.startsWith('ar-label-'))).toHaveLength(0);
+  expect(tree!.root.findByProps({ testID: 'ar-list-north' })).toBeDefined();
+  expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+
+it('rejects future native GPS timestamps instead of treating them as the receipt clock', async () => {
+  await mount();
+  controls.location.positionTimestamp = Date.now() + 60000;
+  controls.location.watcherTimestamp = controls.location.positionTimestamp;
+  controls.receiptTime = Date.now();
+  await act(async () => { controls.notifyLocation!(); });
+  expect(output()).toContain(translations.t('ar.trackingFallback'));
+  expect(placesService.nearby).not.toHaveBeenCalled();
 });

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppActive } from '@/lib/use-app-active';
 import { useIsFocused } from 'expo-router';
 import { LOCATION } from '@/config/limits';
@@ -14,9 +14,11 @@ type DeviceState = {
   errorCode: LocationErrorCode | null;
   position: Coordinate | null; accuracy: number | null; heading: Heading | null;
   positionTimestamp: number | null; watcherTimestamp: number | null; headingTimestamp: number | null;
+  /** JS receipt clock for rendering; never substitutes for native sample freshness. */
+  sampleReceivedAt: number | null;
   headingStatus: 'pending' | 'ready' | 'unavailable'; canAskAgain: boolean; error: string | null;
 };
-const initial: DeviceState = { phase: 'waiting', status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, positionTimestamp: null, watcherTimestamp: null, headingTimestamp: null, headingStatus: 'pending', canAskAgain: true, error: null };
+const initial: DeviceState = { phase: 'waiting', status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, positionTimestamp: null, watcherTimestamp: null, headingTimestamp: null, sampleReceivedAt: null, headingStatus: 'pending', canAskAgain: true, error: null };
 
 export function useDeviceLocation({ enabled = true, heading: needsHeading = false, distanceIntervalMeters = LOCATION.distanceIntervalMeters }: { enabled?: boolean; heading?: boolean; distanceIntervalMeters?: number } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
@@ -57,12 +59,13 @@ export function useDeviceLocation({ enabled = true, heading: needsHeading = fals
       const receive = (position: Awaited<ReturnType<typeof getCurrentCoordinates>>, fromWatcher = false) => {
         if (disposed) return;
         clearTimeout(startupTimer);
+        const sampleReceivedAt = Date.now();
         setState((previous) => {
           // A one-shot fix provides coordinates, but cannot establish watcher health.
           const watcherStatus = fromWatcher ? 'ready' : previous.watcherStatus;
           return { ...previous, watcherStatus, status: watcherStatus === 'error' ? 'error' : 'ready',
             position: { latitude: position.coords.latitude, longitude: position.coords.longitude },
-            accuracy: position.coords.accuracy, positionTimestamp: position.timestamp,
+            accuracy: position.coords.accuracy, positionTimestamp: position.timestamp, sampleReceivedAt,
             watcherTimestamp: fromWatcher ? position.timestamp : previous.watcherTimestamp, error: watcherStatus === 'error' ? previous.error : null,
             errorCode: watcherStatus === 'error' ? previous.errorCode : null };
         });
@@ -76,7 +79,8 @@ export function useDeviceLocation({ enabled = true, heading: needsHeading = fals
       if (needsHeading) {
         headingTimer = setTimeout(() => patch({ headingStatus: 'unavailable', heading: null }), 10000);
         stops.push(manageSubscription(() => subscribeToHeading((heading) => {
-          clearTimeout(headingTimer); patch({ heading, headingTimestamp: heading ? Date.now() : null, headingStatus: heading ? 'ready' : 'unavailable' });
+          const sampleReceivedAt = Date.now();
+          clearTimeout(headingTimer); patch({ heading, sampleReceivedAt, headingTimestamp: heading ? sampleReceivedAt : null, headingStatus: heading ? 'ready' : 'unavailable' });
         }, () => patch({ headingStatus: 'unavailable', heading: null })), () => patch({ headingStatus: 'unavailable', heading: null })));
       }
       try { receive(await getCurrentCoordinates()); }
@@ -85,5 +89,6 @@ export function useDeviceLocation({ enabled = true, heading: needsHeading = fals
     void start().catch((error: unknown) => { clearTimeout(startupTimer); patch({ status: 'error', ...locationFailure(error) }); });
     return stop;
   }, [enabled, active, focused, attempt, needsHeading, distanceIntervalMeters]);
-  return { ...state, retry: () => setAttempt((value) => value + 1) };
+  const retry = useCallback(() => setAttempt((value) => value + 1), []);
+  return { ...state, retry };
 }

@@ -31,13 +31,18 @@ export function useRoutePreview(token: unknown, configured: boolean) {
   const authorized = useRef(false);
   const [owner] = useState(Symbol);
   const data = session.data;
-  const expired = !!data && now - data.intent.createdAt >= routePreviewLifetimeMs;
+  const clockExpired = !!data && now - data.intent.createdAt >= routePreviewLifetimeMs;
   // A dead link cannot authorize even permission checks or a native GPS owner.
   // Completed previews still use location for the live marker/Recenter; waiting
   // sessions need this screen's unexpired claim, or an explicit retry first.
-  const locationEnabled = configured && !!data && (data.status === 'success' || data.status === 'pending' ||
-    (data.status === 'waiting' && data.owner === owner && !expired));
-  const location = useDeviceLocation({ enabled: locationEnabled });
+  const sensorsEnabled = configured && !!data && (data.status === 'success' || data.status === 'pending' ||
+    (data.status === 'waiting' && data.owner === owner && !clockExpired));
+  const location = useDeviceLocation({ enabled: sensorsEnabled });
+  const sampleNow = Math.max(now, location.sampleReceivedAt ?? now);
+  const expired = !!data && sampleNow - data.intent.createdAt >= routePreviewLifetimeMs;
+  // A sample can retire presentation/authority before the next one-second
+  // clock tick retires the waiting session's native subscription.
+  const locationEnabled = sensorsEnabled && (data?.status !== 'waiting' || !expired);
   const tracking = running && locationEnabled;
   const [ownership, setOwnership] = useState(() => ({ running: tracking, since: Date.now() }));
   useEffect(() => {
@@ -52,7 +57,7 @@ export function useRoutePreview(token: unknown, configured: boolean) {
     void Promise.resolve().then(() => { if (alive) setNow(Date.now()); });
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => { alive = false; clearInterval(timer); };
-  }, [running, location.positionTimestamp, location.watcherTimestamp]);
+  }, [running]);
   useEffect(() => {
     if (attemptedClaim.current) return;
     attemptedClaim.current = true;
@@ -67,8 +72,7 @@ export function useRoutePreview(token: unknown, configured: boolean) {
   }, [client, token, key, owner]);
   // Check both the latest fix and the continuous watcher's sample/health. A new
   // foreground owner must receive its own sample, not a retained pre-resume fix.
-  const timestamp = now;
-  const fresh = (time: number | null) => time !== null && Number.isFinite(time) && time >= ownership.since && time <= timestamp + 1000 && timestamp - time <= AR.positionMaxAgeMs;
+  const fresh = (time: number | null) => time !== null && Number.isFinite(time) && time >= ownership.since && time <= sampleNow + 1000 && sampleNow - time <= AR.positionMaxAgeMs;
   const usable = tracking && ownership.running === tracking && location.status === 'ready' && location.watcherStatus === 'ready' && isCoordinate(location.position) &&
     fresh(location.positionTimestamp) && fresh(location.watcherTimestamp) && location.accuracy !== null &&
     Number.isFinite(location.accuracy) && location.accuracy >= 0 && location.accuracy <= AR.maxPositionAccuracyMeters;

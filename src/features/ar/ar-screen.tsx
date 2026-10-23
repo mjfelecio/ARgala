@@ -33,7 +33,6 @@ export default function ArScreen() {
     return () => { start(); end(); };
   }, [stack]);
   const active = useAppActive(); const focused = useIsFocused();
-  const location = useDeviceLocation({ heading: true, distanceIntervalMeters: 0 });
   const checkPermission = useCallback(async () => {
     try { await getPermission(); setError(null); }
     catch { setError('camera.permissionCheckFailed'); }
@@ -63,6 +62,11 @@ export default function ArScreen() {
     if (width > 0 && height > 0) setScene(previous => previous.width === width && previous.height === height ? previous : { width, height });
   }}>
     {cameraReady && <CameraView style={{ position: 'absolute', top: 0, left: 0, width: scene.width, height: scene.height }} facing="back" onMountError={() => setError('camera.mountFailed')} />}
-    <ArDiscovery location={location} running={running} cameraReady={cameraReady} cameraStatus={cameraStatus} />
+    <ArDiscoveryWithLocation running={running} cameraReady={cameraReady} cameraStatus={cameraStatus} />
   </View>;
+}
+
+function ArDiscoveryWithLocation({ running, cameraReady, cameraStatus }: { running: boolean; cameraReady: boolean; cameraStatus: React.ReactNode }) {
+  const location = useDeviceLocation({ heading: true, distanceIntervalMeters: 0 });
+  return <ArDiscovery location={location} running={running} cameraReady={cameraReady} cameraStatus={cameraStatus} />;
 }

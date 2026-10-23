@@ -90,3 +90,15 @@ it('keeps watcher sample freshness independent of a newer one-shot fix', async (
   expect(current.positionTimestamp).toBe(100);
   expect(current.watcherTimestamp).toBe(1);
 });
+
+it('records receipt time separately from native timestamps without refreshing watcher authority', async () => {
+  const clock = vi.spyOn(Date, 'now').mockReturnValue(5000);
+  await act(async () => { tree = create(React.createElement(Probe)); });
+  await act(async () => { vi.mocked(subscribeToLocation).mock.calls[0][0](fix); });
+  expect(current).toHaveProperty('sampleReceivedAt', 5000);
+  clock.mockReturnValue(6000);
+  await act(async () => { oneShot.resolve({ ...fix, timestamp: 60000 }); });
+  expect(current).toHaveProperty('sampleReceivedAt', 6000);
+  expect(current.positionTimestamp).toBe(60000);
+  expect(current.watcherTimestamp).toBe(1);
+});

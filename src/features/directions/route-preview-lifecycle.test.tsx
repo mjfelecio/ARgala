@@ -71,6 +71,20 @@ it('claims once with installed SDK focus hooks before navigation readiness, wait
   navigation.focused = false; await act(async () => { tree!.update(render()); }); expect(navigation.remove).toHaveBeenCalledOnce();
   navigation.focused = true; await act(async () => { tree!.update(render()); vi.mocked(subscribeToLocation).mock.calls.at(-1)![0](fix()); }); expect(routeService.walking).toHaveBeenCalledOnce();
 });
+it('does not rearm the freshness clock for location samples or repeat the route request', async () => {
+  const setIntervalSpy = vi.spyOn(globalThis, 'setInterval');
+  await act(async () => { tree = create(render()); });
+  const intervalCount = setIntervalSpy.mock.calls.length;
+  const emit = vi.mocked(subscribeToLocation).mock.calls[0][0];
+  for (let index = 0; index < 4; index++) {
+    await act(async () => {
+      vi.setSystemTime(Date.now() + 100);
+      emit({ ...fix(), coords: { ...fix().coords, latitude: 11.01 + index / 1000 } });
+    });
+  }
+  expect(setIntervalSpy).toHaveBeenCalledTimes(intervalCount);
+  expect(routeService.walking).toHaveBeenCalledOnce();
+});
 it('bounds full location startup with pending SDK navigation and permits no paid request after deadline', async () => {
   const permission = Promise.withResolvers<Awaited<ReturnType<typeof requestLocationPermission>>>(); vi.mocked(requestLocationPermission).mockReturnValue(permission.promise);
   await act(async () => { tree = create(render()); }); await act(async () => { await vi.advanceTimersByTimeAsync(15000); });

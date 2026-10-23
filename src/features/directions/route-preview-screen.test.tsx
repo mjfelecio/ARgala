@@ -21,7 +21,7 @@ vi.mock('expo-router', () => ({ useLocalSearchParams: () => ({ token: controls.t
   router: { back: vi.fn(), canGoBack: () => controls.canBack, push: vi.fn(), navigate: vi.fn(), dismissTo: vi.fn(), setParams: vi.fn() } }));
 vi.mock('expo-constants', () => ({ default: { get expoConfig() { return { extra: { mapsConfigured: controls.mapsConfigured } }; } } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language }) }));
-vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ ...controls.location, retry: controls.retry }) }));
+vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ ...controls.location, sampleReceivedAt: Date.now(), retry: controls.retry }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('@/features/places/service', () => ({ placesService: { details: vi.fn(), nearby: vi.fn() } }));
 vi.mock('./service', () => ({ routeService: { walking: vi.fn() } }));
@@ -66,6 +66,18 @@ beforeEach(async () => {
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; nativeUi.fontScale=1; client.clear(); notifyManager.setScheduler(cb => setTimeout(cb, 0)); vi.restoreAllMocks(); });
 it.each([undefined, '', 'unknown', ['bad']])('never requests a route from bare or invalid entry %j', async token => {
   controls.token = token; await mount(); expect(routeService.walking).not.toHaveBeenCalled(); expect(output()).toContain(translations.t('directions.unavailable')); expect(tree!.root.findAllByType('polyline')).toHaveLength(0);
+});
+it.each(['focused', 'active'] as const)('disables native route-map location while %s ownership is absent', async lifecycle => {
+  handoff(); await mount();
+  const map = tree!.root.findByType('map');
+  expect(map.props.showsUserLocation).toBe(true);
+  controls[lifecycle] = false; await update();
+  expect(tree!.root.findByType('map')).toBe(map);
+  expect(map.props.showsUserLocation).toBe(false);
+  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
+  controls[lifecycle] = true; await update();
+  expect(map.props.showsUserLocation).toBe(true);
+  expect(routeService.walking).not.toHaveBeenCalled();
 });
 it('renders the exact existing route, captured origin, destination and real warnings without requesting', async () => {
   handoff(); controls.location.position = { latitude: 10, longitude: 124 }; await mount(); await expand();

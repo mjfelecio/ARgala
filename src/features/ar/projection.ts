@@ -22,7 +22,7 @@ export function selectedPlaceId(places: RankedPlace[], manualId: string | null):
   return places.find((p) => p.place.providerId === manualId)?.place.providerId ??
     places.find((p) => p.eligible)?.place.providerId ?? null;
 }
-export type OverlayLabel = RankedPlace & { left: number; width: number; lane: number };
+export type OverlayLabel = RankedPlace & { left: number; maxLeft: number; width: number; lane: number };
 /** One label per vertical lane prevents overlap, including clustered bearings. */
 export function layoutLabels(places: RankedPlace[], viewportWidth: number, selectedId: string | null): OverlayLabel[] {
   if (!Number.isFinite(viewportWidth) || viewportWidth < 2 * AR.labelGap + 48) return [];
@@ -32,6 +32,6 @@ export function layoutLabels(places: RankedPlace[], viewportWidth: number, selec
     // Distance dominates, with a small center preference for similarly distant POIs.
     (a.distance + Math.abs(a.x! - 0.5) * 40) - (b.distance + Math.abs(b.x! - 0.5) * 40) ||
     a.place.providerId.localeCompare(b.place.providerId))
-    .slice(0, AR.maxLabels).map((p, lane) => ({ ...p, lane, width,
+    .slice(0, AR.maxLabels).map((p, lane) => ({ ...p, lane, width, maxLeft: viewportWidth - width - AR.labelGap,
       left: Math.max(AR.labelGap, Math.min(viewportWidth - width - AR.labelGap, p.x! * viewportWidth - width / 2)) }));
 }
