@@ -20,8 +20,11 @@ import { RoutePreviewSheet } from './route-preview-sheet';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
 import { useSharedValue } from 'react-native-reanimated';
 import { destinationIdForRoutePlace } from '@/features/destinations/routing';
+import { useWalkingNavigation } from './use-walking-navigation';
+import type { Coordinate } from '@/features/location/geo';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
+const EMPTY_COORDINATES: Coordinate[] = [];
 export default function RoutePreviewScreen() {
   const { token } = useLocalSearchParams();
   // Different URL intents have independent leases and native map readiness.
@@ -33,6 +36,17 @@ function Preview({ token }: { token: unknown }) {
   const configured = !!Constants.expoConfig?.extra?.mapsConfigured;
   const preview = useRoutePreview(token, configured);
   const { data, result, location, usable, running } = preview;
+  const coordinates = result?.coordinates ?? EMPTY_COORDINATES;
+  const place = data?.intent.place;
+  const navigation = useWalkingNavigation({ coordinates, destination: result?.destination ?? place?.coordinates,
+    location, usable, running, now: preview.now });
+  const navigationStatusKey = {
+    preview: 'directions.navigationPreview',
+    navigating: 'directions.navigationNavigating',
+    uncertain: 'directions.navigationUncertainShort',
+    'off-route': 'directions.navigationOffRouteShort',
+    arrived: 'directions.navigationArrived',
+  }[navigation.status];
   const insets = useSafeAreaInsets();
   const sheetPosition = useSharedValue(0);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -42,8 +56,6 @@ function Preview({ token }: { token: unknown }) {
   const { fontScale = 1 } = useWindowDimensions();
   const sheetGeometry = routeSheetGeometry(viewportHeight, headerHeight, insets.bottom, fontScale);
   const accent = useThemeColor('accent');
-  const coordinates = result?.coordinates ?? [];
-  const place = data?.intent.place;
   function toMap() {
     // Curated Home-map selection is deferred; never forward catalog IDs to Google's selection path.
     if (place?.provider === 'curated') { router.dismissTo('/'); return; }
@@ -54,6 +66,7 @@ function Preview({ token }: { token: unknown }) {
     <FocusedStatusBar style="dark" />
     <View testID="route-preview-scene" className="flex-1" onLayout={event => { if (event.nativeEvent.layout.height > 0) setViewportHeight(event.nativeEvent.layout.height); }}>
       {place && configured && <RoutePreviewMap place={place} origin={result?.origin} destination={result?.destination ?? place.coordinates} coordinates={coordinates}
+        displayCoordinates={navigation.started ? navigation.remainingCoordinates : coordinates}
         currentPosition={usable ? location.position : null} dockHeight={dockHeight} settledDockHeight={settledDockHeight}
         headerHeight={headerHeight} position={sheetPosition} enabled={running} sceneHeight={viewportHeight} collapsedHeight={sheetGeometry.peek} />}
       <View testID="route-preview-header" className="absolute inset-x-0 top-0 px-4 pb-1" style={{ paddingTop: insets.top + 4 }} onLayout={event => setHeaderHeight(event.nativeEvent.layout.height)}>
@@ -74,10 +87,20 @@ function Preview({ token }: { token: unknown }) {
           </View>
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}
-          {result && coordinates.length > 1 && <>
+          {result && coordinates.length > 1 && !navigation.started && <>
             <Text className="font-sans text-title font-bold text-foreground">{t('map.routeSummary', { meters: result.route.distanceMeters, minutes: Math.ceil(result.route.durationSeconds / 60) })}</Text>
             <Text className="font-sans text-xs text-muted">{t('directions.estimated')}</Text>
           </>}
+          {result && coordinates.length > 1 && !navigation.started && (navigation.canStart
+            ? <Button variant="primary" className="min-h-12" accessibilityLabel={t('directions.startNavigation')} onPress={navigation.start}><Button.Label>{t('directions.startNavigation')}</Button.Label></Button>
+            : <Text className="font-sans text-sm text-muted">{t('directions.navigationNeedsLocation')}</Text>)}
+          {navigation.started && <View className="gap-2 rounded-card bg-surface-secondary p-3">
+            <Text accessibilityLiveRegion="polite" className="font-sans text-sm font-semibold text-foreground">{t(navigationStatusKey)}</Text>
+            <Text className="font-sans text-sm text-foreground">{t('directions.remaining', { meters: Math.max(0, Math.round(navigation.remainingMeters)) })}</Text>
+            {navigation.status === 'arrived'
+              ? <Button variant="outline" accessibilityLabel={t('directions.returnToPreview')} onPress={navigation.stop}><Button.Label>{t('directions.returnToPreview')}</Button.Label></Button>
+              : <Button variant="outline" accessibilityLabel={t('directions.stopNavigation')} onPress={navigation.stop}><Button.Label>{t('directions.stopNavigation')}</Button.Label></Button>}
+          </View>}
           {place && preview.locationEnabled && data?.status === 'waiting' && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('directions.waiting')}</Text>}
           {place && preview.locationEnabled && !usable && <><RoutePreviewLocationStatus location={location} />{location.status === 'ready' && <><Text className="font-sans text-sm text-muted">{t('directions.stale')}</Text><Button variant="outline" accessibilityLabel={t('location.retry')} onPress={location.retry}><Button.Label>{t('location.retry')}</Button.Label></Button></>}</>}
           {data?.status === 'waiting' && preview.expired && <Text className="font-sans text-sm text-muted">{t('directions.unavailable')}</Text>}
@@ -103,6 +126,13 @@ function Preview({ token }: { token: unknown }) {
             <Text className="font-sans text-sm text-muted">{t('directions.snapshot')}</Text>
             {result.route.warnings.map((warning, index) => <View key={index} className="flex-row items-start gap-2"><Ionicons name="warning-outline" size={20} color={accent} /><Text className="min-w-0 flex-1 font-sans text-sm text-foreground">{warning}</Text></View>)}
             <Text className="font-sans text-sm text-muted">{t('map.walkingCaution')}</Text>
+          </View>}
+          {expanded && navigation.started && <View className="gap-2 border-t border-outline pt-4">
+            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.navigationInformation')}</Text>
+            {navigation.status === 'uncertain' && <Text className="font-sans text-sm text-muted">{t('directions.navigationUncertainDetail')}</Text>}
+            {navigation.status === 'off-route' && <Text className="font-sans text-sm text-muted">{t('directions.navigationOffRouteDetail')}</Text>}
+            {navigation.status === 'arrived' && <Text className="font-sans text-sm text-muted">{t('directions.navigationArrival')}</Text>}
+            <Text className="font-sans text-sm text-muted">{t('directions.noAutomaticReroute')}</Text>
           </View>}
           {place && <ProviderAttributions places={[place]} />}
           {expanded && <View className="flex-row flex-wrap gap-2 border-t border-outline pt-4">
