@@ -226,7 +226,22 @@
     "journey": "Journey",
     "information": "Route information",
     "estimated": "Estimated walking route",
-    "originDescription": "Your location when this route was requested."
+    "originDescription": "Your location when this route was requested.",
+    "startNavigation": "Start Navigation",
+    "navigationNeedsLocation": "A fresh, accurate location is required to start navigation.",
+    "stopNavigation": "Stop navigation",
+    "returnToPreview": "Return to route preview",
+    "navigationPreview": "Route preview",
+    "navigationNavigating": "Walking navigation active",
+    "navigationUncertainShort": "Location uncertain · progress paused",
+    "navigationUncertainDetail": "Progress is paused, and the last confirmed progress is retained until reliable readings return. If progress stays paused after a long interruption, stop and start navigation again from your current position.",
+    "navigationOffRouteShort": "Off route · progress paused",
+    "navigationOffRouteDetail": "You may be away from this route. Progress is paused while your location is checked.",
+    "navigationArrived": "You have arrived",
+    "remaining": "About {{meters}} m remaining",
+    "navigationInformation": "Walking progress",
+    "navigationArrival": "Arrival was confirmed from repeated current location readings near the destination.",
+    "noAutomaticReroute": "This route does not update automatically. Stop navigation to return to the full route preview."
   },
   "destinations": {
     "title": "Featured Destinations",

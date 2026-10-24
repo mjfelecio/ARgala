@@ -13,8 +13,9 @@ import type { Place } from '@/features/places/service';
 import { MAP_SHEET_OVERLAP } from '@/features/map/sheet-geometry';
 
 const StyledMapView = withUniwind(MapView);
-export function RoutePreviewMap({ place, origin, destination, coordinates, currentPosition, dockHeight, settledDockHeight, headerHeight, position, enabled, sceneHeight, collapsedHeight }: {
+export function RoutePreviewMap({ place, origin, destination, coordinates, displayCoordinates = coordinates, currentPosition, dockHeight, settledDockHeight, headerHeight, position, enabled, sceneHeight, collapsedHeight }: {
   place: Place; origin?: Coordinate; destination: Coordinate; coordinates: Coordinate[]; currentPosition: Coordinate | null;
+  displayCoordinates?: Coordinate[];
   dockHeight: number; settledDockHeight: number; headerHeight: number; position: SharedValue<number>; enabled: boolean; sceneHeight: number; collapsedHeight: number;
 }) {
   const { t } = useTranslation();
@@ -56,7 +57,7 @@ export function RoutePreviewMap({ place, origin, destination, coordinates, curre
       onLayout={event => { const { width, height } = event.nativeEvent.layout; if (width > 0 && height > 0) setSize(previous => previous.width === width && previous.height === height ? previous : { width, height }); }}>
       {origin && <Marker coordinate={origin} title={t('directions.origin')} pinColor={routeColor} />}
       <Marker coordinate={destination} title={place.name} pinColor={destinationColor} />
-      {coordinates.length > 1 && <Polyline coordinates={coordinates} strokeColor={routeColor} strokeWidth={5} />}
+      {displayCoordinates.length > 1 && <Polyline coordinates={displayCoordinates} strokeColor={routeColor} strokeWidth={5} />}
     </StyledMapView>
     {!ready && <View pointerEvents="none" className="absolute left-4 gap-2 rounded-card bg-surface p-3" style={{ top: headerHeight + 8 }}><Spinner size="sm" /><Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('map.loading')}</Text></View>}
     <Animated.View testID="route-map-controls" className="absolute right-4 top-0 flex-row gap-2" style={controlsStyle}>

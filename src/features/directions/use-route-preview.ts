@@ -120,6 +120,6 @@ export function useRoutePreview(token: unknown, configured: boolean) {
     authorized.current = true;
     client.setQueryData<Session>(key, { owner, attempt: nextToken, intent: next, status: 'waiting' });
   }
-  return { data, location, locationEnabled, usable, running, expired, result: data?.result,
+  return { data, location, locationEnabled, usable, running, expired, now: sampleNow, result: data?.result,
     needsRetry: data?.status === 'failed' || (data?.status === 'waiting' && (data.owner !== owner || expired)), retry };
 }

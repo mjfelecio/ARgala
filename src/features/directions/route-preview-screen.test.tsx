@@ -110,6 +110,60 @@ it('withholds native padding and fitting until this map instance is ready and me
   controls.fit.mockClear(); controls.location.position = { latitude: 10, longitude: 124 }; await update(); expect(controls.fit).not.toHaveBeenCalled();
   await press('directions.fit'); expect(controls.fit).toHaveBeenCalledOnce(); await press('directions.recenter'); expect(controls.animate).toHaveBeenCalledWith(expect.objectContaining(controls.location.position), expect.any(Number));
 });
+it('starts explicitly, trims actual GPS progress locally, keeps Fit stable and restores the full route on Stop', async () => {
+  const target = { ...place, coordinates: { latitude: 38.5, longitude: -120.1977 } };
+  const walkingRoute = { ...route, encodedPolyline: '_p~iF~ps|U?gE?gE', distanceMeters: 200 };
+  controls.token = createRoutePreviewIntent(client,target, { origin, destination:target.coordinates,route:walkingRoute }, 'map','en');
+  await mount(); await layout(); await act(async () => tree!.root.findByType('map').props.onMapReady());
+  const original = tree!.root.findByType('polyline').props.coordinates;
+  const fitCount = controls.fit.mock.calls.length;
+  await press('directions.startNavigation');
+  expect(output()).toContain(translations.t('directions.navigationUncertainShort'));
+  for (const longitude of [-120.19995,-120.1998]) {
+    vi.mocked(Date.now).mockReturnValue(Date.now()+6000);
+    Object.assign(controls.location,{position:{latitude:38.5,longitude},positionTimestamp:Date.now(),watcherTimestamp:Date.now()}); await update();
+  }
+  expect(output()).toContain(translations.t('directions.navigationNavigating'));
+  expect(output()).not.toContain(translations.t('directions.estimated'));
+  expect(tree!.root.findByType('polyline').props.coordinates[0].longitude).toBeCloseTo(-120.1998,5);
+  expect(controls.fit).toHaveBeenCalledTimes(fitCount);
+  await press('directions.fit'); expect(controls.fit).toHaveBeenLastCalledWith(original, expect.any(Object));
+  const { focusManager, onlineManager } = await import('@tanstack/react-query');
+  for (const key of ['active','focused'] as const) {
+    controls[key]=false;await update();expect(output()).toContain(translations.t('directions.navigationUncertainShort'));
+    controls[key]=true;await update();
+    vi.mocked(Date.now).mockReturnValue(Date.now()+3000);
+    Object.assign(controls.location,{positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();
+  }
+  await act(async()=>{await translations.changeLanguage('ja');controls.language='ja';await client.invalidateQueries();focusManager.setFocused(false);focusManager.setFocused(true);onlineManager.setOnline(false);onlineManager.setOnline(true);});
+  await update();expect(routeService.walking).not.toHaveBeenCalled();
+  await press('directions.stopNavigation');
+  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(original);
+  expect(output()).toContain(translations.t('directions.estimated'));expect(routeService.walking).not.toHaveBeenCalled();
+});
+it.each(['en','ko','ja'] as const)('renders real %s navigation quality, expiry, off-route and arrival feedback without new requests', async language => {
+  await translations.changeLanguage(language);controls.language=language;
+  const target={...place,coordinates:{latitude:38.5,longitude:-120.198}};
+  const navigationRoute={...route,encodedPolyline:'_p~iF~ps|U?gE?gE'};
+  controls.token=createRoutePreviewIntent(client,target,{origin,destination:target.coordinates,route:navigationRoute},'map',language);
+  controls.location.accuracy=40;await mount();expect(button('directions.startNavigation')).toBeUndefined();expect(output()).toContain(translations.t('directions.navigationNeedsLocation'));
+  controls.location.accuracy=5;await update();await press('directions.startNavigation');
+  for(const [north,seconds] of [[.00015,10],[.0003,10],[.00045,10],[.00048,3]]){
+    vi.mocked(Date.now).mockReturnValue(Date.now()+seconds*1000);
+    Object.assign(controls.location,{position:{latitude:38.5+north,longitude:-120.2},positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();
+  }
+  expect(output()).toContain(translations.t('directions.navigationOffRouteShort'));await expand();expect(output()).toContain(translations.t('directions.navigationOffRouteDetail'));
+  expect(output()).not.toContain('directions.');await press('directions.stopNavigation');
+  vi.mocked(Date.now).mockReturnValue(Date.now()+120000);
+  Object.assign(controls.location,{position:{latitude:38.5,longitude:-120.1982},positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();await press('directions.startNavigation');
+  for(const longitude of [-120.19812,-120.19805]){
+    vi.mocked(Date.now).mockReturnValue(Date.now()+3000);
+    Object.assign(controls.location,{position:{latitude:38.5,longitude},positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();
+  }
+  expect(output()).toContain(translations.t('directions.navigationArrived'));expect(output()).toContain(translations.t('directions.navigationArrival'));
+  expect(tree!.root.findAllByType('polyline')).toHaveLength(0);await press('directions.returnToPreview');expect(tree!.root.findAllByType('polyline')).toHaveLength(1);
+  expect(routeService.walking).not.toHaveBeenCalled();
+});
 it('returns to Map with selection or to the selected Place Details without provider work', async () => {
   handoff(); await mount(); await press('directions.map'); expect(router.dismissTo).toHaveBeenCalledWith({ pathname: '/', params: { placeId: place.providerId } });
   await press('directions.details'); expect(router.dismissTo).toHaveBeenCalledWith({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
@@ -200,7 +254,7 @@ it.each(['en', 'ko', 'ja'] as const)('renders actual %s resources, long names, n
   controls.language = language; await translations.changeLanguage(language);
   const target = { ...place, name: 'A long destination 日本語 한국어 '.repeat(15), address: undefined }; handoff(true, target); await mount(); await expand();
   expect(output()).toContain(target.name); expect(output()).not.toContain(place.address); expect(output()).toContain(translations.t('directions.title')); expect(output()).toContain(translations.t('directions.snapshot'));
-  expect(output()).toContain('Returned credit'); expect(output()).not.toContain('Flat Terrain'); expect(output()).not.toContain('Start Navigation'); expect(output()).not.toContain('directions.');
+  expect(output()).toContain('Returned credit'); expect(output()).not.toContain('Flat Terrain'); expect(output()).toContain(translations.t('directions.startNavigation')); expect(output()).not.toContain('directions.');
   expect(tree!.root.findAllByType('text').find(n => n.props.children === target.name)!.props.numberOfLines).toBeUndefined();
   expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left', 'right']);
   await act(async () => {

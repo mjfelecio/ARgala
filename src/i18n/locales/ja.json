@@ -186,7 +186,22 @@
     "journey": "行程",
     "information": "ルート情報",
     "estimated": "推定の徒歩ルート",
-    "originDescription": "このルートをリクエストした時点の現在地です。"
+    "originDescription": "このルートをリクエストした時点の現在地です。",
+    "startNavigation": "ナビを開始",
+    "navigationNeedsLocation": "ナビを開始するには、新しく正確な位置情報が必要です。",
+    "stopNavigation": "ナビを終了",
+    "returnToPreview": "ルートプレビューに戻る",
+    "navigationPreview": "ルートプレビュー",
+    "navigationNavigating": "徒歩ナビ中",
+    "navigationUncertainShort": "現在地不明・進行を一時停止",
+    "navigationUncertainDetail": "進行状況を一時停止し、正確な位置情報が戻るまで最後に確認した進行状況を保持します。 長い中断の後も進行が停止したままの場合は、ナビを停止して現在地から再開してください。",
+    "navigationOffRouteShort": "ルート外・進行を一時停止",
+    "navigationOffRouteDetail": "ルートから外れている可能性があります。位置を確認する間、進行状況を一時停止します。",
+    "navigationArrived": "目的地に到着しました",
+    "remaining": "残り約{{meters}}m",
+    "navigationInformation": "徒歩の進行状況",
+    "navigationArrival": "目的地付近で現在地を複数回確認して到着を判定しました。",
+    "noAutomaticReroute": "ルートは自動更新されません。ナビを終了するとルート全体のプレビューに戻ります。"
   },
   "destinations": {
     "title": "おすすめの目的地",

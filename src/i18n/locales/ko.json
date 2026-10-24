@@ -186,7 +186,22 @@
     "journey": "여정",
     "information": "경로 안내",
     "estimated": "예상 도보 경로",
-    "originDescription": "이 경로를 요청했을 때의 내 위치입니다."
+    "originDescription": "이 경로를 요청했을 때의 내 위치입니다.",
+    "startNavigation": "안내 시작",
+    "navigationNeedsLocation": "안내를 시작하려면 최신의 정확한 위치가 필요합니다.",
+    "stopNavigation": "안내 종료",
+    "returnToPreview": "경로 미리보기로 돌아가기",
+    "navigationPreview": "경로 미리보기",
+    "navigationNavigating": "도보 안내 중",
+    "navigationUncertainShort": "위치 불확실 · 진행 일시 중지",
+    "navigationUncertainDetail": "진행 상황을 일시 중지하고 정확한 위치가 확인될 때까지 마지막으로 확인된 진행 상황을 유지합니다. 오래 중단된 후에도 진행이 계속 멈춰 있으면 내비게이션을 중지한 다음 현재 위치에서 다시 시작하세요.",
+    "navigationOffRouteShort": "경로 이탈 · 진행 일시 중지",
+    "navigationOffRouteDetail": "경로를 벗어났을 수 있습니다. 위치를 확인하는 동안 진행 상황이 일시 중지됩니다.",
+    "navigationArrived": "목적지에 도착했습니다",
+    "remaining": "약 {{meters}}m 남음",
+    "navigationInformation": "도보 진행 상황",
+    "navigationArrival": "목적지 근처에서 현재 위치가 여러 번 확인되어 도착으로 판단했습니다.",
+    "noAutomaticReroute": "경로는 자동으로 갱신되지 않습니다. 안내를 종료하면 전체 경로 미리보기로 돌아갑니다."
   },
   "destinations": {
     "title": "추천 여행지",

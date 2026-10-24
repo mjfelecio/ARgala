@@ -8,6 +8,9 @@ import { getCurrentCoordinates, requestLocationPermission, subscribeToLocation }
 import { createRoutePreviewIntent } from './route-preview-intent';
 import { routeService } from './service';
 import { useRoutePreview } from './use-route-preview';
+import { useWalkingNavigation } from './use-walking-navigation';
+const emptyCoordinates: {latitude:number;longitude:number}[] = [];
+let walking: ReturnType<typeof useWalkingNavigation>;
 const navigation = vi.hoisted(() => ({ active: true, focused: true, ref: { current: null as object | null }, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
   value: { isFocused: () => true, addListener: () => () => {} }, remove: vi.fn() }));
 vi.mock('expo-router', async () => {
@@ -51,7 +54,7 @@ let client: QueryClient; let token: unknown; let configured: boolean; let tree: 
 let state: ReturnType<typeof useRoutePreview>;
 const permissionGrant: Awaited<ReturnType<typeof requestLocationPermission>> = { granted: true, canAskAgain: true, status: 'granted' as Awaited<ReturnType<typeof requestLocationPermission>>['status'], expires: 'never' };
 const place = { id: 'google:north', provider: 'google', providerId: 'north', name: 'North', coordinates: { latitude: 11, longitude: 124 }, attributions: [] };
-function Probe() { const value = useRoutePreview(token, configured); React.useEffect(() => { state = value; }, [value]); return null; }
+function Probe() { const value = useRoutePreview(token, configured); const live = useWalkingNavigation({ coordinates:value.result?.coordinates ?? emptyCoordinates, destination:value.result?.destination,location:value.location,usable:value.usable,running:value.running,now:value.now }); React.useEffect(() => { state = value; walking=live; }, [value,live]); return null; }
 function render() { const NavigationProvider = navigation.context!.Provider; const FocusProvider = navigation.focusContext!.Provider;
   return <QueryClientProvider client={client}><NavigationProvider value={navigation.value}><FocusProvider value={navigation.focused}><Probe /></FocusProvider></NavigationProvider></QueryClientProvider>; }
 
@@ -137,4 +140,18 @@ it('waits for a new sensor owner sample when retry re-enables location after a r
   vi.setSystemTime(Date.now() + 1000); vi.mocked(getCurrentCoordinates).mockImplementation(() => new Promise(() => {}));
   await act(async () => { state.retry(); }); expect(routeService.walking).toHaveBeenCalledOnce();
   await act(async () => { vi.mocked(subscribeToLocation).mock.calls.at(-1)![0](fix()); }); expect(routeService.walking).toHaveBeenCalledTimes(2);
+});
+
+it('shares the installed SDK foreground watcher with navigation and never acquires a route on resume or Stop',async()=>{
+ await act(async()=>{tree=create(render());});
+ await act(async()=>vi.mocked(subscribeToLocation).mock.calls[0][0](fix()));
+ expect(routeService.walking).toHaveBeenCalledOnce();expect(walking.canStart).toBe(true);
+ await act(async()=>walking.start());expect(walking.started).toBe(true);expect(subscribeToLocation).toHaveBeenCalledOnce();
+ for(const key of ['active','focused'] as const){
+  navigation[key]=false;await act(async()=>tree!.update(render()));expect(walking.status).toBe('uncertain');
+  navigation[key]=true;await act(async()=>tree!.update(render()));expect(walking.status).toBe('uncertain');
+  vi.setSystemTime(Date.now()+3000);await act(async()=>vi.mocked(subscribeToLocation).mock.calls.at(-1)![0](fix()));
+ }
+ expect(subscribeToLocation).toHaveBeenCalledTimes(3);expect(navigation.remove).toHaveBeenCalledTimes(2);
+ await act(async()=>walking.stop());expect(walking.started).toBe(false);expect(subscribeToLocation).toHaveBeenCalledTimes(3);expect(routeService.walking).toHaveBeenCalledOnce();
 });
