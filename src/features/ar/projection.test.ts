@@ -54,3 +54,24 @@ it('uses direction to break similar-distance priority without displacing much cl
   const candidates = ranked.map((p) => ({ ...p, distance: ({ edge: 100, center: 110, close: 10, far: 1000 } as Record<string, number>)[p.place.id], x: p.place.id === 'edge' ? 0 : 0.5 }));
   expect(layoutLabels(candidates, 360, null).map((p) => p.place.id)).toEqual(['close', 'center', 'edge']);
 });
+
+it('reserves richer visual bounds for selected or raw-eligible places without changing geography', () => {
+  const ranked = rankPlaces([place('near', 0.0001), place('selected', 0.002), place('ordinary', 0.003)], origin, 0, 100);
+  const original = ranked.map(item => ({ ...item }));
+  const labels = layoutLabels(ranked, 360, 'selected');
+  expect(labels.map(label => [label.place.providerId, label.width, label.eligible])).toEqual([
+    ['selected', 232, false], ['near', 232, true], ['ordinary', 168, false],
+  ]);
+  expect(ranked).toEqual(original);
+  expect(labels.map(label => label.distance)).toEqual([ranked[1].distance, ranked[0].distance, ranked[2].distance]);
+});
+it('keeps both card sizes inside narrow camera bounds without widening raw FOV', () => {
+  const places = [place('near', 0.0001), place('outside', 0.002)];
+  const labels = layoutLabels(rankPlaces(places, origin, 0, 100), 120, null);
+  expect(labels).toHaveLength(2);
+  for (const label of labels) {
+    expect(label.width).toBe(104);
+    expect(label.left).toBe(8); expect(label.maxLeft).toBe(8);
+  }
+  expect(layoutLabels(rankPlaces(places, origin, 180, 100), 360, 'near')).toEqual([]);
+});

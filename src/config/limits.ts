@@ -6,6 +6,6 @@ export const DESTINATIONS = { nearbyRadiusMeters: 500 } as const;
 export const ACTIVATION = { defaultMeters: 100, minMeters: 10, maxMeters: 1000 } as const;
 export const LOCATION = { distanceIntervalMeters: 5, timeIntervalMs: 3000, timeoutMs: 15000 } as const;
 /** Approximate portrait projection, not physical camera calibration. */
-export const AR = { horizontalFovDegrees: 60, maxLabels: 3, labelWidth: 168, labelGap: 8,
+export const AR = { horizontalFovDegrees: 60, maxLabels: 3, labelWidth: 168, richLabelWidth: 232, labelGap: 8,
   positionMaxAgeMs: 30000, headingMaxAgeMs: 10000, maxPositionAccuracyMeters: 100,
   nearbyReuseMs: 120000, nearbyReuseDistanceMeters: 100 } as const;

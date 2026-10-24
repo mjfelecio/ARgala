@@ -12,6 +12,7 @@ import { EdgeRequestError } from '@/lib/edge-error';
 import { placesService, type Place } from '@/features/places/service';
 import { AR } from '@/config/limits';
 import ArScreen from './ar-screen';
+import { ArLabels } from './ar-labels';
 import { claimRoutePreviewIntent } from '@/features/directions/route-preview-intent';
 import { useRoutePreview } from '@/features/directions/use-route-preview';
 import { routeService } from '@/features/directions/service';
@@ -85,7 +86,7 @@ beforeEach(async () => {
   vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
 afterEach(async () => { await act(async () => { tree?.unmount(); previewTree?.unmount(); }); tree = undefined; previewTree = undefined; client.clear(); notifyManager.setScheduler((callback) => setTimeout(callback, 0)); vi.useRealTimers(); vi.restoreAllMocks(); });
-it('scans at current GPS only on action, selects camera labels, and requests details explicitly', async () => {
+it('scans at current GPS only on action, preserves sheet selection, and requests details explicitly', async () => {
   await mount(); expect(placesService.nearby).not.toHaveBeenCalled();
   await scan();
   expect(placesService.nearby).toHaveBeenCalledWith({ center: { latitude: 0, longitude: 0 }, radiusMeters: 1000, language: 'en' });
@@ -93,12 +94,47 @@ it('scans at current GPS only on action, selects camera labels, and requests det
   await act(async () => { tree!.root.findByProps({ testID: 'ar-chrome' }).props.onLayout({ nativeEvent: { layout: { height: 120 } } }); });
   const labels = tree!.root.findAllByType(Pressable).filter((p) => p.props.testID?.startsWith('ar-label-'));
   expect(labels).toHaveLength(1);
-  await act(async () => { labels[0].props.onPress(); });
+  await act(async () => { tree!.root.findByProps({ testID: 'ar-list-north' }).props.onPress(); });
   expect(output()).toContain('First Street'); expect(output()).toContain(translations.t('ar.distance', { meters: 11 }));
   expect(placesService.details).not.toHaveBeenCalled();
   await press('ar.more'); await settle(); expect(output()).toContain('Provider description');
   await press('placeDetails.map'); expect(controls.navigate).toHaveBeenCalledWith({ pathname: '/', params: { placeId: 'north' } });
   expect(output()).toContain('Google Maps'); expect(output()).toContain('Local Provider');
+});
+it('opens the selected floating card through the existing Details handoff without a new request', async () => {
+  const complete = { ...north, source: 'discovery' as const };
+  vi.mocked(placesService.nearby).mockResolvedValue([complete]);
+  await mount(); await scan();
+  const label = tree!.root.findAllByType(Pressable).find(node => node.props.testID === 'ar-label-north')!;
+  expect(label).toBeDefined();
+  await act(async () => label.props.onPress());
+  expect(controls.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/place/[providerId]', params: { providerId: north.providerId } });
+  expect(client.getQueryData(['place-selection', north.providerId])).toEqual(complete);
+  expect(placesService.nearby).toHaveBeenCalledTimes(1);
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+it('ignores inspect actions for another provider or an inactive AR owner', async () => {
+  await mount(); await scan();
+  await act(async () => tree!.root.findByType(ArLabels).props.onInspect('south'));
+  expect(controls.navigate).not.toHaveBeenCalled();
+  controls.focused = false; await update();
+  await act(async () => tree!.root.findByType(ArLabels).props.onInspect('north'));
+  expect(controls.navigate).not.toHaveBeenCalled();
+  expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
+});
+it('selects an unselected floating place and keeps that provider synchronized through heading and radius changes', async () => {
+  const second = { ...north, id: 'google:second', providerId: 'second', name: 'Second place', coordinates: { latitude: 0.0002, longitude: 0 }, source: 'discovery' as const };
+  vi.mocked(placesService.nearby).mockResolvedValue([{ ...north, source: 'discovery' }, second]);
+  await mount(); await scan();
+  const label = tree!.root.findAllByType(Pressable).find(node => node.props.testID === 'ar-label-second')!;
+  await act(async () => label.props.onPress());
+  expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(second.name);
+  controls.radius = 1; controls.location.heading = { degrees: 10, accuracy: 3, reference: 'true' }; await update();
+  expect(tree!.root.findByProps({ testID: 'ar-selected-name' }).props.children).toBe(second.name);
+  const selected = tree!.root.findAllByType(Pressable).find(node => node.props.testID === 'ar-label-second')!;
+  expect(selected.props.accessibilityState.selected).toBe(true);
+  expect(controls.navigate).not.toHaveBeenCalled();
+  expect(placesService.nearby).toHaveBeenCalledTimes(1); expect(placesService.details).not.toHaveBeenCalled();
 });
 it('does not offer a second paid request for the complete configured discovery fields', async () => {
   vi.mocked(placesService.nearby).mockResolvedValue([{ ...north, source: 'discovery' }]);

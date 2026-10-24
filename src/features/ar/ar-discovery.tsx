@@ -109,6 +109,12 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
     const token = createRoutePreviewIntent(client, selected, undefined, 'ar', language);
     router.push({ pathname: '/directions', params: { token } });
   }
+  function inspect(providerId: string) {
+    if (!running || !selected || selected.providerId !== providerId || navigating.current) return;
+    navigating.current = true;
+    setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
+    router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
+  }
   const state = data.nearby.isFetching ? 'scanning' : data.nearby.error ? 'failed' : !data.request ? 'unscanned' : places.length === 0 ? 'empty' : 'results';
   const status = <>
     {cameraStatus}
@@ -132,7 +138,7 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
     </View>
     <View testID="ar-viewport" className="flex-1" onLayout={event => setViewport(event.nativeEvent.layout)}>
       <Animated.View pointerEvents="box-none" className="absolute left-0 right-0 top-0 overflow-hidden" style={labelClip}>
-        <ArLabels labels={chromeHeight ? labels : []} selectedId={selectedId} onSelect={select}
+        <ArLabels labels={chromeHeight ? labels : []} selectedId={selectedId} onSelect={select} onInspect={inspect}
           top={8} bottom={viewport.height - occupation - 8} fontScale={fontScale} />
       </Animated.View>
       <ArNearbySheet rows={rows}
@@ -140,12 +146,7 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
         height={viewport.height} fontScale={fontScale} selectionRevision={selectionRevision} position={sheetPosition} onOccupation={setOccupation}
         detailsLoaded={!!detail} detailsBusy={data.details.isFetching}
         onSelect={select} onMore={() => { if (running && selected) data.more(selected.providerId); }}
-        onDetails={() => {
-          if (!running || !selected || navigating.current) return;
-          navigating.current = true;
-          setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
-          router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
-        }} onDirections={directions} onMap={toMap} />
+        onDetails={() => { if (selected) inspect(selected.providerId); }} onDirections={directions} onMap={toMap} />
     </View>
     {(places.length > 0 || selected) && <View testID="ar-attributions" className="gap-1 border-t border-outline bg-surface px-4 py-2">
       <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" className="h-5 w-28" resizeMode="contain" />
