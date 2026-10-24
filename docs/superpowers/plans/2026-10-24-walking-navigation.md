@@ -9,4 +9,6 @@ Spec: [walking design](../specs/2026-10-24-walking-navigation-design.md), implem
 - [x] Exercise real screen/query defaults for Start/GPS/foreground/language/failure/Stop with zero extra paid calls and no automatic map camera movement.
 - [x] Independent review, full project checks, dependency/native/Android checks and export. Correct confirmed findings.
 - [x] Record ADB limitation: secure keyguard at 4% charge prevented card interaction, then the phone disappeared from ADB before navigation verification. Existing app was force-stopped/display off; no live navigation, sensor accuracy or outdoor acceptance is claimed. No APK build without explicit owner approval.
-- [ ] Conventional Commit, push and create separate reviewable PR against latest stable main; do not merge automatically.
+- [x] Conventional Commit, push and create separate reviewable PR against latest stable main; do not merge automatically.
+
+Owner follow-up: PRs #22 and #23 were explicitly authorized for merge after page crash checks, with field refinement deferred. Both merged; one subsequent preview build was authorized. Selected-only AR information and unified new label styling supersede the initial eligible-card design before that build.

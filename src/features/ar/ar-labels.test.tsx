@@ -68,7 +68,10 @@ it('bounds labels to three measured lanes, retains stable IDs and full accessibl
   expect(labels[0].props.className).toContain('shadow-sm');
   expect(labels[0].props.children[0].props.className).toContain('text-sm leading-4');
   expect(labels[0].props.children[1].props.className).toContain('text-xs leading-4');
-  expect(labels[1].props.className).toContain('bg-ink/95');
+  expect(labels[1].props.className).toContain('bg-surface');
+  expect(labels[1].props.className).toContain('rounded-card');
+  expect(labels[1].props.className).toContain('shadow-sm');
+  expect(labels[1].props.className).not.toContain('bg-ink');
   expect(labels.every(label => geometry(label).height >= 48)).toBe(true);
   for (const label of labels) {
     expect(geometry(label).top).toBeGreaterThanOrEqual(130);
@@ -78,38 +81,40 @@ it('bounds labels to three measured lanes, retains stable IDs and full accessibl
   await act(async () => { labels[1].props.onPress(); }); expect(select).toHaveBeenCalledWith('0');
 });
 
-it('shows eligible unselected places as rich cards and uses address then description without placeholders', async () => {
+it('keeps eligible unselected places compact in the new style and expands only the selected metadata', async () => {
   const eligible = [
     { ...places[0], name: 'Café Sample', coordinates: { latitude: 0.0001, longitude: 0 }, address: '12 Main Street', description: 'Ignored when address exists' },
     { ...places[1], name: 'Garden Sample', coordinates: { latitude: 0.0002, longitude: 0 }, description: 'A quiet public garden.' },
     { ...places[2], name: 'Bare Sample', coordinates: { latitude: 0.0003, longitude: 0 }, address: '   ', description: '   ' },
   ];
-  const { inspect } = await mount(0, 850, 0, { selectedId: null, items: eligible, fontScale: 1 });
-  const cafe = button('0');
-  expect(cafe.props.className).toContain('bg-surface');
-  expect(cafe.props.className).toContain('border-brand-primary');
-  expect(cafe.props.className).toContain('shadow-sm');
-  expect(cafe.props.children[0].props.className).toContain('text-foreground');
-  expect(cafe.props.children[0].props.className).not.toContain('text-white');
-  expect(cafe.props.style.height).toBe(32 + 112);
-  expect(textContent(cafe.props.children)).toContain('12 Main Street');
-  expect(textContent(cafe.props.children)).toContain('Within range');
-  expect(textContent(cafe.props.children)).toContain('Select place');
-  expect(cafe.props.accessibilityLabel).toContain('12 Main Street');
-  expect(cafe.props.accessibilityLabel).toContain('Select place');
-
-  const garden = button('1');
-  expect(garden.props.accessibilityLabel).toContain('A quiet public garden.');
-  expect(garden.props.accessibilityLabel).toContain('Within range');
-  const bare = button('2');
-  expect(bare.props.accessibilityLabel).not.toContain('unavailable');
-  expect(bare.props.accessibilityLabel).not.toContain('category');
-  expect(bare.props.accessibilityLabel).toContain('Select place');
-
-  await updateLabels(tree!.root.findByType(ArLabels).props.labels, { selectedId: '0' });
+  const { inspect, select } = await mount(0, 850, 0, { selectedId: null, items: eligible, fontScale: 1 });
+  for (const id of ['0','1','2']) {
+    const card=button(id);
+    expect(card.props.className).toContain('bg-surface');
+    expect(card.props.className).toContain('border-brand-primary');
+    expect(card.props.className).toContain('rounded-card');
+    expect(card.props.className).toContain('shadow-sm');
+    expect(card.props.children[0].props.className).toContain('text-foreground');
+    expect(card.props.style.height).toBe(24+36);
+    expect(textContent(card.props.children)).not.toContain('Within range');
+    expect(textContent(card.props.children)).not.toContain('Select place');
+    expect(textContent(card.props.children)).not.toContain('12 Main Street');
+    expect(textContent(card.props.children)).not.toContain('A quiet public garden.');
+  }
+  await act(async()=>button('0').props.onPress());expect(select).toHaveBeenCalledWith('0');
+  const labels=tree!.root.findByType(ArLabels).props.labels;
+  await updateLabels(labels,{selectedId:'0'});
+  expect(textContent(button('0').props.children)).toContain('12 Main Street');
+  expect(textContent(button('0').props.children)).not.toContain('Ignored when address exists');
   expect(button('0').props.accessibilityLabel).toContain('Selected · within range');
-  await act(async () => { button('0').props.onPress(); });
-  expect(inspect).toHaveBeenCalledWith('0');
+  expect(button('0').props.style.height).toBe(32+112);
+  await act(async()=>button('0').props.onPress());expect(inspect).toHaveBeenCalledWith('0');
+  await updateLabels(labels,{selectedId:'1'});
+  expect(textContent(button('0').props.children)).not.toContain('12 Main Street');
+  expect(textContent(button('1').props.children)).toContain('A quiet public garden.');
+  await updateLabels(labels,{selectedId:'2'});
+  expect(button('2').props.accessibilityLabel).not.toContain('unavailable');
+  expect(button('2').props.accessibilityLabel).not.toContain('category');
 });
 
 it('renders selected outside-radius places richly with live translated action copy', async () => {
@@ -155,7 +160,8 @@ it('keeps metadata-rich CJK cards disjoint at large text scale', async () => {
   expect(cards).toHaveLength(2);
   for (const [index, card] of cards.entries()) {
     expect(card.props.accessibilityLabel).toContain(name);
-    expect(card.props.accessibilityLabel).toContain(rich[0].address);
+    if (card.props.accessibilityState.selected) expect(card.props.accessibilityLabel).toContain(rich[0].address);
+    else expect(textContent(card.props.children)).not.toContain(rich[0].address);
     expect(card.props.style.top).toBeGreaterThanOrEqual(80);
     expect(card.props.style.top + card.props.style.height).toBeLessThanOrEqual(850);
     if (index) expect(card.props.style.top).toBeGreaterThanOrEqual(cards[index - 1].props.style.top + cards[index - 1].props.style.height + 8);

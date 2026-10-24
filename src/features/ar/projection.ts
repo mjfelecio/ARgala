@@ -32,7 +32,7 @@ export function layoutLabels(places: RankedPlace[], viewportWidth: number, selec
     (a.distance + Math.abs(a.x! - 0.5) * 40) - (b.distance + Math.abs(b.x! - 0.5) * 40) ||
     a.place.providerId.localeCompare(b.place.providerId))
     .slice(0, AR.maxLabels).map((p, lane) => {
-      const rich = p.eligible || p.place.providerId === selectedId;
+      const rich = p.place.providerId === selectedId;
       const width = Math.min(rich ? AR.richLabelWidth : AR.labelWidth, viewportWidth - 2 * AR.labelGap);
       return { ...p, lane, width, maxLeft: viewportWidth - width - AR.labelGap,
         left: Math.max(AR.labelGap, Math.min(viewportWidth - width - AR.labelGap, p.x! * viewportWidth - width / 2)) };

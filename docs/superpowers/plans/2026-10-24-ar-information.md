@@ -47,6 +47,8 @@ Interface: add `onInspect(providerId: string)` to `ArLabels`; ordinary taps call
 
 - [x] Run `npm run check`, applicable Android checks/export and `git diff --check`.
 - [x] Attempt existing-client ADB verification and document gaps: USB tunnel failed to load the bundle; LAN Metro became available, but secure keyguard and 4% battery prevented card interaction. App stopped and screen off. Camera-card appearance, outdoor readability and live interaction remain unverified.
-- [ ] Commit coherent Conventional Commits, push the dedicated branch and prepare PR A against current main. Do not merge it or start an EAS preview build.
+- [x] Commit coherent Conventional Commits, push the dedicated branch and prepare PR A against current main. Do not merge it or start an EAS preview build.
 
 PR B is independent and begins only after PR A's implementation/reviewable delivery, from latest stable main using its own branch and navigation design/tests.
+
+Owner follow-up: PRs #22 and #23 were explicitly authorized for merge after page crash checks, with field refinement deferred. Both merged; one subsequent preview build was authorized. Selected-only AR information and unified new label styling supersede the initial eligible-card design before that build.

@@ -39,3 +39,8 @@ A full card for every nearby POI would obscure the camera. Adding category data 
 ## Verification
 
 Pure projection tests pin rich/compact bounds without changing bearings or eligibility. Real label tests cover contents, omitted fields, locale changes, selected/eligible/outside states, actions, CJK/full accessibility, narrow scenes, enlarged type and existing snapping/reset behavior. Real discovery tests cover label-to-sheet synchronization, explicit Details handoff, manual selection, raw radius boundaries, quality/stale/FOV fallback and no requests during sensor/selection updates. Run full checks/export and use the existing development client for brief ADB checks if the phone is available. Keep outdoor/low-battery limitations explicit; do not start a preview build.
+
+
+## Owner follow-up before the combined preview
+
+Only the selected place receives expanded information and the 232 dp card width. All unselected places remain compact at 168 dp regardless of raw eligibility. Every label uses the newer rounded-card, semantic surface/brand border, typography and subtle shadow; selection retains its strong brand emphasis. Existing raw radius/selection authority and Details actions remain. This supersedes the initial `selected || eligible` presentation decision.
