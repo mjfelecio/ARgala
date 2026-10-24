@@ -26,12 +26,15 @@ export type OverlayLabel = RankedPlace & { left: number; maxLeft: number; width:
 /** One label per vertical lane prevents overlap, including clustered bearings. */
 export function layoutLabels(places: RankedPlace[], viewportWidth: number, selectedId: string | null): OverlayLabel[] {
   if (!Number.isFinite(viewportWidth) || viewportWidth < 2 * AR.labelGap + 48) return [];
-  const width = Math.min(AR.labelWidth, viewportWidth - 2 * AR.labelGap);
   return places.filter((p) => p.x !== null).sort((a, b) =>
     Number(b.place.providerId === selectedId) - Number(a.place.providerId === selectedId) ||
     // Distance dominates, with a small center preference for similarly distant POIs.
     (a.distance + Math.abs(a.x! - 0.5) * 40) - (b.distance + Math.abs(b.x! - 0.5) * 40) ||
     a.place.providerId.localeCompare(b.place.providerId))
-    .slice(0, AR.maxLabels).map((p, lane) => ({ ...p, lane, width, maxLeft: viewportWidth - width - AR.labelGap,
-      left: Math.max(AR.labelGap, Math.min(viewportWidth - width - AR.labelGap, p.x! * viewportWidth - width / 2)) }));
+    .slice(0, AR.maxLabels).map((p, lane) => {
+      const rich = p.eligible || p.place.providerId === selectedId;
+      const width = Math.min(rich ? AR.richLabelWidth : AR.labelWidth, viewportWidth - 2 * AR.labelGap);
+      return { ...p, lane, width, maxLeft: viewportWidth - width - AR.labelGap,
+        left: Math.max(AR.labelGap, Math.min(viewportWidth - width - AR.labelGap, p.x! * viewportWidth - width / 2)) };
+    });
 }

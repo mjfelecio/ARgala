@@ -5,10 +5,10 @@ import { AR } from '@/config/limits';
 import type { OverlayLabel } from './projection';
 import { snapLabelLeft } from './label-placement';
 
-type Props = { labels: OverlayLabel[]; selectedId: string | null; onSelect(id: string): void; top: number; bottom: number; fontScale: number };
+type Props = { labels: OverlayLabel[]; selectedId: string | null; onSelect(id: string): void; onInspect(id: string): void; top: number; bottom: number; fontScale: number };
 
-function ArLabel({ label, lane, selected, onSelect, top, stride, laneHeight, scale }: {
-  label: OverlayLabel; lane: number; selected: boolean; onSelect(id: string): void;
+function ArLabel({ label, lane, selected, onSelect, onInspect, top, stride, laneHeight, scale }: {
+  label: OverlayLabel; lane: number; selected: boolean; onSelect(id: string): void; onInspect(id: string): void;
   top: number; stride: number; laneHeight: number; scale: number;
 }) {
   const { t } = useTranslation();
@@ -18,24 +18,41 @@ function ArLabel({ label, lane, selected, onSelect, top, stride, laneHeight, sca
   const reset = displayed.width !== label.width || displayed.maxLeft !== label.maxLeft || displayed.lane !== lane;
   const left = snapLabelLeft(reset ? null : displayed.left, label.left, AR.labelGap, label.maxLeft);
   if (displayed.left !== left || reset) setDisplayed({ left, width: label.width, maxLeft: label.maxLeft, lane });
-  const distance = t('ar.distance', { meters: Math.round(label.distance) });
+  const distance = t('ar.approximateDistance', { meters: Math.round(label.distance) });
+  const rich = selected || label.eligible;
+  const metadata = label.place.address?.trim() || label.place.description?.trim() || '';
+  const status = selected
+    ? label.eligible ? t('ar.selectedWithinRange') : t('ar.selected')
+    : label.eligible ? t('ar.withinRange') : '';
+  const action = selected ? t('placeDetails.view') : t('ar.selectPlace');
+  const height = !rich ? 24 + 36 * scale : metadata ? laneHeight : 32 + 80 * scale;
+  const accessibilityLabel = [label.place.name, distance, status, metadata, action].filter(Boolean).join(', ');
+  const textColor = selected || !rich ? 'text-white' : 'text-foreground';
   return <Pressable testID={`ar-label-${label.place.providerId}`}
-    accessibilityRole="button" accessibilityState={{ selected }} accessibilityLabel={`${label.place.name}, ${distance}`}
-    onPress={() => onSelect(label.place.providerId)}
-    className={selected ? 'absolute justify-center gap-1 rounded-card border-2 border-white bg-brand-strong px-3 py-2' : 'absolute justify-center gap-1 rounded-pill border border-white/80 bg-ink/95 px-3 py-2'}
-    style={{ left, top: top + lane * stride, width: label.width, height: selected ? laneHeight : 24 + 36 * scale }}>
-    {selected && <Text numberOfLines={1} className="font-sans text-sm font-bold text-white">{t('ar.selected')}</Text>}
-    <Text numberOfLines={1} className="font-sans text-sm font-semibold text-white">{label.place.name}</Text>
-    <Text numberOfLines={1} className="font-sans text-sm text-white">{distance}</Text>
+    accessibilityRole="button" accessibilityState={{ selected }} accessibilityLabel={accessibilityLabel}
+    onPress={() => selected ? onInspect(label.place.providerId) : onSelect(label.place.providerId)}
+    className={selected
+      ? 'absolute justify-center gap-1 rounded-card border-2 border-white bg-brand-strong px-3 py-2 shadow-sm'
+      : rich
+        ? 'absolute justify-center gap-1 rounded-card border border-brand-primary bg-surface px-3 py-2 shadow-sm'
+        : 'absolute justify-center gap-1 rounded-pill border border-white/80 bg-ink/95 px-3 py-2'}
+    style={{ left, top: top + lane * stride, width: label.width, height }}>
+    <Text numberOfLines={1} className={`font-sans text-sm leading-4 font-semibold ${textColor}`}>{label.place.name}</Text>
+    <Text numberOfLines={1} className={`font-sans text-xs leading-4 ${textColor}`}>{distance}</Text>
+    {rich && <>
+      <Text numberOfLines={1} className={`font-sans text-xs leading-4 ${textColor}`}>{status}</Text>
+      {metadata ? <Text numberOfLines={2} className={`font-sans text-xs leading-4 ${textColor}`}>{metadata}</Text> : null}
+      <Text numberOfLines={1} className={`font-sans text-xs leading-4 ${textColor}`}>{action}</Text>
+    </>}
   </Pressable>;
 }
 
 /** Reserve the largest badge in every lane; compact pills keep the same safe hit bounds. */
-export function ArLabels({ labels, selectedId, onSelect, top, bottom, fontScale }: Props) {
+export function ArLabels({ labels, selectedId, onSelect, onInspect, top, bottom, fontScale }: Props) {
   const scale = Math.max(1, fontScale);
-  const laneHeight = 24 + 64 * scale;
+  const laneHeight = 32 + 112 * scale;
   const stride = laneHeight + AR.labelGap;
   const slots = Math.max(0, Math.min(AR.maxLabels, Math.floor((bottom - top + AR.labelGap) / stride)));
   return <>{labels.slice(0, slots).map((label, lane) => <ArLabel key={label.place.providerId} label={label} lane={lane}
-    selected={selectedId === label.place.providerId} onSelect={onSelect} top={top} stride={stride} laneHeight={laneHeight} scale={scale} />)}</>;
+    selected={selectedId === label.place.providerId} onSelect={onSelect} onInspect={onInspect} top={top} stride={stride} laneHeight={laneHeight} scale={scale} />)}</>;
 }
