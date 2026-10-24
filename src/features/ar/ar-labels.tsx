@@ -19,23 +19,21 @@ function ArLabel({ label, lane, selected, onSelect, onInspect, top, stride, lane
   const left = snapLabelLeft(reset ? null : displayed.left, label.left, AR.labelGap, label.maxLeft);
   if (displayed.left !== left || reset) setDisplayed({ left, width: label.width, maxLeft: label.maxLeft, lane });
   const distance = t('ar.approximateDistance', { meters: Math.round(label.distance) });
-  const rich = selected || label.eligible;
-  const metadata = label.place.address?.trim() || label.place.description?.trim() || '';
+  const rich = selected;
+  const metadata = selected ? label.place.address?.trim() || label.place.description?.trim() || '' : '';
   const status = selected
     ? label.eligible ? t('ar.selectedWithinRange') : t('ar.selected')
-    : label.eligible ? t('ar.withinRange') : '';
+    : '';
   const action = selected ? t('placeDetails.view') : t('ar.selectPlace');
   const height = !rich ? 24 + 36 * scale : metadata ? laneHeight : 32 + 80 * scale;
   const accessibilityLabel = [label.place.name, distance, status, metadata, action].filter(Boolean).join(', ');
-  const textColor = selected || !rich ? 'text-white' : 'text-foreground';
+  const textColor = selected ? 'text-white' : 'text-foreground';
   return <Pressable testID={`ar-label-${label.place.providerId}`}
     accessibilityRole="button" accessibilityState={{ selected }} accessibilityLabel={accessibilityLabel}
     onPress={() => selected ? onInspect(label.place.providerId) : onSelect(label.place.providerId)}
     className={selected
       ? 'absolute justify-center gap-1 rounded-card border-2 border-white bg-brand-strong px-3 py-2 shadow-sm'
-      : rich
-        ? 'absolute justify-center gap-1 rounded-card border border-brand-primary bg-surface px-3 py-2 shadow-sm'
-        : 'absolute justify-center gap-1 rounded-pill border border-white/80 bg-ink/95 px-3 py-2'}
+      : 'absolute justify-center gap-1 rounded-card border border-brand-primary bg-surface px-3 py-2 shadow-sm'}
     style={{ left, top: top + lane * stride, width: label.width, height }}>
     <Text numberOfLines={1} className={`font-sans text-sm leading-4 font-semibold ${textColor}`}>{label.place.name}</Text>
     <Text numberOfLines={1} className={`font-sans text-xs leading-4 ${textColor}`}>{distance}</Text>

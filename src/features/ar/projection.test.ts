@@ -55,12 +55,12 @@ it('uses direction to break similar-distance priority without displacing much cl
   expect(layoutLabels(candidates, 360, null).map((p) => p.place.id)).toEqual(['close', 'center', 'edge']);
 });
 
-it('reserves richer visual bounds for selected or raw-eligible places without changing geography', () => {
+it('reserves richer visual bounds only for selection without changing raw eligibility', () => {
   const ranked = rankPlaces([place('near', 0.0001), place('selected', 0.002), place('ordinary', 0.003)], origin, 0, 100);
   const original = ranked.map(item => ({ ...item }));
   const labels = layoutLabels(ranked, 360, 'selected');
   expect(labels.map(label => [label.place.providerId, label.width, label.eligible])).toEqual([
-    ['selected', 232, false], ['near', 232, true], ['ordinary', 168, false],
+    ['selected', 232, false], ['near', 168, true], ['ordinary', 168, false],
   ]);
   expect(ranked).toEqual(original);
   expect(labels.map(label => label.distance)).toEqual([ranked[1].distance, ranked[0].distance, ranked[2].distance]);
