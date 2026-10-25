@@ -308,5 +308,43 @@
       "permission-failed": "Camera permission could not be checked. Please retry.",
       "startup-timeout": "AR startup timed out. Check camera access and Google Play Services for AR, then retry."
     }
+  },
+  "destinationRing": {
+    "title": "ACLC ring prototype",
+    "live": "Look around to find the sample tiles. Use your finger pad to hold a tile briefly, then release.",
+    "prototype": "Development samples only. No approved destination content or location verification.",
+    "recenter": "Recenter",
+    "help": "Help",
+    "helpText": "Turn to discover the ring. Hold and release a tile to bring it closer. Hold and release controls to turn pages, change text size or close. Recenter uses your current view.",
+    "close": "Close",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "{{current}} / {{total}}",
+    "smaller": "A−",
+    "larger": "A+",
+    "empty": "No sample text available.",
+    "contentFailed": "This sample text could not be laid out. Close the panel and try another sample.",
+    "load-failed": "Reading size could not be loaded. Using the default for now.",
+    "save-failed": "Reading size could not be saved. Your current size still works in this session.",
+    "retry": "Retry size preference",
+    "sampleLabel": "DEVELOPMENT SAMPLE",
+    "mock": {
+      "overview": {
+        "title": "Overview",
+        "body": "This is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring."
+      },
+      "history": {
+        "title": "History",
+        "body": "This is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring."
+      },
+      "notes": {
+        "title": "Visitor notes",
+        "body": "This is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring."
+      },
+      "facts": {
+        "title": "Facts",
+        "body": "This is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring."
+      }
+    }
   }
 }
