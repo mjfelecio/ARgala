@@ -9,16 +9,17 @@ vi.mock('./viro-runtime', () => ({ cameraPermission: vi.fn(), readViroSupport: v
 let tree: ReactTestRenderer;
 let current: ReturnType<typeof useViroStartup>;
 let running: boolean; let transitionReady: boolean; let measured: boolean;
+let policy: { begin(): boolean; authorizeMount(): boolean; ready(): boolean; interrupt(): void; fail(): void } | undefined;
 const granted = { granted: true, canAskAgain: true, status: 'granted' as PermissionResponse['status'], expires: 'never' as const };
 function Probe() {
-  const startup = useViroStartup({ running, transitionReady, measured });
+  const startup = useViroStartup({ running, transitionReady, measured, policy });
   useEffect(() => { current = startup; });
   return null;
 }
 async function update() { await act(async () => tree.update(createElement(Probe))); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-  vi.useFakeTimers(); running = true; transitionReady = true; measured = true;
+  vi.useFakeTimers(); policy = undefined; running = true; transitionReady = true; measured = true;
   vi.mocked(cameraPermission).mockReset().mockResolvedValue(granted);
   vi.mocked(readViroSupport).mockReset().mockResolvedValue('supported');
   const original = console.error;
@@ -118,4 +119,17 @@ it('retires a hung permission read at the deadline and permits an explicit succe
   expect(current.mountScene).toBe(true);
   await act(async () => read.resolve(granted));
   expect(current.attempt).toBe(newAttempt); expect(current.mountScene).toBe(true);
+});
+
+it('revalidates entry after permission, measurement and delayed transition immediately before mount', async () => {
+  const gate = vi.fn(() => true); policy = { begin: () => true, authorizeMount: gate, ready: () => true, interrupt: vi.fn(), fail: vi.fn() };
+  transitionReady = false; measured = false; await update(); await act(async () => current.start());
+  expect(gate).not.toHaveBeenCalled(); measured = true; await update(); expect(gate).not.toHaveBeenCalled();
+  gate.mockReturnValue(false); transitionReady = true; await update();
+  expect(gate).toHaveBeenCalledOnce(); expect(current.mountScene).toBe(false); expect(current.errorCode).toBe('entry-ineligible');
+});
+it('does not promote an expired logical recovery on a late native ready callback', async () => {
+  policy = { begin: () => true, authorizeMount: () => true, ready: () => false, interrupt: vi.fn(), fail: vi.fn() }; await update();
+  await act(async () => current.start()); expect(current.mountScene).toBe(true);
+  await act(async () => current.onReady()); expect(current.mountScene).toBe(false); expect(current.errorCode).toBe('entry-ineligible');
 });

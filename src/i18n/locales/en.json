@@ -306,7 +306,8 @@
       "checking": "Device AR support is still undetermined. Retry when ready.",
       "failed": "The AR test could not start. Retry when ready.",
       "permission-failed": "Camera permission could not be checked. Please retry.",
-      "startup-timeout": "AR startup timed out. Check camera access and Google Play Services for AR, then retry."
+      "startup-timeout": "AR startup timed out. Check camera access and Google Play Services for AR, then retry.",
+      "entry-ineligible": "This entry is no longer eligible. Return to the selected destination and verify entry again."
     }
   },
   "destinationRing": {

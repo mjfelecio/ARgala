@@ -23,7 +23,7 @@ Add session.ts/test. RED tests: pending interruption requires fresh validation; 
 
 ### Task 2: Startup and foreground session orchestration
 
-Extend use-viro-startup.ts/tests and add use-ar-session.ts/tests. RED: mount predicate runs after preflight and delayed transition/measurement immediately before mount; denied admission never mounts; late permission/support/deadline callbacks cannot revive retired attempts. Passive resume only for established suspended sessions and never re-prompts; revocation blocks mounting; initial/install interruption requires Retry, including interrupted live recovery. Grace/identity checks repeat at mount. Run real hooks with native boundaries mocked; preserve all M1 regressions.
+Extend use-viro-startup.ts/tests and add use-ar-session.ts/tests. RED: mount predicate runs after preflight and delayed transition/measurement immediately before mount; denied admission never mounts; late permission/support/deadline callbacks cannot revive retired attempts. Passive resume only for established suspended sessions and never re-prompts; revocation blocks mounting; initial/install interruption requires Retry, including interrupted live recovery. Grace/identity checks repeat at mount. The M3 screen must resolve its native module before enabling final mount readiness, so a lazy bundle delay cannot separate eligibility validation from native creation. Run real hooks with native boundaries mocked; preserve all M1 regressions.
 
 ### Task 3: Logical scene restoration and reveal
 
