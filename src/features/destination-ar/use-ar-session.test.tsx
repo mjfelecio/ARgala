@@ -5,7 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { cameraPermission, readViroSupport } from './viro-runtime';
 import { useArSession } from './use-ar-session';
 vi.mock('./viro-runtime', () => ({ cameraPermission: vi.fn(), readViroSupport: vi.fn() }));
-const identity = { destinationId: 'development-aclc', principalId: 'owner', provenance: 'development' as const };
+const identity = { admissionId: 'development-entry', destinationId: 'development-aclc', principalId: 'owner', provenance: 'development' as const };
 const granted = { granted: true, canAskAgain: true, status: 'granted' as PermissionResponse['status'], expires: 'never' as const };
 let running: boolean; let transitionReady: boolean; let measured: boolean; let eligible: boolean;
 let reveal = false;

@@ -3,11 +3,11 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
 import { Action, Notice, Screen } from '@/ui/shared';
+import { isViroSpikeEnabled } from './dev-guard';
+export { isViroSpikeEnabled } from './dev-guard';
 
 const Spike = lazy(() => import('./destination-ar-screen'));
-export function isViroSpikeEnabled() {
-  return __DEV__ && process.env.EXPO_PUBLIC_VIRO_SPIKE === '1';
-}
+const SessionRing = lazy(() => import('./destination-ar-session-screen'));
 export function ViroSpikeLaunch() {
   const { t } = useTranslation();
   return isViroSpikeEnabled() ? <Button variant="secondary" accessibilityLabel={t('destinationAr.title')} onPress={() => router.push('/viro-spike')}>
@@ -27,5 +27,5 @@ function DevelopmentArRoute({ variant }: { variant: 'square' | 'ring' }) {
   // Neither a URL nor an environment flag can enable this in a release build.
   if (!isViroSpikeEnabled()) return <Screen><Notice>{t('destinationAr.unavailable')}</Notice>
     <Action title={t('common.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }} /></Screen>;
-  return <Suspense fallback={<Screen><Notice busy>{t('common.loading')}</Notice></Screen>}><Spike variant={variant} /></Suspense>;
+  return <Suspense fallback={<Screen><Notice busy>{t('common.loading')}</Notice></Screen>}>{variant === 'ring' ? <SessionRing /> : <Spike variant={variant} />}</Suspense>;
 }

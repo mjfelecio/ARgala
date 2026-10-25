@@ -1,7 +1,7 @@
 import type { ReadingCursor } from './content-layout';
 import type { TrackingState } from './types';
 export const suspensionGraceMs = 5 * 60 * 1000;
-export type SessionIdentity = { destinationId: string; principalId: string; provenance: 'development' | 'verified' };
+export type SessionIdentity = { admissionId: string; destinationId: string; principalId: string; provenance: 'development' | 'verified' };
 export type LogicalArProgress = { selectedId: string | null; cursors: Record<string, ReadingCursor> };
 type Phase = 'idle' | 'preflight' | 'initializing' | 'reveal' | 'exploring' | 'limited' | 'suspended' | 'interrupted' | 'failed' | 'expired' | 'closed';
 export type SessionSnapshot = { phase: Phase; attempt: number; established: boolean; suspendedAt: number | null; progress: LogicalArProgress; revealedCount: number };
@@ -19,7 +19,7 @@ export class ArSession {
   getSnapshot = () => this.state;
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
   private write(patch: Partial<SessionSnapshot>) { this.state = Object.freeze({ ...this.state, ...patch }); this.listeners.forEach(listener => listener()); }
-  private matches(identity: SessionIdentity) { return identity.destinationId === this.identity.destinationId && identity.principalId === this.identity.principalId && identity.provenance === this.identity.provenance; }
+  private matches(identity: SessionIdentity) { return identity.admissionId === this.identity.admissionId && identity.destinationId === this.identity.destinationId && identity.principalId === this.identity.principalId && identity.provenance === this.identity.provenance; }
   private current(attempt: number) { return attempt === this.state.attempt && this.state.phase !== 'closed' && this.state.phase !== 'expired'; }
   canRestore(now: number) {
     const start = this.state.suspendedAt;

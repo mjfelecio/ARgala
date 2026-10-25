@@ -9,17 +9,18 @@ vi.mock('./viro-runtime', () => ({ cameraPermission: vi.fn(), readViroSupport: v
 let tree: ReactTestRenderer;
 let current: ReturnType<typeof useViroStartup>;
 let running: boolean; let transitionReady: boolean; let measured: boolean;
+let clonePolicy = false;
 let policy: { begin(): boolean; authorizeMount(): boolean; ready(): boolean; interrupt(): void; fail(): void } | undefined;
 const granted = { granted: true, canAskAgain: true, status: 'granted' as PermissionResponse['status'], expires: 'never' as const };
 function Probe() {
-  const startup = useViroStartup({ running, transitionReady, measured, policy });
+  const startup = useViroStartup({ running, transitionReady, measured, policy: clonePolicy && policy ? { ...policy } : policy });
   useEffect(() => { current = startup; });
   return null;
 }
 async function update() { await act(async () => tree.update(createElement(Probe))); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-  vi.useFakeTimers(); policy = undefined; running = true; transitionReady = true; measured = true;
+  vi.useFakeTimers(); clonePolicy = false; policy = undefined; running = true; transitionReady = true; measured = true;
   vi.mocked(cameraPermission).mockReset().mockResolvedValue(granted);
   vi.mocked(readViroSupport).mockReset().mockResolvedValue('supported');
   const original = console.error;
@@ -132,4 +133,11 @@ it('does not promote an expired logical recovery on a late native ready callback
   policy = { begin: () => true, authorizeMount: () => true, ready: () => false, interrupt: vi.fn(), fail: vi.fn() }; await update();
   await act(async () => current.start()); expect(current.mountScene).toBe(true);
   await act(async () => current.onReady()); expect(current.mountScene).toBe(false); expect(current.errorCode).toBe('entry-ineligible');
+});
+
+it('does not retire foreground ownership again merely because equivalent policy callbacks rerender', async () => {
+  const interrupt = vi.fn(() => { clonePolicy = false; });
+  policy = { begin: () => true, authorizeMount: () => true, ready: () => true, interrupt, fail: vi.fn() };
+  clonePolicy = true; await update(); await act(async () => current.start()); await act(async () => current.onReady());
+  running = false; await update(); expect(interrupt).toHaveBeenCalledOnce();
 });

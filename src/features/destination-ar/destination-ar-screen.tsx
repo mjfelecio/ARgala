@@ -16,7 +16,7 @@ import type { TrackingState } from './types';
 // Do not evaluate Viro's native components in old APKs or before capability checks.
 const NativeScene = lazy(() => import('./destination-scene').then(module => ({ default: module.DestinationSceneHost })));
 const NativeRing = lazy(() => import('./destination-ring-scene').then(module => ({ default: module.DestinationRingSceneHost })));
-class SceneBoundary extends Component<{ onFailure(): void; children: ReactNode }, { failed: boolean }> {
+export class SceneBoundary extends Component<{ onFailure(): void; children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   componentDidCatch() { this.props.onFailure(); }

@@ -355,6 +355,9 @@
     "intro": {
       "load-failed": "The introduction preference could not be loaded. You can continue or retry.",
       "save-failed": "The introduction preference could not be saved. You can retry."
-    }
+    },
+    "skip": "Skip introduction",
+    "reveal": "Look around as the sample panels appear. You can skip this introduction.",
+    "restoring": "Restoring your reading progress. Move gently to reacquire tracking."
   }
 }

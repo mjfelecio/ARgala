@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { cameraPermission, readViroSupport } from './viro-runtime';
 import type { StartupError, StartupPhase } from './types';
 
@@ -13,6 +13,8 @@ const startupTimeoutMs = 20000;
  * replacement view (and hence never recreates an ARCore install prompt) by itself.
  */
 export function useViroStartup({ running, transitionReady, measured, policy }: Options) {
+  const latestPolicy = useRef(policy);
+  useLayoutEffect(() => { latestPolicy.current = policy; }, [policy]);
   const [state, setState] = useState<State>(initial);
   const current = useRef(state);
   const sequence = useRef(0);
@@ -34,11 +36,11 @@ export function useViroStartup({ running, transitionReady, measured, policy }: O
     if (running) return;
     retire();
     if (operation.current?.stage !== 'permission-request') { operation.current = null; setPending(false); }
-    if (current.current.phase !== 'idle') { policy?.interrupt(); write({ ...current.current, phase: 'interrupted', errorCode: null }); }
-  }, [running, retire, write, policy]);
+    if (current.current.phase !== 'idle') { latestPolicy.current?.interrupt(); write({ ...current.current, phase: 'interrupted', errorCode: null }); }
+  }, [running, retire, write]);
 
   const start = useCallback(async (prompt = false) => {
-    if (!running || operation.current || policy?.begin() === false) return;
+    if (!running || operation.current || latestPolicy.current?.begin() === false) return;
     retire(); const attempt = sequence.current;
     const valid = () => alive.current && sequence.current === attempt;
     const fail = (errorCode: StartupError) => {
@@ -46,7 +48,7 @@ export function useViroStartup({ running, transitionReady, measured, policy }: O
       // A hung support callback is safe to abandon. An outstanding permission
       // activity must settle before another owner can offer a new prompt.
       if (operation.current?.stage !== 'permission-request') { operation.current = null; setPending(false); }
-      policy?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode });
+      latestPolicy.current?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode });
     };
     operation.current = { attempt, stage: 'support' }; setPending(true);
     write({ ...initial, attempt, phase: 'checking' });
@@ -63,7 +65,7 @@ export function useViroStartup({ running, transitionReady, measured, policy }: O
       });
       if (!valid()) return;
       if (!permission.granted) {
-        clearTimeout(timer.current); policy?.fail();
+        clearTimeout(timer.current); latestPolicy.current?.fail();
         write({ ...current.current, phase: 'permission', canAskAgain: permission.canAskAgain });
       } else write({ ...current.current, phase: 'prepared' });
     } catch { fail('permission-failed'); }
@@ -72,26 +74,26 @@ export function useViroStartup({ running, transitionReady, measured, policy }: O
         operation.current = null; if (alive.current) setPending(false);
       }
     }
-  }, [running, retire, write, policy]);
+  }, [running, retire, write]);
 
   useEffect(() => {
     if (!running || !transitionReady || !measured || current.current.phase !== 'prepared') return;
-    if (policy?.authorizeMount() === false) {
-      policy.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'entry-ineligible' });
+    if (latestPolicy.current?.authorizeMount() === false) {
+      latestPolicy.current?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'entry-ineligible' });
     } else write({ ...current.current, phase: 'initializing' });
-  }, [running, transitionReady, measured, state.phase, write, retire, policy]);
+  }, [running, transitionReady, measured, state.phase, write, retire]);
   const onReady = useCallback(() => {
     if (!running || sequence.current !== state.attempt || current.current.phase !== 'initializing') return;
     if (Date.now() >= deadline.current) {
-      policy?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'startup-timeout' }); return;
+      latestPolicy.current?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'startup-timeout' }); return;
     }
-    if (policy?.ready() === false) { policy.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'entry-ineligible' }); return; }
+    if (latestPolicy.current?.ready() === false) { latestPolicy.current?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'entry-ineligible' }); return; }
     clearTimeout(timer.current); write({ ...current.current, phase: 'live' });
-  }, [running, state.attempt, retire, write, policy]);
+  }, [running, state.attempt, retire, write]);
   const onFailure = useCallback(() => {
     if (sequence.current !== state.attempt || !alive.current) return;
-    policy?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'failed' });
-  }, [state.attempt, retire, write, policy]);
+    latestPolicy.current?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'failed' });
+  }, [state.attempt, retire, write]);
   return { ...state, pending, start, onReady, onFailure,
     mountScene: running && transitionReady && measured && (state.phase === 'initializing' || state.phase === 'live'),
   };

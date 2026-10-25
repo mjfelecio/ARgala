@@ -11,7 +11,7 @@ export function useArSession({ identity, tileIds, running, transitionReady, meas
   const [owner] = useState(() => ({ identity: { ...identity }, session: new ArSession(identity, tileIds) }));
   const model = owner.session; const session = useSyncExternalStore(model.subscribe, model.getSnapshot, model.getSnapshot);
   const token = useRef(0);
-  const matches = owner.identity.destinationId === identity.destinationId && owner.identity.principalId === identity.principalId && owner.identity.provenance === identity.provenance;
+  const matches = owner.identity.admissionId === identity.admissionId && owner.identity.destinationId === identity.destinationId && owner.identity.principalId === identity.principalId && owner.identity.provenance === identity.provenance;
   const policy = useMemo<StartupPolicy>(() => ({
     begin() { const next = model.begin(identity, Date.now()); if (next === null) return false; token.current = next; return true; },
     authorizeMount: () => model.authorizeMount(token.current, identity, Date.now(), freshEligible),

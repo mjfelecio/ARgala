@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest';
 import { ArSession, suspensionGraceMs } from './session';
-const identity = { destinationId: 'development-aclc', principalId: 'owner', provenance: 'development' as const };
+const identity = { admissionId: 'development-entry', destinationId: 'development-aclc', principalId: 'owner', provenance: 'development' as const };
 const ids = ['overview', 'history'];
 function create() { return new ArSession(identity, ids); }
 function initialize(session: ArSession, now = 1000) {
@@ -51,7 +51,7 @@ it('does not automatically repeat installation after an interrupted recovery att
   expect(session.canRestore(3000)).toBe(true); expect(session.getSnapshot().suspendedAt).toBe(2000);
   expect(session.ready(token, 3000, false)).toBe(false);
 });
-it.each(['destinationId', 'principalId', 'provenance'] as const)('invalidates ownership on %s change', field => {
+it.each(['admissionId', 'destinationId', 'principalId', 'provenance'] as const)('invalidates ownership on %s change', field => {
   const session = create(); const token = live(session);
   expect(session.authorizeMount(token, { ...identity, [field]: 'changed' }, 1500, () => true)).toBe(false);
   expect(session.getSnapshot().phase).toBe('closed'); expect(session.canRestore(1501)).toBe(false);
