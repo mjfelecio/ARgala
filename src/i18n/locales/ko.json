@@ -307,6 +307,6 @@
     },
     "hold": "길게 누른 뒤 떼기",
     "poseRequired": "정면을 향해 휴대폰을 천천히 움직인 뒤 다시 설정하세요.",
-    "poseRate": "자세 알림: {{received}}/초 · 네이티브 이동 갱신: {{applied}}/초"
+    "poseRate": "자세 알림: {{received}}/초 · 위치 출력: {{applied}}/초"
   }
 }

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ViroARScene, ViroARSceneNavigator, ViroNode, ViroTrackingStateConstants } from '@reactvision/react-viro';
 import { useTranslation } from 'react-i18next';
 import { developmentRingContent, type RingContent } from './development-ring-content';
@@ -21,10 +21,20 @@ export function DestinationRingScene({ onReady, onTracking, onControls, onRecent
   const [controller] = useState(() => new RingController(snapshot));
   const [frame, setFrame] = useState<{ slots: RingSlot[]; position: Vector3 } | null>(null);
   const [tracking, setTracking] = useState<TrackingState>('unavailable');
-  const trackingRef = useRef<TrackingState>('unavailable'); const ring = useRef<ViroNode>(null);
+  const trackingRef = useRef<TrackingState>('unavailable'); const ring = useRef<ViroNode>(null); const panelFrame = useRef<ViroNode>(null);
   const [selection, setSelection] = useState<FocusSelection | null>(null);
   const [cursors, setCursors] = useState<Record<string, ReadingCursor>>({});
   const counts = useRef({ received: 0, applied: 0 });
+  const closingCommitted = useRef(false);
+  useLayoutEffect(() => {
+    if (frame) ring.current?.setNativeProps({ position: controller.ringPosition! });
+  }, [controller, frame]);
+  useLayoutEffect(() => {
+    closingCommitted.current = selection?.phase === 'closing';
+    // Explicitly commit both directions of the origin handoff: unchanged
+    // declarative coordinates cannot reset an imperatively translated parent.
+    if (selection) panelFrame.current?.setNativeProps({ position: closingCommitted.current ? controller.ringPosition! : selection.origin });
+  }, [controller, selection]);
   const recenter = useCallback(() => {
     const success = controller.recenter(performance.now()); onRecenterResult?.(success);
     if (!success) return;
@@ -53,7 +63,10 @@ export function DestinationRingScene({ onReady, onTracking, onControls, onRecent
     if (update.position) {
       counts.current.applied++;
       if (update.captured) { setFrame({ slots: controller.slots, position: update.position }); onReady(); }
-      else ring.current?.setNativeProps({ position: update.position });
+      else {
+        ring.current?.setNativeProps({ position: update.position });
+        if (closingCommitted.current && controller.selection?.phase === 'closing') panelFrame.current?.setNativeProps({ position: update.position });
+      }
     }
   }
   function select(id: string) { const next = controller.select(id, performance.now()); if (next) setSelection(next); }
@@ -67,8 +80,8 @@ export function DestinationRingScene({ onReady, onTracking, onControls, onRecent
     {frame && <ViroNode ref={ring} testID="ring-root" position={frame.position} opacity={(selection ? 0.25 : 1) * (tracking === 'normal' ? 1 : 0.35)}>
       {frame.slots.map(slot => selection?.id === slot.id ? null : <InformationTile key={slot.id} slot={slot} content={snapshot.find(item => item.id === slot.id)!} enabled={tracking === 'normal' && !selection} style={style} onSelect={select} />)}
     </ViroNode>}
-    {selection && selectedContent && <InformationPanel selection={selection} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={tracking === 'normal'} style={style}
-      onCursor={(id, cursor) => setCursors(previous => ({ ...previous, [id]: cursor }))} onClose={close} onComplete={complete} />}
+    {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel selection={selection} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={tracking === 'normal'} style={style}
+      onCursor={(id, cursor) => setCursors(previous => ({ ...previous, [id]: cursor }))} onClose={close} onComplete={complete} /></ViroNode>}
     </ViroNode>
   </ViroARScene>;
 }

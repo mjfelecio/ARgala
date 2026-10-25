@@ -31,8 +31,9 @@ it('focuses once toward the current heading, freezes spatial focus, and restores
   c.pose({ position: [6, 2, 3], forward: [0, 0, 1] }, 1200);
   expect(c.selection!.to.position).toEqual([5.15, 2, 3]);
   const close = c.close(1200)!;
-  expect(close.to.position[0]).toBeCloseTo(8);
-  expect(close.to.position[2]).toBeCloseTo(3);
+  expect(close.origin).toEqual([6, 2, 3]);
+  expect(close.to.position[0]).toBeCloseTo(2);
+  expect(close.to.position[2]).toBeCloseTo(0);
   c.complete(close.token); expect(c.selection).toBeNull();
 });
 it('retains basis and focused transform through tracking loss and rejects stale interactions', () => {

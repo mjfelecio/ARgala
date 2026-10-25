@@ -12,7 +12,7 @@ type Storage = { getItem(key: string): Promise<string | null>; setItem(key: stri
 export function createReadingStore(storage: Storage) {
   const key = 'argala.ar-reading.v1'; let tail: Promise<unknown> = Promise.resolve();
   return {
-    async read() { return readReadingSize(await storage.getItem(key)); },
+    async read() { await tail; return readReadingSize(await storage.getItem(key)); },
     write(size: ReadingSize) {
       const next = tail.then(() => storage.setItem(key, JSON.stringify({ version: 1, size })));
       tail = next.catch(() => undefined); return next;

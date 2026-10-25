@@ -1,6 +1,7 @@
-import { buildRingSlots, captureBasis, focusTransform, slotTransform, validPose, type Basis, type RingEntry, type RingSlot, type SpatialTransform } from './scene-geometry';
+import { buildRingSlots, captureBasis, focusTransform, slotTransform, validPose, ringMetrics, type Basis, type RingEntry, type RingSlot, type SpatialTransform } from './scene-geometry';
 import type { PoseSample, TrackingState, Vector3 } from './types';
-export type FocusSelection = { id: string; phase: 'opening' | 'focused' | 'closing'; token: number; from: SpatialTransform; to: SpatialTransform };
+/** from/to are local to origin; only the closing origin follows translation. */
+export type FocusSelection = { id: string; phase: 'opening' | 'focused' | 'closing'; token: number; origin: Vector3; from: SpatialTransform; to: SpatialTransform };
 
 /** Native-coordinate-frame geometry only. This grants no destination admission. */
 export class RingController {
@@ -42,12 +43,17 @@ export class RingController {
     if (this.selection || !this.fresh(now) || !this.position) return null;
     const slot = this.slots.find(item => item.id === id); const to = focusTransform(this.latest!);
     if (!slot || !to) return null;
-    return this.selection = { id, phase: 'opening', token: ++this.serial, from: slotTransform(slot, this.position), to };
+    return this.selection = { id, phase: 'opening', token: ++this.serial, origin: [0, 0, 0], from: slotTransform(slot, this.position), to };
   }
   close(now: number): FocusSelection | null {
     if (this.selection?.phase !== 'focused' || !this.fresh(now) || !this.position) return null;
     const slot = this.slots.find(item => item.id === this.selection!.id)!;
-    return this.selection = { id: slot.id, phase: 'closing', token: ++this.serial, from: this.selection.to, to: slotTransform(slot, this.position) };
+    // Closing joins the translation-following frame. Animate in its local
+    // coordinates so movement (including recovery) cannot stale the endpoint.
+    const origin: Vector3 = [...this.position];
+    const from = { ...this.selection.to, position: this.selection.to.position.map((v, i) => v - origin[i]) as Vector3 };
+    const to = { position: slot.position, rotation: slot.rotation, scale: ringMetrics.tileScale };
+    return this.selection = { id: slot.id, phase: 'closing', token: ++this.serial, origin, from, to };
   }
   complete(token: number) {
     if (!this.selection || this.selection.token !== token || this.selection.phase === 'focused') return false;
@@ -62,7 +68,7 @@ export class RingController {
     ++this.serial;
     if (this.selection) {
       const transform = focusTransform(this.latest!)!;
-      this.selection = { ...this.selection, phase: 'focused', token: this.serial, from: transform, to: transform };
+      this.selection = { ...this.selection, phase: 'focused', token: this.serial, origin: [0, 0, 0], from: transform, to: transform };
     }
     return true;
   }

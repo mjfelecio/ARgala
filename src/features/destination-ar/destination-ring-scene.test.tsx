@@ -118,3 +118,44 @@ it('keeps oversized content recoverable through font reflow instead of throwing 
   await press('ring-action-larger');
   expect(text('ring-body').replaceAll('\n', '')).toContain('This sample text could not');
 });
+
+it.each([false, true])('moves the closing frame with the ring until restore (tracking interruption=%s)', async interrupted => {
+  await mount(); await track(); await pose(); await press('ring-tile-overview'); await finish(); await press('ring-action-close');
+  if (interrupted) { await track(2); await pose({ position: [0.2, 2, 0], forward: [1, 0, 0] }, 1050); await track(3); }
+  await pose({ position: [0.4, 2, 0], forward: [1, 0, 0] }, 1100);
+  const ringOutput = native.patches.filter(item => item.id === 'ring-root').at(-1)!;
+  const closingOutput = native.patches.filter(item => item.id === 'ring-panel-frame').at(-1);
+  expect(closingOutput?.patch.position).toEqual([0.4, 2, 0]);
+  expect(ringOutput.patch.position).toEqual([0.4, 2, 0]);
+  await finish();
+  expect(node('ring-focused-panel')).toBeUndefined();
+  expect(node('ring-tile-overview').props.position).toEqual([0, 0, -2]);
+});
+
+it('switches closing coordinate frames only after the native child commit', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-overview'); await finish();
+  await pose({ position: [4, 2, 0], forward: [0, 0, -1] }, 1100); native.patches.length = 0;
+  await act(async () => {
+    node('ring-action-close').props.onClick();
+    vi.setSystemTime(1200);
+    tree.root.findByType('native-scene' as React.ElementType).props.onCameraTransformUpdate({ position: [4.4, 2, 0], forward: [0, 0, -1] });
+    expect(native.patches.filter(item => item.id === 'ring-panel-frame')).toHaveLength(0);
+  });
+  expect(native.patches.filter(item => item.id === 'ring-panel-frame').at(-1)!.patch.position).toEqual([4.4, 2, 0]);
+});
+
+it('resets an imperatively translated zero-origin panel frame on recenter', async () => {
+  await mount(); await track(); await pose({ position: [0, 0, 0], forward: [0, 0, -1] });
+  await press('ring-tile-overview'); await finish(); await press('ring-action-close');
+  await pose({ position: [0.4, 0, 0], forward: [0, 0, -1] }, 1100); native.patches.length = 0;
+  await act(async () => controls!.recenter());
+  expect(native.patches.filter(item => item.id === 'ring-panel-frame').at(-1)?.patch.position).toEqual([0, 0, 0]);
+  expect(node('ring-focused-panel').props.position).toEqual([0.4, 0, -1.15]);
+});
+it('commits recenter origin even when it equals the original declarative ring position', async () => {
+  await mount(); await track(); await pose();
+  await pose({ position: [0.1, 2, 0], forward: [0, 0, -1] }, 1100);
+  await pose(initial, 1140); native.patches.length = 0;
+  await act(async () => controls!.recenter());
+  expect(native.patches.filter(item => item.id === 'ring-root').at(-1)?.patch.position).toEqual([0, 2, 0]);
+});

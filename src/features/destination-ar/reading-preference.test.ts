@@ -16,3 +16,14 @@ it('serializes writes, survives a failed write, and reads the same dedicated key
   expect(storage.getItem.mock.calls[0][0]).toBe(storage.setItem.mock.calls[0][0]);
   expect(storage.getItem.mock.calls[0][0]).not.toBe('argala.preferences.v1');
 });
+
+it('orders a remount read after all preference writes already queued', async () => {
+  const delayed = Promise.withResolvers<void>(); let saved = '{"version":1,"size":"standard"}';
+  const storage = { getItem: vi.fn(async () => saved), setItem: vi.fn(async (_key: string, value: string) => { if (JSON.parse(value).size === 'small') await delayed.promise; saved = value; }) };
+  const store = createReadingStore(storage);
+  const first = store.write('small'); const second = store.write('large'); const remountedRead = store.read();
+  await Promise.resolve();
+  expect(storage.getItem).not.toHaveBeenCalled();
+  delayed.resolve(); await first; await second;
+  expect(await remountedRead).toBe('large');
+});

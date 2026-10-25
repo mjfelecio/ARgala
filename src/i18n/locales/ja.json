@@ -307,6 +307,6 @@
     },
     "hold": "長押しして離す",
     "poseRequired": "正面を向き、端末をゆっくり動かしてから再設定してください。",
-    "poseRate": "姿勢通知: {{received}}/秒 · ネイティブ移動更新: {{applied}}/秒"
+    "poseRate": "姿勢通知: {{received}}/秒 · 位置出力: {{applied}}/秒"
   }
 }

@@ -348,6 +348,6 @@
     },
     "hold": "Hold, then release",
     "poseRequired": "Face ahead and move the phone gently before recentering.",
-    "poseRate": "Pose callbacks: {{received}}/s · native translations: {{applied}}/s"
+    "poseRate": "Pose callbacks: {{received}}/s · position outputs: {{applied}}/s"
   }
 }
