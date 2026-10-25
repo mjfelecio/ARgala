@@ -16,6 +16,7 @@ export class RingController {
   private serial = 0;
   constructor(private readonly entries: readonly RingEntry[]) {}
   track(state: TrackingState) {
+    if (state !== this.tracking) this.latest = null;
     if (state === 'normal' && this.tracking !== 'normal') this.snap = true;
     this.tracking = state;
   }
@@ -35,6 +36,7 @@ export class RingController {
     this.publishedAt = now; this.snap = false;
     return { captured, position: [...this.position] };
   }
+  get ringPosition(): Vector3 | null { return this.position ? [...this.position] : null; }
   private fresh(now: number) { return this.tracking === 'normal' && this.latest && now >= this.sampledAt && now - this.sampledAt <= 500; }
   select(id: string, now: number): FocusSelection | null {
     if (this.selection || !this.fresh(now) || !this.position) return null;

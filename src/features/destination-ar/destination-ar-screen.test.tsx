@@ -7,16 +7,17 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import DestinationArScreen from './destination-ar-screen';
-import { ViroSpikeRoute, ViroSpikeLaunch } from './dev-entry';
+import { ViroSpikeRoute, ViroSpikeLaunch, ViroRingRoute, ViroRingLaunch } from './dev-entry';
 import { router } from 'expo-router';
 
 const native = vi.hoisted(() => ({
   active: true, focused: true, context: null as React.Context<unknown> | null,
   focusContext: null as React.Context<boolean | undefined> | null,
   transitions: new Map<string, Set<(e: { data: { closing: boolean } }) => void>>(),
-  get: vi.fn(), request: vi.fn(), support: vi.fn(),
+  get: vi.fn(), request: vi.fn(), support: vi.fn(), getSize: vi.fn(), setSize: vi.fn(),
 }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
+vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getSize, setItem: native.setSize } }));
 vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get, requestCameraPermissionsAsync: native.request } }));
 vi.mock('expo-router', async () => {
   const require = createRequire(import.meta.url);
@@ -32,7 +33,7 @@ vi.mock('expo-router', async () => {
 vi.mock('@reactvision/react-viro', () => ({
   ViroARScene: 'native-scene', ViroNode: 'node', ViroQuad: 'quad', ViroText: 'viro-text',
   ViroARSceneNavigator: (props: { initialScene: { scene: () => React.JSX.Element } }) => React.createElement('native-navigator', props, React.createElement(props.initialScene.scene)),
-  ViroMaterials: { createMaterials: vi.fn() },
+  ViroMaterials: { createMaterials: vi.fn() }, ViroAnimations: { registerAnimations: vi.fn() },
   ViroTrackingStateConstants: { TRACKING_UNAVAILABLE: 1, TRACKING_LIMITED: 2, TRACKING_NORMAL: 3 },
 }));
 
@@ -54,7 +55,7 @@ const copy = () => JSON.stringify(tree!.toJSON());
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: true });
   vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); vi.useFakeTimers();
-  native.active = true; native.focused = true; native.transitions.clear();
+  native.active = true; native.focused = true; native.transitions.clear(); native.getSize.mockReset().mockResolvedValue(null); native.setSize.mockReset().mockResolvedValue(undefined);
   native.get.mockReset().mockResolvedValue({ granted: true, status: 'granted', canAskAgain: true, expires: 'never' });
   native.request.mockReset().mockResolvedValue({ granted: false, status: 'denied', canAskAgain: true, expires: 'never' });
   native.support.mockReset().mockImplementation(callback => callback('SUPPORTED'));
@@ -164,4 +165,34 @@ it.each([
   expect(copy()).toContain(translations.t('destinationAr.live'));
   await act(async () => tree!.root.findByType('node' as React.ElementType).props.onClick());
   expect(label()).toBe(translations.t('destinationAr.square'));
+});
+
+it.each([false, true])('protects the M2 route before native work when dev=%s and the opt-in is incomplete', async development => {
+  Object.assign(globalThis, { __DEV__: development }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', development ? '0' : '1');
+  await mount(React.createElement(ViroRingRoute));
+  expect(copy()).toContain(translations.t('destinationAr.unavailable'));
+  expect(native.get).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled(); expect(native.getSize).not.toHaveBeenCalled();
+});
+it('launches the separate M2 route explicitly while preserving the native-square entry', async () => {
+  await mount(React.createElement(ViroRingLaunch)); await press('destinationRing.title');
+  expect(router.push).toHaveBeenCalledWith('/viro-ring'); expect(native.support).not.toHaveBeenCalled();
+});
+it('keeps ring startup behind real focus/transition gates and exposes only utility controls outside Viro', async () => {
+  const child = () => React.createElement(DestinationArScreen, { variant: 'ring' });
+  await mount(child()); await layout();
+  await act(async () => native.transitions.get('transitionStart')?.forEach(callback => callback({ data: { closing: false } })));
+  await press('destinationAr.start'); expect(camera()).toHaveLength(0);
+  await act(async () => native.transitions.get('transitionEnd')?.forEach(callback => callback({ data: { closing: false } })));
+  await act(async () => { await vi.dynamicImportSettled(); }); expect(camera()).toHaveLength(1);
+  const scene = tree!.root.findByType('native-scene' as React.ElementType);
+  await act(async () => { scene.props.onTrackingUpdated(3, 1); scene.props.onCameraTransformUpdate({ position: [0, 0, 0], forward: [0, 0, -1] }); });
+  expect(copy()).toContain(translations.t('destinationRing.live'));
+  await press('destinationRing.recenter'); await press('destinationRing.help');
+  expect(copy()).toContain(translations.t('destinationRing.helpText'));
+  await act(async () => tree!.root.findAllByType('node' as React.ElementType).find(item => item.props.testID === 'ring-tile-history')!.props.onClick());
+  const chrome = tree!.root.findByType('safe-area' as React.ElementType);
+  expect(chrome.findAllByType('text').flatMap(item => item.children).join(' ')).not.toContain('This is development sample text');
+  native.focused = false; await act(async () => tree!.update(wrapper(child()))); expect(camera()).toHaveLength(0);
+  native.focused = true; await act(async () => tree!.update(wrapper(child()))); expect(camera()).toHaveLength(0);
+  expect(copy()).toContain(translations.t('destinationAr.interrupted'));
 });

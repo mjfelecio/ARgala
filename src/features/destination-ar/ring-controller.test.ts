@@ -53,3 +53,10 @@ it('recenter cancels an in-flight transition, preserves selected identity, and f
   expect(c.complete(focus.token)).toBe(false);
   expect(c.slots[0].position[0]).toBeCloseTo(2);
 });
+
+it('requires a new pose after tracking recovery before accepting an interaction', () => {
+  const c = ready(); c.track('limited'); c.track('normal');
+  expect(c.select('overview', 1100)).toBeNull();
+  c.pose({ ...pose, forward: [1, 0, 0] }, 1100);
+  expect(c.select('overview', 1100)!.to.position).toEqual([1.15, 2, 0]);
+});

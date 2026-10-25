@@ -345,6 +345,9 @@
         "title": "Facts",
         "body": "This is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring."
       }
-    }
+    },
+    "hold": "Hold, then release",
+    "poseRequired": "Face ahead and move the phone gently before recentering.",
+    "poseRate": "Pose callbacks: {{received}}/s · native translations: {{applied}}/s"
   }
 }

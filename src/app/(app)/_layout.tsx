@@ -17,6 +17,7 @@ export default function AppLayout() {
     <Stack.Screen name="directions" options={{ headerShown: false }} />
     <Stack.Screen name="destinations" options={{ headerShown: false }} />
     <Stack.Screen name="settings" options={{ title: t('settings.title'), headerShown: false }} />
+    <Stack.Screen name="viro-ring" options={{ headerShown: false }} />
     <Stack.Screen name="viro-spike" options={{ headerShown: false }} />
   </Stack>;
 }
