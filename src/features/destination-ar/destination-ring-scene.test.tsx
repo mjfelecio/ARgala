@@ -159,3 +159,23 @@ it('commits recenter origin even when it equals the original declarative ring po
   await act(async () => controls!.recenter());
   expect(native.patches.filter(item => item.id === 'ring-root').at(-1)?.patch.position).toEqual([0, 2, 0]);
 });
+
+it('uses readable-resolution glyph textures while preserving world-space text bounds', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  const body = tree.root.findAllByType('viro-text' as React.ElementType).find(item => item.props.testID === 'ring-body')!;
+  expect(body.props.style.fontSize).toBeGreaterThanOrEqual(32);
+  expect(body.props.width * body.props.scale[0]).toBeCloseTo(1.08);
+  expect(body.props.height * body.props.scale[1]).toBeCloseTo(0.44);
+  expect(body.props.style.fontSize * body.props.scale[0]).toBe(5);
+});
+it('gives Close a larger visible surface with separated control rows and preserves interaction gates', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  const close = node('ring-action-close');
+  const surface = close.findByType('quad' as React.ElementType);
+  expect(surface.props.height).toBeGreaterThanOrEqual(0.18);
+  expect(surface.props.width).toBeGreaterThanOrEqual(0.46);
+  const previous = node('ring-action-previous');
+  expect(previous.props.position[1] - close.props.position[1]).toBeGreaterThan(surface.props.height);
+  await track(2); await press('ring-action-close'); expect(node('ring-focused-panel')).toBeDefined();
+  await track(); await pose(); await press('ring-action-close'); await finish(); expect(node('ring-focused-panel')).toBeUndefined();
+});

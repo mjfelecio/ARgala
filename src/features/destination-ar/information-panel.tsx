@@ -1,5 +1,6 @@
+import { ArText } from './ar-text';
 import { useEffect, useRef } from 'react';
-import { ViroAnimations, ViroNode, ViroQuad, ViroText } from '@reactvision/react-viro';
+import { ViroAnimations, ViroNode, ViroQuad } from '@reactvision/react-viro';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { paginate, readingMetrics, reflowCursor, type ReadingCursor } from './content-layout';
@@ -50,23 +51,23 @@ export function InformationPanel({ selection, content, previous, reading, enable
     animation={{ name, run: false, onFinish: () => onComplete(selection.token), interruptible: true }}>
     <ViroQuad width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} materials="argalaRingEdge" />
     <ViroQuad width={ringMetrics.panelWidth} height={ringMetrics.panelHeight} position={[0, 0, 0.003]} opacity={0.96} materials="argalaRingSurface" />
-    <ViroText position={[0, closing ? 0 : 0.4, 0.006]} width={1.12} height={0.14} text={t(content.titleKey)} style={style.text(8, 'center', '600')} />
+    <ArText position={[0, closing ? 0 : 0.4, 0.006]} width={1.12} height={0.14} text={t(content.titleKey)} style={style.text(8, 'center', '600')} />
     {!closing && <>
-      <ViroText testID="ring-sample-label" position={[0, 0.3, 0.006]} width={1.12} height={0.06} text={t('destinationRing.sampleLabel')} style={style.text(3)} />
-      <ViroText testID="ring-body" position={[0, 0.035, 0.006]} width={1.08} height={0.44} text={page.text || t('destinationRing.empty')}
+      <ArText testID="ring-sample-label" position={[0, 0.3, 0.006]} width={1.12} height={0.06} text={t('destinationRing.sampleLabel')} style={style.text(3)} />
+      <ArText testID="ring-body" position={[0, 0.035, 0.006]} width={1.08} height={0.44} text={page.text || t('destinationRing.empty')}
         textLineBreakMode="None" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />
-      <NativePanelAction id="previous" label={t('destinationRing.previous')} position={[-0.4, -0.3, 0.012]} enabled={interactive && cursor.page > 0} style={style}
+      <NativePanelAction id="previous" label={t('destinationRing.previous')} position={[-0.4, -0.27, 0.012]} enabled={interactive && cursor.page > 0} style={style}
         onPress={() => onCursor(content.id, { ...cursor, page: cursor.page - 1, offset: pages[cursor.page - 1].start })} />
-      <ViroText testID="ring-page-indicator" position={[0, -0.3, 0.012]} width={0.4} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />
-      <NativePanelAction id="next" label={t('destinationRing.next')} position={[0.4, -0.3, 0.012]} enabled={interactive && cursor.page < pages.length - 1} style={style}
+      <ArText testID="ring-page-indicator" position={[0, -0.27, 0.012]} width={0.4} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />
+      <NativePanelAction id="next" label={t('destinationRing.next')} position={[0.4, -0.27, 0.012]} enabled={interactive && cursor.page < pages.length - 1} style={style}
         onPress={() => onCursor(content.id, { ...cursor, page: cursor.page + 1, offset: pages[cursor.page + 1].start })} />
-      <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.42, -0.44, 0.012]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />
-      <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[-0.17, -0.44, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
-      <NativePanelAction id="close" label={t('destinationRing.close')} width={0.4} position={[0.32, -0.44, 0.012]} enabled={interactive} style={style} onPress={onClose} />
+      <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.42, -0.49, 0.012]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />
+      <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[-0.17, -0.49, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
+      <NativePanelAction id="close" label={t('destinationRing.close')} width={0.46} position={[0.28, -0.49, 0.012]} enabled={interactive} style={style} onPress={onClose} />
       {reading.error && <ViroNode position={[0, 0, 0.025]}>
-        <ViroQuad width={1.12} height={0.4} materials="argalaRingSurface" />
-        <ViroText testID="ring-reading-error" position={[0, 0.06, 0.004]} width={1.02} height={0.23} text={t(`destinationRing.${reading.error}`)} style={style.text(4)} />
-        <NativePanelAction id="preference-retry" label={t('common.retry')} width={0.45} position={[0, -0.13, 0.006]} enabled={interactive && !reading.pending} style={style} onPress={() => void reading.retry()} />
+        <ViroQuad width={1.12} height={0.5} materials="argalaRingSurface" />
+        <ArText testID="ring-reading-error" position={[0, 0.06, 0.004]} width={1.02} height={0.23} text={t(`destinationRing.${reading.error}`)} style={style.text(4)} />
+        <NativePanelAction id="preference-retry" label={t('common.retry')} width={0.45} position={[0, -0.155, 0.006]} enabled={interactive && !reading.pending} style={style} onPress={() => void reading.retry()} />
       </ViroNode>}
     </>}
   </ViroNode>;
