@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { act, create, type ReactTestRenderer } from 'react-test-renderer';
+import { act, create, type ReactTestRenderer, type ReactTestInstance } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { DestinationScene } from './destination-scene';
 import type { PoseSample } from './types';
@@ -32,10 +32,10 @@ it('requires normal tracking and a valid horizontal pose before making the squar
 });
 it('keeps the square orientation and focus through same-frame tracking loss after the viewer turns', async () => {
   await updateTracking(3); await updatePose();
-  await act(async () => tree.root.findAllByType('quad' as React.ElementType).find(node => node.props.onClick)!.props.onClick());
+  await nativeClickAcross(tree.root.findByType('label' as React.ElementType), tree.root.findByType('label' as React.ElementType));
   const original = tree.root.findByType('node' as React.ElementType).props;
   await updateTracking(2);
-  await act(async () => tree.root.findAllByType('quad' as React.ElementType).find(node => node.props.onClick)!.props.onClick());
+  await nativeClickAcross(tree.root.findByType('label' as React.ElementType), tree.root.findByType('label' as React.ElementType));
   await updatePose({ position: [4, 2, 3], forward: [1, 0, 0] });
   expect(tree.root.findByType('node' as React.ElementType).props.opacity).toBeLessThan(1);
   await updateTracking(3); await updatePose({ position: [4, 2, 3], forward: [1, 0, 0] });
@@ -48,4 +48,32 @@ it('keeps repeated camera callbacks below the host React render boundary', async
   await updateTracking(3); await updatePose();
   for (let n = 0; n < 20; n++) await updatePose({ position: [n, 2, 3], forward: [0, 0, -1] });
   expect(ready).toHaveBeenCalledOnce(); expect(tracking).toHaveBeenCalledOnce();
+});
+
+// The pinned native VROInputControllerBase completes a click only when Down/Up
+// resolve to the same event owner, bubbling from hit geometry to its ancestors.
+// Model that native boundary; this does not emulate physical ray casting.
+async function nativeClickAcross(down: ReactTestInstance, up: ReactTestInstance) {
+  function owner(hit: ReactTestInstance | null): ReactTestInstance | null {
+    while (hit && !hit.props.onClick) hit = hit.parent;
+    return hit;
+  }
+  const pressed = owner(down);
+  if (pressed && pressed === owner(up)) await act(async () => pressed.props.onClick());
+}
+it.each(['text-to-panel', 'panel-to-text', 'border'])('keeps one square interaction across its visual layers: %s', async gesture => {
+  await updateTracking(3); await updatePose();
+  const label = tree.root.findByType('label' as React.ElementType);
+  const [border, panel] = tree.root.findAllByType('quad' as React.ElementType);
+  const [down, up] = gesture === 'text-to-panel' ? [label, panel] : gesture === 'panel-to-text' ? [panel, label] : [border, border];
+  await nativeClickAcross(down, up);
+  expect(tree.root.findByType('label' as React.ElementType).props.text).toBe('destinationAr.squareTapped');
+});
+
+it('alternates native label props on repeated completed square presses', async () => {
+  await updateTracking(3); await updatePose();
+  for (let n = 1; n <= 10; n++) {
+    await nativeClickAcross(tree.root.findByType('label' as React.ElementType), tree.root.findAllByType('quad' as React.ElementType)[1]);
+    expect(tree.root.findByType('label' as React.ElementType).props.text).toBe(n % 2 ? 'destinationAr.squareTapped' : 'destinationAr.square');
+  }
 });

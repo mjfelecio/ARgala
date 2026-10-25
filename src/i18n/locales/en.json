@@ -296,10 +296,10 @@
     "prepared": "Waiting for the screen to finish appearing…",
     "initializing": "Starting AR tracking. Move the phone slowly over a well-lit, textured area.",
     "interrupted": "The test was interrupted. Retry explicitly to check permissions and start a new native scene.",
-    "live": "Tracking ready. Turn and move to inspect the square; tap it to test interaction.",
+    "live": "Tracking ready. Hold the square briefly, then release to interact.",
     "trackingLost": "Tracking is limited. Move the phone slowly toward a well-lit, textured area.",
-    "square": "ACLC\nNative square\nTap to test",
-    "squareTapped": "ACLC\nTap received\nTap again",
+    "square": "ACLC\nNative square\nHold, then release",
+    "squareTapped": "ACLC\nInteraction received\nHold again",
     "errors": {
       "native-unavailable": "This APK does not contain the native Viro integration. Install the new development build.",
       "unsupported": "This device does not support the native AR test. Map features remain available.",

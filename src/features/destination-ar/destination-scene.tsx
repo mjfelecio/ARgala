@@ -43,11 +43,12 @@ export function DestinationScene({ onReady, onTracking }: Callbacks) {
   }
   function tap() { if (trackingRef.current === 'normal') setTapped(value => !value); }
   return <ViroARScene anchorDetectionTypes="None" onTrackingUpdated={track} onCameraTransformUpdate={transform}>
-    {placement && <ViroNode position={placement.position} rotation={placement.rotation} opacity={tracking === 'normal' ? 1 : 0.35}>
+    {/* One click owner keeps press/release valid across text, fill and border. */}
+    {placement && <ViroNode position={placement.position} rotation={placement.rotation} opacity={tracking === 'normal' ? 1 : 0.35} onClick={tap}>
       <ViroQuad width={0.84} height={0.84} materials="argalaSpikeEdge" />
-      <ViroQuad width={0.8} height={0.8} position={[0, 0, 0.003]} opacity={0.94} materials={tapped ? 'argalaSpikeSelected' : 'argalaSpikePanel'} onClick={tap} />
-      <ViroText position={[0, 0, 0.006]} width={0.68} height={0.65} text={t(tapped ? 'destinationAr.squareTapped' : 'destinationAr.square')} onClick={tap}
-        style={{ fontFamily: 'PlusJakartaSans', fontSize: 24, color: white, textAlign: 'center', textAlignVertical: 'center' }} />
+      <ViroQuad width={0.8} height={0.8} position={[0, 0, 0.003]} opacity={0.94} materials={tapped ? 'argalaSpikeSelected' : 'argalaSpikePanel'} />
+      <ViroText position={[0, 0, 0.006]} width={0.68} height={0.65} text={t(tapped ? 'destinationAr.squareTapped' : 'destinationAr.square')}
+        style={{ fontFamily: 'PlusJakartaSans', fontSize: 8, color: white, textAlign: 'center', textAlignVertical: 'center' }} />
     </ViroNode>}
   </ViroARScene>;
 }

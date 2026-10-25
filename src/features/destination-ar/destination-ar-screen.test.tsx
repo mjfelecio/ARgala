@@ -138,3 +138,30 @@ it('never prompts after Allow if its permission read finishes after SDK focus is
   native.focused = true; await update();
   expect(camera()).toHaveLength(0); expect(copy()).toContain(translations.t('destinationAr.interrupted'));
 });
+
+it.each([
+  ['en', 'Hold the square briefly, then release to interact.', 'Hold, then release', 'Interaction received'],
+  ['ko', '사각형을 잠시 누른 뒤 손을 떼어 상호작용하세요.', '길게 누른 뒤 떼기', '상호작용 확인됨'],
+  ['ja', '四角形をしばらく押してから離すと操作できます。', '長押しして離す', '操作を確認'],
+])('localizes %s hold guidance and completed native interaction feedback', async (language, guidance, action, received) => {
+  await translations.changeLanguage(language);
+  await mount(); await layout(); await press('destinationAr.start');
+  await act(async () => { await vi.dynamicImportSettled(); });
+  const scene = tree!.root.findByType('native-scene' as React.ElementType);
+  await act(async () => {
+    scene.props.onTrackingUpdated(3, 1);
+    scene.props.onCameraTransformUpdate({ position: [0, 0, 0], forward: [0, 0, -1] });
+  });
+  expect(copy()).toContain(guidance);
+  const label = () => tree!.root.findByType('viro-text' as React.ElementType).props.text as string;
+  expect(label()).toContain(action);
+  // The native renderer reports completion after release. This callback does
+  // not simulate a touch duration or prove Viro's native gesture recognition.
+  await act(async () => tree!.root.findByType('node' as React.ElementType).props.onClick());
+  expect(label()).toContain(received);
+  await act(async () => { await translations.changeLanguage(language === 'en' ? 'ja' : 'en'); });
+  expect(label()).toBe(translations.t('destinationAr.squareTapped'));
+  expect(copy()).toContain(translations.t('destinationAr.live'));
+  await act(async () => tree!.root.findByType('node' as React.ElementType).props.onClick());
+  expect(label()).toBe(translations.t('destinationAr.square'));
+});
