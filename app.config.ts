@@ -16,6 +16,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['expo-splash-screen', { backgroundColor: '#ffffff', image: './assets/images/splash-icon.png', imageWidth: 76 }],
     ['expo-camera', { recordAudioAndroid: false, barcodeScannerEnabled: false }],
     ['expo-location', { isAndroidBackgroundLocationEnabled: false, isAndroidForegroundServiceEnabled: false }],
+    // SDK 57 manifest mods run in reverse registration order: normalize last.
+    './plugins/with-optional-ar',
+    ['@reactvision/react-viro', { android: { xRMode: ['AR'] }, provider: 'none' }],
     'expo-localization',
     ['expo-font', { android: { fonts: [{
       fontFamily: 'PlusJakartaSans',

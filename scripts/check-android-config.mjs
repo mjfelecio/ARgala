@@ -18,6 +18,10 @@ for (const name of ['CAMERA', 'ACCESS_FINE_LOCATION', 'ACCESS_COARSE_LOCATION'])
 }
 for (const name of ['RECORD_AUDIO', 'ACCESS_BACKGROUND_LOCATION']) assert.equal(permissions.get(`android.permission.${name}`)?.['tools:node'], 'remove');
 const metadata = manifest.application[0]['meta-data'];
+assert.ok(metadata.some(entry => entry.$['android:name'] === 'com.google.ar.core' && entry.$['android:value'] === 'optional'), 'AR services must be optional for ordinary map users');
+for (const name of ['android.hardware.camera', 'android.hardware.camera.ar']) {
+  assert.ok(manifest['uses-feature'].some(entry => entry.$['android:name'] === name && entry.$['android:required'] === 'false'), `${name} must not exclude non-AR devices`);
+}
 assert.ok(metadata.some((entry) => entry.$['android:name'] === 'com.google.android.geo.API_KEY' && entry.$['android:value'] === marker), 'Maps key must enter native Android metadata');
 assert.equal(config.extra.mapsConfigured, true);
 const eas = JSON.parse(readFileSync(new URL('../eas.json', import.meta.url), 'utf8'));
