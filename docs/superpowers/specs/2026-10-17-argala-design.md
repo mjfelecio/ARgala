@@ -1,5 +1,7 @@
 # ARgala foundation design
 
+> **Approved extension, 25 October 2026:** The [ACLC blueprint](../../../ARgala_MVP_Blueprint.md) and [vertical-slice plan](../plans/2026-10-25-aclc-viro-vertical-slice.md) supersede this historical design's blanket exclusion of ARCore for selected-featured-destination AR. M1 adds only an opt-in development square with Viro 3.0.3; native build and physical Gate A remain pending. Ordinary discovery/provider safeguards and the existing camera-overlay implementation remain intact during this checkpoint. See [device verification](../../aclc-ar-device-testing.md).
+
 The two supplied briefs define the scope: Android-only travel discovery with Expo SDK 57, strict TypeScript, Expo Router, Supabase and Google APIs. All work stays in the existing ARgala root. The scaffold goes to main, then coherent validated commits go to feat/app-foundation and an unmerged PR.
 
 ## Architecture

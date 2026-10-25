@@ -3,10 +3,11 @@ import { vi } from 'vitest';
 import { HeroUINativeProviderRaw } from 'heroui-native/provider-raw';
 import type { BottomSheetProps } from '@gorhom/bottom-sheet';
 
-const nativeUi = vi.hoisted(() => ({ sheetReady: true, fontScale: 1, mutableValueWrites: [] as unknown[], animatedStyles: new WeakMap<object, () => Record<string, unknown>>(), reactions: new Set<() => void>(), openURL: vi.fn(), alert: vi.fn(), insets: { top: 24, bottom: 24, left: 0, right: 0 } }));
+const nativeUi = vi.hoisted(() => ({ modules: {} as Record<string, unknown>, sheetReady: true, fontScale: 1, mutableValueWrites: [] as unknown[], animatedStyles: new WeakMap<object, () => Record<string, unknown>>(), reactions: new Set<() => void>(), openURL: vi.fn(), alert: vi.fn(), insets: { top: 24, bottom: 24, left: 0, right: 0 } }));
 
 // Keep HeroUI components real; only native runtime boundaries are replaced.
 vi.mock('react-native', () => ({
+  NativeModules: nativeUi.modules,
   Button: (props: { title: string }) => React.createElement('button', { accessibilityLabel: props.title, ...props }),
   AppState: { currentState: 'active', addEventListener: () => ({ remove: vi.fn() }) }, KeyboardAvoidingView: 'keyboard-avoiding',
   Alert: { alert: nativeUi.alert }, Linking: { openURL: nativeUi.openURL, openSettings: vi.fn() },
