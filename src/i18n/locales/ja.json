@@ -309,5 +309,11 @@
     "hold": "長押しして離す",
     "poseRequired": "正面を向き、端末をゆっくり動かしてから再設定してください。",
     "poseRate": "姿勢通知: {{received}}/秒 · 位置出力: {{applied}}/秒"
+  },
+  "destinationSession": {
+    "intro": {
+      "load-failed": "導入表示の設定を読み込めませんでした。続行するか、再試行してください。",
+      "save-failed": "導入表示の設定を保存できませんでした。再試行できます。"
+    }
   }
 }

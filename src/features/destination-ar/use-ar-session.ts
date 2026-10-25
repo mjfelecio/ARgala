@@ -31,6 +31,11 @@ export function useArSession({ identity, tileIds, running, transitionReady, meas
   useEffect(() => {
     if (running && transitionReady && measured && matches && session.phase === 'suspended' && model.canRestore(Date.now())) void start();
   }, [running, transitionReady, measured, matches, session.phase, model, start]);
+  useEffect(() => {
+    if (session.phase !== 'reveal') return;
+    const timer = setInterval(() => model.advanceReveal(session.attempt), 2400 / Math.max(1, tileIds.length));
+    return () => clearInterval(timer);
+  }, [model, session.phase, session.attempt, tileIds.length]);
   const onTracking = useCallback((value: TrackingState) => model.track(session.attempt, value), [model, session.attempt]);
   const onProgress = useCallback((value: LogicalArProgress) => model.saveProgress(session.attempt, value), [model, session.attempt]);
   const close = useCallback(() => model.close(), [model]);

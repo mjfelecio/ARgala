@@ -350,5 +350,11 @@
     "hold": "Hold, then release",
     "poseRequired": "Face ahead and move the phone gently before recentering.",
     "poseRate": "Pose callbacks: {{received}}/s · position outputs: {{applied}}/s"
+  },
+  "destinationSession": {
+    "intro": {
+      "load-failed": "The introduction preference could not be loaded. You can continue or retry.",
+      "save-failed": "The introduction preference could not be saved. You can retry."
+    }
   }
 }

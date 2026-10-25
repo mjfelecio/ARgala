@@ -8,9 +8,10 @@ vi.mock('./viro-runtime', () => ({ cameraPermission: vi.fn(), readViroSupport: v
 const identity = { destinationId: 'development-aclc', principalId: 'owner', provenance: 'development' as const };
 const granted = { granted: true, canAskAgain: true, status: 'granted' as PermissionResponse['status'], expires: 'never' as const };
 let running: boolean; let transitionReady: boolean; let measured: boolean; let eligible: boolean;
+let reveal = false;
 let tree: ReactTestRenderer; let current: ReturnType<typeof useArSession>; const gate = vi.fn();
 function Probe() {
-  const result = useArSession({ identity, tileIds: ['overview', 'history'], running, transitionReady, measured, freshEligible: gate, reveal: false });
+  const result = useArSession({ identity, tileIds: ['overview', 'history'], running, transitionReady, measured, freshEligible: gate, reveal });
   useEffect(() => { current = result; }); return null;
 }
 async function update() { await act(async () => tree.update(createElement(Probe))); }
@@ -20,7 +21,7 @@ async function background() { running = false; await update(); }
 async function foreground() { running = true; await update(); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }); vi.useFakeTimers(); vi.setSystemTime(1000);
-  running = transitionReady = measured = eligible = true; gate.mockReset().mockImplementation(() => eligible);
+  running = transitionReady = measured = eligible = true; reveal = false; gate.mockReset().mockImplementation(() => eligible);
   vi.mocked(readViroSupport).mockReset().mockResolvedValue('supported'); vi.mocked(cameraPermission).mockReset().mockResolvedValue(granted);
   const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
   await act(async () => { tree = create(createElement(Probe)); });
@@ -81,4 +82,19 @@ it('keeps logical progress through native unmount but invalidates explicit exit 
   await background(); await foreground(); expect(current.session.progress.selectedId).toBe('history');
   await ready(); await act(async () => oldTracking('limited')); expect(current.session.phase).toBe('exploring');
   await act(async () => current.close()); expect(current.startup.mountScene).toBe(false); expect(current.session.phase).toBe('closed');
+});
+
+it('stages a tracking-ready reveal, pauses on tracking loss, supports Skip and keeps recovery quick', async () => {
+  reveal = true; await update(); await start();
+  await act(async () => { await vi.advanceTimersByTimeAsync(1200); }); expect(current.session.phase).toBe('initializing');
+  await ready(); expect(current.session.phase).toBe('reveal'); expect(current.session.revealedCount).toBe(1);
+  await act(async () => { await vi.advanceTimersByTimeAsync(1200); }); expect(current.session.revealedCount).toBe(2);
+  await act(async () => current.onTracking('limited')); await act(async () => { await vi.advanceTimersByTimeAsync(2000); }); expect(current.session.revealedCount).toBe(2);
+  await act(async () => current.onTracking('normal')); await act(async () => current.finishReveal()); expect(current.session.phase).toBe('exploring');
+  await background(); await foreground(); await ready(); expect(current.session.phase).toBe('exploring');
+});
+it('finishes a first-use reveal in approximately 2.4 seconds of valid tracking', async () => {
+  reveal = true; await update(); await start(); await ready();
+  await act(async () => { await vi.advanceTimersByTimeAsync(2399); }); expect(current.session.phase).toBe('reveal');
+  await act(async () => { await vi.advanceTimersByTimeAsync(1); }); expect(current.session.phase).toBe('exploring');
 });

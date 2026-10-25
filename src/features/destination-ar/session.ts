@@ -4,14 +4,14 @@ export const suspensionGraceMs = 5 * 60 * 1000;
 export type SessionIdentity = { destinationId: string; principalId: string; provenance: 'development' | 'verified' };
 export type LogicalArProgress = { selectedId: string | null; cursors: Record<string, ReadingCursor> };
 type Phase = 'idle' | 'preflight' | 'initializing' | 'reveal' | 'exploring' | 'limited' | 'suspended' | 'interrupted' | 'failed' | 'expired' | 'closed';
-export type SessionSnapshot = { phase: Phase; attempt: number; established: boolean; suspendedAt: number | null; progress: LogicalArProgress };
+export type SessionSnapshot = { phase: Phase; attempt: number; established: boolean; suspendedAt: number | null; progress: LogicalArProgress; revealedCount: number };
 const emptyProgress = (): LogicalArProgress => ({ selectedId: null, cursors: {} });
 
 /** Route-owned logical state only. A fresh instance never inherits admission.
  * No camera transform, coordinates, provider response or persisted session data.
  */
 export class ArSession {
-  private state: SessionSnapshot = Object.freeze({ phase: 'idle', attempt: 0, established: false, suspendedAt: null, progress: emptyProgress() });
+  private state: SessionSnapshot = Object.freeze({ phase: 'idle', attempt: 0, established: false, suspendedAt: null, progress: emptyProgress(), revealedCount: 0 });
   private listeners = new Set<() => void>();
   private resumePhase: 'reveal' | 'exploring' = 'exploring';
   private ids: ReadonlySet<string>;
@@ -48,7 +48,7 @@ export class ArSession {
     if (!this.current(attempt) || this.state.phase !== 'initializing') return false;
     if (this.state.established && !this.canRestore(now)) { this.expire(now); return false; }
     const first = !this.state.established;
-    this.write({ established: true, suspendedAt: null, phase: first && reveal ? 'reveal' : 'exploring' }); return true;
+    this.write({ established: true, suspendedAt: null, phase: first && reveal && this.ids.size > 0 ? 'reveal' : 'exploring', revealedCount: first && reveal ? Math.min(1, this.ids.size) : this.ids.size }); return true;
   }
   track(attempt: number, tracking: TrackingState) {
     if (!this.current(attempt)) return;
@@ -58,8 +58,13 @@ export class ArSession {
   }
   finishReveal(attempt: number) {
     if (!this.current(attempt)) return;
-    if (this.state.phase === 'reveal') this.write({ phase: 'exploring' });
-    else if (this.state.phase === 'limited' && this.resumePhase === 'reveal') this.resumePhase = 'exploring';
+    if (this.state.phase === 'reveal') this.write({ phase: 'exploring', revealedCount: this.ids.size });
+    else if (this.state.phase === 'limited' && this.resumePhase === 'reveal') { this.resumePhase = 'exploring'; this.write({ revealedCount: this.ids.size }); }
+  }
+  advanceReveal(attempt: number) {
+    if (!this.current(attempt) || this.state.phase !== 'reveal') return;
+    if (this.state.revealedCount >= this.ids.size) this.finishReveal(attempt);
+    else this.write({ revealedCount: this.state.revealedCount + 1 });
   }
   suspend(now: number) {
     const phase = this.state.phase;
