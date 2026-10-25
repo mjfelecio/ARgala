@@ -283,5 +283,30 @@
       "ko": "Korean",
       "ja": "Japanese"
     }
+  },
+  "destinationAr": {
+    "title": "Viro feasibility test",
+    "unavailable": "This development test is unavailable in this build.",
+    "prototype": "ACLC · Development prototype. No destination content or location verification.",
+    "start": "Start native AR test",
+    "exit": "Exit test",
+    "idle": "Start the rear-camera tracking test when you are ready. Stay aware of your surroundings.",
+    "checking": "Checking device support and camera permission…",
+    "permission": "Camera access is needed for this test. Allow access or check permission in Settings.",
+    "prepared": "Waiting for the screen to finish appearing…",
+    "initializing": "Starting AR tracking. Move the phone slowly over a well-lit, textured area.",
+    "interrupted": "The test was interrupted. Retry explicitly to check permissions and start a new native scene.",
+    "live": "Tracking ready. Use your finger pad to hold the square briefly, then release.",
+    "trackingLost": "Tracking is limited. Move the phone slowly toward a well-lit, textured area.",
+    "square": "ACLC\nNative square\nHold, then release",
+    "squareTapped": "ACLC\nInteraction received\nHold again",
+    "errors": {
+      "native-unavailable": "This APK does not contain the native Viro integration. Install the new development build.",
+      "unsupported": "This device does not support the native AR test. Map features remain available.",
+      "checking": "Device AR support is still undetermined. Retry when ready.",
+      "failed": "The AR test could not start. Retry when ready.",
+      "permission-failed": "Camera permission could not be checked. Please retry.",
+      "startup-timeout": "AR startup timed out. Check camera access and Google Play Services for AR, then retry."
+    }
   }
 }

@@ -1,5 +1,7 @@
 # Clean Explorer application shell
 
+The ACLC M1 development spike adds `/viro-spike` to the existing authenticated parent stack, with its header hidden. With both `__DEV__` and `EXPO_PUBLIC_VIRO_SPIKE=1`, Profile exposes an explicit test action. The route itself repeats the guard; release builds and disabled flags show only unavailable/Back UI, with no capability checks, permission work or native Viro scene. Opening the enabled screen still requires Start. Existing tabs, map and generic AR entry remain unchanged until the approved integration milestone. The [device checklist](aclc-ar-device-testing.md) records this temporary test flow.
+
 The authenticated shell adds presentation and navigation around the existing Home Map and AR features. The root authentication guard is unchanged.
 
 ```text
