@@ -49,8 +49,8 @@ export function InformationPanel({ selection, content, previous, reading, enable
   return <ViroNode ref={ref} key={selection.token} testID="ring-focused-panel" position={transform.position} rotation={transform.rotation}
     scale={[transform.scale, transform.scale, transform.scale]} opacity={enabled ? 1 : 0.35}
     animation={{ name, run: false, onFinish: () => onComplete(selection.token), interruptible: true }}>
-    <ViroQuad width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} materials="argalaRingEdge" />
-    <ViroQuad width={ringMetrics.panelWidth} height={ringMetrics.panelHeight} position={[0, 0, 0.003]} opacity={0.96} materials="argalaRingSurface" />
+    <ViroQuad renderingOrder={0} ignoreEventHandling width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} materials="argalaRingEdge" />
+    <ViroQuad renderingOrder={1} ignoreEventHandling width={ringMetrics.panelWidth} height={ringMetrics.panelHeight} position={[0, 0, 0.003]} opacity={0.96} materials="argalaRingSurface" />
     <ArText position={[0, closing ? 0 : 0.4, 0.006]} width={1.12} height={0.14} text={t(content.titleKey)} style={style.text(8, 'center', '600')} />
     {!closing && <>
       <ArText testID="ring-sample-label" position={[0, 0.3, 0.006]} width={1.12} height={0.06} text={t('destinationRing.sampleLabel')} style={style.text(3)} />
@@ -65,9 +65,9 @@ export function InformationPanel({ selection, content, previous, reading, enable
       <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[-0.17, -0.49, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
       <NativePanelAction id="close" label={t('destinationRing.close')} width={0.46} position={[0.28, -0.49, 0.012]} enabled={interactive} style={style} onPress={onClose} />
       {reading.error && <ViroNode position={[0, 0, 0.025]}>
-        <ViroQuad width={1.12} height={0.5} materials="argalaRingSurface" />
-        <ArText testID="ring-reading-error" position={[0, 0.06, 0.004]} width={1.02} height={0.23} text={t(`destinationRing.${reading.error}`)} style={style.text(4)} />
-        <NativePanelAction id="preference-retry" label={t('common.retry')} width={0.45} position={[0, -0.155, 0.006]} enabled={interactive && !reading.pending} style={style} onPress={() => void reading.retry()} />
+        <ViroQuad renderingOrder={4} ignoreEventHandling width={1.12} height={0.5} materials="argalaRingSurface" />
+        <ArText renderingOrder={5} testID="ring-reading-error" position={[0, 0.06, 0.004]} width={1.02} height={0.23} text={t(`destinationRing.${reading.error}`)} style={style.text(4)} />
+        <NativePanelAction renderingOrder={5} id="preference-retry" label={t('common.retry')} width={0.45} position={[0, -0.155, 0.006]} enabled={interactive && !reading.pending} style={style} onPress={() => void reading.retry()} />
       </ViroNode>}
     </>}
   </ViroNode>;

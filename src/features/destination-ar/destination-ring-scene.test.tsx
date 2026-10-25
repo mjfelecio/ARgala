@@ -34,7 +34,7 @@ beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: true }); vi.useFakeTimers(); vi.setSystemTime(1000);
   vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); vi.spyOn(performance, 'now').mockImplementation(() => Date.now()); native.reduced = false; native.patches.length = 0;
   native.getItem.mockReset().mockResolvedValue(null); native.setItem.mockReset().mockResolvedValue(undefined); ready.mockClear(); commits.mockClear();
-  translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
+  translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, resources: structuredClone(localizationOptions.resources), lng: 'en', react: { useSuspense: false } });
   const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
 afterEach(async () => { await act(async () => tree?.unmount()); vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
@@ -178,4 +178,48 @@ it('gives Close a larger visible surface with separated control rows and preserv
   expect(previous.props.position[1] - close.props.position[1]).toBeGreaterThan(surface.props.height);
   await track(2); await press('ring-action-close'); expect(node('ring-focused-panel')).toBeDefined();
   await track(); await pose(); await press('ring-action-close'); await finish(); expect(node('ring-focused-panel')).toBeUndefined();
+});
+
+it('keeps decorative geometry out of native hit ordering and precisely tests only visible controls', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  for (const quad of tree.root.findAllByType('quad' as React.ElementType)) {
+    const action = quad.parent?.props.testID?.startsWith('ring-action-');
+    if (action && quad.parent?.props.onClick) {
+      expect(quad.props.highAccuracyEvents).toBe(true);
+      expect(quad.props.ignoreEventHandling).toBe(false);
+    } else expect(quad.props.ignoreEventHandling).toBe(true);
+  }
+  for (const glyph of tree.root.findAllByType('viro-text' as React.ElementType)) expect(glyph.props.ignoreEventHandling).toBe(true);
+  await press('ring-action-close'); await finish();
+  const tile = node('ring-tile-history');
+  const activeSurface = tile.findAllByType('quad' as React.ElementType).find(quad => quad.props.ignoreEventHandling === false);
+  expect(activeSurface?.props.highAccuracyEvents).toBe(true);
+});
+it.each([['overview', 0], ['history', 45], ['history', -135]] as const)('keeps both control columns usable for %s after yaw %s', async (id, yaw) => {
+  await mount(); await track(); await pose(); const radians = yaw * Math.PI / 180;
+  await pose({ ...initial, forward: [-Math.sin(radians), 0, -Math.cos(radians)] }, 1100);
+  await press(`ring-tile-${id}`); await finish();
+  await press('ring-action-next'); expect(text('ring-page-indicator')).toMatch(/^2 /);
+  await press('ring-action-previous'); expect(text('ring-page-indicator')).toMatch(/^1 /);
+  await press('ring-action-larger'); await press('ring-action-smaller');
+  for (const name of ['previous', 'next', 'smaller', 'larger', 'close']) {
+    const quad = node(`ring-action-${name}`).findByType('quad' as React.ElementType);
+    expect(quad.props.highAccuracyEvents).toBe(true);
+  }
+  await press('ring-action-close'); await finish(); expect(node('ring-focused-panel')).toBeUndefined();
+});
+
+it('draws translucent panel backgrounds before glyphs, including dimmed tiles and the recovery notice', async () => {
+  native.getItem.mockRejectedValueOnce(new Error('STORAGE_DIAGNOSTIC'));
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  for (const panel of [node('ring-tile-overview'), node('ring-focused-panel')]) {
+    const layers = panel.children.filter(child => typeof child !== 'string');
+    const backgrounds = layers.filter(child => child.type === ('quad' as React.ElementType));
+    const glyphs = panel.findAllByType('viro-text' as React.ElementType);
+    for (const bg of backgrounds) for (const glyph of glyphs) expect(glyph.props.renderingOrder ?? 0).toBeGreaterThan(bg.props.renderingOrder ?? 0);
+  }
+  const retry = node('ring-action-preference-retry'); const retryFill = retry.findByType('quad' as React.ElementType);
+  const noticeFill = tree.root.findAllByType('quad' as React.ElementType).find(quad => quad.props.height === 0.5)!;
+  expect(retryFill.props.renderingOrder).toBeGreaterThan(noticeFill.props.renderingOrder);
+  expect(retry.findByType('viro-text' as React.ElementType).props.renderingOrder).toBeGreaterThan(retryFill.props.renderingOrder);
 });
