@@ -14,10 +14,18 @@ export function ViroSpikeLaunch() {
     <Button.Label>{t('destinationAr.title')}</Button.Label>
   </Button> : null;
 }
-export function ViroSpikeRoute() {
+export function ViroSpikeRoute() { return <DevelopmentArRoute variant="square" />; }
+export function ViroRingRoute() { return <DevelopmentArRoute variant="ring" />; }
+export function ViroRingLaunch() {
+  const { t } = useTranslation();
+  return isViroSpikeEnabled() ? <Button variant="secondary" className="mx-4 mb-2" accessibilityLabel={t('destinationRing.title')} onPress={() => router.push('/viro-ring')}>
+    <Button.Label>{t('destinationRing.title')}</Button.Label>
+  </Button> : null;
+}
+function DevelopmentArRoute({ variant }: { variant: 'square' | 'ring' }) {
   const { t } = useTranslation();
   // Neither a URL nor an environment flag can enable this in a release build.
   if (!isViroSpikeEnabled()) return <Screen><Notice>{t('destinationAr.unavailable')}</Notice>
     <Action title={t('common.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }} /></Screen>;
-  return <Suspense fallback={<Screen><Notice busy>{t('common.loading')}</Notice></Screen>}><Spike /></Suspense>;
+  return <Suspense fallback={<Screen><Notice busy>{t('common.loading')}</Notice></Screen>}><Spike variant={variant} /></Suspense>;
 }
