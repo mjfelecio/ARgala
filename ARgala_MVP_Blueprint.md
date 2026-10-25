@@ -1,8 +1,11 @@
 # ARgala — Consolidated Product Blueprint and Coding-Agent Handoff
 
-**Planning baseline:** 25 October 2026 (Asia/Manila)  
-**Status:** Product brainstorming decisions consolidated; **not** an audit of the application code  
-**Pilot destination:** ACLC College of Ormoc  
+**Planning baseline:** 25 October 2026 (Asia/Manila)
+
+**Status:** Product brainstorming decisions consolidated; **not** an audit of the application code
+
+**Pilot destination:** ACLC College of Ormoc
+
 **Platforms:** Android-first React Native/Expo application; React Native Viro for the immersive experience
 
 ## 1. Executive intent
