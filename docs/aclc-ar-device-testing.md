@@ -1,6 +1,6 @@
 # ACLC M1 native feasibility checkpoint
 
-Status: implementation prepared; **no development APK built/installed and no physical Viro verification yet**. M2 scene/ring implementation must wait for physical Gate A. The full approved product flow and lifecycle clarifications are in the [implementation plan](superpowers/plans/2026-10-25-aclc-viro-vertical-slice.md).
+Status: the approved [development APK](https://expo.dev/artifacts/eas/xCwGwSwy5ztzenU8RU19Z06JjtsDUhrH3bOPLc8VdUw.apk) was built successfully from `fa29e8e`; **not installed or physically tested yet**. [EAS build](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/91f33401-365b-4ec0-b0c2-23c1f0c4ec25). M2 scene/ring implementation must wait for physical Gate A. The full approved product flow and lifecycle clarifications are in the [implementation plan](superpowers/plans/2026-10-25-aclc-viro-vertical-slice.md).
 
 ## What this checkpoint adds
 
@@ -23,7 +23,7 @@ After approval, from the implementation worktree:
 npx eas-cli@latest build --platform android --profile development
 ```
 
-Install the resulting APK on the named physical test device and record the build ID, commit and APK SHA-256. This command has **not** been run for M1. Starting EAS or a local APK build requires the owner's per-build approval.
+Install the resulting APK on the named physical test device and record the build ID, commit and APK SHA-256. The owner approved this one M1 build and it finished successfully; the artifact record below identifies it. Any additional EAS or local APK build requires separate approval.
 
 ## Enter the test
 
@@ -56,7 +56,7 @@ Record each scenario as PASS / FAIL / NOT RUN with device, OS, build/APK hash, a
 
 Gate A passes only after a real development APK demonstrates the above core integration on a named Android device. A passed export, config check, mocked callback or local manifest task is not this evidence. Specific installation failures/font/preview/native crashes remain integration issues until observed and resolved. If reliable tracking/startup cannot be demonstrated, stop downstream work and record the failure.
 
-The local `:app:processDebugMainManifest` verification stopped because `ANDROID_HOME` points to a missing SDK directory. CNG and config introspection succeeded, but no final merged manifest or app-native compilation result is available from this host. Verify the merged manifest and permission blocks in the authorized EAS development build before physical acceptance.
+The local `:app:processDebugMainManifest` verification stopped because `ANDROID_HOME` points to a missing SDK directory. CNG and config introspection succeeded, but no final merged manifest or app-native compilation result is available from this host. The finished EAS APK has now passed the static manifest/permission checks recorded below; the local SDK remains unavailable and physical acceptance is still pending.
 
 Deferred minor from code review: a queued tracking-status callback from a disposed scene can briefly change guidance during Retry. It cannot grant readiness/admission or reposition the square; fence that display callback by attempt before the production session milestone.
 
@@ -67,3 +67,15 @@ No ACLC on-site GPS, approved entrance or location radius claim follows from M1.
 - [Pinned Viro package and peer dependencies](https://github.com/ReactVision/viro/blob/v3.0.3/package.json), [plugin options](https://github.com/ReactVision/viro/blob/v3.0.3/plugins/withViro.ts).
 - [Pinned raw support callback](https://github.com/ReactVision/viro/blob/v3.0.3/components/Utilities/ViroUtils.tsx), [native startup handler](https://github.com/ReactVision/viro/blob/v3.0.3/android/viro_bridge/src/main/java/com/viromedia/bridge/component/VRTARSceneNavigator.java).
 - [Expo SDK 57 camera reference](https://docs.expo.dev/versions/v57.0.0/sdk/camera/); permission adapter checked against installed 57.0.6 declarations/source.
+
+## Approved native build and artifact inspection — 25 October 2026
+
+- Build: [91f33401-365b-4ec0-b0c2-23c1f0c4ec25](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/91f33401-365b-4ec0-b0c2-23c1f0c4ec25), status **FINISHED**, completed `2026-10-25T07:43:18.768Z` (15:43 Asia/Manila).
+- Source: `fa29e8e76f20750582e5fcea04e96840640eea20`; EAS CLI 25.3.0; Android `development` profile, internal APK, existing remote keystore reused with credential changes disabled. CI run 40172052234 passed before submission. Only one build was submitted under this approval.
+- [Download APK](https://expo.dev/artifacts/eas/xCwGwSwy5ztzenU8RU19Z06JjtsDUhrH3bOPLc8VdUw.apk); size 308,575,060 bytes (~294 MiB).
+- APK SHA-256: `0b756a3f883042a70c70d44d28d44fffad4a726828867e881a1d0a5daa5dff95`.
+- Gradle: **BUILD SUCCESSFUL**, including manifest processing, native compilation and `assembleDebug`.
+- Static final-APK inspection using Android AAPT2: package `com.mjfelecio.argala`, camera and AR-camera features optional, ARCore metadata `optional`, camera permission present, microphone/background-location permissions absent, native Maps key metadata present (value not recorded).
+- ZIP/DEX inspection: arm64 Viro renderer/ARCore libraries and Viro package/module classes present. These checks prove packaging, not native initialization, tracking, font rendering, touch behavior or live Maps/provider operation.
+- A direct unauthenticated download returned HTTP 403; authenticated `eas build:download --build-id 91f33401-365b-4ec0-b0c2-23c1f0c4ec25` succeeded. A checksum-verified local copy is retained at `/home/kirbysmashyeet/.cache/argala/builds/91f33401-365b-4ec0-b0c2-23c1f0c4ec25/argala-development.apk` for later in-place installation.
+- No ADB command, installation, simulator session or physical test was run. The owner reports the phone is unavailable and will notify when ready; every scenario in Gate A remains NOT RUN. Do not start M2 before that gate passes.

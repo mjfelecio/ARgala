@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task; independent investigation/review may use subagents as authorized by the owner. Steps use checkbox (`- [ ]`) syntax for tracking. **Approved for M1 implementation with the lifecycle clarifications recorded below; the physical gate remains mandatory.**
 
-**M1 status:** prepared for the specific development-build approval checkpoint; physical Gate A remains pending. The native square is a signed-in, opt-in development route. Its interruption recovery is explicit Retry; production geographic admission and live-session grace remain M3/M4. Local merged-manifest verification is blocked by a missing Android SDK, not reported as passed. See [current evidence](../../validation.md) and [device checklist](../../aclc-ar-device-testing.md).
+**M1 status:** the specifically approved [EAS development build](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/91f33401-365b-4ec0-b0c2-23c1f0c4ec25) finished successfully from `fa29e8e`; final APK manifest/native-library checks passed. Physical Gate A remains pending because the phone is unavailable. Production geographic admission and live-session grace remain M3/M4. See [current evidence](../../validation.md) and [device checklist](../../aclc-ar-device-testing.md).
 
 **Goal:** Deliver the approved ACLC College of Ormoc map → directions → verified arrival → Viro information-ring experience inside the existing ARgala Android app.
 
