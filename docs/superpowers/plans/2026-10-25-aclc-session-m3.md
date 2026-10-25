@@ -36,3 +36,7 @@ Wire only development ring route to session experience, with actual auth identit
 ### Task 5: Review and evidence
 
 Independent read-only whole-branch review (authorized by blueprint); one focused RED→GREEN fix pass for confirmed material findings. Update parent plan and validation/checklist. Draft PR only; no automatic merge. Record physical M3 tracking/background/permission cycles as NOT RUN while the low-battery phone charges. M4 approved activation point/content/provider association and on-site GPS remain later inputs/gates.
+
+## Offline checkpoint
+
+M1/M2 PR26 merged956ecfc; M3 implementation commits d7f2137/9a892a4/09d089a/1c29b5c, review-fix160fd59. Final local check857 tests/75files plus lint/typecheck; Android export2848 modules8.1MB. Independent review identified two Important findings, fixed with failing-then-passing regressions; no Critical/Minor findings. Precise native SDK failure classification remains a documented limit. [Physical checks](../../aclc-ar-session-device-testing.md) are NOT RUN and expressly deferred by the owner to2026-10-26; no further ADB commands or APK builds. Candidate goes to a draft PR; no M4 or automatic merge.

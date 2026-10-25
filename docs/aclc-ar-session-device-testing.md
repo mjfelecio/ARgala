@@ -19,8 +19,8 @@ A new owner is keyed by authenticated principal and has destination/admission/pr
 - Native panel selection/pages and the actual reading controller remain above the disposable native navigator. Reading-size save errors and unsaved local size survive native unmount. A separate one-time intro flag is the only added persisted data (`argala.ar-introduction.v1`). No live admission, pose, coordinates, provider data or camera frames are stored.
 - Background/blur immediately removes the native scene. An established live session can return within strictly less than300000ms after suspension, after focus/foreground/transition/permission checks. Restore logical panel/page from a newly captured coordinate frame; do not reuse old spatial transforms. New admission/selected destination/principal/provenance changes invalidate the old owner.
 - Recovery startup interrupted by a system activity requires explicit Retry; the previous live exemption is retained only while the original grace remains valid. No automatic remount loop may reset Viro's per-view install-request flag.
-- Exactly five minutes, clock rollback, explicit Exit, screen disposal/process death or auth change ends restoration authority. New entry requires fresh verification. Once a legitimate session is live, there is no continuous GPS/radius enforcement.
-- Within one surviving native coordinate frame, temporary tracking loss dims/freezes interaction and retains basis/focused transform/page. A new NORMAL pose resumes updates without recentering. Explicit Recenter or a fresh native frame is the only new basis.
+- Five minutes on either wall or independent elapsed time, a clock sample before its captured origin, explicit Exit, screen disposal/process death or auth change ends restoration authority. New entry requires fresh verification. Once a legitimate session is live, there is no continuous GPS/radius enforcement.
+- Within one surviving native coordinate frame, temporary tracking loss dims/freezes interaction and retains basis/focused transform/page. A new NORMAL pose resumes updates without recentering. Retry tracking is an explicit utility action for prolonged loss: it retires the old native frame, retains logical progress/live admission and reacquires from a fresh pose. It never restarts automatically merely because tracking is lost. Explicit Recenter or a fresh native frame is the only new basis.
 - Keep the accepted finger-pad, hold-briefly, release technique. Accurate visible-surface hits and decorative input exclusion remain in place; short-tap reliability is not claimed.
 
 ## Native error limitation
@@ -40,6 +40,7 @@ Use the same named Galaxy A53 candidate after charging; record actual battery/co
 | Pending interruption | Background before first tracking-ready; return requires Retry, does not start a camera automatically | NOT RUN |
 | Reveal | No reveal before ready; Overview first, sequential tiles, Skip, quick repeat; reduced-motion behavior | NOT RUN |
 | Live background/return | Open History/page/A+, background briefly, verify camera release, resume/reacquire; same logical reading progress at the new frame | NOT RUN |
+| Explicit tracking Retry | Remain LIMITED/UNAVAILABLE, verify no automatic restart, choose Retry tracking, reacquire and retain panel/page; interruption still requires explicit Retry | NOT RUN |
 | Recovery interruption | Interrupt reinitialization; return requires explicit Retry with no automatic native view/prompt loop | NOT RUN |
 | Expiry/Exit | Expired session and Exit cannot restore authority; old callbacks cannot revive camera; new entry verifies again | NOT RUN |
 | Same-frame loss/turn/recovery | Hold selected panel, lose tracking, turn, recover: no automatic ring recenter and same focused transform/page | NOT RUN |
@@ -48,3 +49,9 @@ Use the same named Galaxy A53 candidate after charging; record actual battery/co
 | Appearance/performance | Bright/dark/outdoor backgrounds, large system text, measured pose/output pressure and actual animation/touch behavior | NOT RUN |
 
 The deterministic4:59/5:00 boundary is automated evidence; it does not establish physical permission/camera behavior. The M2 broader rotation/translation/CJK/contrast/performance checklist remains partial. Actual ACLC on-site GPS/arrival is a separate M4+ gate requiring approved activation coordinates/content/provider association; M3 contains no GPS watcher or paid provider request.
+
+## Final offline review evidence
+
+Independent read-only review of956ecfc..d8a8bb2 found no Critical/Minor issues and two Important findings: partial wall-clock rollback could extend grace, and prolonged tracking loss lacked explicit Retry. Both were corrected in160fd59 in one regression-driven pass. Grace now uses the earliest wall/elapsed deadline and reschedules early timer callbacks; old expiry callbacks cannot close an already-recovered live frame. Explicit tracking Retry retires the current frame and preserves logical progress under the established-session exemption, while interrupted recovery still cannot loop prompts automatically.
+
+Six core regressions were observed failing before their fixes; EN/JA/KO recovery controls also have actual-resource screen coverage. Final `npm run check`:857 tests/75files, strict TypeScript and zero-warning lint. Final Android export:2848 modules,8.1MB Hermes bundle; diff check passed. The reviewer separately ran61 tests against the pre-fix immutable review head; final857-test and export evidence is the implementer's post-fix verification, not a second independent review. All M3 physical rows above remain NOT RUN.
