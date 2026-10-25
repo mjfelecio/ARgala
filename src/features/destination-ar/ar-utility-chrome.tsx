@@ -8,7 +8,9 @@ import { withUniwind } from 'uniwind';
 const SafeOverlay = withUniwind(SafeAreaView);
 export function ArUtilityChrome({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
-  return <SafeOverlay className="absolute inset-0" pointerEvents="box-none">
+  // Keep native overlay bounds at the controls: a full-height safe-area view
+  // swallowed Viro touches on the physical Fabric build despite box-none.
+  return <SafeOverlay className="absolute left-0 right-0 top-0" edges={['top', 'left', 'right']} pointerEvents="box-none">
     <View className="flex-row flex-wrap items-center gap-3 px-4 pt-2">
       <Button variant="secondary" accessibilityLabel={t('destinationAr.exit')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/profile'); }}>
         <Button.Label>{t('destinationAr.exit')}</Button.Label>
