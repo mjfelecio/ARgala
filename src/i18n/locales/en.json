@@ -296,7 +296,7 @@
     "prepared": "Waiting for the screen to finish appearing…",
     "initializing": "Starting AR tracking. Move the phone slowly over a well-lit, textured area.",
     "interrupted": "The test was interrupted. Retry explicitly to check permissions and start a new native scene.",
-    "live": "Tracking ready. Hold the square briefly, then release to interact.",
+    "live": "Tracking ready. Use your finger pad to hold the square briefly, then release.",
     "trackingLost": "Tracking is limited. Move the phone slowly toward a well-lit, textured area.",
     "square": "ACLC\nNative square\nHold, then release",
     "squareTapped": "ACLC\nInteraction received\nHold again",

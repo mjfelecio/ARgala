@@ -1158,3 +1158,11 @@ The owner made ADB available for final hold-guidance/text-size verification of `
 The next attempt connected the camera at 18:37:19 and released it at 18:37:37 when the first tracked horizontal pose was not reached before the startup deadline. The localized timeout/Retry UI was observed. A synchronized owner-held upright Retry was requested; while awaiting it, the camera was off. Final readability and held-interaction acceptance remain pending. This is not a passed startup/interaction check or proof of an Android renderer crash. Original camera grant/flags remained unchanged.
 
 Fresh typecheck and zero-warning lint passed. The application source is unchanged from the previously validated 727-test commit, so no full-suite rerun was required for this evidence-only update. [Detailed scenario record](aclc-ar-device-testing.md). Gate A and M2 remain pending; no native correction, APK build or ACLC GPS verification was performed.
+
+### Held interaction accepted with finger-pad technique — 2026-10-25
+
+Following the synchronized upright Retry, the owner reported the updated held interaction was much more stable and **passable**, with better results using more of the finger pad. This clears the pending owner-held retry/interaction observation from the previous entry. It does not establish touch-area causation, reliable short taps or universal gesture performance. Native font identity/CJK and full-label readability were not separately scored.
+
+The camera connected at 18:49:46 and disconnected at 18:54:06 after Home; release was verified. EN/JA/KO live guidance now briefly suggests the finger pad while retaining hold/release. Native touch handling, scene geometry and hit area are unchanged. The wording has automated locale/screen coverage; separate phone confirmation of this last copy edit remains pending. No native correction or APK build was started. The broader physical checklist remains partial; no M2 or ACLC GPS implementation was started.
+
+Final checks for the finger-pad copy update: `npm run check` passed strict TypeScript, zero-warning lint and **727 tests / 65 files**; targeted screen/localization checks passed **13 tests**; `git diff --check` passed. No native/dependency or Edge changes required additional build/provider checks.

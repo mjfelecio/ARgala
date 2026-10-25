@@ -140,9 +140,9 @@ it('never prompts after Allow if its permission read finishes after SDK focus is
 });
 
 it.each([
-  ['en', 'Hold the square briefly, then release to interact.', 'Hold, then release', 'Interaction received'],
-  ['ko', '사각형을 잠시 누른 뒤 손을 떼어 상호작용하세요.', '길게 누른 뒤 떼기', '상호작용 확인됨'],
-  ['ja', '四角形をしばらく押してから離すと操作できます。', '長押しして離す', '操作を確認'],
+  ['en', 'Use your finger pad to hold the square briefly, then release.', 'Hold, then release', 'Interaction received'],
+  ['ko', '손가락 끝의 넓은 부분으로 사각형을 잠시 누른 뒤 떼세요.', '길게 누른 뒤 떼기', '상호작용 확인됨'],
+  ['ja', '指の腹で四角形をしばらく押してから離してください。', '長押しして離す', '操作を確認'],
 ])('localizes %s hold guidance and completed native interaction feedback', async (language, guidance, action, received) => {
   await translations.changeLanguage(language);
   await mount(); await layout(); await press('destinationAr.start');
