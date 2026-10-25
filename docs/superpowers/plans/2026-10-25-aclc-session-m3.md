@@ -12,7 +12,7 @@ M4 owns real destination manifest, GPS eligibility and single-use entry intents.
 
 ## Interfaces
 
-- Pure session owner holds destination/principal identity, pending/live status, suspension timestamp, selected ID and reading cursors. No pose, coordinates, provider data or frames. Identity change/exit/unmount/process death closes ownership. Exact300000ms grace expires; clock rollback cannot extend it.
+- Pure session owner holds destination/admission/principal identity, pending/live status, suspension timestamp, selected ID and reading cursors. No pose, coordinates, provider data or frames. Identity change/exit/unmount/process death closes ownership. Exact300000ms grace expires; clock rollback cannot extend it.
 - useViroStartup gains optional lifecycle callbacks and a synchronous mount-authorization predicate; default square/M1 behavior remains explicit Retry. State above navigator owns permission/install attempts. Same-frame loss retains native geometry; a remount restores logical progress only after a new NORMAL horizontal pose.
 - Ring scene accepts an optional externally owned reading controller and initial/logical progress callbacks. Existing standalone scene tests remain real. Selected ID/page restore in the fresh coordinate frame; old transforms are never passed back.
 - First-use approximately2.4s reveal starts only after tracking-ready, pauses for lost tracking and is skippable. A dedicated completion key stores only its one-time flag; failures remain recoverable with localized diagnostics-free UI. Repeat/recovery sessions skip reveal. Reduced motion avoids staged motion. Reuse utility chrome; no rich-content overlay or language picker.
