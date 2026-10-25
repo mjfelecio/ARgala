@@ -98,3 +98,10 @@ it('finishes a first-use reveal in approximately 2.4 seconds of valid tracking',
   await act(async () => { await vi.advanceTimersByTimeAsync(2399); }); expect(current.session.phase).toBe('reveal');
   await act(async () => { await vi.advanceTimersByTimeAsync(1); }); expect(current.session.phase).toBe('exploring');
 });
+
+it('expires on the original elapsed deadline after a partial wall-clock rollback', async () => {
+  let elapsed = 1000; vi.spyOn(performance, 'now').mockImplementation(() => elapsed);
+  await start(); await ready(); await background();
+  await act(async () => { elapsed = 241000; await vi.advanceTimersByTimeAsync(240000); vi.setSystemTime(61000); elapsed = 301000; await vi.advanceTimersByTimeAsync(60000); });
+  expect(current.session.phase).toBe('expired'); eligible = false; await foreground(); expect(current.startup.mountScene).toBe(false); expect(readViroSupport).toHaveBeenCalledOnce();
+});

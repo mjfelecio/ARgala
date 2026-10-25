@@ -358,6 +358,7 @@
     },
     "skip": "Skip introduction",
     "reveal": "Look around as the sample panels appear. You can skip this introduction.",
-    "restoring": "Restoring your reading progress. Move gently to reacquire tracking."
+    "restoring": "Restoring your reading progress. Move gently to reacquire tracking.",
+    "retryTracking": "Retry tracking"
   }
 }

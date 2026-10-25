@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { ArSession, suspensionGraceMs, type LogicalArProgress, type SessionIdentity } from './session';
+import { ArSession, type LogicalArProgress, type SessionIdentity } from './session';
 import { useViroStartup, type StartupPolicy } from './use-viro-startup';
 import type { TrackingState } from './types';
 type Options = { identity: SessionIdentity; tileIds: readonly string[]; running: boolean; transitionReady: boolean; measured: boolean; freshEligible(): boolean; reveal: boolean };
@@ -24,9 +24,15 @@ export function useArSession({ identity, tileIds, running, transitionReady, meas
   useEffect(() => { if (!matches) model.close(); }, [matches, model]);
   useEffect(() => {
     if (!session.established || session.suspendedAt === null) return;
-    if (!model.canRestore(Date.now())) { model.expire(Date.now()); return; }
-    const timer = setTimeout(() => model.expire(Date.now()), Math.max(0, suspensionGraceMs - (Date.now() - session.suspendedAt)));
-    return () => clearTimeout(timer);
+    let current = true; let timer: ReturnType<typeof setTimeout> | undefined;
+    function checkExpiry() {
+      if (!current || model.getSnapshot().suspendedAt === null) return;
+      const remaining = model.remainingGraceMs(Date.now());
+      if (remaining <= 0) model.expire(Date.now());
+      else timer = setTimeout(checkExpiry, Math.max(1, Math.ceil(remaining)));
+    }
+    checkExpiry();
+    return () => { current = false; clearTimeout(timer); };
   }, [model, session.established, session.suspendedAt, running]);
   useEffect(() => {
     if (running && transitionReady && measured && matches && session.phase === 'suspended' && model.canRestore(Date.now())) void start();
@@ -38,11 +44,12 @@ export function useArSession({ identity, tileIds, running, transitionReady, meas
   }, [model, session.phase, session.attempt, tileIds.length]);
   const onTracking = useCallback((value: TrackingState) => model.track(session.attempt, value), [model, session.attempt]);
   const onProgress = useCallback((value: LogicalArProgress) => model.saveProgress(session.attempt, value), [model, session.attempt]);
+  const retryTracking = useCallback(() => model.retryTracking(session.attempt, Date.now()), [model, session.attempt]);
   const close = useCallback(() => model.close(), [model]);
   const finishReveal = useCallback(() => model.finishReveal(session.attempt), [model, session.attempt]);
   const expired = session.phase === 'expired';
-  return { session, onTracking, onProgress, close, finishReveal, startup: {
+  return { session, onTracking, onProgress, close, finishReveal, retryTracking, startup: {
     ...startup, phase: expired ? 'failed' as const : startup.phase, errorCode: expired ? 'entry-ineligible' as const : startup.errorCode,
-    mountScene: startup.mountScene && matches && !expired && session.phase !== 'closed',
+    mountScene: startup.mountScene && matches && ['initializing', 'reveal', 'exploring', 'limited'].includes(session.phase),
   } };
 }

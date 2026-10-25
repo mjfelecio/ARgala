@@ -84,6 +84,7 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
       {startup.phase === 'live' && <View className="gap-2 p-4">
         <Text className="font-sans text-sm text-white">{t(session.phase === 'limited' ? 'destinationAr.trackingLost' : revealing ? 'destinationSession.reveal' : 'destinationRing.live')}</Text>
         <Text className="font-sans text-xs text-white">{t('destinationRing.prototype')}</Text>
+        {session.phase === 'limited' && <Action title={t('destinationSession.retryTracking')} onPress={lifecycle.retryTracking} disabled={startup.pending} />}
         {revealing && <Action title={t('destinationSession.skip')} onPress={() => { finishReveal(); void completeIntroduction(); }} />}
         {poseRequired && <Notice>{t('destinationRing.poseRequired')}</Notice>}
         {help && <Notice>{t('destinationRing.helpText')}{'\n'}{t('destinationRing.poseRate', metrics)}</Notice>}

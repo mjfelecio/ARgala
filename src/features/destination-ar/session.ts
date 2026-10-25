@@ -15,15 +15,26 @@ export class ArSession {
   private listeners = new Set<() => void>();
   private resumePhase: 'reveal' | 'exploring' = 'exploring';
   private ids: ReadonlySet<string>;
-  constructor(private readonly identity: SessionIdentity, ids: readonly string[]) { this.identity = { ...identity }; this.ids = new Set(ids); }
+  private suspendedElapsedAt: number | null = null;
+  constructor(private readonly identity: SessionIdentity, ids: readonly string[], private readonly elapsedNow: () => number = () => performance.now()) { this.identity = { ...identity }; this.ids = new Set(ids); }
   getSnapshot = () => this.state;
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
   private write(patch: Partial<SessionSnapshot>) { this.state = Object.freeze({ ...this.state, ...patch }); this.listeners.forEach(listener => listener()); }
   private matches(identity: SessionIdentity) { return identity.admissionId === this.identity.admissionId && identity.destinationId === this.identity.destinationId && identity.principalId === this.identity.principalId && identity.provenance === this.identity.provenance; }
   private current(attempt: number) { return attempt === this.state.attempt && this.state.phase !== 'closed' && this.state.phase !== 'expired'; }
-  canRestore(now: number) {
-    const start = this.state.suspendedAt;
-    return this.state.established && start !== null && Number.isFinite(now) && now >= start && now - start < suspensionGraceMs;
+  remainingGraceMs(now: number) {
+    const start = this.state.suspendedAt; const elapsedStart = this.suspendedElapsedAt;
+    if (!this.state.established || start === null || elapsedStart === null) return 0;
+    const wall = now - start; const elapsed = this.elapsedNow() - elapsedStart;
+    if (!Number.isFinite(wall) || !Number.isFinite(elapsed) || wall < 0 || elapsed < 0) return 0;
+    // Either clock can end the grace. A wall rollback cannot extend the
+    // process-owned elapsed deadline; wall time still covers suspended timers.
+    return Math.max(0, suspensionGraceMs - Math.max(wall, elapsed));
+  }
+  canRestore(now: number) { return this.remainingGraceMs(now) > 0; }
+  private suspensionTime(now: number) {
+    if (this.state.suspendedAt !== null) return this.state.suspendedAt;
+    this.suspendedElapsedAt = this.elapsedNow(); return now;
   }
   begin(identity: SessionIdentity, now: number): number | null {
     if (!this.matches(identity)) { this.close(); return null; }
@@ -47,7 +58,7 @@ export class ArSession {
   ready(attempt: number, now: number, reveal: boolean) {
     if (!this.current(attempt) || this.state.phase !== 'initializing') return false;
     if (this.state.established && !this.canRestore(now)) { this.expire(now); return false; }
-    const first = !this.state.established;
+    const first = !this.state.established; this.suspendedElapsedAt = null;
     this.write({ established: true, suspendedAt: null, phase: first && reveal && this.ids.size > 0 ? 'reveal' : 'exploring', revealedCount: first && reveal ? Math.min(1, this.ids.size) : this.ids.size }); return true;
   }
   track(attempt: number, tracking: TrackingState) {
@@ -73,15 +84,21 @@ export class ArSession {
     // Interrupted initial/recovery startup never auto-creates another native
     // view: its install-attempt flag would reset and could repeat a prompt.
     this.write({ attempt: this.state.attempt + 1, phase: liveFrame ? 'suspended' : 'interrupted',
-      suspendedAt: this.state.established ? this.state.suspendedAt ?? now : null });
+      suspendedAt: this.state.established ? this.suspensionTime(now) : null });
   }
   fail(attempt: number, now: number) {
     if (!this.current(attempt)) return;
-    this.write({ phase: 'failed', suspendedAt: this.state.established ? this.state.suspendedAt ?? now : null });
+    this.write({ phase: 'failed', suspendedAt: this.state.established ? this.suspensionTime(now) : null });
   }
   expire(now: number) {
-    if (!this.state.established || this.canRestore(now)) return false;
+    if (!this.state.established || this.state.suspendedAt === null || this.canRestore(now)) return false;
+    this.suspendedElapsedAt = null;
     this.write({ phase: 'expired', established: false, suspendedAt: null, attempt: this.state.attempt + 1, progress: emptyProgress() }); return true;
+  }
+  retryTracking(attempt: number, now: number) {
+    if (!this.current(attempt) || !this.state.established || this.state.phase !== 'limited') return false;
+    const suspendedAt = this.suspensionTime(now);
+    this.write({ phase: 'suspended', suspendedAt, attempt: this.state.attempt + 1 }); return true;
   }
   saveProgress(attempt: number, progress: LogicalArProgress) {
     if (!this.current(attempt) || !['reveal', 'exploring', 'limited'].includes(this.state.phase)) return;
@@ -93,5 +110,5 @@ export class ArSession {
     }
     this.write({ progress: Object.freeze({ selectedId: progress.selectedId !== null && this.ids.has(progress.selectedId) ? progress.selectedId : null, cursors: Object.freeze(cursors) }) });
   }
-  close() { this.write({ phase: 'closed', established: false, suspendedAt: null, attempt: this.state.attempt + 1, progress: emptyProgress() }); }
+  close() { this.suspendedElapsedAt = null; this.write({ phase: 'closed', established: false, suspendedAt: null, attempt: this.state.attempt + 1, progress: emptyProgress() }); }
 }

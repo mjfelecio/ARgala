@@ -82,3 +82,21 @@ it('notifies subscribers with stable snapshots only on transitions', () => {
   expect(session.getSnapshot()).toBe(session.getSnapshot()); live(session); expect(callback).toHaveBeenCalled();
   stop(); callback.mockClear(); session.close(); expect(callback).not.toHaveBeenCalled();
 });
+
+it('expires by an independent elapsed clock when wall time rolls back but remains after suspension', () => {
+  let elapsed = 1000; const session = new ArSession(identity, ids, () => elapsed); live(session); elapsed = 2000; session.suspend(2000);
+  elapsed = 302000; expect(session.expire(122000)).toBe(true); expect(session.canRestore(242000)).toBe(false);
+  const token = session.begin(identity, 242000)!; expect(session.authorizeMount(token, identity, 242001, () => false)).toBe(false);
+});
+it('permits an explicit tracking recovery while retaining logical progress and live admission', () => {
+  const session = create(); const old = live(session); session.saveProgress(old, { selectedId: 'history', cursors: { history: { page: 2, offset: 50, locale: 'en', size: 'large' } } });
+  session.track(old, 'limited'); expect(session.retryTracking(old, 2000)).toBe(true); expect(session.getSnapshot().phase).toBe('suspended');
+  expect(session.retryTracking(old, 2001)).toBe(false); const next = session.begin(identity, 2010)!;
+  const fresh = vi.fn(() => false); expect(session.authorizeMount(next, identity, 2011, fresh)).toBe(true); expect(fresh).not.toHaveBeenCalled();
+  expect(session.ready(next, 2012, false)).toBe(true); expect(session.getSnapshot().progress.selectedId).toBe('history'); expect(session.getSnapshot().progress.cursors.history.page).toBe(2);
+});
+it('ignores an old suspension-expiry callback after tracking has recovered live', () => {
+  const session = create(); live(session); session.suspend(2000); const token = session.begin(identity, 2010)!;
+  session.authorizeMount(token, identity, 2011, () => false); session.ready(token, 2012, false);
+  expect(session.expire(302000)).toBe(false); expect(session.getSnapshot().phase).toBe('exploring');
+});

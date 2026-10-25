@@ -180,3 +180,19 @@ it.each(['destinationId', 'admissionId'] as const)('invalidates restoration when
   await layout(); await start(); await ready(); await active(false); selectedIdentity = { ...identity, [field]: 'other-development' }; await active(true);
   expect(cameras()).toHaveLength(0); expect(native.support).toHaveBeenCalledOnce();
 });
+
+it.each(['en', 'ja', 'ko'])('offers %s explicit Retry for prolonged tracking loss and restores the panel in a fresh native frame', async locale => {
+  await translations.changeLanguage(locale);
+  expect(translations.getResource(locale, 'translation', 'destinationSession.retryTracking')).toBeTruthy();
+  await mount(); await layout(); await start(); await ready(); await click('ring-tile-history'); await finish(); await click('ring-action-next');
+  const page = text('ring-page-indicator'); await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
+  await act(async () => { await vi.advanceTimersByTimeAsync(6000); }); expect(native.support).toHaveBeenCalledOnce(); expect(cameras()).toHaveLength(1);
+  native.eligible = false; await press('destinationSession.retryTracking'); await settle(); expect(node('ring-focused-panel')).toBeUndefined();
+  await ready([9, 2, 1], [0, 0, 1]); expect(node('ring-focused-panel').props.position).toEqual([9, 2, 2.15]); expect(text('ring-page-indicator')).toBe(page);
+  expect(native.gate).toHaveBeenCalledOnce(); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled();
+});
+it('does not automatically repeat an interrupted explicit tracking recovery', async () => {
+  await mount(); await layout(); await start(); await ready(); await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(1, 1));
+  await press('destinationSession.retryTracking'); await settle(); expect(cameras()).toHaveLength(1); await active(false); await active(true);
+  expect(cameras()).toHaveLength(0); expect(native.support).toHaveBeenCalledTimes(2); await press('common.retry'); await settle(); expect(native.support).toHaveBeenCalledTimes(3);
+});
