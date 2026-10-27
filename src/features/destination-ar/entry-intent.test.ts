@@ -43,3 +43,15 @@ it('invalidates issued pending mounts when cleared, without touching M3 establis
   store.clear();
   expect(entry?.authorizeMount()).toBe(false);
 });
+it('uses distinct handles across simultaneous principal-scoped intent owners', () => {
+ vi.spyOn(Date, 'now').mockReturnValue(10000);
+ const first = setup(); const second = setup();
+ expect(first.store.create('pilot-aclc', 'owner')).not.toBe(second.store.create('pilot-aclc', 'owner'));
+});
+it('expires unclaimed handles while a claimed pending entry still revalidates fresh eligibility on explicit retry', () => {
+ vi.spyOn(Date, 'now').mockReturnValue(10000);
+ const { store, change } = setup(); const entry = store.claim(store.create('pilot-aclc', 'owner'), 'pilot-aclc', 'owner');
+ vi.mocked(Date.now).mockReturnValue(60000);
+ expect(entry?.authorizeMount()).toBe(true);
+ change('eligible'); expect(entry?.authorizeMount()).toBe(false);
+});
