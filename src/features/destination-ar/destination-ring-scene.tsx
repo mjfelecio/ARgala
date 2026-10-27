@@ -1,3 +1,4 @@
+import { ringCopy } from './ring-copy';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ViroARScene, ViroARSceneNavigator, ViroNode, ViroTrackingStateConstants } from '@reactvision/react-viro';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +24,7 @@ function OwnedReadingRingScene(props: Props) { const reading = useReadingSize();
 function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetrics, content = developmentRingContent, reading, initialProgress, onProgress, visibleTileCount = Infinity, interactive = true }: Props & { reading: ReturnType<typeof useReadingSize> }) {
   const { t, i18n } = useTranslation(); const style = useArNativeStyle();
   const [restored] = useState(initialProgress);
-  const [snapshot] = useState(() => content.filter(item => i18n.exists(item.bodyKey) && t(item.bodyKey).trim()));
+  const [snapshot] = useState(() => content.filter(item => ringCopy(item, 'body', i18n.resolvedLanguage ?? i18n.language, key => t(key), key => i18n.exists(key)).trim()));
   const [controller] = useState(() => new RingController(snapshot));
   const [frame, setFrame] = useState<{ slots: RingSlot[]; position: Vector3 } | null>(null);
   const [tracking, setTracking] = useState<TrackingState>('unavailable');

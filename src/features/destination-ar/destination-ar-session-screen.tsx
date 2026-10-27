@@ -33,16 +33,17 @@ export default function DevelopmentSessionRoute() {
     : <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
 }
 
-type Props = { identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[] };
-export function DestinationArSessionExperience({ identity, freshEligible, content = developmentRingContent }: Props) {
+type Props = { identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
+export function DestinationArSessionExperience({ identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
   const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
   const [transitionReady, setTransitionReady] = useState(true); const [scene, setScene] = useState({ width: 0, height: 0 });
   const [NativeRing, setNativeRing] = useState<Awaited<ReturnType<typeof loadRingScene>> | null>(null);
   const reading = useReadingSize(); const introduction = useArIntroduction(); const reduced = useReducedMotion();
   const lifecycle = useArSession({ identity, tileIds: content.map(item => item.id), running: focused && active, transitionReady,
-    measured: scene.width > 0 && scene.height > 0 && NativeRing !== null, freshEligible, reveal: !introduction.seen && !reduced });
+    entryReady, measured: scene.width > 0 && scene.height > 0 && NativeRing !== null, freshEligible, reveal: !introduction.seen && !reduced });
   const { startup, session, finishReveal, close } = lifecycle;
+  useEffect(() => { if (session.established) onEstablished?.(); }, [session.established, onEstablished]);
   const completeIntroduction = introduction.complete;
   const reportFailure = startup.onFailure;
   useEffect(() => {
@@ -75,15 +76,16 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
           visibleTileCount={session.revealedCount} interactive={exploring} />
       </SceneBoundary>
     </View>}
-    <ArUtilityChrome titleKey="destinationRing.title" onExit={close} actions={startup.phase === 'live' ? <>
+    <ArUtilityChrome titleKey="destinationRing.title" title={title} onReturn={onReturn} onExit={() => { close(); onExit?.(); }} actions={startup.phase === 'live' ? <>
       <Button variant="secondary" accessibilityLabel={t('destinationRing.recenter')} isDisabled={!exploring} onPress={() => controls.current?.recenter()}><Button.Label>{t('destinationRing.recenter')}</Button.Label></Button>
       <Button variant="secondary" accessibilityLabel={t('destinationRing.help')} accessibilityState={{ expanded: help }} onPress={() => setHelp(value => !value)}><Button.Label>{t('destinationRing.help')}</Button.Label></Button>
     </> : undefined}>
-      <ArPreflight phase={startup.phase} errorCode={startup.errorCode} pending={startup.pending} canAskAgain={startup.canAskAgain} onStart={prompt => void startup.start(prompt)} />
+      <ArPreflight noticeKey={preflightNoticeKey ?? (identity.provenance === 'verified' ? 'arrival.preflight' : 'destinationAr.prototype')} phase={startup.phase} errorCode={startup.errorCode} pending={startup.pending} canAskAgain={startup.canAskAgain} onStart={prompt => void startup.start(prompt)} />
+      {!session.established && guidance}
       {session.established && (startup.phase === 'checking' || startup.phase === 'prepared' || startup.phase === 'initializing') && <Notice>{t('destinationSession.restoring')}</Notice>}
       {startup.phase === 'live' && <View className="gap-2 p-4">
         <Text className="font-sans text-sm text-white">{t(session.phase === 'limited' ? 'destinationAr.trackingLost' : revealing ? 'destinationSession.reveal' : 'destinationRing.live')}</Text>
-        <Text className="font-sans text-xs text-white">{t('destinationRing.prototype')}</Text>
+        <Text className="font-sans text-xs text-white">{t(identity.provenance === 'verified' ? 'arrival.live' : developmentNoticeKey)}</Text>
         {session.phase === 'limited' && <Action title={t('destinationSession.retryTracking')} onPress={lifecycle.retryTracking} disabled={startup.pending} />}
         {revealing && <Action title={t('destinationSession.skip')} onPress={() => { finishReveal(); void completeIntroduction(); }} />}
         {poseRequired && <Notice>{t('destinationRing.poseRequired')}</Notice>}

@@ -1,5 +1,5 @@
-import type { RingEntry } from './scene-geometry';
-export type RingContent = RingEntry & { titleKey: string; bodyKey: string };
+import type { RingContent } from './ring-content';
+export type { RingContent } from './ring-content';
 /** Development-only, independently written layout samples. No destination facts/media. */
 export const developmentRingContent: readonly RingContent[] = [
   { id: 'overview', role: 'overview', titleKey: 'destinationRing.mock.overview.title', bodyKey: 'destinationRing.mock.overview.body' },

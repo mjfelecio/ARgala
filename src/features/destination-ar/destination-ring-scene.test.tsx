@@ -256,3 +256,12 @@ it('keeps the actual reading controller and unsaved size/error above a remountin
   const body = tree.root.findAllByType('viro-text' as React.ElementType).find(item => item.props.testID === 'ring-body')!;
   expect(body.props.style.fontSize * body.props.scale[0]).toBe(6);
 });
+it('renders approved catalog copy through the actual native panel and follows the app locale', async () => {
+ const approved = (value: string) => ({ value, approvalReference: 'synthetic test approval' });
+ sceneOptions = { content: [{ id: 'overview', role: 'overview', approved: { title: { en: approved('Approved title'), ja: approved('承認済み見出し') }, body: { en: approved('Approved native body'), ja: approved('承認済みの本文') } } }] };
+ await mount(); await track(); await pose(); await press('ring-tile-overview'); await finish();
+ const copy = () => tree.root.findAllByType('viro-text' as React.ElementType).map(value => value.props.text).join('\n');
+ expect(copy()).toContain('Approved native body'); expect(copy()).not.toContain(translations.t('destinationRing.sampleLabel'));
+ await act(async () => { await translations.changeLanguage('ja'); });
+ expect(copy()).toContain('承認済みの本文'); expect(copy()).toContain('承認済み見出し');
+});

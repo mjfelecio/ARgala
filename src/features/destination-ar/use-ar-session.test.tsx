@@ -34,11 +34,11 @@ it('keeps startup pending until a fresh mount gate and tracking-ready', async ()
   expect(current.startup.mountScene).toBe(false); expect(current.startup.errorCode).toBe('entry-ineligible');
 });
 it('automatically recovers only an already-live session after transition readiness with passive permission checks', async () => {
-  await start(); await ready(); const staleReady = current.startup.onReady;
+  await start(); await ready(); gate.mockClear(); const staleReady = current.startup.onReady;
   await background(); expect(current.startup.mountScene).toBe(false); expect(current.session.phase).toBe('suspended');
   eligible = false; transitionReady = false; await foreground(); expect(readViroSupport).toHaveBeenCalledOnce();
   transitionReady = true; await update(); expect(readViroSupport).toHaveBeenCalledTimes(2); expect(current.startup.mountScene).toBe(true);
-  expect(vi.mocked(cameraPermission).mock.calls.map(call => call[0])).toEqual([false, false]); expect(gate).toHaveBeenCalledOnce();
+  expect(vi.mocked(cameraPermission).mock.calls.map(call => call[0])).toEqual([false, false]); expect(gate).not.toHaveBeenCalled();
   await act(async () => staleReady()); expect(current.session.phase).toBe('initializing');
   await ready(); expect(current.session.phase).toBe('exploring');
 });
@@ -48,9 +48,9 @@ it('never restores an interrupted first startup without an explicit retry and fr
   await start(); expect(gate).toHaveBeenCalledTimes(2); expect(current.startup.errorCode).toBe('entry-ineligible');
 });
 it('does not auto-loop a native installation interruption during live recovery', async () => {
-  await start(); await ready(); await background(); await foreground(); expect(current.startup.mountScene).toBe(true);
+  await start(); await ready(); gate.mockClear(); await background(); await foreground(); expect(current.startup.mountScene).toBe(true);
   await background(); await foreground(); expect(current.startup.mountScene).toBe(false); expect(readViroSupport).toHaveBeenCalledTimes(2);
-  await start(); expect(readViroSupport).toHaveBeenCalledTimes(3); expect(gate).toHaveBeenCalledOnce();
+  await start(); expect(readViroSupport).toHaveBeenCalledTimes(3); expect(gate).not.toHaveBeenCalled();
 });
 it('rechecks grants on live resume and blocks revocation without automatic prompting', async () => {
   await start(); await ready(); await background();
