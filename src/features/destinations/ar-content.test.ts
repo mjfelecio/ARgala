@@ -12,8 +12,11 @@ it('keeps the pilot separate from the nine provisional launch labels and contain
   expect(listFeaturedDestinations().map(d => d.id)).toEqual([...listDestinations().map(d => d.id), 'pilot-aclc']);
   const pilot = getDestination('pilot-aclc');
   expect(pilot).not.toBeNull();
-  for (const key of ['center', 'routeEntrance', 'ar', 'copy', 'media']) expect(pilot).not.toHaveProperty(key);
-  expect(activationPolicy(pilot)).toBeNull();
+  for (const key of ['copy', 'media']) expect(pilot).not.toHaveProperty(key);
+  expect(pilot?.center).toEqual({ latitude: 11.022973, longitude: 124.6054992 });
+  expect(pilot?.routeEntrance).toEqual({ latitude: 11.022845368322905, longitude: 124.60452610504089 });
+  expect(activationPolicy(pilot)).toMatchObject({ point: pilot?.center, radiusMeters: 50 });
+  expect(pilot?.ar?.providerAssociation).toBeUndefined();
   expect(approvedArContent(pilot, 'en')).toEqual([]);
 });
 it('requires independent activation and radius approvals and never substitutes a display/entrance point', () => {
