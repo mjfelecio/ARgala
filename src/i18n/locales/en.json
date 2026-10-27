@@ -209,11 +209,11 @@
     "loaded": "Place details loaded."
   },
   "directions": {
-    "title": "Walking Directions",
+    "title": "Directions",
     "back": "Back",
     "map": "Back to Map",
     "details": "Place Details",
-    "walking": "Walking Route",
+    "walking": "Walking",
     "destination": "Destination",
     "origin": "Route starting point",
     "recenter": "Recenter on your location",
@@ -241,7 +241,14 @@
     "remaining": "About {{meters}} m remaining",
     "navigationInformation": "Walking progress",
     "navigationArrival": "Arrival was confirmed from repeated current location readings near the destination.",
-    "noAutomaticReroute": "This route does not update automatically. Stop navigation to return to the full route preview."
+    "noAutomaticReroute": "This route does not update automatically. Stop navigation to return to the full route preview.",
+    "driving": "Driving",
+    "followWalk": "Follow this walk in ARgala",
+    "previewMode": "Preview selected mode",
+    "displayedMode": "Displayed route: {{mode}}",
+    "estimatedDriving": "Estimated driving route",
+    "drivingCaution": "Check road access, signs and current conditions before driving.",
+    "mapsFailed": "Could not open Google Maps. Your route preview is still available; try again."
   },
   "destinations": {
     "title": "Featured Destinations",
@@ -375,5 +382,19 @@
     "dismiss": "Not now",
     "teaser": "Explore this destination’s stories in AR after a verified arrival.",
     "selectDestination": "Select a featured destination to enter AR."
+  },
+  "search": {
+    "query": "Search places",
+    "placeholder": "Search places or an address",
+    "noArea": "Search for a place to choose an area. No current location is required.",
+    "thisArea": "Search this area",
+    "areaExtent": "Search this area · within {{meters}} m",
+    "categories": {
+      "all": "All",
+      "attractions": "Attractions",
+      "restaurants": "Restaurants",
+      "hotels": "Hotels",
+      "shopping": "Shopping"
+    }
   }
 }

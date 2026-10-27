@@ -1,8 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import Constants from 'expo-constants';
-import { useState } from 'react';
-import { Text, View, useWindowDimensions } from 'react-native';
+import { useRef, useState } from 'react';
+import { Linking, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Button } from 'heroui-native/button';
@@ -14,6 +14,9 @@ import { RoutePreviewLocationStatus } from './route-preview-location-status';
 import { ProviderAttributions } from '@/features/map/attributions';
 import { setPlaceSelection } from '@/features/places/selection';
 import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
+import { createRoutePreviewIntent } from './route-preview-intent';
+import { googleMapsNavigationUrl } from './google-maps-navigation';
+import type { TravelMode } from '../../../supabase/functions/_shared/contracts';
 import { useRoutePreview } from './use-route-preview';
 import { RoutePreviewMap } from './route-preview-map';
 import { routeSheetGeometry } from '@/features/map/sheet-geometry';
@@ -39,7 +42,24 @@ function Preview({ token }: { token: unknown }) {
   const { data, result, location, usable, running } = preview;
   const coordinates = result?.coordinates ?? EMPTY_COORDINATES;
   const place = data?.intent.place;
-  const navigation = useWalkingNavigation({ coordinates, destination: result?.destination ?? place?.coordinates,
+  const displayedMode = data?.intent.mode ?? 'walking';
+  const [draftMode, setDraftMode] = useState<TravelMode | null>(null);
+  const desiredMode = draftMode ?? displayedMode;
+  const linking = useRef(false); const [linkPending, setLinkPending] = useState(false);
+  const [linkError, setLinkError] = useState(false);
+  const target = place ? { ...place, coordinates: result?.destination ?? place.coordinates } : null;
+  const externalUrl = target ? googleMapsNavigationUrl(target, displayedMode) : null;
+  function startExternalNavigation() {
+    if (!externalUrl || !running || linking.current) return;
+    linking.current = true; setLinkPending(true); setLinkError(false);
+    void Linking.openURL(externalUrl).catch(() => setLinkError(true)).finally(() => { linking.current = false; setLinkPending(false); });
+  }
+  function previewMode() {
+    if (!place || !running || desiredMode === displayedMode || data?.status === 'pending') return;
+    const next = createRoutePreviewIntent(client, target!, undefined, 'map', data?.intent.language, data?.intent.featuredDestinationId, desiredMode);
+    router.setParams({ token: next });
+  }
+  const navigation = useWalkingNavigation({ coordinates: displayedMode === 'walking' ? coordinates : EMPTY_COORDINATES, destination: result?.destination ?? place?.coordinates,
     location, usable, running, now: preview.now });
   const navigationStatusKey = {
     preview: 'directions.navigationPreview',
@@ -86,15 +106,22 @@ function Preview({ token }: { token: unknown }) {
               <Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={accent} />
             </Button>
           </View>
+          {place && <View className="gap-2">
+            <View className="flex-row flex-wrap gap-2">{(['walking', 'driving'] as const).map(mode => <Button key={mode} variant={desiredMode === mode ? 'primary' : 'outline'} accessibilityLabel={t(`directions.${mode}`)} accessibilityState={{ selected: desiredMode === mode }} onPress={() => setDraftMode(mode)}><Button.Label>{t(`directions.${mode}`)}</Button.Label></Button>)}</View>
+            <Text className="font-sans text-xs text-muted">{t('directions.displayedMode', { mode: t(`directions.${displayedMode}`) })}</Text>
+            {desiredMode !== displayedMode && <Button accessibilityLabel={t('directions.previewMode')} isDisabled={!running || data?.status === 'pending'} onPress={previewMode}><Button.Label>{t('directions.previewMode')}</Button.Label></Button>}
+            <Button accessibilityLabel={t('directions.startNavigation')} isDisabled={!externalUrl || !running || linkPending} onPress={startExternalNavigation}><Button.Label>{t('directions.startNavigation')}</Button.Label></Button>
+            {linkError && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('directions.mapsFailed')}</Text>}
+          </View>}
           {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} contentReady={false} onDismiss={preview.arrival.dismiss} />}
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}
           {result && coordinates.length > 1 && !navigation.started && <>
             <Text className="font-sans text-title font-bold text-foreground">{t('map.routeSummary', { meters: result.route.distanceMeters, minutes: Math.ceil(result.route.durationSeconds / 60) })}</Text>
-            <Text className="font-sans text-xs text-muted">{t('directions.estimated')}</Text>
+            <Text className="font-sans text-xs text-muted">{t(displayedMode === 'walking' ? 'directions.estimated' : 'directions.estimatedDriving')}</Text>
           </>}
-          {result && coordinates.length > 1 && !navigation.started && (navigation.canStart
-            ? <Button variant="primary" className="min-h-12" accessibilityLabel={t('directions.startNavigation')} onPress={navigation.start}><Button.Label>{t('directions.startNavigation')}</Button.Label></Button>
+          {result && displayedMode === 'walking' && coordinates.length > 1 && !navigation.started && (navigation.canStart
+            ? <Button variant="primary" className="min-h-12" accessibilityLabel={t('directions.followWalk')} onPress={navigation.start}><Button.Label>{t('directions.followWalk')}</Button.Label></Button>
             : <Text className="font-sans text-sm text-muted">{t('directions.navigationNeedsLocation')}</Text>)}
           {navigation.started && <View className="gap-2 rounded-card bg-surface-secondary p-3">
             <Text accessibilityLiveRegion="polite" className="font-sans text-sm font-semibold text-foreground">{t(navigationStatusKey)}</Text>
@@ -127,7 +154,7 @@ function Preview({ token }: { token: unknown }) {
             <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.information')}</Text>
             <Text className="font-sans text-sm text-muted">{t('directions.snapshot')}</Text>
             {result.route.warnings.map((warning, index) => <View key={index} className="flex-row items-start gap-2"><Ionicons name="warning-outline" size={20} color={accent} /><Text className="min-w-0 flex-1 font-sans text-sm text-foreground">{warning}</Text></View>)}
-            <Text className="font-sans text-sm text-muted">{t('map.walkingCaution')}</Text>
+            <Text className="font-sans text-sm text-muted">{t(displayedMode === 'walking' ? 'map.walkingCaution' : 'directions.drivingCaution')}</Text>
           </View>}
           {expanded && navigation.started && <View className="gap-2 border-t border-outline pt-4">
             <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.navigationInformation')}</Text>

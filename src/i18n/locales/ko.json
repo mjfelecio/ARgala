@@ -169,11 +169,11 @@
     "loaded": "장소 정보를 불러왔습니다."
   },
   "directions": {
-    "title": "도보 길찾기",
+    "title": "길찾기",
     "back": "뒤로",
     "map": "지도로 돌아가기",
     "details": "장소 상세정보",
-    "walking": "도보 경로",
+    "walking": "도보",
     "destination": "목적지",
     "origin": "경로 출발 위치",
     "recenter": "현재 위치로 이동",
@@ -201,7 +201,14 @@
     "remaining": "약 {{meters}}m 남음",
     "navigationInformation": "도보 진행 상황",
     "navigationArrival": "목적지 근처에서 현재 위치가 여러 번 확인되어 도착으로 판단했습니다.",
-    "noAutomaticReroute": "경로는 자동으로 갱신되지 않습니다. 안내를 종료하면 전체 경로 미리보기로 돌아갑니다."
+    "noAutomaticReroute": "경로는 자동으로 갱신되지 않습니다. 안내를 종료하면 전체 경로 미리보기로 돌아갑니다.",
+    "driving": "자동차",
+    "followWalk": "ARgala에서 도보 경로 따라가기",
+    "previewMode": "선택한 이동 수단 미리보기",
+    "displayedMode": "표시된 경로: {{mode}}",
+    "estimatedDriving": "예상 자동차 경로",
+    "drivingCaution": "운전 전에 도로 진입 가능 여부, 표지판과 현재 상황을 확인하세요.",
+    "mapsFailed": "Google Maps를 열지 못했습니다. 경로 미리보기는 계속 사용할 수 있습니다. 다시 시도하세요."
   },
   "destinations": {
     "title": "추천 여행지",
@@ -334,5 +341,19 @@
     "dismiss": "나중에",
     "teaser": "도착이 확인되면 AR로 이 목적지의 이야기를 살펴보세요.",
     "selectDestination": "AR을 이용하려면 추천 목적지를 선택하세요."
+  },
+  "search": {
+    "query": "장소 검색",
+    "placeholder": "장소 또는 주소 검색",
+    "noArea": "장소를 검색해 탐색할 지역을 선택하세요. 현재 위치는 필요하지 않습니다.",
+    "thisArea": "이 지역 검색",
+    "areaExtent": "이 지역 검색 · {{meters}}m 이내",
+    "categories": {
+      "all": "전체",
+      "attractions": "명소",
+      "restaurants": "음식점",
+      "hotels": "호텔",
+      "shopping": "쇼핑"
+    }
   }
 }

@@ -53,3 +53,10 @@ it('carries explicit featured context only for an exact approved curated entranc
  expect(claimRoutePreviewIntent(c, createRoutePreviewIntent(c, place, undefined, 'map', 'en', 'pilot-aclc'))?.featuredDestinationId).toBeUndefined();
  expect(claimRoutePreviewIntent(c, createRoutePreviewIntent(c, { ...target, coordinates: { latitude: 0, longitude: 0 } }, undefined, 'map', 'en', 'pilot-aclc'))?.featuredDestinationId).toBeUndefined();
 });
+it('never reuses a walking preview as a driving preview', () => {
+ const c = client(); const result = { origin: { latitude: 11, longitude: 125 }, destination: place.coordinates, route: { distanceMeters: 1, durationSeconds: 1, encodedPolyline: '??AA', warnings: [] } };
+ c.setQueryData(['route-preview-session', 'old'], { status: 'success', language: 'en', intent: { place, mode: 'walking', createdAt: Date.now(), source: 'map' }, result });
+ const token = createRoutePreviewIntent(c, place, undefined, 'map', 'en', undefined, 'driving');
+ const intent = claimRoutePreviewIntent(c, token);
+ expect(intent).toMatchObject({ mode: 'driving' }); expect(intent?.existing).toBeUndefined();
+});

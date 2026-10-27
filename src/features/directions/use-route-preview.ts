@@ -95,10 +95,16 @@ export function useRoutePreview(token: unknown, configured: boolean) {
       const current = client.getQueryData<Session>(key);
       if (current?.status === 'pending' && current.attempt === pending.attempt) client.setQueryData(key, next);
     };
-    const acquire = async () => routeService.walking({ origin, destination: data.intent.place.coordinates, language });
+    const mode = data.intent.mode ?? 'walking';
+    const acquire = async () => {
+      if (mode === 'walking') return routeService.walking({ origin, destination: data.intent.place.coordinates, language });
+      const route = await routeService.preview({ origin, destination: data.intent.place.coordinates, language, mode });
+      if (route.mode !== mode) throw new EdgeRequestError('UPSTREAM_INVALID');
+      return route;
+    };
     void acquire().then(route => {
       let result: Result;
-      try { result = validated({ origin, destination: data.intent.place.coordinates, route }); }
+      try { result = validated({ origin, destination: data.intent.place.coordinates, route, mode }); }
       catch { throw new EdgeRequestError('UPSTREAM_INVALID'); }
       finish({ owner, attempt: data.attempt, intent: data.intent, status: 'success', language, result });
     }).catch((error: unknown) => finish({ owner, attempt: data.attempt, intent: data.intent, status: 'failed', errorKey: edgeErrorMessageKey(error) }));
@@ -106,7 +112,7 @@ export function useRoutePreview(token: unknown, configured: boolean) {
   function retry() {
     const current = client.getQueryData<Session>(key);
     if (!running || !configured || !current || current.status === 'pending' || current.status === 'success' || (current.status === 'waiting' && current.owner === owner && authorized.current && !expired)) return;
-    const nextToken = createRoutePreviewIntent(client, current.intent.place, undefined, current.intent.source, language, current.intent.featuredDestinationId);
+    const nextToken = createRoutePreviewIntent(client, current.intent.place, undefined, current.intent.source, language, current.intent.featuredDestinationId, current.intent.mode ?? 'walking');
     const next = claimRoutePreviewIntent(client, nextToken);
     if (!next) return;
     if (next.existing) {

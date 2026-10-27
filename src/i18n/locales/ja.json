@@ -169,11 +169,11 @@
     "loaded": "場所の詳細を読み込みました。"
   },
   "directions": {
-    "title": "徒歩ルート",
+    "title": "経路",
     "back": "戻る",
     "map": "地図に戻る",
     "details": "場所の詳細",
-    "walking": "徒歩ルート",
+    "walking": "徒歩",
     "destination": "目的地",
     "origin": "ルートの出発地点",
     "recenter": "現在地を表示",
@@ -201,7 +201,14 @@
     "remaining": "残り約{{meters}}m",
     "navigationInformation": "徒歩の進行状況",
     "navigationArrival": "目的地付近で現在地を複数回確認して到着を判定しました。",
-    "noAutomaticReroute": "ルートは自動更新されません。ナビを終了するとルート全体のプレビューに戻ります。"
+    "noAutomaticReroute": "ルートは自動更新されません。ナビを終了するとルート全体のプレビューに戻ります。",
+    "driving": "車",
+    "followWalk": "ARgalaで徒歩経路を確認",
+    "previewMode": "選択した移動手段でプレビュー",
+    "displayedMode": "表示中の経路: {{mode}}",
+    "estimatedDriving": "車の推定経路",
+    "drivingCaution": "運転前に道路の通行可否、標識、現在の状況をご確認ください。",
+    "mapsFailed": "Google Mapsを開けませんでした。経路プレビューは引き続き利用できます。もう一度お試しください。"
   },
   "destinations": {
     "title": "おすすめの目的地",
@@ -334,5 +341,19 @@
     "dismiss": "後で",
     "teaser": "到着を確認したら、ARでこの目的地の物語を探索しましょう。",
     "selectDestination": "ARを利用するには、おすすめの目的地を選択してください。"
+  },
+  "search": {
+    "query": "場所を検索",
+    "placeholder": "場所や住所を検索",
+    "noArea": "場所を検索して探索するエリアを選択してください。現在地は不要です。",
+    "thisArea": "このエリアを検索",
+    "areaExtent": "このエリアを検索 · {{meters}}m以内",
+    "categories": {
+      "all": "すべて",
+      "attractions": "観光スポット",
+      "restaurants": "飲食店",
+      "hotels": "ホテル",
+      "shopping": "買い物"
+    }
   }
 }

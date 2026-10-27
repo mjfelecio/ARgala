@@ -24,7 +24,7 @@ vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language:
 vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ ...controls.location, sampleReceivedAt: Date.now(), retry: controls.retry }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('@/features/places/service', () => ({ placesService: { details: vi.fn(), nearby: vi.fn() } }));
-vi.mock('./service', () => ({ routeService: { walking: vi.fn() } }));
+vi.mock('./service', () => ({ routeService: { walking: vi.fn(), preview: vi.fn() } }));
 vi.mock('react-native-maps', async () => {
   const { createElement, forwardRef, useImperativeHandle } = await import('react');
   return { default: forwardRef((props: Record<string, unknown>, ref) => { useImperativeHandle(ref, () => ({ fitToCoordinates: controls.fit, animateToRegion: controls.animate })); return createElement('map', props); }),
@@ -117,7 +117,7 @@ it('starts explicitly, trims actual GPS progress locally, keeps Fit stable and r
   await mount(); await layout(); await act(async () => tree!.root.findByType('map').props.onMapReady());
   const original = tree!.root.findByType('polyline').props.coordinates;
   const fitCount = controls.fit.mock.calls.length;
-  await press('directions.startNavigation');
+  await press('directions.followWalk');
   expect(output()).toContain(translations.t('directions.navigationUncertainShort'));
   for (const longitude of [-120.19995,-120.1998]) {
     vi.mocked(Date.now).mockReturnValue(Date.now()+6000);
@@ -146,8 +146,8 @@ it.each(['en','ko','ja'] as const)('renders real %s navigation quality, expiry, 
   const target={...place,coordinates:{latitude:38.5,longitude:-120.198}};
   const navigationRoute={...route,encodedPolyline:'_p~iF~ps|U?gE?gE'};
   controls.token=createRoutePreviewIntent(client,target,{origin,destination:target.coordinates,route:navigationRoute},'map',language);
-  controls.location.accuracy=40;await mount();expect(button('directions.startNavigation')).toBeUndefined();expect(output()).toContain(translations.t('directions.navigationNeedsLocation'));
-  controls.location.accuracy=5;await update();await press('directions.startNavigation');
+  controls.location.accuracy=40;await mount();expect(button('directions.followWalk')).toBeUndefined();expect(output()).toContain(translations.t('directions.navigationNeedsLocation'));
+  controls.location.accuracy=5;await update();await press('directions.followWalk');
   for(const [north,seconds] of [[.00015,10],[.0003,10],[.00045,10],[.00048,3]]){
     vi.mocked(Date.now).mockReturnValue(Date.now()+seconds*1000);
     Object.assign(controls.location,{position:{latitude:38.5+north,longitude:-120.2},positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();
@@ -155,7 +155,7 @@ it.each(['en','ko','ja'] as const)('renders real %s navigation quality, expiry, 
   expect(output()).toContain(translations.t('directions.navigationOffRouteShort'));await expand();expect(output()).toContain(translations.t('directions.navigationOffRouteDetail'));
   expect(output()).not.toContain('directions.');await press('directions.stopNavigation');
   vi.mocked(Date.now).mockReturnValue(Date.now()+120000);
-  Object.assign(controls.location,{position:{latitude:38.5,longitude:-120.1982},positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();await press('directions.startNavigation');
+  Object.assign(controls.location,{position:{latitude:38.5,longitude:-120.1982},positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();await press('directions.followWalk');
   for(const longitude of [-120.19812,-120.19805]){
     vi.mocked(Date.now).mockReturnValue(Date.now()+3000);
     Object.assign(controls.location,{position:{latitude:38.5,longitude},positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();
@@ -445,4 +445,51 @@ it('uses route-owned continuous samples for featured arrival without another rou
  controls.focused = false; await update();
  expect(output()).not.toContain(translations.t('arrival.eligible'));
  expect(routeService.walking).not.toHaveBeenCalled();
+});
+
+it('opens Google Maps with the displayed mode and captured destination without a new provider request', async () => {
+ handoff(); await mount();
+ await press('directions.startNavigation');
+ const url = new URL(nativeUi.openURL.mock.calls[0][0]);
+ expect(url.searchParams.get('travelmode')).toBe('walking');
+ expect(url.searchParams.get('destination')).toBe(`${place.coordinates.latitude},${place.coordinates.longitude}`);
+ expect(url.searchParams.has('origin')).toBe(false);
+ expect(routeService.walking).not.toHaveBeenCalled(); expect(routeService.preview).not.toHaveBeenCalled();
+});
+it('keeps travel mode as a draft and calculates driving only after explicit preview', async () => {
+ handoff(); await mount();
+ await press('directions.driving');
+ expect(routeService.preview).not.toHaveBeenCalled(); expect(router.setParams).not.toHaveBeenCalled();
+ await press('directions.previewMode');
+ const params = vi.mocked(router.setParams).mock.calls.at(-1)![0] as { token: string };
+ controls.token = params.token;
+ vi.mocked(routeService.preview).mockResolvedValue({ ...route, mode: 'driving' });
+ await update();
+ expect(routeService.preview).toHaveBeenCalledOnce();
+ expect(routeService.preview).toHaveBeenCalledWith(expect.objectContaining({ mode: 'driving' }));
+ expect(button('directions.followWalk')).toBeUndefined();
+ await press('directions.startNavigation');
+ expect(new URL(nativeUi.openURL.mock.calls.at(-1)![0]).searchParams.get('travelmode')).toBe('driving');
+});
+it('shows localized linking recovery while retaining the route preview', async () => {
+ handoff(); await mount(); nativeUi.openURL.mockRejectedValue(new Error('private native detail'));
+ await press('directions.startNavigation');
+ expect(output()).toContain(translations.t('directions.mapsFailed')); expect(output()).not.toContain('private native detail');
+ expect(tree!.root.findAllByType('polyline')).toHaveLength(1);
+ for (const language of ['ko', 'ja']) { await act(async () => { await translations.changeLanguage(language); }); expect(output()).toContain(translations.t('directions.mapsFailed')); }
+});
+
+it('permits external destination navigation without inventing an in-app GPS origin', async () => {
+ handoff(); controls.location.position = null; controls.location.status = 'denied'; await mount();
+ expect(button('directions.followWalk')).toBeUndefined();
+ await press('directions.startNavigation');
+ expect(new URL(nativeUi.openURL.mock.calls[0][0]).searchParams.has('origin')).toBe(false);
+ expect(routeService.walking).not.toHaveBeenCalled(); expect(routeService.preview).not.toHaveBeenCalled();
+});
+it('coalesces rapid external navigation presses until native linking settles', async () => {
+ handoff(); await mount(); const deferred = Promise.withResolvers<void>(); nativeUi.openURL.mockReturnValue(deferred.promise);
+ const action = button('directions.startNavigation')!;
+ await act(async () => { action.props.onPress(); action.props.onPress(); });
+ expect(nativeUi.openURL).toHaveBeenCalledOnce();
+ await act(async () => deferred.resolve());
 });
