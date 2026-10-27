@@ -13,3 +13,11 @@ import_map = "./functions/deno.json"
 [functions.walking-route]
 verify_jwt = false
 import_map = "./functions/deno.json"
+
+[functions.route-preview]
+verify_jwt = false
+import_map = "./functions/deno.json"
+
+[functions.places-search]
+verify_jwt = false
+import_map = "./functions/deno.json"

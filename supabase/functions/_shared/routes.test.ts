@@ -16,3 +16,19 @@ it('reports unavailable routes and rejects invalid coordinates and upstream payl
   await expect(computeWalkingRoute({ ...request, origin: { latitude: 99, longitude: 0 } }, { key: 'test', fetcher: async () => { throw new Error('must not call'); } })).rejects.toThrow();
   await expect(computeWalkingRoute(request, { key: 'test', fetcher: async () => Response.json({ routes: [{ duration: 'bad' }] }) })).rejects.toThrow('invalid');
 });
+
+it.each(['walking', 'driving'] as const)('previews explicit %s mode with exact server travel mapping', async mode => {
+  const { computeRoutePreview } = await import('./routes.ts');
+  let submitted: Record<string, unknown> = {};
+  const result = await computeRoutePreview({ origin: { latitude: 0, longitude: 0 }, destination: { latitude: 0.1, longitude: 0.1 }, mode }, {
+    key: 'test', fetcher: async (_url, init) => { submitted = JSON.parse(String(init?.body)); return Response.json({ routes: [{ distanceMeters: 1, duration: '2s', polyline: { encodedPolyline: '??AA' } }] }); },
+  });
+  expect(submitted.travelMode).toBe(mode === 'walking' ? 'WALK' : 'DRIVE');
+  expect(result.mode).toBe(mode);
+});
+it('rejects unknown travel modes before invoking Google', async () => {
+  const { computeRoutePreview } = await import('./routes.ts');
+  let calls = 0;
+  await expect(computeRoutePreview({ origin: { latitude: 0, longitude: 0 }, destination: { latitude: 0.1, longitude: 0.1 }, mode: 'flying' }, { key: 'test', fetcher: async () => { calls++; return Response.json({}); } })).rejects.toThrow();
+  expect(calls).toBe(0);
+});
