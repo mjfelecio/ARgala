@@ -35,7 +35,7 @@ vi.mock('react-native-maps', async () => {
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ activationRadiusMeters: 100, language: controls.language }) }));
 vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ position: controls.hasLocation ? controls.position : null, accuracy: controls.accuracy, status: controls.locationStatus, retry: vi.fn() }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
-vi.mock('@/features/places/service', () => ({ placesService: { nearby: vi.fn(), details: vi.fn() } }));
+vi.mock('@/features/places/service', () => ({ placesService: { search: vi.fn(), nearby: vi.fn(), details: vi.fn() } }));
 vi.mock('@/features/directions/service', () => ({ routeService: { walking: vi.fn() } }));
 vi.mock('./attributions', async () => {
   const { createElement } = await import('react');
@@ -302,8 +302,8 @@ it('offers an explicit details request when the handoff has expired', async () =
 it('offers floating Home controls and spends nothing on mount, pan, locale, navigation or invalidation', async () => {
  await act(async () => { tree = create(renderMap()); });
  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
- expect(tree!.root.findAllByType('button').filter(b => b.props.accessibilityRole === 'button')).toHaveLength(4);
- // Native region changes have no paid-refresh handler.
+ expect(tree!.root.findAllByType('button').map(b => b.props.accessibilityLabel)).toEqual(expect.arrayContaining([translations.t('map.search'), translations.t('destinations.title'), translations.t('search.categories.restaurants')]));
+ // Native region changes update draft geometry only.
  await act(async () => { tree!.root.findByType('map').props.onRegionChangeComplete?.({ latitude: 10, longitude: 20 }); });
  await press('destinations.title'); expect(router.navigate).toHaveBeenLastCalledWith('/destinations');
  expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('map.settings'))).toBe(false);
@@ -578,4 +578,21 @@ it.each(['initial', 'handoff'] as const)('keeps exact-associated provider %s sel
  expect(sheet.props.onViewDetails).toBeUndefined();
  if (original) expect(tree!.root.findByType('map')).toBe(original);
  expect(placesService.details).not.toHaveBeenCalled();
+});
+it('submits text/category/settled area only on explicit Search This Area and never lifecycle refreshes', async () => {
+ vi.mocked(placesService.search).mockResolvedValue([{ ...destination, source: 'discovery' }]);
+ await act(async () => { tree = create(renderMap()); });
+ await act(async () => tree!.root.findByType('map').props.onMapReady());
+ await act(async () => tree!.root.findByType('map').props.onRegionChangeComplete({ latitude: 1, longitude: 2, latitudeDelta: 0.1, longitudeDelta: 0.1 }));
+ await act(async () => tree!.root.findByType('input').props.onChangeText('dinner'));
+ await press('search.categories.restaurants');
+ expect(placesService.search).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+ await press('search.thisArea');
+ expect(placesService.search).toHaveBeenCalledWith({ query: 'dinner', category: 'restaurants', language: 'en', area: { center: { latitude: 1, longitude: 2 }, radiusMeters: 5000 } });
+ await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ await act(async () => tree!.root.findByType('map').props.onPoiClick({ nativeEvent: { placeId: destination.providerId } }));
+ expect(placesService.details).not.toHaveBeenCalled();
+ controls.focused = false; await act(async () => tree!.update(renderMap())); controls.focused = true;
+ await act(async () => { tree!.update(renderMap()); void client.invalidateQueries({ queryKey: ['places'] }); });
+ expect(placesService.search).toHaveBeenCalledOnce();
 });
