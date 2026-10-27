@@ -21,6 +21,8 @@ npx supabase secrets set --env-file /absolute/path/to/ignored-edge-secrets.env
 npx supabase functions deploy places-nearby
 npx supabase functions deploy place-details
 npx supabase functions deploy walking-route
+npx supabase functions deploy places-search
+npx supabase functions deploy route-preview
 ```
 
 Copy `supabase/functions/.env.example` to the ignored `supabase/functions/.env` for local secrets if desired. Pass that path explicitly to CLI commands; never commit its values. The Edge secrets file needs `GOOGLE_PLACES_API_KEY` and `GOOGLE_ROUTES_API_KEY`. Restrict each key to its corresponding API. Hosted Supabase provides `SUPABASE_URL` and named JSON dictionaries `SUPABASE_PUBLISHABLE_KEYS` / `SUPABASE_SECRET_KEYS`; the handlers prefer each dictionary’s `default` key. Single-key local variables (`SUPABASE_PUBLISHABLE_KEY` / `SUPABASE_SECRET_KEY`) and legacy injected anon/service-role keys remain supported as fallbacks. Never copy a secret/service-role key to the mobile environment. Set Google quotas and billing alerts appropriate to your project; per-user application limits do not replace project quotas.
@@ -40,3 +42,14 @@ References: [Nearby Search (New)](https://developers.google.com/maps/documentati
 Walking routes use Google Routes computeRoutes with WALK mode and explicit distance/duration/polyline/warning fields. Draw returned paths on the Google map and retain the walking caution and provider warnings. A route is a snapshot from the supplied origin; there is no turn-by-turn guidance, continuous rerouting or guarantee of pedestrian access.
 
 Key injection reference: [Supabase Edge environment variables](https://supabase.com/docs/guides/functions/secrets). The admin secret has service-role privileges for the private limiter RPC; caller JWTs are validated with a low-privilege publishable client.
+
+## Selected-destination slice endpoints (2026-10-27)
+
+`places-search` supports explicit bounded free-text/category/area search;
+`route-preview` supports explicit WALK/DRIVE snapshots. Both use the same bearer
+validation, atomic limiter, payload/result limits and provider boundaries as the
+existing handlers. The mobile client requires both deployed functions. Deployment
+and unauthorized-request evidence is recorded in validation.md; that evidence does
+not establish authenticated Google calls or route accuracy. The existing
+`walking-route` endpoint remains available for older clients. Global text-search
+results retain the Google Maps logo and returned provider attributions.

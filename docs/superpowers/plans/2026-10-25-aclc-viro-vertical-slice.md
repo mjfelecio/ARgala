@@ -280,3 +280,18 @@ AR-incapable devices in the initial slice receive honest support guidance and re
 ## Review checkpoint
 
 The owner approved M1 with the two lifecycle clarifications above. Implement and verify M1 in isolation, then request approval for its specific development APK build. M1 must pass its physical gate before downstream scene implementation. Later milestones remain planned, not authorization to bypass that gate.
+
+## Execution status — 2026-10-27
+
+M1/M2 prototype observations are recorded in validation.md; the owner reports the
+ring works well. M3 remains a draft dependency PR, with its full lifecycle physical
+checklist pending. M4/M5 selected arrival and native handoff, M6 explicit discovery
+and driving/Maps handoff, and M7 development-simulation/release guards are now
+implemented with automated contract evidence. This updates the historical
+implementation/input status above; it does not pass the remaining physical gates.
+Owner-approved Maps place center and approximate entrance are recorded separately
+from the still-trial radius, missing approved content/media/provider association.
+Both new Edge handlers are deployed; unauthorized requests were rejected, while
+authenticated paid-provider integration remains unverified. The selected-flow
+checklist separates off-site simulation from real ACLC field calibration. Later
+blueprint phases remain deferred.

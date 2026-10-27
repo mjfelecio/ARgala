@@ -1247,3 +1247,46 @@ Owner reports the ACLC ring prototype works well. This is not a blanket lifecycl
 - Final `npm run check`: **931 tests /84 files**, strict TypeScript, zero-warning lint, all passing. `npm run check:edge` passed all five handlers; `npm run lint:edge` passed13 files after correcting the async wrapper's await. `git diff --check` passed. M6 Android export remains pending.
 - **Not deployed or tested live:** both new Edge endpoints. No provider request, external device Maps launch, native build, APK installation, ADB action, AR tracking or real GPS verification ran. Deterministic provider/native mocks establish contracts, not live credentials, route accuracy or field arrival.
 - Research draft: `docs/content/aclc-research-draft.md` contains sourced EN/JA/KO text, uncertainty, a candidate provider ID and no licensed campus image. It is unapproved and not in the production manifest.
+
+## 2026-10-27 — selected-destination integration and deployed endpoint auth
+
+This entry supersedes the earlier same-day prepared/unwired/not-deployed status.
+The owner restored Supabase access; configured application host and linked project
+matched `dhjlcvviiscuuzjtzxor`. CLI2.122.0 deployed only `places-search` and
+`route-preview` using `--use-api`, both successfully. Existing endpoints, secrets,
+DB schema and limiter were unchanged. Live POSTs with missing and bogus bearer
+tokens returned401/`UNAUTHORIZED` on each new endpoint (four rejection checks).
+No authenticated paid Google request was made; credentials/provider success,
+route accuracy and Android Google Maps handoff remain unverified.
+
+Principal-scoped admission now connects retained featured-map/Directions selection
+to the actual native ring route. Source leases, single-use transfer, pending
+first-mount/first-ready freshness and selection/auth invalidation are covered.
+Only established tracking-ready sessions stop initial-entry GPS and receive the
+bounded live recovery exemption. Approved text renders directly with per-field
+locale fallback. Draft research and geographic simulation require development
+runtime guards, remain labeled, and never feed synthetic coordinates into real
+arrival. The ACLC draft is scoped to `pilot-aclc`; published factual content,
+licensed media and exact provider association remain unapproved.
+
+Independent read-only review of `47a6f2f..74f5696` found two Important issues:
+expired logical ownership offered an unrecoverable Retry, and other destinations
+could load ACLC draft text. One fix pass makes expiry terminal with Back to
+Explore/new handoff and guards the draft store, UI and lazy loader by destination.
+Seven focused regressions were observed failing before fixes. Older expiry tests
+were updated to require a fresh logical owner instead of reviving the expired one.
+No second independent review is claimed.
+
+Final `npm run check` passed **970 tests /90 files**, strict TypeScript and
+zero-warning lint. `npm run export:android` passed with an8.1MB Hermes bundle
+`entry-68274ca1d5ba5b229e40d305553f3a1a.hbc`. Edge typecheck passed all five handlers;
+Edge lint passed13 files; `git diff --check` passed. No dependencies,
+native configuration or recognizer changed. No ADB, APK build/install, Metro
+startup, physical AR/GPS test, on-site calibration or device Maps launch ran.
+Automated native/network mocks and an export do not establish those outcomes.
+
+The owner reports the existing ring prototype works well. The integrated selected
+flow and full M3 lifecycle still require the separate
+[selected-flow checklist](aclc-selected-flow-device-testing.md); simulation is not
+on-site arrival evidence. Later Passport/guest sync/reminder/offline/fallback phases
+remain deferred. Current changes stack on unmerged draft M3 PR27.

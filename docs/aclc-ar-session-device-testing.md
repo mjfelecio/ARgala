@@ -1,6 +1,6 @@
 # ACLC M3 lifecycle verification
 
-Status: implementation prepared for offline review; **M3 physical verification NOT RUN**. The owner stopped ADB verification and deferred it to2026-10-26. Do not start device commands until the owner resumes verification. The camera was released during the previous M2 trial; the task Metro server is stopped. No M3 APK was built or installed.
+Status as of 2026-10-27: owner reports the ring prototype works well; this is not a complete lifecycle/GPS pass. Implementation prepared for offline review; **M3 physical verification NOT RUN**. The owner stopped ADB verification and deferred it to2026-10-26. Do not start device commands until the owner resumes verification. The camera was released during the previous M2 trial; the task Metro server is stopped. No M3 APK was built or installed.
 
 ## Scope and entry
 
@@ -8,7 +8,7 @@ The existing approved Viro3.0.3 development APK can load this JavaScript through
 
 Profile → ACLC ring prototype remains behind both `__DEV__` and `EXPO_PUBLIC_VIRO_SPIKE=1`. The actual ring route now uses the M3 session owner. The original Viro feasibility square retains its explicit-retry M1 startup behavior. Only labeled development samples are available; this route is not production destination admission or a GPS simulation result.
 
-A new owner is keyed by authenticated principal and has destination/admission/principal/provenance identity. The development admission ID is a component-owned correlation value, not a verified capability. M4 must supply the actual selected-destination single-use entry and fresh foreground eligibility validator. URLs and cache presence are not admission.
+A new owner is keyed by authenticated principal and has destination/admission/principal/provenance identity. The development admission ID is a component-owned correlation value, not a verified capability. The selected-destination integration now supplies a principal-scoped single-use entry and fresh foreground eligibility validator; see [its separate checklist](aclc-selected-flow-device-testing.md). URLs and cache presence are not admission.
 
 ## Expected lifecycle
 
