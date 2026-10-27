@@ -41,3 +41,9 @@ it('retires a captured validation callback when its foreground owner unmounts', 
   await act(async () => tree!.unmount()); tree = undefined;
   expect(validate()).toBe(false);
 });
+it('retires captured eligibility when selection changes without unmounting its owner', async () => {
+  await ready(); const validate = current.canEnter;
+  await act(async () => tree!.update(<Probe selected={null} input={sample(16000)} />));
+  expect(current.canEnter()).toBe(false);
+  expect(validate()).toBe(false);
+});

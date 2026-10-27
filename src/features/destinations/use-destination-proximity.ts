@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { activationPolicy } from './ar-content';
 import { DestinationProximity, type ArrivalInput } from './proximity';
 import type { Destination } from './catalog';
@@ -13,6 +13,8 @@ export function useDestinationProximity(destination: Destination | null, input: 
     [id, policy?.point.latitude, policy?.point.longitude, policy?.radiusMeters]);
   const latest = useRef(input);
   const alive = useRef(false);
+  const currentModel = useRef(model);
+  useLayoutEffect(() => { currentModel.current = model; latest.current = input; });
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const [result, setResult] = useState(() => model?.snapshot() ?? null);
   const { running, watcherStatus, sample } = input;
@@ -24,7 +26,7 @@ export function useDestinationProximity(destination: Destination | null, input: 
     const timer = setInterval(update, 1000);
     return () => clearInterval(timer);
   }, [model, running, watcherStatus, sample]);
-  const canEnter = useCallback(() => alive.current && !!model?.update(latest.current, Date.now()).eligible, [model]);
+  const canEnter = useCallback(() => alive.current && currentModel.current === model && !!model?.update(latest.current, Date.now()).eligible, [model]);
   const dismiss = useCallback(() => { model?.dismiss(); setResult(model?.snapshot() ?? null); }, [model]);
   // Old selection presentation cannot survive the render before the ownership effect.
   return { state: result?.destinationId === id ? result : model?.snapshot() ?? null, canEnter, dismiss };
