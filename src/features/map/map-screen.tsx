@@ -70,7 +70,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
   const queryClient = useQueryClient();
   const params = useLocalSearchParams<{ placeId?: string; featuredDestinationId?: string }>();
   const parsedId = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
-  const incomingFeatured = getDestination(params.featuredDestinationId);
+  const incomingFeatured = getDestination(params.featuredDestinationId) ?? (parsedId.success ? matchedFeaturedDestination({ provider: 'google', providerId: parsedId.data.providerId }) : null);
   const [featuredId, setFeaturedId] = useState(incomingFeatured?.id ?? null);
   const featured = getDestination(featuredId);
   const incomingId = !incomingFeatured && parsedId.success ? parsedId.data.providerId : null;

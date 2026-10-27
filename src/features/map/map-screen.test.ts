@@ -562,3 +562,20 @@ it('allows a known featured selection after an initial GPS-denied screen', async
   await act(async () => tree!.update(renderMap()));
   expect(tree!.root.findAllByType('map')).toHaveLength(1);
 });
+it.each(['initial', 'handoff'] as const)('keeps exact-associated provider %s selection minimal without losing the map', async entry => {
+ const catalog = await import('@/features/destinations/catalog'); const selection = await import('@/features/places/selection');
+ const pilot = catalog.getDestination('pilot-aclc')!;
+ const approved = catalog.destinationSchema.parse({ ...pilot, ar: { ...pilot.ar, providerAssociation: { providerId: destination.providerId, approvalReference: 'Synthetic test association' } } });
+ vi.spyOn(catalog, 'listFeaturedDestinations').mockReturnValue([approved]);
+ vi.spyOn(catalog, 'getDestination').mockImplementation(id => id === 'pilot-aclc' ? approved : null);
+ selection.setPlaceSelection(client, { ...destination, source: 'discovery', description: 'Rich provider copy must stay hidden' }, 'en');
+ let original: unknown;
+ if (entry === 'handoff') { await act(async () => { tree = create(renderMap()); }); original = tree!.root.findByType('map'); }
+ controls.params = { placeId: destination.providerId };
+ await act(async () => { if (tree) tree.update(renderMap()); else tree = create(renderMap()); });
+ const { HomePlaceSheet } = await import('./place-sheet'); const sheet = tree!.root.findByType(HomePlaceSheet);
+ expect(sheet.props.selectedPlace?.provider).toBe('curated'); expect(sheet.props.selectedPlace).not.toHaveProperty('description');
+ expect(sheet.props.onViewDetails).toBeUndefined();
+ if (original) expect(tree!.root.findByType('map')).toBe(original);
+ expect(placesService.details).not.toHaveBeenCalled();
+});
