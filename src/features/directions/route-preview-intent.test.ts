@@ -42,3 +42,14 @@ it.each(['pending','failed','expired','different-provider','different-destinatio
  c.setQueryData(['route-preview-session','old'],{status:['pending','failed'].includes(kind)?kind:'success',language:kind==='different-language'?'ja':'en',intent:{place:target,createdAt:Date.now()-(kind==='expired'?120001:0),source:'ar'},result});
  expect(claimRoutePreviewIntent(c,createRoutePreviewIntent(c,place))?.existing).toBeUndefined();
 });
+
+it('carries explicit featured context only for an exact approved curated entrance', async () => {
+ const { getDestination } = await import('@/features/destinations/catalog');
+ const { destinationToRoutePlace } = await import('@/features/destinations/routing');
+ const target = destinationToRoutePlace(getDestination('pilot-aclc')!)!;
+ const c = client();
+ expect(claimRoutePreviewIntent(c, createRoutePreviewIntent(c, target, undefined, 'details', 'en', 'pilot-aclc'))?.featuredDestinationId).toBe('pilot-aclc');
+ expect(claimRoutePreviewIntent(c, createRoutePreviewIntent(c, target))?.featuredDestinationId).toBeUndefined();
+ expect(claimRoutePreviewIntent(c, createRoutePreviewIntent(c, place, undefined, 'map', 'en', 'pilot-aclc'))?.featuredDestinationId).toBeUndefined();
+ expect(claimRoutePreviewIntent(c, createRoutePreviewIntent(c, { ...target, coordinates: { latitude: 0, longitude: 0 } }, undefined, 'map', 'en', 'pilot-aclc'))?.featuredDestinationId).toBeUndefined();
+});

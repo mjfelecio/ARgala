@@ -29,7 +29,7 @@ export default function DestinationScreen() {
   function directions() {
     if (!routePlace || !active || !focused || navigating.current) return;
     navigating.current = true;
-    const token = createRoutePreviewIntent(client, routePlace, undefined, 'details', language);
+    const token = createRoutePreviewIntent(client, routePlace, undefined, 'details', language, destination?.id);
     router.push({ pathname: '/directions', params: { token } });
   }
   const overview = localizedContent({ en: destination?.copy?.en?.overview, ko: destination?.copy?.ko?.overview, ja: destination?.copy?.ja?.overview }, language);

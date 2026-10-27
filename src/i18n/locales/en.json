@@ -360,5 +360,18 @@
     "reveal": "Look around as the sample panels appear. You can skip this introduction.",
     "restoring": "Restoring your reading progress. Move gently to reacquire tracking.",
     "retryTracking": "Retry tracking"
+  },
+  "arrival": {
+    "unavailable": "AR arrival is not available for this destination yet.",
+    "uncertain": "Waiting for fresh, accurate location updates.",
+    "distant": "Select this destination and approach it to unlock AR.",
+    "approaching": "You are approaching the selected destination.",
+    "near": "You are near the selected destination. Keep location enabled.",
+    "checking": "Checking stable arrival…",
+    "eligible": "Arrival verified for the selected destination.",
+    "invitation": "Explore this place through its AR information ring.",
+    "contentPending": "Arrival is verified. Approved AR content is still being prepared.",
+    "launch": "Launch AR",
+    "dismiss": "Not now"
   }
 }

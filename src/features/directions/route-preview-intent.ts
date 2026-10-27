@@ -4,9 +4,12 @@ import type { Coordinate } from '@/features/location/geo';
 import type { Place } from '@/features/places/service';
 import type { Preferences } from '@/features/settings/preferences';
 import type { WalkingRoute } from './service';
+import { getDestination, type FeaturedDestinationId } from '@/features/destinations/catalog';
+import { destinationToRoutePlace } from '@/features/destinations/routing';
 
 export type RoutePreviewResult = { origin: Coordinate; destination: Coordinate; route: WalkingRoute };
 export type RoutePreviewIntent = {
+  featuredDestinationId?: FeaturedDestinationId;
   place: Place; language: Preferences['language']; source: 'details' | 'map' | 'ar'; createdAt: number; existing?: RoutePreviewResult;
 };
 export const routePreviewLifetimeMs = AR.nearbyReuseMs;
@@ -14,13 +17,18 @@ const prefix = ['route-preview-intent'] as const;
 let sequence = 0;
 
 /** Local navigation handle, never a credential. A new handoff retires an older target. */
-export function createRoutePreviewIntent(client: QueryClient, place: Place, existing?: RoutePreviewResult, source: RoutePreviewIntent['source'] = existing ? 'map' : 'details', language: Preferences['language'] = 'en'): string {
+export function createRoutePreviewIntent(client: QueryClient, place: Place, existing?: RoutePreviewResult, source: RoutePreviewIntent['source'] = existing ? 'map' : 'details', language: Preferences['language'] = 'en', featuredDestinationId?: FeaturedDestinationId): string {
+  const featured = featuredDestinationId ? getDestination(featuredDestinationId) : null;
+  const entrance = featured ? destinationToRoutePlace(featured) : null;
+  const verifiedContext = entrance && place.provider === 'curated' && place.source === 'curated' &&
+    place.id === entrance.id && place.providerId === entrance.providerId &&
+    place.coordinates.latitude === entrance.coordinates.latitude && place.coordinates.longitude === entrance.coordinates.longitude;
   existing ??= completedPreview(client, place, language);
   client.removeQueries({ queryKey: prefix });
   client.setQueryDefaults(prefix, { gcTime: routePreviewLifetimeMs });
   const token = `${Date.now().toString(36)}-${(++sequence).toString(36)}`;
   client.setQueryData<RoutePreviewIntent>([...prefix, token], {
-    place, source, language, createdAt: Date.now(), ...(existing ? { existing } : {}),
+    place, source, language, ...(verifiedContext ? { featuredDestinationId } : {}), createdAt: Date.now(), ...(existing ? { existing } : {}),
   });
   return token;
 }

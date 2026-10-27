@@ -1,6 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useIsFocused } from 'expo-router';
+import { getDestination } from '@/features/destinations/catalog';
+import { useDestinationProximity } from '@/features/destinations/use-destination-proximity';
 import { AR } from '@/config/limits';
 import { useDeviceLocation } from '@/features/location/use-device-location';
 import { isCoordinate, type Coordinate } from '@/features/location/geo';
@@ -37,13 +39,14 @@ export function useRoutePreview(token: unknown, configured: boolean) {
   // sessions need this screen's unexpired claim, or an explicit retry first.
   const sensorsEnabled = configured && !!data && (data.status === 'success' || data.status === 'pending' ||
     (data.status === 'waiting' && data.owner === owner && !clockExpired));
-  const location = useDeviceLocation({ enabled: sensorsEnabled });
+  const location = useDeviceLocation({ enabled: sensorsEnabled, distanceIntervalMeters: data?.intent.featuredDestinationId ? 0 : undefined });
   const sampleNow = Math.max(now, location.sampleReceivedAt ?? now);
   const expired = !!data && sampleNow - data.intent.createdAt >= routePreviewLifetimeMs;
   // A sample can retire presentation/authority before the next one-second
   // clock tick retires the waiting session's native subscription.
   const locationEnabled = sensorsEnabled && (data?.status !== 'waiting' || !expired);
   const tracking = running && locationEnabled;
+  const arrival = useDestinationProximity(getDestination(data?.intent.featuredDestinationId), { running: tracking, watcherStatus: location.watcherStatus, sample: location.watcherSample ?? null });
   const [ownership, setOwnership] = useState(() => ({ running: tracking, since: Date.now() }));
   useEffect(() => {
     let alive = true;
@@ -103,7 +106,7 @@ export function useRoutePreview(token: unknown, configured: boolean) {
   function retry() {
     const current = client.getQueryData<Session>(key);
     if (!running || !configured || !current || current.status === 'pending' || current.status === 'success' || (current.status === 'waiting' && current.owner === owner && authorized.current && !expired)) return;
-    const nextToken = createRoutePreviewIntent(client, current.intent.place, undefined, current.intent.source, language);
+    const nextToken = createRoutePreviewIntent(client, current.intent.place, undefined, current.intent.source, language, current.intent.featuredDestinationId);
     const next = claimRoutePreviewIntent(client, nextToken);
     if (!next) return;
     if (next.existing) {
@@ -120,6 +123,6 @@ export function useRoutePreview(token: unknown, configured: boolean) {
     authorized.current = true;
     client.setQueryData<Session>(key, { owner, attempt: nextToken, intent: next, status: 'waiting' });
   }
-  return { data, location, locationEnabled, usable, running, expired, now: sampleNow, result: data?.result,
+  return { data, location, arrival, locationEnabled, usable, running, expired, now: sampleNow, result: data?.result,
     needsRetry: data?.status === 'failed' || (data?.status === 'waiting' && (data.owner !== owner || expired)), retry };
 }
