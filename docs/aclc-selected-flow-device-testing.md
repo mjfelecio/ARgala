@@ -18,7 +18,7 @@ never commit credentials. LAN requires phone/computer connectivity. Do not start
 ADB merely to use this checklist.
 
 Record device/OS, APK identity, source commit, language, conditions and actual
-outcomes. Every item below is currently NOT RUN for the integrated flow.
+outcomes. The checklist below defines the full scope; the partial 2026-10-27 results are recorded afterward.
 
 1. Open Featured Destinations → ACLC → map. Check remote browsing without GPS,
    selected marker/minimal sheet, pending content explanation, and separate
@@ -59,3 +59,28 @@ Approved factual content, licensed media and exact Google Place ID association
 remain separate inputs. Development research is editable in
 [the research draft](content/aclc-research-draft.md); it is not production approval.
 Passport, guest sync, reminders and broader offline/fallback phases remain deferred.
+
+## Partial off-site results — 2026-10-27
+
+Galaxy A53 SM-A536E, Android16/API36, source c09ce99, existing APK; see the
+artifact hash and setup observations in validation.md. No new APK/native change.
+
+- Observed: signed-in map, preserved catalog plus ACLC pilot, ACLC map selection,
+  explicit development simulation → selected native route, correct ACLC title and
+  simulated-arrival disclaimer, real camera and Overview tile.
+- Owner confirmed: ring opens and draft text is readable using held interaction.
+- Owner confirmed: expanded panel on page3/3 restores after background/return.
+  First attempt was inconclusive because the panel had been closed beforehand;
+  the second attempt started with the expanded panel on page3/3.
+- Android camera-service snapshot after two seconds in the background: no active
+  clients. Return reacquired the camera; logical page restoration was observed.
+- Pending: full EN/JA/KO/size/control coverage, permission/install interruptions,
+  five-minute expiration, authenticated Google requests/Maps handoff and actual
+  ACLC GPS/entrance/radius field calibration. This off-site simulation verifies
+  none of the geographic admission criteria.
+
+Owner also confirmed same native-scene tracking loss → turn → recovery retains
+original orientation and expanded page3/3. Exit returned to the retained selected
+ACLC map, and Android reported no active camera clients afterward. Battery ended
+35%, USB charging,37.0°C. These observations pass those brief scenarios only;
+full field/lifecycle/locale acceptance remains pending.

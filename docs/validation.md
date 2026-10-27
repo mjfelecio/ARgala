@@ -1290,3 +1290,45 @@ flow and full M3 lifecycle still require the separate
 [selected-flow checklist](aclc-selected-flow-device-testing.md); simulation is not
 on-site arrival evidence. Later Passport/guest sync/reminder/offline/fallback phases
 remain deferred. Current changes stack on unmerged draft M3 PR27.
+
+## 2026-10-27 — integrated ACLC off-site device trial
+
+Owner explicitly resumed ADB testing. Source `c09ce99`, Galaxy A53 SM-A536E,
+Android16/API36; existing installed version1.0.0/code1 APK SHA256
+`0b756a3f883042a70c70d44d28d44fffad4a726828867e881a1d0a5daa5dff95`.
+No APK build, native correction or recognizer patch. Battery36%, USB charging,
+36.5°C at start. Metro ran with the development opt-in over USB reverse8081.
+The first request preceded server readiness; USB transport later reconnected and
+the development runtime remained blank. Re-establishing reverse and restarting
+only this app loaded the current bundle; no application-code change was made.
+
+Observed the existing signed-in map render, Featured Destinations including
+preserved D01–D09 plus pilot-aclc, ACLC selection on the retained map, and the
+explicit Simulate arrival action. The actual selected route displayed ACLC identity,
+simulated-arrival disclaimer, live camera and Overview tile. Owner answered
+“Ring opens and text is readable” after opening a tile with the accepted held
+finger-pad technique. This is a partial integrated off-site ring/content pass,
+not on-site geographic admission or complete locale/control coverage.
+
+PR28's GitHub validate check passed in2m33s (run40488161834). That automated result
+is separate from device observations. Authenticated paid-provider calls, Google
+Maps launch, actual arrival accuracy/calibration, all locale/size combinations and
+expired-session return remain unverified in this trial.
+
+Background/return: first attempt was inconclusive (owner had closed the panel).
+Repeated with expanded page3/3: Android reported `Active Camera Clients: []` after
+two seconds in the background, then the owner confirmed “Expanded panel restored
+on page3/3” after return. This verifies that brief recovery case on the recorded
+APK/device; five-minute expiration and permission/install interruptions remain
+pending.
+
+Owner also confirmed same native-scene tracking loss → turn → recovery retains
+original orientation and expanded page3/3. Exit returned to the retained selected
+ACLC map, and Android reported no active camera clients afterward. Battery ended
+35%, USB charging,37.0°C. These observations pass those brief scenarios only;
+full field/lifecycle/locale acceptance remains pending.
+
+Documentation-only evidence update: `npm run typecheck` and `npm run lint` passed;
+`git diff --check` passed. No application code changed and no additional full
+suite/export was necessary; the previously recorded970-test/Android-export and
+PR28 CI results refer to the implementation candidate tested here.
