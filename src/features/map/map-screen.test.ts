@@ -20,7 +20,7 @@ const controls = vi.hoisted(() => ({
   language: 'en' as 'en' | 'ko' | 'ja',
   position: { latitude: 38.5, longitude: -120.2 },
   params: {} as { placeId?: string },
-  hasLocation: true, locationStatus: 'ready', accuracy: 8,
+  hasLocation: true, locationStatus: 'ready', accuracy: 8, watcherSample: null as { position: { latitude: number; longitude: number }; accuracy: number; timestamp: number } | null,
 }));
 vi.mock('expo-constants', () => ({ default: { expoConfig: { extra: { mapsConfigured: true } } } }));
 vi.mock('expo-router', () => ({ router: { navigate: vi.fn(), push: vi.fn(), setParams: vi.fn(() => { controls.params = {}; }) }, useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params }));
@@ -33,7 +33,7 @@ vi.mock('react-native-maps', async () => {
   return { default: MapView, Circle: 'circle', Marker: 'marker', Callout: 'callout', Polyline: 'polyline', PROVIDER_GOOGLE: 'google' };
 });
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ activationRadiusMeters: 100, language: controls.language }) }));
-vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ position: controls.hasLocation ? controls.position : null, accuracy: controls.accuracy, status: controls.locationStatus, retry: vi.fn() }) }));
+vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ watcherStatus: 'ready', watcherSample: controls.watcherSample, position: controls.hasLocation ? controls.position : null, accuracy: controls.accuracy, status: controls.locationStatus, retry: vi.fn() }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('@/features/places/service', () => ({ placesService: { search: vi.fn(), nearby: vi.fn(), details: vi.fn() } }));
 vi.mock('@/features/directions/service', () => ({ routeService: { walking: vi.fn() } }));
@@ -625,4 +625,36 @@ it('allows explicit area-search recovery with a known viewport and no GPS', asyn
  expect(retry.props.disabled).toBe(false);
  await act(async () => retry.props.onPress());
  expect(placesService.search).toHaveBeenCalledTimes(2);
+});
+
+it('hands a corroborated selected ACLC launch to the guarded native route with development provenance', async () => {
+ const { AdmissionContext } = await import('@/features/destination-ar/admission-context'); const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+ const { getDestination } = await import('@/features/destinations/catalog');
+ Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
+ const store = new ArAdmissionStore('owner'); controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+ const render = () => React.createElement(AdmissionContext.Provider, { value: store }, renderMap());
+ try {
+  await act(async () => { tree = create(render()); }); await act(async () => tree!.root.findByType('map').props.onMapReady());
+  for (const time of [10000, 13000, 16000]) {
+   vi.spyOn(Date, 'now').mockReturnValue(time); controls.watcherSample = { position: getDestination('pilot-aclc')!.center!, accuracy: 5, timestamp: time };
+   await act(async () => tree!.update(render()));
+  }
+  await press('arrival.launchDraft');
+  const target = vi.mocked(router.push).mock.calls.at(-1)![0] as { pathname: string; params: { destinationId: 'pilot-aclc'; entryToken: string } };
+  expect(target.pathname).toBe('/destination-ar/[destinationId]');
+  expect(store.take(target.params.entryToken, target.params.destinationId)?.identity.provenance).toBe('development');
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.search).not.toHaveBeenCalled();
+ } finally { controls.watcherSample = null; Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
+});
+it('offers opted-in simulated arrival without converting a browsing point into GPS evidence', async () => {
+ const { AdmissionContext } = await import('@/features/destination-ar/admission-context'); const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+ Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); controls.hasLocation = false;
+ const store = new ArAdmissionStore('owner'); controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+ try {
+  await act(async () => { tree = create(React.createElement(AdmissionContext.Provider, { value: store }, renderMap())); });
+  await press('arrival.simulate'); await act(async () => { await vi.dynamicImportSettled(); });
+  const target = vi.mocked(router.push).mock.calls.at(-1)![0] as unknown as { params: { entryToken: string } };
+  expect(store.take(target.params.entryToken, 'pilot-aclc')).toMatchObject({ simulated: true, identity: { provenance: 'development' } });
+  expect(store.getSnapshot()?.eligible).toBe(false); expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.search).not.toHaveBeenCalled();
+ } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
 });

@@ -13,6 +13,12 @@ import { withUniwind } from 'uniwind';
 import { RoutePreviewLocationStatus } from './route-preview-location-status';
 import { ProviderAttributions } from '@/features/map/attributions';
 import { setPlaceSelection } from '@/features/places/selection';
+import { useSettings } from '@/features/settings/provider';
+import { approvedArContent } from '@/features/destinations/ar-content';
+import { getDestination } from '@/features/destinations/catalog';
+import { useArAdmission, useAdmissionSource } from '@/features/destination-ar/admission-context';
+import { simulateArEntry } from '@/features/destination-ar/simulation-loader';
+import { isViroSpikeEnabled } from '@/features/destination-ar/dev-guard';
 import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
 import { createRoutePreviewIntent } from './route-preview-intent';
 import { googleMapsNavigationUrl } from './google-maps-navigation';
@@ -40,6 +46,20 @@ function Preview({ token }: { token: unknown }) {
   const configured = !!Constants.expoConfig?.extra?.mapsConfigured;
   const preview = useRoutePreview(token, configured);
   const { data, result, location, usable, running } = preview;
+  const admission = useArAdmission(); const { language } = useSettings();
+  const featured = getDestination(data?.intent.featuredDestinationId);
+  const arSource = useAdmissionSource(admission, featured?.id ?? null, { running: running && preview.locationEnabled, watcherStatus: location.watcherStatus, sample: location.watcherSample ?? null }, true);
+  const contentReady = !!approvedArContent(featured, language).length; const draftAr = !contentReady && isViroSpikeEnabled();
+  function launchAr() {
+    if (!featured) return;
+    const entryToken = arSource.begin(draftAr ? 'draft' : 'approved', language);
+    if (entryToken) router.push({ pathname: '/destination-ar/[destinationId]', params: { destinationId: featured.id, entryToken } });
+  }
+  async function simulateArrival() {
+    if (!featured || !isViroSpikeEnabled()) return;
+    const entryToken = await simulateArEntry(arSource, contentReady ? 'approved' : 'draft', language);
+    if (entryToken) router.push({ pathname: '/destination-ar/[destinationId]', params: { destinationId: featured.id, entryToken } });
+  }
   const coordinates = result?.coordinates ?? EMPTY_COORDINATES;
   const place = data?.intent.place;
   const displayedMode = data?.intent.mode ?? 'walking';
@@ -113,7 +133,8 @@ function Preview({ token }: { token: unknown }) {
             <Button accessibilityLabel={t('directions.startNavigation')} isDisabled={!externalUrl || !running || linkPending} onPress={startExternalNavigation}><Button.Label>{t('directions.startNavigation')}</Button.Label></Button>
             {linkError && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('directions.mapsFailed')}</Text>}
           </View>}
-          {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} contentReady={false} onDismiss={preview.arrival.dismiss} />}
+          {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
+          {featured && admission && isViroSpikeEnabled() && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}
           {result && coordinates.length > 1 && !navigation.started && <>

@@ -14,6 +14,10 @@ import { getDestination } from '@/features/destinations/catalog';
 import { featuredMapPlace, matchedFeaturedDestination } from '@/features/destinations/map-selection';
 import { destinationToRoutePlace } from '@/features/destinations/routing';
 import { useDestinationProximity } from '@/features/destinations/use-destination-proximity';
+import { approvedArContent } from '@/features/destinations/ar-content';
+import { useArAdmission, useAdmissionSource } from '@/features/destination-ar/admission-context';
+import { simulateArEntry } from '@/features/destination-ar/simulation-loader';
+import { isViroSpikeEnabled } from '@/features/destination-ar/dev-guard';
 import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
 import { DISCOVERY } from '@/config/limits';
 import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
@@ -83,6 +87,20 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
   const incomingId = !incomingFeatured && parsedId.success ? parsedId.data.providerId : null;
   const active = useAppActive(); const focused = useIsFocused(); const map = useRef<MapView>(null);
   const arrival = useDestinationProximity(featured, { running: active && focused, watcherStatus: location.watcherStatus ?? 'pending', sample: location.watcherSample ?? null });
+  const admission = useArAdmission();
+  const arSource = useAdmissionSource(admission, featured?.id ?? null, { running: active && focused, watcherStatus: location.watcherStatus ?? 'pending', sample: location.watcherSample ?? null }, true);
+  const contentReady = !!approvedArContent(featured, language).length;
+  const draftAr = !contentReady && isViroSpikeEnabled();
+  function launchAr() {
+    if (!featured) return;
+    const entryToken = arSource.begin(draftAr ? 'draft' : 'approved', language);
+    if (entryToken) router.push({ pathname: '/destination-ar/[destinationId]', params: { destinationId: featured.id, entryToken } });
+  }
+  async function simulateArrival() {
+    if (!featured || !isViroSpikeEnabled()) return;
+    const entryToken = await simulateArEntry(arSource, contentReady ? 'approved' : 'draft', language);
+    if (entryToken) router.push({ pathname: '/destination-ar/[destinationId]', params: { destinationId: featured.id, entryToken } });
+  }
   const previewNavigation = useRef(false);
   useEffect(() => { if (focused) previewNavigation.current = false; }, [focused]);
   const pendingHandoffCenter = useRef<string | null>(null);
@@ -204,7 +222,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
     <HomePlaceSheet geometry={sheetGeometry} animatedPosition={sheetPosition} key={featured?.id ?? selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId || !!featured}
       canRequest={featured ? mapEnabled && !!destinationToRoutePlace(featured) : mapEnabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!complete || !!featured} detailsLoading={details.isFetching} mapLoading={!mapReady}
-      locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} contentReady={false} onDismiss={arrival.dismiss} />}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
+      locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
       selectionSummary={featured ? t('arrival.teaser') : place && locationReady ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : place ? t('map.proximityUnavailable') : undefined}
       onViewDetails={place && !featured ? () => {
         if (!active || !focused) return;
