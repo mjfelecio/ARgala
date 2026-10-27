@@ -6,6 +6,7 @@ import { createInstance, type i18n } from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { router } from 'expo-router';
+import { EdgeRequestError } from '@/lib/edge-error';
 import { queryClient } from '@/lib/query';
 import { localizationOptions } from '@/i18n/options';
 import type { Place } from '@/features/places/service';
@@ -492,4 +493,19 @@ it('coalesces rapid external navigation presses until native linking settles', a
  await act(async () => { action.props.onPress(); action.props.onPress(); });
  expect(nativeUi.openURL).toHaveBeenCalledOnce();
  await act(async () => deferred.resolve());
+});
+
+it('renders driving loading/unavailable recovery using actual locales without a walking error claim', async () => {
+ const pending = Promise.withResolvers<WalkingRoute & { mode: 'driving' }>();
+ vi.mocked(routeService.preview).mockReturnValue(pending.promise);
+ controls.token = createRoutePreviewIntent(client, place, undefined, 'map', 'en', undefined, 'driving');
+ await mount();
+ expect(output()).toContain(translations.t('directions.drivingLoading'));
+ await act(async () => pending.reject(new EdgeRequestError('ROUTE_UNAVAILABLE')));
+ for (const language of ['en', 'ko', 'ja']) {
+  await act(async () => { await translations.changeLanguage(language); });
+  expect(output()).toContain(translations.t('directions.drivingUnavailable'));
+  expect(output()).not.toContain(translations.t('service.routeUnavailable'));
+ }
+ expect(routeService.preview).toHaveBeenCalledOnce();
 });

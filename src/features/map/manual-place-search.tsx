@@ -1,17 +1,22 @@
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useIsFocused } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Input } from 'heroui-native/input';
 import { TextField } from 'heroui-native/text-field';
 import { Button } from 'heroui-native/button';
+import { withUniwind } from 'uniwind';
+import googleMapsAttribution from '../../../assets/attribution/google-maps.png';
+import { ProviderAttributions } from './attributions';
 import { AR } from '@/config/limits';
 import { placesService, type Place } from '@/features/places/service';
 import { useSettings } from '@/features/settings/provider';
 import { useAppActive } from '@/lib/use-app-active';
 import { edgeErrorMessageKey } from '@/lib/edge-error';
 import type { Language } from '../../../supabase/functions/_shared/contracts';
+
+const StyledImage = withUniwind(Image);
 
 /** No invented map center, native location owner or per-keystroke request. */
 export function ManualPlaceSearch({ onSelect }: { onSelect(place: Place, language: Language, updatedAt: number): void }) {
@@ -34,5 +39,7 @@ export function ManualPlaceSearch({ onSelect }: { onSelect(place: Place, languag
     {result.error && <Text className="font-sans text-sm text-danger">{t(edgeErrorMessageKey(result.error))}</Text>}
     {result.isSuccess && result.data.length === 0 && <Text className="font-sans text-sm text-muted">{t('map.empty')}</Text>}
     {result.data?.map(place => <Button key={place.id} variant="secondary" accessibilityLabel={place.name} onPress={() => onSelect(place, language, result.dataUpdatedAt)}><Button.Label>{place.name}</Button.Label></Button>)}
+    {result.data?.some(place => place.provider === 'google') && <StyledImage source={googleMapsAttribution} accessibilityLabel="Google Maps" className="h-[18px] w-[98px]" resizeMode="contain" />}
+    <ProviderAttributions places={result.data ?? []} />
   </View>;
 }

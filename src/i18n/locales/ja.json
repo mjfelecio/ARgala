@@ -73,7 +73,8 @@
     "start": "周辺を検索をタップして、現在地付近の場所を探しましょう。",
     "expand": "もっと見る",
     "collapse": "折りたたむ",
-    "results": "{{count}}件の場所が見つかりました。地図のマーカーをタップしてください。"
+    "results": "{{count}}件の場所が見つかりました。地図のマーカーをタップしてください。",
+    "proximityUnavailable": "新しい端末の位置情報がないため、現在の距離を確認できません。"
   },
   "location": {
     "timeout": "位置情報の取得がタイムアウトしました。位置情報サービスを有効にして、屋外で再試行してください。",
@@ -208,7 +209,9 @@
     "displayedMode": "表示中の経路: {{mode}}",
     "estimatedDriving": "車の推定経路",
     "drivingCaution": "運転前に道路の通行可否、標識、現在の状況をご確認ください。",
-    "mapsFailed": "Google Mapsを開けませんでした。経路プレビューは引き続き利用できます。もう一度お試しください。"
+    "mapsFailed": "Google Mapsを開けませんでした。経路プレビューは引き続き利用できます。もう一度お試しください。",
+    "drivingLoading": "車の経路を検索中…",
+    "drivingUnavailable": "この目的地への車の経路が見つかりませんでした。"
   },
   "destinations": {
     "title": "おすすめの目的地",

@@ -122,7 +122,8 @@
     "start": "Tap Search Nearby to discover places around your location.",
     "expand": "Show more",
     "collapse": "Show less",
-    "results": "{{count}} places returned. Tap a map marker to explore."
+    "results": "{{count}} places returned. Tap a map marker to explore.",
+    "proximityUnavailable": "Current distance is unavailable without a fresh device location."
   },
   "service": {
     "failed": "Unable to complete this request. Please try again.",
@@ -248,7 +249,9 @@
     "displayedMode": "Displayed route: {{mode}}",
     "estimatedDriving": "Estimated driving route",
     "drivingCaution": "Check road access, signs and current conditions before driving.",
-    "mapsFailed": "Could not open Google Maps. Your route preview is still available; try again."
+    "mapsFailed": "Could not open Google Maps. Your route preview is still available; try again.",
+    "drivingLoading": "Finding a driving route…",
+    "drivingUnavailable": "No driving route could be found for this destination."
   },
   "destinations": {
     "title": "Featured Destinations",

@@ -596,3 +596,33 @@ it('submits text/category/settled area only on explicit Search This Area and nev
  await act(async () => { tree!.update(renderMap()); void client.invalidateQueries({ queryKey: ['places'] }); });
  expect(placesService.search).toHaveBeenCalledOnce();
 });
+
+it('keeps denied-GPS global selection separate from physical proximity and permits Directions', async () => {
+ controls.hasLocation = false; controls.locationStatus = 'denied';
+ vi.mocked(placesService.search).mockResolvedValue([{ ...destination, source: 'discovery' }]);
+ vi.mocked(router.setParams).mockImplementation(params => { controls.params = { ...controls.params, ...params }; });
+ try {
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => tree!.root.findByType('input').props.onChangeText('destination'));
+  await press('map.search'); await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+  await act(async () => tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === destination.name)!.props.onPress());
+  await act(async () => tree!.root.findByType('map').props.onMapReady());
+  const { HomePlaceSheet } = await import('./place-sheet'); const sheet = tree!.root.findByType(HomePlaceSheet);
+  expect(sheet.props.selectionSummary).toBe(translations.t('map.proximityUnavailable'));
+  expect(sheet.props.canRequest).toBe(true);
+  await press('placeDetails.directions');
+  expect(router.push).toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+ } finally { vi.mocked(router.setParams).mockImplementation(() => { controls.params = {}; }); }
+});
+it('allows explicit area-search recovery with a known viewport and no GPS', async () => {
+ controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params; controls.hasLocation = false;
+ vi.mocked(placesService.search).mockRejectedValue(new Error('private provider detail'));
+ await act(async () => { tree = create(renderMap()); });
+ await act(async () => { const map = tree!.root.findByType('map'); map.props.onMapReady(); map.props.onRegionChangeComplete({ latitude: 1, longitude: 2, latitudeDelta: 0.01, longitudeDelta: 0.01 }); });
+ await act(async () => tree!.root.findByType('input').props.onChangeText('test'));
+ await press('search.thisArea'); await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ const retry = tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('common.retry'))!;
+ expect(retry.props.disabled).toBe(false);
+ await act(async () => retry.props.onPress());
+ expect(placesService.search).toHaveBeenCalledTimes(2);
+});

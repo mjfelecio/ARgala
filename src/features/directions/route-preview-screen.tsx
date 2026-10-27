@@ -133,7 +133,7 @@ function Preview({ token }: { token: unknown }) {
           {place && preview.locationEnabled && data?.status === 'waiting' && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('directions.waiting')}</Text>}
           {place && preview.locationEnabled && !usable && <><RoutePreviewLocationStatus location={location} />{location.status === 'ready' && <><Text className="font-sans text-sm text-muted">{t('directions.stale')}</Text><Button variant="outline" accessibilityLabel={t('location.retry')} onPress={location.retry}><Button.Label>{t('location.retry')}</Button.Label></Button></>}</>}
           {data?.status === 'waiting' && preview.expired && <Text className="font-sans text-sm text-muted">{t('directions.unavailable')}</Text>}
-          {data?.status === 'pending' && <View className="gap-2"><Spinner size="sm" /><Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('map.routeLoading')}</Text></View>}
+          {data?.status === 'pending' && <View className="gap-2"><Spinner size="sm" /><Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t(displayedMode === 'driving' ? 'directions.drivingLoading' : 'map.routeLoading')}</Text></View>}
           {data?.errorKey && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(data.errorKey)}</Text>}
           {preview.needsRetry && <Button variant="outline" accessibilityLabel={t('directions.retry')} isDisabled={!running || !configured} onPress={preview.retry}><Button.Label>{t('directions.retry')}</Button.Label></Button>}
           {expanded && place && <View className="gap-4 border-t border-outline pt-4">

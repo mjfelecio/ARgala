@@ -202,10 +202,10 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
     </View>
     <MapRecenter disabled={!enabled} position={sheetPosition} onPress={() => enabled && map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
     <HomePlaceSheet geometry={sheetGeometry} animatedPosition={sheetPosition} key={featured?.id ?? selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId || !!featured}
-      canRequest={featured ? mapEnabled && !!destinationToRoutePlace(featured) : enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
+      canRequest={featured ? mapEnabled && !!destinationToRoutePlace(featured) : mapEnabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!complete || !!featured} detailsLoading={details.isFetching} mapLoading={!mapReady}
       locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} contentReady={false} onDismiss={arrival.dismiss} />}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
-      selectionSummary={featured ? t('arrival.teaser') : place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
+      selectionSummary={featured ? t('arrival.teaser') : place && locationReady ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : place ? t('map.proximityUnavailable') : undefined}
       onViewDetails={place && !featured ? () => {
         if (!active || !focused) return;
         setPlaceSelection(queryClient, place, complete ? language : undefined, detailsOptions(selectedId).initialDataUpdatedAt);

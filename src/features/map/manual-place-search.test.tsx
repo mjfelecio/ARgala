@@ -18,7 +18,7 @@ afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined
 it('requires explicit global text submission and preserves response language/age on selection', async () => {
  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
  const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
- const place = { id: 'google:test', provider: 'google', providerId: 'test', source: 'discovery' as const, name: 'Synthetic place', coordinates: { latitude: 0, longitude: 0 }, attributions: [] };
+ const place = { id: 'google:test', provider: 'google', providerId: 'test', source: 'discovery' as const, name: 'Synthetic place', coordinates: { latitude: 0, longitude: 0 }, attributions: [{ name: 'Synthetic provider attribution', uri: 'https://example.com/credit' }] };
  vi.mocked(placesService.search).mockResolvedValue([place]);
  client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() });
  const translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
@@ -33,6 +33,9 @@ it('requires explicit global text submission and preserves response language/age
  await act(async () => { search().props.onPress(); });
  await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
  expect(placesService.search).toHaveBeenCalledWith({ query: 'ACLC Ormoc', category: 'all', language: 'en' });
+ expect(JSON.stringify(tree!.toJSON())).toContain('Synthetic provider attribution');
+ expect(tree!.root.findAllByProps({ accessibilityLabel: 'Google Maps' })).not.toHaveLength(0);
+ expect(tree!.root.findAllByProps({ accessibilityRole: 'link' })).not.toHaveLength(0);
  await act(async () => tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === place.name)!.props.onPress());
  expect(selected).toHaveBeenCalledWith(place, 'en', expect.any(Number));
  await act(async () => tree!.update(render())); expect(placesService.search).toHaveBeenCalledOnce();

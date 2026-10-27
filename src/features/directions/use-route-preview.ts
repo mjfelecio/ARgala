@@ -107,7 +107,7 @@ export function useRoutePreview(token: unknown, configured: boolean) {
       try { result = validated({ origin, destination: data.intent.place.coordinates, route, mode }); }
       catch { throw new EdgeRequestError('UPSTREAM_INVALID'); }
       finish({ owner, attempt: data.attempt, intent: data.intent, status: 'success', language, result });
-    }).catch((error: unknown) => finish({ owner, attempt: data.attempt, intent: data.intent, status: 'failed', errorKey: edgeErrorMessageKey(error) }));
+    }).catch((error: unknown) => finish({ owner, attempt: data.attempt, intent: data.intent, status: 'failed', errorKey: mode === 'driving' && error instanceof EdgeRequestError && error.code === 'ROUTE_UNAVAILABLE' ? 'directions.drivingUnavailable' : edgeErrorMessageKey(error) }));
   }, [client, key, data, configured, usable, expired, location.position, location.positionTimestamp, location.watcherTimestamp, language, owner]);
   function retry() {
     const current = client.getQueryData<Session>(key);
