@@ -49,14 +49,14 @@ function Preview({ token }: { token: unknown }) {
   const admission = useArAdmission(); const { language } = useSettings();
   const featured = getDestination(data?.intent.featuredDestinationId);
   const arSource = useAdmissionSource(admission, featured?.id ?? null, { running: running && preview.locationEnabled, watcherStatus: location.watcherStatus, sample: location.watcherSample ?? null }, true);
-  const contentReady = !!approvedArContent(featured, language).length; const draftAr = !contentReady && isViroSpikeEnabled();
+  const contentReady = !!approvedArContent(featured, language).length; const draftAr = !contentReady && featured?.id === 'pilot-aclc' && isViroSpikeEnabled();
   function launchAr() {
     if (!featured) return;
     const entryToken = arSource.begin(draftAr ? 'draft' : 'approved', language);
     if (entryToken) router.push({ pathname: '/destination-ar/[destinationId]', params: { destinationId: featured.id, entryToken } });
   }
   async function simulateArrival() {
-    if (!featured || !isViroSpikeEnabled()) return;
+    if (!featured || !isViroSpikeEnabled() || (!contentReady && featured.id !== 'pilot-aclc')) return;
     const entryToken = await simulateArEntry(arSource, contentReady ? 'approved' : 'draft', language);
     if (entryToken) router.push({ pathname: '/destination-ar/[destinationId]', params: { destinationId: featured.id, entryToken } });
   }
@@ -134,7 +134,7 @@ function Preview({ token }: { token: unknown }) {
             {linkError && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('directions.mapsFailed')}</Text>}
           </View>}
           {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
-          {featured && admission && isViroSpikeEnabled() && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
+          {featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}
           {result && coordinates.length > 1 && !navigation.started && <>

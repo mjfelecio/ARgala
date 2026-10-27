@@ -658,3 +658,11 @@ it('offers opted-in simulated arrival without converting a browsing point into G
   expect(store.getSnapshot()?.eligible).toBe(false); expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.search).not.toHaveBeenCalled();
  } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
 });
+it('does not offer the ACLC draft simulation for a different destination selected through a map link', async () => {
+ const { AdmissionContext } = await import('@/features/destination-ar/admission-context'); const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+ Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); controls.params = { featuredDestinationId: 'D01' } as typeof controls.params;
+ try {
+  await act(async () => { tree = create(React.createElement(AdmissionContext.Provider, { value: new ArAdmissionStore('owner') }, renderMap())); });
+  expect(tree!.root.findAllByType('button').some(button => button.props.accessibilityLabel === translations.t('arrival.simulate'))).toBe(false);
+ } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
+});

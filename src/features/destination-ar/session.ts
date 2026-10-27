@@ -38,8 +38,8 @@ export class ArSession {
   }
   begin(identity: SessionIdentity, now: number): number | null {
     if (!this.matches(identity)) { this.close(); return null; }
-    if (this.state.phase === 'closed' || ['preflight', 'initializing', 'reveal', 'exploring', 'limited'].includes(this.state.phase)) return null;
-    if (this.state.established && !this.canRestore(now)) this.expire(now);
+    if (['closed', 'expired'].includes(this.state.phase) || ['preflight', 'initializing', 'reveal', 'exploring', 'limited'].includes(this.state.phase)) return null;
+    if (this.state.established && !this.canRestore(now)) { this.expire(now); return null; }
     const attempt = this.state.attempt + 1;
     this.write({ attempt, phase: 'preflight' }); return attempt;
   }

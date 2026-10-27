@@ -59,3 +59,8 @@ it('never admits simulated arrival in release, including a retained development 
  Object.assign(globalThis, { __DEV__: false });
  expect(store.beginSimulation(lease, 'pilot-aclc', 'draft', 'en')).toBeNull(); expect(store.take(handle, 'pilot-aclc')).toBeNull();
 });
+it('cannot attach the ACLC research draft to another selected destination', () => {
+ const store = new ArAdmissionStore('owner'); store.select('D01'); const lease = store.acquire('D01')!;
+ store.publish(lease, { running: true, watcherStatus: 'pending', sample: null });
+ expect(store.beginSimulation(lease, 'D01', 'draft', 'en')).toBeNull();
+});

@@ -74,7 +74,7 @@ export class ArAdmissionStore {
   }
   private issue(lease: number, id: FeaturedDestinationId, kind: 'approved' | 'draft', language: Language, simulated: boolean): string | null {
     if (this.closed || lease !== this.lease || id !== this.selected || !this.input.running) return null;
-    if (kind === 'draft' && !isViroSpikeEnabled()) return null;
+    if (kind === 'draft' && (id !== 'pilot-aclc' || !isViroSpikeEnabled())) return null;
     const destination = getDestination(id);
     if (!destination || kind === 'approved' && !approvedArContent(destination, language).length) return null;
     this.endEntry(); this.simulationActive = simulated;

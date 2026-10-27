@@ -128,7 +128,7 @@ it('keeps permission-attempt ownership outside the navigator and requires explic
 it('expires at five minutes, prevents fresh remote entry and closes before Exit navigation', async () => {
   await mount(); await layout(); await start(); await ready(); await active(false); native.eligible = false;
   await act(async () => { await vi.advanceTimersByTimeAsync(300000); }); await active(true); expect(cameras()).toHaveLength(0);
-  expect(copy()).toContain(translations.t('destinationAr.errors.entry-ineligible')); await press('common.retry'); await settle(); expect(cameras()).toHaveLength(0);
+  expect(copy()).toContain(translations.t('destinationSession.expired')); expect(cameras()).toHaveLength(0);
   await press('destinationAr.exit'); expect(router.back).toHaveBeenCalled();
 });
 it('keys real route ownership by authentication identity and never revives the former native frame', async () => {
@@ -218,4 +218,14 @@ it('cannot promote pending startup to live when fresh eligibility fails at first
  const established = vi.fn(); child = () => <DestinationArSessionExperience identity={identity} freshEligible={() => native.eligible} onEstablished={established} />;
  await mount(); await layout(); await start(); native.eligible = false; await ready();
  expect(established).not.toHaveBeenCalled(); expect(cameras()).toHaveLength(0);
+});
+it.each(['en', 'ko', 'ja'])('offers a fresh map handoff instead of an unrecoverable expired Retry in %s', async language => {
+ const returned = vi.fn(); const exited = vi.fn(); await translations.changeLanguage(language);
+ child = () => <DestinationArSessionExperience identity={identity} freshEligible={() => native.eligible} onReturn={returned} onExit={exited} />;
+ await mount(); await layout(); await start(); await ready(); await active(false);
+ await act(async () => { vi.advanceTimersByTime(300000); }); await active(true);
+ expect(copy()).toContain(translations.t('destinationSession.expired'));
+ expect(tree!.root.findAllByType('button').some(button => button.props.accessibilityLabel === translations.t('common.retry'))).toBe(false);
+ expect(cameras()).toHaveLength(0);
+ await press('arrival.returnToMap'); expect(returned).toHaveBeenCalledOnce(); expect(exited).toHaveBeenCalledOnce();
 });

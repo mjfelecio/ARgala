@@ -41,7 +41,7 @@ function ClaimedEntry({ store, id, token }: { store: ArAdmissionStore | null; id
   useEffect(() => {
     if (entry?.kind !== 'draft' || !isViroSpikeEnabled()) return;
     let alive = true;
-    void loadDraftRingContent().then(value => { if (alive) setDraft(value ?? []); }).catch(() => { if (alive) setDraft([]); });
+    void loadDraftRingContent(entry.destination.id).then(value => { if (alive) setDraft(value ?? []); }).catch(() => { if (alive) setDraft([]); });
     return () => { alive = false; };
   }, [entry]);
   if (!entry) return <Unavailable loading={entry === undefined} />;

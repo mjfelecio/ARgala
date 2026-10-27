@@ -36,11 +36,11 @@ it.each([299000, 300000, 300001, -1])('enforces grace exactly at elapsed %s and 
   expect(session.canRestore(2000 + elapsed)).toBe(elapsed >= 0 && elapsed < suspensionGraceMs);
 });
 it('rechecks recovery expiry immediately before mount and ready', () => {
-  const session = create(); live(session); session.suspend(2000);
+  let session = create(); live(session); session.suspend(2000);
   let token = session.begin(identity, 301000)!;
   expect(session.authorizeMount(token, identity, 302000, () => true)).toBe(false);
   expect(session.getSnapshot().phase).toBe('expired');
-  token = initialize(session, 400000); session.ready(token, 400010, false); session.suspend(401000);
+  session = create(); token = initialize(session, 400000); session.ready(token, 400010, false); session.suspend(401000);
   token = session.begin(identity, 700000)!; session.authorizeMount(token, identity, 700001, () => false);
   expect(session.ready(token, 701000, false)).toBe(false); expect(session.getSnapshot().phase).toBe('expired');
 });
@@ -99,4 +99,12 @@ it('ignores an old suspension-expiry callback after tracking has recovered live'
   const session = create(); live(session); session.suspend(2000); const token = session.begin(identity, 2010)!;
   session.authorizeMount(token, identity, 2011, () => false); session.ready(token, 2012, false);
   expect(session.expire(302000)).toBe(false); expect(session.getSnapshot().phase).toBe('exploring');
+});
+it('requires a new logical owner after restoration grace expires', () => {
+ const session = new ArSession(identity, ['overview']);
+ const token = session.begin(identity, 1000)!; session.authorizeMount(token, identity, 1000, () => true); session.ready(token, 1000, false);
+ session.suspend(2000); session.expire(302000);
+ expect(session.begin(identity, 302001)).toBeNull();
+ session.fail(session.getSnapshot().attempt, 302002);
+ expect(session.getSnapshot().phase).toBe('expired');
 });

@@ -90,14 +90,14 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
   const admission = useArAdmission();
   const arSource = useAdmissionSource(admission, featured?.id ?? null, { running: active && focused, watcherStatus: location.watcherStatus ?? 'pending', sample: location.watcherSample ?? null }, true);
   const contentReady = !!approvedArContent(featured, language).length;
-  const draftAr = !contentReady && isViroSpikeEnabled();
+  const draftAr = !contentReady && featured?.id === 'pilot-aclc' && isViroSpikeEnabled();
   function launchAr() {
     if (!featured) return;
     const entryToken = arSource.begin(draftAr ? 'draft' : 'approved', language);
     if (entryToken) router.push({ pathname: '/destination-ar/[destinationId]', params: { destinationId: featured.id, entryToken } });
   }
   async function simulateArrival() {
-    if (!featured || !isViroSpikeEnabled()) return;
+    if (!featured || !isViroSpikeEnabled() || (!contentReady && featured.id !== 'pilot-aclc')) return;
     const entryToken = await simulateArEntry(arSource, contentReady ? 'approved' : 'draft', language);
     if (entryToken) router.push({ pathname: '/destination-ar/[destinationId]', params: { destinationId: featured.id, entryToken } });
   }
@@ -222,7 +222,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
     <HomePlaceSheet geometry={sheetGeometry} animatedPosition={sheetPosition} key={featured?.id ?? selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId || !!featured}
       canRequest={featured ? mapEnabled && !!destinationToRoutePlace(featured) : mapEnabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!complete || !!featured} detailsLoading={details.isFetching} mapLoading={!mapReady}
-      locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
+      locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
       selectionSummary={featured ? t('arrival.teaser') : place && locationReady ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : place ? t('map.proximityUnavailable') : undefined}
       onViewDetails={place && !featured ? () => {
         if (!active || !focused) return;

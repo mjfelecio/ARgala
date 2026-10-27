@@ -369,7 +369,8 @@
     "skip": "Skip introduction",
     "reveal": "Look around as the sample panels appear. You can skip this introduction.",
     "restoring": "Restoring your reading progress. Move gently to reacquire tracking.",
-    "retryTracking": "Retry tracking"
+    "retryTracking": "Retry tracking",
+    "expired": "This AR session has expired. Return to Explore to verify arrival and start a new session."
   },
   "arrival": {
     "unavailable": "AR arrival is not available for this destination yet.",
