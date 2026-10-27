@@ -372,6 +372,8 @@
     "invitation": "Explore this place through its AR information ring.",
     "contentPending": "Arrival is verified. Approved AR content is still being prepared.",
     "launch": "Launch AR",
-    "dismiss": "Not now"
+    "dismiss": "Not now",
+    "teaser": "Explore this destination’s stories in AR after a verified arrival.",
+    "selectDestination": "Select a featured destination to enter AR."
   }
 }

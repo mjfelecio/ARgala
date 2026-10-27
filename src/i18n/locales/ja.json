@@ -331,6 +331,8 @@
     "invitation": "AR情報リングでこの場所を探索しましょう。",
     "contentPending": "到着を確認しました。承認済みARコンテンツを準備中です。",
     "launch": "ARを開始",
-    "dismiss": "後で"
+    "dismiss": "後で",
+    "teaser": "到着を確認したら、ARでこの目的地の物語を探索しましょう。",
+    "selectDestination": "ARを利用するには、おすすめの目的地を選択してください。"
   }
 }

@@ -16,7 +16,7 @@ import PlaceDetailsScreen from '@/features/places/place-details-screen';
 import { placeSelectionOptions } from '@/features/places/selection';
 
 const controls = vi.hoisted(() => ({ token: undefined as unknown, details: false, providerId: 'north', active: true, focused: true, mapsConfigured: true, language: 'en' as 'en' | 'ko' | 'ja', fit: vi.fn(), animate: vi.fn(), retry: vi.fn(), canBack: true,
-  location: { status: 'ready', watcherStatus: 'ready', errorCode: null as string | null, position: { latitude: 38.5, longitude: -120.2 } as { latitude: number; longitude: number } | null, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8, canAskAgain: true } }));
+  location: { watcherSample: null as { position: { latitude: number; longitude: number }; accuracy: number; timestamp: number } | null, status: 'ready', watcherStatus: 'ready', errorCode: null as string | null, position: { latitude: 38.5, longitude: -120.2 } as { latitude: number; longitude: number } | null, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8, canAskAgain: true } }));
 vi.mock('expo-router', () => ({ useLocalSearchParams: () => ({ token: controls.token, providerId: controls.providerId }), useIsFocused: () => controls.focused,
   router: { back: vi.fn(), canGoBack: () => controls.canBack, push: vi.fn(), navigate: vi.fn(), dismissTo: vi.fn(), setParams: vi.fn() } }));
 vi.mock('expo-constants', () => ({ default: { get expoConfig() { return { extra: { mapsConfigured: controls.mapsConfigured } }; } } }));
@@ -57,7 +57,7 @@ async function expand() { if (button('map.expand')) await press('map.expand'); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false }); vi.clearAllMocks(); vi.spyOn(Date, 'now').mockReturnValue(1800000000000);
   Object.assign(controls, { token: undefined, details: false, active: true, focused: true, mapsConfigured: true, language: 'en', canBack: true });
-  Object.assign(controls.location, { status: 'ready', watcherStatus: 'ready', errorCode: null, position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8 });
+  Object.assign(controls.location, { watcherSample: null, status: 'ready', watcherStatus: 'ready', errorCode: null, position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8 });
   vi.mocked(routeService.walking).mockReset().mockResolvedValue(route); nativeUi.openURL.mockReset().mockResolvedValue(undefined);
   client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() }); notifyManager.setScheduler(cb => cb());
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
@@ -182,7 +182,7 @@ it('retains its Google selection until details mounts after a navigation delay',
 it('spends one intent only when delayed foreground GPS becomes fresh, with no repeat on lifecycle or locale changes', async () => {
   const { focusManager, onlineManager } = await import('@tanstack/react-query');
   handoff(false); controls.location.status = 'loading'; controls.location.position = null; await mount(); expect(routeService.walking).not.toHaveBeenCalled();
-  Object.assign(controls.location, { status: 'ready', position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now() }); await update();
+  Object.assign(controls.location, { watcherSample: null, status: 'ready', position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now() }); await update();
   expect(routeService.walking).toHaveBeenCalledExactlyOnceWith({ origin, destination: place.coordinates, language: 'en' });
   controls.active = false; controls.focused = false; await update(); controls.active = true; controls.focused = true; await update();
   await act(async () => { await translations.changeLanguage('ja'); controls.language = 'ja'; await client.invalidateQueries(); focusManager.setFocused(false); focusManager.setFocused(true); onlineManager.setOnline(false); onlineManager.setOnline(true); });
@@ -422,5 +422,27 @@ it('keeps its collapsed map height and zoom framing through both sheet detents',
  expect(tree!.root.findByType('map')).toBe(map);expect(map.props.style.height).toBe(height);
  expect(controls.fit).toHaveBeenCalledTimes(fits);
  await press('directions.fit');expect(controls.fit).toHaveBeenCalledTimes(fits+1);
+ expect(routeService.walking).not.toHaveBeenCalled();
+});
+
+it('uses route-owned continuous samples for featured arrival without another route request', async () => {
+ const { getDestination } = await import('@/features/destinations/catalog');
+ const { destinationToRoutePlace } = await import('@/features/destinations/routing');
+ const pilot = getDestination('pilot-aclc')!; const target = destinationToRoutePlace(pilot)!;
+ controls.token = createRoutePreviewIntent(client, target, { origin, destination: target.coordinates, route }, 'map', 'en', 'pilot-aclc');
+ await mount();
+ const startedAt = Date.now();
+ for (const offset of [0, 3000, 6000]) {
+   const timestamp = startedAt + offset; vi.mocked(Date.now).mockReturnValue(timestamp);
+   controls.location.watcherSample = { position: pilot.center!, accuracy: 5, timestamp };
+   await update();
+ }
+ expect(output()).toContain(translations.t('arrival.eligible'));
+ expect(output()).toContain(translations.t('arrival.contentPending'));
+ expect(button('arrival.launch')).toBeUndefined();
+ await press('arrival.dismiss');
+ expect(output()).not.toContain(translations.t('arrival.contentPending'));
+ controls.focused = false; await update();
+ expect(output()).not.toContain(translations.t('arrival.eligible'));
  expect(routeService.walking).not.toHaveBeenCalled();
 });

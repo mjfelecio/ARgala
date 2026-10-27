@@ -199,7 +199,7 @@ it.each([
  expect(map).toBeDefined();
  await act(async () => { map!.props.onPress(); });
  expect(router.navigate).toHaveBeenCalledWith('/');
- expect(tree!.root.findAllByType('ar-camera-screen' as React.ElementType)).toHaveLength(1);
+ expect(tree!.root.findAllByType('ar-camera-screen' as React.ElementType)).toHaveLength(0);
 });
 it.each(['index', 'ar'])('keeps the %s tab context below Details and returns to the existing tab navigator', async origin => {
  await mount(React.createElement(AppLayout));

@@ -6,10 +6,10 @@ import { Spinner } from 'heroui-native/spinner';
 import { useThemeColor } from 'heroui-native/hooks';
 
 export type HomeMapControlsProps = {
-  onSearchNearby(): void; onOpenAr(): void; onOpenDestinations(): void;
+  onSearchNearby(): void; onOpenAr?(): void; onOpenDestinations(): void;
   canSearch: boolean; searching: boolean; onLayout?(event: LayoutChangeEvent): void;
 };
-export function HomeMapControls({ onSearchNearby, onOpenAr, onOpenDestinations, canSearch, searching, onLayout }: HomeMapControlsProps) {
+export function HomeMapControls({ onSearchNearby, onOpenDestinations, canSearch, searching, onLayout }: HomeMapControlsProps) {
   const { t } = useTranslation();
   const [ink, accent, onAccent] = useThemeColor(['default-foreground', 'accent', 'accent-foreground']);
   return <View testID="home-map-controls" className="gap-2 px-4 pb-2 pt-3" onLayout={onLayout} pointerEvents="box-none">
@@ -22,9 +22,6 @@ export function HomeMapControls({ onSearchNearby, onOpenAr, onOpenDestinations, 
       {searching ? <Spinner size="sm" color={accent} /> : <Ionicons name="search-outline" size={22} color={ink} />}
     </Button>
     <ScrollView className="grow-0" horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 py-1">
-      <Button size="sm" variant="secondary" className="h-auto min-h-10 bg-surface px-4 py-2 shadow-sm" hitSlop={4} accessibilityLabel={t('map.camera')} onPress={onOpenAr}>
-        <Ionicons name="scan-outline" size={18} color={ink} /><Button.Label>{t('map.camera')}</Button.Label>
-      </Button>
       <Button size="sm" variant="secondary" className="h-auto min-h-10 bg-surface px-4 py-2 shadow-sm" hitSlop={4} accessibilityLabel={t('destinations.title')} onPress={onOpenDestinations}>
         <Ionicons name="library-outline" size={18} color={ink} accessible={false} /><Button.Label>{t('destinations.title')}</Button.Label>
       </Button>

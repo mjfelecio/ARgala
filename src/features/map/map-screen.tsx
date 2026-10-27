@@ -10,6 +10,11 @@ import { useExplorerMapStyle } from './map-style';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
+import { getDestination } from '@/features/destinations/catalog';
+import { featuredMapPlace, matchedFeaturedDestination } from '@/features/destinations/map-selection';
+import { destinationToRoutePlace } from '@/features/destinations/routing';
+import { useDestinationProximity } from '@/features/destinations/use-destination-proximity';
+import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
 import { DISCOVERY } from '@/config/limits';
 import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
 import { distanceMeters, isWithinRadius, type Coordinate } from '@/features/location/geo';
@@ -37,8 +42,7 @@ const StyledMapView = withUniwind(MapView);
 
 function LaunchControls() {
   const { t } = useTranslation();
-  return <View className="flex-row flex-wrap justify-evenly gap-2 px-2"><Button accessibilityLabel={t('map.camera')} onPress={() => router.navigate('/ar')}><Button.Label>{t('map.camera')}</Button.Label></Button>
-    <Button variant="secondary" accessibilityLabel={t('destinations.title')} onPress={() => router.navigate('/destinations')}><Button.Label>{t('destinations.title')}</Button.Label></Button></View>;
+  return <View className="flex-row flex-wrap justify-evenly gap-2 px-2"><Button variant="secondary" accessibilityLabel={t('destinations.title')} onPress={() => router.navigate('/destinations')}><Button.Label>{t('destinations.title')}</Button.Label></Button></View>;
 }
 export default function MapScreen() {
   const { t } = useTranslation();
@@ -46,28 +50,36 @@ export default function MapScreen() {
   return <LocatedMap />;
 }
 function LocatedMap() {
-  const location = useDeviceLocation();
+  const params = useLocalSearchParams<{ featuredDestinationId?: string }>();
+  const selected = getDestination(params.featuredDestinationId);
+  const location = useDeviceLocation({ distanceIntervalMeters: 0 });
   // A tab refocus rechecks permissions and starts GPS again. Keep the existing
   // map and selection mounted while awaiting its next fix, without enabling
   // provider actions based on a retained position after a permission revocation.
-  const [retainedPosition, setRetainedPosition] = useState(location.position);
+  const [retainedPosition, setRetainedPosition] = useState(location.position ?? selected?.center ?? null);
   if (location.position && location.position !== retainedPosition) setRetainedPosition(location.position);
-  const position = location.position ?? retainedPosition;
+  else if (!retainedPosition && selected?.center) setRetainedPosition(selected.center);
+  const position = location.position ?? retainedPosition ?? selected?.center;
   if (!position) return <Screen><LaunchControls /><LocationStatus location={location} /></Screen>;
-  return <MapContent position={position} locationReady={Boolean(location.position)} accuracy={location.accuracy} locationStatus={<LocationStatus location={location} />} />;
+  return <MapContent position={position} locationReady={Boolean(location.position)} accuracy={location.accuracy} locationStatus={<LocationStatus location={location} />} location={location} />;
 }
-function MapContent({ position, locationReady, accuracy, locationStatus }: { position: Coordinate; locationReady: boolean; accuracy: number | null; locationStatus: React.ReactNode }) {
+function MapContent({ position, locationReady, accuracy, locationStatus, location }: { location: ReturnType<typeof useDeviceLocation>; position: Coordinate; locationReady: boolean; accuracy: number | null; locationStatus: React.ReactNode }) {
   const insets = useSafeAreaInsets();
   const customMapStyle = useExplorerMapStyle();
   const { t } = useTranslation(); const { language, activationRadiusMeters } = useSettings();
   const queryClient = useQueryClient();
-  const params = useLocalSearchParams<{ placeId?: string }>();
+  const params = useLocalSearchParams<{ placeId?: string; featuredDestinationId?: string }>();
   const parsedId = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
-  const incomingId = parsedId.success ? parsedId.data.providerId : null;
+  const incomingFeatured = getDestination(params.featuredDestinationId);
+  const [featuredId, setFeaturedId] = useState(incomingFeatured?.id ?? null);
+  const featured = getDestination(featuredId);
+  const incomingId = !incomingFeatured && parsedId.success ? parsedId.data.providerId : null;
   const active = useAppActive(); const focused = useIsFocused(); const map = useRef<MapView>(null);
+  const arrival = useDestinationProximity(featured, { running: active && focused, watcherStatus: location.watcherStatus ?? 'pending', sample: location.watcherSample ?? null });
   const previewNavigation = useRef(false);
   useEffect(() => { if (focused) previewNavigation.current = false; }, [focused]);
   const pendingHandoffCenter = useRef<string | null>(null);
+  const pendingFeaturedCenter = useRef(incomingFeatured);
   const [mapReady, setMapReady] = useState(false);
   const window = useWindowDimensions();
   const [sceneSize, setSceneSize] = useState({ width: 0, height: 0 });
@@ -80,18 +92,24 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const routeArea = useCSSVariable('--color-route-area') as string;
   const [center, setCenter] = useState(position);
   const [selectedId, setSelectedId] = useState<string | null>(incomingId);
-  const enabled = active && focused && mapReady && locationReady;
+  const mapEnabled = active && focused && mapReady;
+  const enabled = mapEnabled && locationReady;
   const [lastIncomingId, setLastIncomingId] = useState(incomingId);
   if (incomingId !== lastIncomingId) {
     setLastIncomingId(incomingId);
-    if (incomingId && incomingId !== selectedId) { setSelectedId(incomingId); }
+    if (incomingId && incomingId !== selectedId) { setSelectedId(incomingId); setFeaturedId(null); }
+  }
+  const [lastFeatured, setLastFeatured] = useState(incomingFeatured?.id);
+  if (incomingFeatured?.id !== lastFeatured) {
+    setLastFeatured(incomingFeatured?.id);
+    if (incomingFeatured) { setFeaturedId(incomingFeatured.id); setSelectedId(null); }
   }
   const handoff = useQuery(placeSelectionOptions(selectedId));
   useEffect(() => {
-    if (!incomingId || !active || !focused) return;
+    if ((!incomingId && !incomingFeatured) || !active || !focused) return;
     // Consume the handoff so closing and reopening the same POI works.
-    router.setParams({ placeId: undefined });
-  }, [incomingId, active, focused]);
+    router.setParams({ placeId: undefined, featuredDestinationId: undefined });
+  }, [incomingId, incomingFeatured, active, focused]);
   const nearbyOptions = (searchCenter: Coordinate) => ({ queryKey: ['places', searchCenter, language], staleTime: 0,
     queryFn: () => placesService.nearby({ center: searchCenter, radiusMeters: DISCOVERY.radiusMeters, language }) });
   const detailsOptions = (providerId: string | null) => ({ ...placeDetailsOptions(queryClient, providerId, language), staleTime: 0 });
@@ -99,7 +117,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const nearby = useQuery({ ...nearbyOptions(center), enabled: false });
   const details = useQuery({ ...detailsOptions(selectedId), enabled: false });
   const maxSheetHeight = sceneSize.height > 0 ? Math.max(0, sceneSize.height - headerHeight - Math.min(fitMargin * 2, sceneSize.height)) : undefined;
-  const sheetGeometry = homeSheetGeometry(sceneSize.height || window.height, maxSheetHeight, !!selectedId, window.fontScale ?? 1);
+  const sheetGeometry = homeSheetGeometry(sceneSize.height || window.height, maxSheetHeight, !!selectedId || !!featured, window.fontScale ?? 1);
   const frameHeight = Math.max(1, Math.min(sceneSize.height, sceneSize.height - sheetGeometry.peek + MAP_SHEET_OVERLAP));
   // Android adds fit edgePadding to mapPadding. Reserve measured chrome once,
   // keeping Google logo/legal controls above the sheet through native sheet gestures.
@@ -108,17 +126,26 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
   const topPadding = Math.min(headerHeight, Math.max(0, frameHeight - gutter));
   const mapPadding = { top: topPadding, bottom: Math.max(0, Math.min(sheetHeight - sheetGeometry.peek + MAP_SHEET_OVERLAP, frameHeight - topPadding - gutter)), left: gutter, right: gutter };
   const complete = availablePlaceDetails(queryClient, selectedId, language);
-  const place = complete ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
+  const place = featured ? featuredMapPlace(featured) : complete ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
   useEffect(() => {
     if (incomingId) pendingHandoffCenter.current = incomingId;
     if (!enabled || !place || pendingHandoffCenter.current !== place.providerId) return;
     map.current?.animateToRegion({ ...place.coordinates, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400);
     pendingHandoffCenter.current = null;
   }, [incomingId, enabled, place]);
+  useEffect(() => {
+    if (incomingFeatured) pendingFeaturedCenter.current = incomingFeatured;
+    if (!mapEnabled || !pendingFeaturedCenter.current?.center) return;
+    map.current?.animateToRegion({ ...pendingFeaturedCenter.current.center, latitudeDelta: 0.002, longitudeDelta: 0.002 }, 400);
+    pendingFeaturedCenter.current = null;
+  }, [incomingFeatured, mapEnabled]);
   const open = useOpenProviderLink();
   function select(providerId: string | null) {
-    if (providerId && !enabled) return;
-    setSelectedId(providerId);
+    if (providerId && !mapEnabled) return;
+    const matched = providerId ? matchedFeaturedDestination({ provider: 'google', providerId }) : null;
+    setFeaturedId(matched?.id ?? null);
+    setSelectedId(matched ? null : providerId);
+    if (matched) return;
     if (providerId && !availablePlaceDetails(queryClient, providerId, language)) void queryClient.fetchQuery(detailsOptions(providerId)).catch(() => {});
   }
   function discover() {
@@ -129,13 +156,15 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     void queryClient.fetchQuery(nearbyOptions(searchCenter)).catch(() => {});
   }
   function directions() {
-    if (!enabled || !place || previewNavigation.current) return;
+    if (!mapEnabled || !place || previewNavigation.current) return;
+    const target = featured ? destinationToRoutePlace(featured) : place;
+    if (!target) return;
     previewNavigation.current = true;
-    const token = createRoutePreviewIntent(queryClient, place, undefined, 'map', language);
+    const token = createRoutePreviewIntent(queryClient, target, undefined, 'map', language, featured?.id);
     router.push({ pathname: '/directions', params: { token } });
   }
-  const state: HomePlaceSheetState = selectedId ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';
-  const error = selectedId ? !complete && details.error : nearby.error;
+  const state: HomePlaceSheetState = selectedId || featured ? 'selected' : nearby.isFetching ? 'loading' : nearby.error ? 'failed' : nearby.isSuccess ? nearby.data.length ? 'results' : 'empty' : 'unsearched';
+  const error = featured ? null : selectedId ? !complete && details.error : nearby.error;
   return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
     <FocusedStatusBar style="dark" />
     <View testID="home-map-scene" className="flex-1" onLayout={event => {
@@ -145,22 +174,22 @@ function MapContent({ position, locationReady, accuracy, locationStatus }: { pos
     <StyledMapView ref={map} className="absolute inset-x-0 top-0" style={{ height: sceneSize.height > 0 ? frameHeight : '100%' }} provider={PROVIDER_GOOGLE} customMapStyle={customMapStyle} initialRegion={{ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }}
       {...(mapReady ? { mapPadding } : {})} showsUserLocation={enabled} showsMyLocationButton={false} onMapReady={() => setMapReady(true)}
       onPoiClick={(event) => select(event.nativeEvent.placeId)}>
-      <Circle center={position} radius={activationRadiusMeters} strokeColor={routeColor} fillColor={routeArea} />
-      {nearby.data?.map((item) => <Marker key={item.id} coordinate={item.coordinates} title={item.name} onPress={() => select(item.providerId)}><PlaceCallout name={item.name} /></Marker>)}
-      {place && !nearby.data?.some((item) => item.providerId === place.providerId) && <Marker coordinate={place.coordinates} title={place.name}><PlaceCallout name={place.name} /></Marker>}
+      {!featured && locationReady && <Circle center={position} radius={activationRadiusMeters} strokeColor={routeColor} fillColor={routeArea} />}
+      {nearby.data?.filter(item => !featured || matchedFeaturedDestination(item)?.id !== featured.id).map((item) => <Marker key={item.id} coordinate={item.coordinates} title={item.name} onPress={() => select(item.providerId)}><PlaceCallout name={item.name} /></Marker>)}
+      {place && !nearby.data?.some((item) => item.providerId === place.providerId) && <Marker coordinate={place.coordinates} title={place.name} pinColor={featured ? routeColor : undefined}><PlaceCallout name={place.name} /></Marker>}
     </StyledMapView>
     <View style={{ paddingTop: insets.top }} pointerEvents="box-none">
     <HomeMapControls onSearchNearby={discover} canSearch={enabled} searching={nearby.isFetching}
       onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height + insets.top)}
       onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')} />
     </View>
-    <MapRecenter position={sheetPosition} onPress={() => map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
-    <HomePlaceSheet geometry={sheetGeometry} animatedPosition={sheetPosition} key={selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId}
-      canRequest={enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
-      detailsLoaded={!!complete} detailsLoading={details.isFetching} mapLoading={!mapReady}
-      locationStatus={<>{locationStatus}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
-      selectionSummary={place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
-      onViewDetails={place ? () => {
+    <MapRecenter disabled={!enabled} position={sheetPosition} onPress={() => enabled && map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
+    <HomePlaceSheet geometry={sheetGeometry} animatedPosition={sheetPosition} key={featured?.id ?? selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId || !!featured}
+      canRequest={featured ? mapEnabled && !!destinationToRoutePlace(featured) : enabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
+      detailsLoaded={!!complete || !!featured} detailsLoading={details.isFetching} mapLoading={!mapReady}
+      locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} contentReady={false} onDismiss={arrival.dismiss} />}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
+      selectionSummary={featured ? t('arrival.teaser') : place ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : undefined}
+      onViewDetails={place && !featured ? () => {
         if (!active || !focused) return;
         setPlaceSelection(queryClient, place, complete ? language : undefined, detailsOptions(selectedId).initialDataUpdatedAt);
         router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });

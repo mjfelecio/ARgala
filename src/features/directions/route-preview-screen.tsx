@@ -13,6 +13,7 @@ import { withUniwind } from 'uniwind';
 import { RoutePreviewLocationStatus } from './route-preview-location-status';
 import { ProviderAttributions } from '@/features/map/attributions';
 import { setPlaceSelection } from '@/features/places/selection';
+import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
 import { useRoutePreview } from './use-route-preview';
 import { RoutePreviewMap } from './route-preview-map';
 import { routeSheetGeometry } from '@/features/map/sheet-geometry';
@@ -85,6 +86,7 @@ function Preview({ token }: { token: unknown }) {
               <Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={accent} />
             </Button>
           </View>
+          {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} contentReady={false} onDismiss={preview.arrival.dismiss} />}
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}
           {result && coordinates.length > 1 && !navigation.started && <>

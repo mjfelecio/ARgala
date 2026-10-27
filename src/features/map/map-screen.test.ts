@@ -302,10 +302,10 @@ it('offers an explicit details request when the handoff has expired', async () =
 it('offers floating Home controls and spends nothing on mount, pan, locale, navigation or invalidation', async () => {
  await act(async () => { tree = create(renderMap()); });
  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
- expect(tree!.root.findAllByType('button').filter(b => b.props.accessibilityRole === 'button')).toHaveLength(5);
+ expect(tree!.root.findAllByType('button').filter(b => b.props.accessibilityRole === 'button')).toHaveLength(4);
  // Native region changes have no paid-refresh handler.
  await act(async () => { tree!.root.findByType('map').props.onRegionChangeComplete?.({ latitude: 10, longitude: 20 }); });
- await press('map.camera'); expect(router.navigate).toHaveBeenLastCalledWith('/ar');
+ await press('destinations.title'); expect(router.navigate).toHaveBeenLastCalledWith('/destinations');
  expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('map.settings'))).toBe(false);
  controls.focused = false; controls.active = false;
  await act(async () => { tree!.update(renderMap()); });
@@ -457,6 +457,7 @@ it('centers a Details handoff only when the existing native map is ready without
 
 it('separates Recenter from the search bar and keeps it attached to the native sheet position', async () => {
  await act(async()=>{ tree=create(renderMap()); });
+ await act(async()=>tree!.root.findByType('map').props.onMapReady());
  const top=tree!.root.findByProps({testID:'home-map-controls'});
  expect(top.findAllByType('button').some(b=>b.props.accessibilityLabel===translations.t('map.recenter'))).toBe(false);
  const floating=tree!.root.findByType(MapRecenter);
@@ -534,4 +535,30 @@ it('bounds native padding in very short scenes and ignores transient zero scene 
  const height=map.props.style.height;
  await act(async()=>tree!.root.findByProps({testID:'home-map-scene'}).props.onLayout({nativeEvent:{layout:{width:0,height:0}}}));
  expect(map.props.style.height).toBe(height);expect(tree!.root.findByType('map')).toBe(map);
+});
+
+it('opens the approved ACLC map point and minimal sheet without GPS or paid provider details', async () => {
+  const { getDestination } = await import('@/features/destinations/catalog');
+  controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+  controls.hasLocation = false;
+  await act(async () => { tree = create(renderMap()); });
+  expect(tree!.root.findByType('map').props.initialRegion).toMatchObject(getDestination('pilot-aclc')!.center!);
+  expect(JSON.stringify(tree!.toJSON())).toContain('ACLC College of Ormoc');
+  expect(tree!.root.findByType('map').props.showsUserLocation).toBe(false);
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('retains the requested featured center until the current native map becomes ready', async () => {
+  controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+  await act(async () => { tree = create(renderMap()); });
+  expect(controls.animate).not.toHaveBeenCalled();
+  await act(async () => tree!.root.findByType('map').props.onMapReady());
+  expect(controls.animate).toHaveBeenCalledWith(expect.objectContaining({ latitude: 11.022973, longitude: 124.6054992 }), 400);
+});
+it('allows a known featured selection after an initial GPS-denied screen', async () => {
+  controls.hasLocation = false;
+  await act(async () => { tree = create(renderMap()); });
+  expect(tree!.root.findAllByType('map')).toHaveLength(0);
+  controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+  await act(async () => tree!.update(renderMap()));
+  expect(tree!.root.findAllByType('map')).toHaveLength(1);
 });

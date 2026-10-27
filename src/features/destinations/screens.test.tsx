@@ -75,13 +75,15 @@ it('uses history for Back and translates missing states with actual resources on
   }
   expect(placesService.nearby).not.toHaveBeenCalled();
 });
-it('shows approved overview and highlights independently with visible English fallback only when needed', async () => {
+it('shows only localized prearrival teaser instead of approved rich copy', async () => {
  const catalog = await import('./catalog');
- const fixture = catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic fixture', copy: { en: { overview: { value: 'Approved test overview', approvalReference: 'Test' }, highlights: { value: ['Approved test highlight'], approvalReference: 'Test' } }, ja: { overview: { value: '日本語テスト', approvalReference: 'Test' } } } });
+ const fixture = catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic fixture', copy: { en: { overview: { value: 'Approved test overview', approvalReference: 'Test' } } } });
  vi.spyOn(catalog, 'getDestination').mockReturnValue(fixture);
- await mount(); expect(output()).toContain('Approved test overview'); expect(output()).toContain('Approved test highlight'); expect(output()).not.toContain(translations.t('destinations.englishFallback'));
- controls.language = 'ja'; await act(async () => { await translations.changeLanguage('ja'); tree!.update(render()); });
- expect(output()).toContain('日本語テスト'); expect(output()).toContain('Approved test highlight'); expect(output()).toContain(translations.t('destinations.englishFallback')); expect(output()).not.toContain(translations.t('destinations.contentPending'));
+ await mount();
+ for (const language of ['en', 'ja', 'ko'] as const) {
+   controls.language = language; await act(async () => { await translations.changeLanguage(language); tree!.update(render()); });
+   expect(output()).not.toContain('Approved test overview'); expect(output()).toContain(translations.t('arrival.teaser'));
+ }
 });
 it('routes an approved visitor entrance exactly once without obtaining GPS on the catalog screen', async () => {
  const catalog = await import('./catalog'); const { claimRoutePreviewIntent } = await import('@/features/directions/route-preview-intent');
@@ -97,4 +99,21 @@ it('does not create directions intent from an inactive catalog owner', async () 
  const catalog = await import('./catalog');
  vi.spyOn(catalog, 'getDestination').mockReturnValue(catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic fixture', routeEntrance: { latitude: 0, longitude: 0 }, routeEntranceApprovalReference: 'Test' }));
  controls.active = false; await mount(); await act(async () => button('placeDetails.directions')!.props.onPress()); expect(router.push).not.toHaveBeenCalled();
+});
+
+it('opens the ACLC pilot card on the existing map without acquiring catalog GPS', async () => {
+  await mount(<DestinationsScreen />);
+  const card = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === 'ACLC College of Ormoc');
+  expect(card).toBeDefined();
+  await act(async () => card!.props.onPress());
+  expect(router.navigate).toHaveBeenCalledWith({ pathname: '/', params: { featuredDestinationId: 'pilot-aclc' } });
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+it('keeps approved featured overview and history out of prearrival 2D details', async () => {
+ const catalog = await import('./catalog');
+ const fixture = catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic featured', copy: { en: { overview: { value: 'Private approved overview', approvalReference: 'test' }, highlights: { value: ['Private approved highlight'], approvalReference: 'test' } } } });
+ vi.spyOn(catalog, 'getDestination').mockReturnValue(fixture);
+ await mount();
+ expect(output()).not.toContain('Private approved overview'); expect(output()).not.toContain('Private approved highlight');
+ expect(output()).toContain(translations.t('arrival.teaser'));
 });
