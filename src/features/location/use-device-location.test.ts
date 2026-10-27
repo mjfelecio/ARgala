@@ -102,3 +102,11 @@ it('records receipt time separately from native timestamps without refreshing wa
   expect(current.positionTimestamp).toBe(60000);
   expect(current.watcherTimestamp).toBe(1);
 });
+
+it('keeps exact watcher coordinates and accuracy independent from a newer one-shot fix', async () => {
+  await act(async () => { tree = create(React.createElement(Probe)); });
+  const receive = vi.mocked(subscribeToLocation).mock.calls[0][0];
+  await act(async () => { receive(fix); oneShot.resolve({ ...fix, coords: { ...fix.coords, latitude: 0, accuracy: 500 }, timestamp: 100 }); });
+  expect(current).toHaveProperty('watcherSample', { position: { latitude: 11.01, longitude: 124.61 }, accuracy: 8, timestamp: 1 });
+  expect(current.position).toEqual({ latitude: 0, longitude: 124.61 });
+});

@@ -13,12 +13,14 @@ type DeviceState = {
   watcherStatus: 'pending' | 'ready' | 'error';
   errorCode: LocationErrorCode | null;
   position: Coordinate | null; accuracy: number | null; heading: Heading | null;
+  /** Exact continuous sample: a later one-shot fix must never replace its geometry/accuracy. */
+  watcherSample: Readonly<{ position: Coordinate; accuracy: number | null; timestamp: number }> | null;
   positionTimestamp: number | null; watcherTimestamp: number | null; headingTimestamp: number | null;
   /** JS receipt clock for rendering; never substitutes for native sample freshness. */
   sampleReceivedAt: number | null;
   headingStatus: 'pending' | 'ready' | 'unavailable'; canAskAgain: boolean; error: string | null;
 };
-const initial: DeviceState = { phase: 'waiting', status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, positionTimestamp: null, watcherTimestamp: null, headingTimestamp: null, sampleReceivedAt: null, headingStatus: 'pending', canAskAgain: true, error: null };
+const initial: DeviceState = { watcherSample: null, phase: 'waiting', status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, positionTimestamp: null, watcherTimestamp: null, headingTimestamp: null, sampleReceivedAt: null, headingStatus: 'pending', canAskAgain: true, error: null };
 
 export function useDeviceLocation({ enabled = true, heading: needsHeading = false, distanceIntervalMeters = LOCATION.distanceIntervalMeters }: { enabled?: boolean; heading?: boolean; distanceIntervalMeters?: number } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
@@ -66,6 +68,7 @@ export function useDeviceLocation({ enabled = true, heading: needsHeading = fals
           return { ...previous, watcherStatus, status: watcherStatus === 'error' ? 'error' : 'ready',
             position: { latitude: position.coords.latitude, longitude: position.coords.longitude },
             accuracy: position.coords.accuracy, positionTimestamp: position.timestamp, sampleReceivedAt,
+            watcherSample: fromWatcher ? Object.freeze({ position: Object.freeze({ latitude: position.coords.latitude, longitude: position.coords.longitude }), accuracy: position.coords.accuracy, timestamp: position.timestamp }) : previous.watcherSample,
             watcherTimestamp: fromWatcher ? position.timestamp : previous.watcherTimestamp, error: watcherStatus === 'error' ? previous.error : null,
             errorCode: watcherStatus === 'error' ? previous.errorCode : null };
         });
