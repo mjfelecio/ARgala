@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { bookmarkKey,bookmarkSchema,emptyJournal,journalSchema,mergeJournal,saveBookmark,type Journal } from './model';
+import { bookmarkKey,bookmarkSchema,emptyJournal,journalSchema,mergeJournal,type Journal } from './model';
 const counter=z.number().int().min(0).max(Number.MAX_SAFE_INTEGER);
 const editSchema=z.object({reference:bookmarkSchema,saved:z.boolean(),version:counter.min(1)}).strict();
 const flightSchema=z.object({requestId:z.uuid(),sequence:counter.min(1),revision:counter,journal:journalSchema,editVersion:counter}).strict();
@@ -37,9 +37,11 @@ export function beginSync(doc:JournalDocument,makeId=journalUuid):{document:Sync
  return {document,request:{clientId:document.cloud.clientId,flight:document.cloud.flight!}};
 }
 function applyEdits(remote:Journal,local:Journal,edits:SyncDocument['cloud']['edits']):Journal{
- let result:Journal={...remote,stamps:mergeJournal({...remote,bookmarks:[]},{...local,bookmarks:[]}).stamps};
- for(const edit of edits)result=saveBookmark(result,edit.reference,edit.saved);
- return journalSchema.parse(result);
+ const bookmarks=new Map(remote.bookmarks.map(reference=>[bookmarkKey(reference),reference]));
+ for(const edit of edits){const key=bookmarkKey(edit.reference);if(edit.saved)bookmarks.set(key,edit.reference);else bookmarks.delete(key);}
+ const stamps=mergeJournal({...remote,bookmarks:[]},{...local,bookmarks:[]}).stamps;
+ // Capacity applies to the completed reconciliation, not intermediate intent order.
+ return journalSchema.parse({...remote,bookmarks:[...bookmarks.values()],stamps});
 }
 export function acceptSyncDocument(doc:SyncDocument,request:SyncRequest,input:unknown,makeId=journalUuid){
  const response=syncResponseSchema.parse(input);const flight=doc.cloud.flight;

@@ -40,3 +40,13 @@ it('treats a guest save as fresh intent even if the account still has an outdate
  await repo.change('guest',s=>saveBookmark(s,ref,true));await repo.open('account');request=await repo.prepareSync('account');
  const result=await repo.acceptSync('account',request,{status:'conflict',sequence:request.flight.sequence,requestId:request.flight.requestId,revision:2,journal:emptyJournal()});expect(result.journal.bookmarks).toEqual([ref]);expect(result.pending).toBe(true);
 });
+it('validates the final reconciled capacity rather than a temporary add-before-remove overflow',async()=>{
+ const {repo}=setup();const baseline={version:1 as const,bookmarks:Array.from({length:999},(_,i)=>({kind:'google' as const,id:`ChIJ_${i}`})),stamps:[]};await repo.change('account',()=>baseline);
+ let request=await repo.prepareSync('account');await repo.acceptSync('account',request,{status:'applied',sequence:request.flight.sequence,requestId:request.flight.requestId,revision:1,journal:baseline});
+ await repo.change('account',s=>saveBookmark(s,{kind:'google',id:'ChIJ_B'},true));await repo.change('account',s=>saveBookmark(s,baseline.bookmarks[0],false));request=await repo.prepareSync('account');
+ const remote=saveBookmark(baseline,{kind:'google',id:'ChIJ_C'},true);const result=await repo.acceptSync('account',request,{status:'conflict',sequence:request.flight.sequence,requestId:request.flight.requestId,revision:2,journal:remote});expect(result.journal.bookmarks).toHaveLength(1000);expect(result.journal.bookmarks).toContainEqual({kind:'google',id:'ChIJ_B'});expect(result.journal.bookmarks).toContainEqual({kind:'google',id:'ChIJ_C'});expect(result.journal.bookmarks).not.toContainEqual(baseline.bookmarks[0]);
+});
+it('retains local data and the flight on genuine final reconciliation overflow',async()=>{
+ const {repo}=setup();const baseline={version:1 as const,bookmarks:Array.from({length:999},(_,i)=>({kind:'google' as const,id:`ChIJ_${i}`})),stamps:[]};await repo.change('account',()=>baseline);let request=await repo.prepareSync('account');await repo.acceptSync('account',request,{status:'applied',sequence:request.flight.sequence,requestId:request.flight.requestId,revision:1,journal:baseline});
+ await repo.change('account',s=>saveBookmark(s,{kind:'google',id:'ChIJ_B'},true));request=await repo.prepareSync('account');const remote=saveBookmark(baseline,{kind:'google',id:'ChIJ_C'},true);await expect(repo.acceptSync('account',request,{status:'conflict',sequence:request.flight.sequence,requestId:request.flight.requestId,revision:2,journal:remote})).rejects.toThrow();expect((await repo.open('account')).bookmarks).toHaveLength(1000);expect(await repo.prepareSync('account')).toEqual(request);
+});

@@ -38,6 +38,6 @@ it('defers background changes and uses the actual foreground snapshot to resume'
  vi.useFakeTimers();runtime.session={user:{id:'user-a'},access_token:'token-a'};await mount();await foreground(false);const count=runtime.transport.mock.calls.length;await act(async()=>{await journal.save({kind:'google',id:'ChIJ_background'},true);});await act(async()=>{await vi.advanceTimersByTimeAsync(500);});expect(runtime.transport).toHaveBeenCalledTimes(count);
  await foreground(true);expect(runtime.transport.mock.calls.length).toBe(count+1);expect(journal.state.bookmarks).toHaveLength(1);
 });
-it.each(['journal.syncAuth','journal.syncTimeout','journal.syncUnavailable','journal.syncConflict'] as const)('renders known %s failures and follows language changes',async code=>{
+it.each(['journal.syncAuth','journal.syncTimeout','journal.syncUnavailable','journal.syncConflict','journal.syncDeviceLimit'] as const)('renders known %s failures and follows language changes',async code=>{
  runtime.session={user:{id:'user-a'},access_token:'token-a'};runtime.transport.mockRejectedValueOnce(new JournalSyncError(code));await mount();expect(copy()).toContain(translations.t(code));await act(async()=>{await translations.changeLanguage('ko');});expect(copy()).toContain(translations.t(code));await act(async()=>{await translations.changeLanguage('ja');});expect(copy()).toContain(translations.t(code));
 });

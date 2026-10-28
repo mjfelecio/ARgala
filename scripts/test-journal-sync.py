@@ -18,7 +18,7 @@ with tempfile.TemporaryDirectory(prefix='argala-journal-pg-') as directory:
         return subprocess.run(command, check=True, capture_output=True, text=True, **kwargs)
     run([str(bin_dir / 'initdb'), '-D', directory, '-A', 'trust', '-U', 'argala_test'])
     run([str(bin_dir / 'pg_ctl'), '-D', directory, '-l', str(Path(directory) / 'server.log'), '-o', f"-F -k {directory} -p 55439 -h ''", '-w', 'start'])
-    command = [str(bin_dir / 'psql'), '-h', directory, '-p', '55439', '-U', 'argala_test', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-At']
+    command = [str(bin_dir / 'psql'), '-h', directory, '-p', '55439', '-U', 'argala_test', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-v', 'VERBOSITY=verbose', '-At']
     def sql(text):
         return run(command, input=text).stdout.strip()
     def as_user(user, text):
@@ -83,6 +83,13 @@ with tempfile.TemporaryDirectory(prefix='argala-journal-pg-') as directory:
         huge = {**empty, 'bookmarks':[{'kind':'google','id':f'ChIJ_{i}_'+'x'*2000} for i in range(600)]}
         denied(user_a, f"SELECT public.sync_travel_journal('{client_a}','40000000-0000-4000-8000-000000000002',5,4,'{json.dumps(huge)}'::jsonb);")
         assert as_user(user_a, 'SELECT revision FROM public.account_journals;') == '4'
+        # Rejected fresh namespaces must not allocate permanent receipt rows.
+        before = int(as_user(user_a, 'SELECT count(*) FROM public.journal_sync_clients;'))
+        for index in range(16):
+            cid = f'60000000-0000-4000-8000-{index:012d}'
+            assert request(user_a,cid,999,4,empty)['status'] == 'reset'
+            assert request(user_a,cid,1,0,empty)['status'] == 'conflict'
+        assert int(as_user(user_a, 'SELECT count(*) FROM public.journal_sync_clients;')) == before
         def concurrent(index):
             cid = f'50000000-0000-4000-8000-{index:012d}'
             return request(user_a, cid, 1, 4, {**empty, 'bookmarks':[{'kind':'google','id':f'ChIJ_{index}'}]})
@@ -90,6 +97,26 @@ with tempfile.TemporaryDirectory(prefix='argala-journal-pg-') as directory:
             results = list(executor.map(concurrent, range(8)))
         assert [x['status'] for x in results].count('applied') == 1, results
         assert [x['status'] for x in results].count('conflict') == 7, results
+        # Admission is bounded under the account lock, without evicting replay receipts.
+        snapshot = json.loads(as_user(user_a, 'SELECT payload FROM public.account_journals;'))
+        existing = int(as_user(user_a, 'SELECT count(*) FROM public.journal_sync_clients;'))
+        for index in range(127-existing):
+            cid = f'70000000-0000-4000-8000-{index:012d}'
+            assert request(user_a,cid,1,5,snapshot)['status'] == 'applied'
+        def admit(index):
+            try:
+                cid=f'80000000-0000-4000-8000-{index:012d}'
+                return request(user_a,cid,1,5,snapshot)['status']
+            except subprocess.CalledProcessError as error:
+                assert '54000' in error.stderr, error.stderr
+                return 'capacity'
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            admissions=list(executor.map(admit,range(8)))
+        assert admissions.count('applied') == 1 and admissions.count('capacity') == 7, admissions
+        assert int(as_user(user_a, 'SELECT count(*) FROM public.journal_sync_clients;')) == 128
+        # Existing client requests and replays remain available at capacity.
+        assert request(user_a,client_a,5,5,snapshot)['status'] == 'applied'
+        assert request(user_a,client_a,5,5,snapshot)['status'] == 'applied'
         sql(f"DELETE FROM auth.users WHERE id='{user_a}';")
         assert sql(f"SELECT count(*) FROM public.account_journals WHERE user_id='{user_a}';") == '0'
         assert sql(f"SELECT count(*) FROM public.journal_sync_clients WHERE user_id='{user_a}';") == '0'

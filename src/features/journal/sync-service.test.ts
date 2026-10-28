@@ -23,3 +23,6 @@ it('cancels a retired owner even if fetch ignores abort and never sends an alrea
  const network=vi.fn(()=>new Promise<Response>(()=>{}));const sync=createJournalSyncService(config,network);const abort=new AbortController();const pending=sync(request,account,abort.signal);const assertion=expect(pending).rejects.toBeInstanceOf(JournalSyncError);abort.abort();await assertion;
  network.mockClear();await expect(sync(request,account,abort.signal)).rejects.toBeInstanceOf(JournalSyncError);expect(network).not.toHaveBeenCalled();
 });
+it('maps the bounded device-receipt capacity error without exposing SQL diagnostics',async()=>{
+ const sync=createJournalSyncService(config,async()=>new Response(JSON.stringify({code:'54000',message:'PRIVATE SQL detail'}),{status:500}));await expect(sync(request,account,new AbortController().signal)).rejects.toMatchObject({code:'journal.syncDeviceLimit'});
+});

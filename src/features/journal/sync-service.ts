@@ -1,7 +1,7 @@
 import { environment } from '@/config/env';
 import { syncRequestSchema,syncResponseSchema,type SyncRequest,type SyncResponse } from './sync-protocol';
 export type JournalAccount=Readonly<{principalId:string;accessToken:string}>;
-export type SyncErrorCode='journal.syncFailed'|'journal.syncTimeout'|'journal.syncAuth'|'journal.syncUnavailable'|'journal.syncConflict';
+export type SyncErrorCode='journal.syncFailed'|'journal.syncTimeout'|'journal.syncAuth'|'journal.syncUnavailable'|'journal.syncConflict'|'journal.syncDeviceLimit';
 export class JournalSyncError extends Error {constructor(readonly code:SyncErrorCode){super(code);}}
 export type JournalSyncTransport=(request:SyncRequest,account:JournalAccount,signal:AbortSignal)=>Promise<SyncResponse>;
 const maxBytes=1024*1024;
@@ -24,9 +24,9 @@ export function createJournalSyncService(config:{url:string;key:string},network:
     const response=await network(config.url.replace(/\/$/,'')+'/rest/v1/rpc/sync_travel_journal',{method:'POST',headers:{'Content-Type':'application/json',apikey:config.key,Authorization:`Bearer ${token}`},body,signal:abort.signal});
     if(response.status===401||response.status===403)throw new JournalSyncError('journal.syncAuth');
     if(response.status===404)throw new JournalSyncError('journal.syncUnavailable');
-    if(!response.ok)throw new JournalSyncError('journal.syncFailed');
     const length=response.headers.get('content-length');if(length!==null&&(!Number.isFinite(Number(length))||Number(length)<0||Number(length)>maxBytes))throw new JournalSyncError('journal.syncFailed');
     const text=await response.text();if(utf8Length(text)>maxBytes)throw new JournalSyncError('journal.syncFailed');
+    if(!response.ok){let code:unknown;try{code=(JSON.parse(text) as {code?:unknown})?.code;}catch{}throw new JournalSyncError(code==='54000'?'journal.syncDeviceLimit':'journal.syncFailed');}
     return syncResponseSchema.parse(JSON.parse(text));
    };
    return await Promise.race([operation(),stopped]);

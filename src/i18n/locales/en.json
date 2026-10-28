@@ -454,6 +454,7 @@
     "syncTimeout": "Sync took too long. Your local changes are safe. Please retry.",
     "syncAuth": "Sign in again to sync your progress. Your local changes are safe.",
     "syncUnavailable": "Account sync is not available right now. Your local changes are safe.",
-    "syncConflict": "Other changes are still arriving. Your local changes are safe. Retry sync."
+    "syncConflict": "Other changes are still arriving. Your local changes are safe. Retry sync.",
+    "syncDeviceLimit": "This account has reached its sync device limit. Your local changes remain saved."
   }
 }

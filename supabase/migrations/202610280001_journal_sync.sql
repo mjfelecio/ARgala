@@ -80,8 +80,8 @@ begin
   end if;
   insert into public.account_journals(user_id) values (owner_id) on conflict do nothing;
   select * into strict current_row from public.account_journals where user_id = owner_id for update;
-  insert into public.journal_sync_clients(user_id,client_id) values (owner_id,p_client_id) on conflict do nothing;
-  select * into strict client_row from public.journal_sync_clients where user_id = owner_id and client_id = p_client_id;
+  select * into client_row from public.journal_sync_clients where user_id = owner_id and client_id = p_client_id;
+  if not found then client_row.last_sequence := 0; end if;
   digest := pg_catalog.md5(p_revision::text || ':' || p_journal::text);
   if p_sequence <= client_row.last_sequence then
     -- Replays return the latest snapshot, not an obsolete saved response.
@@ -91,6 +91,13 @@ begin
   elsif p_revision <> current_row.revision then
     outcome := 'conflict';
   else
+    -- Admit only accepted namespaces, under the same account lock. Never evict replay receipts.
+    if client_row.client_id is null then
+      if (select count(*) from public.journal_sync_clients where user_id=owner_id) >= 128 then
+        raise exception using errcode = '54000', message = 'Journal device capacity reached';
+      end if;
+      insert into public.journal_sync_clients(user_id,client_id) values (owner_id,p_client_id) returning * into client_row;
+    end if;
     -- Passport is monotonic first-visit state, not a server GPS attestation.
     select coalesce(pg_catalog.jsonb_agg(pg_catalog.jsonb_build_object('destinationId',destination_id,'visitedAt',visited_at) order by destination_id),'[]'::jsonb)
       into stamps from (
