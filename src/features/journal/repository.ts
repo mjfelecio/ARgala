@@ -16,10 +16,14 @@ export class JournalRepository {
     const raw=JSON.stringify(journalSchema.parse(state)); if(raw.length>maxBytes) throw new Error('journal.capacity');
     await this.storage.setItem(this.key(principal),raw);
   }
-  open(principal:string):Promise<Journal> { return this.serial(async()=>{
-    const own=await this.read(principal); if(principal==='guest') return own;
+  open(principal:string,isCurrent:()=>boolean=()=>true):Promise<Journal> { return this.serial(async()=>{
+    const own=await this.read(principal); if(!isCurrent()) throw new Error('journal.ownerRetired'); if(principal==='guest') return own;
     const guest=await this.read('guest'); if(!guest.bookmarks.length&&!guest.stamps.length) return own;
-    const merged=mergeJournal(own,guest); await this.write(principal,merged);
+    const merged=mergeJournal(own,guest);
+    // Claim immediately before the first durable target write, while this owner is current.
+    // Once claimed, this serialized transfer belongs to that account, even after sign-out.
+    if(!isCurrent()) throw new Error('journal.ownerRetired');
+    await this.write(principal,merged);
     // Never clear the source before account persistence. Retry is idempotent after either write fails.
     await this.write('guest',emptyJournal()); return merged;
   }); }

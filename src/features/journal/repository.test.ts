@@ -44,3 +44,15 @@ it('recovers idempotently when guest clearing fails after account persistence',a
  storage.setItem.mockImplementationOnce(original).mockRejectedValueOnce(new Error('clear failed'));
  await expect(repo.open('user-a')).rejects.toThrow();expect((await repo.open('guest')).bookmarks).toHaveLength(1);expect((await repo.open('user-a')).bookmarks).toHaveLength(1);expect((await repo.open('guest')).bookmarks).toHaveLength(0);
 });
+it('retires a stale migration after delayed reads before claiming any account write',async()=>{
+ const {repo,storage,disk}=setup();await repo.change('guest',s=>saveBookmark(s,ref,true));const gate=Promise.withResolvers<void>();const original=storage.getItem.getMockImplementation()!;
+ storage.getItem.mockImplementationOnce(async k=>{await gate.promise;return original(k);});let current=true;
+ const retired=repo.open('user-a',()=>current);await Promise.resolve();current=false;const next=repo.open('user-b');gate.resolve();
+ await expect(retired).rejects.toThrow();expect((await next).bookmarks).toHaveLength(1);expect(disk.has(repo.key('user-a'))).toBe(false);
+});
+it.each(['account-write','guest-clear'])('finishes an already-claimed %s for its original account, never another account',async phase=>{
+ const {repo,storage}=setup();await repo.change('guest',s=>saveBookmark(s,ref,true));const gate=Promise.withResolvers<void>();const started=Promise.withResolvers<void>();const original=storage.setItem.getMockImplementation()!;let current=true;
+ storage.setItem.mockImplementation(async(k,v)=>{if(k===repo.key(phase==='account-write'?'user-a':'guest')){started.resolve();await gate.promise;}return original(k,v);});
+ const first=repo.open('user-a',()=>current);await started.promise;current=false;const next=repo.open('user-b');gate.resolve();await first;
+ expect((await next).bookmarks).toHaveLength(0);expect((await repo.open('user-a')).bookmarks).toHaveLength(1);
+});

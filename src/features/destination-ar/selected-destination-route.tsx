@@ -59,7 +59,7 @@ function ClaimedEntry({ store, id, token }: { store: ArAdmissionStore | null; id
 function PreparedScene({ entry, store, content }: { entry: PreparedArEntry; store: ArAdmissionStore; content: readonly RingContent[] }) {
   const { t } = useTranslation(); const active = useAppActive(); const focused = useIsFocused();
   const [established, setEstablished] = useState(false);
-  const earnStamp=useEarnedStamp(entry);
+  const {onEstablished:earnStamp,retry:retryStamp}=useEarnedStamp(entry);
   const onEstablished = useCallback(() => { setEstablished(true); earnStamp(); }, [earnStamp]);
   const location = useDeviceLocation({ enabled: !established && !entry.simulated, heading: false, distanceIntervalMeters: 0 });
   useAdmissionSource(store, entry.destination.id, { running: active && focused && !established && !entry.simulated, watcherStatus: location.watcherStatus, sample: location.watcherSample }, false);
@@ -68,6 +68,6 @@ function PreparedScene({ entry, store, content }: { entry: PreparedArEntry; stor
     freshEligible={entry.authorizeMount} entryReady={entry.simulated || arrival?.destinationId === entry.destination.id && arrival.eligible}
     onEstablished={onEstablished} onExit={() => store.endEntry(entry.identity.admissionId)}
     onReturn={() => router.dismissTo({ pathname: '/', params: { featuredDestinationId: entry.destination.id } })}
-    preflightNoticeKey="arrival.preflight" developmentNoticeKey={entry.simulated ? "arrival.simulatedLive" : "arrival.draftLive"} progressFeedback={<JournalFeedback onRetrySave={earnStamp}/>} guidance={entry.simulated ? <Notice>{t("arrival.simulatedLive")}</Notice> : <View className="gap-2 px-4"><LocationStatus location={location} />
+    preflightNoticeKey="arrival.preflight" developmentNoticeKey={entry.simulated ? "arrival.simulatedLive" : "arrival.draftLive"} progressFeedback={established && entry.kind === 'approved' && !entry.simulated && entry.identity.provenance === 'verified' ? <JournalFeedback onRetrySave={retryStamp}/> : null} guidance={entry.simulated ? <Notice>{t("arrival.simulatedLive")}</Notice> : <View className="gap-2 px-4"><LocationStatus location={location} />
       <Text className="font-sans text-sm text-white">{t(`arrival.${arrival?.status ?? 'uncertain'}`)}</Text></View>} />;
 }

@@ -14,7 +14,7 @@ export function JournalProvider({children}:PropsWithChildren){
 }
 function JournalOwner({principalId,children}:PropsWithChildren<{principalId:string}>){
  const [state,setState]=useState(emptyJournal);const [ready,setReady]=useState(false);const [error,setError]=useState<JournalContextValue['error']>(null);const [attempt,setAttempt]=useState(0);const live=useRef(false);
- useEffect(()=>{live.current=true;let current=true;void repository.open(principalId).then(s=>{if(current){setState(s);setError(null);setReady(true);}}).catch(()=>{if(current){setError('journal.loadFailed');setReady(false);}});return()=>{current=false;live.current=false;};},[principalId,attempt]);
+ useEffect(()=>{live.current=true;let current=true;void repository.open(principalId,()=>current).then(s=>{if(current){setState(s);setError(null);setReady(true);}}).catch(()=>{if(current){setError('journal.loadFailed');setReady(false);}});return()=>{current=false;live.current=false;};},[principalId,attempt]);
  const change=useCallback(async(update:(s:Journal)=>Journal)=>{if(!live.current||!ready)return false;try{const s=await repository.change(principalId,update);if(live.current){setState(s);setError(null);}return true;}catch{if(live.current)setError('journal.saveFailed');return false;}},[principalId,ready]);
  const save=useCallback((ref:Bookmark,saved:boolean)=>change(s=>saveBookmark(s,ref,saved)),[change]);
  const award=useCallback(async(entry:PreparedArEntry)=>{

@@ -18,12 +18,12 @@ vi.mock('@react-native-async-storage/async-storage',()=>({default:{getItem:runti
 vi.mock('@/features/auth/provider',()=>({useAuth:()=>({session:runtime.session})}));
 vi.mock('@/features/auth/guest-context',()=>({useGuestAccess:()=>({enabled:runtime.guest})}));
 vi.mock('expo-router',()=>({router:{push:vi.fn(),navigate:vi.fn(),back:vi.fn(),canGoBack:()=>true}}));
-let tree:ReactTestRenderer; let journal:NonNullable<ReturnType<typeof useJournal>>; let establish:()=>void;
+let tree:ReactTestRenderer; let journal:NonNullable<ReturnType<typeof useJournal>>; let establish:()=>void; let retryStamp:()=>void;
 const translations=createInstance();await translations.use(initReactI18next).init({...localizationOptions,lng:'en',react:{useSuspense:false}});
 function entry(overrides:Partial<PreparedArEntry>={}):PreparedArEntry{return {destination:getDestination('pilot-aclc')!,kind:'approved',simulated:false,language:'en',authorizeMount:()=>true,identity:{admissionId:'test-entry',destinationId:'pilot-aclc',principalId:'user-a',provenance:'verified'},...overrides};}
 let candidate=entry();
 let showSaved=false;
-function Probe(){const value=useJournal()!;const earn=useEarnedStamp(candidate);React.useEffect(()=>{journal=value;establish=earn;});return <><SavePlaceAction reference={{kind:'google',id:'ChIJ_test'}}/><JournalFeedback/>{showSaved&&<SavedPlacesScreen/>}<PassportSummary/></>;}
+function Probe(){const value=useJournal()!;const earn=useEarnedStamp(candidate);React.useEffect(()=>{journal=value;establish=earn.onEstablished;retryStamp=earn.retry;});return <><SavePlaceAction reference={{kind:'google',id:'ChIJ_test'}}/><JournalFeedback/>{showSaved&&<SavedPlacesScreen/>}<PassportSummary/></>;}
 const view=()=>withHeroUI(<I18nextProvider i18n={translations}><JournalProvider><Probe/></JournalProvider></I18nextProvider>);
 async function mount(){await act(async()=>{tree=create(view());});}
 async function press(key:string){const b=tree.root.findAll(x=>x.type==='button'&&x.props.accessibilityLabel===translations.t(key))[0];expect(b).toBeDefined();await act(async()=>{await b.props.onPress();});}
@@ -51,4 +51,15 @@ it('does not publish a retired account write into the next account',async()=>{
 });
 it('retains failed earned stamps for an explicit established-event retry',async()=>{
  runtime.session={user:{id:'user-a'}};await mount();runtime.set.mockRejectedValueOnce(new Error('raw'));await act(async()=>establish());expect(journal.state.stamps).toHaveLength(0);expect(journal.error).toBe('journal.saveFailed');await act(async()=>establish());expect(journal.state.stamps).toHaveLength(1);
+});
+
+it('cannot turn an unrelated bookmark failure into an earned event before establishment',async()=>{
+ runtime.session={user:{id:'user-a'}};await mount();runtime.set.mockRejectedValueOnce(new Error('bookmark error'));await act(async()=>{await journal.save({kind:'google',id:'ChIJ_failure'},true);});expect(journal.error).toBe('journal.saveFailed');
+ await act(async()=>retryStamp());expect(journal.state.stamps).toHaveLength(0);await act(async()=>establish());expect(journal.state.stamps).toHaveLength(1);
+});
+it('lets the current account claim guest data when a former owner retires during hydration',async()=>{
+ runtime.values.set('argala.journal.v1:guest',JSON.stringify({version:1,bookmarks:[{kind:'google',id:'ChIJ_guest'}],stamps:[]}));
+ const gate=Promise.withResolvers<void>();runtime.get.mockImplementation(async(k:string)=>{if(k==='argala.journal.v1:user-a')await gate.promise;return runtime.values.get(k)??null;});
+ runtime.session={user:{id:'user-a'}};await mount();expect(journal.ready).toBe(false);runtime.session={user:{id:'user-b'}};await act(async()=>tree.update(view()));await act(async()=>gate.resolve());
+ expect(journal.principalId).toBe('user-b');expect(journal.state.bookmarks).toEqual([{kind:'google',id:'ChIJ_guest'}]);expect(runtime.values.has('argala.journal.v1:user-a')).toBe(false);
 });
