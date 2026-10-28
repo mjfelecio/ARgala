@@ -1395,3 +1395,72 @@ read-only fallback; per-destination opt-in background reminders; adaptive qualit
 and separately gated photo capture. Missing approved destinations/content/media
 and real on-site GPS calibration remain genuine publication/field gates. No
 research draft, guessed provider association or simulation was promoted to approval.
+
+## 2026-10-28 — account journal cloud sync
+
+Builds on open local-journal draft PR29 without merging it. Branch feat/journal-sync
+keeps existing v1 public journals/storage keys and adds a validated v2 account
+envelope: durable request identity/sequence, cloud revision and latest versioned
+bookmark intents. Guest state stays local and retains its first-account claim
+rule. New account requests use a captured bearer, not the SDK client's later
+session; retiring a foreground owner fences network acknowledgement/publication.
+Local saves remain available through network failures. Saved Places/Passport show
+localized pending/syncing/synced/recovery states in EN/JA/KO. No Google display
+content, coordinates, credentials, camera data or operation/location history is
+stored by this feature. Passport remains application progress, not attested GPS.
+
+Lost-response replay preserves a later remote deletion; remove→re-add during a
+flight and overlapping guest saves remain explicit new intent. Conflicts preserve
+unrelated remote changes and apply pending local intent without device-clock
+ordering. Four reconciliation rounds and a15s complete network/read deadline are
+bounded. Document/request/response and journal schema budgets remain enforced.
+
+Commits8906f05 (durable protocol/repository),92e94a0 (SQL/isolated tests/CI),570f71f
+(transport/controller/provider/UI) form the initial candidate. Fresh independent
+read-only review of c02023f..570f71f ran the1041-test full check and SQL/module
+reproductions. It found two Important issues and no Critical/Minor: temporary
+add-before-remove overflow and unbounded client receipt admission before revision/
+sequence validation. Root reproduced actual repository, SQL and known-error
+failures, then fixed them in one pass b0f3e1b. No second independent review claimed.
+
+Final reconciliation validates the completed keyed bookmark set once; true overflow
+retains local state/flight. Receipt admission occurs only for accepted initial
+namespaces, capped at128 per account under its row lock. Rejected fresh requests
+allocate no receipt; a concurrent127→128 admission trial allows exactly one of
+eight, and existing clients/replays work at capacity. No automatic eviction can
+invalidate delayed replay safety. Capacity errors map from SQL54000 to a known
+localized code and preserve local work. Tradeoff: another fresh device at capacity
+needs account maintenance; existing clients are unaffected.
+
+Final local `npm run check` passed **1045 tests /99 files**, strict TypeScript and
+zero-warning lint. Post-review journal suites passed66 tests. `npm run test:journal-sync` passed real isolated PostgreSQL auth/RLS/direct-write/strict
+payload/revision/replay/deletion/stamp/reset/concurrency/receipt-limit/cascade
+checks; `npm run test:limiter` passed the existing32-call30-allowed/2-denied,
+privilege/window test. `npm run export:android` passed8.2MB Hermes bundle
+`entry-963fa52c7b39e84850f7f51e06ef9e03.hbc`; `git diff --check` passed. Initial
+new test-harness TypeScript return/listener signatures and one lint style warning
+were corrected before this final run. No new dependencies/native configuration.
+
+Hosted access initially failed403 on project linking and the database login role.
+Owner restored CLI database access. Configured host and explicit project ref matched
+`dhjlcvviiscuuzjtzxor`; dry run listed only202610280001_journal_sync.sql. CLI2.122.0
+applied exactly that additive migration with `--skip-vault`, no seeds/roles and
+no historical migration repair or existing limiter/provider/secret changes.
+Deployed source b0f3e1b; migration SHA256:
+`97bf946c92ca09b1380c7264e79bf30adef7c45fe614e1e00a6c4d00cc5d77e4`.
+
+Hosted metadata confirmed both RLS flags/owner read policies, denied direct
+application writes, denied anonymous RPC execution, allowed authenticated
+execution, public INVOKER wrapper and private DEFINER with pinned empty search
+path, plus the recorded migration. Private schema probe returned406/PGRST106.
+Live RPC POSTs returned401/42501 with missing bearer and401/PGRST301 with invalid
+bearer. The final dry run reported upToDate=true/no pending migrations. Those are
+hosted deployment/configuration/auth-rejection observations, not a successful
+signed-in app sync or multi-device trial. No real app-account fixtures, paid
+provider request, ADB/simulator/APK/Metro/device storage test ran.
+
+Remaining checks: authenticated app round trip on two sessions/devices, offline
+restart/response loss in the actual client, Android process-death/backup behavior,
+and the previously pending AR/GPS field gates. See [cloud sync](journal-cloud-sync.md)
+for reconciliation/ownership rules and deployment details. New sync work remains
+independently reviewable; PR29 and this branch are not merged by this stage.

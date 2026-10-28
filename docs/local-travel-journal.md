@@ -40,12 +40,12 @@ continues to use D01–D09; an eventual genuine approved ACLC pilot visit is sep
 Disk failures offer explicit retry in AR utility chrome. This is application-local
 progress, not tamper-resistant proof of physical attendance.
 
-Cloud account synchronization is not implemented by this local merge. UI copy
-explicitly says progress is stored on this device. A later additive RLS-backed
-sync delivery must preserve ID-only data, deletion semantics, account isolation,
-retries and conflict/idempotency behavior. No backend schema or secrets changed
-for this delivery. Background reminders, eligible unsupported-device fallback,
-trusted remote content publication and adaptive/capture work remain separate.
+Account cloud synchronization is a separate extension of this local merge, now
+implemented with a v2 envelope, durable request/intent metadata and an RLS-backed
+RPC; see [cloud sync](journal-cloud-sync.md). Guest state remains local until an
+account claims it. The extension preserves ID-only data, deletion/replay semantics,
+account isolation and recovery. Background reminders, eligible unsupported-device
+fallback, trusted remote content publication and adaptive/capture remain separate.
 
 ## Verification boundaries
 
