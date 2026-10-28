@@ -60,3 +60,15 @@ save/remove/reopen and sign-in merge; sign-out/account switch; no stamp from
 simulation; storage recovery presentation; and one genuine approved on-site first
 tracking-ready stamp. The latter remains blocked on approved destination content
 and real-location verification, not something to fake in a demo.
+
+### Physical local-storage and merge observation — 2026-10-28
+
+On source `3cffea9`, Galaxy A53/existing development APK, signed-in and guest
+bookmarks each survived force-stop/relaunch without clearing app data. Actual
+offline saving retained a Google reference and showed sync recovery guidance;
+network restoration plus explicit Retry synchronized. Owner sign-in merged the
+guest ACLC reference into the account and reached synchronized status. Test
+bookmarks were removed, restoring the initial empty account journal. No account
+credentials were handled by the agent. A second account/device, backup/reinstall,
+storage corruption and a genuine approved on-site stamp remain unverified. See
+[client smoke evidence](client-progress-smoke-2026-10-28.md) for the exact scope.

@@ -116,3 +116,18 @@ concurrent writers, receipt admission at capacity and cascading cleanup. Native/
 mocked in app tests. Real hosted bearer integration, two-device/reinstall behavior
 and Android process-death storage still need separate observations; ADB is not used
 for this stage.
+
+### Subsequent physical phone check — 2026-10-28
+
+Source `3cffea9` on the existing Galaxy A53 development APK: actual signed-in
+Saved Places reached synchronized status after saving ACLC. Force-stop/relaunch
+preserved the bookmark and restored synchronized status. With phone networking
+disabled, a Google bookmark remained local and sync showed recoverable failure;
+restoring the original network settings and pressing Retry reached synchronized
+status. Both test references were removed and the empty journal synchronized.
+
+After explicit guest entry, a new ACLC bookmark survived force-stop/relaunch.
+The owner then signed in directly on the phone; the guest reference appeared in
+the account and synchronized. The fixture was removed afterward. This is a real
+single-account app/RPC round trip, not a two-device, second-account, reinstall or
+remote response-loss trial. See [client smoke evidence](client-progress-smoke-2026-10-28.md).

@@ -84,3 +84,36 @@ original orientation and expanded page3/3. Exit returned to the retained selecte
 ACLC map, and Android reported no active camera clients afterward. Battery ended
 35%, USB charging,37.0°C. These observations pass those brief scenarios only;
 full field/lifecycle/locale acceptance remains pending.
+
+## Client-progress sweep — 2026-10-28
+
+Source `3cffea9`, same Galaxy A53/existing Viro APK, current journal-sync branch;
+see [the detailed smoke record](client-progress-smoke-2026-10-28.md). Owner plans
+a laptop-connected presentation and deferred the hands-on ring check until later.
+
+Real authenticated Google discovery/details, walking/driving previews and Google
+Maps handoff were observed; external first-use navigation terms were not accepted.
+English/Japanese/Korean settings and Saved Places rendered, with English restored.
+This does not establish those languages' AR tile readability or paid-call counts.
+
+Explicit simulation/Start reached live AR on this branch with the rear camera
+active. Brief background released the camera; return reacquired it; Exit returned
+to the selected map and released it. Missing camera permission produced localized
+guidance/Settings/Retry. After restoring the original grant, return still required
+explicit Retry, which reached live AR. Initial dynamic Metro scene loads were
+slow, so preload before the meeting. After 318.2 seconds of actual background time,
+return showed session expiry/Back to Explore with no camera remount. That action
+returned to the selected map, and a new explicit simulated session reached live
+AR. Help/Recenter/Android Back did not crash; spatial correctness was not assessed.
+Master location off showed retry guidance; restoring location and explicit Retry
+recovered. Passport remained empty after simulation. No crash/ANR was observed in
+the monitored approximately 37-minute window, including background waits and
+intentional force-stops/permission-change termination. No application code was changed.
+
+Hands-on panel interactions, readability, tracking-loss orientation and page
+restoration are still pending for this branch. Earlier owner confirmations remain
+historical evidence, not a new trial. The actual ACLC GPS/entrance/radius gate and
+approved factual content/media/provider association are also unresolved. Local
+guest/Saved/Passport and account-sync foundations have since been implemented;
+simulation must still award no stamp. Reminders and broader fallback/offline work
+remain later phases.

@@ -1464,3 +1464,41 @@ restart/response loss in the actual client, Android process-death/backup behavio
 and the previously pending AR/GPS field gates. See [cloud sync](journal-cloud-sync.md)
 for reconciliation/ownership rules and deployment details. New sync work remains
 independently reviewable; PR29 and this branch are not merged by this stage.
+
+## 2026-10-28 — client-progress phone sweep
+
+Source `3cffea9`, existing Viro development APK on Galaxy A53 SM-A536E/Android16;
+no new APK/build or application-code change. Owner chose the laptop-connected
+development-server presentation. Fresh `npm run check` passed lint/typecheck and
+99 files/1,045 tests. Full scenario/configuration details are recorded in
+[client smoke evidence](client-progress-smoke-2026-10-28.md).
+
+Observed real signed-in map/provider details, destination-centered discovery,
+walking/driving previews and external Google Maps handoff. Maps first-use terms
+were not accepted; active external navigation was not verified. Signed-in and
+guest bookmarks survived force-stop/relaunch. Offline saving retained the local
+reference and exposed sync failure; restored networking plus explicit Retry
+synchronized. Owner sign-in merged the guest bookmark and synchronized. All test
+bookmarks were subsequently removed and the account returned to its initial empty
+Saved Places. Restored English after Japanese/Korean UI checks and retained 500 m
+generic activation preference; original Wi-Fi/mobile-data states restored.
+
+Explicit development arrival/Start reached live native AR and active rear camera.
+Brief background released the camera, return reacquired it, and Exit returned to
+selected ACLC map with no camera clients. Camera permission revocation showed
+permission/Settings/Retry guidance; restoring the grant while backgrounded did not
+automatically remount, and explicit Retry reached live AR. Android exit records
+classify that termination as PERMISSION CHANGE; the other observed terminations
+were deliberate FORCE STOP trials. No crash/ANR events or crash-buffer entries
+appeared in the monitored 10:56:57–11:34:01 window (about 37 minutes including
+intentional restarts/background waits). A real 318.2-second background trial
+showed expired-session guidance/Back to Explore with no camera remount; returning
+to the map and starting a new explicit simulated session worked. Help/Recenter
+and Android Back did not crash; spatial correctness remains unevaluated. Turning
+master location off showed recovery guidance; restoring it and pressing Retry
+recovered. Passport remained empty after simulated sessions. Original permissions
+(including flags), network settings and master location state were restored.
+Final battery 35%, USB charging, 36.3°C; camera clients empty and app backgrounded
+from selected ACLC map, Metro left running. Owner deferred hands-on ring/readability/recovery checks
+until later. On-site GPS, actual journeys and two-account/device isolation remain
+unverified; simulated/draft AR must never earn a stamp.
