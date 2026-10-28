@@ -1,3 +1,4 @@
+import { SavePlaceAction, JournalFeedback } from '@/features/journal/actions';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -66,6 +67,7 @@ export default function PlaceDetailsScreen() {
     {canLoad && <Button variant="outline" accessibilityLabel={t('placeDetails.load')} onPress={load} isDisabled={details.isFetching || !active || !focused} accessibilityState={{ busy: details.isFetching }}><Button.Label>{t('placeDetails.load')}</Button.Label></Button>}
   </>;
   const actions = <View className="gap-2">
+    {providerId && <SavePlaceAction reference={{kind:'google',id:providerId}}/>}<JournalFeedback/>
     <Button accessibilityLabel={t('placeDetails.directions')} onPress={directions}>
       <Ionicons name="navigate-outline" size={24} color={onAccent} /><Button.Label>{t('placeDetails.directions')}</Button.Label>
     </Button>

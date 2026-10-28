@@ -427,5 +427,34 @@
       "title": "Facts",
       "body": "RESEARCH DRAFT — review pending.\n\nLocation: Lilia Avenue, Ormoc City, Leyte.\n\nThe campus was listed as a Strengthened Senior High School pilot school for 2025–2026.\n\nNo campus founding date is asserted.\n\nSources: CHED Region VIII directory; DepEd Region VIII Memorandum 567 (2025)."
     }
+  },
+  "journal": {
+    "continueGuest": "Continue as guest",
+    "guestNote": "Guest mode keeps progress on this device. Sign in for online places and routes.",
+    "localOnly": "Stored on this device. Sign in to sync your progress.",
+    "save": "Save place",
+    "remove": "Remove saved place",
+    "savedTitle": "Saved Places",
+    "savedEmpty": "Save a place from its map details to find it here.",
+    "googlePlace": "Saved Google place",
+    "open": "Open place",
+    "passportTitle": "Tourist Passport",
+    "passportCount": "{{count}} of {{total}} destinations visited",
+    "passportEmpty": "Start an eligible on-site experience to earn your first stamp. Development simulations do not earn stamps.",
+    "pilotVisited": "ACLC pilot visited",
+    "loadFailed": "Could not load local progress. Retry before making changes.",
+    "saveFailed": "Could not save local progress. Your previous data is unchanged. Please retry the action.",
+    "signIn": "Sign in to your account",
+    "syncPending": "Changes are saved on this device and waiting to sync.",
+    "syncing": "Syncing your saved places and Passport…",
+    "synced": "Synced with your account.",
+    "syncNow": "Sync now",
+    "retrySync": "Retry sync",
+    "syncFailed": "Could not sync now. Your local changes are safe. Retry when connected.",
+    "syncTimeout": "Sync took too long. Your local changes are safe. Please retry.",
+    "syncAuth": "Sign in again to sync your progress. Your local changes are safe.",
+    "syncUnavailable": "Account sync is not available right now. Your local changes are safe.",
+    "syncConflict": "Other changes are still arriving. Your local changes are safe. Retry sync.",
+    "syncDeviceLimit": "This account has reached its sync device limit. Your local changes remain saved."
   }
 }

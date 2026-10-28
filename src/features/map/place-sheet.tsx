@@ -25,13 +25,13 @@ export type HomePlaceSheetProps = {
   geometry?: ReturnType<typeof homeSheetGeometry>;
   state: HomePlaceSheetState; selectedPlace: Place | null; hasSelection: boolean;
   canRequest: boolean; resultCount: number; errorKey?: string; detailsLoading?: boolean; detailsLoaded?: boolean;
-  selectionSummary?: string; locationStatus?: ReactNode; mapLoading?: boolean;
+  saveAction?: ReactNode; selectionSummary?: string; locationStatus?: ReactNode; mapLoading?: boolean;
   attributions: ReactNode; onRetrySearch(): void; onClosePlace(): void; onDetails(): void;
   onViewDetails?(): void; onDirections(): void; onOpenGoogle?(): void; onMeasuredHeight(height: number): void;
   animatedPosition?: SharedValue<number>;
   onSettledHeight?(height: number): void; maxHeight?: number; containerHeight?: number;
 };
-export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, selectionSummary, locationStatus, mapLoading, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onDirections, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight, animatedPosition }: HomePlaceSheetProps) {
+export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, saveAction, selectionSummary, locationStatus, mapLoading, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onDirections, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight, animatedPosition }: HomePlaceSheetProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [settledIndex, setSettledIndex] = useState(0);
@@ -106,6 +106,7 @@ export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelec
               {place.mapsUri && onOpenGoogle && <Button variant="outline" accessibilityLabel={t('map.openGoogle')} onPress={onOpenGoogle}><Button.Label>{t('map.openGoogle')}</Button.Label></Button>}
             </>}
           </Card.Body>
+          {saveAction}
           <Card.Footer className="flex-row flex-wrap gap-2">{onViewDetails && <Button variant="secondary" className="h-auto min-h-12 min-w-28 flex-1 py-3" accessibilityLabel={t('placeDetails.view')} onPress={onViewDetails}><Button.Label className="shrink text-center">{t('placeDetails.view')}</Button.Label></Button>}<Button className="h-auto min-h-12 min-w-28 flex-1 py-3" accessibilityLabel={t('placeDetails.directions')} onPress={onDirections} isDisabled={!canRequest} accessibilityState={{ disabled: !canRequest }}>
             <Button.Label className="shrink text-center">{t('placeDetails.directions')}</Button.Label>
           </Button></Card.Footer>

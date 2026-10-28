@@ -53,3 +53,14 @@ and unauthorized-request evidence is recorded in validation.md; that evidence do
 not establish authenticated Google calls or route accuracy. The existing
 `walking-route` endpoint remains available for older clients. Global text-search
 results retain the Google Maps logo and returned provider attributions.
+
+## Account journal RPC
+
+The account-sync extension uses additive migration202610280001_journal_sync.sql,
+not another Google Edge handler. Read [journal cloud sync](journal-cloud-sync.md)
+for the revision/replay contract, per-user RLS, private implementation and data
+limits. After authorized project access, inspect a database dry run and apply only
+pending migrations with `--skip-vault`; do not include seeds/roles or repair
+migration history by guessing. The migration was deployed to the configured
+project on2026-10-28; validation.md records its source hash and hosted checks.
+No Places/Routes credentials, native settings or limiter objects changed.

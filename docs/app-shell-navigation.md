@@ -64,3 +64,15 @@ Install the current development APK and run `npx expo start --dev-client` from t
 Automated checks exercise the installed SDK's router reducers and focus hooks with native rendering/hardware/network boundaries replaced. They do not establish Android rendering, physical sensor behavior or live provider integration. See [validation evidence](validation.md).
 
 Details and Walking Directions use the protected parent stack without the tab bar or duplicate navigator headers. Home, Details and AR open Directions with a single-use transient intent; matching completed preview snapshots are reused without another request. See [route preview](design/clean-explorer/ROUTE_PREVIEW.md).
+
+## Local guest and journal extension — 2026-10-28
+
+After completed Welcome, Continue as guest is an explicit local choice. The app
+stack accepts that committed mode or a real account session; Sign In remains
+reachable from a guest Profile. Guest mode is not provider authentication. Saved
+Places is a parent-stack screen reached through Profile and save controls in the
+existing map/Details flow. Tourist Passport remains inside Featured Destinations.
+Journal ownership sits inside the app stack, so guest-entry navigation waits for
+the root guard commit without a journal-key change remounting the sign-in screen.
+Account changes create a fresh journal/admission owner and preserve query clearing.
+See [local travel journal](local-travel-journal.md) for data and verification limits.

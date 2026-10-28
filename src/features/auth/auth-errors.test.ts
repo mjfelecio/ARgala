@@ -15,6 +15,7 @@ const auth = vi.hoisted(() => ({
   onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
   startAutoRefresh: vi.fn(), stopAutoRefresh: vi.fn(),
 }));
+vi.mock('expo-router', () => ({ router: { replace: vi.fn() } }));
 vi.mock('@/lib/supabase', () => ({ getSupabase: () => ({ auth }) }));
 vi.mock('@/ui/shared', async () => {
   const { createElement } = await import('react');

@@ -33,8 +33,8 @@ export default function DevelopmentSessionRoute() {
     : <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
 }
 
-type Props = { identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
-export function DestinationArSessionExperience({ identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
+type Props = { identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
+export function DestinationArSessionExperience({ identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
   const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
   const [transitionReady, setTransitionReady] = useState(true); const [scene, setScene] = useState({ width: 0, height: 0 });
@@ -83,6 +83,7 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
       {session.phase === 'expired' ? <View className="gap-3 p-4"><Notice>{t('destinationSession.expired')}</Notice>
         <Action title={t('arrival.returnToMap')} onPress={() => { close(); onExit?.(); if (onReturn) onReturn(); else router.navigate('/'); }} />
       </View> : <ArPreflight noticeKey={preflightNoticeKey ?? (identity.provenance === 'verified' ? 'arrival.preflight' : 'destinationAr.prototype')} phase={startup.phase} errorCode={startup.errorCode} pending={startup.pending} canAskAgain={startup.canAskAgain} onStart={prompt => void startup.start(prompt)} />}
+      {progressFeedback}
       {!session.established && guidance}
       {session.established && (startup.phase === 'checking' || startup.phase === 'prepared' || startup.phase === 'initializing') && <Notice>{t('destinationSession.restoring')}</Notice>}
       {startup.phase === 'live' && <View className="gap-2 p-4">

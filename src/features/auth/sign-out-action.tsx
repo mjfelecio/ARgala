@@ -1,3 +1,4 @@
+import { useJournal } from '@/features/journal/context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Button } from 'heroui-native/button';
 import { useThemeColor } from 'heroui-native/hooks';
@@ -11,6 +12,7 @@ import { authErrorMessageKey } from './errors';
 export function SignOutAction({ appearance = 'default' }: { appearance?: 'default' | 'settings' }) {
   const { t } = useTranslation();
   const danger = useThemeColor('danger');
+  const journal=useJournal();
   const [busy, setBusy] = useState(false);
   const submitting = useRef(false);
   const [error, setError] = useState<ReturnType<typeof authErrorMessageKey> | null>(null);
@@ -21,6 +23,7 @@ export function SignOutAction({ appearance = 'default' }: { appearance?: 'defaul
     catch (failure) { setError(authErrorMessageKey(failure, 'auth.logoutFailed')); }
     finally { submitting.current = false; setBusy(false); }
   }
+  if(journal?.principalId==='guest') return null;
   const title = t(busy ? 'auth.signingOut' : 'auth.signOut');
   if (appearance === 'settings') return <>
     {error && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(error)}</Text>}

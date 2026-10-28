@@ -7,6 +7,8 @@ import RootNavigation from '@/features/navigation/root-navigation';
 import { useOnboarding } from './provider';
 import { onboardingStorageKey } from './completion';
 import i18n from '@/i18n';
+const guest = vi.hoisted(() => ({ enabled: false, loading: false }));
+vi.mock('@/features/auth/guest-context', () => ({ useGuestAccess: () => guest }));
 
 // Exercise SDK 57's protected child filtering and stack reducer. Replace native
 // module barrels only: route guards and history removal stay in installed code.
@@ -49,7 +51,7 @@ function config() {
 }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
-  resetRuntime(); await i18n.changeLanguage('en');
+  resetRuntime(); guest.enabled=false; guest.loading=false; await i18n.changeLanguage('en');
   const original = console.error;
   vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
@@ -129,4 +131,13 @@ it.each(['en', 'ko', 'ja'])('localizes storage recovery and keeps auth recovery 
   expect(JSON.stringify(tree!.toJSON())).toContain(i18n.t('auth.restoreFailed'));
   await act(async () => { tree!.root.findByType('button').props.onPress(); });
   expect(runtime.auth.retry).toHaveBeenCalledOnce();
+});
+
+it('permits explicitly restored guests without inventing a Supabase session and removes sign-in after authentication',async()=>{
+ runtime.values.set(onboardingStorageKey,'complete');guest.enabled=true;await mount();expect(config().routeNames).toEqual(['sign-in','(app)']);
+ runtime.auth.session={user:{id:'account'}};await rerender();expect(config().routeNames).toEqual(['(app)']);
+});
+it('waits for guest hydration before resolving unauthenticated deep links',async()=>{
+ runtime.values.set(onboardingStorageKey,'complete');guest.loading=true;await mount();expect(tree!.root.findAllByType('navigator' as React.ElementType)).toHaveLength(0);
+ guest.loading=false;await rerender();expect(config().routeNames).toEqual(['sign-in']);
 });

@@ -1332,3 +1332,173 @@ Documentation-only evidence update: `npm run typecheck` and `npm run lint` passe
 `git diff --check` passed. No application code changed and no additional full
 suite/export was necessary; the previously recorded970-test/Android-export and
 PR28 CI results refer to the implementation candidate tested here.
+
+## 2026-10-28 — merged ACLC slice; local guest travel journal
+
+Owner authorized merging and continuing while ADB is unavailable. Fresh pre-merge
+`npm run check` passed970 tests/90 files, typecheck and zero-warning lint. M3 PR27
+merged as `d01ab9a154a4554d2559e8ab02f725cb94dd5979`, then PR28 was retargeted
+to main and merged as `de429f3c80aa451d555875a6f18568d24bf9f00a`, preserving
+incremental history. Existing GitHub validate checks were green for both. The
+older installed gh CLI lacked match-head-commit and its edit path hit deprecated
+Projects GraphQL; REST merge requests used the exact verified head SHAs instead.
+No application rewrite, provider change or native build was needed.
+
+New isolated branch `feat/travel-journal` adds an explicit durable guest mode,
+ID-only Saved Places in existing map/details/Profile flows, and Tourist Passport
+inside Featured Destinations. Guest mode is not a Supabase session: existing Edge
+auth remains required for online discovery/routes. Curated/local browsing and
+local GPS/AR authority remain separate. Account keys isolate progress; serialized
+writes publish only after persistence; guest progress merges durably on sign-in.
+Cloud sync is not implemented or claimed. Current UI states this limitation.
+
+Passport is awarded only from an approved verified non-simulated entry's captured
+tracking-ready event. Preflight, research drafts and development simulations do
+not earn stamps. Retries replay an earned event rather than creating one. The
+ACLC pilot is separate from the preserved nine-destination count. Bookmarks store
+only exact Google Place IDs or independent curated IDs, never provider display
+content/coordinates/media. Saved Google entry opens existing Details with explicit
+recovery instead of automatic provider calls.
+
+Independent read-only review of `de429f3..013864d` found two Important issues,
+no Critical/Minor: stale pre-claim account migration and Passport retry exposed by
+an unrelated bookmark failure before tracking-ready. Actual repository/provider
+and retry regressions reproduced those failures, then passed in one fix pass
+`5aebe0b`. No second independent review is claimed.
+
+Explicit migration ownership rule: check the current owner after reads, immediately
+before the first account write. Once claimed while current, the serialized
+transfer finishes for that account even after sign-out; later accounts do not
+inherit already-claimed guest data. Retirement before claim leaves the source for
+the current account. Delayed account-write and guest-clear tests pin that rule;
+no claim is made that AsyncStorage supports cancellation or atomic multi-key writes.
+A failed account write retains the guest source, and failed clearing retries
+idempotently. No account state becomes another account's visible journal.
+
+Final `npm run check` passed **1006 tests /94 files**, strict TypeScript and
+zero-warning lint. Final `npm run export:android` passed with8.1MB Hermes bundle
+`entry-454803bc85ce94b83e3a9615fdf7fe65.hbc`; `git diff --check` passed. Focused
+post-review repository/provider/selected-route tests passed34 cases. Existing Auth
+UI tests now mock the native Router boundary; installed Router guards/reducers
+and commit-before-navigation guest behavior have independent coverage. Initial
+harness import/expected-route failures were corrected before the final full run.
+
+No ADB, simulator, physical camera/GPS test, APK build/install, live paid provider
+request, backend deployment/schema change or native dependency/configuration change
+ran in this stage. Automated mocked storage/native boundaries and the JavaScript
+export do not establish Android process-death storage behavior or physical layout.
+The [local journal guide](local-travel-journal.md) lists the pending device checks.
+
+Remaining approved phases: account cloud sync; trusted validated content update
+publication and complete approved nine-place inputs; eligible unsupported-device
+read-only fallback; per-destination opt-in background reminders; adaptive quality
+and separately gated photo capture. Missing approved destinations/content/media
+and real on-site GPS calibration remain genuine publication/field gates. No
+research draft, guessed provider association or simulation was promoted to approval.
+
+## 2026-10-28 — account journal cloud sync
+
+Builds on open local-journal draft PR29 without merging it. Branch feat/journal-sync
+keeps existing v1 public journals/storage keys and adds a validated v2 account
+envelope: durable request identity/sequence, cloud revision and latest versioned
+bookmark intents. Guest state stays local and retains its first-account claim
+rule. New account requests use a captured bearer, not the SDK client's later
+session; retiring a foreground owner fences network acknowledgement/publication.
+Local saves remain available through network failures. Saved Places/Passport show
+localized pending/syncing/synced/recovery states in EN/JA/KO. No Google display
+content, coordinates, credentials, camera data or operation/location history is
+stored by this feature. Passport remains application progress, not attested GPS.
+
+Lost-response replay preserves a later remote deletion; remove→re-add during a
+flight and overlapping guest saves remain explicit new intent. Conflicts preserve
+unrelated remote changes and apply pending local intent without device-clock
+ordering. Four reconciliation rounds and a15s complete network/read deadline are
+bounded. Document/request/response and journal schema budgets remain enforced.
+
+Commits8906f05 (durable protocol/repository),92e94a0 (SQL/isolated tests/CI),570f71f
+(transport/controller/provider/UI) form the initial candidate. Fresh independent
+read-only review of c02023f..570f71f ran the1041-test full check and SQL/module
+reproductions. It found two Important issues and no Critical/Minor: temporary
+add-before-remove overflow and unbounded client receipt admission before revision/
+sequence validation. Root reproduced actual repository, SQL and known-error
+failures, then fixed them in one pass b0f3e1b. No second independent review claimed.
+
+Final reconciliation validates the completed keyed bookmark set once; true overflow
+retains local state/flight. Receipt admission occurs only for accepted initial
+namespaces, capped at128 per account under its row lock. Rejected fresh requests
+allocate no receipt; a concurrent127→128 admission trial allows exactly one of
+eight, and existing clients/replays work at capacity. No automatic eviction can
+invalidate delayed replay safety. Capacity errors map from SQL54000 to a known
+localized code and preserve local work. Tradeoff: another fresh device at capacity
+needs account maintenance; existing clients are unaffected.
+
+Final local `npm run check` passed **1045 tests /99 files**, strict TypeScript and
+zero-warning lint. Post-review journal suites passed66 tests. `npm run test:journal-sync` passed real isolated PostgreSQL auth/RLS/direct-write/strict
+payload/revision/replay/deletion/stamp/reset/concurrency/receipt-limit/cascade
+checks; `npm run test:limiter` passed the existing32-call30-allowed/2-denied,
+privilege/window test. `npm run export:android` passed8.2MB Hermes bundle
+`entry-963fa52c7b39e84850f7f51e06ef9e03.hbc`; `git diff --check` passed. Initial
+new test-harness TypeScript return/listener signatures and one lint style warning
+were corrected before this final run. No new dependencies/native configuration.
+
+Hosted access initially failed403 on project linking and the database login role.
+Owner restored CLI database access. Configured host and explicit project ref matched
+`dhjlcvviiscuuzjtzxor`; dry run listed only202610280001_journal_sync.sql. CLI2.122.0
+applied exactly that additive migration with `--skip-vault`, no seeds/roles and
+no historical migration repair or existing limiter/provider/secret changes.
+Deployed source b0f3e1b; migration SHA256:
+`97bf946c92ca09b1380c7264e79bf30adef7c45fe614e1e00a6c4d00cc5d77e4`.
+
+Hosted metadata confirmed both RLS flags/owner read policies, denied direct
+application writes, denied anonymous RPC execution, allowed authenticated
+execution, public INVOKER wrapper and private DEFINER with pinned empty search
+path, plus the recorded migration. Private schema probe returned406/PGRST106.
+Live RPC POSTs returned401/42501 with missing bearer and401/PGRST301 with invalid
+bearer. The final dry run reported upToDate=true/no pending migrations. Those are
+hosted deployment/configuration/auth-rejection observations, not a successful
+signed-in app sync or multi-device trial. No real app-account fixtures, paid
+provider request, ADB/simulator/APK/Metro/device storage test ran.
+
+Remaining checks: authenticated app round trip on two sessions/devices, offline
+restart/response loss in the actual client, Android process-death/backup behavior,
+and the previously pending AR/GPS field gates. See [cloud sync](journal-cloud-sync.md)
+for reconciliation/ownership rules and deployment details. New sync work remains
+independently reviewable; PR29 and this branch are not merged by this stage.
+
+## 2026-10-28 — client-progress phone sweep
+
+Source `3cffea9`, existing Viro development APK on Galaxy A53 SM-A536E/Android16;
+no new APK/build or application-code change. Owner chose the laptop-connected
+development-server presentation. Fresh `npm run check` passed lint/typecheck and
+99 files/1,045 tests. Full scenario/configuration details are recorded in
+[client smoke evidence](client-progress-smoke-2026-10-28.md).
+
+Observed real signed-in map/provider details, destination-centered discovery,
+walking/driving previews and external Google Maps handoff. Maps first-use terms
+were not accepted; active external navigation was not verified. Signed-in and
+guest bookmarks survived force-stop/relaunch. Offline saving retained the local
+reference and exposed sync failure; restored networking plus explicit Retry
+synchronized. Owner sign-in merged the guest bookmark and synchronized. All test
+bookmarks were subsequently removed and the account returned to its initial empty
+Saved Places. Restored English after Japanese/Korean UI checks and retained 500 m
+generic activation preference; original Wi-Fi/mobile-data states restored.
+
+Explicit development arrival/Start reached live native AR and active rear camera.
+Brief background released the camera, return reacquired it, and Exit returned to
+selected ACLC map with no camera clients. Camera permission revocation showed
+permission/Settings/Retry guidance; restoring the grant while backgrounded did not
+automatically remount, and explicit Retry reached live AR. Android exit records
+classify that termination as PERMISSION CHANGE; the other observed terminations
+were deliberate FORCE STOP trials. No crash/ANR events or crash-buffer entries
+appeared in the monitored 10:56:57–11:34:01 window (about 37 minutes including
+intentional restarts/background waits). A real 318.2-second background trial
+showed expired-session guidance/Back to Explore with no camera remount; returning
+to the map and starting a new explicit simulated session worked. Help/Recenter
+and Android Back did not crash; spatial correctness remains unevaluated. Turning
+master location off showed recovery guidance; restoring it and pressing Retry
+recovered. Passport remained empty after simulated sessions. Original permissions
+(including flags), network settings and master location state were restored.
+Final battery 35%, USB charging, 36.3°C; camera clients empty and app backgrounded
+from selected ACLC map, Metro left running. Owner deferred hands-on ring/readability/recovery checks
+until later. On-site GPS, actual journeys and two-account/device isolation remain
+unverified; simulated/draft AR must never earn a stamp.
