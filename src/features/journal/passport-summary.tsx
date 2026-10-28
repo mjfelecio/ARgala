@@ -1,3 +1,4 @@
+import { JournalSyncStatusView } from './sync-status';
 import { Text } from 'react-native';
 import { Surface } from 'heroui-native/surface';
 import { useTranslation } from 'react-i18next';
@@ -10,5 +11,5 @@ export function PassportSummary(){const {t}=useTranslation();const journal=useJo
  {journal.ready&&<><Text className="font-sans text-base text-foreground">{t('journal.passportCount',{count,total:destinationIds.length})}</Text>
  {!journal.state.stamps.length&&<Text className="font-sans text-sm text-muted">{t('journal.passportEmpty')}</Text>}
  {journal.state.stamps.map(stamp=><Text key={stamp.destinationId} className="font-sans text-base text-brand-strong">{stamp.destinationId==='pilot-aclc'?t('journal.pilotVisited'):destinationName(getDestination(stamp.destinationId)!)}</Text>)}</>}
- <Text className="font-sans text-sm text-muted">{t('journal.localOnly')}</Text></Surface>;
+ <JournalSyncStatusView/></Surface>;
 }

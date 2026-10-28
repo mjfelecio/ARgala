@@ -25,7 +25,7 @@ export class JournalRepository {
     // Claim immediately before the first durable target write, while this owner is current.
     // Once claimed, this serialized transfer belongs to that account, even after sign-out.
     if(!isCurrent()) throw new Error('journal.ownerRetired');
-    await this.write(principal,replaceJournal(ownDocument,merged));
+    await this.write(principal,replaceJournal(ownDocument,merged,guest.bookmarks.map(reference=>({reference,saved:true}))));
     // Never clear the source before account persistence. Retry is idempotent after either write fails.
     await this.write('guest',emptyJournal()); return merged;
   }); }

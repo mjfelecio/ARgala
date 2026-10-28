@@ -21,10 +21,11 @@ function diffBookmarks(base:Journal,local:Journal){
  const before=new Map(base.bookmarks.map(x=>[bookmarkKey(x),x]));const after=new Map(local.bookmarks.map(x=>[bookmarkKey(x),x]));
  return [...new Set([...before.keys(),...after.keys()])].filter(k=>before.has(k)!==after.has(k)).map(k=>({reference:(after.get(k)??before.get(k))!,saved:after.has(k)}));
 }
-export function replaceJournal(doc:JournalDocument,journal:Journal):JournalDocument{
+export function replaceJournal(doc:JournalDocument,journal:Journal,explicit:readonly {reference:z.infer<typeof bookmarkSchema>;saved:boolean}[]=[]):JournalDocument{
  if(doc.version===1)return journal;
  let editVersion=doc.cloud.editVersion;const edits=new Map(doc.cloud.edits.map(e=>[bookmarkKey(e.reference),e]));
- for(const change of diffBookmarks(doc.journal,journal))edits.set(bookmarkKey(change.reference),{...change,version:++editVersion});
+ const changes=new Map([...diffBookmarks(doc.journal,journal),...explicit].map(change=>[bookmarkKey(change.reference),change]));
+ for(const change of changes.values())edits.set(bookmarkKey(change.reference),{...change,version:++editVersion});
  return syncDocumentSchema.parse({...doc,journal,cloud:{...doc.cloud,editVersion,edits:[...edits.values()]}});
 }
 export function beginSync(doc:JournalDocument,makeId=journalUuid):{document:SyncDocument;request:SyncRequest}{
@@ -40,8 +41,6 @@ function applyEdits(remote:Journal,local:Journal,edits:SyncDocument['cloud']['ed
  for(const edit of edits)result=saveBookmark(result,edit.reference,edit.saved);
  return journalSchema.parse(result);
 }
-/** Public helper for pure snapshot differences; durable sync uses explicit latest edit intents. */
-export function rebaseJournal(base:Journal,local:Journal,remote:Journal):Journal{return applyEdits(remote,local,diffBookmarks(base,local).map((e,i)=>({...e,version:i+1})));}
 export function acceptSyncDocument(doc:SyncDocument,request:SyncRequest,input:unknown,makeId=journalUuid){
  const response=syncResponseSchema.parse(input);const flight=doc.cloud.flight;
  if(!flight||request.clientId!==doc.cloud.clientId||request.flight.requestId!==flight.requestId||response.requestId!==flight.requestId||response.sequence!==flight.sequence||response.revision<doc.cloud.revision)throw new Error('journal.invalidSyncResponse');

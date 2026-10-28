@@ -35,3 +35,8 @@ it('retains an explicit remove then re-add during flight even when the final val
  const {repo}=setup();await repo.change('account',s=>saveBookmark(s,ref,true));const request=await repo.prepareSync('account');await repo.change('account',s=>saveBookmark(s,ref,false));await repo.change('account',s=>saveBookmark(s,ref,true));
  const result=await repo.acceptSync('account',request,{status:'applied',sequence:request.flight.sequence,requestId:request.flight.requestId,revision:2,journal:emptyJournal()});expect(result.journal.bookmarks).toEqual([ref]);expect(result.pending).toBe(true);
 });
+it('treats a guest save as fresh intent even if the account still has an outdated copy of the same reference',async()=>{
+ const {repo}=setup();await repo.change('account',s=>saveBookmark(s,ref,true));let request=await repo.prepareSync('account');await repo.acceptSync('account',request,{status:'applied',sequence:request.flight.sequence,requestId:request.flight.requestId,revision:1,journal:request.flight.journal});
+ await repo.change('guest',s=>saveBookmark(s,ref,true));await repo.open('account');request=await repo.prepareSync('account');
+ const result=await repo.acceptSync('account',request,{status:'conflict',sequence:request.flight.sequence,requestId:request.flight.requestId,revision:2,journal:emptyJournal()});expect(result.journal.bookmarks).toEqual([ref]);expect(result.pending).toBe(true);
+});
