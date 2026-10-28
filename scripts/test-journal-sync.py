@@ -40,9 +40,12 @@ with tempfile.TemporaryDirectory(prefix='argala-journal-pg-') as directory:
         CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$SELECT NULLIF(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
         GRANT USAGE ON SCHEMA auth TO authenticated,anon; GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated,anon;
         """
-        sql(fixture + (root / 'supabase/migrations/202610280001_journal_sync.sql').read_text())
+        sql(fixture + (root / 'supabase/migrations/202610170001_google_request_limits.sql').read_text() + (root / 'supabase/migrations/202610280001_journal_sync.sql').read_text())
         privileges = sql("SELECT has_function_privilege('anon','public.sync_travel_journal(uuid,uuid,bigint,bigint,jsonb)','EXECUTE'),has_function_privilege('authenticated','public.sync_travel_journal(uuid,uuid,bigint,bigint,jsonb)','EXECUTE');")
         assert privileges == 'f|t', privileges
+        limiter = sql("SELECT has_function_privilege('anon','public.consume_google_request(uuid)','EXECUTE'),has_function_privilege('authenticated','public.consume_google_request(uuid)','EXECUTE'),has_function_privilege('service_role','public.consume_google_request(uuid)','EXECUTE');")
+        assert limiter == 'f|f|t', limiter
+        denied(user_a, 'SELECT * FROM private.google_request_limits;')
         denied('', f"SELECT public.sync_travel_journal('{client_a}','30000000-0000-4000-8000-000000000001',1,0,'{json.dumps(empty)}');")
         saved = {**empty, 'bookmarks': [ref]}
         first = request(user_a, client_a, 1, 0, saved)
