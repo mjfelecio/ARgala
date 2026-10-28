@@ -1332,3 +1332,66 @@ Documentation-only evidence update: `npm run typecheck` and `npm run lint` passe
 `git diff --check` passed. No application code changed and no additional full
 suite/export was necessary; the previously recorded970-test/Android-export and
 PR28 CI results refer to the implementation candidate tested here.
+
+## 2026-10-28 — merged ACLC slice; local guest travel journal
+
+Owner authorized merging and continuing while ADB is unavailable. Fresh pre-merge
+`npm run check` passed970 tests/90 files, typecheck and zero-warning lint. M3 PR27
+merged as `d01ab9a154a4554d2559e8ab02f725cb94dd5979`, then PR28 was retargeted
+to main and merged as `de429f3c80aa451d555875a6f18568d24bf9f00a`, preserving
+incremental history. Existing GitHub validate checks were green for both. The
+older installed gh CLI lacked match-head-commit and its edit path hit deprecated
+Projects GraphQL; REST merge requests used the exact verified head SHAs instead.
+No application rewrite, provider change or native build was needed.
+
+New isolated branch `feat/travel-journal` adds an explicit durable guest mode,
+ID-only Saved Places in existing map/details/Profile flows, and Tourist Passport
+inside Featured Destinations. Guest mode is not a Supabase session: existing Edge
+auth remains required for online discovery/routes. Curated/local browsing and
+local GPS/AR authority remain separate. Account keys isolate progress; serialized
+writes publish only after persistence; guest progress merges durably on sign-in.
+Cloud sync is not implemented or claimed. Current UI states this limitation.
+
+Passport is awarded only from an approved verified non-simulated entry's captured
+tracking-ready event. Preflight, research drafts and development simulations do
+not earn stamps. Retries replay an earned event rather than creating one. The
+ACLC pilot is separate from the preserved nine-destination count. Bookmarks store
+only exact Google Place IDs or independent curated IDs, never provider display
+content/coordinates/media. Saved Google entry opens existing Details with explicit
+recovery instead of automatic provider calls.
+
+Independent read-only review of `de429f3..013864d` found two Important issues,
+no Critical/Minor: stale pre-claim account migration and Passport retry exposed by
+an unrelated bookmark failure before tracking-ready. Actual repository/provider
+and retry regressions reproduced those failures, then passed in one fix pass
+`5aebe0b`. No second independent review is claimed.
+
+Explicit migration ownership rule: check the current owner after reads, immediately
+before the first account write. Once claimed while current, the serialized
+transfer finishes for that account even after sign-out; later accounts do not
+inherit already-claimed guest data. Retirement before claim leaves the source for
+the current account. Delayed account-write and guest-clear tests pin that rule;
+no claim is made that AsyncStorage supports cancellation or atomic multi-key writes.
+A failed account write retains the guest source, and failed clearing retries
+idempotently. No account state becomes another account's visible journal.
+
+Final `npm run check` passed **1006 tests /94 files**, strict TypeScript and
+zero-warning lint. Final `npm run export:android` passed with8.1MB Hermes bundle
+`entry-454803bc85ce94b83e3a9615fdf7fe65.hbc`; `git diff --check` passed. Focused
+post-review repository/provider/selected-route tests passed34 cases. Existing Auth
+UI tests now mock the native Router boundary; installed Router guards/reducers
+and commit-before-navigation guest behavior have independent coverage. Initial
+harness import/expected-route failures were corrected before the final full run.
+
+No ADB, simulator, physical camera/GPS test, APK build/install, live paid provider
+request, backend deployment/schema change or native dependency/configuration change
+ran in this stage. Automated mocked storage/native boundaries and the JavaScript
+export do not establish Android process-death storage behavior or physical layout.
+The [local journal guide](local-travel-journal.md) lists the pending device checks.
+
+Remaining approved phases: account cloud sync; trusted validated content update
+publication and complete approved nine-place inputs; eligible unsupported-device
+read-only fallback; per-destination opt-in background reminders; adaptive quality
+and separately gated photo capture. Missing approved destinations/content/media
+and real on-site GPS calibration remain genuine publication/field gates. No
+research draft, guessed provider association or simulation was promoted to approval.
