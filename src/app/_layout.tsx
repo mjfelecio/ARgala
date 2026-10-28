@@ -10,6 +10,7 @@ import { SettingsProvider } from '@/features/settings/provider';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { environment } from '@/config/env';
+import { GuestAccessProvider } from '@/features/auth/guest-access';
 import { AuthProvider } from '@/features/auth/provider';
 import { queryClient } from '@/lib/query';
 import { Notice, Screen } from '@/ui/shared';
@@ -30,7 +31,7 @@ export default function RootLayout() {
         <DevelopmentShowcase>
           <SettingsProvider>
             {environment.success
-              ? <QueryClientProvider client={queryClient}><AuthProvider><OnboardingProvider><RootNavigation /></OnboardingProvider></AuthProvider></QueryClientProvider>
+              ? <QueryClientProvider client={queryClient}><AuthProvider><GuestAccessProvider><OnboardingProvider><RootNavigation /></OnboardingProvider></GuestAccessProvider></AuthProvider></QueryClientProvider>
               : <Screen><Notice>{t('auth.setup')}</Notice></Screen>}
           </SettingsProvider>
         </DevelopmentShowcase>

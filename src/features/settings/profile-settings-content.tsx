@@ -1,3 +1,4 @@
+import { JournalProfileEntry } from '@/features/journal/profile-entry';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { Button } from 'heroui-native/button';
@@ -20,6 +21,7 @@ export function ProfileSettingsContent({ entry }: { entry: 'tab' | 'stack' }) {
       <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('settings.profileTitle')}</Text>
     </View>
     {entry === 'tab' && <><ViroRingLaunch /><ViroSpikeLaunch /></>}
+    <JournalProfileEntry/>
     <SettingsForm />
   </StyledSafeAreaView>;
 }

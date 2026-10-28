@@ -177,7 +177,7 @@ it('hands an AR selection to the existing Explore route without replacing its ro
 });
 it('keeps Settings outside the tabs and Back restores the originating tab state', async () => {
  await mount(React.createElement(AppLayout));
- expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.name)).toEqual(['(tabs)', 'place/[providerId]', 'destination-ar/[destinationId]', 'directions', 'destinations', 'settings', 'viro-ring', 'viro-spike']);
+ expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.name)).toEqual(['(tabs)', 'place/[providerId]', 'destination-ar/[destinationId]', 'saved-places', 'directions', 'destinations', 'settings', 'viro-ring', 'viro-spike']);
  expect(tree!.root.findAllByType('route' as React.ElementType).find(r => r.props.name === 'settings')!.props.options.headerShown).toBe(false);
  const reducer = StackRouter({ initialRouteName: '(tabs)' });
  const config = { routeNames: ['(tabs)', 'settings'], routeParamList: {}, routeGetIdList: {} };

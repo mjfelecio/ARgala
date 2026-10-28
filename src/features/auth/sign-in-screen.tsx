@@ -2,11 +2,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Button } from 'heroui-native/button';
 import { useThemeColor } from 'heroui-native/hooks';
 import { Surface } from 'heroui-native/surface';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, KeyboardAvoidingView, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { withUniwind } from 'uniwind';
+import { router } from 'expo-router';
+import { useGuestAccess } from './guest-context';
 import { getSupabase } from '@/lib/supabase';
 import { ScenicLandscape } from '@/ui/scenic-landscape';
 import { CredentialsFields } from './credentials-fields';
@@ -20,6 +22,9 @@ type MessageKey = ReturnType<typeof authErrorMessageKey> | 'auth.invalid' | 'aut
 export default function SignInScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const guest=useGuestAccess();
+  const [guestRequested,setGuestRequested]=useState(false);
+  useEffect(()=>{if(guestRequested&&guest.enabled)router.replace('/');},[guestRequested,guest.enabled]);
   const [accent, onAccent] = useThemeColor(['accent', 'accent-foreground']);
   const [registering, setRegistering] = useState(false);
   const [email, setEmail] = useState('');
@@ -80,6 +85,8 @@ export default function SignInScreen() {
               <Button.Label>{t(busy ? 'common.connecting' : registering ? 'auth.register' : 'auth.signIn')}</Button.Label>
               {!busy && <Ionicons name="arrow-forward" size={20} color={onAccent} accessible={false} />}
             </Button>
+            {guest.error && <Text accessibilityRole="alert" className="font-sans text-sm text-danger">{t(guest.error)}</Text>}
+            {guest.error === 'journal.loadFailed' ? <Button variant="secondary" onPress={guest.retry}><Button.Label>{t('common.retry')}</Button.Label></Button> : <Button variant="secondary" isDisabled={busy || guest.loading} accessibilityLabel={t('journal.continueGuest')} onPress={() => { setGuestRequested(true); void guest.enter().then(ok => { if(!ok) setGuestRequested(false); }); }}><Button.Label>{t('journal.continueGuest')}</Button.Label></Button>}
             <View className="grow flex-row flex-wrap items-end justify-center pt-6">
               <View className="flex-row flex-wrap items-center justify-center gap-x-1">
                 <Text className="text-center font-sans text-sm text-muted">{t(registering ? 'auth.alreadyMember' : 'auth.newHere')}</Text>

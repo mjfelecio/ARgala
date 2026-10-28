@@ -9,6 +9,7 @@ import { localizationOptions } from '@/i18n/options';
 import SignInScreen from './sign-in-screen';
 
 const auth = vi.hoisted(() => ({ signInWithPassword: vi.fn(), signUp: vi.fn() }));
+vi.mock('expo-router', () => ({ router: { replace: vi.fn() } }));
 vi.mock('@/lib/supabase', () => ({ getSupabase: () => ({ auth }) }));
 let tree: ReactTestRenderer | undefined;
 let translations: i18n;

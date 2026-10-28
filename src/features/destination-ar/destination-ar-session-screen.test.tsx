@@ -229,3 +229,6 @@ it.each(['en', 'ko', 'ja'])('offers a fresh map handoff instead of an unrecovera
  expect(cameras()).toHaveLength(0);
  await press('arrival.returnToMap'); expect(returned).toHaveBeenCalledOnce(); expect(exited).toHaveBeenCalledOnce();
 });
+it('keeps local earned-progress recovery feedback visible after tracking-ready', async()=>{
+ await mount(()=>React.createElement(DestinationArSessionExperience,{identity,freshEligible:native.gate,progressFeedback:React.createElement('text',null,'journal-save-recovery')}));await layout();await start();await ready();expect(copy()).toContain('journal-save-recovery');
+});

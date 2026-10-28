@@ -38,3 +38,9 @@ it('removal survives repeated guest merges rather than resurrecting a bookmark',
  const {repo}=setup(); await repo.change('guest', s=>saveBookmark(s,ref,true)); await repo.open('user-a');
  await repo.change('user-a',s=>saveBookmark(s,ref,false)); expect((await repo.open('user-a')).bookmarks).toHaveLength(0);
 });
+
+it('recovers idempotently when guest clearing fails after account persistence',async()=>{
+ const {repo,storage}=setup();await repo.change('guest',s=>saveBookmark(s,ref,true));const original=storage.setItem.getMockImplementation()!;
+ storage.setItem.mockImplementationOnce(original).mockRejectedValueOnce(new Error('clear failed'));
+ await expect(repo.open('user-a')).rejects.toThrow();expect((await repo.open('guest')).bookmarks).toHaveLength(1);expect((await repo.open('user-a')).bookmarks).toHaveLength(1);expect((await repo.open('guest')).bookmarks).toHaveLength(0);
+});

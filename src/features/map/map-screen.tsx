@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Constants from 'expo-constants';
+import { SavePlaceAction, JournalFeedback } from '@/features/journal/actions';
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { View, useWindowDimensions } from 'react-native';
@@ -219,7 +220,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
       onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')} />
     </View>
     <MapRecenter disabled={!enabled} position={sheetPosition} onPress={() => enabled && map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
-    <HomePlaceSheet geometry={sheetGeometry} animatedPosition={sheetPosition} key={featured?.id ?? selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId || !!featured}
+    <HomePlaceSheet saveAction={<>{featured ? <SavePlaceAction reference={{kind:'featured',id:featured.id}}/> : place?.provider === 'google' ? <SavePlaceAction reference={{kind:'google',id:place.providerId}}/> : null}<JournalFeedback/></>} geometry={sheetGeometry} animatedPosition={sheetPosition} key={featured?.id ?? selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId || !!featured}
       canRequest={featured ? mapEnabled && !!destinationToRoutePlace(featured) : mapEnabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!complete || !!featured} detailsLoading={details.isFetching} mapLoading={!mapReady}
       locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
