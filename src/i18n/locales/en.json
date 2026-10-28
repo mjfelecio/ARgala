@@ -306,7 +306,8 @@
       "checking": "Device AR support is still undetermined. Retry when ready.",
       "failed": "The AR test could not start. Retry when ready.",
       "permission-failed": "Camera permission could not be checked. Please retry.",
-      "startup-timeout": "AR startup timed out. Check camera access and Google Play Services for AR, then retry."
+      "startup-timeout": "AR startup timed out. Check camera access and Google Play Services for AR, then retry.",
+      "entry-ineligible": "This entry is no longer eligible. Return to the selected destination and verify entry again."
     }
   },
   "destinationRing": {
@@ -349,5 +350,15 @@
     "hold": "Hold, then release",
     "poseRequired": "Face ahead and move the phone gently before recentering.",
     "poseRate": "Pose callbacks: {{received}}/s · position outputs: {{applied}}/s"
+  },
+  "destinationSession": {
+    "intro": {
+      "load-failed": "The introduction preference could not be loaded. You can continue or retry.",
+      "save-failed": "The introduction preference could not be saved. You can retry."
+    },
+    "skip": "Skip introduction",
+    "reveal": "Look around as the sample panels appear. You can skip this introduction.",
+    "restoring": "Restoring your reading progress. Move gently to reacquire tracking.",
+    "retryTracking": "Retry tracking"
   }
 }

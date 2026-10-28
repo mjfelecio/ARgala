@@ -6,6 +6,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { DestinationRingScene, type RingControls } from './destination-ring-scene';
 import type { PoseSample } from './types';
+import { useReadingSize } from './use-reading-size';
 const native = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn(), patches: [] as { id: string; patch: Record<string, unknown> }[], reduced: false }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => native.reduced }));
@@ -20,9 +21,10 @@ vi.mock('@reactvision/react-viro', async () => {
     ViroMaterials: { createMaterials: vi.fn() }, ViroAnimations: { registerAnimations: vi.fn() },
     ViroTrackingStateConstants: { TRACKING_UNAVAILABLE: 1, TRACKING_LIMITED: 2, TRACKING_NORMAL: 3 } };
 });
+let sceneOptions: Partial<React.ComponentProps<typeof DestinationRingScene>> = {};
 let tree: ReactTestRenderer; let translations: i18n; let controls: RingControls | null = null; const ready = vi.fn(); const commits = vi.fn();
 const initial: PoseSample = { position: [0, 2, 0], forward: [0, 0, -1] };
-function wrapper() { return React.createElement(I18nextProvider, { i18n: translations }, React.createElement(React.Profiler, { id: 'ring', onRender: commits }, React.createElement(DestinationRingScene, { onReady: ready, onTracking: () => {}, onControls: (value: RingControls | null) => { controls = value; } }))); }
+function wrapper() { return React.createElement(I18nextProvider, { i18n: translations }, React.createElement(React.Profiler, { id: 'ring', onRender: commits }, React.createElement(DestinationRingScene, { onReady: ready, onTracking: () => {}, onControls: (value: RingControls | null) => { controls = value; }, ...sceneOptions }))); }
 async function mount() { await act(async () => { tree = create(wrapper()); }); }
 async function track(state = 3) { await act(async () => tree.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(state, 1)); }
 async function pose(value = initial, time = Date.now()) { vi.setSystemTime(time); await act(async () => tree.root.findByType('native-scene' as React.ElementType).props.onCameraTransformUpdate(value)); }
@@ -32,7 +34,7 @@ async function finish() { await act(async () => node('ring-focused-panel').props
 function text(id: string) { return tree.root.findAllByType('viro-text' as React.ElementType).find(item => item.props.testID === id)!.props.text as string; }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: true }); vi.useFakeTimers(); vi.setSystemTime(1000);
-  vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); vi.spyOn(performance, 'now').mockImplementation(() => Date.now()); native.reduced = false; native.patches.length = 0;
+  vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); vi.spyOn(performance, 'now').mockImplementation(() => Date.now()); native.reduced = false; native.patches.length = 0; sceneOptions = {};
   native.getItem.mockReset().mockResolvedValue(null); native.setItem.mockReset().mockResolvedValue(undefined); ready.mockClear(); commits.mockClear();
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, resources: structuredClone(localizationOptions.resources), lng: 'en', react: { useSuspense: false } });
   const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
@@ -222,4 +224,35 @@ it('draws translucent panel backgrounds before glyphs, including dimmed tiles an
   const noticeFill = tree.root.findAllByType('quad' as React.ElementType).find(quad => quad.props.height === 0.5)!;
   expect(retryFill.props.renderingOrder).toBeGreaterThan(noticeFill.props.renderingOrder);
   expect(retry.findByType('viro-text' as React.ElementType).props.renderingOrder).toBeGreaterThan(retryFill.props.renderingOrder);
+});
+
+it('restores only logical selection/page after a fresh frame and keeps its new pose through same-frame tracking loss', async () => {
+  const progress = vi.fn();
+  sceneOptions = { initialProgress: { selectedId: 'history', cursors: { history: { page: 2, offset: 400, locale: 'en', size: 'standard' } } }, onProgress: progress };
+  await mount(); expect(node('ring-focused-panel')).toBeUndefined(); await track();
+  await pose({ position: [8, 4, -2], forward: [1, 0, 0] });
+  expect(node('ring-focused-panel').props.position).toEqual([9.15, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^3 /);
+  await track(2); await track(3); await pose({ position: [10, 4, -2], forward: [0, 0, 1] }, 1100);
+  expect(node('ring-focused-panel').props.position).toEqual([9.15, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^3 /);
+  await press('ring-action-close'); await finish(); expect(progress.mock.lastCall?.[0].selectedId).toBeNull();
+  expect(JSON.stringify(progress.mock.calls)).not.toContain('position');
+});
+it('reveals Overview first and blocks native interaction until the reveal allows it', async () => {
+  sceneOptions = { visibleTileCount: 1, interactive: false }; await mount(); await track(); await pose();
+  expect(node('ring-tile-overview')).toBeDefined(); expect(node('ring-tile-history')).toBeUndefined();
+  await press('ring-tile-overview'); expect(node('ring-focused-panel')).toBeUndefined();
+  sceneOptions = { visibleTileCount: 4, interactive: true }; await act(async () => tree.update(wrapper()));
+  await press('ring-tile-history'); expect(node('ring-focused-panel')).toBeDefined();
+});
+it('keeps the actual reading controller and unsaved size/error above a remounting native scene', async () => {
+  native.setItem.mockRejectedValueOnce(new Error('PRIVATE_WRITE_ERROR'));
+  function Owner({ visible }: { visible: boolean }) { const reading = useReadingSize(); return visible ? React.createElement(DestinationRingScene, { reading, onReady: ready, onTracking: () => {} }) : null; }
+  const owned = (visible: boolean) => React.createElement(I18nextProvider, { i18n: translations }, React.createElement(Owner, { visible }));
+  await act(async () => { tree = create(owned(true)); }); await track(); await pose(); await press('ring-tile-history'); await finish();
+  await press('ring-action-larger'); expect(text('ring-reading-error')).toBe(translations.t('destinationRing.save-failed'));
+  await act(async () => tree.update(owned(false))); await act(async () => tree.update(owned(true)));
+  await track(); await pose(); await press('ring-tile-history'); await finish();
+  expect(text('ring-reading-error')).toBe(translations.t('destinationRing.save-failed')); expect(native.getItem).toHaveBeenCalledOnce();
+  const body = tree.root.findAllByType('viro-text' as React.ElementType).find(item => item.props.testID === 'ring-body')!;
+  expect(body.props.style.fontSize * body.props.scale[0]).toBe(6);
 });

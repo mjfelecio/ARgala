@@ -265,7 +265,8 @@
       "checking": "기기의 AR 지원 여부가 아직 확인되지 않았습니다. 준비되면 다시 시도하세요.",
       "failed": "AR 테스트를 시작할 수 없습니다. 준비되면 다시 시도하세요.",
       "permission-failed": "카메라 권한을 확인할 수 없습니다. 다시 시도하세요.",
-      "startup-timeout": "AR 시작 시간이 초과되었습니다. 카메라 권한과 Google Play AR 서비스를 확인한 후 다시 시도하세요."
+      "startup-timeout": "AR 시작 시간이 초과되었습니다. 카메라 권한과 Google Play AR 서비스를 확인한 후 다시 시도하세요.",
+      "entry-ineligible": "입장 조건을 다시 확인해야 합니다. 선택한 목적지로 돌아가 다시 확인해 주세요."
     }
   },
   "destinationRing": {
@@ -308,5 +309,15 @@
     "hold": "길게 누른 뒤 떼기",
     "poseRequired": "정면을 향해 휴대폰을 천천히 움직인 뒤 다시 설정하세요.",
     "poseRate": "자세 알림: {{received}}/초 · 위치 출력: {{applied}}/초"
+  },
+  "destinationSession": {
+    "intro": {
+      "load-failed": "소개 표시 설정을 불러오지 못했습니다. 계속하거나 다시 시도해 주세요.",
+      "save-failed": "소개 표시 설정을 저장하지 못했습니다. 다시 시도할 수 있습니다."
+    },
+    "skip": "소개 건너뛰기",
+    "reveal": "샘플 패널이 나타납니다. 주변을 둘러보세요. 소개를 건너뛸 수 있습니다.",
+    "restoring": "읽던 위치를 복원하고 있습니다. 천천히 움직여 추적을 다시 시작해 주세요.",
+    "retryTracking": "추적 다시 시도"
   }
 }
