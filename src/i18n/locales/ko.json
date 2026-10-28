@@ -73,7 +73,8 @@
     "start": "주변 검색을 눌러 현재 위치 주변의 장소를 찾아보세요.",
     "expand": "더 보기",
     "collapse": "접기",
-    "results": "장소 {{count}}곳을 찾았습니다. 지도 마커를 눌러 살펴보세요."
+    "results": "장소 {{count}}곳을 찾았습니다. 지도 마커를 눌러 살펴보세요.",
+    "proximityUnavailable": "최신 기기 위치가 없어 현재 거리를 확인할 수 없습니다."
   },
   "location": {
     "timeout": "위치 확인 시간이 초과되었습니다. 위치 서비스를 켜고 야외에서 다시 시도하세요.",
@@ -169,11 +170,11 @@
     "loaded": "장소 정보를 불러왔습니다."
   },
   "directions": {
-    "title": "도보 길찾기",
+    "title": "길찾기",
     "back": "뒤로",
     "map": "지도로 돌아가기",
     "details": "장소 상세정보",
-    "walking": "도보 경로",
+    "walking": "도보",
     "destination": "목적지",
     "origin": "경로 출발 위치",
     "recenter": "현재 위치로 이동",
@@ -201,7 +202,16 @@
     "remaining": "약 {{meters}}m 남음",
     "navigationInformation": "도보 진행 상황",
     "navigationArrival": "목적지 근처에서 현재 위치가 여러 번 확인되어 도착으로 판단했습니다.",
-    "noAutomaticReroute": "경로는 자동으로 갱신되지 않습니다. 안내를 종료하면 전체 경로 미리보기로 돌아갑니다."
+    "noAutomaticReroute": "경로는 자동으로 갱신되지 않습니다. 안내를 종료하면 전체 경로 미리보기로 돌아갑니다.",
+    "driving": "자동차",
+    "followWalk": "ARgala에서 도보 경로 따라가기",
+    "previewMode": "선택한 이동 수단 미리보기",
+    "displayedMode": "표시된 경로: {{mode}}",
+    "estimatedDriving": "예상 자동차 경로",
+    "drivingCaution": "운전 전에 도로 진입 가능 여부, 표지판과 현재 상황을 확인하세요.",
+    "mapsFailed": "Google Maps를 열지 못했습니다. 경로 미리보기는 계속 사용할 수 있습니다. 다시 시도하세요.",
+    "drivingLoading": "자동차 경로를 찾는 중…",
+    "drivingUnavailable": "이 목적지까지의 자동차 경로를 찾을 수 없습니다."
   },
   "destinations": {
     "title": "추천 여행지",
@@ -318,6 +328,63 @@
     "skip": "소개 건너뛰기",
     "reveal": "샘플 패널이 나타납니다. 주변을 둘러보세요. 소개를 건너뛸 수 있습니다.",
     "restoring": "읽던 위치를 복원하고 있습니다. 천천히 움직여 추적을 다시 시작해 주세요.",
-    "retryTracking": "추적 다시 시도"
+    "retryTracking": "추적 다시 시도",
+    "expired": "이 AR 세션이 만료되었습니다. 탐색으로 돌아가 도착을 확인한 후 새 세션을 시작하세요."
+  },
+  "arrival": {
+    "unavailable": "이 목적지는 아직 AR 도착 확인을 지원하지 않습니다.",
+    "uncertain": "최신의 정확한 위치 업데이트를 기다리는 중입니다.",
+    "distant": "이 목적지를 선택하고 가까이 이동하면 AR을 이용할 수 있습니다.",
+    "approaching": "선택한 목적지에 접근하고 있습니다.",
+    "near": "선택한 목적지 근처입니다. 위치 기능을 켜 두세요.",
+    "checking": "안정적인 도착 위치를 확인하는 중…",
+    "eligible": "선택한 목적지의 도착이 확인되었습니다.",
+    "invitation": "AR 정보 링으로 이 장소를 둘러보세요.",
+    "contentPending": "도착이 확인되었습니다. 승인된 AR 콘텐츠를 준비 중입니다.",
+    "launch": "AR 시작",
+    "dismiss": "나중에",
+    "teaser": "도착이 확인되면 AR로 이 목적지의 이야기를 살펴보세요.",
+    "selectDestination": "AR을 이용하려면 추천 목적지를 선택하세요.",
+    "launchDraft": "초안 AR 시작",
+    "draftInvitation": "개발용 초안입니다. 조사한 내용은 검토가 필요하며 실제 도착 확인은 계속 적용됩니다.",
+    "preflight": "밝고 무늬가 있는 공간을 향해 휴대폰을 세워 주세요. 카메라는 이 AR 체험에만 사용됩니다.",
+    "live": "선택한 목적지의 AR 정보입니다.",
+    "entryUnavailable": "이 AR 진입은 사용할 수 없습니다. 지도로 돌아가 도착을 다시 확인하세요.",
+    "returnToMap": "탐색으로 돌아가기",
+    "draftLive": "검토용 조사 초안입니다. 도착 판정은 임시 기준이며 현장 보정은 아직 하지 않았습니다.",
+    "simulate": "도착 시뮬레이션 · 개발 전용",
+    "simulatedLive": "도착 시뮬레이션 — 카메라 추적은 실제로 작동합니다. 현장 GPS를 확인한 것은 아닙니다."
+  },
+  "search": {
+    "query": "장소 검색",
+    "placeholder": "장소 또는 주소 검색",
+    "noArea": "장소를 검색해 탐색할 지역을 선택하세요. 현재 위치는 필요하지 않습니다.",
+    "thisArea": "이 지역 검색",
+    "areaExtent": "이 지역 검색 · {{meters}}m 이내",
+    "categories": {
+      "all": "전체",
+      "attractions": "명소",
+      "restaurants": "음식점",
+      "hotels": "호텔",
+      "shopping": "쇼핑"
+    }
+  },
+  "aclcResearch": {
+    "overview": {
+      "title": "개요",
+      "body": "조사 자료에 기반한 초안 — 검토가 필요합니다.\n\nACLC College of Ormoc은 레이테주 오르모크시 Lilia Avenue에 있는 사립 교육기관입니다. 정부 교육 자료에는 이 캠퍼스의 고등교육, 디플로마 과정 및 시니어 하이스쿨 관련 활동이 기록되어 있습니다.\n\n출처: CHED 제VIII지역 학교 목록."
+    },
+    "history": {
+      "title": "연혁",
+      "body": "조사 자료에 기반한 초안 — 검토가 필요합니다.\n\nTESDA의 2024년 디플로마 과정 목록에 학교가 포함되어 있으며, DepEd는 이 학교를 2025~2026학년도 강화 시니어 하이스쿨 프로그램의 시범학교로 선정했습니다. 이는 당시의 기록이며, 개교 연도나 현재의 전체 과정 목록을 확인한 것은 아닙니다.\n\n출처: TESDA 2024년 12월 목록, DepEd 제VIII지역 문서 567호(2025년)."
+    },
+    "notes": {
+      "title": "방문 안내",
+      "body": "조사 자료에 기반한 초안 — 편집상 권고이며 확인된 학교 규정이 아닙니다.\n\n방문 전에 학교에 직접 최신 방문 안내를 확인하세요. 교내에 들어가거나 사진을 촬영하기 전에 학교 직원에게 확인하세요. 방문 시간, 요금 및 일반인 견학 가능 여부는 확인되지 않았습니다."
+    },
+    "facts": {
+      "title": "기본 정보",
+      "body": "조사 자료에 기반한 초안 — 검토가 필요합니다.\n\n위치: 레이테주 오르모크시 Lilia Avenue.\n\n2025~2026학년도 강화 시니어 하이스쿨 프로그램의 시범학교로 등재되었습니다.\n\n개교 연도는 명시하지 않습니다.\n\n출처: CHED 제VIII지역 학교 목록, DepEd 제VIII지역 문서 567호(2025년)."
+    }
   }
 }

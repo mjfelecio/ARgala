@@ -1,3 +1,4 @@
+import { ringCopy } from './ring-copy';
 import { ArText } from './ar-text';
 import { useEffect, useRef } from 'react';
 import { ViroAnimations, ViroNode, ViroQuad } from '@reactvision/react-viro';
@@ -33,7 +34,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
     // same animation without recapturing a heading or feeding frames to React.
     ref.current?.setNativeProps({ animation: { name, run: moving && enabled, interruptible: true } });
   }, [moving, enabled, name, selection.token]);
-  const body = t(content.bodyKey); const locale = i18n.resolvedLanguage ?? i18n.language;
+  const body = ringCopy(content, 'body', i18n.resolvedLanguage ?? i18n.language, key => t(key), key => i18n.exists(key)); const locale = i18n.resolvedLanguage ?? i18n.language;
   function layout(size: ReadingSize) {
     try { return paginate(body, size); }
     catch { return paginate(t('destinationRing.contentFailed'), size); }
@@ -51,9 +52,9 @@ export function InformationPanel({ selection, content, previous, reading, enable
     animation={{ name, run: false, onFinish: () => onComplete(selection.token), interruptible: true }}>
     <ViroQuad renderingOrder={0} ignoreEventHandling width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} materials="argalaRingEdge" />
     <ViroQuad renderingOrder={1} ignoreEventHandling width={ringMetrics.panelWidth} height={ringMetrics.panelHeight} position={[0, 0, 0.003]} opacity={0.96} materials="argalaRingSurface" />
-    <ArText position={[0, closing ? 0 : 0.4, 0.006]} width={1.12} height={0.14} text={t(content.titleKey)} style={style.text(8, 'center', '600')} />
+    <ArText position={[0, closing ? 0 : 0.4, 0.006]} width={1.12} height={0.14} text={ringCopy(content, 'title', i18n.resolvedLanguage ?? i18n.language, key => t(key), key => i18n.exists(key))} style={style.text(8, 'center', '600')} />
     {!closing && <>
-      <ArText testID="ring-sample-label" position={[0, 0.3, 0.006]} width={1.12} height={0.06} text={t('destinationRing.sampleLabel')} style={style.text(3)} />
+      <ArText testID="ring-sample-label" position={[0, 0.3, 0.006]} width={1.12} height={0.06} text={content.approved ? 'ARgala' : t('destinationRing.sampleLabel')} style={style.text(3)} />
       <ArText testID="ring-body" position={[0, 0.035, 0.006]} width={1.08} height={0.44} text={page.text || t('destinationRing.empty')}
         textLineBreakMode="None" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />
       <NativePanelAction id="previous" label={t('destinationRing.previous')} position={[-0.4, -0.27, 0.012]} enabled={interactive && cursor.page > 0} style={style}

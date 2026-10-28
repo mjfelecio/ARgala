@@ -1,8 +1,10 @@
 import { z } from 'zod';
-import { coordinateSchema, type Language } from '../../../supabase/functions/_shared/contracts';
+import { coordinateSchema, detailsRequestSchema, type Language } from '../../../supabase/functions/_shared/contracts';
 
 export const destinationIds = ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09'] as const;
 export type DestinationId = typeof destinationIds[number];
+export const featuredDestinationIds = [...destinationIds, 'pilot-aclc'] as const;
+export type FeaturedDestinationId = typeof featuredDestinationIds[number];
 const text = z.string().trim().min(1);
 const approvedText = z.object({ value: text, approvalReference: text }).strict();
 const approvedHighlights = z.object({ value: z.array(text).min(1).readonly(), approvalReference: text }).strict();
@@ -13,8 +15,21 @@ const mediaSchema = z.object({
   // A bundled require(...) asset only; no remote photo loading or provider-photo cache.
   alt: translatedText.extend({ en: approvedText }), caption: translatedText.optional(),
 }).strict();
+const arTileSchema = z.object({
+  id: text.max(80), role: z.enum(['overview', 'history']).optional(),
+  title: translatedText, body: translatedText,
+}).strict();
+const arSchema = z.object({
+  schemaVersion: z.literal(1), contentVersion: text.max(80),
+  activation: z.object({ point: coordinateSchema, pointApprovalReference: text,
+    radiusMeters: z.number().finite().min(10).max(1000), radiusApprovalReference: text }).strict().optional(),
+  providerAssociation: z.object({ providerId: detailsRequestSchema.shape.providerId, approvalReference: text }).strict().optional(),
+  tiles: z.array(arTileSchema).max(12).refine(items => new Set(items.map(item => item.id)).size === items.length)
+    .refine(items => ['overview', 'history'].every(role => items.filter(item => item.role === role).length <= 1)).readonly(),
+}).strict();
 export const destinationSchema = z.object({
-  id: z.enum(destinationIds), provisionalName: text, verifiedName: approvedText.optional(),
+  id: z.enum(featuredDestinationIds), provisionalName: text, verifiedName: approvedText.optional(),
+  ar: arSchema.optional(),
   center: coordinateSchema.optional(), centerApprovalReference: text.optional(),
   routeEntrance: coordinateSchema.optional(), routeEntranceApprovalReference: text.optional(),
   copy: z.object({ en: copy.optional(), ko: copy.optional(), ja: copy.optional() }).strict().optional(),
@@ -31,8 +46,21 @@ const catalog: readonly Destination[] = Object.freeze([
   ['D07', 'Alto Peak'], ['D08', 'Heaven’s Peak'], ['D09', 'Sabin Resort Hotel'],
 ].map(([id, provisionalName]) => destinationSchema.parse({ id, provisionalName })));
 export const listDestinations = (): readonly Destination[] => catalog;
+const pilotApproval = 'Owner supplied entrance and approved Maps place activation center, 2026-10-27; docs/aclc-pilot-inputs.md';
+const pilotPoint = { latitude: 11.022973, longitude: 124.6054992 };
+const pilot = destinationSchema.parse({
+  id: 'pilot-aclc', provisionalName: 'ACLC College of Ormoc',
+  center: pilotPoint, centerApprovalReference: pilotApproval,
+  routeEntrance: { latitude: 11.022845368322905, longitude: 124.60452610504089 },
+  routeEntranceApprovalReference: pilotApproval,
+  ar: { schemaVersion: 1, contentVersion: 'pilot-inputs-2026-10-27', tiles: [],
+    activation: { point: pilotPoint, pointApprovalReference: pilotApproval, radiusMeters: 50,
+      radiusApprovalReference: 'Approved blueprint tentative 50m trial; field calibration pending' } },
+});
+/** Pilot is not a change to the client launch roster. */
+export const listFeaturedDestinations = (): readonly Destination[] => [...catalog, pilot];
 export function getDestination(id: unknown): Destination | null {
-  return typeof id === 'string' ? catalog.find(d => d.id === id) ?? null : null;
+  return typeof id === 'string' ? listFeaturedDestinations().find(d => d.id === id) ?? null : null;
 }
 export const destinationName = (destination: Destination) => destination.verifiedName?.value ?? destination.provisionalName;
 

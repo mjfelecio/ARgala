@@ -122,7 +122,8 @@
     "start": "Tap Search Nearby to discover places around your location.",
     "expand": "Show more",
     "collapse": "Show less",
-    "results": "{{count}} places returned. Tap a map marker to explore."
+    "results": "{{count}} places returned. Tap a map marker to explore.",
+    "proximityUnavailable": "Current distance is unavailable without a fresh device location."
   },
   "service": {
     "failed": "Unable to complete this request. Please try again.",
@@ -209,11 +210,11 @@
     "loaded": "Place details loaded."
   },
   "directions": {
-    "title": "Walking Directions",
+    "title": "Directions",
     "back": "Back",
     "map": "Back to Map",
     "details": "Place Details",
-    "walking": "Walking Route",
+    "walking": "Walking",
     "destination": "Destination",
     "origin": "Route starting point",
     "recenter": "Recenter on your location",
@@ -241,7 +242,16 @@
     "remaining": "About {{meters}} m remaining",
     "navigationInformation": "Walking progress",
     "navigationArrival": "Arrival was confirmed from repeated current location readings near the destination.",
-    "noAutomaticReroute": "This route does not update automatically. Stop navigation to return to the full route preview."
+    "noAutomaticReroute": "This route does not update automatically. Stop navigation to return to the full route preview.",
+    "driving": "Driving",
+    "followWalk": "Follow this walk in ARgala",
+    "previewMode": "Preview selected mode",
+    "displayedMode": "Displayed route: {{mode}}",
+    "estimatedDriving": "Estimated driving route",
+    "drivingCaution": "Check road access, signs and current conditions before driving.",
+    "mapsFailed": "Could not open Google Maps. Your route preview is still available; try again.",
+    "drivingLoading": "Finding a driving route…",
+    "drivingUnavailable": "No driving route could be found for this destination."
   },
   "destinations": {
     "title": "Featured Destinations",
@@ -359,6 +369,63 @@
     "skip": "Skip introduction",
     "reveal": "Look around as the sample panels appear. You can skip this introduction.",
     "restoring": "Restoring your reading progress. Move gently to reacquire tracking.",
-    "retryTracking": "Retry tracking"
+    "retryTracking": "Retry tracking",
+    "expired": "This AR session has expired. Return to Explore to verify arrival and start a new session."
+  },
+  "arrival": {
+    "unavailable": "AR arrival is not available for this destination yet.",
+    "uncertain": "Waiting for fresh, accurate location updates.",
+    "distant": "Select this destination and approach it to unlock AR.",
+    "approaching": "You are approaching the selected destination.",
+    "near": "You are near the selected destination. Keep location enabled.",
+    "checking": "Checking stable arrival…",
+    "eligible": "Arrival verified for the selected destination.",
+    "invitation": "Explore this place through its AR information ring.",
+    "contentPending": "Arrival is verified. Approved AR content is still being prepared.",
+    "launch": "Launch AR",
+    "dismiss": "Not now",
+    "teaser": "Explore this destination’s stories in AR after a verified arrival.",
+    "selectDestination": "Select a featured destination to enter AR.",
+    "launchDraft": "Launch draft AR",
+    "draftInvitation": "Development draft: researched text awaits review. Real arrival checks still apply.",
+    "preflight": "Hold your phone upright in a well-lit, textured area. Camera access is used only for this AR experience.",
+    "live": "AR information for your selected destination.",
+    "entryUnavailable": "This AR entry is unavailable. Return to the map and verify arrival again.",
+    "returnToMap": "Back to Explore",
+    "draftLive": "Research draft for review. Arrival policy is provisional and has not been calibrated on site.",
+    "simulate": "Simulate arrival · development only",
+    "simulatedLive": "SIMULATED ARRIVAL — real camera tracking. This does not verify on-site GPS."
+  },
+  "search": {
+    "query": "Search places",
+    "placeholder": "Search places or an address",
+    "noArea": "Search for a place to choose an area. No current location is required.",
+    "thisArea": "Search this area",
+    "areaExtent": "Search this area · within {{meters}} m",
+    "categories": {
+      "all": "All",
+      "attractions": "Attractions",
+      "restaurants": "Restaurants",
+      "hotels": "Hotels",
+      "shopping": "Shopping"
+    }
+  },
+  "aclcResearch": {
+    "overview": {
+      "title": "Overview",
+      "body": "RESEARCH DRAFT — review pending.\n\nACLC College of Ormoc is a private educational institution on Lilia Avenue in Ormoc City, Leyte. Government education records document the campus’s higher education, diploma and senior high school activities.\n\nSource: CHED Region VIII directory."
+    },
+    "history": {
+      "title": "History",
+      "body": "RESEARCH DRAFT — review pending.\n\nTESDA’s 2024 diploma list includes the Ormoc institution. DepEd listed it among Strengthened Senior High School pilot schools for school year 2025–2026. These are dated records, not a verified founding date or current course catalog.\n\nSources: TESDA December 2024 list; DepEd Region VIII Memorandum 567 (2025)."
+    },
+    "notes": {
+      "title": "Visitor notes",
+      "body": "RESEARCH DRAFT — editorial advice, not verified campus rules.\n\nBefore visiting, confirm current visitor arrangements directly with the school. Check with campus staff before entering school areas or taking photographs. Visitor hours, fees and public-tour arrangements have not been verified."
+    },
+    "facts": {
+      "title": "Facts",
+      "body": "RESEARCH DRAFT — review pending.\n\nLocation: Lilia Avenue, Ormoc City, Leyte.\n\nThe campus was listed as a Strengthened Senior High School pilot school for 2025–2026.\n\nNo campus founding date is asserted.\n\nSources: CHED Region VIII directory; DepEd Region VIII Memorandum 567 (2025)."
+    }
   }
 }

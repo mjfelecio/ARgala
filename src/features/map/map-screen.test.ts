@@ -20,7 +20,7 @@ const controls = vi.hoisted(() => ({
   language: 'en' as 'en' | 'ko' | 'ja',
   position: { latitude: 38.5, longitude: -120.2 },
   params: {} as { placeId?: string },
-  hasLocation: true, locationStatus: 'ready', accuracy: 8,
+  hasLocation: true, locationStatus: 'ready', accuracy: 8, watcherSample: null as { position: { latitude: number; longitude: number }; accuracy: number; timestamp: number } | null,
 }));
 vi.mock('expo-constants', () => ({ default: { expoConfig: { extra: { mapsConfigured: true } } } }));
 vi.mock('expo-router', () => ({ router: { navigate: vi.fn(), push: vi.fn(), setParams: vi.fn(() => { controls.params = {}; }) }, useIsFocused: () => controls.focused, useLocalSearchParams: () => controls.params }));
@@ -33,9 +33,9 @@ vi.mock('react-native-maps', async () => {
   return { default: MapView, Circle: 'circle', Marker: 'marker', Callout: 'callout', Polyline: 'polyline', PROVIDER_GOOGLE: 'google' };
 });
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ activationRadiusMeters: 100, language: controls.language }) }));
-vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ position: controls.hasLocation ? controls.position : null, accuracy: controls.accuracy, status: controls.locationStatus, retry: vi.fn() }) }));
+vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ watcherStatus: 'ready', watcherSample: controls.watcherSample, position: controls.hasLocation ? controls.position : null, accuracy: controls.accuracy, status: controls.locationStatus, retry: vi.fn() }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
-vi.mock('@/features/places/service', () => ({ placesService: { nearby: vi.fn(), details: vi.fn() } }));
+vi.mock('@/features/places/service', () => ({ placesService: { search: vi.fn(), nearby: vi.fn(), details: vi.fn() } }));
 vi.mock('@/features/directions/service', () => ({ routeService: { walking: vi.fn() } }));
 vi.mock('./attributions', async () => {
   const { createElement } = await import('react');
@@ -302,10 +302,10 @@ it('offers an explicit details request when the handoff has expired', async () =
 it('offers floating Home controls and spends nothing on mount, pan, locale, navigation or invalidation', async () => {
  await act(async () => { tree = create(renderMap()); });
  await act(async () => { tree!.root.findByType('map').props.onMapReady(); });
- expect(tree!.root.findAllByType('button').filter(b => b.props.accessibilityRole === 'button')).toHaveLength(5);
- // Native region changes have no paid-refresh handler.
+ expect(tree!.root.findAllByType('button').map(b => b.props.accessibilityLabel)).toEqual(expect.arrayContaining([translations.t('map.search'), translations.t('destinations.title'), translations.t('search.categories.restaurants')]));
+ // Native region changes update draft geometry only.
  await act(async () => { tree!.root.findByType('map').props.onRegionChangeComplete?.({ latitude: 10, longitude: 20 }); });
- await press('map.camera'); expect(router.navigate).toHaveBeenLastCalledWith('/ar');
+ await press('destinations.title'); expect(router.navigate).toHaveBeenLastCalledWith('/destinations');
  expect(tree!.root.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('map.settings'))).toBe(false);
  controls.focused = false; controls.active = false;
  await act(async () => { tree!.update(renderMap()); });
@@ -457,6 +457,7 @@ it('centers a Details handoff only when the existing native map is ready without
 
 it('separates Recenter from the search bar and keeps it attached to the native sheet position', async () => {
  await act(async()=>{ tree=create(renderMap()); });
+ await act(async()=>tree!.root.findByType('map').props.onMapReady());
  const top=tree!.root.findByProps({testID:'home-map-controls'});
  expect(top.findAllByType('button').some(b=>b.props.accessibilityLabel===translations.t('map.recenter'))).toBe(false);
  const floating=tree!.root.findByType(MapRecenter);
@@ -534,4 +535,134 @@ it('bounds native padding in very short scenes and ignores transient zero scene 
  const height=map.props.style.height;
  await act(async()=>tree!.root.findByProps({testID:'home-map-scene'}).props.onLayout({nativeEvent:{layout:{width:0,height:0}}}));
  expect(map.props.style.height).toBe(height);expect(tree!.root.findByType('map')).toBe(map);
+});
+
+it('opens the approved ACLC map point and minimal sheet without GPS or paid provider details', async () => {
+  const { getDestination } = await import('@/features/destinations/catalog');
+  controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+  controls.hasLocation = false;
+  await act(async () => { tree = create(renderMap()); });
+  expect(tree!.root.findByType('map').props.initialRegion).toMatchObject(getDestination('pilot-aclc')!.center!);
+  expect(JSON.stringify(tree!.toJSON())).toContain('ACLC College of Ormoc');
+  expect(tree!.root.findByType('map').props.showsUserLocation).toBe(false);
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('retains the requested featured center until the current native map becomes ready', async () => {
+  controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+  await act(async () => { tree = create(renderMap()); });
+  expect(controls.animate).not.toHaveBeenCalled();
+  await act(async () => tree!.root.findByType('map').props.onMapReady());
+  expect(controls.animate).toHaveBeenCalledWith(expect.objectContaining({ latitude: 11.022973, longitude: 124.6054992 }), 400);
+});
+it('allows a known featured selection after an initial GPS-denied screen', async () => {
+  controls.hasLocation = false;
+  await act(async () => { tree = create(renderMap()); });
+  expect(tree!.root.findAllByType('map')).toHaveLength(0);
+  controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+  await act(async () => tree!.update(renderMap()));
+  expect(tree!.root.findAllByType('map')).toHaveLength(1);
+});
+it.each(['initial', 'handoff'] as const)('keeps exact-associated provider %s selection minimal without losing the map', async entry => {
+ const catalog = await import('@/features/destinations/catalog'); const selection = await import('@/features/places/selection');
+ const pilot = catalog.getDestination('pilot-aclc')!;
+ const approved = catalog.destinationSchema.parse({ ...pilot, ar: { ...pilot.ar, providerAssociation: { providerId: destination.providerId, approvalReference: 'Synthetic test association' } } });
+ vi.spyOn(catalog, 'listFeaturedDestinations').mockReturnValue([approved]);
+ vi.spyOn(catalog, 'getDestination').mockImplementation(id => id === 'pilot-aclc' ? approved : null);
+ selection.setPlaceSelection(client, { ...destination, source: 'discovery', description: 'Rich provider copy must stay hidden' }, 'en');
+ let original: unknown;
+ if (entry === 'handoff') { await act(async () => { tree = create(renderMap()); }); original = tree!.root.findByType('map'); }
+ controls.params = { placeId: destination.providerId };
+ await act(async () => { if (tree) tree.update(renderMap()); else tree = create(renderMap()); });
+ const { HomePlaceSheet } = await import('./place-sheet'); const sheet = tree!.root.findByType(HomePlaceSheet);
+ expect(sheet.props.selectedPlace?.provider).toBe('curated'); expect(sheet.props.selectedPlace).not.toHaveProperty('description');
+ expect(sheet.props.onViewDetails).toBeUndefined();
+ if (original) expect(tree!.root.findByType('map')).toBe(original);
+ expect(placesService.details).not.toHaveBeenCalled();
+});
+it('submits text/category/settled area only on explicit Search This Area and never lifecycle refreshes', async () => {
+ vi.mocked(placesService.search).mockResolvedValue([{ ...destination, source: 'discovery' }]);
+ await act(async () => { tree = create(renderMap()); });
+ await act(async () => tree!.root.findByType('map').props.onMapReady());
+ await act(async () => tree!.root.findByType('map').props.onRegionChangeComplete({ latitude: 1, longitude: 2, latitudeDelta: 0.1, longitudeDelta: 0.1 }));
+ await act(async () => tree!.root.findByType('input').props.onChangeText('dinner'));
+ await press('search.categories.restaurants');
+ expect(placesService.search).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+ await press('search.thisArea');
+ expect(placesService.search).toHaveBeenCalledWith({ query: 'dinner', category: 'restaurants', language: 'en', area: { center: { latitude: 1, longitude: 2 }, radiusMeters: 5000 } });
+ await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ await act(async () => tree!.root.findByType('map').props.onPoiClick({ nativeEvent: { placeId: destination.providerId } }));
+ expect(placesService.details).not.toHaveBeenCalled();
+ controls.focused = false; await act(async () => tree!.update(renderMap())); controls.focused = true;
+ await act(async () => { tree!.update(renderMap()); void client.invalidateQueries({ queryKey: ['places'] }); });
+ expect(placesService.search).toHaveBeenCalledOnce();
+});
+
+it('keeps denied-GPS global selection separate from physical proximity and permits Directions', async () => {
+ controls.hasLocation = false; controls.locationStatus = 'denied';
+ vi.mocked(placesService.search).mockResolvedValue([{ ...destination, source: 'discovery' }]);
+ vi.mocked(router.setParams).mockImplementation(params => { controls.params = { ...controls.params, ...params }; });
+ try {
+  await act(async () => { tree = create(renderMap()); });
+  await act(async () => tree!.root.findByType('input').props.onChangeText('destination'));
+  await press('map.search'); await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+  await act(async () => tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === destination.name)!.props.onPress());
+  await act(async () => tree!.root.findByType('map').props.onMapReady());
+  const { HomePlaceSheet } = await import('./place-sheet'); const sheet = tree!.root.findByType(HomePlaceSheet);
+  expect(sheet.props.selectionSummary).toBe(translations.t('map.proximityUnavailable'));
+  expect(sheet.props.canRequest).toBe(true);
+  await press('placeDetails.directions');
+  expect(router.push).toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
+ } finally { vi.mocked(router.setParams).mockImplementation(() => { controls.params = {}; }); }
+});
+it('allows explicit area-search recovery with a known viewport and no GPS', async () => {
+ controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params; controls.hasLocation = false;
+ vi.mocked(placesService.search).mockRejectedValue(new Error('private provider detail'));
+ await act(async () => { tree = create(renderMap()); });
+ await act(async () => { const map = tree!.root.findByType('map'); map.props.onMapReady(); map.props.onRegionChangeComplete({ latitude: 1, longitude: 2, latitudeDelta: 0.01, longitudeDelta: 0.01 }); });
+ await act(async () => tree!.root.findByType('input').props.onChangeText('test'));
+ await press('search.thisArea'); await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ const retry = tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('common.retry'))!;
+ expect(retry.props.disabled).toBe(false);
+ await act(async () => retry.props.onPress());
+ expect(placesService.search).toHaveBeenCalledTimes(2);
+});
+
+it('hands a corroborated selected ACLC launch to the guarded native route with development provenance', async () => {
+ const { AdmissionContext } = await import('@/features/destination-ar/admission-context'); const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+ const { getDestination } = await import('@/features/destinations/catalog');
+ Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
+ const store = new ArAdmissionStore('owner'); controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+ const render = () => React.createElement(AdmissionContext.Provider, { value: store }, renderMap());
+ try {
+  await act(async () => { tree = create(render()); }); await act(async () => tree!.root.findByType('map').props.onMapReady());
+  for (const time of [10000, 13000, 16000]) {
+   vi.spyOn(Date, 'now').mockReturnValue(time); controls.watcherSample = { position: getDestination('pilot-aclc')!.center!, accuracy: 5, timestamp: time };
+   await act(async () => tree!.update(render()));
+  }
+  await press('arrival.launchDraft');
+  const target = vi.mocked(router.push).mock.calls.at(-1)![0] as { pathname: string; params: { destinationId: 'pilot-aclc'; entryToken: string } };
+  expect(target.pathname).toBe('/destination-ar/[destinationId]');
+  expect(store.take(target.params.entryToken, target.params.destinationId)?.identity.provenance).toBe('development');
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.search).not.toHaveBeenCalled();
+ } finally { controls.watcherSample = null; Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
+});
+it('offers opted-in simulated arrival without converting a browsing point into GPS evidence', async () => {
+ const { AdmissionContext } = await import('@/features/destination-ar/admission-context'); const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+ Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); controls.hasLocation = false;
+ const store = new ArAdmissionStore('owner'); controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
+ try {
+  await act(async () => { tree = create(React.createElement(AdmissionContext.Provider, { value: store }, renderMap())); });
+  await press('arrival.simulate'); await act(async () => { await vi.dynamicImportSettled(); });
+  const target = vi.mocked(router.push).mock.calls.at(-1)![0] as unknown as { params: { entryToken: string } };
+  expect(store.take(target.params.entryToken, 'pilot-aclc')).toMatchObject({ simulated: true, identity: { provenance: 'development' } });
+  expect(store.getSnapshot()?.eligible).toBe(false); expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.search).not.toHaveBeenCalled();
+ } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
+});
+it('does not offer the ACLC draft simulation for a different destination selected through a map link', async () => {
+ const { AdmissionContext } = await import('@/features/destination-ar/admission-context'); const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+ Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); controls.params = { featuredDestinationId: 'D01' } as typeof controls.params;
+ try {
+  await act(async () => { tree = create(React.createElement(AdmissionContext.Provider, { value: new ArAdmissionStore('owner') }, renderMap())); });
+  expect(tree!.root.findAllByType('button').some(button => button.props.accessibilityLabel === translations.t('arrival.simulate'))).toBe(false);
+ } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
 });

@@ -34,11 +34,20 @@ Destination nearby search uses its own fixed 500 m center radius. Home remains
 straight-line distance from the destination and retain Google attributions.
 No optional user-distance acquisition is added, so browsing never prompts GPS.
 
-Curated Home-map handoff is deferred: Home currently requires GPS and its
-selection path fetches Google details. A follow-up needs a namespaced local
-selection, permission-free remote viewport and provider-safe sheet. There is no
-inert View on Map action. Verified-entrance directions use the existing walking
-preview's map and single-use intent. No curated ID may reach Google details.
+Curated Home-map handoff now uses a namespaced transient selection, a remote
+viewport that works without GPS, and the existing minimal bottom sheet. Curated
+IDs never reach Google Details. Only an exact approved provider association can
+normalize provider selection to a featured destination; ACLC has no approved
+association yet. Rich featured copy stays in the arrival-gated experience.
+Directions requires an independently approved accessible entrance and explicit
+preview action; remote browsing never supplies a physical route origin.
+
+The separate `pilot-aclc` record preserves D01–D09. Its Maps place center and
+approximate entrance are owner-approved independently; the 50m activation radius
+remains a field-calibration trial. Sourced EN/JA/KO ACLC research is development
+content only. No approved factual tiles, provider association or licensed campus
+media have been promoted. See ../../aclc-pilot-inputs.md and
+../../content/aclc-research-draft.md.
 
 The approved hierarchy is adapted to real content: one Back control, labeled
 daytime hero or mint empty state, destination heading, horizontal thumbnails,

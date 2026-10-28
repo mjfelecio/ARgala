@@ -23,7 +23,7 @@ export function AppTabs() {
   }}>
     <Tabs.Screen name="index" options={{ title: t('navigation.explore'), tabBarButtonTestID: 'tab-explore',
       tabBarIcon: ({ focused, color, size }) => <Ionicons name={focused ? 'location' : 'location-outline'} color={color} size={size} /> }} />
-    <Tabs.Screen name="ar" options={{ title: t('navigation.ar'), tabBarButtonTestID: 'tab-ar', headerShown: false,
+    <Tabs.Screen name="ar" options={{ href: null, title: t('navigation.ar'), tabBarButtonTestID: 'tab-ar', headerShown: false,
       tabBarStyle: { display: 'none' },
       tabBarIcon: ({ color, size }) => <Ionicons name="scan-outline" color={color} size={size} /> }} />
     <Tabs.Screen name="profile" options={{ title: t('navigation.profile'), headerShown: false, tabBarButtonTestID: 'tab-profile',

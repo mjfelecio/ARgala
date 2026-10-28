@@ -1,3 +1,4 @@
+import { DestinationArAdmissionProvider } from '@/features/destination-ar/admission-provider';
 import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useResolveClassNames } from 'uniwind';
@@ -11,13 +12,14 @@ export default function AppLayout() {
   const headerStyle = useResolveClassNames('bg-page-mint');
   const headerTitleStyle = useResolveClassNames('font-sans text-card font-semibold text-foreground');
   const headerTintColor = useThemeColor('accent');
-  return <Stack screenOptions={{ headerStyle, headerTitleStyle, headerTintColor, headerShadowVisible: false }}>
+  return <DestinationArAdmissionProvider><Stack screenOptions={{ headerStyle, headerTitleStyle, headerTintColor, headerShadowVisible: false }}>
     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     <Stack.Screen name="place/[providerId]" options={{ headerShown: false }} />
+    <Stack.Screen name="destination-ar/[destinationId]" options={{ headerShown: false }} />
     <Stack.Screen name="directions" options={{ headerShown: false }} />
     <Stack.Screen name="destinations" options={{ headerShown: false }} />
     <Stack.Screen name="settings" options={{ title: t('settings.title'), headerShown: false }} />
     <Stack.Screen name="viro-ring" options={{ headerShown: false }} />
     <Stack.Screen name="viro-spike" options={{ headerShown: false }} />
-  </Stack>;
+  </Stack></DestinationArAdmissionProvider>;
 }

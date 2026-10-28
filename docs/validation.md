@@ -1224,3 +1224,111 @@ One fix pass,160fd59, adds an independent in-process elapsed deadline alongside 
 Final local `npm run check` passed **857 tests / 75 files**, strict TypeScript and zero-warning lint. The corrected model/hook/screen run passed57 cases before the two additional locale cases entered the final suite. Post-fix `npm run export:android` passed2848 modules and an8.1MB Hermes bundle (`entry-29f614392076f72126a6383cc046f07c.hbc`). `git diff --check` passed. The final fix pass is covered by implementer-run regressions/full checks; no second independent review is claimed.
 
 M3 is **prepared, awaiting physical verification**. At the owner's explicit request, all ADB/device work remains stopped until verification is resumed tomorrow; Metro is off and no M3 APK was built. All [M3 device scenarios](aclc-ar-session-device-testing.md) remain NOT RUN. No M4 production admission/GPS/content integration has begun; precise native startup-failure classification retains the documented pinned-SDK timeout/Retry limitation.
+
+## 2026-10-27 — M4 arrival foundation and M5 map preparation
+
+Owner reports the ACLC ring prototype works well. This is not a blanket lifecycle/GPS pass. No ADB commands, native build, installation, camera capture, on-site GPS test or paid provider request ran in this stage.
+
+- Approval-aware pilot metadata preserves D01–D09. Owner supplied an approximate entrance and explicitly selected the Maps place point as the activation center; see `docs/aclc-pilot-inputs.md`. Radius remains a 50m trial.
+- Foreground arrival consumes exact continuous-watcher position/accuracy/timestamp independently of later one-shot fixes. Three distinct readings over six seconds, conservative containment, freshness/quality/jump guards, expiry, invitation dismissal, and corroborated exit are deterministic hypotheses awaiting field calibration.
+- Thirty-second single-use entry handles bind selection/principal and revalidate pending first mount. These are prepared interfaces; the real destination scene is not wired yet and no current production Launch action is exposed.
+- Independent read-only review of `06f972b..cd4b7e8` found one Important retained-callback ownership bug. Root reproduced a failing actual-hook regression and fixed it in `ff8850c`. No second independent review of that fix is claimed.
+- ACLC card now opens the retained existing map/minimal sheet, including without GPS. Delayed map readiness preserves the requested center. Directions uses the separate approved entrance and explicit featured context; its existing GPS owner feeds arrival without another watcher. Provider matching is exact approved-ID only; none is yet approved for ACLC. Legacy generic AR route is dormant and mounts no camera or GPS; implementation is preserved.
+- Rich featured copy is withheld from prearrival 2D details. Ordinary provider details remain unchanged. Arrival UI/locales are prepared; approved factual content remains absent. Research draft preparation is separately authorized, not content approval.
+- Final checks at this source state: `npm run check` passed **902 tests /81 files**, strict TypeScript and zero-warning lint; `git diff --check` passed. M4 Android export passed before the M5 map changes; a final M5 export remains pending. Earlier intermediate RED runs are superseded by the final successful run.
+- M5 remaining: selected-destination native entry/preflight handoff, restoration/Exit integration and release guard tests. M6 text/category/area search, driving preview/Maps handoff and M7 simulation/field gates remain outstanding. Do not report the complete vertical slice delivered.
+
+## 2026-10-27 — M6 search/routes candidate and review fixes
+
+- Added authenticated `places-search` and `route-preview` handlers. Shared auth, complete body/schema limits, atomic quota consumption, provider timeout/error mapping and explicit field masks remain in front of Google. The installed `walking-route` contract remains available.
+- Free text, five bounded categories and viewport-derived Search This Area are explicit actions. Text Search uses supported type filtering/location bias with returned-circle containment; empty text uses typed Nearby. Area radius caps at5000m/20 results. With no GPS/known center, an explicit global text search supplies no invented center. Search results retain source response age for complete Details reuse.
+- Mode selection is a draft until explicit Preview. Snapshots/cache reuse distinguish walking/driving; displayed mode/target drive Google Maps URLs with no origin. Existing local walking progress remains a separate walking-only action. Universal HTTPS linking provides Maps/browser handling; rejected linking leaves the preview and localized recovery.
+- Independent immutable review `ec0ef9b..ed4fcd7` found three Important no-GPS/attribution defects. Root observed four focused failures, then fixed viewport-vs-physical proximity display, GPS-independent Directions/search retry and global-result attribution. Inspection of sibling results surfaces also required the existing Google Maps logo on this new list; its regression failed before the fix. Reviewer Minor wrong-mode loading/error copy was regraded as a material known-error contract and fixed with actual EN/KO/JA resources and `EdgeRequestError` coverage. No second independent review is claimed.
+- Final `npm run check`: **931 tests /84 files**, strict TypeScript, zero-warning lint, all passing. `npm run check:edge` passed all five handlers; `npm run lint:edge` passed13 files after correcting the async wrapper's await. `git diff --check` passed. M6 Android export remains pending.
+- **Not deployed or tested live:** both new Edge endpoints. No provider request, external device Maps launch, native build, APK installation, ADB action, AR tracking or real GPS verification ran. Deterministic provider/native mocks establish contracts, not live credentials, route accuracy or field arrival.
+- Research draft: `docs/content/aclc-research-draft.md` contains sourced EN/JA/KO text, uncertainty, a candidate provider ID and no licensed campus image. It is unapproved and not in the production manifest.
+
+## 2026-10-27 — selected-destination integration and deployed endpoint auth
+
+This entry supersedes the earlier same-day prepared/unwired/not-deployed status.
+The owner restored Supabase access; configured application host and linked project
+matched `dhjlcvviiscuuzjtzxor`. CLI2.122.0 deployed only `places-search` and
+`route-preview` using `--use-api`, both successfully. Existing endpoints, secrets,
+DB schema and limiter were unchanged. Live POSTs with missing and bogus bearer
+tokens returned401/`UNAUTHORIZED` on each new endpoint (four rejection checks).
+No authenticated paid Google request was made; credentials/provider success,
+route accuracy and Android Google Maps handoff remain unverified.
+
+Principal-scoped admission now connects retained featured-map/Directions selection
+to the actual native ring route. Source leases, single-use transfer, pending
+first-mount/first-ready freshness and selection/auth invalidation are covered.
+Only established tracking-ready sessions stop initial-entry GPS and receive the
+bounded live recovery exemption. Approved text renders directly with per-field
+locale fallback. Draft research and geographic simulation require development
+runtime guards, remain labeled, and never feed synthetic coordinates into real
+arrival. The ACLC draft is scoped to `pilot-aclc`; published factual content,
+licensed media and exact provider association remain unapproved.
+
+Independent read-only review of `47a6f2f..74f5696` found two Important issues:
+expired logical ownership offered an unrecoverable Retry, and other destinations
+could load ACLC draft text. One fix pass makes expiry terminal with Back to
+Explore/new handoff and guards the draft store, UI and lazy loader by destination.
+Seven focused regressions were observed failing before fixes. Older expiry tests
+were updated to require a fresh logical owner instead of reviving the expired one.
+No second independent review is claimed.
+
+Final `npm run check` passed **970 tests /90 files**, strict TypeScript and
+zero-warning lint. `npm run export:android` passed with an8.1MB Hermes bundle
+`entry-68274ca1d5ba5b229e40d305553f3a1a.hbc`. Edge typecheck passed all five handlers;
+Edge lint passed13 files; `git diff --check` passed. No dependencies,
+native configuration or recognizer changed. No ADB, APK build/install, Metro
+startup, physical AR/GPS test, on-site calibration or device Maps launch ran.
+Automated native/network mocks and an export do not establish those outcomes.
+
+The owner reports the existing ring prototype works well. The integrated selected
+flow and full M3 lifecycle still require the separate
+[selected-flow checklist](aclc-selected-flow-device-testing.md); simulation is not
+on-site arrival evidence. Later Passport/guest sync/reminder/offline/fallback phases
+remain deferred. Current changes stack on unmerged draft M3 PR27.
+
+## 2026-10-27 — integrated ACLC off-site device trial
+
+Owner explicitly resumed ADB testing. Source `c09ce99`, Galaxy A53 SM-A536E,
+Android16/API36; existing installed version1.0.0/code1 APK SHA256
+`0b756a3f883042a70c70d44d28d44fffad4a726828867e881a1d0a5daa5dff95`.
+No APK build, native correction or recognizer patch. Battery36%, USB charging,
+36.5°C at start. Metro ran with the development opt-in over USB reverse8081.
+The first request preceded server readiness; USB transport later reconnected and
+the development runtime remained blank. Re-establishing reverse and restarting
+only this app loaded the current bundle; no application-code change was made.
+
+Observed the existing signed-in map render, Featured Destinations including
+preserved D01–D09 plus pilot-aclc, ACLC selection on the retained map, and the
+explicit Simulate arrival action. The actual selected route displayed ACLC identity,
+simulated-arrival disclaimer, live camera and Overview tile. Owner answered
+“Ring opens and text is readable” after opening a tile with the accepted held
+finger-pad technique. This is a partial integrated off-site ring/content pass,
+not on-site geographic admission or complete locale/control coverage.
+
+PR28's GitHub validate check passed in2m33s (run40488161834). That automated result
+is separate from device observations. Authenticated paid-provider calls, Google
+Maps launch, actual arrival accuracy/calibration, all locale/size combinations and
+expired-session return remain unverified in this trial.
+
+Background/return: first attempt was inconclusive (owner had closed the panel).
+Repeated with expanded page3/3: Android reported `Active Camera Clients: []` after
+two seconds in the background, then the owner confirmed “Expanded panel restored
+on page3/3” after return. This verifies that brief recovery case on the recorded
+APK/device; five-minute expiration and permission/install interruptions remain
+pending.
+
+Owner also confirmed same native-scene tracking loss → turn → recovery retains
+original orientation and expanded page3/3. Exit returned to the retained selected
+ACLC map, and Android reported no active camera clients afterward. Battery ended
+35%, USB charging,37.0°C. These observations pass those brief scenarios only;
+full field/lifecycle/locale acceptance remains pending.
+
+Documentation-only evidence update: `npm run typecheck` and `npm run lint` passed;
+`git diff --check` passed. No application code changed and no additional full
+suite/export was necessary; the previously recorded970-test/Android-export and
+PR28 CI results refer to the implementation candidate tested here.

@@ -6,16 +6,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { withUniwind } from 'uniwind';
 
 const SafeOverlay = withUniwind(SafeAreaView);
-export function ArUtilityChrome({ children, actions, titleKey = 'destinationAr.title', onExit }: { children: React.ReactNode; actions?: React.ReactNode; titleKey?: string; onExit?(): void }) {
+export function ArUtilityChrome({ children, actions, titleKey = 'destinationAr.title', title, onReturn, onExit }: { children: React.ReactNode; actions?: React.ReactNode; titleKey?: string; title?: string; onReturn?(): void; onExit?(): void }) {
   const { t } = useTranslation();
   // Keep overlay hit bounds at visible controls, leaving the measured native
   // scene reachable below them. box-none alone is not a physical touch test.
   return <SafeOverlay className="absolute left-0 right-0 top-0" edges={['top', 'left', 'right']} pointerEvents="box-none">
     <View className="flex-row flex-wrap items-center gap-3 px-4 pt-2">
-      <Button variant="secondary" accessibilityLabel={t('destinationAr.exit')} onPress={() => { onExit?.(); if (router.canGoBack()) router.back(); else router.navigate('/profile'); }}>
+      <Button variant="secondary" accessibilityLabel={t('destinationAr.exit')} onPress={() => { onExit?.(); if (onReturn) { onReturn(); return; } if (router.canGoBack()) router.back(); else router.navigate('/profile'); }}>
         <Button.Label>{t('destinationAr.exit')}</Button.Label>
       </Button>
-      <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-white">{t(titleKey)}</Text>
+      <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-white">{title ?? t(titleKey)}</Text>
       {actions}
     </View>
     {children}

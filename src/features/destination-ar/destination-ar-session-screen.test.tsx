@@ -82,14 +82,14 @@ it('resolves lazy native code before final eligibility and waits for installed s
   expect(native.gate).toHaveBeenCalledOnce(); expect(cameras()).toHaveLength(0); expect(copy()).toContain(translations.t('destinationAr.errors.entry-ineligible'));
 });
 it('releases rendering on background, restores logical panel/page/size from a new pose and avoids duplicate preference reads', async () => {
-  await mount(); await layout(); await start(); await ready(); await click('ring-tile-history'); await finish(); await click('ring-action-next'); await click('ring-action-larger');
+  await mount(); await layout(); await start(); await ready(); native.gate.mockClear(); await click('ring-tile-history'); await finish(); await click('ring-action-next'); await click('ring-action-larger');
   const page = text('ring-page-indicator'); const oldTracking = tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated;
   await active(false); expect(cameras()).toHaveLength(0); native.eligible = false;
   await act(async () => native.transitions.get('transitionStart')?.forEach(cb => cb({ data: { closing: false } })));
   await active(true); expect(cameras()).toHaveLength(0);
   await act(async () => native.transitions.get('transitionEnd')?.forEach(cb => cb({ data: { closing: false } }))); await settle(); await ready([6, 3, 4], [1, 0, 0]);
   expect(node('ring-focused-panel').props.position).toEqual([7.15, 3, 4]); expect(text('ring-page-indicator')).toBe(page);
-  expect(native.getItem).toHaveBeenCalledTimes(2); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled(); expect(native.gate).toHaveBeenCalledOnce();
+  expect(native.getItem).toHaveBeenCalledTimes(2); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled(); expect(native.gate).not.toHaveBeenCalled();
   await act(async () => oldTracking(2, 1)); expect(copy()).not.toContain(translations.t('destinationAr.trackingLost'));
 });
 it('stages the first reveal only after ready, pauses on loss and makes Skip explicit', async () => {
@@ -128,7 +128,7 @@ it('keeps permission-attempt ownership outside the navigator and requires explic
 it('expires at five minutes, prevents fresh remote entry and closes before Exit navigation', async () => {
   await mount(); await layout(); await start(); await ready(); await active(false); native.eligible = false;
   await act(async () => { await vi.advanceTimersByTimeAsync(300000); }); await active(true); expect(cameras()).toHaveLength(0);
-  expect(copy()).toContain(translations.t('destinationAr.errors.entry-ineligible')); await press('common.retry'); await settle(); expect(cameras()).toHaveLength(0);
+  expect(copy()).toContain(translations.t('destinationSession.expired')); expect(cameras()).toHaveLength(0);
   await press('destinationAr.exit'); expect(router.back).toHaveBeenCalled();
 });
 it('keys real route ownership by authentication identity and never revives the former native frame', async () => {
@@ -184,15 +184,48 @@ it.each(['destinationId', 'admissionId'] as const)('invalidates restoration when
 it.each(['en', 'ja', 'ko'])('offers %s explicit Retry for prolonged tracking loss and restores the panel in a fresh native frame', async locale => {
   await translations.changeLanguage(locale);
   expect(translations.getResource(locale, 'translation', 'destinationSession.retryTracking')).toBeTruthy();
-  await mount(); await layout(); await start(); await ready(); await click('ring-tile-history'); await finish(); await click('ring-action-next');
+  await mount(); await layout(); await start(); await ready(); native.gate.mockClear(); await click('ring-tile-history'); await finish(); await click('ring-action-next');
   const page = text('ring-page-indicator'); await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
   await act(async () => { await vi.advanceTimersByTimeAsync(6000); }); expect(native.support).toHaveBeenCalledOnce(); expect(cameras()).toHaveLength(1);
   native.eligible = false; await press('destinationSession.retryTracking'); await settle(); expect(node('ring-focused-panel')).toBeUndefined();
   await ready([9, 2, 1], [0, 0, 1]); expect(node('ring-focused-panel').props.position).toEqual([9, 2, 2.15]); expect(text('ring-page-indicator')).toBe(page);
-  expect(native.gate).toHaveBeenCalledOnce(); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled();
+  expect(native.gate).not.toHaveBeenCalled(); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled();
 });
 it('does not automatically repeat an interrupted explicit tracking recovery', async () => {
   await mount(); await layout(); await start(); await ready(); await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(1, 1));
   await press('destinationSession.retryTracking'); await settle(); expect(cameras()).toHaveLength(1); await active(false); await active(true);
   expect(cameras()).toHaveLength(0); expect(native.support).toHaveBeenCalledTimes(2); await press('common.retry'); await settle(); expect(native.support).toHaveBeenCalledTimes(3);
+});
+it('waits for fresh route eligibility before its first native mount, then retains the established exemption', async () => {
+ let entryReady = false; const established = vi.fn();
+ child = () => <DestinationArSessionExperience identity={identity} freshEligible={() => native.eligible} entryReady={entryReady} onEstablished={established} />;
+ await mount(); await layout(); await start();
+ expect(cameras()).toHaveLength(0);
+ entryReady = true; await update(); await ready();
+ expect(established).toHaveBeenCalledOnce(); expect(cameras()).toHaveLength(1);
+ entryReady = false; native.eligible = false; await update();
+ expect(cameras()).toHaveLength(1);
+});
+it('retires interrupted initial mounting instead of automatically recreating a pending native view', async () => {
+ let entryReady = true;
+ child = () => <DestinationArSessionExperience identity={identity} freshEligible={() => native.eligible} entryReady={entryReady} />;
+ await mount(); await layout(); await start(); expect(cameras()).toHaveLength(1);
+ entryReady = false; await update(); expect(cameras()).toHaveLength(0);
+ entryReady = true; await update(); expect(cameras()).toHaveLength(0);
+ await press('common.retry'); await settle(); expect(cameras()).toHaveLength(1);
+});
+it('cannot promote pending startup to live when fresh eligibility fails at first tracking-ready', async () => {
+ const established = vi.fn(); child = () => <DestinationArSessionExperience identity={identity} freshEligible={() => native.eligible} onEstablished={established} />;
+ await mount(); await layout(); await start(); native.eligible = false; await ready();
+ expect(established).not.toHaveBeenCalled(); expect(cameras()).toHaveLength(0);
+});
+it.each(['en', 'ko', 'ja'])('offers a fresh map handoff instead of an unrecoverable expired Retry in %s', async language => {
+ const returned = vi.fn(); const exited = vi.fn(); await translations.changeLanguage(language);
+ child = () => <DestinationArSessionExperience identity={identity} freshEligible={() => native.eligible} onReturn={returned} onExit={exited} />;
+ await mount(); await layout(); await start(); await ready(); await active(false);
+ await act(async () => { vi.advanceTimersByTime(300000); }); await active(true);
+ expect(copy()).toContain(translations.t('destinationSession.expired'));
+ expect(tree!.root.findAllByType('button').some(button => button.props.accessibilityLabel === translations.t('common.retry'))).toBe(false);
+ expect(cameras()).toHaveLength(0);
+ await press('arrival.returnToMap'); expect(returned).toHaveBeenCalledOnce(); expect(exited).toHaveBeenCalledOnce();
 });

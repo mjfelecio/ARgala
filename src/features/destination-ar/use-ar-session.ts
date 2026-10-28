@@ -2,12 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { ArSession, type LogicalArProgress, type SessionIdentity } from './session';
 import { useViroStartup, type StartupPolicy } from './use-viro-startup';
 import type { TrackingState } from './types';
-type Options = { identity: SessionIdentity; tileIds: readonly string[]; running: boolean; transitionReady: boolean; measured: boolean; freshEligible(): boolean; reveal: boolean };
+type Options = { identity: SessionIdentity; tileIds: readonly string[]; running: boolean; transitionReady: boolean; measured: boolean; entryReady?: boolean; freshEligible(): boolean; reveal: boolean };
 
 /** Owns logical progress and attempts above the disposable native navigator.
  * The route keys this owner by principal/destination; mismatches also fail closed.
  */
-export function useArSession({ identity, tileIds, running, transitionReady, measured, freshEligible, reveal }: Options) {
+export function useArSession({ identity, tileIds, running, transitionReady, measured, entryReady = true, freshEligible, reveal }: Options) {
   const [owner] = useState(() => ({ identity: { ...identity }, session: new ArSession(identity, tileIds) }));
   const model = owner.session; const session = useSyncExternalStore(model.subscribe, model.getSnapshot, model.getSnapshot);
   const token = useRef(0);
@@ -15,11 +15,11 @@ export function useArSession({ identity, tileIds, running, transitionReady, meas
   const policy = useMemo<StartupPolicy>(() => ({
     begin() { const next = model.begin(identity, Date.now()); if (next === null) return false; token.current = next; return true; },
     authorizeMount: () => model.authorizeMount(token.current, identity, Date.now(), freshEligible),
-    ready: () => model.ready(token.current, Date.now(), reveal),
+    ready: () => (model.getSnapshot().established || freshEligible()) && model.ready(token.current, Date.now(), reveal),
     interrupt: () => model.suspend(Date.now()),
     fail: () => model.fail(token.current, Date.now()),
   }), [model, identity, freshEligible, reveal]);
-  const startup = useViroStartup({ running: running && matches && session.phase !== 'closed', transitionReady, measured, policy });
+  const startup = useViroStartup({ running: running && matches && session.phase !== 'closed', transitionReady, measured, admissionReady: entryReady || session.established, policy });
   const start = startup.start;
   useEffect(() => { if (!matches) model.close(); }, [matches, model]);
   useEffect(() => {

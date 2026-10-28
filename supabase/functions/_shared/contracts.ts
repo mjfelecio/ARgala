@@ -24,3 +24,19 @@ export const walkingRequestSchema = z.object({ origin: coordinateSchema, destina
 export const walkingRouteSchema = z.object({ distanceMeters: z.number().int().nonnegative(), durationSeconds: z.number().nonnegative(), encodedPolyline: z.string().min(1).max(100000), warnings: z.array(z.string()) });
 export type WalkingRequest = z.input<typeof walkingRequestSchema>;
 export type WalkingRoute = z.infer<typeof walkingRouteSchema>;
+
+export const travelModeSchema = z.enum(['walking', 'driving']);
+export type TravelMode = z.infer<typeof travelModeSchema>;
+export const routePreviewRequestSchema = walkingRequestSchema.extend({ mode: travelModeSchema.default('walking') });
+export const routePreviewSchema = walkingRouteSchema.extend({ mode: travelModeSchema });
+export type RoutePreviewRequest = z.input<typeof routePreviewRequestSchema>;
+export type RoutePreview = z.infer<typeof routePreviewSchema>;
+
+export const searchCategorySchema = z.enum(['all', 'attractions', 'restaurants', 'hotels', 'shopping']);
+export type SearchCategory = z.infer<typeof searchCategorySchema>;
+export const placesSearchRequestSchema = z.object({
+  query: z.string().trim().max(256).default(''), category: searchCategorySchema.default('all'),
+  area: z.object({ center: coordinateSchema, radiusMeters: z.number().positive().max(DISCOVERY_LIMITS.maxRadiusMeters) }).strict().optional(),
+  language: languageSchema.default('en'),
+}).strict().refine(request => !!request.query || !!request.area, { path: ['query'] });
+export type PlacesSearch = z.input<typeof placesSearchRequestSchema>;

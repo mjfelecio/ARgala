@@ -22,6 +22,7 @@ const { TabRouter } = require('expo-router/build/react-navigation/routers/TabRou
 const { StackRouter } = require('expo-router/build/react-navigation/routers/StackRouter');
 const routeFiles = import.meta.glob('../../app/**/*.tsx');
 const layoutModules = import.meta.glob('../../app/**/_layout.tsx');
+vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: { user: { id: 'test-owner' } } }) }));
 vi.mock('expo-router', async () => {
  const { createElement } = await import('react');
  const screen = (props: Record<string, unknown>) => createElement('route', props);
@@ -176,7 +177,7 @@ it('hands an AR selection to the existing Explore route without replacing its ro
 });
 it('keeps Settings outside the tabs and Back restores the originating tab state', async () => {
  await mount(React.createElement(AppLayout));
- expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.name)).toEqual(['(tabs)', 'place/[providerId]', 'directions', 'destinations', 'settings', 'viro-ring', 'viro-spike']);
+ expect(tree!.root.findAllByType('route' as React.ElementType).map(r => r.props.name)).toEqual(['(tabs)', 'place/[providerId]', 'destination-ar/[destinationId]', 'directions', 'destinations', 'settings', 'viro-ring', 'viro-spike']);
  expect(tree!.root.findAllByType('route' as React.ElementType).find(r => r.props.name === 'settings')!.props.options.headerShown).toBe(false);
  const reducer = StackRouter({ initialRouteName: '(tabs)' });
  const config = { routeNames: ['(tabs)', 'settings'], routeParamList: {}, routeGetIdList: {} };
@@ -199,7 +200,7 @@ it.each([
  expect(map).toBeDefined();
  await act(async () => { map!.props.onPress(); });
  expect(router.navigate).toHaveBeenCalledWith('/');
- expect(tree!.root.findAllByType('ar-camera-screen' as React.ElementType)).toHaveLength(1);
+ expect(tree!.root.findAllByType('ar-camera-screen' as React.ElementType)).toHaveLength(0);
 });
 it.each(['index', 'ar'])('keeps the %s tab context below Details and returns to the existing tab navigator', async origin => {
  await mount(React.createElement(AppLayout));
