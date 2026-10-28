@@ -74,7 +74,8 @@
     "check:edge": "npx --yes deno@2.9.6 check --config supabase/functions/deno.json supabase/functions/places-nearby/index.ts supabase/functions/place-details/index.ts supabase/functions/walking-route/index.ts supabase/functions/route-preview/index.ts supabase/functions/places-search/index.ts",
     "test:limiter": "python3 scripts/test-rate-limiter.py",
     "check:android": "node scripts/check-android-config.mjs",
-    "lint:edge": "npx --yes deno@2.9.6 lint --config supabase/functions/deno.json supabase/functions"
+    "lint:edge": "npx --yes deno@2.9.6 lint --config supabase/functions/deno.json supabase/functions",
+    "test:journal-sync": "python3 scripts/test-journal-sync.py"
   },
   "private": true,
   "expo": {

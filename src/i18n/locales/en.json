@@ -431,7 +431,7 @@
   "journal": {
     "continueGuest": "Continue as guest",
     "guestNote": "Guest mode keeps progress on this device. Sign in for online places and routes.",
-    "localOnly": "Stored on this device. Account cloud sync is not available yet.",
+    "localOnly": "Stored on this device. Sign in to sync your progress.",
     "save": "Save place",
     "remove": "Remove saved place",
     "savedTitle": "Saved Places",
@@ -444,6 +444,17 @@
     "pilotVisited": "ACLC pilot visited",
     "loadFailed": "Could not load local progress. Retry before making changes.",
     "saveFailed": "Could not save local progress. Your previous data is unchanged. Please retry the action.",
-    "signIn": "Sign in to your account"
+    "signIn": "Sign in to your account",
+    "syncPending": "Changes are saved on this device and waiting to sync.",
+    "syncing": "Syncing your saved places and Passport…",
+    "synced": "Synced with your account.",
+    "syncNow": "Sync now",
+    "retrySync": "Retry sync",
+    "syncFailed": "Could not sync now. Your local changes are safe. Retry when connected.",
+    "syncTimeout": "Sync took too long. Your local changes are safe. Please retry.",
+    "syncAuth": "Sign in again to sync your progress. Your local changes are safe.",
+    "syncUnavailable": "Account sync is not available right now. Your local changes are safe.",
+    "syncConflict": "Other changes are still arriving. Your local changes are safe. Retry sync.",
+    "syncDeviceLimit": "This account has reached its sync device limit. Your local changes remain saved."
   }
 }
