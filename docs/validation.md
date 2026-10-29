@@ -1632,3 +1632,32 @@ were updated to the approved optional-native and opt-in configuration contracts;
 the final full check above includes their real-screen regressions. No backend
 checks were rerun locally because this patch changes no backend code; PR CI runs
 the complete Edge and isolated SQL validation matrix.
+
+### Integration and first refinement
+
+[PR32](https://github.com/mjfelecio/ARgala/pull/32) merged as `9880195` after
+[CI 40915663866](https://github.com/mjfelecio/ARgala/actions/runs/40915663866)
+passed the complete workflow, including Edge validation and all three isolated
+SQL suites. Main's tracked tree matched the reviewed `ec66c48` tree exactly.
+`npm ci` completed in the main checkout, applying all four dependency patches;
+Android configuration passed and an offline Metro smoke on port8091 reached the
+development-build QR screen. That temporary server was stopped. Ignored local
+environment/reference files were retained; the prior generated Android directory
+was preserved under `.superpowers/preserved-native/` so future CNG uses plugins.
+
+The owner specifically approved one development APK from `ec66c48`:
+[EAS 2cd68ffa-4cf1-4754-8762-c59ed01ec044](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/2cd68ffa-4cf1-4754-8762-c59ed01ec044).
+Submission reused existing remote Android credentials and configured development
+provider variables. At this checkpoint it is queued, with no APK/device success
+claim. Physical acceptance remains pending.
+
+Refinement begins with passing the explicit reminder-consent locale into Android
+channel naming instead of always choosing English. Actual EN/JA/KO resources and
+controller-to-native forwarding regressions failed before the fix; the targeted
+reminder suite passes **48 tests**. A focused independent review found no issues.
+This is JavaScript-only and changes no native capability or automatic permission
+behavior.
+The final refinement `npm run check` passes strict TypeScript, zero-warning lint,
+and **1,216 tests / 114 files**; `git diff --check` passes. No dependency/native
+configuration changed, so the approved native build is still sufficient to test
+this JavaScript change through Metro.

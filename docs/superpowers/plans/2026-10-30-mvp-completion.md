@@ -107,3 +107,9 @@ and re-review found no remaining confirmed blocker after four corrected findings
 The remaining Step 6 gates are CI/merge and a separately approved APK plus physical
 acceptance. Refinement follows this engineering baseline; content approval and
 on-site GPS remain external gates rather than unimplemented app code.
+
+PR32 is merged as `9880195` with full CI green. Main dependencies, native patches,
+configuration and Metro startup are prepared. The specifically approved APK from
+`ec66c48` is queued as `2cd68ffa-4cf1-4754-8762-c59ed01ec044`; physical and input
+gates remain. Refinement has begun with localized Android reminder-channel copy,
+without changing the approved product design or adding native capabilities.
