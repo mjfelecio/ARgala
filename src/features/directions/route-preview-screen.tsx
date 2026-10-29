@@ -15,7 +15,7 @@ import { ProviderAttributions } from '@/features/map/attributions';
 import { setPlaceSelection } from '@/features/places/selection';
 import { useSettings } from '@/features/settings/provider';
 import { approvedArContent } from '@/features/destinations/ar-content';
-import { getDestination } from '@/features/destinations/catalog';
+import { useDestinationLookup } from '@/features/destination-content/context';
 import { useArAdmission, useAdmissionSource } from '@/features/destination-ar/admission-context';
 import { simulateArEntry } from '@/features/destination-ar/simulation-loader';
 import { isViroSpikeEnabled } from '@/features/destination-ar/dev-guard';
@@ -47,7 +47,8 @@ function Preview({ token }: { token: unknown }) {
   const preview = useRoutePreview(token, configured);
   const { data, result, location, usable, running } = preview;
   const admission = useArAdmission(); const { language } = useSettings();
-  const featured = getDestination(data?.intent.featuredDestinationId);
+  const contentDestination = useDestinationLookup();
+  const featured = contentDestination(data?.intent.featuredDestinationId);
   const arSource = useAdmissionSource(admission, featured?.id ?? null, { running: running && preview.locationEnabled, watcherStatus: location.watcherStatus, sample: location.watcherSample ?? null }, true);
   const contentReady = !!approvedArContent(featured, language).length; const draftAr = !contentReady && featured?.id === 'pilot-aclc' && isViroSpikeEnabled();
   function launchAr() {

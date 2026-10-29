@@ -456,5 +456,21 @@
     "syncUnavailable": "Account sync is not available right now. Your local changes are safe.",
     "syncConflict": "Other changes are still arriving. Your local changes are safe. Retry sync.",
     "syncDeviceLimit": "This account has reached its sync device limit. Your local changes remain saved."
+  },
+  "content": {
+    "title": "Destination content",
+    "check": "Check for updates",
+    "checking": "Checking for approved content…",
+    "bundled": "Using the content included with this app.",
+    "cached": "Previously approved content is available on this device.",
+    "current": "The latest available approved content is saved on this device.",
+    "noUpdates": "No published update is available. Your current content is unchanged.",
+    "failed": "Could not check for content updates. Your current content is still available.",
+    "authRequired": "Sign in to download approved content updates. Saved content remains available offline.",
+    "unavailable": "Content updates are not available right now. Your current content is unchanged.",
+    "timeout": "The content check timed out. Please retry when connected.",
+    "saveFailed": "Could not save the update. Your previous content is still available.",
+    "loadFailed": "Could not read saved content. Using the content included with this app.",
+    "offlineNote": "Content updates do not include offline Google maps or routes. Some destinations are still awaiting content approval."
   }
 }

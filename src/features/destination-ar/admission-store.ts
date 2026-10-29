@@ -25,7 +25,7 @@ export class ArAdmissionStore {
   private intents: ArEntryIntents;
   private simulatedIntents: ArEntryIntents;
   private simulationActive = false;
-  constructor(readonly principalId: string) {
+  constructor(readonly principalId: string, private resolveDestination: (id: FeaturedDestinationId) => Destination | null = getDestination) {
     this.intents = new ArEntryIntents((id, principal) => !this.closed && principal === this.principalId && id === this.selected && this.tick()?.eligible === true);
     this.simulatedIntents = new ArEntryIntents((id, principal) => !this.closed && this.simulationActive && isViroSpikeEnabled() && principal === this.principalId && id === this.selected);
   }
@@ -33,6 +33,8 @@ export class ArAdmissionStore {
   getSnapshot = () => this.arrival;
   currentLease = () => this.lease;
   selectedId = () => this.selected;
+  /** Refresh future content lookup only; issued entries and geographic evidence remain unchanged. */
+  setContentResolver(resolve: (id: FeaturedDestinationId) => Destination | null) { this.resolveDestination = resolve; }
   private emit() {
     const next = this.model?.snapshot() ?? null;
     if (next === this.arrival) return;
@@ -46,7 +48,7 @@ export class ArAdmissionStore {
   select(id: FeaturedDestinationId | null) {
     if (this.closed || this.selected === id) return;
     this.endEntry(); this.lease++; this.input = inactive; this.selected = id;
-    this.model = id ? new DestinationProximity(id, activationPolicy(getDestination(id))) : null;
+    this.model = id ? new DestinationProximity(id, activationPolicy(this.resolveDestination(id))) : null;
     this.emit();
   }
   acquire(id: FeaturedDestinationId): number | null {
@@ -75,7 +77,7 @@ export class ArAdmissionStore {
   private issue(lease: number, id: FeaturedDestinationId, kind: 'approved' | 'draft', language: Language, simulated: boolean): string | null {
     if (this.closed || lease !== this.lease || id !== this.selected || !this.input.running) return null;
     if (kind === 'draft' && (id !== 'pilot-aclc' || !isViroSpikeEnabled())) return null;
-    const destination = getDestination(id);
+    const destination = this.resolveDestination(id);
     if (!destination || kind === 'approved' && !approvedArContent(destination, language).length) return null;
     this.endEntry(); this.simulationActive = simulated;
     const intents = simulated ? this.simulatedIntents : this.intents;

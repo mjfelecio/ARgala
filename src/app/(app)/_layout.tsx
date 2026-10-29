@@ -1,4 +1,5 @@
 import { JournalProvider } from '@/features/journal/provider';
+import { DestinationContentProvider } from '@/features/destination-content/provider';
 import { DestinationArAdmissionProvider } from '@/features/destination-ar/admission-provider';
 import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +14,7 @@ export default function AppLayout() {
   const headerStyle = useResolveClassNames('bg-page-mint');
   const headerTitleStyle = useResolveClassNames('font-sans text-card font-semibold text-foreground');
   const headerTintColor = useThemeColor('accent');
-  return <JournalProvider><DestinationArAdmissionProvider><Stack screenOptions={{ headerStyle, headerTitleStyle, headerTintColor, headerShadowVisible: false }}>
+  return <JournalProvider><DestinationContentProvider><DestinationArAdmissionProvider><Stack screenOptions={{ headerStyle, headerTitleStyle, headerTintColor, headerShadowVisible: false }}>
     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     <Stack.Screen name="place/[providerId]" options={{ headerShown: false }} />
     <Stack.Screen name="destination-ar/[destinationId]" options={{ headerShown: false }} />
@@ -23,5 +24,5 @@ export default function AppLayout() {
     <Stack.Screen name="settings" options={{ title: t('settings.title'), headerShown: false }} />
     <Stack.Screen name="viro-ring" options={{ headerShown: false }} />
     <Stack.Screen name="viro-spike" options={{ headerShown: false }} />
-  </Stack></DestinationArAdmissionProvider></JournalProvider>;
+  </Stack></DestinationArAdmissionProvider></DestinationContentProvider></JournalProvider>;
 }
