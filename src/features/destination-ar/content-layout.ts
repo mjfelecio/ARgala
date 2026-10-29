@@ -1,7 +1,7 @@
 import { graphemeSegments } from 'unicode-segmenter/grapheme';
 import type { ReadingSize } from './reading-preference';
 export type ContentPage = { start: number; end: number; text: string };
-export type ReadingCursor = { page: number; offset: number; locale: string; size: ReadingSize };
+export type ReadingCursor = { page: number; offset: number; locale: string; size: ReadingSize; mediaId?: string; mediaPage?: number };
 // Conservative trial budgets, NOT a measurement of native font fit (Gate B).
 export const readingMetrics = {
   small: { columns: 21, lines: 6, fontSize: 4 },

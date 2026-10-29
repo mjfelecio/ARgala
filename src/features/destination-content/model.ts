@@ -37,6 +37,10 @@ export function resolveContent(destination: Destination | null, manifest: Conten
   if (!destination) return null;
   const update = manifest?.destinations.find(item => item.id === destination.id);
   return update ? destinationSchema.parse({ ...destination, ar: {
-    ...destination.ar, schemaVersion: 1, contentVersion: update.contentVersion, tiles: update.tiles,
+    ...destination.ar, schemaVersion: 1, contentVersion: update.contentVersion,
+    tiles: update.tiles.map(tile => {
+      const mediaIds = destination.ar?.tiles.find(bundled => bundled.id === tile.id)?.mediaIds;
+      return { ...tile, ...(mediaIds ? { mediaIds } : {}) };
+    }),
   } }) : destination;
 }

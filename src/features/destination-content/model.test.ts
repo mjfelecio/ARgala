@@ -39,3 +39,21 @@ it('rejects drafts, wrong versions, duplicate IDs, unknown IDs, missing locales,
 it('accepts an empty approved withdrawal snapshot', () => {
   expect(contentManifestSchema.parse({ ...manifest(2), destinations: [] }).destinations).toEqual([]);
 });
+
+it('retains only matching reviewed bundle image bindings through text-only updates without changing captured content', async () => {
+  const { destinationSchema } = await import('@/features/destinations/catalog');
+  const update = contentManifestSchema.parse(manifest());
+  const tile = update.destinations[0].tiles[0];
+  const base = destinationSchema.parse({ ...getDestination('pilot-aclc'),
+    media: [{ id: 'synthetic-photo', source: 1, credit: 'Synthetic credit', rightsReference: 'test', approvalReference: 'test', alt: { en: { value: 'Synthetic image', approvalReference: 'test' } } }],
+    ar: { ...getDestination('pilot-aclc')!.ar, tiles: [{ ...tile, body: { en: { value: 'Captured text', approvalReference: 'test' } }, mediaIds: ['synthetic-photo'] }] },
+  });
+  const before = JSON.stringify(base);
+  const next = resolveContent(base, update)!;
+  expect(next.ar?.tiles[0]).toHaveProperty('mediaIds', ['synthetic-photo']);
+  expect(next.ar?.tiles[0].body.en?.value).toBe('Synthetic test en');
+  expect(JSON.stringify(base)).toBe(before);
+  const renamed = contentManifestSchema.parse({ ...update, destinations: [{ ...update.destinations[0], tiles: [{ ...tile, id: 'new-tile' }] }] });
+  expect(resolveContent(base, renamed)!.ar?.tiles[0]).not.toHaveProperty('mediaIds');
+  expect(contentManifestSchema.safeParse({ ...update, destinations: [{ ...update.destinations[0], tiles: [{ ...tile, mediaIds: ['synthetic-photo'] }] }] }).success).toBe(false);
+});
