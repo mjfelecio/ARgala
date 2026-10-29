@@ -1550,3 +1550,31 @@ See [content delivery](destination-content.md) for authoring, publication and
 offline/withdrawal semantics. `npm run export:android` passed with 8.2MB Hermes
 bundle `entry-feb942170ede7708d699a623d05a8d21.hbc`. Export does not establish a
 native build, downloaded publication or physical-device operation.
+
+### Subsequent Supabase retry — 2026-10-29
+
+Owner requested another attempt. Configured project remained
+`dhjlcvviiscuuzjtzxor`; CLI 2.122.0 dry run succeeded and listed only
+`202610290001_destination_content.sql`, no seeds/roles. The reviewed source at
+bb13f57 matched the working migration SHA256:
+`119304286ef84e010b1ab8863ba965e74de4b7a5b3b2868ad2d01fb62b707a21`.
+Applied exactly that additive migration with `--skip-vault` and no historical
+migration repair, seeds, role changes, application-secret or provider configuration changes.
+
+Read-only hosted checks confirmed the recorded migration, table existence,
+enabled/forced RLS, denied authenticated direct table SELECT/INSERT/UPDATE/DELETE,
+denied anonymous RPC and allowed authenticated RPC, INVOKER public wrapper and
+private DEFINER with pinned empty search paths. Existing journal authenticated
+execution and service-only Google limiter grants were preserved. Published
+artifact count was zero. Automated assertions matched all expected metadata.
+
+Live missing-bearer POST returned 401/42501; invalid bearer returned 401/PGRST301;
+requesting private-schema data returned 406/PGRST106. No real account JWT or device
+storage was read and no content fixture was published. These are hosted
+deployment/metadata/auth-rejection observations, not an authenticated app download
+or physical offline/update/AR proof. Fresh typecheck and lint passed; application
+source is unchanged from the prior 1,077-test/SQL/export verification. Draft PR #31's
+pre-deployment CI also passed. Main/presentation checkout remains unchanged.
+
+The final CLI dry run reported upToDate=true with no pending migrations, seeds
+or custom roles. Hosted deployment is no longer blocked.

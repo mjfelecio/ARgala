@@ -102,3 +102,21 @@ invalid artifacts, monotonic withdrawal, RLS flags and preservation of existing
 limiter/journal grants. Existing limiter and journal suites now also apply the
 complete migration chain. Hosted deployment and real app downloads are separate
 evidence; record their actual status in validation.md.
+
+## Hosted deployment — 2026-10-29
+
+After the owner restored CLI access, the dry run listed only
+`202610290001_destination_content.sql`. Supabase CLI 2.122.0 applied that exact
+additive migration to project `dhjlcvviiscuuzjtzxor`, with Vault updates disabled
+and no seed/role changes. Migration source is `bb13f57`; SHA256:
+`119304286ef84e010b1ab8863ba965e74de4b7a5b3b2868ad2d01fb62b707a21`.
+
+Hosted metadata confirmed migration history, forced/enabled RLS, denied direct
+application reads/writes, anonymous RPC denial, authenticated RPC execution,
+INVOKER wrapper/private DEFINER with pinned empty search paths, and unchanged
+journal/limiter grants. Publication contains zero artifacts; no research draft or
+other factual text was promoted. Missing/invalid bearer probes returned 401 with
+42501/PGRST301; selecting the private schema returned 406/PGRST106. These establish
+deployment, metadata and rejection paths, not a successful authenticated app
+download. Approved content and physical offline/cache/AR-update trials remain
+pending.

@@ -102,6 +102,9 @@ claim mock/SQL tests establish phone storage, tracking or arrival accuracy.
   passed. Independent read-only review and lifecycle follow-up found no material
   defect. React Compiler lint findings were corrected without suppressions.
 - Task4: documentation complete; Android export passed (8.2MB Hermes bundle
-  `entry-feb942170ede7708d699a623d05a8d21.hbc`). Hosted deployment remains pending
-  CLI database access. No native dependency change, APK, ADB, main checkout
-  modification or content publication.
+  `entry-feb942170ede7708d699a623d05a8d21.hbc`). After the owner's retry request,
+  CLI access worked and only the reviewed migration was deployed. Hosted metadata,
+  empty publication and auth/private-schema rejection checks passed; see
+  validation.md. No native dependency change, APK, ADB, main checkout modification
+  or content publication. Real authenticated app download and physical update
+  behavior remain separate pending checks.
