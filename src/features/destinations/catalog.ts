@@ -18,6 +18,7 @@ const mediaSchema = z.object({
 const arTileSchema = z.object({
   id: text.max(80), role: z.enum(['overview', 'history']).optional(),
   title: translatedText, body: translatedText,
+  mediaIds: z.array(text).refine(items => new Set(items).size === items.length).readonly().optional(),
 }).strict();
 const arSchema = z.object({
   schemaVersion: z.literal(1), contentVersion: text.max(80),
@@ -35,7 +36,8 @@ export const destinationSchema = z.object({
   copy: z.object({ en: copy.optional(), ko: copy.optional(), ja: copy.optional() }).strict().optional(),
   media: z.array(mediaSchema).refine(items => new Set(items.map(item => item.id)).size === items.length).readonly().optional(),
 }).strict().refine(d => !d.center || !!d.centerApprovalReference, { path: ['centerApprovalReference'] })
-  .refine(d => !d.routeEntrance || !!d.routeEntranceApprovalReference, { path: ['routeEntranceApprovalReference'] }).readonly();
+  .refine(d => !d.routeEntrance || !!d.routeEntranceApprovalReference, { path: ['routeEntranceApprovalReference'] })
+  .refine(d => (d.ar?.tiles ?? []).every(tile => (tile.mediaIds ?? []).every(id => d.media?.some(media => media.id === id))), { path: ['ar', 'tiles'] }).readonly();
 export type Destination = z.infer<typeof destinationSchema>;
 export type DestinationMedia = z.infer<typeof mediaSchema>;
 

@@ -21,6 +21,8 @@ import { useArIntroduction } from './use-ar-introduction';
 import { loadRingScene } from './ring-loader';
 import type { RingControls, RingMetrics } from './destination-ring-scene';
 import type { SessionIdentity } from './session';
+import { ArPhotoControls } from '@/features/ar-photo/ar-photo-controls';
+import type { NativeCapture } from '@/features/ar-photo/types';
 
 /** Auth changes get a new in-memory owner. The outer route guard runs before
  * loading this module; this entry is explicitly development provenance only.
@@ -33,8 +35,8 @@ export default function DevelopmentSessionRoute() {
     : <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
 }
 
-type Props = { identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
-export function DestinationArSessionExperience({ identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
+type Props = { identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
+export function DestinationArSessionExperience({ identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
   const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
   const [transitionReady, setTransitionReady] = useState(true); const [scene, setScene] = useState({ width: 0, height: 0 });
@@ -60,10 +62,12 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
   }, [startup.phase, startup.attempt, NativeRing, reportFailure]);
   useEffect(() => { if (session.phase === 'reveal' && (introduction.seen || reduced)) finishReveal(); }, [session.phase, introduction.seen, reduced, finishReveal]);
   useEffect(() => { if (session.phase === 'exploring' && !introduction.seen && !introduction.pending) void completeIntroduction(); }, [session.phase, introduction.seen, introduction.pending, completeIntroduction]);
-  const controls = useRef<RingControls | null>(null); const acceptControls = useCallback((value: RingControls | null) => { controls.current = value; }, []);
+  const [capture, setCapture] = useState<NativeCapture | null>(null);
+  const controls = useRef<RingControls | null>(null); const acceptControls = useCallback((value: RingControls | null) => { controls.current = value; setCapture(() => value?.capture ?? null); }, []);
   const [poseRequired, setPoseRequired] = useState(false); const recenterResult = useCallback((success: boolean) => setPoseRequired(!success), []);
   const [help, setHelp] = useState(false); const [metrics, setMetrics] = useState<RingMetrics>({ received: 0, applied: 0 });
   const exploring = session.phase === 'exploring'; const revealing = session.phase === 'reveal' || session.phase === 'limited' && session.revealedCount < content.length;
+  if (startup.errorCode === 'unsupported' && unsupportedFallback && focused && active) return <>{unsupportedFallback}</>;
   return <View testID="destination-ar-scene" className="flex-1 bg-ink" onLayout={event => {
     const { width, height } = event.nativeEvent.layout;
     if (width > 0 && height > 0) setScene(previous => previous.width === width && previous.height === height ? previous : { width, height });
@@ -79,6 +83,7 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
     <ArUtilityChrome titleKey="destinationRing.title" title={title} onReturn={onReturn} onExit={() => { close(); onExit?.(); }} actions={startup.phase === 'live' ? <>
       <Button variant="secondary" accessibilityLabel={t('destinationRing.recenter')} isDisabled={!exploring} onPress={() => controls.current?.recenter()}><Button.Label>{t('destinationRing.recenter')}</Button.Label></Button>
       <Button variant="secondary" accessibilityLabel={t('destinationRing.help')} accessibilityState={{ expanded: help }} onPress={() => setHelp(value => !value)}><Button.Label>{t('destinationRing.help')}</Button.Label></Button>
+      {exploring && focused && active && <ArPhotoControls capture={capture} running sessionKey={JSON.stringify([identity.principalId, identity.admissionId, identity.destinationId, identity.provenance, startup.attempt])} />}
     </> : undefined}>
       {session.phase === 'expired' ? <View className="gap-3 p-4"><Notice>{t('destinationSession.expired')}</Notice>
         <Action title={t('arrival.returnToMap')} onPress={() => { close(); onExit?.(); if (onReturn) onReturn(); else router.navigate('/'); }} />

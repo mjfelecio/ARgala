@@ -51,6 +51,19 @@ it('waits for normal horizontal pose, then publishes native translation without 
   expect((last.patch.position as number[])[0]).toBeGreaterThan(3.8);
   expect(node('ring-tile-overview').props.rotation).toEqual([0, 0, 0]);
 });
+it('reduces only decoration under sustained scheduling delay while retaining focused content, controls and frame', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish(); await press('ring-action-next');
+  const panel = node('ring-focused-panel'); const position = panel.props.position; const rotation = panel.props.rotation;
+  const page = text('ring-page-indicator'); const body = text('ring-body');
+  const quads = tree.root.findAllByType('quad' as React.ElementType).length;
+  let clock = Date.now(); vi.mocked(performance.now).mockImplementation(() => clock);
+  for (let index = 0; index < 3; index++) { clock += 1400; await act(async () => { await vi.advanceTimersByTimeAsync(1000); }); }
+  expect(tree.root.findAllByType('quad' as React.ElementType).length).toBeLessThan(quads);
+  expect(node('ring-focused-panel').props.position).toEqual(position); expect(node('ring-focused-panel').props.rotation).toEqual(rotation);
+  expect(text('ring-page-indicator')).toBe(page); expect(text('ring-body')).toBe(body);
+  for (const action of ['previous', 'next', 'smaller', 'larger', 'close']) expect(node(`ring-action-${action}`)).toBeDefined();
+  expect(ready).toHaveBeenCalledOnce();
+});
 it('captures current-view focus once, ignores transition conflicts, closes and recenters without resetting the page', async () => {
   await mount(); await track(); await pose();
   await pose({ position: [4, 2, 3], forward: [1, 0, 0] }, 1100);

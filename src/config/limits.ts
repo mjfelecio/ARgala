@@ -3,6 +3,8 @@ import { DISCOVERY_LIMITS } from '../../supabase/functions/_shared/contracts';
 export const DISCOVERY = { radiusMeters: 1000, ...DISCOVERY_LIMITS } as const;
 /** Curated destination centers, independent from user discovery and local AR activation. */
 export const DESTINATIONS = { nearbyRadiusMeters: 500 } as const;
+/** Nearby OS reminders are best effort and never evidence of AR arrival. */
+export const ARRIVAL_REMINDERS = { radiusMeters: 150, maxDestinations: 10 } as const;
 export const ACTIVATION = { defaultMeters: 100, minMeters: 10, maxMeters: 1000 } as const;
 export const LOCATION = { distanceIntervalMeters: 5, timeIntervalMs: 3000, timeoutMs: 15000 } as const;
 /** Approximate portrait projection, not physical camera calibration. */

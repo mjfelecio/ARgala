@@ -359,7 +359,9 @@
     },
     "hold": "Hold, then release",
     "poseRequired": "Face ahead and move the phone gently before recentering.",
-    "poseRate": "Pose callbacks: {{received}}/s · position outputs: {{applied}}/s"
+    "poseRate": "Pose callbacks: {{received}}/s · position outputs: {{applied}}/s",
+    "imageCredit": "Credit: {{credit}}",
+    "imageFailed": "Image unavailable"
   },
   "destinationSession": {
     "intro": {
@@ -472,5 +474,59 @@
     "saveFailed": "Could not save the update. Your previous content is still available.",
     "loadFailed": "Could not read saved content. Using the content included with this app.",
     "offlineNote": "Content updates do not include offline Google maps or routes. Some destinations are still awaiting content approval."
+  },
+  "fallback": {
+    "unsupported": "This device does not support AR. Approved information is available here while your arrival is verified.",
+    "verify": "Verify your current location to read this destination’s information. You must remain eligible at the destination."
+  },
+  "reminders": {
+    "title": "Nearby reminders",
+    "enable": "Remind me once when nearby",
+    "disable": "Turn off reminder",
+    "explanation": "Optional, best-effort Android notification near this destination (about 150 m). It may be delayed, including while the app is closed. It does not confirm arrival or earn a Passport stamp.",
+    "backgroundTitle": "Allow a nearby reminder?",
+    "backgroundExplanation": "To send your one-time reminder while ARgala is in the background, Android requires Allow all the time location access in Settings. Choose that option only if you want this reminder. No continuous route or location history is saved. You can turn it off here at any time.",
+    "continueSettings": "Continue to Settings",
+    "cancel": "Cancel",
+    "requested": "Reminder requested. Android delivery is best effort; monitoring cannot be confirmed.",
+    "used": "This one-time reminder has been attempted. Turn it off, then enable again for another reminder.",
+    "off": "Reminders are off by default. Choose a destination to enable one.",
+    "permissions": "Allow precise location, background location and notifications in Android Settings, then enable again to retry. Permission prompts never open automatically.",
+    "unavailable": "Nearby reminders need an Android build with the reminder modules. Other app features remain available.",
+    "pointMissing": "A reminder is unavailable until an approved destination point is bundled.",
+    "storageFailed": "Reminder preferences could not be saved or loaded. Your previous choices are retained. Retry before changing reminders.",
+    "failed": "The reminder could not be registered. Try again explicitly.",
+    "limit": "Up to 10 destinations can have a reminder. Turn one off first.",
+    "retry": "Retry reminder setup",
+    "channel": "Nearby destination reminders",
+    "notificationTitle": "A destination may be nearby",
+    "notificationBody": "{{destination}} may be nearby. Open its details when safe. This is a reminder, not confirmation of arrival."
+  },
+  "arPhoto": {
+    "capture": "Capture photo",
+    "capturing": "Capturing…",
+    "preview": "AR photo",
+    "image": "Captured AR photo",
+    "save": "Save to gallery",
+    "saving": "Saving…",
+    "saved": "Saved to gallery",
+    "share": "Share photo",
+    "sharing": "Opening share…",
+    "discard": "Discard photo",
+    "about": "Captures the camera and AR scene. Sharing may pause your AR session.",
+    "temporary": "Discard removes this temporary preview. A saved gallery copy stays.",
+    "errors": {
+      "unavailable": "Photo tools are unavailable in this app build. Install an updated build to try again.",
+      "busy": "A previous photo action is still finishing. Wait before trying again.",
+      "capture-failed": "The photo could not be captured. Please try again.",
+      "capture-write": "The photo could not be stored. Check available device space and try again.",
+      "unsupported": "Photo capture is not supported on this device.",
+      "timeout": "The photo action took too long. A previous action may still be finishing. Please wait before trying again.",
+      "save-failed": "The photo could not be saved. Please try again.",
+      "save-permission": "Allow photo saving in Android Settings, then capture a new photo and try again.",
+      "share-failed": "The share sheet could not be opened. Please try again.",
+      "share-unavailable": "Photo sharing is unavailable on this device.",
+      "preview-failed": "The photo preview could not be opened. Discard it and capture a new photo."
+    }
   }
 }

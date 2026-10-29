@@ -14,6 +14,7 @@ import { destinationName, getDestination } from './catalog';
 import { DaytimeGallery } from './daytime-gallery';
 import { NearbyEstablishments } from './nearby-establishments';
 import { destinationToRoutePlace } from './routing';
+import { DestinationReminderAction } from '@/features/arrival-reminders/components';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
 export default function DestinationScreen() {
@@ -45,6 +46,7 @@ export default function DestinationScreen() {
         </Card></DaytimeGallery>
         <Text className="font-sans text-base text-muted">{t('arrival.teaser')}</Text>
         <Text className="font-sans text-sm text-muted">{t('destinations.contentPending')}</Text>
+        <DestinationReminderAction destination={destination} />
         <Button isDisabled={!routePlace || !active || !focused} accessibilityLabel={t('placeDetails.directions')} onPress={directions}><Button.Label>{t('placeDetails.directions')}</Button.Label></Button>
         {!routePlace && <Text className="font-sans text-sm text-muted">{t('destinations.entranceMissing')}</Text>}
         <NearbyEstablishments key={`nearby:${destination.id}`} destination={destination} />

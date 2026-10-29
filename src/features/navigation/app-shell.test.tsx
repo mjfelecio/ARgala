@@ -25,10 +25,11 @@ const { StackRouter } = require('expo-router/build/react-navigation/routers/Stac
 const routeFiles = import.meta.glob('../../app/**/*.tsx');
 const layoutModules = import.meta.glob('../../app/**/_layout.tsx');
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: { user: { id: 'test-owner' } } }) }));
+vi.mock('@/features/arrival-reminders/native', () => ({ optionalNotifications: () => null, reminderNative: { available: () => false, unregister: async () => {} } }));
 vi.mock('expo-router', async () => {
  const { createElement } = await import('react');
  const screen = (props: Record<string, unknown>) => createElement('route', props);
- return { useIsFocused: () => true, router: { push: vi.fn(), navigate: vi.fn() },
+ return { useIsFocused: () => true, useRootNavigationState: () => ({ key: 'root' }), router: { push: vi.fn(), navigate: vi.fn() },
   Stack: Object.assign((props: Record<string, unknown>) => createElement('stack', props), { Screen: screen }),
   Tabs: Object.assign((props: Record<string, unknown>) => createElement('tabs', props), { Screen: screen }),
  };

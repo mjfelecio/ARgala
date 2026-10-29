@@ -18,6 +18,9 @@ vi.mock('expo-router', () => ({ useLocalSearchParams: () => controls.params, use
   router: { push: vi.fn(), back: vi.fn(), canGoBack: () => controls.back, navigate: vi.fn(), dismissTo: vi.fn() } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language }) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
+vi.mock('@/features/arrival-reminders/native', () => ({ optionalNotifications: () => null, reminderNative: { available: () => false } }));
+vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: async () => null, setItem: async () => {} } }));
+vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: null, loading: false }) }));
 vi.mock('@/features/places/service', () => ({ placesService: { nearby: vi.fn(), details: vi.fn() } }));
 vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => { throw new Error('Catalog must not acquire GPS'); } }));
 let client: QueryClient;

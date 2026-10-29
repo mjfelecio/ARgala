@@ -15,5 +15,8 @@ it('selects only local Android AR without enabling cloud providers or recording 
   const config = configure({ config: { name: 'ARgala', slug: 'argala' } } as Parameters<typeof configure>[0]);
   expect(config.plugins).toContainEqual(['@reactvision/react-viro', { android: { xRMode: ['AR'] }, provider: 'none' }]);
   expect(config.android?.blockedPermissions).toContain('android.permission.RECORD_AUDIO');
-  expect(config.android?.blockedPermissions).toContain('android.permission.ACCESS_BACKGROUND_LOCATION');
+  expect(config.plugins).toContainEqual(['expo-location', { isAndroidBackgroundLocationEnabled: true, isAndroidForegroundServiceEnabled: false }]);
+  expect(config.android?.blockedPermissions).not.toContain('android.permission.ACCESS_BACKGROUND_LOCATION');
+  expect(config.android?.blockedPermissions).toContain('android.permission.FOREGROUND_SERVICE_LOCATION');
+  expect(config.android?.blockedPermissions).toContain('android.permission.READ_MEDIA_IMAGES');
 });

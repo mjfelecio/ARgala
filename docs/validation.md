@@ -1578,3 +1578,57 @@ pre-deployment CI also passed. Main/presentation checkout remains unchanged.
 
 The final CLI dry run reported upToDate=true with no pending migrations, seeds
 or custom roles. Hosted deployment is no longer blocked.
+
+## Supporting MVP implementation — 2026-10-30
+
+The `feat/mvp-completion` increment starts at main `d46af1f`, after content
+pipeline PR31 was merged and its read-only hosted migration verified. Baseline:
+**1,077 tests / 103 files passed**. See [feature behavior and acceptance gates](mvp-completion.md)
+and the [completion plan](superpowers/plans/2026-10-30-mvp-completion.md).
+
+Changes add explicit one-shot background reminders, definite-unsupported on-site
+reader with the blueprint D20 Passport exception, conservative scheduling-based
+AR decoration reduction, AR-photo preview/save/share, and validated approved
+bundled galleries. No destination content or media was fabricated or promoted.
+No backend migration or Edge-function change belongs to this increment.
+
+The implementation used installed SDK57/Viro3.0.3 sources and documentation for
+native boundary decisions. Independent review found and drove regressions for
+reader authorization reuse after resume, notification-handoff retry spinning
+while storage was deferred, Android API24/25 notification-channel checks, and
+missing gallery English-fallback notices. The reviewer re-read all four fixes
+and the integrated capture/bootstrap/configuration/handoff paths and reported no
+remaining confirmed merge blocker. Native runtime boundaries remain mocked.
+
+Native configuration checks confirm optional AR, explicit opt-in background
+location capability without a foreground location service, notification support,
+no audio/broad photo-read/media-location permissions, and WRITE capped at API29.
+The ignored generated native directory in the implementation worktree was
+preserved under `.superpowers/preserved-native/` before clean CNG introspection;
+no generated Android source was hand-edited. Compatibility check reports current
+dependencies, Expo Doctor reports **21/21**, and Android configuration passes.
+
+New native modules have **not** been built or installed for this increment. No
+ADB or physical verification occurred. Historical device results for the existing
+AR ring do not establish screenshot/gallery/share/background-reminder behavior.
+These still require the specifically approved rebuilt APK and physical scenarios
+listed in the feature guide. Unsupported-reader gating is automated evidence,
+not evidence from an unsupported phone. JS scheduling tests are not native FPS
+or thermal measurements. Actual ACLC GPS calibration and approved nine-site
+content/coordinates/media remain outstanding input/field gates.
+
+Final local verification on the reviewed source tree:
+
+- `npm run check`: strict TypeScript, zero-warning ESLint, **1,212 tests / 114 files passed**.
+- `npx expo install --check`: dependencies up to date.
+- `npx expo-doctor`: **21/21 checks passed**.
+- `npm run check:android`: passed with the new opt-in and save-only manifest contracts.
+- `npm run export:android`: final Android Hermes export completed (8.5 MB bundle).
+- `git diff --check`: passed.
+
+The first integrated run exposed two Node test imports without native/auth/storage
+boundary mocks and the previous blanket-background-permission assertion. Those
+were updated to the approved optional-native and opt-in configuration contracts;
+the final full check above includes their real-screen regressions. No backend
+checks were rerun locally because this patch changes no backend code; PR CI runs
+the complete Edge and isolated SQL validation matrix.

@@ -37,3 +37,15 @@ it('falls back per approved field to English, marking only an actual fallback', 
   expect(localizedContent(undefined, 'ko')).toBeNull();
   expect(localizedContent({ ja: content.ja }, 'ko')).toBeNull();
 });
+
+it('binds AR galleries only to unique approved media IDs owned by this destination', () => {
+  const media = { id: 'synthetic-photo', source: 1, credit: 'Synthetic credit', rightsReference: 'test rights', approvalReference: 'test only', alt: { en: { value: 'Synthetic image', approvalReference: 'test only' } } };
+  const tile = { id: 'history', title: {}, body: {}, mediaIds: [media.id] };
+  const input = { ...base, media: [media], ar: { schemaVersion: 1, contentVersion: 'test', tiles: [tile] } };
+  expect(destinationSchema.parse(input).ar?.tiles[0]).toHaveProperty('mediaIds', [media.id]);
+  for (const mediaIds of [[media.id, media.id], ['unknown'], [1], ['https://example.com/image']]) {
+    expect(destinationSchema.safeParse({ ...input, ar: { ...input.ar, tiles: [{ ...tile, mediaIds }] } }).success).toBe(false);
+  }
+  expect(destinationSchema.safeParse({ ...input, media: [] }).success).toBe(false);
+  expect(destinationSchema.safeParse({ ...input, ar: { ...input.ar, tiles: [{ ...tile, media: [media] }] } }).success).toBe(false);
+});
