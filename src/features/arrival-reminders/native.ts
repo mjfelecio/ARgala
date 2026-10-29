@@ -41,14 +41,14 @@ export function createReminderNative({task:getTask=optionalTaskManager,notificat
   const channelAllowed=!requiresChannel||(!!channel&&channel.importance!==notifications.AndroidImportance.NONE);
   return precise(foreground)&&background.granted&&notification.granted&&enabled&&available&&channelAllowed;
  },
- request(explain,isCurrent=()=>true){if(permissionWork)return permissionWork;
+ request(explain,isCurrent=()=>true,locale='en'){if(permissionWork)return permissionWork;
   let live=true;
   let timer:ReturnType<typeof setTimeout>;
   const current=()=>live&&isCurrent();
   const work=(async()=>{const notifications=getNotifications();const task=getTask();if(!notifications||!task||!current()||!await task.isAvailableAsync())return false;
    const permission=await foreground({prompt:'retry'});if(!precise(permission)||!current())return false;
    // Android 13 needs a channel before it can present the notification prompt.
-   await notifications.setNotificationChannelAsync(REMINDER_CHANNEL,{name:copy('en').channel,importance:notifications.AndroidImportance.DEFAULT});if(!current())return false;
+   await notifications.setNotificationChannelAsync(REMINDER_CHANNEL,{name:copy(locale).channel,importance:notifications.AndroidImportance.DEFAULT});if(!current())return false;
    let notification=await notifications.getPermissionsAsync();if(!current())return false;
    if(!notification.granted&&notification.canAskAgain)notification=await notifications.requestPermissionsAsync();if(!notification.granted||!current())return false;
    let background=await location.getBackgroundPermissionsAsync();if(!current())return false;

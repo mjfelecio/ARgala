@@ -1,3 +1,6 @@
+import en from '@/i18n/locales/en.json';
+import ja from '@/i18n/locales/ja.json';
+import ko from '@/i18n/locales/ko.json';
 import { beforeEach, expect,it,vi } from 'vitest';
 import type * as Location from 'expo-location';
 import type * as Notifications from 'expo-notifications';
@@ -22,3 +25,9 @@ it('bootstrap defines no task and starts no permission work when optional native
 
 it.each([24,25])('accepts granted reminder permissions on Android API%d without notification channels',async version=>{probe.version=version;const x=setup();x.location.getBackgroundPermissionsAsync.mockResolvedValue(granted);x.notifications.getPermissionsAsync.mockResolvedValue(granted);x.notifications.getNotificationChannelAsync.mockResolvedValue(null);expect(await x.native.check()).toBe(true);expect(x.notifications.getNotificationChannelAsync).not.toHaveBeenCalled();});
 it.each([26,34])('requires a nonblocked notification channel on Android API%d',async version=>{probe.version=version;const x=setup();x.location.getBackgroundPermissionsAsync.mockResolvedValue(granted);x.notifications.getPermissionsAsync.mockResolvedValue(granted);x.notifications.getNotificationChannelAsync.mockResolvedValueOnce(null).mockResolvedValueOnce({importance:0}).mockResolvedValueOnce({importance:3});expect(await x.native.check()).toBe(false);expect(await x.native.check()).toBe(false);expect(await x.native.check()).toBe(true);});
+
+it.each(['en','ja','ko'] as const)('names the Android channel in the explicitly selected %s app locale',async locale=>{
+ const x=setup();x.location.getBackgroundPermissionsAsync.mockResolvedValue(granted);x.notifications.getPermissionsAsync.mockResolvedValue(granted);
+ expect(await x.native.request(async()=>true,()=>true,locale)).toBe(true);
+ expect(x.notifications.setNotificationChannelAsync).toHaveBeenCalledExactlyOnceWith('destination-nearby',{name:{en,ja,ko}[locale].reminders.channel,importance:3});
+});
