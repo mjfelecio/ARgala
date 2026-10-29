@@ -90,4 +90,18 @@ claim mock/SQL tests establish phone storage, tracking or arrival accuracy.
 - Repository inspection: catalog/admission snapshots, journal transport/repository,
   HOP query/error/focus patterns reviewed. Adapt explicit-action/error boundaries;
   preserve ARgala's stricter request policy instead of HOP's automatic retries.
-- Baseline full check running; no dependency/native changes planned.
+- Baseline `npm run check`: 99 files / 1,045 tests, lint/typecheck passed.
+- Task1: `6248313`; model/repository RED before implementation, seven focused
+  tests GREEN. Invalid cache and failed reads/writes preserve bundle/last good.
+- Task2: `bb13f57`; transport RED→GREEN (eight tests), new SQL RED before RPC and
+  null-validation regressions; all three SQL suites passed against the complete
+  migration chain. Hosted dry run returned 403; no deployment or content seed.
+- Task3: `61a5908`; 44 content/admission tests passed, plus 27 real navigator and
+  selected-entry tests after matching fixtures to the production Query provider
+  and injected content lookup. Full check: 103 files / 1,077 tests, lint/typecheck
+  passed. Independent read-only review and lifecycle follow-up found no material
+  defect. React Compiler lint findings were corrected without suppressions.
+- Task4: documentation complete; Android export passed (8.2MB Hermes bundle
+  `entry-feb942170ede7708d699a623d05a8d21.hbc`). Hosted deployment remains pending
+  CLI database access. No native dependency change, APK, ADB, main checkout
+  modification or content publication.
