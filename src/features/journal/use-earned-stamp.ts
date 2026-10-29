@@ -1,7 +1,7 @@
 import { useCallback,useRef } from 'react';
 import type { PreparedArEntry } from '@/features/destination-ar/admission-store';
 import { useJournal } from './context';
-/** Only the tracking-ready callback may capture an earned event. Retry cannot create one. */
+/** Capture only actual AR tracking-ready or the approved unsupported reader's fresh, visible establishment event. Retry cannot create one. */
 export function useEarnedStamp(entry:PreparedArEntry){
  const journal=useJournal();const earned=useRef<PreparedArEntry|null>(null);const completed=useRef(false);const pending=useRef(false);
  const award=journal?.award;

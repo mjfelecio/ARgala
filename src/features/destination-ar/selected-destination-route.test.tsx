@@ -69,7 +69,8 @@ it('labels simulated entry and never enables a route GPS owner for it', async ()
 it('uses approved content with verified pending provenance in release without loading draft modules', async () => {
  const catalog = await import('@/features/destinations/catalog'); const pilot = catalog.getDestination('pilot-aclc')!;
  const approved = (value: string) => ({ value, approvalReference: 'synthetic test approval' });
- const fixture = catalog.destinationSchema.parse({ ...pilot, ar: { ...pilot.ar, tiles: [{ id: 'overview', role: 'overview', title: { en: approved('Approved title') }, body: { en: approved('Approved body') } }] } });
+ const media = { id: 'synthetic-route-photo', source: 1, credit: 'Synthetic credit', rightsReference: 'test', approvalReference: 'test', alt: { en: approved('Synthetic photo') } };
+ const fixture = catalog.destinationSchema.parse({ ...pilot, media: [media, { ...media, id: 'unbound', source: 2 }], ar: { ...pilot.ar, tiles: [{ id: 'overview', role: 'overview', title: { en: approved('Approved title') }, body: { en: approved('Approved body') }, mediaIds: [media.id] }] } });
  store.setContentResolver(id => id === 'pilot-aclc' ? fixture : null);
  Object.assign(globalThis, { __DEV__: false }); store.select('pilot-aclc'); const lease = store.acquire('pilot-aclc')!;
  for (const time of [10000, 13000, 16000]) { vi.mocked(Date.now).mockReturnValue(time); store.publish(lease, { running: true, watcherStatus: 'ready', sample: { timestamp: time, accuracy: 5, position: fixture.center! } }); }
@@ -77,5 +78,6 @@ it('uses approved content with verified pending provenance in release without lo
  await act(async () => { tree = create(render()); });
  const scene = tree!.root.findByType('ar-experience' as React.ElementType);
  expect(scene.props.identity.provenance).toBe('verified'); expect(scene.props.content[0].approved.body.en.value).toBe('Approved body');
+ expect(scene.props.content[0].approved.media).toEqual([media]);
  expect(scene.props.entryReady).toBe(false); expect(loadDraftRingContent).not.toHaveBeenCalled();
 });

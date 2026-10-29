@@ -16,6 +16,7 @@ import type { RingContent } from './ring-content';
 import { isViroSpikeEnabled } from './dev-guard';
 import { loadDraftRingContent } from './draft-content-loader';
 import { DestinationArSessionExperience } from './destination-ar-session-screen';
+import { ReadOnlyFallback } from './read-only-fallback';
 
 export default function SelectedDestinationArRoute() {
   const store = useArAdmission(); const params = useLocalSearchParams();
@@ -52,7 +53,7 @@ function ClaimedEntry({ store, id, token }: { store: ArAdmissionStore | null; id
   if (entry.kind === 'draft') { if (!draft) return <Unavailable loading />; content = draft; }
   else {
     const ids = new Set(approvedArContent(entry.destination, entry.language).map(tile => tile.id));
-    content = (entry.destination.ar?.tiles ?? []).filter(tile => ids.has(tile.id)).map(tile => ({ id: tile.id, role: tile.role, approved: { title: tile.title, body: tile.body } }));
+    content = (entry.destination.ar?.tiles ?? []).filter(tile => ids.has(tile.id)).map(tile => ({ id: tile.id, role: tile.role, approved: { title: tile.title, body: tile.body, media: (tile.mediaIds ?? []).flatMap(id => entry.destination.media?.find(media => media.id === id) ?? []) } }));
   }
   return content.length ? <PreparedScene entry={entry} store={store} content={content} /> : <Unavailable />;
 }
@@ -65,6 +66,11 @@ function PreparedScene({ entry, store, content }: { entry: PreparedArEntry; stor
   useAdmissionSource(store, entry.destination.id, { running: active && focused && !established && !entry.simulated, watcherStatus: location.watcherStatus, sample: location.watcherSample }, false);
   const arrival = useAdmissionSnapshot(store);
   return <DestinationArSessionExperience identity={entry.identity} content={content} title={destinationName(entry.destination)}
+    unsupportedFallback={entry.kind === 'approved' && !entry.simulated && !established && entry.identity.provenance === 'verified' ? <ReadOnlyFallback entry={entry}
+      eligible={arrival?.destinationId === entry.destination.id && arrival.eligible} running={active && focused}
+      onEstablished={earnStamp} feedback={<JournalFeedback onRetrySave={retryStamp} />}
+      onExit={() => { store.endEntry(entry.identity.admissionId); router.dismissTo({ pathname: '/', params: { featuredDestinationId: entry.destination.id } }); }}
+      guidance={<LocationStatus location={location} />} /> : undefined}
     freshEligible={entry.authorizeMount} entryReady={entry.simulated || arrival?.destinationId === entry.destination.id && arrival.eligible}
     onEstablished={onEstablished} onExit={() => store.endEntry(entry.identity.admissionId)}
     onReturn={() => router.dismissTo({ pathname: '/', params: { featuredDestinationId: entry.destination.id } })}

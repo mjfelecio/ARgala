@@ -12,13 +12,14 @@ import { ViroRingRoute } from './dev-entry';
 import { router } from 'expo-router';
 const native = vi.hoisted(() => ({ active: true, focused: true, reduced: false, eligible: true,
   principal: 'owner' as string | null, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
-  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), load: vi.fn(), gate: vi.fn(),
+  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(),
 }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: native.principal ? { user: { id: native.principal } } : null }) }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
 vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get, requestCameraPermissionsAsync: native.request } }));
 vi.mock('./ring-loader', () => ({ loadRingScene: native.load }));
+vi.mock('@/features/ar-photo/ar-photo-controls', async () => { const R = await import('react'); return { ArPhotoControls: (props: Record<string, unknown>) => R.createElement('photo-controls', props) }; });
 vi.mock('expo-router', async () => {
   const require = createRequire(import.meta.url); const focus = require('expo-router/build/react-navigation/core/useIsFocused');
   native.context = require('expo-router/build/react-navigation/core/NavigationContext').NavigationContext; native.focusContext = focus.IsFocusedContext;
@@ -29,7 +30,10 @@ vi.mock('@reactvision/react-viro', async () => {
   const R = await import('react');
   return { ViroARScene: 'native-scene', ViroQuad: 'quad', ViroText: 'viro-text',
     ViroNode: R.forwardRef((props: { children?: React.ReactNode }, ref) => { R.useImperativeHandle(ref, () => ({ setNativeProps: vi.fn() })); return R.createElement('node', props, props.children); }),
-    ViroARSceneNavigator: (props: { initialScene: { scene: () => React.JSX.Element } }) => R.createElement('native-navigator', props, R.createElement(props.initialScene.scene)),
+    ViroARSceneNavigator: R.forwardRef((props: { initialScene: { scene: () => React.JSX.Element } }, ref) => {
+      R.useImperativeHandle(ref, () => ({ arSceneNavigator: { takeScreenshot: native.screenshot } }), []);
+      return R.createElement('native-navigator', props, R.createElement(props.initialScene.scene));
+    }),
     ViroMaterials: { createMaterials: vi.fn() }, ViroAnimations: { registerAnimations: vi.fn() }, ViroTrackingStateConstants: { TRACKING_UNAVAILABLE: 1, TRACKING_LIMITED: 2, TRACKING_NORMAL: 3 } };
 });
 const identity = { admissionId: 'development-entry', destinationId: 'development-aclc', principalId: 'owner', provenance: 'development' as const };
@@ -47,6 +51,28 @@ async function settle() { await act(async () => { await vi.dynamicImportSettled(
 async function start() { await press('destinationAr.start'); await settle(); }
 const cameras = () => tree!.root.findAllByType('native-navigator' as React.ElementType);
 const copy = () => JSON.stringify(tree!.toJSON());
+it('hands photo capture only to the current live navigator and retires the old frame callback on background', async () => {
+  await mount(); await layout(); expect(tree!.root.findAllByType('photo-controls' as React.ElementType)).toHaveLength(0);
+  await start(); await ready();
+  const photo = tree!.root.findByType('photo-controls' as React.ElementType); expect(photo.props.running).toBe(true);
+  native.screenshot.mockResolvedValueOnce({ success: true, url: '/synthetic.jpg', errorCode: -1 });
+  const capture = photo.props.capture;
+  await capture('synthetic-photo'); expect(native.screenshot).toHaveBeenCalledWith('synthetic-photo', false);
+  const key = photo.props.sessionKey;
+  await active(false); expect(tree!.root.findAllByType('photo-controls' as React.ElementType)).toHaveLength(0);
+  expect((await capture('retired-photo')).errorCode).toBe(6); expect(native.screenshot).toHaveBeenCalledOnce();
+  await active(true); await settle(); await ready();
+  expect(tree!.root.findByType('photo-controls' as React.ElementType).props.sessionKey).not.toBe(key);
+});
+it.each(['UNSUPPORTED', 'SUPPORTED', 'TRANSIENT', 'UNKNOWN', 'FAILED', 'MISSING'])('offers fallback only for definite native incapability: %s', async result => {
+  if (result === 'MISSING') delete nativeUi.modules.VRTARSceneNavigatorModule;
+  else native.support.mockImplementation(callback => callback(result));
+  await mount(() => React.createElement(DestinationArSessionExperience, { identity, freshEligible: native.gate, unsupportedFallback: React.createElement('fallback-reader') }));
+  expect(tree!.root.findAllByType('fallback-reader' as React.ElementType)).toHaveLength(0);
+  await layout(); await start();
+  expect(tree!.root.findAllByType('fallback-reader' as React.ElementType)).toHaveLength(result === 'UNSUPPORTED' ? 1 : 0);
+  if (result === 'UNSUPPORTED') { expect(native.get).not.toHaveBeenCalled(); expect(cameras()).toHaveLength(0); expect(native.load).not.toHaveBeenCalled(); }
+});
 function node(id: string) { return tree!.root.findAllByType('node' as React.ElementType).find(value => value.props.testID === id)!; }
 async function click(id: string) { await act(async () => node(id).props.onClick?.()); }
 function text(id: string) { return tree!.root.findAllByType('viro-text' as React.ElementType).find(value => value.props.testID === id)!.props.text as string; }
@@ -60,6 +86,7 @@ beforeEach(async () => {
   native.active = native.focused = native.eligible = true; native.reduced = false; native.principal = 'owner'; native.transitions.clear();
   vi.spyOn(Reanimated, 'useReducedMotion').mockImplementation(() => native.reduced);
   native.get.mockReset().mockResolvedValue(granted); native.request.mockReset().mockResolvedValue({ ...granted, granted: false, status: 'denied' });
+  native.screenshot.mockReset();
   native.support.mockReset().mockImplementation(callback => callback('SUPPORTED')); nativeUi.modules.VRTARSceneNavigatorModule = { isARSupportedOnDevice: native.support };
   native.getItem.mockReset().mockImplementation(async key => key === 'argala.ar-introduction.v1' ? 'complete' : null); native.setItem.mockReset().mockResolvedValue(undefined);
   native.gate.mockReset().mockImplementation(() => native.eligible); native.load.mockReset().mockImplementation(async () => (await import('./destination-ring-scene')).DestinationRingSceneHost);

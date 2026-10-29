@@ -8,11 +8,13 @@ import { useArNativeStyle } from './native-styles';
 import { InformationTile } from './information-tile';
 import { InformationPanel } from './information-panel';
 import { useReadingSize } from './use-reading-size';
+import { useArVisualQuality } from './use-ar-visual-quality';
 import type { ReadingCursor } from './content-layout';
 import type { PoseSample, TrackingState, Vector3 } from './types';
 import type { RingSlot } from './scene-geometry';
 import type { LogicalArProgress } from './session';
-export type RingControls = { recenter(): void };
+import type { NativeCapture } from '@/features/ar-photo/types';
+export type RingControls = { recenter(): void; capture?: NativeCapture };
 export type RingMetrics = { received: number; applied: number };
 type Props = { onReady(): void; onTracking(state: TrackingState): void; onControls?(controls: RingControls | null): void; onRecenterResult?(success: boolean): void; onMetrics?(metrics: RingMetrics): void; content?: readonly RingContent[]; reading?: ReturnType<typeof useReadingSize>; initialProgress?: LogicalArProgress; onProgress?(progress: LogicalArProgress): void; visibleTileCount?: number; interactive?: boolean };
 
@@ -28,6 +30,7 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
   const [controller] = useState(() => new RingController(snapshot));
   const [frame, setFrame] = useState<{ slots: RingSlot[]; position: Vector3 } | null>(null);
   const [tracking, setTracking] = useState<TrackingState>('unavailable');
+  const quality = useArVisualQuality(interactive && tracking === 'normal');
   const trackingRef = useRef<TrackingState>('unavailable'); const ring = useRef<ViroNode>(null); const panelFrame = useRef<ViroNode>(null);
   const [selection, setSelection] = useState<FocusSelection | null>(null);
   const [cursors, setCursors] = useState<Record<string, ReadingCursor>>(() => initialProgress?.cursors ?? {});
@@ -93,9 +96,9 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
         nodes beneath a zero-origin frame so their transforms share camera space. */}
     <ViroNode testID="ring-native-frame" position={[0, 0, 0]}>
     {frame && <ViroNode ref={ring} testID="ring-root" position={frame.position} opacity={(selection ? 0.25 : 1) * (tracking === 'normal' ? 1 : 0.35)}>
-      {frame.slots.slice(0, Math.max(0, visibleTileCount)).map(slot => selection?.id === slot.id ? null : <InformationTile key={slot.id} slot={slot} content={snapshot.find(item => item.id === slot.id)!} enabled={interactive && tracking === 'normal' && !selection} style={style} onSelect={select} />)}
+      {frame.slots.slice(0, Math.max(0, visibleTileCount)).map(slot => selection?.id === slot.id ? null : <InformationTile key={slot.id} slot={slot} content={snapshot.find(item => item.id === slot.id)!} enabled={interactive && tracking === 'normal' && !selection} style={style} onSelect={select} decorations={quality === 'standard'} />)}
     </ViroNode>}
-    {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel selection={selection} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style}
+    {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel selection={selection} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style} decorations={quality === 'standard'}
       onCursor={(id, cursor) => setCursors(previous => ({ ...previous, [id]: cursor }))} onClose={close} onComplete={complete} /></ViroNode>}
     </ViroNode>
   </ViroARScene>;
@@ -107,6 +110,12 @@ function RingEntry() {
 }
 const initialScene = { scene: RingEntry };
 export function DestinationRingSceneHost(props: Props) {
-  return <RingContext.Provider value={props}><ViroARSceneNavigator initialScene={initialScene} provider="none" frontCameraEnabled={false}
+  const navigator = useRef<ViroARSceneNavigator | null>(null);
+  const capture = useCallback<NativeCapture>(fileName => navigator.current
+    ? navigator.current.arSceneNavigator.takeScreenshot(fileName, false)
+    : Promise.resolve({ success: false, url: null, errorCode: 6 }), []);
+  const onControls = props.onControls;
+  const acceptControls = useCallback((controls: RingControls | null) => onControls?.(controls ? { ...controls, capture } : null), [onControls, capture]);
+  return <RingContext.Provider value={{ ...props, onControls: acceptControls }}><ViroARSceneNavigator ref={navigator} initialScene={initialScene} provider="none" frontCameraEnabled={false}
     hdrEnabled={false} pbrEnabled={false} bloomEnabled={false} shadowsEnabled={false} depthEnabled={false} occlusionMode="disabled" style={{ flex: 1 }} /></RingContext.Provider>;
 }
