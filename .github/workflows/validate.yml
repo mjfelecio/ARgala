@@ -30,3 +30,4 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y postgresql libpq-dev
       - run: npm run test:limiter
       - run: npm run test:journal-sync
+      - run: npm run test:destination-content
