@@ -8,6 +8,8 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { router } from 'expo-router';
 import { localizationOptions } from '@/i18n/options';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/query';
 import AppLayout from '@/app/(app)/_layout';
 import { AppTabs } from './app-tabs';
 import { ImmersiveArScreen } from './immersive-ar-screen';
@@ -37,7 +39,7 @@ vi.mock('@/features/settings/profile-settings-content', () => ({ ProfileSettings
 vi.mock('@/features/ar/ar-screen', () => ({ default: 'ar-camera-screen' }));
 let tree: ReactTestRenderer | undefined;
 let translations: i18n;
-function render(child: React.ReactNode) { return React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(child)); }
+function render(child: React.ReactNode) { return React.createElement(QueryClientProvider, { client: queryClient }, React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(child))); }
 async function mount(child: React.ReactNode) { await act(async () => { tree = create(render(child)); }); }
 beforeEach(async () => {
  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
@@ -47,7 +49,7 @@ beforeEach(async () => {
  const original = console.error;
  vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
-afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; nativeUi.fontScale = 1; vi.restoreAllMocks(); });
+afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; queryClient.clear(); nativeUi.fontScale = 1; vi.restoreAllMocks(); });
 
 it.each(['en', 'ko', 'ja'])('keeps the %s header compact with degree-only heading and an accessible unavailable state', async language => {
  await translations.changeLanguage(language);

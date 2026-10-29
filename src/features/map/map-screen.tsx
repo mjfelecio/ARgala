@@ -12,6 +12,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
 import { getDestination } from '@/features/destinations/catalog';
+import { useDestinationLookup } from '@/features/destination-content/context';
 import { featuredMapPlace, matchedFeaturedDestination } from '@/features/destinations/map-selection';
 import { destinationToRoutePlace } from '@/features/destinations/routing';
 import { useDestinationProximity } from '@/features/destinations/use-destination-proximity';
@@ -84,7 +85,8 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
   const parsedId = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
   const incomingFeatured = getDestination(params.featuredDestinationId) ?? (parsedId.success ? matchedFeaturedDestination({ provider: 'google', providerId: parsedId.data.providerId }) : null);
   const [featuredId, setFeaturedId] = useState(incomingFeatured?.id ?? null);
-  const featured = getDestination(featuredId);
+  const contentDestination = useDestinationLookup();
+  const featured = contentDestination(featuredId);
   const incomingId = !incomingFeatured && parsedId.success ? parsedId.data.providerId : null;
   const active = useAppActive(); const focused = useIsFocused(); const map = useRef<MapView>(null);
   const arrival = useDestinationProximity(featured, { running: active && focused, watcherStatus: location.watcherStatus ?? 'pending', sample: location.watcherSample ?? null });

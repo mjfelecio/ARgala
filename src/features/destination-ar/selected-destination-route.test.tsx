@@ -70,7 +70,7 @@ it('uses approved content with verified pending provenance in release without lo
  const catalog = await import('@/features/destinations/catalog'); const pilot = catalog.getDestination('pilot-aclc')!;
  const approved = (value: string) => ({ value, approvalReference: 'synthetic test approval' });
  const fixture = catalog.destinationSchema.parse({ ...pilot, ar: { ...pilot.ar, tiles: [{ id: 'overview', role: 'overview', title: { en: approved('Approved title') }, body: { en: approved('Approved body') } }] } });
- vi.spyOn(catalog, 'getDestination').mockImplementation(id => id === 'pilot-aclc' ? fixture : null);
+ store.setContentResolver(id => id === 'pilot-aclc' ? fixture : null);
  Object.assign(globalThis, { __DEV__: false }); store.select('pilot-aclc'); const lease = store.acquire('pilot-aclc')!;
  for (const time of [10000, 13000, 16000]) { vi.mocked(Date.now).mockReturnValue(time); store.publish(lease, { running: true, watcherStatus: 'ready', sample: { timestamp: time, accuracy: 5, position: fixture.center! } }); }
  const entryToken = store.begin(lease, 'pilot-aclc', 'approved', 'en'); store.release(lease); control.params = { destinationId: 'pilot-aclc', entryToken };

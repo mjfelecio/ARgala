@@ -1,4 +1,5 @@
 import { PassportSummary } from '@/features/journal/passport-summary';
+import { ContentUpdates } from '@/features/destination-content/updates';
 import { useQueryClient } from '@tanstack/react-query';
 import { setFeaturedSelection } from './map-selection';
 import { router } from 'expo-router';
@@ -21,6 +22,7 @@ export default function DestinationsScreen() {
     </View>
     <ScrollView contentContainerClassName="gap-4 px-4 pb-8">
       <PassportSummary/>
+      <ContentUpdates />
       <Text className="font-sans text-base text-muted">{t('destinations.intro')}</Text>
       {listFeaturedDestinations().map(destination => <Card key={destination.id} className="gap-3 p-4 shadow-none">
         <Text className="font-sans text-xs text-muted">{destination.id}{!destination.verifiedName ? ` · ${t('destinations.provisional')}` : ''}</Text>

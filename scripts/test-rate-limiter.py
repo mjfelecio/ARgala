@@ -15,7 +15,8 @@ with tempfile.TemporaryDirectory(prefix='argala-pg-') as directory:
         command = [str(bin_dir / 'psql'), '-h', directory, '-p', '55437', '-U', 'argala_test', '-d', 'postgres', '-v', 'ON_ERROR_STOP=1', '-At']
         user_id = '00000000-0000-4000-8000-000000000001'
         fixture = f"CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role; CREATE SCHEMA auth; CREATE TABLE auth.users(id uuid primary key); INSERT INTO auth.users VALUES ('{user_id}');"
-        migration = (root / 'supabase/migrations/202610170001_google_request_limits.sql').read_text()
+        fixture += " CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$SELECT NULLIF(current_setting('request.jwt.claim.sub',true),'')::uuid$$;"
+        migration = '\n'.join(path.read_text() for path in sorted((root / 'supabase/migrations').glob('*.sql')))
         run(command, input=fixture + migration)
         def consume(_):
             return run(command, input=f"SELECT public.consume_google_request('{user_id}');").stdout.strip()

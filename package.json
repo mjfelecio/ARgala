@@ -75,7 +75,8 @@
     "test:limiter": "python3 scripts/test-rate-limiter.py",
     "check:android": "node scripts/check-android-config.mjs",
     "lint:edge": "npx --yes deno@2.9.6 lint --config supabase/functions/deno.json supabase/functions",
-    "test:journal-sync": "python3 scripts/test-journal-sync.py"
+    "test:journal-sync": "python3 scripts/test-journal-sync.py",
+    "test:destination-content": "python3 scripts/test-destination-content.py"
   },
   "private": true,
   "expo": {

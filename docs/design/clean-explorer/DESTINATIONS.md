@@ -80,3 +80,15 @@ Local POI navigation uses `setPlaceSelection` to configure transient retention
 before storing an unobserved query. This avoids a zero-cache-lifetime race while
 the next screen mounts. Retention expires when unused and auth clear still
 removes the data. It does not grant details or route-request authority.
+
+## Approved text delivery foundation
+
+The versioned [content pipeline](../../destination-content.md) can overlay reviewed
+AR title/body text for these existing IDs without replacing the catalog. Protocol 1
+requires approved EN/JA/KO values and references, rejects remote geometry/provider
+fields/media handles, and retains the last valid project-scoped snapshot offline.
+The app explicitly checks for updates; guest cache reads remain local. An issued
+AR entry retains its captured text revision, and cached content grants no arrival
+authority. This implementation does not fill any pending approval field above or
+promote the ACLC research draft. No production artifact is supplied by this change;
+publication requires separately reviewed actual content.

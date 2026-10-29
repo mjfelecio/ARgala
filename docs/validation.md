@@ -1502,3 +1502,79 @@ Final battery 35%, USB charging, 36.3°C; camera clients empty and app backgroun
 from selected ACLC map, Metro left running. Owner deferred hands-on ring/readability/recovery checks
 until later. On-site GPS, actual journeys and two-account/device isolation remain
 unverified; simulated/draft AR must never earn a stamp.
+
+## 2026-10-29 — approved destination text delivery
+
+Isolated `feat/destination-content` from main 62f6e15; implementation commits
+6248313/bb13f57/61a5908. Preserved the owner's prepared main presentation checkout.
+Existing catalog/approval schema, admission snapshot and HOP query/focus/error
+patterns were inspected. SDK57 documentation URLs returned HTTP errors; Context7
+primary Expo/TanStack/Supabase sources and installed Expo streaming-fetch runtime
+were consulted. No dependency/native configuration change.
+
+Protocol 1 validates versioned, approved, complete EN/JA/KO AR text for existing
+IDs. Project-scoped single-value offline storage serializes installs, rejects
+rollback/conflicting revisions and persists before UI publication. Source catalog
+geometry, provider associations and licensed bundle media remain authoritative.
+Featured Destinations offers an explicit authenticated update check; guest cache
+remains local. Background/principal/unmount retire requests; entry issuance
+captures the resolved text without replacing live admission ownership. No actual
+destination text/media approval was invented or promoted.
+
+RED→GREEN observations: absent model/repository/service/provider/RPC; malformed
+SQL null ID/role fields; and admission initially unable to see the resolved text.
+Focused content/admission tests: 44 passed; installed-navigation/selected-entry
+fixtures: 27 passed after adding the production Query provider and using the explicit
+content resolver. React Compiler ref/effect/global-state lint findings and fixture
+TypeScript signatures were corrected. Final `npm run check` passed typecheck,
+lint and 103 files / 1,077 tests. Independent whole-branch read-only review plus a
+focused lifecycle follow-up found no material defect; reviewer did not rerun tests.
+
+`npm run test:destination-content`, `npm run test:limiter` and
+`npm run test:journal-sync` all passed in isolated PostgreSQL. Each now applies
+the complete migration chain. New tests cover no seed, authenticated read/anonymous
+and missing-user denial, denied client publication/direct table reads, strict
+manifest checks, monotonic revision/withdrawal, forced RLS and preserved existing
+RPC grants. These are not hosted bearer or physical-storage observations.
+
+Configured HTTPS host matched project dhjlcvviiscuuzjtzxor. CLI 2.122.0
+`db push --dry-run --skip-vault --project-ref dhjlcvviiscuuzjtzxor` returned 403
+while initializing its database login role. No migration, secret, role, seed or
+hosted content was changed. Owner was asked to restore CLI database access; local
+implementation/review continued. Hosted RPC deployment/download, physical cache
+restart and unchanged live native pages after an update remain separate pending
+checks, along with actual approved content and ACLC field calibration. No APK
+build, ADB or simulator verification was performed for this change.
+
+See [content delivery](destination-content.md) for authoring, publication and
+offline/withdrawal semantics. `npm run export:android` passed with 8.2MB Hermes
+bundle `entry-feb942170ede7708d699a623d05a8d21.hbc`. Export does not establish a
+native build, downloaded publication or physical-device operation.
+
+### Subsequent Supabase retry — 2026-10-29
+
+Owner requested another attempt. Configured project remained
+`dhjlcvviiscuuzjtzxor`; CLI 2.122.0 dry run succeeded and listed only
+`202610290001_destination_content.sql`, no seeds/roles. The reviewed source at
+bb13f57 matched the working migration SHA256:
+`119304286ef84e010b1ab8863ba965e74de4b7a5b3b2868ad2d01fb62b707a21`.
+Applied exactly that additive migration with `--skip-vault` and no historical
+migration repair, seeds, role changes, application-secret or provider configuration changes.
+
+Read-only hosted checks confirmed the recorded migration, table existence,
+enabled/forced RLS, denied authenticated direct table SELECT/INSERT/UPDATE/DELETE,
+denied anonymous RPC and allowed authenticated RPC, INVOKER public wrapper and
+private DEFINER with pinned empty search paths. Existing journal authenticated
+execution and service-only Google limiter grants were preserved. Published
+artifact count was zero. Automated assertions matched all expected metadata.
+
+Live missing-bearer POST returned 401/42501; invalid bearer returned 401/PGRST301;
+requesting private-schema data returned 406/PGRST106. No real account JWT or device
+storage was read and no content fixture was published. These are hosted
+deployment/metadata/auth-rejection observations, not an authenticated app download
+or physical offline/update/AR proof. Fresh typecheck and lint passed; application
+source is unchanged from the prior 1,077-test/SQL/export verification. Draft PR #31's
+pre-deployment CI also passed. Main/presentation checkout remains unchanged.
+
+The final CLI dry run reported upToDate=true with no pending migrations, seeds
+or custom roles. Hosted deployment is no longer blocked.

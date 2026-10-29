@@ -40,7 +40,7 @@ with tempfile.TemporaryDirectory(prefix='argala-journal-pg-') as directory:
         CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$SELECT NULLIF(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
         GRANT USAGE ON SCHEMA auth TO authenticated,anon; GRANT EXECUTE ON FUNCTION auth.uid() TO authenticated,anon;
         """
-        sql(fixture + (root / 'supabase/migrations/202610170001_google_request_limits.sql').read_text() + (root / 'supabase/migrations/202610280001_journal_sync.sql').read_text())
+        sql(fixture + '\n'.join(migration.read_text() for migration in sorted((root / 'supabase/migrations').glob('*.sql'))))
         privileges = sql("SELECT has_function_privilege('anon','public.sync_travel_journal(uuid,uuid,bigint,bigint,jsonb)','EXECUTE'),has_function_privilege('authenticated','public.sync_travel_journal(uuid,uuid,bigint,bigint,jsonb)','EXECUTE');")
         assert privileges == 'f|t', privileges
         limiter = sql("SELECT has_function_privilege('anon','public.consume_google_request(uuid)','EXECUTE'),has_function_privilege('authenticated','public.consume_google_request(uuid)','EXECUTE'),has_function_privilege('service_role','public.consume_google_request(uuid)','EXECUTE');")

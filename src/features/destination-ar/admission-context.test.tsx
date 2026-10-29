@@ -5,6 +5,9 @@ import { useArAdmission, useAdmissionSource } from './admission-context';
 import { DestinationArAdmissionProvider } from './admission-provider';
 import type { ArrivalInput } from '@/features/destinations/proximity';
 import { getDestination } from '@/features/destinations/catalog';
+import { DestinationContentContext } from '@/features/destination-content/context';
+import { contentManifestSchema } from '@/features/destination-content/model';
+import { manifest } from '@/features/destination-content/test-fixtures';
 const controls = vi.hoisted(() => ({ principal: 'owner' }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: { user: { id: controls.principal } } }) }));
 let current: { store: ReturnType<typeof useArAdmission>; source: ReturnType<typeof useAdmissionSource> }; let tree: ReactTestRenderer | undefined;
@@ -32,4 +35,16 @@ it('replaces principal ownership and invalidates pending first mounts', async ()
  expect(entry.authorizeMount()).toBe(true);
  controls.principal = 'different'; await act(async () => tree!.update(render(sample(16000))));
  expect(entry.authorizeMount()).toBe(false); expect(current.source.begin('draft', 'en')).toBeNull();
+});
+it('reads committed content updates without replacing the admission owner or changing an issued entry', async () => {
+ function view(revision: number, input: ArrivalInput) {
+  return <DestinationContentContext.Provider value={{ manifest: contentManifestSchema.parse(manifest(revision)), ready: true, checking: false, canCheck: true, authenticated: true, message: 'content.cached', error: null, checkUpdates: async () => {} }}>{render(input)}</DestinationContentContext.Provider>;
+ }
+ await act(async () => { tree = create(view(1, { running: true, watcherStatus: 'pending', sample: null })); });
+ for (const time of [10000, 13000, 16000]) await act(async () => { vi.mocked(Date.now).mockReturnValue(time); tree!.update(view(1, sample(time))); });
+ const original = current.store!; const token = current.source.begin('approved', 'en'); const entry = original.take(token, 'pilot-aclc')!;
+ expect(entry.destination.ar?.contentVersion).toBe('test-1');
+ await act(async () => tree!.update(view(2, sample(16000))));
+ expect(current.store).toBe(original); expect(entry.authorizeMount()).toBe(true); expect(entry.destination.ar?.contentVersion).toBe('test-1');
+ const next = current.source.begin('approved', 'en'); expect(original.take(next, 'pilot-aclc')!.destination.ar?.contentVersion).toBe('test-2');
 });
