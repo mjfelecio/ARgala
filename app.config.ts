@@ -8,14 +8,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     ...config.android,
     package: 'com.mjfelecio.argala',
-    permissions: ['android.permission.ACCESS_COARSE_LOCATION', 'android.permission.ACCESS_FINE_LOCATION', 'android.permission.CAMERA'],
-    blockedPermissions: ['android.permission.RECORD_AUDIO', 'android.permission.ACCESS_BACKGROUND_LOCATION'],
+    permissions: ['android.permission.ACCESS_COARSE_LOCATION', 'android.permission.ACCESS_FINE_LOCATION', 'android.permission.CAMERA', 'android.permission.POST_NOTIFICATIONS'],
+    blockedPermissions: ['android.permission.RECORD_AUDIO', 'android.permission.FOREGROUND_SERVICE_LOCATION',
+      'android.permission.READ_EXTERNAL_STORAGE', 'android.permission.READ_MEDIA_IMAGES', 'android.permission.READ_MEDIA_VIDEO',
+      'android.permission.READ_MEDIA_AUDIO', 'android.permission.READ_MEDIA_VISUAL_USER_SELECTED', 'android.permission.ACCESS_MEDIA_LOCATION'],
   },
   plugins: [
+    './plugins/with-save-only-media',
     'expo-router',
     ['expo-splash-screen', { backgroundColor: '#ffffff', image: './assets/images/splash-icon.png', imageWidth: 76 }],
     ['expo-camera', { recordAudioAndroid: false, barcodeScannerEnabled: false }],
-    ['expo-location', { isAndroidBackgroundLocationEnabled: false, isAndroidForegroundServiceEnabled: false }],
+    ['expo-location', { isAndroidBackgroundLocationEnabled: true, isAndroidForegroundServiceEnabled: false }],
+    ['expo-notifications', { defaultChannel: 'destination-nearby' }],
+    ['expo-media-library', { granularPermissions: [], isAccessMediaLocationEnabled: false }],
+    'expo-sharing',
     // SDK 57 manifest mods run in reverse registration order: normalize last.
     './plugins/with-optional-ar',
     ['@reactvision/react-viro', { android: { xRMode: ['AR'] }, provider: 'none' }],

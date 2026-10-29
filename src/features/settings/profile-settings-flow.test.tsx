@@ -27,6 +27,7 @@ const boundary = vi.hoisted(() => ({ stored: null as string | null, getItem: vi.
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: boundary.getItem, setItem: boundary.setItem } }));
 vi.mock('expo-location', () => ({ requestForegroundPermissionsAsync: vi.fn(), watchPositionAsync: vi.fn(), watchHeadingAsync: vi.fn(), getCurrentPositionAsync: vi.fn() }));
 vi.mock('expo-camera', () => ({ Camera: { requestCameraPermissionsAsync: vi.fn() } }));
+vi.mock('@/features/arrival-reminders/native', () => ({ optionalNotifications: () => null, reminderNative: { available: () => false } }));
 vi.mock('expo-localization', () => ({ getLocales: () => [{ languageTag: 'en' }] }));
 vi.mock('@/lib/supabase', () => ({ getSupabase: () => ({ auth: boundary.auth }) }));
 vi.mock('expo-constants', () => ({ default: { get expoConfig() { return { version: boundary.version }; } } }));

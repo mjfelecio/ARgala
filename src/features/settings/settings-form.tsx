@@ -9,6 +9,7 @@ import { SignOutAction } from '@/features/auth/sign-out-action';
 import { LanguageControl } from './language-control';
 import { RadiusControl } from './radius-control';
 import { useSettingsDraft } from './use-settings-draft';
+import { ReminderSettings } from '@/features/arrival-reminders/components';
 
 export default function SettingsForm() {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ export default function SettingsForm() {
       <Text className="font-sans text-xs text-muted">{t('settings.radiusHelp', { meters: DISCOVERY.radiusMeters, min: ACTIVATION.minMeters, max: ACTIVATION.maxMeters })}</Text>
       <DeviceSettingsAction />
     </View>
+    <ReminderSettings />
     <AboutSettings />
     {storageError && <Text accessibilityRole="alert" className="font-sans text-sm text-danger">{t(storageError)}</Text>}
     {message && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-foreground">{t(message)}</Text>}

@@ -1,0 +1,32 @@
+import { createContext, useContext, useEffect, useRef, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
+import { Alert } from 'react-native';
+import { router, useRootNavigationState } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/features/auth/provider';
+import { useGuestAccess } from '@/features/auth/guest-context';
+import { useAppActive } from '@/lib/use-app-active';
+import { reminderRepository } from './runtime';
+import { ReminderController } from './controller';
+import { optionalNotifications, reminderNative } from './native';
+import { ReminderTapHandoff } from './tap-handoff';
+import type { ReminderSelection } from './model';
+import type { Destination, FeaturedDestinationId } from '@/features/destinations/catalog';
+const sharedController=new ReminderController(reminderRepository,reminderNative);
+const ReminderContext=createContext<{controller:ReminderController;snapshot:ReminderController['snapshot'];enable(destination:Destination,locale:ReminderSelection['locale']):Promise<void>}|null>(null);
+export const useArrivalReminders=()=>useContext(ReminderContext);
+export function ArrivalReminderProvider({children,navigationReady=true,onOpenDestination}:PropsWithChildren<{navigationReady?:boolean;onOpenDestination?:(id:FeaturedDestinationId)=>void}>){
+ const {session,loading}=useAuth();const guest=useGuestAccess();const principalId=!loading&&!guest.loading?(session?.user.id??(guest.enabled?'guest':null)):null;
+ const active=useAppActive();const navigation=useRootNavigationState();const {t}=useTranslation();
+ const [controller]=useState(()=>sharedController);const snapshot=useSyncExternalStore(controller.subscribe,controller.getSnapshot,controller.getSnapshot);
+ const handoff=useRef(new ReminderTapHandoff());const [tapRevision,setTapRevision]=useState(0);
+ const ready=!!principalId&&snapshot.principalId===principalId&&snapshot.ready&&!!navigation?.key&&navigationReady&&active;
+ const committed=useRef({principalId,ready,onOpenDestination});useEffect(()=>{committed.current={principalId,ready,onOpenDestination};},[principalId,ready,onOpenDestination]);
+ const previousPrincipal=useRef<string|null>(null);
+ useEffect(()=>{if(previousPrincipal.current&&previousPrincipal.current!==principalId)handoff.current.clear();previousPrincipal.current=principalId;void controller.setPrincipal(principalId);},[controller,principalId]);
+ useEffect(()=>()=>{handoff.current.clear();void controller.setPrincipal(null);},[controller]);
+ useEffect(()=>{if(active)void controller.refresh();},[controller,active]);
+ useEffect(()=>{const n=optionalNotifications();if(!n)return;const receive=(response:unknown)=>{if(handoff.current.receive(response))setTapRevision(x=>x+1);};const listener=n.addNotificationResponseReceivedListener(receive);try{receive(n.getLastNotificationResponse());}catch{/* Not supported in this installed binary. */}return()=>listener.remove();},[]);
+ useEffect(()=>{if(ready&&principalId)void handoff.current.flush(principalId,reminderRepository,destinationId=>{const open=committed.current.onOpenDestination;if(open)open(destinationId);else router.push({pathname:'/destinations/[destinationId]',params:{destinationId}});},()=>committed.current.ready&&committed.current.principalId===principalId).finally(()=>{if(handoff.current.hasPending&&committed.current.ready&&committed.current.principalId===principalId)setTapRevision(x=>x+1);});},[ready,principalId,tapRevision]);
+ const enable=(destination:Destination,locale:ReminderSelection['locale'])=>!committed.current.ready||committed.current.principalId!==principalId?Promise.resolve():controller.enable(destination,locale,()=>new Promise(resolve=>{if(committed.current.principalId!==principalId||!committed.current.ready){resolve(false);return;}Alert.alert(t('reminders.backgroundTitle'),t('reminders.backgroundExplanation'),[{text:t('reminders.cancel'),style:'cancel',onPress:()=>resolve(false)},{text:t('reminders.continueSettings'),onPress:()=>resolve(true)}],{cancelable:true,onDismiss:()=>resolve(false)});}));
+ return <ReminderContext.Provider value={{controller,snapshot,enable}}>{children}</ReminderContext.Provider>;
+}
