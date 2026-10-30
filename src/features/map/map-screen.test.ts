@@ -19,7 +19,7 @@ const controls = vi.hoisted(() => ({
   fit: vi.fn(), animate: vi.fn(), active: true, focused: true,
   language: 'en' as 'en' | 'ko' | 'ja',
   position: { latitude: 38.5, longitude: -120.2 },
-  params: {} as { placeId?: string },
+  params: {} as { placeId?: string; featuredDestinationId?: string },
   hasLocation: true, locationStatus: 'ready', accuracy: 8, watcherSample: null as { position: { latitude: number; longitude: number }; accuracy: number; timestamp: number } | null,
 }));
 vi.mock('expo-constants', () => ({ default: { expoConfig: { extra: { mapsConfigured: true } } } }));
@@ -81,6 +81,7 @@ beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   controls.hasLocation = true; controls.locationStatus = 'ready'; controls.accuracy = 8;
   vi.mocked(router.push).mockClear();
+  vi.mocked(router.navigate).mockClear();
   controls.params = {}; controls.fit.mockReset(); controls.animate.mockReset(); controls.active = true; controls.focused = true;
   controls.language = 'en';
   translations = createInstance();
@@ -446,6 +447,38 @@ it('opens the protected Details page from a selected Map POI with its cached sum
   controls.focused = false; await act(async () => tree!.update(renderMap())); controls.focused = true; await act(async () => tree!.update(renderMap()));
   expect(JSON.stringify(tree!.toJSON())).toContain(destination.name); expect(placesService.details).not.toHaveBeenCalled();
 });
+it('preserves the complete Google Details handoff language and original response age', async () => {
+  const completePlace: Place = { ...destination, source: 'discovery' };
+  const updatedAt = Date.now() - 1000;
+  client.setQueryData(['places', { radiusMeters: 1000 }, 'en'], [completePlace], { updatedAt });
+  controls.params = { placeId: destination.providerId };
+  await act(async () => { tree = create(renderMap()); });
+  await press('placeDetails.view');
+  expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/place/[providerId]', params: { providerId: destination.providerId } });
+  expect(client.getQueryData(['place-selection', destination.providerId])).toEqual(completePlace);
+  expect(client.getQueryState(['place-details', destination.providerId, 'en'])).toMatchObject({ data: completePlace, dataUpdatedAt: updatedAt });
+  expect(client.getQueryData(['place-details', destination.providerId, 'ko'])).toBeUndefined();
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+it.each(['featured', 'google'] as const)('blocks %s View Details after blur or background', async selection => {
+  if (selection === 'featured') controls.params = { featuredDestinationId: 'pilot-aclc' };
+  else {
+    client.setQueryData(['place-selection', destination.providerId], destination);
+    controls.params = { placeId: destination.providerId };
+  }
+  await act(async () => { tree = create(renderMap()); });
+  for (const lifecycle of ['focused', 'active'] as const) {
+    controls[lifecycle] = false;
+    await act(async () => tree!.update(renderMap()));
+    await press('placeDetails.view');
+    expect(router.navigate).not.toHaveBeenCalled();
+    controls[lifecycle] = true;
+    await act(async () => tree!.update(renderMap()));
+  }
+  expect(placesService.details).not.toHaveBeenCalled();
+  expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(routeService.walking).not.toHaveBeenCalled();
+});
 it('centers a Details handoff only when the existing native map is ready without a provider call', async () => {
   client.setQueryData(['place-selection', destination.providerId], destination); controls.params = { placeId: destination.providerId };
   await act(async () => { tree = create(renderMap()); }); expect(controls.animate).not.toHaveBeenCalled();
@@ -547,6 +580,31 @@ it('opens the approved ACLC map point and minimal sheet without GPS or paid prov
   expect(tree!.root.findByType('map').props.showsUserLocation).toBe(false);
   expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
+it('opens approved-center featured View Details with the exact curated ID and retains the map on return', async () => {
+  controls.params = { featuredDestinationId: 'pilot-aclc' };
+  controls.hasLocation = false;
+  await act(async () => { tree = create(renderMap()); });
+  const map = tree!.root.findByType('map');
+  await act(async () => map.props.onMapReady());
+  const centers = controls.animate.mock.calls.length;
+  await press('map.expand');
+  await press('placeDetails.view');
+  expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'pilot-aclc' } });
+  expect(client.getQueryData(['place-selection', 'pilot-aclc'])).toBeUndefined();
+  expect(client.getQueryCache().findAll({ queryKey: ['place-selection'], predicate: query => query.state.data != null })).toHaveLength(0);
+  controls.focused = false;
+  await act(async () => tree!.update(renderMap()));
+  controls.focused = true;
+  await act(async () => tree!.update(renderMap()));
+  expect(tree!.root.findByType('map')).toBe(map);
+  expect(controls.animate).toHaveBeenCalledTimes(centers);
+  expect(tree!.root.findAllByType('button').some(button => button.props.accessibilityLabel === translations.t('map.collapse'))).toBe(true);
+  expect(JSON.stringify(tree!.toJSON())).toContain('ACLC College of Ormoc');
+  expect(placesService.details).not.toHaveBeenCalled();
+  expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(placesService.search).not.toHaveBeenCalled();
+  expect(routeService.walking).not.toHaveBeenCalled();
+});
 it('retains the requested featured center until the current native map becomes ready', async () => {
   controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
   await act(async () => { tree = create(renderMap()); });
@@ -575,7 +633,8 @@ it.each(['initial', 'handoff'] as const)('keeps exact-associated provider %s sel
  await act(async () => { if (tree) tree.update(renderMap()); else tree = create(renderMap()); });
  const { HomePlaceSheet } = await import('./place-sheet'); const sheet = tree!.root.findByType(HomePlaceSheet);
  expect(sheet.props.selectedPlace?.provider).toBe('curated'); expect(sheet.props.selectedPlace).not.toHaveProperty('description');
- expect(sheet.props.onViewDetails).toBeUndefined();
+ await press('placeDetails.view');
+ expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'pilot-aclc' } });
  if (original) expect(tree!.root.findByType('map')).toBe(original);
  expect(placesService.details).not.toHaveBeenCalled();
 });
