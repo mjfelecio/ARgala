@@ -119,7 +119,7 @@
     "inactive": "Outside activation range",
     "selectionUnavailable": "The selected place is no longer in memory. Load its details to continue.",
     "explore": "Explore",
-    "start": "Tap Search Nearby to discover places around your location.",
+    "start": "Search for a place above, or tap the search icon to explore nearby.",
     "expand": "Show more",
     "collapse": "Show less",
     "results": "{{count}} places returned. Tap a map marker to explore.",

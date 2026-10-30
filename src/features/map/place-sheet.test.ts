@@ -37,6 +37,16 @@ it.each(['unsearched','loading','empty','results'] as const)('renders truthful %
  const keys={unsearched:'map.start',loading:'map.searching',empty:'map.empty',results:'map.results'};
  expect(content()).toContain(translations.t(keys[state], {count:2})); expect(content()).toContain('Provider credit');
 });
+it.each([
+ ['en', 'Search for a place above, or tap the search icon to explore nearby.'],
+ ['ja', '上の検索欄で場所を検索するか、検索アイコンをタップして周辺の場所を探しましょう。'],
+ ['ko', '위 검색창에서 장소를 검색하거나 검색 아이콘을 눌러 주변 장소를 둘러보세요.'],
+])('updates unsearched guidance to the compact search field/icon in %s', async (language, guidance) => {
+ await render();
+ await act(async () => { await translations.changeLanguage(language); });
+ expect(tree.root.findAllByType('text').some(node => node.props.children === guidance)).toBe(true);
+ expect(props.onRetrySearch).not.toHaveBeenCalled();
+});
 it('preserves long names, hides absent fields and expands only by an actual action', async () => {
  props.state='selected'; props.selectedPlace=place; props.hasSelection=true; await render();
  expect(content()).toContain(place.name); expect(content()).not.toContain('4.8');
