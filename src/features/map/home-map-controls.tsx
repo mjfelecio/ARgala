@@ -17,24 +17,41 @@ export type HomeMapControlsProps = {
 export function HomeMapControls({ onSearchNearby, onOpenDestinations, canSearch, searching, onLayout, query, onQueryChange, category = 'all', onCategoryChange, onSearchArea, canSearchArea, areaRadiusMeters }: HomeMapControlsProps) {
   const { t } = useTranslation();
   const [ink, accent, onAccent] = useThemeColor(['default-foreground', 'accent', 'accent-foreground']);
+  const searchDisabled = !canSearch || searching;
+  const searchLabel = t(query?.trim() ? 'search.submit' : 'map.search');
+  const submitSearch = () => { if (!searchDisabled) onSearchNearby(); };
+
   return <View testID="home-map-controls" className="gap-2 px-4 pb-2 pt-3" onLayout={onLayout} pointerEvents="box-none">
-    {onQueryChange && <TextField><Input value={query ?? ''} onChangeText={onQueryChange} maxLength={256} returnKeyType="search" onSubmitEditing={onSearchNearby}
-      accessibilityLabel={t('search.query')} placeholder={t('search.placeholder')} className="min-h-12 rounded-pill bg-surface px-4 font-sans shadow-sm" /></TextField>}
-    <Button variant="secondary" className="h-auto min-h-12 justify-start rounded-pill bg-surface px-3 py-1 shadow-sm" accessibilityLabel={t('map.search')} isDisabled={!canSearch || searching}
-      accessibilityState={{ disabled: !canSearch || searching, busy: searching }} onPress={onSearchNearby}>
-      <View className="size-8 items-center justify-center rounded-xl bg-accent" accessible={false}>
+    <View className="min-h-12 flex-row items-center gap-1 rounded-pill bg-surface px-2 py-1 shadow-sm">
+      <View className="size-8 items-center justify-center rounded-xl bg-accent" accessible={false} pointerEvents="none">
         <Ionicons name="compass-outline" size={22} color={onAccent} />
       </View>
-      <Button.Label className="flex-1 font-medium">{t('map.search')}</Button.Label>
-      {searching ? <Spinner size="sm" color={accent} /> : <Ionicons name="search-outline" size={22} color={ink} />}
-    </Button>
-    <ScrollView className="grow-0" horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 py-1">
-      <Button size="sm" variant="secondary" className="h-auto min-h-10 bg-surface px-4 py-2 shadow-sm" hitSlop={4} accessibilityLabel={t('destinations.title')} onPress={onOpenDestinations}>
-        <Ionicons name="library-outline" size={18} color={ink} accessible={false} /><Button.Label>{t('destinations.title')}</Button.Label>
+      {onQueryChange && <TextField className="min-w-0 flex-1">
+        <Input value={query ?? ''} onChangeText={onQueryChange} maxLength={256} returnKeyType="search" onSubmitEditing={submitSearch}
+          accessibilityLabel={t('search.query')} placeholder={t('search.placeholder')} variant="secondary"
+          className="min-h-12 rounded-pill bg-transparent px-2 py-2 font-sans" />
+      </TextField>}
+      <Button variant="ghost" isIconOnly={!!onQueryChange} className={onQueryChange ? 'min-h-11 min-w-11 rounded-pill' : 'h-auto min-h-11 flex-1 rounded-pill py-2'}
+        accessibilityLabel={searchLabel} isDisabled={searchDisabled} accessibilityState={{ disabled: searchDisabled, busy: searching }} onPress={submitSearch}>
+        {!onQueryChange && <Button.Label className="flex-1 font-medium">{searchLabel}</Button.Label>}
+        {searching ? <Spinner size="sm" color={accent} /> : <Ionicons name="search-outline" size={22} color={ink} accessible={false} />}
       </Button>
-      {onCategoryChange && (['all', 'attractions', 'restaurants', 'hotels', 'shopping'] as const).map(value => <Button key={value} size="sm" variant={category === value ? 'primary' : 'secondary'}
-        className="h-auto min-h-10 px-4 py-2 shadow-sm" accessibilityLabel={t(`search.categories.${value}`)} accessibilityState={{ selected: category === value }} onPress={() => onCategoryChange(value)}><Button.Label>{t(`search.categories.${value}`)}</Button.Label></Button>)}
-    </ScrollView>
-    {onSearchArea && <Button size="sm" variant="secondary" accessibilityLabel={t('search.thisArea')} isDisabled={!canSearchArea || searching} onPress={onSearchArea}><Button.Label>{areaRadiusMeters ? t('search.areaExtent', { meters: Math.round(areaRadiusMeters) }) : t('search.thisArea')}</Button.Label></Button>}
+    </View>
+    <View className="flex-row items-center gap-2">
+      <Button size="sm" variant="secondary" className="h-auto min-h-11 shrink-0 rounded-pill bg-surface px-3 py-2" accessibilityLabel={t('destinations.title')} onPress={onOpenDestinations}>
+        <Ionicons name="library-outline" size={18} color={ink} accessible={false} /><Button.Label>{t('destinations.shortTitle')}</Button.Label>
+      </Button>
+      {onCategoryChange && <ScrollView className="min-w-0 flex-1" horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 py-1" keyboardShouldPersistTaps="handled">
+        {(['all', 'attractions', 'restaurants', 'hotels', 'shopping'] as const).map(value => <Button key={value} size="sm" variant={category === value ? 'primary' : 'secondary'}
+          className="h-auto min-h-11 rounded-pill px-3 py-2" accessibilityLabel={t(`search.categories.${value}`)} accessibilityState={{ selected: category === value }} onPress={() => onCategoryChange(value)}>
+          <Button.Label>{t(`search.categories.${value}`)}</Button.Label>
+        </Button>)}
+      </ScrollView>}
+    </View>
+    {onSearchArea && <Button size="sm" variant="secondary" className="h-auto min-h-11 self-center rounded-pill bg-surface px-4 py-2"
+      accessibilityLabel={t('search.thisArea')} accessibilityHint={areaRadiusMeters ? t('search.areaExtent', { meters: Math.round(areaRadiusMeters) }) : undefined}
+      isDisabled={!canSearchArea || searching} onPress={onSearchArea}>
+      <Button.Label>{t('search.thisArea')}</Button.Label>
+    </Button>}
   </View>;
 }

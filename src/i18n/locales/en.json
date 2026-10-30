@@ -255,6 +255,7 @@
   },
   "destinations": {
     "title": "Featured Destinations",
+    "shortTitle": "Featured",
     "intro": "Browse nine study destinations. Official names and visitor content are awaiting verification.",
     "provisional": "Provisional name",
     "contentPending": "Verified visitor information is not yet available.",
@@ -399,6 +400,7 @@
     "simulatedLive": "SIMULATED ARRIVAL — real camera tracking. This does not verify on-site GPS."
   },
   "search": {
+    "submit": "Search",
     "query": "Search places",
     "placeholder": "Search places or an address",
     "noArea": "Search for a place to choose an area. No current location is required.",
