@@ -36,6 +36,12 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
   const [cursors, setCursors] = useState<Record<string, ReadingCursor>>(() => initialProgress?.cursors ?? {});
   const counts = useRef({ received: 0, applied: 0 });
   const closingCommitted = useRef(false);
+  const interactiveRef = useRef(false);
+  useLayoutEffect(() => {
+    // Queued native clicks must read committed ownership, including retirement.
+    interactiveRef.current = interactive;
+    return () => { interactiveRef.current = false; };
+  }, [interactive]);
   useEffect(() => { onProgress?.({ selectedId: selection?.id ?? null, cursors }); }, [onProgress, selection, cursors]);
   useLayoutEffect(() => {
     if (frame) ring.current?.setNativeProps({ position: controller.ringPosition! });
@@ -87,8 +93,15 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
       }
     }
   }
-  function select(id: string) { if (!interactive) return; const next = controller.select(id, performance.now()); if (next) setSelection(next); }
-  function close() { const next = controller.close(performance.now()); if (next) setSelection(next); }
+  function select(id: string) {
+    if (!interactiveRef.current || controller.selection?.id === id) return;
+    // Native completed clicks can arrive before React commits the new selection.
+    // An already focused panel closes; another tile never replaces it directly.
+    const now = performance.now();
+    const next = controller.selection ? controller.close(now) : controller.select(id, now);
+    if (next) setSelection(next);
+  }
+  function close() { if (!interactiveRef.current) return; const next = controller.close(performance.now()); if (next) setSelection(next); }
   function complete(token: number) { if (controller.complete(token)) setSelection(controller.selection); }
   const selectedContent = snapshot.find(item => item.id === selection?.id);
   return <ViroARScene anchorDetectionTypes="None" onTrackingUpdated={track} onCameraTransformUpdate={pose}>
@@ -96,7 +109,7 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
         nodes beneath a zero-origin frame so their transforms share camera space. */}
     <ViroNode testID="ring-native-frame" position={[0, 0, 0]}>
     {frame && <ViroNode ref={ring} testID="ring-root" position={frame.position} opacity={(selection ? 0.25 : 1) * (tracking === 'normal' ? 1 : 0.35)}>
-      {frame.slots.slice(0, Math.max(0, visibleTileCount)).map(slot => selection?.id === slot.id ? null : <InformationTile key={slot.id} slot={slot} content={snapshot.find(item => item.id === slot.id)!} enabled={interactive && tracking === 'normal' && !selection} style={style} onSelect={select} decorations={quality === 'standard'} />)}
+      {frame.slots.slice(0, Math.max(0, visibleTileCount)).map(slot => selection?.id === slot.id ? null : <InformationTile key={slot.id} slot={slot} content={snapshot.find(item => item.id === slot.id)!} enabled={interactive && tracking === 'normal' && (!selection || selection.phase === 'focused')} style={style} onSelect={select} decorations={quality === 'standard'} />)}
     </ViroNode>}
     {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel selection={selection} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style} decorations={quality === 'standard'}
       onCursor={(id, cursor) => setCursors(previous => ({ ...previous, [id]: cursor }))} onClose={close} onComplete={complete} /></ViroNode>}

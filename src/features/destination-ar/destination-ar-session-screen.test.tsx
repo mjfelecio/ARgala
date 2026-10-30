@@ -115,7 +115,7 @@ it('releases rendering on background, restores logical panel/page/size from a ne
   await act(async () => native.transitions.get('transitionStart')?.forEach(cb => cb({ data: { closing: false } })));
   await active(true); expect(cameras()).toHaveLength(0);
   await act(async () => native.transitions.get('transitionEnd')?.forEach(cb => cb({ data: { closing: false } }))); await settle(); await ready([6, 3, 4], [1, 0, 0]);
-  expect(node('ring-focused-panel').props.position).toEqual([7.15, 3, 4]); expect(text('ring-page-indicator')).toBe(page);
+  expect(node('ring-focused-panel').props.position).toEqual([7.5, 3, 4]); expect(text('ring-page-indicator')).toBe(page);
   expect(native.getItem).toHaveBeenCalledTimes(2); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled(); expect(native.gate).not.toHaveBeenCalled();
   await act(async () => oldTracking(2, 1)); expect(copy()).not.toContain(translations.t('destinationAr.trackingLost'));
 });
@@ -215,7 +215,7 @@ it.each(['en', 'ja', 'ko'])('offers %s explicit Retry for prolonged tracking los
   const page = text('ring-page-indicator'); await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
   await act(async () => { await vi.advanceTimersByTimeAsync(6000); }); expect(native.support).toHaveBeenCalledOnce(); expect(cameras()).toHaveLength(1);
   native.eligible = false; await press('destinationSession.retryTracking'); await settle(); expect(node('ring-focused-panel')).toBeUndefined();
-  await ready([9, 2, 1], [0, 0, 1]); expect(node('ring-focused-panel').props.position).toEqual([9, 2, 2.15]); expect(text('ring-page-indicator')).toBe(page);
+  await ready([9, 2, 1], [0, 0, 1]); expect(node('ring-focused-panel').props.position).toEqual([9, 2, 2.5]); expect(text('ring-page-indicator')).toBe(page);
   expect(native.gate).not.toHaveBeenCalled(); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled();
 });
 it('does not automatically repeat an interrupted explicit tracking recovery', async () => {

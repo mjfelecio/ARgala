@@ -37,6 +37,6 @@ it('keeps headings near ±180 continuous and captures current focus independent 
   const b = captureBasis({ ...forward, forward: [-0.001, 0, 1] })!;
   expect(Math.abs(a.forward[0] - b.forward[0])).toBeLessThan(0.003);
   const focused = focusTransform({ position: [5, 2, 6], forward: [1, 0, 0] })!;
-  expect(focused.position).toEqual([6.15, 2, 6]);
+  expect(focused.position).toEqual([6.5, 2, 6]);
   expect(focused.rotation).toEqual([0, -90, 0]);
 });

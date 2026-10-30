@@ -656,6 +656,30 @@ it('submits text/category/settled area only on explicit Search This Area and nev
  expect(placesService.search).toHaveBeenCalledOnce();
 });
 
+it('shares the compact typed-search action and keyboard guard without lifecycle provider requests', async () => {
+ let completeSearch!: (places: Place[]) => void;
+ vi.mocked(placesService.search).mockResolvedValue([]).mockImplementationOnce(() => new Promise(resolve => { completeSearch = resolve; }));
+ await act(async () => { tree = create(renderMap()); });
+ await act(async () => tree!.root.findByType('map').props.onMapReady());
+ await act(async () => tree!.root.findByType('input').props.onChangeText('dinner'));
+ await press('search.categories.restaurants');
+ expect(placesService.search).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+ await press('search.submit');
+ expect(placesService.search).toHaveBeenCalledExactlyOnceWith({ query: 'dinner', category: 'restaurants', language: 'en', area: { center: { latitude: 38.5, longitude: -120.2 }, radiusMeters: 1000 } });
+ expect(tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === 'Search')!.props.disabled).toBe(true);
+ await act(async () => tree!.root.findByType('input').props.onSubmitEditing());
+ expect(placesService.search).toHaveBeenCalledOnce();
+ await act(async () => { completeSearch([]); });
+ controls.focused = false; await act(async () => tree!.update(renderMap()));
+ controls.focused = true; await act(async () => tree!.update(renderMap()));
+ controls.active = false; await act(async () => tree!.update(renderMap()));
+ controls.active = true; await act(async () => { tree!.update(renderMap()); void client.invalidateQueries({ queryKey: ['places'] }); });
+ expect(placesService.search).toHaveBeenCalledOnce();
+ await act(async () => tree!.root.findByType('input').props.onSubmitEditing());
+ expect(placesService.search).toHaveBeenCalledTimes(2);
+ expect(placesService.nearby).not.toHaveBeenCalled();
+});
+
 it('keeps denied-GPS global selection separate from physical proximity and permits Directions', async () => {
  controls.hasLocation = false; controls.locationStatus = 'denied';
  vi.mocked(placesService.search).mockResolvedValue([{ ...destination, source: 'discovery' }]);

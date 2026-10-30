@@ -1708,3 +1708,58 @@ covered. Actual-screen RED regressions reproduced the omission;55 map tests and
 independent review pass. Full `npm run check`: strict TypeScript, zero-warning
 lint and **1,220 tests /114 files**. Native maps/router/network boundaries remain
 mocked in those automated regressions; physical recheck is recorded separately.
+
+### Completion of unattended smoke and requested refinements
+
+Live authenticated area search returned20 ordinary Google places. Ordinary-place
+Details opened; explicit text search handled an empty device-centered result,
+then explicit Search this area returned the requested place in the viewed area.
+Walking and driving previews each displayed a real provider route/polyline.
+Start Navigation opened Google Maps' first-use navigation notice. The notice was
+not accepted; the test returned to ARgala. This establishes handoff, not navigation
+on the road or route/accessibility accuracy.
+
+Japanese and Korean Settings rendered and saved on the phone; English and the
+existing500m device-local preference were restored. A test bookmark deletion while
+Wi-Fi was off (mobile data already off; Android reported no default network)
+remained available as a safe local edit with a localized sync failure. After a
+process restart and Wi-Fi restoration, the deletion remained; explicit Retry sync
+returned to Synced with an empty journal, matching the initial bookmark state.
+The offline cold-launch UI did not finish before network restoration, so this is
+not a separate offline cold-shell pass or a multi-device/guest merge result.
+
+Reminder opt-in was turned off; original notification/background-location grants
+were restored to false using ADB, and reopening did not initiate a permission
+prompt. Fine/coarse location and camera grants, sign-in and existing data were
+preserved. Wi-Fi1/mobile-data0 and original font scale1.1 were restored. No mock
+GPS, factual publication, fabricated media, new login or additional APK build was
+used. Scoped AndroidRuntime/libc and ReactNativeJS monitoring observed no unexpected
+fatal or JS exception during the exercised flows; intentional force-stops and
+permission-revocation process retirement are not crash evidence.
+
+PR34 merged as426f941 after complete CI success. Its new direct Featured→map→
+View Details path was then observed on the phone, reaching ACLC's minimal details
+and reminder action without a Saved Places detour. Automated regressions cover retained map selection and
+expanded sheet on return. The owner's subsequent panel, Directions
+peek and Explore header requests are described in
+[the refinement guide](ui-refinements-2026-10-30.md).
+
+Refinement preview used the same installed APK and Metro on8082 from the isolated
+worktree. Complete Directions primary actions were visible above system gestures
+at font scales1.1 and1.3, including the optional mode-preview action. Original font
+scale was restored. Compact Explore header and ordinary/featured map rendering
+were observed. Native AR acquired/released the camera and offered interrupted
+startup recovery, but the dark stationary view did not reach tracking-ready;
+new panel comfort/other-tile native delivery and photo capture/save/share remain
+unverified. Initial-startup retry completion/timeout was not established by this
+run. Supported-phone tests cannot establish the unsupported-device reader.
+
+Final source verification: `npm run check` passes strict TypeScript, zero-warning
+lint and **1,254 tests /114 files**. Targeted RED→GREEN and independent reviews
+covered current-interactivity and native-layout mount ownership, the shared
+1.5-unit focus geometry, complete measured dock controls, and explicit compact
+header search behavior. A first full typecheck caught a removed handleHeight prop
+and a synthetic test tag typing error; both were corrected through the supported
+installed handleStyle API/test boundary before the final successful check.
+`git diff --check` passes. No backend/native configuration changed; CI repeats
+Edge, Android export/config and isolated SQL checks before integration.

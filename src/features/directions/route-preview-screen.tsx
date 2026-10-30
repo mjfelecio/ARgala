@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import Constants from 'expo-constants';
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Linking, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -35,13 +35,27 @@ import type { Coordinate } from '@/features/location/geo';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
 const EMPTY_COORDINATES: Coordinate[] = [];
+function RoutePreviewPrimary({ expanded, onHeight, children }: { expanded: boolean; onHeight(height: number): void; children: ReactNode }) {
+  const mounted = useRef(false);
+  useLayoutEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+  return <View testID="route-preview-primary" className="gap-3" onLayout={event => {
+    // A native event may retain a callback from the compact block after its
+    // keyed replacement, expansion or unmount. Retire that mount at commit.
+    if (!mounted.current || expanded) return;
+    const height = event.nativeEvent.layout.height;
+    if (Number.isFinite(height) && height > 0) onHeight(height);
+  }}>{children}</View>;
+}
 export default function RoutePreviewScreen() {
   const { token } = useLocalSearchParams();
   // Different URL intents have independent leases and native map readiness.
   return <Preview key={typeof token === 'string' ? token : ''} token={token} />;
 }
 function Preview({ token }: { token: unknown }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const client = useQueryClient();
   const configured = !!Constants.expoConfig?.extra?.mapsConfigured;
   const preview = useRoutePreview(token, configured);
@@ -95,8 +109,12 @@ function Preview({ token }: { token: unknown }) {
   const [settledDockHeight, setSettledDockHeight] = useState(0);
   const [dockHeight, setDockHeight] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const [primaryMeasurement, setPrimaryMeasurement] = useState<{ key: string; height: number } | null>(null);
   const { fontScale = 1 } = useWindowDimensions();
-  const sheetGeometry = routeSheetGeometry(viewportHeight, headerHeight, insets.bottom, fontScale);
+  const primaryLayoutKey = JSON.stringify([viewportWidth, fontScale, i18n.resolvedLanguage, place?.name, !!place, desiredMode !== displayedMode, linkError]);
+  const sheetGeometry = routeSheetGeometry(viewportHeight, headerHeight, insets.bottom, fontScale,
+    primaryMeasurement?.key === primaryLayoutKey ? primaryMeasurement.height : undefined);
   const accent = useThemeColor('accent');
   function toMap() {
     // Curated Home-map selection is deferred; never forward catalog IDs to Google's selection path.
@@ -106,7 +124,11 @@ function Preview({ token }: { token: unknown }) {
   }
   return <StyledSafeAreaView className="flex-1 bg-surface" edges={['left', 'right']}>
     <FocusedStatusBar style="dark" />
-    <View testID="route-preview-scene" className="flex-1" onLayout={event => { if (event.nativeEvent.layout.height > 0) setViewportHeight(event.nativeEvent.layout.height); }}>
+    <View testID="route-preview-scene" className="flex-1" onLayout={event => {
+      const { width, height } = event.nativeEvent.layout;
+      if (Number.isFinite(height) && height > 0) setViewportHeight(height);
+      if (Number.isFinite(width) && width > 0) setViewportWidth(width);
+    }}>
       {place && configured && <RoutePreviewMap place={place} origin={result?.origin} destination={result?.destination ?? place.coordinates} coordinates={coordinates}
         displayCoordinates={navigation.started ? navigation.remainingCoordinates : coordinates}
         currentPosition={usable ? location.position : null} dockHeight={dockHeight} settledDockHeight={settledDockHeight}
@@ -121,19 +143,25 @@ function Preview({ token }: { token: unknown }) {
       <RoutePreviewSheet geometry={sheetGeometry} height={viewportHeight} headerHeight={headerHeight} bottomInset={insets.bottom} position={sheetPosition}
         onOccupation={setDockHeight} onSettledHeight={setSettledDockHeight}>
         {(expanded, toggle) => <>
+          <RoutePreviewPrimary key={`${primaryLayoutKey}:${expanded}`} expanded={expanded} onHeight={measuredHeight => {
+            // Remount on collapse to measure changes made while expanded.
+            setPrimaryMeasurement(previous => previous?.key === primaryLayoutKey && previous.height === measuredHeight
+              ? previous : { key: primaryLayoutKey, height: measuredHeight });
+          }}>
           <View className="flex-row items-center justify-between gap-2">
-            <Text accessibilityRole="header" accessibilityLabel={place?.name} numberOfLines={expanded ? undefined : 2} className="flex-1 font-sans text-card font-semibold text-foreground">{place?.name ?? t('directions.title')}</Text>
+            <Text accessibilityRole="header" accessibilityLabel={place?.name} numberOfLines={2} className="flex-1 font-sans text-card font-semibold text-foreground">{place?.name ?? t('directions.title')}</Text>
             <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t(expanded ? 'map.collapse' : 'map.expand')} accessibilityState={{ expanded }} onPress={toggle}>
               <Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={accent} />
             </Button>
           </View>
           {place && <View className="gap-2">
-            <View className="flex-row flex-wrap gap-2">{(['walking', 'driving'] as const).map(mode => <Button key={mode} variant={desiredMode === mode ? 'primary' : 'outline'} accessibilityLabel={t(`directions.${mode}`)} accessibilityState={{ selected: desiredMode === mode }} onPress={() => setDraftMode(mode)}><Button.Label>{t(`directions.${mode}`)}</Button.Label></Button>)}</View>
+            <View className="flex-row flex-wrap gap-2">{(['walking', 'driving'] as const).map(mode => <Button key={mode} variant={desiredMode === mode ? 'primary' : 'outline'} className="h-auto min-h-12 shrink py-3" accessibilityLabel={t(`directions.${mode}`)} accessibilityState={{ selected: desiredMode === mode }} onPress={() => setDraftMode(mode)}><Button.Label className="shrink text-center">{t(`directions.${mode}`)}</Button.Label></Button>)}</View>
             <Text className="font-sans text-xs text-muted">{t('directions.displayedMode', { mode: t(`directions.${displayedMode}`) })}</Text>
-            {desiredMode !== displayedMode && <Button accessibilityLabel={t('directions.previewMode')} isDisabled={!running || data?.status === 'pending'} onPress={previewMode}><Button.Label>{t('directions.previewMode')}</Button.Label></Button>}
-            <Button accessibilityLabel={t('directions.startNavigation')} isDisabled={!externalUrl || !running || linkPending} onPress={startExternalNavigation}><Button.Label>{t('directions.startNavigation')}</Button.Label></Button>
+            {desiredMode !== displayedMode && <Button className="h-auto min-h-12 py-3" accessibilityLabel={t('directions.previewMode')} isDisabled={!running || data?.status === 'pending'} onPress={previewMode}><Button.Label className="shrink text-center">{t('directions.previewMode')}</Button.Label></Button>}
+            <Button className="h-auto min-h-12 py-3" accessibilityLabel={t('directions.startNavigation')} isDisabled={!externalUrl || !running || linkPending} onPress={startExternalNavigation}><Button.Label className="shrink text-center">{t('directions.startNavigation')}</Button.Label></Button>
             {linkError && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('directions.mapsFailed')}</Text>}
           </View>}
+          </RoutePreviewPrimary>
           {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
           {featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}

@@ -5,7 +5,7 @@ export type Basis = { forward: Vector3; right: Vector3; yaw: number };
 export type SpatialTransform = { position: Vector3; rotation: Vector3; scale: number };
 export type RingSlot = RingEntry & { angle: number; position: Vector3; rotation: Vector3 };
 // Engineering starting values in Viro world units; physical Gate B tunes fit/comfort.
-export const ringMetrics = { radius: 2, tileSize: 0.68, panelWidth: 1.25, panelHeight: 1.25, focusDistance: 1.15, tileScale: 0.56, transitionMs: 280 } as const;
+export const ringMetrics = { radius: 2, tileSize: 0.68, panelWidth: 1.25, panelHeight: 1.25, focusDistance: 1.5, tileScale: 0.56, transitionMs: 280 } as const;
 const degrees = (value: number) => ((value + 180) % 360 + 360) % 360 - 180;
 export const validVector = (v: unknown): v is Vector3 => Array.isArray(v) && v.length === 3 && v.every(Number.isFinite);
 export function validPose(pose: PoseSample) { return !!pose && validVector(pose.position) && validVector(pose.forward); }
