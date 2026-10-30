@@ -56,7 +56,7 @@ it.each([[false, false], [true, true], [false, true]])('guards both submit paths
 
 it('keeps Featured pinned before every scrolling category, with independent actions and selected state', async () => {
   const { callbacks, render } = await setup('en', { category: 'restaurants' });
-  const rail = tree.root.findByType('scroll');
+  const rail = tree.root.findByType('scroll' as React.ElementType);
   expect(rail.props.horizontal).toBe(true);
   expect(rail.findAllByType('button').map(node => node.props.accessibilityLabel)).toEqual(['All', 'Attractions', 'Restaurants', 'Hotels', 'Shopping']);
   expect(rail.findAllByType('button')).not.toContain(button('Featured Destinations'));

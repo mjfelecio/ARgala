@@ -534,7 +534,8 @@ it.each(['en', 'ja', 'ko'] as const)('fits measured two-line primary controls an
   await primaryLayout(250);
   const sheet = tree!.root.findByType('dialog');
   expect(sheet.props.snapPoints[0]).toBe(332);
-  expect(sheet.props.handleHeight).toBe(24);
+  expect(sheet.props).not.toHaveProperty('handleHeight');
+  expect(sheet.props.handleStyle).toEqual({ height: 24 });
   expect(tree!.root.findByType('section').props.contentContainerStyle.paddingBottom).toBe(58);
   const primary = tree!.root.findByProps({ testID: 'route-preview-primary' });
   expect(primary.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('directions.startNavigation'))).toBe(true);

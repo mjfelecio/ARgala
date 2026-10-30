@@ -41,7 +41,7 @@ export function RoutePreviewSheet({ geometry, height, headerHeight, bottomInset,
   const handleIndicatorStyle = useResolveClassNames('bg-border');
   return <BottomSheet index={index} snapPoints={snapPoints} containerLayoutState={containerLayoutState}
     animateOnMount enableOverDrag={false} enableDynamicSizing={false} enablePanDownToClose={false} animatedPosition={position}
-    handleComponent={Handle} handleHeight={ROUTE_SHEET_HANDLE_HEIGHT} accessible={false} backgroundStyle={backgroundStyle} handleIndicatorStyle={handleIndicatorStyle}
+    handleComponent={Handle} handleStyle={{ height: ROUTE_SHEET_HANDLE_HEIGHT }} accessible={false} backgroundStyle={backgroundStyle} handleIndicatorStyle={handleIndicatorStyle}
     onChange={(next, top) => { if (snapPoints.length > 1) setExpanded(next > 0); report(top); onSettledHeight(Math.max(0, height - top)); }}>
     <Scroll className="flex-1" contentContainerClassName="gap-3 px-5" contentContainerStyle={{ paddingBottom: bottomInset + ROUTE_SHEET_BOTTOM_GAP }}>
       {children(expanded, () => setExpanded(value => !value))}
