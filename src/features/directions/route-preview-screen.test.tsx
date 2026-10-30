@@ -15,6 +15,7 @@ import { routeService, type WalkingRoute } from './service';
 import RoutePreviewScreen from './route-preview-screen';
 import PlaceDetailsScreen from '@/features/places/place-details-screen';
 import { placeSelectionOptions } from '@/features/places/selection';
+import { routeSheetGeometry } from '@/features/map/sheet-geometry';
 
 const controls = vi.hoisted(() => ({ token: undefined as unknown, details: false, providerId: 'north', active: true, focused: true, mapsConfigured: true, language: 'en' as 'en' | 'ko' | 'ja', fit: vi.fn(), animate: vi.fn(), retry: vi.fn(), canBack: true,
   location: { watcherSample: null as { position: { latitude: number; longitude: number }; accuracy: number; timestamp: number } | null, status: 'ready', watcherStatus: 'ready', errorCode: null as string | null, position: { latitude: 38.5, longitude: -120.2 } as { latitude: number; longitude: number } | null, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8, canAskAgain: true } }));
@@ -256,7 +257,7 @@ it.each(['en', 'ko', 'ja'] as const)('renders actual %s resources, long names, n
   const target = { ...place, name: 'A long destination 日本語 한국어 '.repeat(15), address: undefined }; handoff(true, target); await mount(); await expand();
   expect(output()).toContain(target.name); expect(output()).not.toContain(place.address); expect(output()).toContain(translations.t('directions.title')); expect(output()).toContain(translations.t('directions.snapshot'));
   expect(output()).toContain('Returned credit'); expect(output()).not.toContain('Flat Terrain'); expect(output()).toContain(translations.t('directions.startNavigation')); expect(output()).not.toContain('directions.');
-  expect(tree!.root.findAllByType('text').find(n => n.props.children === target.name)!.props.numberOfLines).toBeUndefined();
+  expect(tree!.root.findAllByType('text').some(n => n.props.children === target.name && n.props.numberOfLines === undefined)).toBe(true);
   expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left', 'right']);
   await act(async () => {
     tree!.root.findByProps({testID:'route-preview-scene'}).props.onLayout({ nativeEvent: { layout: { width: 640, height: 240 } } });
@@ -287,8 +288,8 @@ it('moves credit padding without refitting on drag or settlement and handles rea
   await act(async()=>tree!.root.findByType('map').props.onMapReady());
   const fits=controls.fit.mock.calls.length;
   const dock=tree!.root.findByType('dialog');
-  await act(async()=>{dock.props.animatedPosition.set(400);nativeUi.reactions.forEach(tick=>tick());});
-  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(152);
+  await act(async()=>{dock.props.animatedPosition.set(300);nativeUi.reactions.forEach(tick=>tick());});
+  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(100);
   expect(controls.fit).toHaveBeenCalledTimes(fits);
   await act(async()=>dock.props.onChange(1,720-dock.props.snapPoints[1]));
   expect(controls.fit).toHaveBeenCalledTimes(fits);
@@ -342,7 +343,7 @@ it('uses a draggable compact dock and floats its header above an edge-to-edge ma
  handoff();await mount();await layout();
  const dock=tree!.root.findByType('dialog');
  expect(dock.props.snapPoints).toHaveLength(2);
- expect(dock.props.snapPoints[0]).toBeLessThan(240);
+ expect(dock.props.snapPoints[0]).toBeGreaterThanOrEqual(272);
  expect(tree!.root.findByType('safe-area' as React.ElementType).props.edges).toEqual(['left','right']);
  expect(tree!.root.findByProps({testID:'route-preview-header'})).toBeDefined();
  expect(routeService.walking).not.toHaveBeenCalled();
@@ -398,8 +399,8 @@ it('leaves framing unchanged throughout an accessible toggle and native settleme
  expect(dock.props.animatedPosition.get()).toBe(start);
  expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(24);
  expect(controls.fit).toHaveBeenCalledTimes(fits);
- await act(async()=>{dock.props.animatedPosition.set(400);nativeUi.reactions.forEach(tick=>tick());});
- expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(152);
+ await act(async()=>{dock.props.animatedPosition.set(300);nativeUi.reactions.forEach(tick=>tick());});
+ expect(tree!.root.findByType('map').props.mapPadding.bottom).toBe(100);
  expect(controls.fit).toHaveBeenCalledTimes(fits);
  await act(async()=>dock.props.onChange(1,720-dock.props.snapPoints[1]));
  expect(controls.fit).toHaveBeenCalledTimes(fits);
@@ -508,4 +509,148 @@ it('renders driving loading/unavailable recovery using actual locales without a 
   expect(output()).not.toContain(translations.t('service.routeUnavailable'));
  }
  expect(routeService.preview).toHaveBeenCalledOnce();
+});
+
+
+it('reserves the measured primary controls, one handle and bottom safe area in the collapsed route geometry', () => {
+ // Native layout: a two-line title, wrapped mode choices and both primary actions occupy 310dp.
+ // 310 controls + 24 handle + 24 content clearance + 34 Android safe area = 392dp.
+ expect(routeSheetGeometry(800, 88, 34, 1.5, 310).peek).toBe(392);
+});
+
+async function primaryLayout(height: number) {
+ await act(async () => tree!.root.findByProps({ testID: 'route-preview-primary' }).props.onLayout({ nativeEvent: { layout: { width: 320, height } } }));
+}
+
+it.each(['en', 'ja', 'ko'] as const)('fits measured two-line primary controls and the mode-preview action above the bottom inset in %s', async language => {
+ nativeUi.fontScale = 1.5;
+ const previousInset = nativeUi.insets.bottom;
+ nativeUi.insets.bottom = 34;
+ try {
+  controls.language = language;
+  await translations.changeLanguage(language);
+  handoff(true, { ...place, name: 'A long destination name that occupies two compact title lines' });
+  await mount(); await layout();
+  await primaryLayout(250);
+  const sheet = tree!.root.findByType('dialog');
+  expect(sheet.props.snapPoints[0]).toBe(332);
+  expect(sheet.props.handleHeight).toBe(24);
+  expect(tree!.root.findByType('section').props.contentContainerStyle.paddingBottom).toBe(58);
+  const primary = tree!.root.findByProps({ testID: 'route-preview-primary' });
+  expect(primary.findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('directions.startNavigation'))).toBe(true);
+  expect(primary.findAllByType('text').find(text => text.props.accessibilityRole === 'header')!.props.numberOfLines).toBe(2);
+  await press('directions.driving');
+  await primaryLayout(310);
+  expect(sheet.props.snapPoints[0]).toBe(392);
+  expect(tree!.root.findByProps({ testID: 'route-preview-primary' }).findAllByType('button').some(b => b.props.accessibilityLabel === translations.t('directions.previewMode'))).toBe(true);
+  expect(tree!.root.findByType('map').props.style.height).toBe(352);
+  expect(routeService.walking).not.toHaveBeenCalled(); expect(routeService.preview).not.toHaveBeenCalled();
+ } finally { nativeUi.insets.bottom = previousInset; }
+});
+
+it('fences expanded and invalid measurements while preserving the map, fit and expanded snap index', async () => {
+ handoff(); await mount(); await layout(); await primaryLayout(250); await nativeLayout(360);
+ await act(async () => tree!.root.findByType('map').props.onMapReady());
+ const map = tree!.root.findByType('map'); const sheet = tree!.root.findByType('dialog');
+ const fits = controls.fit.mock.calls.length;
+ const height = map.props.style.height; const peek = sheet.props.snapPoints[0];
+ await expand(); await act(async () => sheet.props.onChange(1, 720 - sheet.props.snapPoints[1]));
+ await primaryLayout(520);
+ expect(sheet.props.index).toBe(1); expect(sheet.props.snapPoints[0]).toBe(peek);
+ expect(map.props.style.height).toBe(height); expect(controls.fit).toHaveBeenCalledTimes(fits);
+ await press('map.collapse');
+ for (const invalid of [0, -1, NaN, Infinity]) await primaryLayout(invalid);
+ expect(sheet.props.snapPoints[0]).toBe(peek);
+ expect(map.props.style.height).toBe(height); expect(controls.fit).toHaveBeenCalledTimes(fits);
+ await primaryLayout(250);
+ expect(controls.fit).toHaveBeenCalledTimes(fits);
+ await expand();
+ nativeUi.fontScale = 1.5;
+ await sceneLayout(400, 800);
+ expect(sheet.props.index).toBe(1);
+ const resizedHeight = map.props.style.height; const resizedPeek = sheet.props.snapPoints[0];
+ const resizedFits = controls.fit.mock.calls.length;
+ await primaryLayout(600);
+ expect(sheet.props.index).toBe(1); expect(sheet.props.snapPoints[0]).toBe(resizedPeek);
+ expect(map.props.style.height).toBe(resizedHeight); expect(controls.fit).toHaveBeenCalledTimes(resizedFits);
+ await press('map.collapse'); await primaryLayout(300);
+ expect(sheet.props.snapPoints[0]).toBe(372);
+ expect(tree!.root.findByType('map')).toBe(map);
+ expect(routeService.walking).not.toHaveBeenCalled(); expect(routeService.preview).not.toHaveBeenCalled();
+});
+
+it('caps an oversized primary block to a short viewport while retaining scrollable recovery and expansion intent', async () => {
+ handoff(); await mount(); await layout(); await primaryLayout(310); await expand();
+ await sceneLayout(640, 240);
+ const sheet = tree!.root.findByType('dialog');
+ expect(sheet.props.snapPoints).toEqual([88]);
+ expect(tree!.root.findByType('section')).toBeDefined();
+ await sceneLayout(360, 720);
+ expect(sheet.props.index).toBe(1);
+ await press('map.collapse'); await primaryLayout(310);
+ expect(sheet.props.snapPoints[0]).toBe(382);
+});
+
+
+it('preserves expanded ownership through inset and header changes and remeasures compact content after a locale change', async () => {
+ const previousInset = nativeUi.insets.bottom;
+ try {
+  handoff(); await mount(); await layout(); await primaryLayout(250); await expand();
+  const sheet = tree!.root.findByType('dialog');
+  nativeUi.insets.bottom = 40; await update();
+  await act(async () => tree!.root.findByProps({ testID: 'route-preview-header' }).props.onLayout({ nativeEvent: { layout: { height: 104 } } }));
+  expect(sheet.props.index).toBe(1); expect(sheet.props.snapPoints[0]).toBe(338);
+  await act(async () => { await translations.changeLanguage('ja'); });
+  expect(sheet.props.index).toBe(1);
+  await primaryLayout(400);
+  await press('map.collapse'); await primaryLayout(280);
+  expect(sheet.props.snapPoints[0]).toBe(368);
+  expect(routeService.walking).not.toHaveBeenCalled(); expect(routeService.preview).not.toHaveBeenCalled();
+ } finally { nativeUi.insets.bottom = previousInset; }
+});
+
+it.each(['width', 'locale', 'action'] as const)('ignores a retired compact layout callback after the new %s block has measured', async change => {
+ handoff(); await mount(); await layout(); await primaryLayout(250); await nativeLayout(360);
+ await act(async () => tree!.root.findByType('map').props.onMapReady());
+ const staleLayout = tree!.root.findByProps({ testID: 'route-preview-primary' }).props.onLayout;
+ if (change === 'width') await sceneLayout(400, 720);
+ if (change === 'locale') await act(async () => { await translations.changeLanguage('ja'); });
+ if (change === 'action') await press('directions.driving');
+ await primaryLayout(310); await nativeLayout(change === 'width' ? 400 : 360);
+ const map = tree!.root.findByType('map'); const sheet = tree!.root.findByType('dialog');
+ const fits = controls.fit.mock.calls.length;
+ expect(sheet.props.snapPoints[0]).toBe(382); expect(map.props.style.height).toBe(362);
+ await act(async () => staleLayout({ nativeEvent: { layout: { width: 320, height: 120 } } }));
+ expect(sheet.props.snapPoints[0]).toBe(382); expect(map.props.style.height).toBe(362);
+ expect(controls.fit).toHaveBeenCalledTimes(fits);
+ expect(routeService.walking).not.toHaveBeenCalled(); expect(routeService.preview).not.toHaveBeenCalled();
+});
+
+it('retires the saved compact layout callback on expansion and keeps it retired after collapse', async () => {
+ handoff(); await mount(); await layout(); await primaryLayout(250); await nativeLayout(360);
+ await act(async () => tree!.root.findByType('map').props.onMapReady());
+ const staleLayout = tree!.root.findByProps({ testID: 'route-preview-primary' }).props.onLayout;
+ const map = tree!.root.findByType('map'); const sheet = tree!.root.findByType('dialog');
+ const fits = controls.fit.mock.calls.length;
+ await expand();
+ await act(async () => staleLayout({ nativeEvent: { layout: { width: 320, height: 400 } } }));
+ expect(sheet.props.snapPoints[0]).toBe(322); expect(map.props.style.height).toBe(422);
+ expect(sheet.props.index).toBe(1); expect(controls.fit).toHaveBeenCalledTimes(fits);
+ await press('map.collapse'); await primaryLayout(280); await nativeLayout(360);
+ const collapsedFits = controls.fit.mock.calls.length;
+ await act(async () => staleLayout({ nativeEvent: { layout: { width: 320, height: 120 } } }));
+ expect(sheet.props.snapPoints[0]).toBe(352); expect(map.props.style.height).toBe(392);
+ expect(controls.fit).toHaveBeenCalledTimes(collapsedFits);
+});
+
+it('retires the compact layout callback on unmount before a new preview measures', async () => {
+ handoff(); await mount(); await layout(); await primaryLayout(250);
+ const staleLayout = tree!.root.findByProps({ testID: 'route-preview-primary' }).props.onLayout;
+ await act(async () => { tree!.unmount(); });
+ await mount(); await layout(); await primaryLayout(310); await nativeLayout(360);
+ await act(async () => tree!.root.findByType('map').props.onMapReady());
+ const map = tree!.root.findByType('map'); const fits = controls.fit.mock.calls.length;
+ await act(async () => staleLayout({ nativeEvent: { layout: { width: 320, height: 120 } } }));
+ expect(tree!.root.findByType('dialog').props.snapPoints[0]).toBe(382);
+ expect(map.props.style.height).toBe(362); expect(controls.fit).toHaveBeenCalledTimes(fits);
 });
