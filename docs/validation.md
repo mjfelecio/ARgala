@@ -1661,3 +1661,50 @@ The final refinement `npm run check` passes strict TypeScript, zero-warning lint
 and **1,216 tests / 114 files**; `git diff --check` passes. No dependency/native
 configuration changed, so the approved native build is still sufficient to test
 this JavaScript change through Metro.
+
+## Unattended Android smoke — 2026-10-30
+
+Owner authorized ADB testing without touching/moving the phone or assisting with
+sign-in. Device: Samsung Galaxy A53 SM-A536E, Android16; USB charging, battery19%
+at start. The specifically approved development APK
+[EAS2cd68ffa](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/2cd68ffa-4cf1-4754-8762-c59ed01ec044)
+finished successfully from `ec66c48`. Downloaded archive309846604 bytes, SHA256
+`ad5cc55cf6259bb4f93abd8ef9c0a702770aaa7a3045d850b8bc9d7de0403d0e`.
+Installed with `adb install -r`, preserving data. Native version1.0.0/code1,
+minSDK24/targetSDK36; installed update time2026-10-30 09:20:50 device local time.
+Metro served main `2aff046`; subsequent JavaScript-only navigation fix uses this
+same APK and adds no native capabilities. No second build was started.
+
+Observed before the navigation correction:
+
+- Cold launch completed; existing signed-in session survived install, the Google
+  map and native location marker rendered, and no new fatal/JS exception appeared
+  in the scoped test log. This is a smoke observation, not crash-free certification.
+- Saved Places began empty. Explicitly saved ACLC, saw it listed with account
+  sync status, force-stopped/reopened the app and found the bookmark still present
+  with “Synced with your account.” This is a same-device/account UI round trip,
+  not a multi-device conflict/replay or guest-merge test.
+- Featured Destinations rendered Passport0/9. The explicit content-update check
+  returned “No published update is available”; nothing was published or seeded.
+- Real arrival stayed locked while waiting for fresh accurate continuous GPS;
+  remote map selection did not unlock it. No mock GPS was injected.
+- Reminder setup displayed the Android notification permission prompt. Later
+  inspection confirmed notification/background grants and the app's requested
+  state. Foreground return retained the selection without another prompt, and
+  explicit Turn off restored the unselected state. No actual OS geofence Enter,
+  background alert delivery or monitoring reliability is claimed.
+- Development simulated arrival opened the real native preflight. Native AR
+  acquired rear camera0; its stationary view was almost black and never supplied
+  tracking-ready. Home released the camera (empty active-client list). Return
+  showed explicit interrupted/Retry guidance with no automatic camera restart.
+  Simulated entry is not proof of on-site arrival or an earned visit.
+
+The normal Featured Destinations→map flow lacked View Details for featured
+selections; reminder controls were reachable only through Saved Places→Open place.
+The JavaScript correction restores the existing View Details action to the minimal
+curated screen, carries the exact destination ID, guards focus/foreground and
+returns before Google handoff/cache work. Ordinary Google Details behavior stays
+covered. Actual-screen RED regressions reproduced the omission;55 map tests and
+independent review pass. Full `npm run check`: strict TypeScript, zero-warning
+lint and **1,220 tests /114 files**. Native maps/router/network boundaries remain
+mocked in those automated regressions; physical recheck is recorded separately.
