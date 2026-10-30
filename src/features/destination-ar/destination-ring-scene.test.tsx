@@ -5,6 +5,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { DestinationRingScene, type RingControls } from './destination-ring-scene';
+import { RingController } from './ring-controller';
 import type { PoseSample } from './types';
 import { useReadingSize } from './use-reading-size';
 const native = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn(), patches: [] as { id: string; patch: Record<string, unknown> }[], reduced: false }));
@@ -69,27 +70,125 @@ it('captures current-view focus once, ignores transition conflicts, closes and r
   await pose({ position: [4, 2, 3], forward: [1, 0, 0] }, 1100);
   await press('ring-tile-history'); await press('ring-action-next');
   expect(text('ring-page-indicator')).toMatch(/^1 /);
-  await finish(); expect(node('ring-focused-panel').props.position).toEqual([5.15, 2, 3]);
+  await finish(); expect(node('ring-focused-panel').props.position).toEqual([5.5, 2, 3]);
   await press('ring-action-next'); expect(text('ring-page-indicator')).toMatch(/^2 /);
   await pose({ position: [6, 2, 3], forward: [0, 0, 1] }, 1200);
-  expect(node('ring-focused-panel').props.position).toEqual([5.15, 2, 3]);
+  expect(node('ring-focused-panel').props.position).toEqual([5.5, 2, 3]);
   await act(async () => controls!.recenter());
   expect(text('ring-page-indicator')).toMatch(/^2 /);
-  expect(node('ring-focused-panel').props.position).toEqual([6, 2, 4.15]);
+  expect(node('ring-focused-panel').props.position).toEqual([6, 2, 4.5]);
   await press('ring-action-close'); await finish(); expect(node('ring-focused-panel')).toBeUndefined();
   expect(node('ring-tile-history')).toBeDefined();
+});
+it('closes the original focus from another tile without opening that tile and retains reading state', async () => {
+  await mount(); await track(); await pose();
+  const ringPosition = node('ring-root').props.position;
+  const tilePosition = node('ring-tile-overview').props.position;
+  await press('ring-tile-history'); await finish(); await press('ring-action-next');
+  const page = text('ring-page-indicator'); const body = text('ring-body');
+  const other = node('ring-tile-overview');
+  expect(other.props.onClick).toBeTypeOf('function');
+  const surface = other.findAllByType('quad' as React.ElementType).find(quad => quad.props.ignoreEventHandling === false)!;
+  expect(surface.props.highAccuracyEvents).toBe(true);
+  expect(other.findAllByType('quad' as React.ElementType).filter(quad => quad.props.onClick)).toHaveLength(0);
+  expect(node('ring-root').props.opacity).toBe(0.25);
+  await press('ring-tile-overview');
+  expect(node('ring-tile-history')).toBeUndefined();
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingClose');
+  expect(node('ring-tile-overview').props.onClick).toBeUndefined();
+  await finish();
+  expect(node('ring-focused-panel')).toBeUndefined();
+  expect(node('ring-root').props.opacity).toBe(1);
+  expect(node('ring-root').props.position).toEqual(ringPosition);
+  expect(node('ring-tile-overview').props.position).toEqual(tilePosition);
+  expect(node('ring-tile-history')).toBeDefined();
+  await press('ring-tile-history'); await finish();
+  expect(text('ring-page-indicator')).toBe(page); expect(text('ring-body')).toBe(body);
+});
+it('uses current controller selection for queued tile clicks and rejects opening and closing conflicts', async () => {
+  await mount(); await track(); await pose();
+  const queuedOtherClick = node('ring-tile-overview').props.onClick;
+  const queuedSameClick = node('ring-tile-history').props.onClick;
+  await press('ring-tile-history');
+  const opening = node('ring-focused-panel').props.animation;
+  expect(node('ring-tile-overview').props.onClick).toBeUndefined();
+  await act(async () => queuedOtherClick());
+  expect(node('ring-focused-panel').props.animation.name).toBe(opening.name);
+  await finish();
+  await act(async () => queuedSameClick());
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingFocus');
+  await act(async () => { queuedOtherClick(); queuedOtherClick(); });
+  const closing = node('ring-focused-panel').props.animation;
+  expect(closing.name).toBe('argalaRingClose');
+  expect(node('ring-tile-history')).toBeUndefined();
+  expect(node('ring-tile-overview').props.onClick).toBeUndefined();
+  await finish(); expect(node('ring-focused-panel')).toBeUndefined();
+  expect(node('ring-tile-history')).toBeDefined();
+});
+it.each([1, 2])('rejects other-tile dismissal through lost tracking %s and until a fresh recovery pose', async state => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  const queuedOtherClick = node('ring-tile-overview').props.onClick;
+  expect(queuedOtherClick).toBeTypeOf('function');
+  await track(state);
+  expect(node('ring-tile-overview').props.onClick).toBeUndefined();
+  await act(async () => queuedOtherClick?.());
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingFocus');
+  await track(); await act(async () => queuedOtherClick?.());
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingFocus');
+  await pose(initial, 1100); await press('ring-tile-overview');
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingClose');
+});
+it.each(['ring-tile-overview', 'ring-action-close'])('rejects retained %s callbacks while background or reveal interaction is disabled', async id => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  const retained = node(id).props.onClick;
+  expect(retained).toBeTypeOf('function');
+  sceneOptions = { interactive: false };
+  await act(async () => tree.update(wrapper()));
+  expect(node('ring-tile-overview').props.onClick).toBeUndefined();
+  expect(node('ring-action-close').props.onClick).toBeUndefined();
+  await act(async () => retained());
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingFocus');
+  sceneOptions = { interactive: true };
+  await act(async () => tree.update(wrapper()));
+  await act(async () => retained());
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingClose');
+});
+it('rejects a retained tile opening callback while interaction is disabled', async () => {
+  await mount(); await track(); await pose();
+  const retained = node('ring-tile-history').props.onClick;
+  sceneOptions = { interactive: false };
+  await act(async () => tree.update(wrapper()));
+  await act(async () => retained());
+  expect(node('ring-focused-panel')).toBeUndefined();
+  sceneOptions = { interactive: true };
+  await act(async () => tree.update(wrapper()));
+  await act(async () => retained());
+  expect(node('ring-focused-panel')).toBeDefined();
+});
+it.each(['open', 'dismiss', 'close'])('retires retained %s callbacks on unmount', async action => {
+  const select = vi.spyOn(RingController.prototype, 'select');
+  await mount(); await track(); await pose();
+  const open = node('ring-tile-history').props.onClick;
+  await press('ring-tile-history'); await finish();
+  const controller = select.mock.contexts[0] as RingController;
+  const original = controller.selection;
+  const retained = action === 'open' ? open : node(action === 'dismiss' ? 'ring-tile-overview' : 'ring-action-close').props.onClick;
+  if (action === 'open') { await press('ring-action-close'); await finish(); }
+  await act(async () => tree.unmount());
+  await act(async () => retained());
+  expect(controller.selection).toBe(action === 'open' ? null : original);
 });
 it('pauses transitions and retains focus/page through same-frame tracking loss after turning', async () => {
   await mount(); await track(); await pose(); await press('ring-tile-overview');
   await track(2);
   expect(native.patches.filter(item => item.id === 'ring-focused-panel').at(-1)!.patch.animation).toMatchObject({ run: false });
   await track(3); await pose({ ...initial, forward: [1, 0, 0] }, 1100); await finish();
-  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -1.15]);
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -1.5]);
   await press('ring-action-next'); const page = text('ring-page-indicator');
   await track(2); await press('ring-action-next');
   await track(3); await pose({ position: [2, 2, 0], forward: [0, 0, 1] }, 1200);
   expect(text('ring-page-indicator')).toBe(page);
-  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -1.15]);
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -1.5]);
 });
 it.each(['en', 'ja', 'ko'].flatMap(locale => ['load', 'save'].map(operation => [locale, operation])))('uses real %s content and localized %s preference failure/recovery without raw errors', async (locale, operation) => {
   await translations.changeLanguage(locale);
@@ -111,7 +210,7 @@ it('keeps selection after recenter cancels an unfinished native transition', asy
   await pose({ position: [1, 2, 1], forward: [1, 0, 0] }, 1100);
   await act(async () => controls!.recenter());
   await act(async () => stale());
-  expect(node('ring-focused-panel').props.position).toEqual([2.15, 2, 1]);
+  expect(node('ring-focused-panel').props.position).toEqual([2.5, 2, 1]);
   expect(text('ring-page-indicator')).toMatch(/^1 /);
 });
 it('omits empty optional content and redistributes remaining slots without blank tiles', async () => {
@@ -165,7 +264,7 @@ it('resets an imperatively translated zero-origin panel frame on recenter', asyn
   await pose({ position: [0.4, 0, 0], forward: [0, 0, -1] }, 1100); native.patches.length = 0;
   await act(async () => controls!.recenter());
   expect(native.patches.filter(item => item.id === 'ring-panel-frame').at(-1)?.patch.position).toEqual([0, 0, 0]);
-  expect(node('ring-focused-panel').props.position).toEqual([0.4, 0, -1.15]);
+  expect(node('ring-focused-panel').props.position).toEqual([0.4, 0, -1.5]);
 });
 it('commits recenter origin even when it equals the original declarative ring position', async () => {
   await mount(); await track(); await pose();
@@ -198,8 +297,9 @@ it('gives Close a larger visible surface with separated control rows and preserv
 it('keeps decorative geometry out of native hit ordering and precisely tests only visible controls', async () => {
   await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
   for (const quad of tree.root.findAllByType('quad' as React.ElementType)) {
-    const action = quad.parent?.props.testID?.startsWith('ring-action-');
-    if (action && quad.parent?.props.onClick) {
+    const owner = quad.parent?.props;
+    const interactiveSurface = owner?.onClick && (owner.testID?.startsWith('ring-action-') || owner.testID?.startsWith('ring-tile-'));
+    if (interactiveSurface && quad.props.highAccuracyEvents) {
       expect(quad.props.highAccuracyEvents).toBe(true);
       expect(quad.props.ignoreEventHandling).toBe(false);
     } else expect(quad.props.ignoreEventHandling).toBe(true);
@@ -244,9 +344,9 @@ it('restores only logical selection/page after a fresh frame and keeps its new p
   sceneOptions = { initialProgress: { selectedId: 'history', cursors: { history: { page: 2, offset: 400, locale: 'en', size: 'standard' } } }, onProgress: progress };
   await mount(); expect(node('ring-focused-panel')).toBeUndefined(); await track();
   await pose({ position: [8, 4, -2], forward: [1, 0, 0] });
-  expect(node('ring-focused-panel').props.position).toEqual([9.15, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^3 /);
+  expect(node('ring-focused-panel').props.position).toEqual([9.5, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^3 /);
   await track(2); await track(3); await pose({ position: [10, 4, -2], forward: [0, 0, 1] }, 1100);
-  expect(node('ring-focused-panel').props.position).toEqual([9.15, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^3 /);
+  expect(node('ring-focused-panel').props.position).toEqual([9.5, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^3 /);
   await press('ring-action-close'); await finish(); expect(progress.mock.lastCall?.[0].selectedId).toBeNull();
   expect(JSON.stringify(progress.mock.calls)).not.toContain('position');
 });

@@ -326,7 +326,7 @@
     "prototype": "Development samples only. No approved destination content or location verification.",
     "recenter": "Recenter",
     "help": "Help",
-    "helpText": "Turn to discover the ring. Hold and release a tile to bring it closer. Hold and release controls to turn pages, change text size or close. Recenter uses your current view.",
+    "helpText": "Turn to discover the ring. Hold and release a tile to bring it closer. Hold and release controls to turn pages, change text size or close. To return to the ring, hold and release another visible tile; it will not open that tile. Recenter uses your current view.",
     "close": "Close",
     "previous": "Previous",
     "next": "Next",

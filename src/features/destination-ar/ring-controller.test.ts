@@ -24,12 +24,12 @@ it('limits native translation publications and ignores malformed or out-of-order
 it('focuses once toward the current heading, freezes spatial focus, and restores current ring on close', () => {
   const c = ready(); c.pose({ position: [4, 2, 3], forward: [1, 0, 0] }, 1100);
   const focus = c.select('history', 1100)!;
-  expect(focus.to.position).toEqual([5.15, 2, 3]);
+  expect(focus.to.position).toEqual([5.5, 2, 3]);
   expect(c.select('overview', 1100)).toBeNull();
   expect(c.close(1100)).toBeNull();
   expect(c.complete(focus.token)).toBe(true);
   c.pose({ position: [6, 2, 3], forward: [0, 0, 1] }, 1200);
-  expect(c.selection!.to.position).toEqual([5.15, 2, 3]);
+  expect(c.selection!.to.position).toEqual([5.5, 2, 3]);
   const close = c.close(1200)!;
   expect(close.origin).toEqual([6, 2, 3]);
   expect(close.to.position[0]).toBeCloseTo(2);
@@ -50,7 +50,7 @@ it('recenter cancels an in-flight transition, preserves selected identity, and f
   c.pose({ position: [1, 2, 1], forward: [1, 0, 0] }, 1100);
   expect(c.recenter(1100)).toBe(true);
   expect(c.selection!.id).toBe('history'); expect(c.selection!.phase).toBe('focused');
-  expect(c.selection!.to.position).toEqual([2.15, 2, 1]);
+  expect(c.selection!.to.position).toEqual([2.5, 2, 1]);
   expect(c.complete(focus.token)).toBe(false);
   expect(c.slots[0].position[0]).toBeCloseTo(2);
 });
@@ -59,5 +59,5 @@ it('requires a new pose after tracking recovery before accepting an interaction'
   const c = ready(); c.track('limited'); c.track('normal');
   expect(c.select('overview', 1100)).toBeNull();
   c.pose({ ...pose, forward: [1, 0, 0] }, 1100);
-  expect(c.select('overview', 1100)!.to.position).toEqual([1.15, 2, 0]);
+  expect(c.select('overview', 1100)!.to.position).toEqual([1.5, 2, 0]);
 });
