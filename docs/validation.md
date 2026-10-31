@@ -1,5 +1,50 @@
 # Foundation validation
 
+## Design coherence refinement — 2026-10-31
+
+From main `775f9da`, the scoped cleanup preserves the approved October 30 compact
+Explore header, measured Directions peek, farther AR panels and held collapse
+interaction. [Audit, skill provenance and before/after evidence](audits/2026-10-30-design-coherence.md)
+record the design authority and full screen coverage/limits.
+
+Installed official Impeccable 4.8.0 for project Codex (reviewed source/installer,
+no force or app dependencies), portable `argala-ui`, and evidence-backed PRODUCT /
+DESIGN indexes. Existing Expo design-system/native-UI/animation guidance was
+evaluated; overlapping Taste was not installed. Codex hook approval remains an
+interactive `/hooks` step; this session does not claim it ran in Codex.
+
+Changes keep growing Profile/guest content within SettingsForm's existing scroll
+owner; simplify Featured destinations to name-first white tappable surfaces with
+maintenance below the catalog; and virtualize Saved with subordinate removal and
+bounded visible IDs. IDs, navigation, full accessible identifier, save/draft logic,
+catalog status, provider/sensor/admission/storage/localization contracts remain.
+No new copy, native configuration, dependency, backend or production review route.
+
+**Automated/static:** deliberate failing-before/passing-after real-screen
+regressions; focused layout/catalog/Saved run **41 passed**. Final `npm run check`
+passes strict TypeScript, zero-warning lint and **1,266 tests /116 files**.
+`npm run check:native-patches` passes with zero updates; `git diff --check` passes.
+`npm run export:android -- --max-workers 1` passed on the explicit rerun: 3,000
+modules and an 8.5 MB Android Hermes bundle. The cancelled attempt is not counted;
+an export is not an APK/native build. Edge/SQL/native-configuration checks were not
+rerun locally for unchanged areas; PR CI repeats the complete matrix.
+
+**Rendered only:** actual production components + HeroUI/CSS/fonts/resources in
+an isolated React Native Web harness, synthetic journal and mocked service context.
+18 baseline /27 after screen-state probes and six Profile input-scroll captures
+per revision. EN/JA/KO at 360×800 normal and 320×640 with 1.5 text-only enlargement;
+Saved empty/loading/read-error states. Reviewed captures and browser bounds show
+no horizontal overflow or sub-48×48 button targets; no uncaught after-probe JS
+exception. Browser review exposed and corrected HeroUI CSS/class-merger precedence.
+Browser font scaling/insets, color diagnostics and keyboard differ from Android.
+
+**Not performed:** no connected ADB device, fresh APK build/install, native Yoga /
+TalkBack /keyboard /touch /fling or foreground acceptance, AR tracking/camera/photo
+checks, live authenticated/provider checks, on-site GPS or background reminder
+delivery. No account reset, synthetic runtime location, new content approval or
+device data modification. Existing compatible APK can load these JS changes via
+Metro; any new APK still requires specific owner approval.
+
 ## App shell navigation — 2026-10-19
 
 Branch `feat/app-shell-navigation` starts from current main `b15a37d`, which includes the merged Home Map and UI infrastructure. The shell implementation is `8dc6226`. The [navigation guide](app-shell-navigation.md) records route structure, component reuse, layout ownership, visual deviations and the Android acceptance checklist.
