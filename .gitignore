@@ -50,7 +50,11 @@ example
 .code-review-graph/
 .superpowers/
 .claude/
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/impeccable/
+!.agents/skills/argala-ui/
 skills-lock.json
 coverage/
 *.apk
@@ -59,3 +63,11 @@ supabase/.temp/
 
 # local UI kickoff and reference exports
 /ARgala_UI_Implementation_Kickoff/
+
+# Impeccable runtime output (shared configuration stays tracked)
+**/.impeccable/config.local.json
+**/.impeccable/hook.*.json
+**/.impeccable/*.png
+**/.impeccable/review/
+**/.impeccable/questions/
+**/.impeccable/live/
