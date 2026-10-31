@@ -10,12 +10,14 @@ import { LanguageControl } from './language-control';
 import { RadiusControl } from './radius-control';
 import { useSettingsDraft } from './use-settings-draft';
 import { ReminderSettings } from '@/features/arrival-reminders/components';
+import type { PropsWithChildren } from 'react';
 
-export default function SettingsForm() {
+export default function SettingsForm({ children }: PropsWithChildren) {
   const { t } = useTranslation();
   const { focused, radius, language, changeRadius, changeLanguage, busy, message, dirty, valid, save, storageError } = useSettingsDraft();
   return <ScrollView className="flex-1" keyboardShouldPersistTaps="handled" contentContainerClassName="gap-6 px-5 pb-8 pt-2">
     <AccountSummary />
+    {children}
     <View className="gap-2 border-t border-outline pt-5">
       <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{t('settings.language')}</Text>
       <Text className="font-sans text-sm text-muted">{t('settings.languageDescription')}</Text>
