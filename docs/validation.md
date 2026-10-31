@@ -31,6 +31,14 @@ modules and an 8.5 MB Android Hermes bundle. The cancelled attempt is not counte
 an export is not an APK/native build. Edge/SQL/native-configuration checks were not
 rerun locally for unchanged areas; PR CI repeats the complete matrix.
 
+**Independent review:** a separate owner-authorized read-only agent reviewed
+`775f9da..3d04976`, relevant consumers/resources and browser comparisons, finding
+no confirmed source blockers. Its independent typecheck, zero-warning lint,
+five focused suites (**84 tests**) and baseline-to-HEAD whitespace check passed;
+no tracked files changed. This is source/render review, not Android acceptance.
+The bounded FlatList test double does not verify native recycling or scroll
+window eviction/re-entry.
+
 **Rendered only:** actual production components + HeroUI/CSS/fonts/resources in
 an isolated React Native Web harness, synthetic journal and mocked service context.
 18 baseline /27 after screen-state probes and six Profile input-scroll captures

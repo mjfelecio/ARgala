@@ -103,6 +103,24 @@ Implementation, skills and evidence are published in [PR #36](https://github.com
 as separate incremental commits. Repository CI and review decisions are tracked
 there; publication does not imply merge approval or physical acceptance.
 
+### Independent read-only review — 2026-10-31
+
+At the owner's explicit request, a separate review agent inspected
+`775f9da..3d04976`, all changed application/test files, relevant consumers/hooks,
+locale resources and binding design guidance. It opened the three browser contact
+sheets before the builder audit, plus before/after comparisons, and verified the
+vendored skill against the official release (only the documented whitespace
+normalization differed). It found **no confirmed source blockers or actionable
+regressions**. Independently rerun typecheck, zero-warning lint, five focused suites
+with **84 passing tests**, and baseline-to-HEAD whitespace check passed. It changed
+no tracked files, built no APK and did not grant native acceptance or merge itself.
+
+The reviewer specifically retained the limitation that the FlatList test double
+renders only the first ten rows: it cannot prove scrolling, window eviction /
+re-entry or native recycling. Browser evidence still cannot establish Android
+layout, text scaling, numeric IME/Save visibility, TalkBack, fling performance,
+Back/refocus or foreground recovery. These remain physical acceptance work below.
+
 ## Before/after visual evidence (browser only)
 
 The isolated review renders the actual screen components, installed HeroUI,
