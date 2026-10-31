@@ -99,6 +99,10 @@ boundaries. No confirmed remaining source blocker in this scoped change. This is
 an in-thread source/render review, not an independent review or native UAT sign-off.
 General Impeccable web detector was not used as a native acceptance gate.
 
+Implementation, skills and evidence are published in [PR #36](https://github.com/mjfelecio/ARgala/pull/36)
+as separate incremental commits. Repository CI and review decisions are tracked
+there; publication does not imply merge approval or physical acceptance.
+
 ## Before/after visual evidence (browser only)
 
 The isolated review renders the actual screen components, installed HeroUI,

@@ -6,6 +6,8 @@ From main `775f9da`, the scoped cleanup preserves the approved October 30 compac
 Explore header, measured Directions peek, farther AR panels and held collapse
 interaction. [Audit, skill provenance and before/after evidence](audits/2026-10-30-design-coherence.md)
 record the design authority and full screen coverage/limits.
+Incremental commits are published in [PR #36](https://github.com/mjfelecio/ARgala/pull/36),
+which tracks repository CI and review decisions separately from device acceptance.
 
 Installed official Impeccable 4.8.0 for project Codex (reviewed source/installer,
 no force or app dependencies), portable `argala-ui`, and evidence-backed PRODUCT /
