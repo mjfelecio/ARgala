@@ -12,6 +12,7 @@ import { placesService } from '@/features/places/service';
 import { listDestinations } from './catalog';
 import DestinationsScreen from './destinations-screen';
 import DestinationScreen from './destination-screen';
+import { DestinationContentContext } from '@/features/destination-content/context';
 
 const controls = vi.hoisted(() => ({ params: { destinationId: 'D01' } as Record<string, unknown>, language: 'en' as 'en' | 'ko' | 'ja', focused: true, active: true, back: true }));
 vi.mock('expo-router', () => ({ useLocalSearchParams: () => controls.params, useIsFocused: () => controls.focused,
@@ -110,6 +111,23 @@ it('opens the ACLC pilot card on the existing map without acquiring catalog GPS'
   expect(card).toBeDefined();
   await act(async () => card!.props.onPress());
   expect(router.navigate).toHaveBeenCalledWith({ pathname: '/', params: { featuredDestinationId: 'pilot-aclc' } });
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+it.each(['en', 'ja', 'ko'])('puts %s destination choices before optional content maintenance', async locale => {
+  await translations.changeLanguage(locale);
+  await mount(<DestinationContentContext.Provider value={{ manifest: null, ready: true, checking: false, canCheck: true, authenticated: true, message: 'content.bundled', error: null, checkUpdates: vi.fn() }}><DestinationsScreen /></DestinationContentContext.Provider>);
+  const copy = tree!.root.findAllByType('text').map(node => node.props.children);
+  const updates = copy.indexOf(translations.t('content.title'));
+  const destination = copy.indexOf('ACLC College of Ormoc');
+  expect(destination).toBeGreaterThan(-1);
+  expect(updates).toBeGreaterThan(destination);
+  const action = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === 'ACLC College of Ormoc')!;
+  expect(action.props.className).toContain('rounded-card');
+  expect(action.props.className).toContain('bg-surface');
+  const name = action.findAllByType('text').find(node => node.props.children === 'ACLC College of Ormoc')!;
+  expect(name.props.className).toContain('text-card');
+  expect(action.findAllByType('text').map(node => node.props.children).flat()).toContain(translations.t('destinations.provisional'));
+  expect(placesService.nearby).not.toHaveBeenCalled();
   expect(placesService.details).not.toHaveBeenCalled();
 });
 it('keeps approved featured overview and history out of prearrival 2D details', async () => {

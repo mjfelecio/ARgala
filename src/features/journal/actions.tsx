@@ -4,11 +4,11 @@ import { Button } from 'heroui-native/button';
 import { useTranslation } from 'react-i18next';
 import { useJournal } from './context';
 import { bookmarkKey,type Bookmark } from './model';
-export function SavePlaceAction({reference}:{reference:Bookmark}){
+export function SavePlaceAction({reference,variant='secondary'}:{reference:Bookmark;variant?:'secondary'|'ghost'}){
  const journal=useJournal();const {t}=useTranslation();const pending=useRef(false);const [busy,setBusy]=useState(false);
  if(!journal)return null;
  const saved=journal.state.bookmarks.some(x=>bookmarkKey(x)===bookmarkKey(reference));const label=t(saved?'journal.remove':'journal.save');
- return <Button variant="secondary" accessibilityLabel={label} isDisabled={!journal.ready||busy} accessibilityState={{busy,disabled:!journal.ready||busy}} onPress={async()=>{
+ return <Button variant={variant} accessibilityLabel={label} isDisabled={!journal.ready||busy} accessibilityState={{busy,disabled:!journal.ready||busy}} onPress={async()=>{
   if(pending.current||!journal.ready)return;pending.current=true;setBusy(true);try{await journal.save(reference,!saved);}finally{pending.current=false;setBusy(false);}
  }}><Button.Label>{label}</Button.Label></Button>;
 }

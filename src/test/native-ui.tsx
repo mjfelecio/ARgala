@@ -14,6 +14,9 @@ vi.mock('react-native', () => ({
   Easing: { bezier: () => (value: number) => value }, Animated: { Interpolation: class {}, Value: class { interpolate() { return 0; } } }, BackHandler: { addEventListener: () => ({ remove() {} }) }, Image: 'img', TextInput: 'input', View: 'view', Text: 'text', Pressable: 'button', ScrollView: 'scroll',
   Platform: { OS: 'android', select: (values: Record<string, unknown>) => values.android ?? values.default },
   Modal: 'modal', ActivityIndicator: 'progress', StyleSheet: { create: (styles: unknown) => styles, flatten: (styles: unknown) => styles, absoluteFillObject: {}, hairlineWidth: 1 },
+  // Model a bounded list window, not native recycling or Yoga layout.
+  FlatList: ({ ListHeaderComponent, ListEmptyComponent, renderItem, ...props }: { data: unknown[]; renderItem(info: { item: unknown; index: number }): React.ReactNode; keyExtractor(item: unknown): string; ListHeaderComponent?: React.ReactNode; ListEmptyComponent?: React.ReactNode }) => React.createElement('virtualized-list', props,
+    ListHeaderComponent, props.data.length ? props.data.slice(0, 10).map((item, index) => React.createElement(React.Fragment, { key: props.keyExtractor(item) }, renderItem({ item, index }))) : ListEmptyComponent),
   I18nManager: { isRTL: false }, PixelRatio: { get: () => 1 },
   useWindowDimensions: () => ({ width: 360, height: 800, fontScale: nativeUi.fontScale }),
 }));

@@ -20,8 +20,9 @@ export function ProfileSettingsContent({ entry }: { entry: 'tab' | 'stack' }) {
       {entry === 'tab' && <Ionicons name="compass-outline" color={accent} size={28} accessible={false} />}
       <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('settings.profileTitle')}</Text>
     </View>
-    {entry === 'tab' && <><ViroRingLaunch /><ViroSpikeLaunch /></>}
-    <JournalProfileEntry/>
-    <SettingsForm />
+    <SettingsForm>
+      {entry === 'tab' && <><ViroRingLaunch /><ViroSpikeLaunch /></>}
+      <JournalProfileEntry />
+    </SettingsForm>
   </StyledSafeAreaView>;
 }
