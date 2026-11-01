@@ -1909,7 +1909,9 @@ material issue in the wrapper, flow, caption or geometry changes.
 Final `npm run check` passed strict TypeScript, zero-warning lint and **1,291 tests
 across 117 files**. `npm run export:android` passed **3,002 modules**, 36 assets and
 an 8.5 MB Hermes bundle; `git diff --check` passed. This export is not an APK build.
-The final physical spacing retry is pending; EN/JA/KO/large-system-text, approved
-media, complete held-control/lifecycle coverage, unsupported hardware and on-site
-GPS remain separate acceptance work. No final spacing acceptance is inferred
-from the automated checks or earlier readability feedback.
+The owner subsequently confirmed the final `09e950a` retry: “yes it works now”,
+answering the check for natural content width and visible padding below
+A−/A+/Close. These two spacing findings pass on the existing Galaxy A53/APK.
+The full EN/JA/KO reading-size and large-system-text matrix, approved media,
+complete held-control/lifecycle coverage, unsupported hardware and on-site GPS
+remain separate acceptance work. This evidence update changes no application code.

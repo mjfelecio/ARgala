@@ -11,7 +11,7 @@
   background-location grants remained denied. Existing sign-in/data retained.
 - Start: 35% battery, USB charging, 38.3°C. No system display settings changed.
 - JavaScript: `feat/ar-destination-stories`, initial `de5943b`, followed by
-  uncommitted reader-layout corrections in this trial. Development opt-in,
+  reader-layout corrections committed as `09e950a`. Development opt-in,
   localhost Metro 8082 and USB reverse; no simulated GPS or geographic admission.
 
 ## Observations
@@ -20,8 +20,8 @@
 | --- | --- |
 | Existing APK / native scene | PASS for this trial: live rear-camera view, native Overview panel and page 2/4 captured around 19:40. Five development chapters; no production tourism claims. |
 | Text readability | Owner: “its readable”. This is normal-scale English evidence, not every reading size/locale. |
-| Right content margin | FAIL: owner saw a greater right gap and text apparently limited per row. The initial estimated-width correction was also rejected. Final native-flow correction awaits another physical check. |
-| Bottom reading controls | FAIL: owner reported buttons against the panel border. Geometry confirmed only 0.005 world units below fills. The correction derives a 0.04 inset and 0.04 row gap; visible acceptance remains pending. |
+| Right content margin | PASS on `09e950a`: after rejecting the original and estimated-width versions, the owner confirmed the native-flow version fills the content width naturally: “yes it works now”. |
+| Bottom reading controls | PASS on `09e950a`: the owner confirmed visible padding below A−/A+/Close after the correction from 0.005 to 0.04 world-unit clearance and a 0.04 row gap. |
 | Held controls | PARTIAL: Overview page 2/4 was observed. A complete Previous/Next/A−/A+/Close sweep was not explicitly confirmed. Accepted brief finger-pad hold/release remains required; no short-tap reliability claim. |
 | Camera release | PASS for the observed return: camera connected at 19:40:00, disconnected at 19:41:15; subsequent Explore screenshot and empty active-client list agree. Not a complete background/restoration matrix. |
 | Help / large system text | NOT RUN as a complete native acceptance check. Automated coverage is separate. |
@@ -52,5 +52,6 @@ flow and bounded one/two-line pagination. Button rows and content share derived
 vertical geometry so bottom inset cannot be consumed by row spacing.
 
 Regression and final verification results are recorded in `docs/validation.md`.
-No complete physical acceptance is claimed until the owner confirms the final
-spacing and the remaining native scenarios are exercised.
+The owner confirmed the final content width and bottom-control padding on the
+existing phone/APK. This closes those two spacing findings. The other native
+scenarios listed above remain independently unverified.
