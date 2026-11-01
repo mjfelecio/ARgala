@@ -17,6 +17,9 @@ additional images. Captions, alt text, credits and English fallback notices rema
 paginated and reachable. Text-only stories have no empty image placeholder.
 Long cover titles are abbreviated by grapheme; their full title is included in
 the reading text. Images use more vertical space than the previous strip.
+Ordinary paragraphs flow across the native reading box; page estimates do not
+force narrow display rows. Explicit paragraphs and protective long-token/CJK
+breaks remain intact. Reading controls retain a visible bottom inset and row gap.
 
 Exit, destination and Help occupy the top utility surface. Recenter and Capture
 occupy a separate bounded bottom surface. Help scrolls within its visible card

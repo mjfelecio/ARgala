@@ -73,6 +73,34 @@ it('renders ordinary text with no image slot when reviewed media are absent', as
   currentContent = { ...content, approved: { ...content.approved!, media: [] } }; await mount();
   expect(image()).toBeUndefined(); expect(action('next').props.onClick).toBeUndefined(); expect(text('ring-body')).toBeDefined();
 });
+it('uses the reading box width without a premature right margin at the existing font size', async () => {
+  const sentence = 'Visitors discover the stories of this place.';
+  currentContent = { ...content, approved: { ...content.approved!, title: { en: approved('Overview') }, body: { en: approved(sentence) }, media: [] } };
+  await mount();
+  const body = tree.root.findAllByType('text' as React.ElementType).find(node => node.props.testID === 'ring-body')!;
+  expect(body.props.text).toContain(sentence);
+  expect(body.props.width * body.props.scale[0]).toBeCloseTo(1.08);
+  expect(body.props.style.fontSize * body.props.scale[0]).toBe(5);
+});
+it('lets the native renderer flow ordinary paragraphs across the actual box instead of enforcing JavaScript rows', async () => {
+  currentContent = { ...content, approved: { ...content.approved!, title: { en: approved('Overview') }, body: { en: approved('Visitors discover the stories of this place. Meaningful context makes the destination worth exploring. '.repeat(3)) }, media: [] } };
+  await mount();
+  const body = tree.root.findAllByType('text' as React.ElementType).find(node => node.props.testID === 'ring-body')!;
+  expect(body.props.textLineBreakMode).toBe('WordWrap');
+  expect(body.props.text.split('\n\n')[1]).not.toContain('\n');
+});
+it('keeps visible padding below reading controls and separates both action rows from content', async () => {
+  currentContent = { ...content, approved: { ...content.approved!, media: [] } }; await mount();
+  const surface = tree.root.findAllByType('quad' as React.ElementType).find(node => node.props.width === 1.25)!;
+  const panelBottom = -surface.props.height / 2;
+  for (const id of ['smaller', 'larger', 'close']) {
+    const node = action(id); const fill = node.findByType('quad' as React.ElementType);
+    const bottom = node.props.position[1] - fill.props.height / 2;
+    expect(bottom - panelBottom).toBeGreaterThanOrEqual(0.039);
+  }
+  const previous = action('previous'); const smaller = action('smaller');
+  expect(previous.props.position[1] - 0.09 - (smaller.props.position[1] + 0.09)).toBeGreaterThanOrEqual(0.039);
+});
 it('keeps long full chapter titles readable beyond their bounded cover label', async () => {
   const title = 'Verified long chapter title '.repeat(5);
   currentContent = { ...content, approved: { ...content.approved!, title: { en: approved(title) }, media: [] } };

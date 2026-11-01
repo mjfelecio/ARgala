@@ -13,13 +13,9 @@ export function galleryPages(textPages: readonly ContentPage[], media: readonly 
       caption?.value !== alt?.value ? caption?.value : undefined, credit(item.credit)].filter(Boolean).join('\n');
     // Reserve the top half of the existing text area for the image. Keep the
     // same glyph widths, with fewer lines; every caption/credit remains reachable.
-    const lines = size === 'large' ? 1 : 2;
-    const wrapped = paginate(metadata, size).flatMap(page => page.text.split('\n'));
-    const pages: GalleryPage[] = [];
-    for (let index = 0; index < wrapped.length; index += lines) {
-      pages.push({ kind: 'image', start: 0, end: 0, text: wrapped.slice(index, index + lines).join('\n'), media: item, mediaPage: pages.length });
-    }
-    return pages;
+    return paginate(metadata, size, '', size === 'large' ? 1 : 2).map((page, index): GalleryPage => ({
+      ...page, kind: 'image', media: item, mediaPage: index,
+    }));
   });
   return [...(images[0] ?? []), ...textPages.map(page => ({ ...page, kind: 'text' as const })), ...images.slice(1).flat()];
 }

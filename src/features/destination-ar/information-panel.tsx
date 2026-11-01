@@ -12,7 +12,17 @@ import { readingSizes, type ReadingSize } from './reading-preference';
 import type { ArNativeStyle } from './native-styles';
 import type { useReadingSize } from './use-reading-size';
 import { galleryPages, galleryCursor, cursorAtPage, type GalleryPage } from './information-gallery';
-import { NativePanelAction } from './information-tile';
+import { NativePanelAction, nativePanelActionHeight } from './information-tile';
+import { readingContentWidth } from './reading-widths';
+
+const bottomRowY = -ringMetrics.panelHeight / 2 + 0.04 + nativePanelActionHeight / 2;
+const pageRowY = bottomRowY + nativePanelActionHeight + 0.04;
+const contentBottom = pageRowY + nativePanelActionHeight / 2 + 0.02;
+const bodyHeight = 0.5;
+const bodyY = contentBottom + bodyHeight / 2;
+const captionHeight = 0.2;
+const imageHeight = bodyHeight - captionHeight - 0.02;
+const imageY = contentBottom + captionHeight + 0.02 + imageHeight / 2;
 
 export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0 }: {
   selection: FocusSelection; content: RingContent; previous?: ReadingCursor; reading: ReturnType<typeof useReadingSize>; enabled: boolean; style: ArNativeStyle; decorations?: boolean;
@@ -61,16 +71,16 @@ export function InformationPanel({ selection, content, previous, reading, enable
     {!closing && <>
       <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
       <ArText testID="ring-sample-label" position={[0.28, 0.555, 0.006]} width={0.56} height={0.06} text={content.approved ? t('destinationStories.openedCount', { count: openedCount, total: chapterCount }) : t('destinationRing.sampleLabel')} style={style.text(3)} />
-      {page.kind === 'image' ? <BundledGalleryPage key={page.media!.id} page={page} size={reading.size} style={style} /> : <ArText testID="ring-body" position={[0, 0.05, 0.006]} width={1.08} height={0.5} text={page.text || t('destinationRing.empty')}
-        textLineBreakMode="None" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />}
-      <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.4, -0.31, 0.012]} enabled={interactive && cursor.page > 0} style={style}
+      {page.kind === 'image' ? <BundledGalleryPage key={page.media!.id} page={page} size={reading.size} style={style} /> : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
+        textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />}
+      <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.4, pageRowY, 0.012]} enabled={interactive && cursor.page > 0} style={style}
         onPress={() => onCursor(content.id, cursorAtPage(pages, cursor.page - 1, locale, reading.size))} />
-      <ArText testID="ring-page-indicator" position={[0, -0.31, 0.012]} width={0.4} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />
-      <NativePanelAction id="next" label={t('destinationRing.next')} width={0.34} position={[0.4, -0.31, 0.012]} enabled={interactive && cursor.page < pages.length - 1} style={style}
+      <ArText testID="ring-page-indicator" position={[0, pageRowY, 0.012]} width={0.4} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />
+      <NativePanelAction id="next" label={t('destinationRing.next')} width={0.34} position={[0.4, pageRowY, 0.012]} enabled={interactive && cursor.page < pages.length - 1} style={style}
         onPress={() => onCursor(content.id, cursorAtPage(pages, cursor.page + 1, locale, reading.size))} />
-      <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.42, -0.53, 0.012]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />
-      <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[-0.17, -0.53, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
-      <NativePanelAction id="close" primary label={t('destinationRing.close')} width={0.46} position={[0.28, -0.53, 0.012]} enabled={interactive} style={style} onPress={onClose} />
+      <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.42, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />
+      <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[-0.17, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
+      <NativePanelAction id="close" primary label={t('destinationRing.close')} width={0.46} position={[0.28, bottomRowY, 0.012]} enabled={interactive} style={style} onPress={onClose} />
       {reading.error && <ViroNode position={[0, 0, 0.025]}>
         <ViroQuad renderingOrder={4} ignoreEventHandling width={1.12} height={0.5} materials="argalaRingSurface" />
         <ArText renderingOrder={5} testID="ring-reading-error" position={[0, 0.06, 0.004]} width={1.02} height={0.23} text={t(`destinationRing.${reading.error}`)} style={style.text(4)} />
@@ -80,16 +90,18 @@ export function InformationPanel({ selection, content, previous, reading, enable
   </ViroNode>;
 }
 
+
+
 /** A single bundled image owns only its loading state, never native hit events. */
 function BundledGalleryPage({ page, size, style }: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle }) {
   const { t } = useTranslation(); const [failed, setFailed] = useState(false);
   return <>
-    {failed ? <ArText testID="ring-gallery-error" position={[0, 0.16, 0.006]} width={1.08} height={0.3}
+    {failed ? <ArText testID="ring-gallery-error" position={[0, imageY, 0.006]} width={readingContentWidth} height={imageHeight}
       text={t('destinationRing.imageFailed')} style={style.text(4)} /> :
-      <ViroImage testID="ring-gallery-image" source={page.media!.source} position={[0, 0.16, 0.006]} width={1.08} height={0.3}
+      <ViroImage testID="ring-gallery-image" source={page.media!.source} position={[0, imageY, 0.006]} width={readingContentWidth} height={imageHeight}
         renderingOrder={2} ignoreEventHandling resizeMode="ScaleToFit" imageClipMode="ClipToBounds"
         onError={() => setFailed(true)} onLoadEnd={event => { if (!event.nativeEvent.success) setFailed(true); }} />}
-    <ArText testID="ring-gallery-caption" position={[0, -0.105, 0.006]} width={1.08} height={0.2} text={page.text}
-      textLineBreakMode="None" textClipMode="ClipToBounds" style={style.text(readingMetrics[size].fontSize, 'left')} />
+    <ArText testID="ring-gallery-caption" position={[0, contentBottom + captionHeight / 2, 0.006]} width={readingContentWidth} height={captionHeight} text={page.flowText ?? page.text}
+      textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[size].fontSize, 'left')} />
   </>;
 }

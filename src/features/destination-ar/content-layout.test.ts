@@ -1,5 +1,33 @@
 import { expect, it } from 'vitest';
 import { paginate, reflowCursor } from './content-layout';
+it('wraps normal Latin words at spaces while retaining every source character', () => {
+  const text = 'Discover meaningful destination stories with context. '.repeat(8);
+  const pages = paginate(text, 'standard');
+  const words = new Set(text.trim().split(' '));
+  for (const page of pages) for (const line of page.text.split('\n')) for (const word of line.trim().split(' ')) {
+    expect(words.has(word)).toBe(true);
+  }
+  expect(pages.map(page => text.slice(page.start, page.end)).join('')).toBe(text);
+});
+it('accounts for wide glyphs instead of treating W like a narrow lowercase letter', () => {
+  const pages = paginate('W'.repeat(100), 'standard');
+  expect(pages[0].text.split('\n')[0].length).toBeLessThanOrEqual(21);
+});
+it('keeps paragraph breaks but releases soft rows to native flow without losing words', () => {
+  const paragraph = 'Visitors discover meaningful destination stories with context. '.repeat(4);
+  const text = paragraph + '\n\n' + paragraph;
+  const pages = paginate(text, 'standard');
+  expect(pages[0].flowText).not.toContain('\n');
+  expect(pages.some(page => page.flowText?.includes('\n\n'))).toBe(true);
+  expect(pages.map(page => text.slice(page.start, page.end)).join('')).toBe(text);
+});
+it('retains bounded hard rows for CJK and long tokens that pinned native WordWrap cannot split', () => {
+  const text = '漢字'.repeat(100);
+  const pages = paginate(text, 'standard');
+  expect(pages[0].flowText).toContain('\n');
+  expect(pages.every(page => page.flowText!.split('\n').every(line => line.length <= 20))).toBe(true);
+  expect(pages.map(page => page.flowText!.replaceAll('\n', '')).join('')).toBe(text);
+});
 it.each(['en', 'ja', 'ko'])('retains all source text and valid page bounds for %s', locale => {
   const text = ({ en: 'Development mock. No visitor facts. '.repeat(30), ja: '開発用の例です。実際の歴史情報ではありません。'.repeat(30), ko: '개발용 예시입니다. 실제 역사 정보가 아닙니다. '.repeat(30) })[locale]!;
   const pages = paginate(text, 'standard');

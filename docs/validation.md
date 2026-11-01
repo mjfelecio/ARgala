@@ -1874,3 +1874,42 @@ unsupported-hardware trial ran. Browser/component structure cannot establish
 Android Yoga, native font/image fit, alpha compositing, touch pass-through or
 large-font EN/JA/KO acceptance. The nine destinations still require approved
 stories/media; ACLC draft/simulation provenance remains separate from production.
+
+
+### Physical AR trial and reader-spacing corrections — 2026-11-01
+
+The owner supplied ADB access to the Galaxy A53/Android 16. The existing
+development APK (SHA-256
+`ad5cc55cf6259bb4f93abd8ef9c0a702770aaa7a3045d850b8bc9d7de0403d0e`)
+loaded `de5943b` through Metro after restoring a lost USB reverse mapping. No
+build/reinstall, data reset, provider search, mock GPS or content publication was
+performed. Native Overview/page 2 of 4 rendered with the new utility surfaces;
+the owner confirmed readable text but rejected the persistent right content gap
+and later reported controls against the bottom border. Returning to Explore
+released the camera in the observed sequence. Full device configuration, native
+observations and untested scenarios are in
+[the device record](ar-destination-stories-device-testing.md).
+
+Font-estimate changes alone did not pass the owner's retry. A temporary invisible
+ten-M sample measured 0.43 world units at logical size 5, supporting the native
+scale without establishing all font fit. The probe was removed before final
+verification. The final correction preserves conservative, source-contiguous
+page budgets but releases ordinary whitespace row boundaries to native WordWrap.
+Explicit paragraphs and bounded long-token/CJK grapheme breaks remain hard,
+avoiding pinned Viro's oversized-word overflow. Captions follow the same bounded
+flow. The 1.08-wide reading box, font sizes and 1.5 focus distance are unchanged.
+
+The bottom-control regression reproduced only 0.005 units of clearance. Shared
+control height and derived row/content geometry now retain a 0.04 bottom inset,
+0.04 row gap and 0.02 content gap. Tests cover this geometry and native paragraph
+flow alongside source fidelity, long/wide glyphs, CJK, reading size, complete
+metadata and session cursor restoration. Independent incremental review found no
+material issue in the wrapper, flow, caption or geometry changes.
+
+Final `npm run check` passed strict TypeScript, zero-warning lint and **1,291 tests
+across 117 files**. `npm run export:android` passed **3,002 modules**, 36 assets and
+an 8.5 MB Hermes bundle; `git diff --check` passed. This export is not an APK build.
+The final physical spacing retry is pending; EN/JA/KO/large-system-text, approved
+media, complete held-control/lifecycle coverage, unsupported hardware and on-site
+GPS remain separate acceptance work. No final spacing acceptance is inferred
+from the automated checks or earlier readability feedback.
