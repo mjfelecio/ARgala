@@ -67,6 +67,7 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
   const [poseRequired, setPoseRequired] = useState(false); const recenterResult = useCallback((success: boolean) => setPoseRequired(!success), []);
   const [help, setHelp] = useState(false); const [metrics, setMetrics] = useState<RingMetrics>({ received: 0, applied: 0 });
   const exploring = session.phase === 'exploring'; const revealing = session.phase === 'reveal' || session.phase === 'limited' && session.revealedCount < content.length;
+  const showLiveGuidance = session.phase === 'limited' || revealing || identity.provenance !== 'verified' || poseRequired || help;
   if (startup.errorCode === 'unsupported' && unsupportedFallback && focused && active) return <>{unsupportedFallback}</>;
   return <View testID="destination-ar-scene" className="flex-1 bg-ink" onLayout={event => {
     const { width, height } = event.nativeEvent.layout;
@@ -76,13 +77,14 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
     {startup.mountScene && NativeRing && <View style={{ position: 'absolute', top: 0, left: 0, width: scene.width, height: scene.height }}>
       <SceneBoundary key={startup.attempt} onFailure={startup.onFailure}>
         <NativeRing onReady={startup.onReady} onTracking={lifecycle.onTracking} onControls={acceptControls} onRecenterResult={recenterResult}
-          onMetrics={help ? setMetrics : undefined} reading={reading} content={content} initialProgress={session.progress} onProgress={lifecycle.onProgress}
-          visibleTileCount={session.revealedCount} interactive={exploring} />
+          onMetrics={help && identity.provenance === 'development' ? setMetrics : undefined} reading={reading} content={content} initialProgress={session.progress} onProgress={lifecycle.onProgress}
+          visibleTileCount={session.revealedCount} interactive={exploring && !help} />
       </SceneBoundary>
     </View>}
-    <ArUtilityChrome titleKey="destinationRing.title" title={title} onReturn={onReturn} onExit={() => { close(); onExit?.(); }} actions={startup.phase === 'live' ? <>
-      <Button variant="secondary" accessibilityLabel={t('destinationRing.recenter')} isDisabled={!exploring} onPress={() => controls.current?.recenter()}><Button.Label>{t('destinationRing.recenter')}</Button.Label></Button>
+    <ArUtilityChrome viewportHeight={scene.height} titleKey="destinationRing.title" title={title} onReturn={onReturn} onExit={() => { close(); onExit?.(); }} actions={startup.phase === 'live' ? <>
       <Button variant="secondary" accessibilityLabel={t('destinationRing.help')} accessibilityState={{ expanded: help }} onPress={() => setHelp(value => !value)}><Button.Label>{t('destinationRing.help')}</Button.Label></Button>
+    </> : undefined} bottom={startup.phase === 'live' && !help ? <>
+      <Button variant="secondary" className="min-h-12" accessibilityLabel={t('destinationRing.recenter')} isDisabled={!exploring} onPress={() => controls.current?.recenter()}><Button.Label>{t('destinationRing.recenter')}</Button.Label></Button>
       {exploring && focused && active && <ArPhotoControls capture={capture} running sessionKey={JSON.stringify([identity.principalId, identity.admissionId, identity.destinationId, identity.provenance, startup.attempt])} />}
     </> : undefined}>
       {session.phase === 'expired' ? <View className="gap-3 p-4"><Notice>{t('destinationSession.expired')}</Notice>
@@ -91,13 +93,19 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
       {progressFeedback}
       {!session.established && guidance}
       {session.established && (startup.phase === 'checking' || startup.phase === 'prepared' || startup.phase === 'initializing') && <Notice>{t('destinationSession.restoring')}</Notice>}
-      {startup.phase === 'live' && <View className="gap-2 p-4">
-        <Text className="font-sans text-sm text-white">{t(session.phase === 'limited' ? 'destinationAr.trackingLost' : revealing ? 'destinationSession.reveal' : 'destinationRing.live')}</Text>
-        <Text className="font-sans text-xs text-white">{t(identity.provenance === 'verified' ? 'arrival.live' : developmentNoticeKey)}</Text>
+      {startup.phase === 'live' && showLiveGuidance && <View className="gap-2 p-4">
+        {(session.phase === 'limited' || revealing) && <Notice>{t(session.phase === 'limited' ? 'destinationAr.trackingLost' : 'destinationSession.reveal')}</Notice>}
+        {!session.established || revealing ? <Text className="font-sans text-sm text-white">{t('destinationStories.exploreHint')}</Text> : null}
+        {identity.provenance !== 'verified' && <Text className="rounded-card bg-ar-panel p-2 font-sans text-xs text-white">{t(developmentNoticeKey)}</Text>}
         {session.phase === 'limited' && <Action title={t('destinationSession.retryTracking')} onPress={lifecycle.retryTracking} disabled={startup.pending} />}
         {revealing && <Action title={t('destinationSession.skip')} onPress={() => { finishReveal(); void completeIntroduction(); }} />}
         {poseRequired && <Notice>{t('destinationRing.poseRequired')}</Notice>}
-        {help && <Notice>{t('destinationRing.helpText')}{'\n'}{t('destinationRing.poseRate', metrics)}</Notice>}
+        {help && <View testID="ar-help" className="gap-3 rounded-card bg-ar-panel p-4">
+          <Text accessibilityRole="header" className="font-sans text-card font-semibold text-white">{t('destinationStories.helpTitle')}</Text>
+          <Text className="font-sans text-sm text-white">{t('destinationStories.exploreHint')}{'\n\n'}{t('destinationRing.helpText')}</Text>
+          {identity.provenance === 'development' && <Text className="font-sans text-xs text-white">{t('destinationRing.poseRate', metrics)}</Text>}
+          <Button variant="secondary" accessibilityLabel={t('destinationStories.dismissHelp')} onPress={() => setHelp(false)}><Button.Label>{t('destinationStories.dismissHelp')}</Button.Label></Button>
+        </View>}
       </View>}
       <ArIntroductionNotice introduction={introduction} />
     </ArUtilityChrome>

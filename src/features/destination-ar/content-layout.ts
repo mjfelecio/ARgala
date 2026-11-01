@@ -8,8 +8,11 @@ export const readingMetrics = {
   standard: { columns: 18, lines: 5, fontSize: 5 },
   large: { columns: 14, lines: 4, fontSize: 6 },
 } as const;
-export function paginate(text: string, size: ReadingSize): ContentPage[] {
-  if (text.length > 24000) throw new Error('AR content exceeds layout budget');
+export function paginate(text: string, size: ReadingSize, heading = ''): ContentPage[] {
+  // Heading presentation cannot consume the existing body allowance. Each
+  // field stays bounded, and offsets refer to the complete displayed source.
+  if (text.length > 24000 || heading.length > 24000) throw new Error('AR content exceeds layout budget');
+  if (heading) text = `${heading}\n\n${text}`;
   if (!text) return [{ start: 0, end: 0, text: '' }];
   const budget = readingMetrics[size]; const pages: ContentPage[] = [];
   let start = 0; let end = 0; let line = ''; let units = 0; let lines: string[] = [];

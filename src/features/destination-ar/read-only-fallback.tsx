@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Image, Text, View, type LayoutChangeEvent } from 'react-native';
-import { Card } from 'heroui-native/card';
 import { useTranslation } from 'react-i18next';
 import { Screen, Notice, Action } from '@/ui/shared';
 import { useSettings } from '@/features/settings/provider';
@@ -48,7 +47,9 @@ function AuthorizedReader({ entry, language, guidance, feedback, onEstablished }
     if (fresh) onEstablished();
   }
   return tiles.length ? <View testID="eligible-read-only-content" className="gap-4" onLayout={establish}>
-    {tiles.map(tile => <Card key={tile.id} className="gap-3 p-4 shadow-none">
+    <Text className="font-sans text-sm text-muted">{t('destinationStories.readerTitle')}</Text>
+    {tiles.map((tile, index) => <View key={tile.id} className="gap-3 border-b border-border pb-6">
+      <Text className="font-sans text-sm text-muted">{t('destinationStories.chapter', { current: index + 1, total: tiles.length })}</Text>
       <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{tile.title}</Text>
       {tile.englishFallback && <Text className="font-sans text-xs text-muted">{t('destinations.englishFallback')}</Text>}
       <Text selectable className="font-sans text-base text-foreground">{tile.body}</Text>
@@ -56,7 +57,7 @@ function AuthorizedReader({ entry, language, guidance, feedback, onEstablished }
         const media = entry.destination.media?.find(item => item.id === id);
         return media ? <ReaderImage key={id} media={media} language={language} /> : null;
       })}
-    </Card>)}
+    </View>)}
     {feedback}
   </View> : <><Notice>{t('fallback.verify')}</Notice>{guidance}</>;
 }

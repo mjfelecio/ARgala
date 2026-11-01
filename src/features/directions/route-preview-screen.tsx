@@ -15,6 +15,7 @@ import { ProviderAttributions } from '@/features/map/attributions';
 import { setPlaceSelection } from '@/features/places/selection';
 import { useSettings } from '@/features/settings/provider';
 import { approvedArContent } from '@/features/destinations/ar-content';
+import { destinationName } from '@/features/destinations/catalog';
 import { useDestinationLookup } from '@/features/destination-content/context';
 import { useArAdmission, useAdmissionSource } from '@/features/destination-ar/admission-context';
 import { simulateArEntry } from '@/features/destination-ar/simulation-loader';
@@ -64,7 +65,8 @@ function Preview({ token }: { token: unknown }) {
   const contentDestination = useDestinationLookup();
   const featured = contentDestination(data?.intent.featuredDestinationId);
   const arSource = useAdmissionSource(admission, featured?.id ?? null, { running: running && preview.locationEnabled, watcherStatus: location.watcherStatus, sample: location.watcherSample ?? null }, true);
-  const contentReady = !!approvedArContent(featured, language).length; const draftAr = !contentReady && featured?.id === 'pilot-aclc' && isViroSpikeEnabled();
+  const chapterCount = approvedArContent(featured, language).length;
+  const contentReady = chapterCount > 0; const draftAr = !contentReady && featured?.id === 'pilot-aclc' && isViroSpikeEnabled();
   function launchAr() {
     if (!featured) return;
     const entryToken = arSource.begin(draftAr ? 'draft' : 'approved', language);
@@ -162,7 +164,7 @@ function Preview({ token }: { token: unknown }) {
             {linkError && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('directions.mapsFailed')}</Text>}
           </View>}
           </RoutePreviewPrimary>
-          {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
+          {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} destinationTitle={featured ? destinationName(featured) : undefined} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
           {featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}

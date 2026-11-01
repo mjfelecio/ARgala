@@ -37,6 +37,11 @@ collapse-on-other-tile held interaction. [Latest refinement](docs/ui-refinements
 Keep full native scene bounds independent of chrome/sheets and retain the accepted
 finger-pad brief hold/release instruction, not a short-tap promise.
 
+Selected-destination AR uses [Destination Stories](docs/ar-destination-stories.md):
+native chapter covers and image/text reading pages, bounded top/bottom utilities,
+and session-only Opened indicators. Editorial readiness and physical acceptance
+remain separate from the implemented presentation.
+
 ## Working skill and review
 
 Use [argala-ui](.agents/skills/argala-ui/SKILL.md) for Android insets, keyboard,

@@ -11,7 +11,7 @@ import { useExplorerMapStyle } from './map-style';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import MapView, { Circle, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useTranslation } from 'react-i18next';
-import { getDestination } from '@/features/destinations/catalog';
+import { destinationName, getDestination } from '@/features/destinations/catalog';
 import { useDestinationLookup } from '@/features/destination-content/context';
 import { featuredMapPlace, matchedFeaturedDestination } from '@/features/destinations/map-selection';
 import { destinationToRoutePlace } from '@/features/destinations/routing';
@@ -92,7 +92,8 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
   const arrival = useDestinationProximity(featured, { running: active && focused, watcherStatus: location.watcherStatus ?? 'pending', sample: location.watcherSample ?? null });
   const admission = useArAdmission();
   const arSource = useAdmissionSource(admission, featured?.id ?? null, { running: active && focused, watcherStatus: location.watcherStatus ?? 'pending', sample: location.watcherSample ?? null }, true);
-  const contentReady = !!approvedArContent(featured, language).length;
+  const chapterCount = approvedArContent(featured, language).length;
+  const contentReady = chapterCount > 0;
   const draftAr = !contentReady && featured?.id === 'pilot-aclc' && isViroSpikeEnabled();
   function launchAr() {
     if (!featured) return;
@@ -225,7 +226,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
     <HomePlaceSheet saveAction={<>{featured ? <SavePlaceAction reference={{kind:'featured',id:featured.id}}/> : place?.provider === 'google' ? <SavePlaceAction reference={{kind:'google',id:place.providerId}}/> : null}<JournalFeedback/></>} geometry={sheetGeometry} animatedPosition={sheetPosition} key={featured?.id ?? selectedId ?? 'nearby'} state={state} selectedPlace={place ?? null} hasSelection={!!selectedId || !!featured}
       canRequest={featured ? mapEnabled && !!destinationToRoutePlace(featured) : mapEnabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!complete || !!featured} detailsLoading={details.isFetching} mapLoading={!mapReady}
-      locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
+      locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} destinationTitle={destinationName(featured)} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
       selectionSummary={featured ? t('arrival.teaser') : place && locationReady ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : place ? t('map.proximityUnavailable') : undefined}
       onViewDetails={place ? () => {
         if (!active || !focused) return;

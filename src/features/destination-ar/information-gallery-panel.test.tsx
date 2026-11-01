@@ -37,22 +37,22 @@ beforeEach(async () => {
 });
 afterEach(async () => { await act(async () => tree?.unmount()); vi.restoreAllMocks(); });
 it('preserves text and transform, reaches bundled photos with completed-click controls, and restores the same image', async () => {
-  await mount(); expect(text('ring-body')?.replaceAll('\n', '')).toContain('Complete history text'); expect(image()).toBeUndefined();
-  await press('next'); expect(image().props).toMatchObject({ source: 1, ignoreEventHandling: true, resizeMode: 'ScaleToFit' });
-  expect(saved?.mediaId).toBe(media.id);
+  await mount(); expect(text('ring-body')).toBeUndefined(); expect(image().props).toMatchObject({ source: 1, ignoreEventHandling: true, resizeMode: 'ScaleToFit' });
+  await press('next'); expect(saved?.mediaId).toBe(media.id);
   for (const id of ['previous', 'next', 'smaller', 'larger', 'close']) {
     expect(action(id).props.onClick).toBeDefined();
     expect(action(id).findAllByType('quad' as React.ElementType)[0].props).toMatchObject({ highAccuracyEvents: true, ignoreEventHandling: false });
   }
   for (const node of tree.root.findAllByType('text' as React.ElementType)) expect(node.props.ignoreEventHandling).toBe(true);
   expect(tree.root.findAllByType('quad' as React.ElementType).some(node => node.props.materials === 'argalaRingEdge')).toBe(false);
-  await press('larger'); expect(image().props.source).toBe(1);
+  await press('previous'); await press('larger'); expect(image().props.source).toBe(1);
   await act(async () => { await translations.changeLanguage('ja'); }); expect(image().props.source).toBe(1); expect(text('ring-gallery-caption')).toContain('合成画像');
   enabled = false; await act(async () => tree.update(view())); expect(action('next').props.onClick).toBeUndefined();
   enabled = true; await act(async () => tree.update(view()));
   expect(tree.root.findAllByType('node' as React.ElementType).find(node => node.props.testID === 'ring-focused-panel')!.props).toMatchObject({ position: transform.position, rotation: transform.rotation, scale: [1, 1, 1] });
   await act(async () => tree.unmount()); await mount(); expect(image().props.source).toBe(1);
-  await press('previous'); expect(image()).toBeUndefined(); expect(text('ring-body')).toBeDefined();
+  for (let index = 0; index < 40 && image(); index++) await press('next');
+  expect(image()).toBeUndefined(); expect(text('ring-body')).toBeDefined();
   await press('close'); expect(closed).toHaveBeenCalledOnce();
 });
 it.each(['en', 'ja', 'ko'])('uses localized %s image errors without raw native messages and retains credits and navigation', async locale => {
@@ -72,6 +72,30 @@ it.each(['en', 'ja', 'ko'])('uses localized %s image errors without raw native m
 it('renders ordinary text with no image slot when reviewed media are absent', async () => {
   currentContent = { ...content, approved: { ...content.approved!, media: [] } }; await mount();
   expect(image()).toBeUndefined(); expect(action('next').props.onClick).toBeUndefined(); expect(text('ring-body')).toBeDefined();
+});
+it('keeps long full chapter titles readable beyond their bounded cover label', async () => {
+  const title = 'Verified long chapter title '.repeat(5);
+  currentContent = { ...content, approved: { ...content.approved!, title: { en: approved(title) }, media: [] } };
+  await mount(); const pages: string[] = [];
+  for (let index = 0; index < 100; index++) {
+    pages.push(text('ring-body') ?? '');
+    if (!action('next').props.onClick) break;
+    await press('next');
+  }
+  expect(pages.join('').replaceAll('\n', '')).toContain(title);
+  expect(pages.join('').replaceAll('\n', '')).toContain('Complete history text');
+});
+it('preserves a complete body at the existing layout budget independently of its full heading', async () => {
+  currentContent = { ...content, approved: { ...content.approved!, title: { en: approved('Complete heading') }, body: { en: approved('z'.repeat(24000)) }, media: [] } };
+  await mount(); const pages: string[] = [];
+  for (let index = 0; index < 200; index++) {
+    pages.push(text('ring-body') ?? '');
+    if (!action('next').props.onClick) break;
+    await press('next');
+  }
+  const displayed = pages.join('').replaceAll('\n', '');
+  expect(displayed).toContain('Complete heading');
+  expect(displayed.match(/z/g)).toHaveLength(24000);
 });
 
 it.each((['ja', 'ko'] as const).flatMap(locale => ['alt', 'caption', 'fully-localized', 'no-caption'].map(mode => [locale, mode] as const)))('marks %s English gallery fallback for %s only, using actual resources', async (locale, mode) => {
@@ -103,4 +127,13 @@ it.each((['ja', 'ko'] as const).flatMap(locale => ['alt', 'caption', 'fully-loca
     await press('previous');
   }
   expect(english.join('').replaceAll('\n', '')).not.toContain(translations.t('destinations.englishFallback'));
+});
+
+it('retires queued page and size callbacks when Help disables the current native panel', async () => {
+  await mount(); const retainedNext = action('next').props.onClick; const retainedSize = action('larger').props.onClick;
+  enabled = false; await act(async () => tree.update(view()));
+  await act(async () => { retainedNext(); retainedSize(); });
+  expect(saved).toBeUndefined();
+  enabled = true; await act(async () => tree.update(view())); await press('next');
+  expect(saved?.mediaPage).toBe(1);
 });
