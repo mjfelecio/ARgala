@@ -3,6 +3,17 @@ import { captureBasis, buildRingSlots, focusTransform } from './scene-geometry';
 
 const forward = { position: [1, 2, 3] as [number, number, number], forward: [0, 0, -1] as [number, number, number] };
 const categories = [{ id: 'overview', role: 'overview' as const }, { id: 'history', role: 'history' as const }, { id: 'notes' }, { id: 'facts' }];
+it.each([1, 2, 8, 12])('renders %s valid chapters without overlapping square tile footprints', count => {
+  const entries = [...categories.slice(0, 2), ...Array.from({ length: 10 }, (_, i) => ({ id: `chapter-${i}` }))].slice(0, count);
+  const slots = buildRingSlots(entries, captureBasis(forward)!);
+  expect(slots).toHaveLength(count);
+  expect(slots[0].angle).toBe(0);
+  if (count > 1) expect(slots[1].angle).toBe(90);
+  for (let i = 0; i < slots.length; i++) for (let j = i + 1; j < slots.length; j++) {
+    expect(Math.hypot(slots[i].position[0] - slots[j].position[0], slots[i].position[2] - slots[j].position[2])).toBeGreaterThan(0.71);
+  }
+  expect(() => buildRingSlots([...entries, ...Array.from({ length: 13 }, (_, i) => ({ id: `overflow-${i}` }))], captureBasis(forward)!)).toThrow();
+});
 it('places Overview ahead and History right, facing inward without camera yaw parenting', () => {
   const slots = buildRingSlots(categories, captureBasis(forward)!);
   expect(slots.map(slot => slot.angle)).toEqual([0, 90, 180, 270]);

@@ -9,7 +9,8 @@ export function ArPreflight({ phase, errorCode, pending, canAskAgain, onStart, n
 }) {
   const { t } = useTranslation();
   if (phase === 'live') return null;
-  return <View className="gap-3 p-4">
+  return <View className="mx-4 mt-4 gap-3 rounded-card bg-ar-panel p-4">
+    <Text accessibilityRole="header" className="font-sans text-section font-semibold text-white">{t('destinationStories.preflightTitle')}</Text>
     <Text className="font-sans text-sm text-white">{t(noticeKey)}</Text>
     {errorCode ? <Notice>{t(`destinationAr.errors.${errorCode}`)}</Notice>
       : <Notice busy={phase === 'checking' || phase === 'initializing' || phase === 'prepared'}>{t(`destinationAr.${phase}`)}</Notice>}

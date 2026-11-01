@@ -2,10 +2,10 @@ import type { ReadingCursor } from './content-layout';
 import type { TrackingState } from './types';
 export const suspensionGraceMs = 5 * 60 * 1000;
 export type SessionIdentity = { admissionId: string; destinationId: string; principalId: string; provenance: 'development' | 'verified' };
-export type LogicalArProgress = { selectedId: string | null; cursors: Record<string, ReadingCursor> };
+export type LogicalArProgress = { selectedId: string | null; cursors: Record<string, ReadingCursor>; openedIds?: readonly string[] };
 type Phase = 'idle' | 'preflight' | 'initializing' | 'reveal' | 'exploring' | 'limited' | 'suspended' | 'interrupted' | 'failed' | 'expired' | 'closed';
 export type SessionSnapshot = { phase: Phase; attempt: number; established: boolean; suspendedAt: number | null; progress: LogicalArProgress; revealedCount: number };
-const emptyProgress = (): LogicalArProgress => ({ selectedId: null, cursors: {} });
+const emptyProgress = (): LogicalArProgress => ({ selectedId: null, cursors: {}, openedIds: [] });
 
 /** Route-owned logical state only. A fresh instance never inherits admission.
  * No camera transform, coordinates, provider response or persisted session data.
@@ -106,9 +106,12 @@ export class ArSession {
     for (const id of this.ids) {
       const cursor = progress.cursors[id];
       if (!cursor || !Number.isSafeInteger(cursor.page) || cursor.page < 0 || !Number.isSafeInteger(cursor.offset) || cursor.offset < 0 || !['small', 'standard', 'large'].includes(cursor.size) || typeof cursor.locale !== 'string') continue;
-      cursors[id] = Object.freeze({ page: cursor.page, offset: cursor.offset, locale: cursor.locale, size: cursor.size });
+      const media = typeof cursor.mediaId === 'string' && cursor.mediaId.length > 0 && Number.isSafeInteger(cursor.mediaPage) && cursor.mediaPage! >= 0
+        ? { mediaId: cursor.mediaId, mediaPage: cursor.mediaPage } : {};
+      cursors[id] = Object.freeze({ page: cursor.page, offset: cursor.offset, locale: cursor.locale, size: cursor.size, ...media });
     }
-    this.write({ progress: Object.freeze({ selectedId: progress.selectedId !== null && this.ids.has(progress.selectedId) ? progress.selectedId : null, cursors: Object.freeze(cursors) }) });
+    const openedIds = Object.freeze([...new Set(progress.openedIds ?? this.state.progress.openedIds ?? [])].filter(id => this.ids.has(id)));
+    this.write({ progress: Object.freeze({ selectedId: progress.selectedId !== null && this.ids.has(progress.selectedId) ? progress.selectedId : null, cursors: Object.freeze(cursors), openedIds }) });
   }
   close() { this.suspendedElapsedAt = null; this.write({ phase: 'closed', established: false, suspendedAt: null, attempt: this.state.attempt + 1, progress: emptyProgress() }); }
 }

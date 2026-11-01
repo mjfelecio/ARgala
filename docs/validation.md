@@ -1818,3 +1818,100 @@ and a synthetic test tag typing error; both were corrected through the supported
 installed handleStyle API/test boundary before the final successful check.
 `git diff --check` passes. No backend/native configuration changed; CI repeats
 Edge, Android export/config and isolated SQL checks before integration.
+
+
+## Destination Stories implementation — 2026-11-01
+
+Implemented the owner-approved selected-destination AR proposal on
+`feat/ar-destination-stories`, based on `fe2f2db`, in an isolated managed worktree.
+Chapter covers show sequence and session-only Opened state. Native reading pages
+lead with the first approved bound image and retain full titles, body text,
+metadata and localized fallback notices. The focused distance remains 1.5 world
+units; Overview/History placement, held interaction and other-tile collapse remain.
+The ring now accepts all 12 chapters allowed by the catalog.
+
+Logical sessions retain opened chapter IDs and image/caption cursor identity.
+Openings require completed accepted focus (including explicit Recenter settling an
+opening); collapse intent and restored focus never add openings. Text reflow uses
+source offsets independently of leading media. Passport/admission and paid-request
+authority were not changed.
+
+Arrival invitations show destination and available chapter context. Preflight has
+a clearer task heading. Top and bottom utility surfaces are separate; the complete
+top stack is bounded by scene height minus measured bottom utilities and has one
+content-sized scroll owner. Help fences retained native actions without remounting
+the camera or pausing tracking/expiry. The eligible unsupported reader uses the
+same chapter hierarchy. EN/JA/KO copy and labeled development chapter samples are
+included. No destination facts, production approvals or preview assets were added.
+Editorial handoff and rollout gates are in [Destination Stories](ar-destination-stories.md).
+
+Regression tests reproduced capacity, leading-media, dropped-media-cursor,
+opening bookkeeping, Help fencing and short-scene stack failures before fixes.
+Independent review also reproduced full-title overhead rejecting a previously valid
+24,000-character body. Heading and body budgets are now separate, with memoized
+pagination; the real-panel regression preserves the full heading and all 24,000
+body characters. The reviewer verified both this fix and whole-stack scrolling,
+and found no remaining material code concerns.
+
+Final automated evidence:
+
+- `npm run check` passed strict TypeScript, zero-warning ESLint and **1,284 tests
+  across 117 files**.
+- Focused geometry/gallery/session run passed 37 tests; chapter/gallery/arrival
+  and real session-screen run passed 63; workflow/M1 run passed 61; final reader
+  and pure layout run passed 25, including the full body-budget regression.
+- `npm run export:android` passed: 3,001 modules, 36 assets and an 8.5 MB Hermes bundle. This is a JavaScript/asset export, not an APK build.
+- `git diff --check` passed.
+
+The source checkout's dependency tree was removed by an unrelated cleanup during
+verification. Worktree-local `npm ci` restored dependencies from the existing
+lockfile and ran the existing patch verifier; no manifest or lockfile changed.
+An interrupted source-checkout baseline is not reported as passing.
+
+`adb devices` reported no attached devices. No APK build, installation, emulator,
+physical camera/GPS/tracking/held-hit test, screenshot, on-site calibration or
+unsupported-hardware trial ran. Browser/component structure cannot establish
+Android Yoga, native font/image fit, alpha compositing, touch pass-through or
+large-font EN/JA/KO acceptance. The nine destinations still require approved
+stories/media; ACLC draft/simulation provenance remains separate from production.
+
+
+### Physical AR trial and reader-spacing corrections — 2026-11-01
+
+The owner supplied ADB access to the Galaxy A53/Android 16. The existing
+development APK (SHA-256
+`ad5cc55cf6259bb4f93abd8ef9c0a702770aaa7a3045d850b8bc9d7de0403d0e`)
+loaded `de5943b` through Metro after restoring a lost USB reverse mapping. No
+build/reinstall, data reset, provider search, mock GPS or content publication was
+performed. Native Overview/page 2 of 4 rendered with the new utility surfaces;
+the owner confirmed readable text but rejected the persistent right content gap
+and later reported controls against the bottom border. Returning to Explore
+released the camera in the observed sequence. Full device configuration, native
+observations and untested scenarios are in
+[the device record](ar-destination-stories-device-testing.md).
+
+Font-estimate changes alone did not pass the owner's retry. A temporary invisible
+ten-M sample measured 0.43 world units at logical size 5, supporting the native
+scale without establishing all font fit. The probe was removed before final
+verification. The final correction preserves conservative, source-contiguous
+page budgets but releases ordinary whitespace row boundaries to native WordWrap.
+Explicit paragraphs and bounded long-token/CJK grapheme breaks remain hard,
+avoiding pinned Viro's oversized-word overflow. Captions follow the same bounded
+flow. The 1.08-wide reading box, font sizes and 1.5 focus distance are unchanged.
+
+The bottom-control regression reproduced only 0.005 units of clearance. Shared
+control height and derived row/content geometry now retain a 0.04 bottom inset,
+0.04 row gap and 0.02 content gap. Tests cover this geometry and native paragraph
+flow alongside source fidelity, long/wide glyphs, CJK, reading size, complete
+metadata and session cursor restoration. Independent incremental review found no
+material issue in the wrapper, flow, caption or geometry changes.
+
+Final `npm run check` passed strict TypeScript, zero-warning lint and **1,291 tests
+across 117 files**. `npm run export:android` passed **3,002 modules**, 36 assets and
+an 8.5 MB Hermes bundle; `git diff --check` passed. This export is not an APK build.
+The owner subsequently confirmed the final `09e950a` retry: “yes it works now”,
+answering the check for natural content width and visible padding below
+A−/A+/Close. These two spacing findings pass on the existing Galaxy A53/APK.
+The full EN/JA/KO reading-size and large-system-text matrix, approved media,
+complete held-control/lifecycle coverage, unsupported hardware and on-site GPS
+remain separate acceptance work. This evidence update changes no application code.

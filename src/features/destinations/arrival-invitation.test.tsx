@@ -13,12 +13,14 @@ it.each(['en', 'ko', 'ja'])('localizes arrival, missing content and launch/dismi
   const original = console.error; const spy = vi.spyOn(console, 'error').mockImplementation((...args) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
   const i18n = createInstance(); await i18n.use(initReactI18next).init({ ...localizationOptions, lng: language, react: { useSuspense: false } });
   const launch = vi.fn(); const dismiss = vi.fn(); let tree: ReactTestRenderer;
-  const render = (ready: boolean) => <I18nextProvider i18n={i18n}>{withHeroUI(<ArrivalInvitation state={state} contentReady={ready} onLaunch={launch} onDismiss={dismiss} />)}</I18nextProvider>;
+  const render = (ready: boolean) => <I18nextProvider i18n={i18n}>{withHeroUI(<ArrivalInvitation state={state} destinationTitle="Synthetic destination" chapterCount={5} contentReady={ready} onLaunch={launch} onDismiss={dismiss} />)}</I18nextProvider>;
   try {
     await act(async () => { tree = create(render(false)); });
     expect(JSON.stringify(tree!.toJSON())).toContain(i18n.t('arrival.contentPending'));
     expect(launch).not.toHaveBeenCalled();
     await act(async () => tree!.update(render(true)));
+    expect(JSON.stringify(tree!.toJSON())).toContain('Synthetic destination');
+    expect(JSON.stringify(tree!.toJSON())).toContain(i18n.t('destinationStories.available', { count: 5 }));
     const button = (key: string) => tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === i18n.t(key))!;
     await act(async () => button('arrival.launch').props.onPress()); expect(launch).toHaveBeenCalledOnce();
     await act(async () => button('arrival.dismiss').props.onPress()); expect(dismiss).toHaveBeenCalledOnce();

@@ -4,6 +4,7 @@ export type { RingContent } from './ring-content';
 export const developmentRingContent: readonly RingContent[] = [
   { id: 'overview', role: 'overview', titleKey: 'destinationRing.mock.overview.title', bodyKey: 'destinationRing.mock.overview.body' },
   { id: 'history', role: 'history', titleKey: 'destinationRing.mock.history.title', bodyKey: 'destinationRing.mock.history.body' },
+  { id: 'highlights', titleKey: 'destinationRing.mock.highlights.title', bodyKey: 'destinationRing.mock.highlights.body' },
   { id: 'visitor-notes', titleKey: 'destinationRing.mock.notes.title', bodyKey: 'destinationRing.mock.notes.body' },
   { id: 'facts', titleKey: 'destinationRing.mock.facts.title', bodyKey: 'destinationRing.mock.facts.body' },
 ];
