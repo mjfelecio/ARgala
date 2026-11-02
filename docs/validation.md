@@ -1,5 +1,44 @@
 # Foundation validation
 
+## Owner UI refinements and sticky settings drafts — 2026-11-02
+
+Owner feedback refines Saved, Featured/preview Nearby and Profile/Settings; the
+later tab instruction replaces both dot and underline with semibold selected
+text. [Full scope, review and evidence](design/seafoam-forest/OWNER-REFINEMENTS.md).
+
+Saved View now starts one missing lookup as its explicit user action before
+navigation. Details stays a disabled observer. Real cached names/addresses are
+shown only with known matching language and original source age; missing/expired
+content falls back to “Saved place”, with no automatic list fetch or persisted
+provider metadata. Success/failure handoff, duplicate taps, cache expiry/clear,
+wrong language, refocus, foreground return, remount and explicit retry are covered.
+The provisional-name presentation, verbose radius help and numeric radius input
+are removed. Slider/presets and precise restored values retain explicit Save.
+
+Dirty settings expose sticky Save/Undo only while the regular Save action is
+outside the measured scroll viewport. Undo restores both latest saved values,
+resets an unfinished slider preview and respects in-flight save guards. Errors
+are rendered on the sticky surface itself, with actual EN/JA/KO resources and
+live language changes. Visibility checks cover scrolling both directions and
+viewport/content layout changes; the page retains one scroll owner.
+
+Final `npm run check`: strict typecheck, zero-warning ESLint, **1,342 tests across
+118 files passed**. Final `npm run export:android` passed (8.5 MB Hermes bundle,
+`index-e43810c11b0659b797567cc588bef2cf.hbc`), and `git diff --check` passed. Focused
+behavior regressions were observed failing before correction. Independent review
+found two issues, both reproduced/fixed: fresh Nearby masked by expired Details,
+and sticky save errors appearing only offscreen. The final full check includes
+both regressions.
+
+Existing-APK captures confirm the initial language-padding/radius simplifications;
+they predate the final sticky and tab changes. The original Metro server stopped
+and was restarted. Latest native verification of sticky geometry/touch/error,
+final selected text, direct Saved View and polished Nearby loaded/error states
+remains pending; mocked tests and an export are not native acceptance. Private
+captures and exact caveats are linked above. No device preference, account or
+journal edits, APK build, new dependencies, native/Edge changes, push or merge.
+
+
 ## Seven-screen Seafoam reference corrections — 2026-11-02
 
 Implemented on the existing `feat/seafoam-forest-ui` branch: `37e6ab7` completes

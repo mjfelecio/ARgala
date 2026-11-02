@@ -141,3 +141,13 @@ Vitest tests across 118 files passed; Android Metro/Hermes export passed. The
 independent review found two important issues, each reproduced and fixed with a
 real-screen regression: continuous walking progress retains compact geometry,
 and preview story availability reads the installed approved text overlay.
+
+
+## Later owner refinements — Saved and Settings interactions
+
+The owner's subsequent feedback supersedes the provisional-name presentation,
+manual Saved→Load Details opening, radius keyboard entry/technical help and tab
+marker decisions above. The final tab design uses selected text weight only.
+See [owner refinements and verification](OWNER-REFINEMENTS.md) for the complete
+scope, sticky Save/Undo behavior, explicit View authority, transient-name limits,
+1,342-test check, final Android export and pending native acceptance.
