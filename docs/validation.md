@@ -1,5 +1,51 @@
 # Foundation validation
 
+## Seven-screen Seafoam reference corrections — 2026-11-02
+
+Implemented on the existing `feat/seafoam-forest-ui` branch: `37e6ab7` completes
+shared/bookmark/sync/Passport/preview/Profile/Explore details and removes ordinary
+Place Details AR/coordinate rows; `8cab000` measures the complete compact Directions
+summary/recovery/action block. AR source, native materials, service/persistence
+interfaces and paid-request authority remain unchanged. See the pre-edit
+[reference checklist and evidence ledger](design/seafoam-forest/REFERENCE-CORRECTIONS.md).
+
+Final `npm run check` passed strict TypeScript, zero-warning ESLint and **1,332
+tests across 118 files**. Final `npm run export:android` passed Metro/Hermes export
+(`index-9fdca96e56b6a406da14c6d1d784d462.hbc`, 8.5 MB); no APK was built. Targeted
+regressions failed before behavioral changes; the independent review's two
+important findings (continuous progress geometry reset and installed-content
+availability) were reproduced, fixed and included in the green full suite.
+Warning foreground/surface contrast is 6.07:1; compiler tests verify emitted colors
+and explicit non-AR heading weights despite HeroUI's same-named family aliases.
+
+Existing Galaxy A53 / Android 16 development APK, local Metro, real signed-in
+state: normal EN captures represent all seven families. Narrow 360×800 logical
+units at 1.5 text covers EN/JA/KO Explore, Featured, destination preview, Saved,
+and actual loaded provider Details/walking Directions. The existing saved May
+Abohan record was explicitly opened/loaded; no names/addresses were fabricated.
+Normal EN also covers an actual nearby response, a loaded route, draft mode and
+expanded Journey. JA driving reached a real waiting/stale-location recovery
+banner; it does **not** establish loaded driving. New Save/Saved/check, row action
+icons, count=3 and real 0/9 progress are visible in the relevant captures.
+
+The native matrix remains partial: normal JA/KO, narrow Profile identity/language/
+radius, failed sync/guest, denied/provider failures, loaded driving, TalkBack,
+IME and outdoor GPS/navigation are unverified. Capture automation stopped
+obtaining fresh UIAutomator snapshots after the final display reset; stale XML,
+mislabeled files and loading states are excluded from loaded acceptance. Those
+code paths retain real-screen/hook/service regressions, which are separate from
+native acceptance. Private evidence and exact filename caveats are in the ledger;
+no account/location screenshots are committed. There is no complete comparable
+baseline capture set.
+
+Restored English (visually confirmed), font scale **1.1**, physical **1080×2400**
+with no size override, and preexisting density override **420**. Radius remains
+**500 m**; the three original bookmarks, zero stamps and account were not edited.
+Only explicit app actions submitted provider searches/details/routes. No AR entry,
+sync retry, permission revocation, reminder activation, external navigation,
+new build, push, PR, merge or deployment was performed.
+
+
 ## Final ordinary-timing Android confirmation (#39) — 2026-11-02
 
 After the owner reconnected ADB, the existing Galaxy A53 / Android 16 development

@@ -124,3 +124,20 @@ untouched. Final source revision for device observations: implementation commit
 - [ ] Comparable baseline/after captures for every family; baseline was not captured.
 - [ ] Loaded Details/Directions native screenshots (no provider request submitted).
 - [ ] AR design/physical acceptance: explicitly reserved for the owner's separate task.
+
+## Seven-screen reference detail correction — 2026-11-02
+
+The later owner-requested correction pass supersedes the earlier decisions above
+that retained ordinary Place Details AR, detached Passport sync or limited
+Directions to a heading change. UI commit `37e6ab7` and Directions commit
+`8cab000` complete the new reference details. AR source/materials remain excluded.
+See the pre-edit [reference checklist and verification ledger](REFERENCE-CORRECTIONS.md)
+for implementation, intentional adaptations, rendered evidence and remaining
+native acceptance. Its loaded provider captures are separate from this earlier
+pass's unavailable states.
+
+Final checks for the correction: strict typecheck, zero-warning lint and 1,332
+Vitest tests across 118 files passed; Android Metro/Hermes export passed. The
+independent review found two important issues, each reproduced and fixed with a
+real-screen regression: continuous walking progress retains compact geometry,
+and preview story availability reads the installed approved text overlay.
