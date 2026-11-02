@@ -12,6 +12,11 @@
   --font-semibold: 'PlusJakartaSans';
   --font-bold: 'PlusJakartaSans';
 
+  /* Seafoam Forest v2 artwork; core controls retain the approved app green. */
+  --color-logo-seafoam: #42D5A5;
+  --color-logo-ink: var(--color-brand-strong);
+  --color-logo-ivory: #FCFBF7;
+
   --color-brand-primary: #247A53;
   --color-brand-strong: #174D38;
   --color-mint: #E7F4EC;
