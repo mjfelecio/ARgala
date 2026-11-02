@@ -1,5 +1,97 @@
 # Foundation validation
 
+## Open-issue fixes and Android QA — 2026-11-02
+
+Baseline: `058f8bc` (`main`), branch `fix/explore-directions-android-qa`.
+Implementation revision: `e95f5bb` (with `6eb49a9` investigation coverage and
+`0934509` Directions guidance). Existing untracked owner reference
+material, preferences and account data are preserved. Paid place photos (#19)
+remain deferred; no dependency, native configuration, backend or schema changes.
+
+**#39 — investigation remains open.** The baseline relevant suites passed
+**152 tests / 3 files**. New real Explore screen probes pass against the unchanged
+sheet implementation in EN/JA/KO: deliberately nonexistent All query, delayed
+loading, empty response, tab refocus, foreground return, query invalidation,
+subsequent named search, Search this area, sanitized failure, explicit Retry,
+success and remount. They assert actual sheet title/status text and handle
+composition, positive snap points, retained map/sheet identity while mounted,
+collapsed/expanded states and normal → 1.5 font-scale configuration. They use
+`src/lib/query.ts` production defaults; four explicit submissions produce exactly
+four search calls, with no automatic nearby/details/routes calls or remount retry.
+
+No blank sheet was reproduced in these component probes. Native sheet layout,
+scroll offset, IME dismissal and touch delivery are mocked; they cannot identify
+whether the audit failure came from native layout/readiness, scroll state or
+another cause. No speculative sheet change or map remount recovery was applied.
+The reported sequence must still be repeated on the phone against this revision;
+#39 must remain open until native evidence establishes the cause or recovery.
+
+**#40 — mode-neutral waiting guidance.** `directions.waiting` now says
+“Waiting for your current location to plan the route…” with equivalent JA/KO
+resources. Three new real Directions screen regressions failed on the old copy
+before passing with the resource changes. They cover walking, driving and
+walking → driving replacement previews, live EN → JA → KO changes, selected
+and displayed mode labels, and the appropriate single request when fresh
+foreground location becomes available. No route-mode behavior changed.
+
+**#42 — intentional native toolbar suppression.** Explore passes
+`toolbarEnabled={false}` to MapView. The new regression failed with the prior
+undefined prop, then passed with suppression. Marker selection, Recenter in
+both detents, Directions handoff, expanded Open in Google Maps and actual
+provider-attribution links remain available without extra provider work.
+The test retains real attribution/linking code and mocks native boundaries.
+Google's native logo/legal placement and actual tap/TalkBack delivery still need
+Android verification.
+
+**#41 — development server evidence.** Following the [development-build workflow](https://docs.expo.dev/develop/development-builds/use-development-builds/),
+Metro was started from this implementation checkout with
+`EXPO_PUBLIC_VIRO_SPIKE=1 npx expo start --dev-client --localhost --port 8081`.
+The SDK 57 manifest and main Android development bundle returned HTTP 200.
+Both lazy screens (`destination-ar-screen`, `destination-ar-session-screen`)
+and both native scene modules (`destination-scene`, `destination-ring-scene`)
+returned HTTP 200 with JavaScript module payloads.
+These are host HTTP/compiler checks; they do not establish bundle evaluation in
+the installed APK or successful native AR. Private manifest/bundle captures stay
+outside Git because they include public runtime configuration.
+
+**Checks:** focused final run **159 passed / 3 files**;
+`npm run check` passed strict TypeScript, zero-warning lint and **1,305 tests /
+118 files**. `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android -- --max-workers 1`
+passed (8.5 MB Android Hermes bundle). `git diff --check` passed. The existing
+NO_COLOR/FORCE_COLOR environment warning appeared during bundling; no export
+failure. Follow-up `npm run typecheck` and `npm run lint` also passed after
+strengthening the sheet text/lifecycle assertions. The first manifest probe preceded Metro readiness and was refused;
+the subsequent manifest/main/lazy requests succeeded. Export/HTTP success is
+separate from an APK build and from device testing. No Edge/SQL checks were
+rerun for unchanged areas.
+
+**Review:** a separate read-only reviewer found no confirmed blocking source
+issues. Native rendering, focus delivery, keyboard behavior and hardware remain
+outside that source review. The Explore tests retain the suite's existing short
+async-flush convention; slow-CI timing sensitivity remains a minor test risk.
+
+**Device evidence and pending acceptance:** repeated `adb devices -l` checks
+through 14:08 Asia/Manila listed no connected or unauthorized device. The owner
+intends to reconnect; the audit's Galaxy A53 / Android 16 is historical context,
+not a device/APK identified during this run. Current APK version, native module
+capabilities, USB reverse forwarding and on-device JavaScript evaluation remain
+unverified. No APK was built or installed, no phone settings/session were changed,
+and no sensitive device screenshots were captured. Metro is left running on
+localhost:8081 with Viro opt-in and the warmed implementation revision above.
+Once ADB detects the phone, restore `adb reverse tcp:8081 tcp:8081` and connect the
+existing development client before attempting the physical checks.
+
+| Acceptance area | This run |
+| --- | --- |
+| #39 original no-match/keyboard dismissal → Profile return → named search → area search | Component probes pass; Android reproduction, native scroll/snap/layout tracing pending |
+| #40 walking/driving/replacement waiting and live EN/JA/KO labels | Real-screen component tests pass; phone presentation pending |
+| #42 selected marker, Recenter, replacement actions and attribution at both detents | Native prop/actions covered by tests; actual placement, taps and TalkBack pending |
+| Normal/large system text, short screens and EN/JA/KO on Android | Font-scale configuration/component composition only; native rendering pending |
+| #41 both prototype preflight, permission guidance, startup, camera, tracking, held interaction, background interruption and explicit recovery | Host lazy bundles compile/serve; installed-client/native scenarios pending |
+| Definite unsupported hardware, denied permission and AR-services install/update/decline | Not exercised; no hardware/support conclusion |
+| Connected-Metro blank-after-error-dismiss | Not reproduced on a device; no speculative product fix |
+| On-site GPS/admission and simulation | Neither run; host bundling grants no on-site or simulated acceptance |
+
 ## Design coherence refinement — 2026-10-31
 
 From main `775f9da`, the scoped cleanup preserves the approved October 30 compact
