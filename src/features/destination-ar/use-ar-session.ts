@@ -2,12 +2,12 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { ArSession, type LogicalArProgress, type SessionIdentity } from './session';
 import { useViroStartup, type StartupPolicy } from './use-viro-startup';
 import type { TrackingState } from './types';
-type Options = { identity: SessionIdentity; tileIds: readonly string[]; running: boolean; transitionReady: boolean; measured: boolean; entryReady?: boolean; freshEligible(): boolean; reveal: boolean };
+type Options = { identity: SessionIdentity; tileIds: readonly string[]; running: boolean; transitionReady: boolean; measured: boolean; entryReady?: boolean; freshEligible(): boolean; reveal: boolean; revealDurationMs?: number };
 
 /** Owns logical progress and attempts above the disposable native navigator.
  * The route keys this owner by principal/destination; mismatches also fail closed.
  */
-export function useArSession({ identity, tileIds, running, transitionReady, measured, entryReady = true, freshEligible, reveal }: Options) {
+export function useArSession({ identity, tileIds, running, transitionReady, measured, entryReady = true, freshEligible, reveal, revealDurationMs }: Options) {
   const [owner] = useState(() => ({ identity: { ...identity }, session: new ArSession(identity, tileIds) }));
   const model = owner.session; const session = useSyncExternalStore(model.subscribe, model.getSnapshot, model.getSnapshot);
   const token = useRef(0);
@@ -39,9 +39,13 @@ export function useArSession({ identity, tileIds, running, transitionReady, meas
   }, [running, transitionReady, measured, matches, session.phase, model, start]);
   useEffect(() => {
     if (session.phase !== 'reveal') return;
+    if (revealDurationMs !== undefined) {
+      const timer = setTimeout(() => model.finishReveal(session.attempt), revealDurationMs);
+      return () => clearTimeout(timer);
+    }
     const timer = setInterval(() => model.advanceReveal(session.attempt), 2400 / Math.max(1, tileIds.length));
     return () => clearInterval(timer);
-  }, [model, session.phase, session.attempt, tileIds.length]);
+  }, [model, session.phase, session.attempt, tileIds.length, revealDurationMs]);
   const onTracking = useCallback((value: TrackingState) => model.track(session.attempt, value), [model, session.attempt]);
   const onProgress = useCallback((value: LogicalArProgress) => model.saveProgress(session.attempt, value), [model, session.attempt]);
   const retryTracking = useCallback(() => model.retryTracking(session.attempt, Date.now()), [model, session.attempt]);

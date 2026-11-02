@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from 'expo-router/native-stack';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
+import { useSettings } from '@/features/settings/provider';
 import { useAuth } from '@/features/auth/provider';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
 import { useAppActive } from '@/lib/use-app-active';
@@ -17,6 +18,7 @@ import { ArIntroductionNotice } from './ar-introduction-notice';
 import { developmentRingContent, type RingContent } from './development-ring-content';
 import { useArSession } from './use-ar-session';
 import { useReadingSize } from './use-reading-size';
+import { introDuration, introVariant } from './intro-policy';
 import { useArIntroduction } from './use-ar-introduction';
 import { loadRingScene } from './ring-loader';
 import type { RingControls, RingMetrics } from './destination-ring-scene';
@@ -41,9 +43,12 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
   const [transitionReady, setTransitionReady] = useState(true); const [scene, setScene] = useState({ width: 0, height: 0 });
   const [NativeRing, setNativeRing] = useState<Awaited<ReturnType<typeof loadRingScene>> | null>(null);
-  const reading = useReadingSize(); const introduction = useArIntroduction(); const reduced = useReducedMotion();
+  const { systemVoice, soundEffects } = useSettings();
+  const audioPreferences = useMemo(() => ({ systemVoice, soundEffects }), [systemVoice, soundEffects]);
+  const reading = useReadingSize(); const introduction = useArIntroduction(identity); const reduced = useReducedMotion();
+  const variant = introVariant({ ready: true, established: false, seen: introduction.seen, reduced });
   const lifecycle = useArSession({ identity, tileIds: content.map(item => item.id), running: focused && active, transitionReady,
-    entryReady, measured: scene.width > 0 && scene.height > 0 && NativeRing !== null, freshEligible, reveal: !introduction.seen && !reduced });
+    entryReady, measured: scene.width > 0 && scene.height > 0 && NativeRing !== null && introduction.loaded, freshEligible, reveal: true, revealDurationMs: introDuration(variant) });
   const { startup, session, finishReveal, close } = lifecycle;
   useEffect(() => { if (session.established) onEstablished?.(); }, [session.established, onEstablished]);
   const completeIntroduction = introduction.complete;
@@ -60,7 +65,6 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
     void loadRingScene().then(component => { if (current) setNativeRing(() => component); }).catch(() => { if (current) reportFailure(); });
     return () => { current = false; };
   }, [startup.phase, startup.attempt, NativeRing, reportFailure]);
-  useEffect(() => { if (session.phase === 'reveal' && (introduction.seen || reduced)) finishReveal(); }, [session.phase, introduction.seen, reduced, finishReveal]);
   useEffect(() => { if (session.phase === 'exploring' && !introduction.seen && !introduction.pending) void completeIntroduction(); }, [session.phase, introduction.seen, introduction.pending, completeIntroduction]);
   const [capture, setCapture] = useState<NativeCapture | null>(null);
   const controls = useRef<RingControls | null>(null); const acceptControls = useCallback((value: RingControls | null) => { controls.current = value; setCapture(() => value?.capture ?? null); }, []);
@@ -78,7 +82,8 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
       <SceneBoundary key={startup.attempt} onFailure={startup.onFailure}>
         <NativeRing onReady={startup.onReady} onTracking={lifecycle.onTracking} onControls={acceptControls} onRecenterResult={recenterResult}
           onMetrics={help && identity.provenance === 'development' ? setMetrics : undefined} reading={reading} content={content} initialProgress={session.progress} onProgress={lifecycle.onProgress}
-          visibleTileCount={session.revealedCount} interactive={exploring && !help} />
+          audioPreferences={audioPreferences} firstVisit={!introduction.seen}
+          visibleTileCount={session.phase === 'reveal' ? Infinity : session.revealedCount} deployment={session.phase === 'reveal' ? variant : undefined} interactive={exploring && !help} />
       </SceneBoundary>
     </View>}
     <ArUtilityChrome viewportHeight={scene.height} titleKey="destinationRing.title" title={title} onReturn={onReturn} onExit={() => { close(); onExit?.(); }} actions={startup.phase === 'live' ? <>

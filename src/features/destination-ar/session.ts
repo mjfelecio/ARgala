@@ -64,7 +64,7 @@ export class ArSession {
   track(attempt: number, tracking: TrackingState) {
     if (!this.current(attempt)) return;
     const phase = this.state.phase;
-    if (tracking !== 'normal' && (phase === 'reveal' || phase === 'exploring')) { this.resumePhase = phase; this.write({ phase: 'limited' }); }
+    if (tracking !== 'normal' && (phase === 'reveal' || phase === 'exploring')) { this.resumePhase = 'exploring'; this.write({ phase: 'limited', revealedCount: this.ids.size }); }
     else if (tracking === 'normal' && phase === 'limited') this.write({ phase: this.resumePhase });
   }
   finishReveal(attempt: number) {

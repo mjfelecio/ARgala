@@ -74,10 +74,10 @@ it('retains whitelisted logical progress without poses or arbitrary caller field
   expect(JSON.stringify(session.getSnapshot())).not.toContain('position');
   session.saveProgress(token, { selectedId: null, cursors: {} }); expect(session.getSnapshot().progress.selectedId).toBe('history');
 });
-it('retains reveal phase across same-frame tracking loss and ignores stale callbacks', () => {
+it('settles reveal across same-frame tracking loss and ignores stale callbacks', () => {
   const session = create(); const token = initialize(session); session.ready(token, 1020, true);
   session.track(token, 'limited'); expect(session.getSnapshot().phase).toBe('limited');
-  session.track(token, 'normal'); expect(session.getSnapshot().phase).toBe('reveal');
+  session.track(token, 'normal'); expect(session.getSnapshot().phase).toBe('exploring');
   session.finishReveal(token); expect(session.getSnapshot().phase).toBe('exploring');
   session.suspend(2000); session.track(token, 'normal'); expect(session.getSnapshot().phase).toBe('suspended');
 });

@@ -17,6 +17,8 @@ const native = vi.hoisted(() => ({
   get: vi.fn(), request: vi.fn(), support: vi.fn(), getSize: vi.fn(), setSize: vi.fn(),
 }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
+vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true }) }));
+vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getSize, setItem: native.setSize } }));
 vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get, requestCameraPermissionsAsync: native.request } }));
 vi.mock('expo-router', async () => {

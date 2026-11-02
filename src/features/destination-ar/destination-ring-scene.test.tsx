@@ -11,6 +11,7 @@ import { useReadingSize } from './use-reading-size';
 const native = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn(), patches: [] as { id: string; patch: Record<string, unknown> }[], reduced: false }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => native.reduced }));
+vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
 vi.mock('uniwind', () => ({ useCSSVariable: () => ['#247A53', '#102724', '#71DCD2', '#FFFFFF', "'PlusJakartaSans'"] }));
 vi.mock('@reactvision/react-viro', async () => {
   const R = await import('react');
@@ -112,7 +113,7 @@ it('closes the original focus from another tile without opening that tile and re
   const surface = other.findAllByType('quad' as React.ElementType).find(quad => quad.props.ignoreEventHandling === false)!;
   expect(surface.props.highAccuracyEvents).toBe(true);
   expect(other.findAllByType('quad' as React.ElementType).filter(quad => quad.props.onClick)).toHaveLength(0);
-  expect(node('ring-root').props.opacity).toBe(0.25);
+  expect(node('ring-root').props.opacity).toBe(0.4);
   await press('ring-tile-overview');
   expect(node('ring-tile-history')).toBeUndefined();
   expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingClose');
@@ -398,4 +399,13 @@ it('renders approved catalog copy through the actual native panel and follows th
  expect(copy()).toContain('Approved native body'); expect(copy()).not.toContain(translations.t('destinationRing.sampleLabel'));
  await act(async () => { await translations.changeLanguage('ja'); });
  expect(copy()).toContain('承認済みの本文'); expect(copy()).toContain('承認済み見出し');
+});
+it('keeps the reading body below the chapter heading without overlapping the native text boxes', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-overview'); await finish();
+  const panel = node('ring-focused-panel');
+  const heading = panel.findAllByType('viro-text' as React.ElementType)[0];
+  const body = panel.findAllByType('viro-text' as React.ElementType).find(item => item.props.testID === 'ring-body')!;
+  const headingBottom = heading.props.position[1] - heading.props.height * heading.props.scale[1] / 2;
+  const bodyTop = body.props.position[1] + body.props.height * body.props.scale[1] / 2;
+  expect(bodyTop).toBeLessThanOrEqual(headingBottom);
 });
