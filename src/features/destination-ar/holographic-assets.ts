@@ -1,5 +1,6 @@
 /** Reproducible authored geometry; see assets/ar/README.md. */
 export const holographicAssets = {
+  glint: require('../../../assets/ar/holographic-glint.png') as number,
   frame: require('../../../assets/ar/holographic-frame.png') as number,
   overview: require('../../../assets/ar/chapter-overview.png') as number,
   history: require('../../../assets/ar/chapter-history.png') as number,

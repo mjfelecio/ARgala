@@ -2523,3 +2523,47 @@ hit an existing timing test timeout under memory pressure; the final complete
 suite above passed after avoiding concurrent checks. Android export is recorded
 in the cinematic implementation evidence. Video stays deferred and the existing
 release-acceptance limitations still apply.
+
+
+### Cinematic native presentation and audible preview — 2026-11-02
+
+The owner redirected work from content/video to the AR experience. Native covers
+now use authored rounded/translucent forest frames, seafoam corners and distinct
+chapter emblems. The owner called the new UI “awesome”; initial held selection
+failed against a0.01-opacity hidden quad. Replacing that quad with the actual
+painted image as the sole high-accuracy hit surface restored opening, explicitly
+confirmed by the owner. Reader frames/decorations still ignore hits. No short-tap
+or native gesture patch is claimed.
+
+Initial entrance feedback exposed covers leaving view too early. The revised
+three-second path presents a separated forward cast, holds it briefly and sends
+chapters to their original ring headings in staggered arcs. Return650ms and
+reduced180ms stay. Native page feedback is140ms inside a stable frame, retaining
+image instances; unchanged Help/tracking return does not replay it. A one-shot
+220ms edge acknowledgement accompanies settlement/focus. The owner subsequently
+responded “Looks good” and requested audio.
+
+Original effects and three synthetic voice drafts are now bundled only for the
+guarded development audition. Production manifest remains empty pending exact
+script/recording/language approval. Galaxy A53 owner confirmed **“Heard the voice
+and effects”** for startup/deployment. JA/KO pronunciation, every-cue loudness,
+all native interruption cells and release performance remain pending. The existing
+APK was used; no build, install, OS-volume change, provider action, merge or
+deployment was performed. Full source/asset/review limits are in
+`docs/design/cinematic-ar/IMPLEMENTATION.md` and `AUDIO-REVIEW.md`.
+
+Visual stage full check passed **1,400 tests across125 files**, TypeScript and
+zero-warning lint. Audio/edge focused suite passed **145 tests across5 files**.
+RED→GREEN regressions cover active hit geometry, forward cast visibility,
+page/edge replay, optional audio not blocking entry, late assets without camera
+remount/startup speech, preview gates and stale native sound completion.
+Final whole-change checks and export are recorded in implementation evidence.
+
+
+Final audio/edge source verification: **1,413 tests across126 files**, strict
+TypeScript and zero-warning lint passed via `VITEST_MAX_WORKERS=2 npm run check`.
+Dependency patches verified with0 updates. Android export passed at8.6MB with the
+development flag disabled; this is a JS/assets export, not an APK build. Preview
+assets are statically included but runtime/provenance/model gates reject release
+audition. `git diff --check` passed. Camera/app owners were released after the
+English audible check. No release/localization approval is inferred from it.

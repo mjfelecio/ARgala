@@ -27,6 +27,7 @@ write('holographic-frame', f'''
 <rect x="5" y="5" width="502" height="502" rx="30" fill="url(#glass)" stroke="url(#rim)" stroke-width="3"/>
 <path d="M27 66V42Q27 27 42 27H66 M446 27H470Q485 27 485 42V66 M485 446V470Q485 485 470 485H446 M66 485H42Q27 485 27 470V446" fill="none" stroke="{edge}" stroke-opacity=".9" stroke-width="5" stroke-linecap="round"/>
 ''')
+write('holographic-glint', f'<rect x="5" y="5" width="502" height="502" rx="30" fill="none" stroke="{edge}" stroke-width="7"/>')
 paths = {
  'overview': '<path d="M156 184Q206 163 256 188Q306 163 356 184V328Q306 307 256 332Q206 307 156 328Z M256 188V332 M183 218Q207 208 229 218 M283 218Q307 208 329 218 M183 253H229 M283 253H329"/>',
  'history': '<circle cx="256" cy="256" r="96"/><path d="M256 194V258L299 286 M256 160V174 M352 256H338 M256 352V338 M160 256H174"/>',

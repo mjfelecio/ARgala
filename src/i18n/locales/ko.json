@@ -523,6 +523,8 @@
     }
   },
   "destinationStories": {
+    "audioPreview": "합성 음성 미리 보기입니다. 안내 문구와 발음은 검토 대기 중입니다.",
+    "systemInitialized": "AR이 시작되었습니다.",
     "previewEntrance": "전체 시작 연출 미리 보기",
     "exit": "돌아가기",
     "chapter": "{{current}}장 / {{total}}장",

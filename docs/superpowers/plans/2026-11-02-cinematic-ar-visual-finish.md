@@ -31,12 +31,12 @@ Files: `cinematic-deployment.tsx`, new `page-transition.tsx`, `information-panel
 - [x] Add regressions for page transition on actual cursor changes without image remount, no motion when disabled/reduced, final stable content, full development preview with existing history intact.
 - [x] Keep native animation definitions stable; strengthen emblem formation/unfold/settle inside3000ms (owner feedback: show all covers before departure) and return650ms. Page changes use brief opacity/translation inside a stationary frame.
 - [x] Add explicitly requested full entrance preview before development startup; leave actual destination first/return/recovery policy intact.
-- [ ] Run regressions, full `npm run check`, native patch check and Android export. Perform brief existing-APK device capture when available; record physical limits honestly.
+- [x] Run regressions, full `npm run check`, native patch check and Android export. Perform brief existing-APK device capture when available; record physical limits honestly.
 
 ## Task3 — Review and evidence
 
 - [x] Fresh read-only whole-change review; fix important findings with focused regression coverage.
-- [ ] Update cinematic implementation/validation evidence with screenshots and exact checks. Commit small reviewable changes; no merge or deployment.
+- [x] Update cinematic implementation/validation evidence with screenshots and exact checks. Commit small reviewable changes; no merge or deployment.
 
 
 Ruling: The supplied design remains the approved direction; owner correction

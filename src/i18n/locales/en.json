@@ -564,6 +564,8 @@
     }
   },
   "destinationStories": {
+    "audioPreview": "Synthetic audio preview. Voice wording and pronunciation are awaiting review.",
+    "systemInitialized": "AR initialized.",
     "previewEntrance": "Preview full entrance",
     "exit": "Exit",
     "chapter": "Chapter {{current}} / {{total}}",

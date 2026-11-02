@@ -523,6 +523,8 @@
     }
   },
   "destinationStories": {
+    "audioPreview": "合成音声のプレビューです。読み上げ内容と発音は確認待ちです。",
+    "systemInitialized": "ARを起動しました。",
     "previewEntrance": "フル演出をプレビュー",
     "exit": "戻る",
     "chapter": "第{{current}}章 / {{total}}章",

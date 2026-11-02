@@ -9,7 +9,7 @@ import { RingController } from './ring-controller';
 import type { PoseSample } from './types';
 import { useReadingSize } from './use-reading-size';
 const native = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn(), patches: [] as { id: string; patch: Record<string, unknown> }[], reduced: false }));
-vi.mock('./holographic-assets', () => ({ holographicAssets: { frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => native.reduced }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
@@ -443,4 +443,13 @@ it('keeps the same reading page still when Help or tracking ownership returns', 
   await track(2); await track(3);
   expect(native.patches.filter(item => item.id === 'ring-page-content').some(item => (item.patch.animation as { run?: boolean } | undefined)?.run)).toBe(false);
   expect(node('ring-page-content').props.position).toEqual([0, 0, 0]);
+});
+
+it('acknowledges accepted focus once and keeps the decorative glint silent on Help/tracking return', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  const glint = node('ring-focus-glint'); expect(glint).toBeDefined(); expect(glint.props.ignoreEventHandling).toBe(true);
+  expect(native.patches.some(item => item.id === 'ring-focus-glint' && (item.patch.animation as { run?: boolean } | undefined)?.run)).toBe(true);
+  native.patches.length = 0; sceneOptions = { interactive: false }; await act(async () => tree.update(wrapper()));
+  sceneOptions = { interactive: true }; await act(async () => tree.update(wrapper())); await track(2); await track(3);
+  expect(native.patches.filter(item => item.id === 'ring-focus-glint').some(item => (item.patch.animation as { run?: boolean } | undefined)?.run)).toBe(false);
 });

@@ -215,3 +215,49 @@ Artwork generation checks passed. Read-only review verified the transparency,
 page recovery and hit-surface fixes. A single full native360° touch/recovery
 matrix, reduced-motion device run and release-performance acceptance remain
 pending. No APK was built, installed or upgraded.
+
+
+## Audible development preview and event accents — 2026-11-02
+
+After accepting the visible panels and revised entrance, the owner requested
+missing voice/effects and additional cinematic feedback. The development
+prototype now has original deployment/focus/page/Close WAV effects and short
+EN/JA/KO eSpeak-NG formant voice drafts. See AUDIO-REVIEW.md and the asset record
+for exact scripts, tool/source rights evidence, durations and pending review.
+Files are bundled auditions, not approved production localization; no synthesis
+engine/model, cloud API, native player dependency or APK is added. Native
+ViroSound never invokes the Fabric-incompatible seek command from the video spike.
+
+Both development guards, development provenance and explicit model preview
+ownership fence the clips. Full-entrance preview may audition speech despite
+saved cinematic history, without altering that history or admission. Audio
+loads independently of content: a hung/rejected import cannot block AR. Late
+assets become available for future events in the same scene without camera
+remount or delayed startup narration. Distinct playback IDs fence stale native
+completion callbacks. Voice/Effects preferences remain independent, and playback
+stops with foreground/interactivity ownership. No system volume change occurred.
+
+A220ms native seafoam edge acknowledgement accompanies settlement and accepted
+focus; it is one-shot, decorative/hit transparent, skipped for reduced motion,
+and does not repeat on unchanged Help/tracking recovery. Reading geometry and
+controls stay stationary. The generated rim is transparent between its edges.
+
+On Galaxy A53 SM-A536E/Android16 with the existing development client, the owner
+confirmed the English startup announcement and deployment effect were audible.
+The owner had already confirmed held opening after the painted-surface correction.
+JS error log capture for the audio pass contained0 error lines. Phone AR was exited
+while final checks ran; Metro remains available for owner review. Battery was26%
+before this brief audition; keep later tests short. No separate JA/KO native
+pronunciation, every-cue volume, complete interruption or release thermal acceptance
+is claimed. Content and video remain deferred.
+
+
+Final audio/edge verification: `VITEST_MAX_WORKERS=2 npm run check` passed strict
+TypeScript, zero-warning lint and **1,413 tests across126 files**. Native patch
+verification passed with0 files updated. Final Android Metro/React Compiler/
+Hermes export with the development flag disabled passed (8.6MB). Preview WAVs
+and artwork remain statically included; runtime guards do not assert asset-byte
+removal. `git diff --check` passed. Read-only review found no remaining important
+issue after the optional-load, stale-callback and recovery-replay corrections.
+Camera testing ended and the app was backgrounded to release its native owners;
+Metro remains running for review. No APK build, install, merge or deployment.

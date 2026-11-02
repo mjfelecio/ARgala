@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { ViroAnimations, ViroImage, ViroNode } from '@reactvision/react-viro';
+import { HolographicGlint } from './holographic-glint';
 import { introEmblemAsset } from './intro-emblem-asset';
 import { deploymentTransform, deploymentKeyframes } from './intro-deployment';
 import { introDuration, type IntroVariant } from './intro-policy';
@@ -34,7 +35,7 @@ export function CinematicTile({ slot, basis, variant, ordinal, peers, children }
     return () => { node?.setNativeProps({ animation: { name, run: false, interruptible: true } }); };
   }, [slot, basis, variant, ordinal, peers]);
   return <ViroNode ref={ref} testID={`cinematic-${slot.id}`} ignoreEventHandling position={initial.position} rotation={initial.rotation}
-    scale={[initial.scale / ringMetrics.tileScale, initial.scale / ringMetrics.tileScale, initial.scale / ringMetrics.tileScale]} opacity={0}>{children}</ViroNode>;
+    scale={[initial.scale / ringMetrics.tileScale, initial.scale / ringMetrics.tileScale, initial.scale / ringMetrics.tileScale]} opacity={0}>{children}<HolographicGlint id={`ring-deploy-glint-${slot.id}`} width={0.71} height={0.71} active reduced={variant === 'reduced' || variant === 'none'} delay={Math.max(0, introDuration(variant) - 220)} /></ViroNode>;
 }
 export function CinematicEmblem({ basis }: { basis: Basis }) {
   const ref = useRef<ViroNode>(null);

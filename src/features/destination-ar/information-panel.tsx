@@ -1,3 +1,4 @@
+import { HolographicGlint } from './holographic-glint';
 import { PageTransition } from './page-transition';
 import { HolographicFrame } from './holographic-frame';
 import { chapterPresentation } from './chapter-presentation';
@@ -28,9 +29,9 @@ const captionHeight = 0.2;
 const imageHeight = 0.46 - (contentBottom + captionHeight + 0.02);
 const imageY = contentBottom + captionHeight + 0.02 + imageHeight / 2;
 
-export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, ordinal = 1, chapterCount = 1, openedCount = 0 }: {
+export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, onPageChange, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0 }: {
   selection: FocusSelection; content: RingContent; previous?: ReadingCursor; reading: ReturnType<typeof useReadingSize>; enabled: boolean; style: ArNativeStyle; decorations?: boolean;
-  onCursor(id: string, cursor: ReadingCursor): void; onClose(): void; onComplete(token: number): void;
+  onPageChange?(): void; onCursor(id: string, cursor: ReadingCursor): void; onClose(): void; onComplete(token: number): void;
   ordinal?: number; chapterCount?: number; openedCount?: number;
 }) {
   const { t, i18n } = useTranslation(); const ref = useRef<ViroNode>(null); const reduced = useReducedMotion();
@@ -62,6 +63,9 @@ export function InformationPanel({ selection, content, previous, reading, enable
   const cursor = galleryCursor(pages, previous, locale, reading.size);
   const page = pages[cursor.page]; const interactive = enabled && !moving;
   const transform = moving ? selection.from : selection.to;
+  function changePage(page: number) {
+    onCursor(content.id, cursorAtPage(pages, page, locale, reading.size)); onPageChange?.();
+  }
   function changeSize(delta: number) {
     const next = readingSizes[Math.min(2, Math.max(0, readingSizes.indexOf(reading.size) + delta))];
     onCursor(content.id, galleryCursor(layout(next), cursor, locale, next)); reading.change(delta);
@@ -72,6 +76,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
     <HolographicFrame width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={false} />
     <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.495 : 0.425, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.05 : 0.16} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 3.5 : 8, 'left', '600')} />
     {!closing && <>
+      {decorations && <HolographicGlint id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
       <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
       <ArText testID="ring-sample-label" position={[0.28, 0.555, 0.006]} width={0.56} height={0.06} text={content.approved ? t('destinationStories.openedCount', { count: openedCount, total: chapterCount }) : t('destinationRing.sampleLabel')} style={style.text(3)} />
       <PageTransition identity={`${content.id}:${cursor.page}:${locale}:${reading.size}`} enabled={interactive} reduced={reduced}>
@@ -79,10 +84,10 @@ export function InformationPanel({ selection, content, previous, reading, enable
         textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />}
       </PageTransition>
       <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.4, pageRowY, 0.012]} enabled={interactive && cursor.page > 0} style={style}
-        onPress={() => onCursor(content.id, cursorAtPage(pages, cursor.page - 1, locale, reading.size))} />
+        onPress={() => changePage(cursor.page - 1)} />
       <ArText testID="ring-page-indicator" position={[0, pageRowY, 0.012]} width={0.4} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />
       <NativePanelAction id="next" label={t('destinationRing.next')} width={0.34} position={[0.4, pageRowY, 0.012]} enabled={interactive && cursor.page < pages.length - 1} style={style}
-        onPress={() => onCursor(content.id, cursorAtPage(pages, cursor.page + 1, locale, reading.size))} />
+        onPress={() => changePage(cursor.page + 1)} />
       <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.42, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />
       <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[-0.17, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
       <NativePanelAction id="close" primary label={t('destinationRing.close')} width={0.46} position={[0.28, bottomRowY, 0.012]} enabled={interactive} style={style} onPress={onClose} />

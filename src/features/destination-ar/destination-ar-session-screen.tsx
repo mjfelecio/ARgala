@@ -20,6 +20,8 @@ import { useArSession } from './use-ar-session';
 import { useReadingSize } from './use-reading-size';
 import { introDuration, introVariant } from './intro-policy';
 import { useArIntroduction } from './use-ar-introduction';
+import type { AudioManifest } from './system-audio';
+import { loadDevelopmentSystemAudio } from './development-audio-loader';
 import { loadDevelopmentGalleryContent } from './development-gallery-loader';
 import { loadRingScene } from './ring-loader';
 import type { RingControls, RingMetrics } from './destination-ring-scene';
@@ -43,28 +45,31 @@ function DevelopmentGallerySession({ identity }: { identity: SessionIdentity }) 
   const [attempt, setAttempt] = useState(0);
   const [content, setContent] = useState<readonly RingContent[] | null>(null);
   const [failed, setFailed] = useState(false);
+  const [audioManifest, setAudioManifest] = useState<AudioManifest | undefined>();
   useEffect(() => {
     let current = true;
+    void loadDevelopmentSystemAudio().then(value => { if (current) setAudioManifest(value ?? undefined); }).catch(() => { /* Optional audio never blocks AR entry. */ });
     void loadDevelopmentGalleryContent().then(value => {
       if (!current) return;
       if (value) setContent(value); else setFailed(true);
     }).catch(() => { if (current) setFailed(true); });
     return () => { current = false; };
   }, [attempt]);
-  if (content) return <DestinationArSessionExperience identity={identity} freshEligible={isViroSpikeEnabled} content={content} />;
+  if (content) return <DestinationArSessionExperience identity={identity} freshEligible={isViroSpikeEnabled} content={content} audioManifest={audioManifest} />;
   return <Screen><Notice>{t(failed ? 'destinationRing.contentFailed' : 'common.loading')}</Notice>
     {failed && <Action title={t('common.retry')} onPress={() => { setFailed(false); setAttempt(value => value + 1); }} />}
   </Screen>;
 }
 
-type Props = { identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
-export function DestinationArSessionExperience({ identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
+type Props = { audioManifest?: AudioManifest; identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
+export function DestinationArSessionExperience({ audioManifest, identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
   const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
   const [transitionReady, setTransitionReady] = useState(true); const [scene, setScene] = useState({ width: 0, height: 0 });
   const [NativeRing, setNativeRing] = useState<Awaited<ReturnType<typeof loadRingScene>> | null>(null);
   const { systemVoice, soundEffects } = useSettings();
   const audioPreferences = useMemo(() => ({ systemVoice, soundEffects }), [systemVoice, soundEffects]);
+  const audition = identity.provenance === 'development' && isViroSpikeEnabled() ? audioManifest : undefined;
   const reading = useReadingSize(); const introduction = useArIntroduction(identity); const reduced = useReducedMotion();
   const [previewEntrance, setPreviewEntrance] = useState(false);
   const variant = introVariant({ ready: true, established: false, seen: introduction.seen && !previewEntrance, reduced });
@@ -103,7 +108,7 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
       <SceneBoundary key={startup.attempt} onFailure={startup.onFailure}>
         <NativeRing onReady={startup.onReady} onTracking={lifecycle.onTracking} onControls={acceptControls} onRecenterResult={recenterResult}
           onMetrics={help && identity.provenance === 'development' ? setMetrics : undefined} reading={reading} content={content} initialProgress={session.progress} onProgress={lifecycle.onProgress}
-          audioPreferences={audioPreferences} firstVisit={!introduction.seen}
+          audioPreferences={audioPreferences} audioManifest={audition} firstVisit={!introduction.seen || previewEntrance && identity.provenance === 'development'}
           visibleTileCount={session.phase === 'reveal' ? Infinity : session.revealedCount} deployment={session.phase === 'reveal' ? variant : undefined} interactive={exploring && !help} />
       </SceneBoundary>
     </View>}
@@ -116,6 +121,7 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
       {session.phase === 'expired' ? <View className="gap-3 p-4"><Notice>{t('destinationSession.expired')}</Notice>
         <Action title={t('arrival.returnToMap')} onPress={() => { close(); onExit?.(); if (onReturn) onReturn(); else router.navigate('/'); }} />
       </View> : <ArPreflight noticeKey={preflightNoticeKey ?? (identity.provenance === 'verified' ? 'arrival.preflight' : 'destinationAr.prototype')} phase={startup.phase} errorCode={startup.errorCode} pending={startup.pending} canAskAgain={startup.canAskAgain} onStart={prompt => void startup.start(prompt)} />}
+      {audition && startup.phase === 'idle' && <View className="px-4 pb-3"><Notice>{t('destinationStories.audioPreview')}</Notice></View>}
       {identity.provenance === 'development' && isViroSpikeEnabled() && startup.phase === 'idle' && !startup.pending && <View className="px-4 pb-3"><Action title={t('destinationStories.previewEntrance')} onPress={() => { setPreviewEntrance(true); void startup.start(false); }} /></View>}
       {progressFeedback}
       {!session.established && guidance}

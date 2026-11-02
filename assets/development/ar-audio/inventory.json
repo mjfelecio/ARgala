@@ -1,0 +1,42 @@
+{
+  "closed.wav": {
+    "durationSeconds": 0.12,
+    "sampleRate": 22050,
+    "peakDbfs": -11.28
+  },
+  "deployed.wav": {
+    "durationSeconds": 0.42,
+    "sampleRate": 22050,
+    "peakDbfs": -7.76
+  },
+  "focused.wav": {
+    "durationSeconds": 0.1,
+    "sampleRate": 22050,
+    "peakDbfs": -10.68
+  },
+  "pageChanged.wav": {
+    "durationSeconds": 0.065,
+    "sampleRate": 22050,
+    "peakDbfs": -13.38
+  },
+  "startup-en.wav": {
+    "durationSeconds": 1.315,
+    "sampleRate": 22050,
+    "peakDbfs": -2.5
+  },
+  "startup-ja.wav": {
+    "durationSeconds": 1.55,
+    "sampleRate": 22050,
+    "peakDbfs": -2.5
+  },
+  "startup-ko.wav": {
+    "durationSeconds": 1.885,
+    "sampleRate": 22050,
+    "peakDbfs": -2.5
+  },
+  "trackingLost.wav": {
+    "durationSeconds": 0.16,
+    "sampleRate": 22050,
+    "peakDbfs": -14.21
+  }
+}

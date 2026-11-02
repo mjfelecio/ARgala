@@ -64,6 +64,8 @@ General location-based discovery and the curated tourist catalog must coexist. A
 
 - Chapter covers use their visible painted image as the high-accuracy native hit surface, with one completed-click owner on the tile. A near-zero-opacity hidden quad failed held selection on the Galaxy A53; do not use invisible geometry as a substitute. Decorative images and focused-reader backplates still explicitly ignore events.
 
+- System audio auditions require both development guards, development provenance and explicit preview-only playback ownership; they do not imply language/release approval. Optional audio loading cannot block AR entry. Late assets update the existing audio owner for future events without replaying startup or remounting the camera; key native sounds and fence their completion by playback ID.
+
 - While a Viro panel is focused, a held interaction on another visible tile collapses the current panel rather than switching focus. Keep transition/tracking/fresh-pose guards and read committed scene interactivity in native callbacks; retire queued selection/Close callbacks on unmount.
 
 - Keep Android `MapView.userInterfaceStyle` unset: the explicit light override crashes the tested Fabric build during native initial-prop conversion. Use the native default plus the shared CSS-derived custom map style; screen-level mocks do not verify native enum serialization.

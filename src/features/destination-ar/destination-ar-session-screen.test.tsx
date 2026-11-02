@@ -12,15 +12,16 @@ import { ViroRingRoute } from './dev-entry';
 import { router } from 'expo-router';
 const native = vi.hoisted(() => ({ active: true, focused: true, reduced: false, eligible: true,
   principal: 'owner' as string | null, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
-  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), gallery: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(),
+  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), gallery: vi.fn(), audio: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(),
 }));
-vi.mock('./holographic-assets', () => ({ holographicAssets: { frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: native.principal ? { user: { id: native.principal } } : null }) }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
 vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get, requestCameraPermissionsAsync: native.request } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true }) }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
+vi.mock('./development-audio-loader', () => ({ loadDevelopmentSystemAudio: native.audio }));
 vi.mock('./development-gallery-loader', () => ({ loadDevelopmentGalleryContent: native.gallery }));
 vi.mock('./ring-loader', () => ({ loadRingScene: native.load }));
 vi.mock('@/features/ar-photo/ar-photo-controls', async () => { const R = await import('react'); return { ArPhotoControls: (props: Record<string, unknown>) => R.createElement('photo-controls', props) }; });
@@ -32,7 +33,7 @@ vi.mock('expo-router', async () => {
 });
 vi.mock('@reactvision/react-viro', async () => {
   const R = await import('react');
-  return { ViroARScene: 'native-scene', ViroQuad: 'quad', ViroText: 'viro-text', ViroImage: 'viro-image',
+  return { ViroSound: 'viro-sound', ViroARScene: 'native-scene', ViroQuad: 'quad', ViroText: 'viro-text', ViroImage: 'viro-image',
     ViroNode: R.forwardRef((props: { children?: React.ReactNode }, ref) => { R.useImperativeHandle(ref, () => ({ setNativeProps: vi.fn() })); return R.createElement('node', props, props.children); }),
     ViroARSceneNavigator: R.forwardRef((props: { initialScene: { scene: () => React.JSX.Element } }, ref) => {
       R.useImperativeHandle(ref, () => ({ arSceneNavigator: { takeScreenshot: native.screenshot } }), []);
@@ -117,7 +118,7 @@ beforeEach(async () => {
   native.active = native.focused = native.eligible = true; native.reduced = false; native.principal = 'owner'; native.transitions.clear();
   vi.spyOn(Reanimated, 'useReducedMotion').mockImplementation(() => native.reduced);
   native.get.mockReset().mockResolvedValue(granted); native.request.mockReset().mockResolvedValue({ ...granted, granted: false, status: 'denied' });
-  native.screenshot.mockReset(); native.gallery.mockReset().mockImplementation(async () => (await import('./development-ring-content')).developmentRingContent);
+  native.screenshot.mockReset(); native.audio.mockReset().mockResolvedValue(null); native.gallery.mockReset().mockImplementation(async () => (await import('./development-ring-content')).developmentRingContent);
   native.support.mockReset().mockImplementation(callback => callback('SUPPORTED')); nativeUi.modules.VRTARSceneNavigatorModule = { isARSupportedOnDevice: native.support };
   native.getItem.mockReset().mockImplementation(async key => key.startsWith('argala.ar-') ? 'complete' : null); native.setItem.mockReset().mockResolvedValue(undefined);
   native.gate.mockReset().mockImplementation(() => native.eligible); native.load.mockReset().mockImplementation(async () => (await import('./destination-ring-scene')).DestinationRingSceneHost);
@@ -361,4 +362,35 @@ it('keeps the development entrance preview out of verified destination admission
   await mount(() => React.createElement(DestinationArSessionExperience, { identity: { ...identity, provenance: 'verified' }, freshEligible: native.gate }));
   expect(tree!.root.findAllByProps({ accessibilityLabel: translations.t('destinationStories.previewEntrance') })).toHaveLength(0);
   expect(native.get).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled();
+});
+
+const auditionClip = (source: number) => ({ source, rightsReference: 'Synthetic rights', approvalReference: 'Synthetic audition request only', previewOnly: true as const });
+const auditionManifest = { voices: { en: auditionClip(201), ja: auditionClip(202), ko: auditionClip(203) }, effects: { deployed: auditionClip(204), focused: auditionClip(205), trackingLost: auditionClip(206), pageChanged: auditionClip(207), closed: auditionClip(208) } };
+it.each(['en', 'ja', 'ko'])('auditions %s voice on explicit full preview and plays event effects without stale native finishes interrupting them', async locale => {
+  native.audio.mockResolvedValue(auditionManifest); await translations.changeLanguage(locale);
+  await mount(() => React.createElement(SessionRoute)); await layout(); await press('destinationStories.previewEntrance'); await settle(); await ready([0, 2, 0], [0, 0, -1], false);
+  const sound = () => tree!.root.findAllByType('viro-sound' as React.ElementType)[0];
+  expect(sound().props.source).toBe(auditionManifest.voices[locale as 'en' | 'ja' | 'ko'].source);
+  const oldFinish = sound().props.onFinish; await act(async () => oldFinish());
+  await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+  expect(sound().props.source).toBe(204); await act(async () => sound().props.onFinish());
+  await ready(); await click('ring-tile-history'); await finish(); expect(sound().props.source).toBe(205);
+  await act(async () => oldFinish()); expect(sound().props.source).toBe(205);
+  await act(async () => sound().props.onFinish()); await click('ring-action-next'); expect(sound().props.source).toBe(207);
+  await act(async () => sound().props.onFinish()); await click('ring-action-close'); await finish(); expect(sound().props.source).toBe(208);
+  await active(false); expect(sound()).toBeUndefined();
+});
+it('keeps failed optional audition loading from blocking native entry or exposing diagnostic messages', async () => {
+  native.audio.mockRejectedValue(new Error('PRIVATE_AUDIO_ERROR'));
+  await mount(() => React.createElement(SessionRoute)); await layout(); await start(); await ready();
+  expect(cameras()).toHaveLength(1); expect(copy()).not.toContain('PRIVATE_AUDIO_ERROR');
+});
+it('starts AR while optional audio is pending and accepts late effects without remounting or speaking late', async () => {
+  const pending = Promise.withResolvers<typeof auditionManifest>(); native.audio.mockReturnValueOnce(pending.promise);
+  await mount(() => React.createElement(SessionRoute)); await layout(); await start(); await ready();
+  const camera = cameras()[0];
+  await act(async () => pending.resolve(auditionManifest)); expect(cameras()[0]).toBe(camera);
+  expect(tree!.root.findAllByType('viro-sound' as React.ElementType)).toHaveLength(0);
+  await click('ring-tile-history'); await finish();
+  expect(tree!.root.findByType('viro-sound' as React.ElementType).props.source).toBe(205);
 });
