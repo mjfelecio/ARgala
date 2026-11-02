@@ -117,3 +117,22 @@ approved factual content/media/provider association are also unresolved. Local
 guest/Saved/Passport and account-sync foundations have since been implemented;
 simulation must still award no stamp. Reminders and broader fallback/offline work
 remain later phases.
+
+
+## 2026-11-02 — simulation and native font follow-up
+
+On the Galaxy A53's existing development APK, the ACLC pilot selected from the
+catalog showed Explore's explicit simulation button. Pressing it opened the
+selected-destination preflight with Start/Preview controls and the simulation
+disclaimer. Japanese cover and reader/control glyphs, and Korean reader/control
+glyphs, rendered after adding Viro's explicit `NotoSansCJK` fallback. English was
+restored and the app backgrounded afterward. See [validation](validation.md) for
+checks and private evidence locations.
+
+Current provisional on-site criteria are two fresh continuous-watcher fixes
+spanning3s, each no worse than50m accuracy, with reported distance within the
+unchanged destination radius.10s freshness, watcher/jump guards and final
+selected-entry revalidation remain. These changes do not establish outdoor
+calibration, real geographic arrival or Passport eligibility. The failed-route
+Directions simulation branch has screen regression coverage only. Other pending
+checklist cells above remain pending.

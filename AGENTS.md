@@ -85,6 +85,9 @@ General location-based discovery and the curated tourist catalog must coexist. A
 
 ## Selected-destination AR admission
 
+- Foreground admission-source ownership is separate from GPS availability. Explicit development simulation may use a focused source after Directions disables its GPS owner; publish pending/no sample in that case so it grants no real entry authority. Captured launch actions belong to the committed foreground/selection scope and must not borrow a later lease after async loading, blur or selection changes.
+- Owner-requested provisional arrival calibration accepts continuous fixes up to50m accuracy, requires two samples spanning3s and compares raw reported distance to the unchanged destination radius. Keep10s freshness, watcher health, jump guards and immediate pre-mount/first-tracking revalidation. This is not outdoor calibration evidence and does not change walking progress rules.
+
 - Admission is principal-scoped and source-lease fenced. URLs, cache presence and remote map centers grant no geographic authority. Transfer handles are single-use; pending real entry revalidates the selected destination before first native mount and first tracking-ready.
 - Stop initial-entry GPS only after tracking-ready establishes the live session. Established recovery retains its bounded exemption; expired logical sessions are terminal and return to Explore for a fresh handoff rather than retrying the retired admission.
 - Simulation is an explicit development-only path, never synthetic samples injected into the real GPS owner. Draft ACLC content is restricted to `pilot-aclc`; preserve destination identity and development provenance through every transfer/loader/mount gate.

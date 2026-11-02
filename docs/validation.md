@@ -2593,3 +2593,48 @@ Private camera screenshots remain gitignored in
 the arrival fixes passed strict TypeScript, zero-warning lint and **1,438 tests
 across126 files** through `VITEST_MAX_WORKERS=2 npm run check`. Android JS/assets
 export passed (8.6MB Hermes); neither operation is an APK build.
+
+
+### Featured arrival and development simulation — 2026-11-02
+
+The owner reported a nonresponsive simulation action and overly strict real
+arrival requirements. Directions previously retired its admission source when a
+failed/expired route preview disabled GPS, even though its simulation action was
+still available. The source now retains its focused foreground lease and
+publishes pending/no sample when GPS is disabled. Real entry remains unavailable
+without fresh continuous GPS. Captured real/simulated actions are also fenced to
+the committed foreground/selection scope, including the interval before passive
+cleanup; delayed imports cannot reuse a later lease. Equivalent rerenders retain
+their action identity.
+
+Provisional arrival calibration changed from20m accuracy and three samples over
+6s to **50m accuracy and two samples over3s**. Eligibility compares reported
+distance directly to the destination's unchanged radius, rather than subtracting
+accuracy from the usable radius.10s freshness, continuous-watcher health,
+implausible-jump guards and selected-entry checks immediately before first mount
+and first tracking-ready remain. Existing established-session recovery is
+unchanged. These thresholds still require outdoor boundary/accuracy measurement;
+this test did not simulate real GPS or claim a verified on-site visit.
+
+RED→GREEN regressions cover disabled-preview simulation, stale callbacks during
+commit/blur/selection, stable equivalent rerenders and final-mount rejection just
+outside the unchanged radius. Screen coverage checks Explore's simulated route
+transfer and excludes borrowing the pilot draft for D01–D09.
+
+Physical Galaxy A53 retest used Catalog → ACLC pilot → Explore's explicit
+`Simulate arrival · development only` button. It opened the selected-destination
+AR preflight with Start/Preview controls and the simulated-arrival disclaimer.
+An earlier snapshot was taken before the navigation transition finished; the
+repeat check waited for the resulting screen. Simulation grants no Passport
+credit. Directions' failed-preview branch was verified by its screen regression,
+not a paid route request on the phone. English was restored and the app was
+backgrounded to release its camera/location owners after testing (battery16%).
+
+Combined final checks: `VITEST_MAX_WORKERS=2 npm run check` passed strict
+TypeScript, zero-warning lint and **1,438 tests across126 files**;
+`npm run check:native-patches` passed with0 updates; Android JS/assets export
+passed (8.6MB Hermes); `git diff --check` passed. Read-only review found no
+remaining concrete correctness issue in the changed paths. No APK build, native
+dependency/configuration change, paid Places/details/routes action, merge or
+deployment occurred. Camera screenshots, UI dumps and verification logs are gitignored in
+`.superpowers/reviews/2026-11-02-cjk-arrival/`.

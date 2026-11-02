@@ -64,7 +64,11 @@ function Preview({ token }: { token: unknown }) {
   const admission = useArAdmission(); const { language } = useSettings();
   const contentDestination = useDestinationLookup();
   const featured = contentDestination(data?.intent.featuredDestinationId);
-  const arSource = useAdmissionSource(admission, featured?.id ?? null, { running: running && preview.locationEnabled, watcherStatus: location.watcherStatus, sample: location.watcherSample ?? null }, true);
+  // A failed/expired preview may still offer an explicit development simulation.
+  // Its foreground lease needs no GPS owner; absent GPS cannot grant real entry.
+  const arSource = useAdmissionSource(admission, featured?.id ?? null, { running,
+    watcherStatus: preview.locationEnabled ? location.watcherStatus : 'pending',
+    sample: preview.locationEnabled ? location.watcherSample ?? null : null }, true);
   const chapterCount = approvedArContent(featured, language).length;
   const contentReady = chapterCount > 0; const draftAr = !contentReady && featured?.id === 'pilot-aclc' && isViroSpikeEnabled();
   function launchAr() {

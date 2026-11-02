@@ -12,7 +12,7 @@ export const AR = { horizontalFovDegrees: 60, maxLabels: 3, labelWidth: 168, ric
   positionMaxAgeMs: 30000, headingMaxAgeMs: 10000, maxPositionAccuracyMeters: 100,
   nearbyReuseMs: 120000, nearbyReuseDistanceMeters: 100 } as const;
 /** Provisional arrival calibration. Field measurements must validate these hypotheses. */
-export const ARRIVAL = { sampleMaxAgeMs: 10000, futureToleranceMs: 1000, maxAccuracyMeters: 20,
-  requiredSamples: 3, corroborationMs: 6000, exitMarginMeters: 10,
+export const ARRIVAL = { sampleMaxAgeMs: 10000, futureToleranceMs: 1000, maxAccuracyMeters: 50,
+  requiredSamples: 2, corroborationMs: 3000, exitMarginMeters: 10,
   approachingMeters: 500, nearMeters: 150, maxSpeedMetersPerSecond: 12, jumpAllowanceMeters: 30,
   entryLifetimeMs: 30000 } as const;

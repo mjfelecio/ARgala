@@ -884,11 +884,31 @@ it('offers opted-in simulated arrival without converting a browsing point into G
   expect(store.getSnapshot()?.eligible).toBe(false); expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.search).not.toHaveBeenCalled();
  } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
 });
-it('does not offer the ACLC draft simulation for a different destination selected through a map link', async () => {
+it.each(['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09'])('does not offer unready %s a borrowed ACLC draft simulation through a map link', async id => {
  const { AdmissionContext } = await import('@/features/destination-ar/admission-context'); const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
- Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); controls.params = { featuredDestinationId: 'D01' } as typeof controls.params;
+ Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); controls.params = { featuredDestinationId: id } as typeof controls.params;
  try {
   await act(async () => { tree = create(React.createElement(AdmissionContext.Provider, { value: new ArAdmissionStore('owner') }, renderMap())); });
   expect(tree!.root.findAllByType('button').some(button => button.props.accessibilityLabel === translations.t('arrival.simulate'))).toBe(false);
+ } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
+});
+
+it.each(['active', 'focused'] as const)('retires Explore featured simulation actions after %s ownership changes', async lifecycle => {
+ const { AdmissionContext } = await import('@/features/destination-ar/admission-context');
+ const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+ Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); controls.hasLocation = false;
+ const store = new ArAdmissionStore('owner'); controls.params = { featuredDestinationId: 'pilot-aclc' };
+ const render = () => React.createElement(AdmissionContext.Provider, { value: store }, renderMap());
+ try {
+  await act(async () => { tree = create(render()); });
+  const simulate = tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('arrival.simulate'))!.props.onPress;
+  controls[lifecycle] = false; await act(async () => tree!.update(render()));
+  controls[lifecycle] = true; await act(async () => tree!.update(render()));
+  await act(async () => { simulate(); await vi.dynamicImportSettled(); });
+  expect(router.push).not.toHaveBeenCalled(); expect(store.getSnapshot()?.eligible).toBe(false);
+  await press('arrival.simulate'); await act(async () => { await vi.dynamicImportSettled(); });
+  const target = vi.mocked(router.push).mock.calls.at(-1)![0] as unknown as { params: { entryToken: string } };
+  expect(store.take(target.params.entryToken, 'pilot-aclc')).toMatchObject({ simulated: true, identity: { provenance: 'development' } });
+  expect(placesService.search).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
  } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
 });

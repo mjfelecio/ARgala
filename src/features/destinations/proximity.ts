@@ -48,7 +48,9 @@ export class DestinationProximity {
     if (previous && distanceMeters(previous.position, sample.position) > ARRIVAL.jumpAllowanceMeters +
       ARRIVAL.maxSpeedMetersPerSecond * (sample.timestamp - previous.timestamp) / 1000) return this.uncertain();
     const distance = distanceMeters(p.point, sample.position);
-    const contained = distance + sample.accuracy <= p.radiusMeters;
+    // Accuracy bounds reject unusable fixes; the approved radius applies to the
+    // reported position itself instead of shrinking by the uncertainty estimate.
+    const contained = distance <= p.radiusMeters;
     if (previous && sample.timestamp - previous.timestamp > ARRIVAL.sampleMaxAgeMs) { this.inside = null; this.outside = null; }
     this.inside = contained ? { first: this.inside?.first ?? sample.timestamp, count: (this.inside?.count ?? 0) + 1 } : null;
     const beyondExit = distance - sample.accuracy > p.radiusMeters + ARRIVAL.exitMarginMeters;
