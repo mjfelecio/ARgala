@@ -45,7 +45,8 @@ en-GB, activation radius 500 m, location enabled and camera granted. No bookmark
 stamp, account, onboarding or radius edits were made by the automation. Font-scale
 changes recreated the Android activity; GPS was reacquired through explicit Retry
 when needed. The final app was backgrounded and camera-service active clients
-were empty. Metro remains running for the existing client.
+were empty. Metro was subsequently stopped at the owner’s request before
+preparing the pull request.
 
 **Removal verification:** two new/updated Profile/navigation assertions failed
 before implementation (retired action/route still present), then the focused
