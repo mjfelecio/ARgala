@@ -2567,3 +2567,29 @@ development flag disabled; this is a JS/assets export, not an APK build. Preview
 assets are statically included but runtime/provenance/model gates reject release
 audition. `git diff --check` passed. Camera/app owners were released after the
 English audible check. No release/localization approval is inferred from it.
+
+
+### Native Japanese/Korean glyph correction — 2026-11-02
+
+The owner reported missing-glyph boxes, rather than line-wrap errors. Pinned Viro
+resolves its own Android system fonts; React Native's normal fallback did not
+reach its text renderer. A shared native family list now appends `NotoSansCJK`
+for every ring cover, reader and control, including the older square prototype.
+The primary family and existing geometry remain unchanged. The Galaxy A53 has
+`NotoSansCJK-Regular.ttc`; the installed Viro loader loaded its collection faces.
+No new font package, native configuration or APK was required.
+
+Regressions using actual locale resources failed before the fix and passed with
+the explicit fallback across both native scene paths. Galaxy A53 SM-A536E,
+Android16, existing development APK installed2026-10-30,1080×2400,420dpi and
+original1.1 font scale: Japanese cover `概要`, Japanese photo caption/reading
+controls and Korean photo caption/reading controls rendered recognizable glyphs
+without the reported boxes. Language changes were temporary in-memory previews;
+English was restored without changing saved preferences. This verifies glyph
+coverage, not editorial translation, pronunciation, all text sizes or TalkBack.
+
+Private camera screenshots remain gitignored in
+`.superpowers/reviews/2026-11-02-cjk-arrival/`. Combined source verification with
+the arrival fixes passed strict TypeScript, zero-warning lint and **1,438 tests
+across126 files** through `VITEST_MAX_WORKERS=2 npm run check`. Android JS/assets
+export passed (8.6MB Hermes); neither operation is an APK build.

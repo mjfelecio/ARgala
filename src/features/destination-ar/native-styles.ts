@@ -1,3 +1,4 @@
+import { arFontFamily } from './native-fonts';
 import { useEffect } from 'react';
 import { ViroMaterials } from '@reactvision/react-viro';
 import { useCSSVariable } from 'uniwind';
@@ -13,7 +14,7 @@ export function useArNativeStyle() {
   }, [brand, surface, edge]);
   return {
     text: (fontSize: number, align: 'left' | 'center' = 'center', weight: '400' | '600' = '400') => ({
-      fontFamily: (typeof font === 'string' ? font : 'PlusJakartaSans').replaceAll("'", '').replaceAll('"', ''), fontSize, color: text,
+      fontFamily: arFontFamily(font), fontSize, color: text,
       fontWeight: weight, textAlign: align, textAlignVertical: 'center' as const,
     }),
   };

@@ -186,3 +186,12 @@ it('keeps ring startup behind real focus/transition gates and exposes only utili
   native.focused = true; await act(async () => tree!.update(wrapper(child()))); expect(camera()).toHaveLength(0);
   expect(copy()).toContain(translations.t('destinationAr.interrupted'));
 });
+it.each(['ja', 'ko'])('also supplies CJK glyph coverage to the older %s native square', async locale => {
+  await translations.changeLanguage(locale); await mount(); await layout(); await press('destinationAr.start');
+  await act(async () => { await vi.dynamicImportSettled(); });
+  const scene = tree!.root.findByType('native-scene' as React.ElementType);
+  await act(async () => { scene.props.onTrackingUpdated(3, 1); scene.props.onCameraTransformUpdate({ position: [0, 2, 0], forward: [0, 0, -1] }); });
+  const glyph = tree!.root.findByType('viro-text' as React.ElementType);
+  expect(glyph.props.text).toBe(translations.t('destinationAr.square'));
+  expect(glyph.props.style.fontFamily).toBe('PlusJakartaSans, NotoSansCJK');
+});

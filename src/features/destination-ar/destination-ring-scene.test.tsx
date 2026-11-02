@@ -453,3 +453,16 @@ it('acknowledges accepted focus once and keeps the decorative glint silent on He
   sceneOptions = { interactive: true }; await act(async () => tree.update(wrapper())); await track(2); await track(3);
   expect(native.patches.filter(item => item.id === 'ring-focus-glint').some(item => (item.patch.animation as { run?: boolean } | undefined)?.run)).toBe(false);
 });
+
+it.each(['ja', 'ko'])('passes an explicit CJK fallback for every %s native cover, body and control without changing text', async locale => {
+  await translations.changeLanguage(locale); await mount(); await track(); await pose();
+  const cover = node('ring-tile-history');
+  const heading = cover.findAllByType('viro-text' as React.ElementType).find(item => item.props.text === translations.t('destinationRing.mock.history.title'))!;
+  expect(heading).toBeDefined();
+  expect(heading.props.style.fontFamily).toBe('PlusJakartaSans, NotoSansCJK');
+  await press('ring-tile-history'); await finish();
+  const glyphs = tree.root.findAllByType('viro-text' as React.ElementType);
+  for (const glyph of glyphs) expect(glyph.props.style.fontFamily).toBe('PlusJakartaSans, NotoSansCJK');
+  expect(text('ring-body')).toContain(translations.t('destinationRing.mock.history.title'));
+  expect(text('ring-page-indicator')).toBeDefined();
+});

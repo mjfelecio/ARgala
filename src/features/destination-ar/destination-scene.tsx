@@ -1,3 +1,4 @@
+import { arFontFamily } from './native-fonts';
 import { useEffect, useRef, useState } from 'react';
 import { ViroARScene, ViroARSceneNavigator, ViroMaterials, ViroNode, ViroQuad, ViroText, ViroTrackingStateConstants } from '@reactvision/react-viro';
 import { useCSSVariable } from 'uniwind';
@@ -48,7 +49,7 @@ export function DestinationScene({ onReady, onTracking }: Callbacks) {
       <ViroQuad width={0.84} height={0.84} materials="argalaSpikeEdge" />
       <ViroQuad width={0.8} height={0.8} position={[0, 0, 0.003]} opacity={0.94} materials={tapped ? 'argalaSpikeSelected' : 'argalaSpikePanel'} />
       <ViroText position={[0, 0, 0.006]} width={0.68} height={0.65} text={t(tapped ? 'destinationAr.squareTapped' : 'destinationAr.square')}
-        style={{ fontFamily: 'PlusJakartaSans', fontSize: 8, color: white, textAlign: 'center', textAlignVertical: 'center' }} />
+        style={{ fontFamily: arFontFamily(), fontSize: 8, color: white, textAlign: 'center', textAlignVertical: 'center' }} />
     </ViroNode>}
   </ViroARScene>;
 }
