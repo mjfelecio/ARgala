@@ -97,14 +97,18 @@ The existing iOS config is inactive: the resolved app supports Android only.
 launcher masks, splash source and Journey treatment. It is not an Android screen
 capture or proof of native launcher/splash behavior.
 
-`adb devices -l` found no connected devices on 2026-11-02. The earlier v1 phone
-captures do not validate this v2 revision. No device data/settings were changed,
-no paid request was started, and no APK was built. Native launch resources need
+The initial 2026-11-02 implementation audit found no connected devices. The owner
+later connected the Galaxy A53: ten native screenshots and a short live Explore
+recording now document v2. See [device proof and local gallery](brand-device-proof-2026-11-02.md)
+for live versus isolated-screen context, restored settings and remaining gaps.
+No paid request or APK build was started. Native launch resources need
 a separately approved rebuilt preview APK; Expo development-client launches do
 not establish production splash appearance. [Expo SDK 57 splash documentation](https://docs.expo.dev/versions/v57.0.0/sdk/splash-screen/).
 
 Remaining: actual launcher/themed masks and cold start in light/dark OS modes;
-Welcome/auth/Explore in EN/JA/KO at normal and large text; keyboard and
-loading/error states; collapsed/expanded docks and TalkBack. Native AR behavior
+the complete EN/JA/KO normal/large-text matrix, all IME scroll actions, server
+loading/error states and TalkBack. The device follow-up covers Explore docks and
+large text, Welcome language/large-text previews and sign-in keyboard/local
+validation appearance, with evidence boundaries recorded separately. Native AR behavior
 and appearance are untouched, and no new live AR/GPS/Maps claim is made.
 Automated results are recorded in [validation evidence](validation.md).

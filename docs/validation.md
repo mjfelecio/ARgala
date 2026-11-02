@@ -1924,3 +1924,28 @@ An independent read-only review found no Critical or Important issue, independen
 confirmed supplied source content, unchanged base CSS and matching icon alpha/safe areas,
 and reiterated the native acceptance gaps above. Its note to supersede the prior
 v1 validation entry is covered by this section. No native success is inferred.
+
+### 2026-11-02 — connected-phone branding follow-up
+
+After the owner connected ADB, captured ten native 1080×2400 PNGs and a short
+720×1600 Explore recording on the Galaxy A53/Android 16 (density override 420,
+original font 1.1, dark OS). Current JavaScript revision `92ff49e` ran through
+Metro on the existing October 30 development APK. The new v2 arch/outlined
+lockups and filled Journey motif were visually inspected on the phone.
+
+Live Explore covers collapsed/expanded docks and 1.5 text; Welcome captures cover
+EN/JA/KO at 1.1 and EN at 1.5; sign-in covers EN default, IME and local invalid
+input at 1.1. Welcome/sign-in use actual native screen components in a temporary
+isolated provider wrapper so the existing session/onboarding data remains intact.
+Those previews do not establish normal route-guard or authentication-flow success.
+Temporary code/context exports were removed and restored byte-for-byte.
+
+Font scale was restored to 1.1; locale en-GB and dark OS were retained. The phone
+was left on live Explore for owner review. No paid Places/routes request, sign-out,
+storage reset, onboarding completion, native AR session or APK build was performed.
+TypeScript and lint passed after source restoration. Native launch assets still
+need a rebuilt preview APK; the remaining locale/large-text, TalkBack and native
+acceptance matrix is recorded in the [device proof report](brand-device-proof-2026-11-02.md).
+Raw captures/recording and their hashed manifest are retained locally under the
+gitignored `.superpowers/reviews/2026-11-02-seafoam-forest/`, because they include
+live map and personal keyboard/status content; the report links the review gallery.
