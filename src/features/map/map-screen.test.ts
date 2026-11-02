@@ -98,6 +98,7 @@ beforeEach(async () => {
 });
 afterEach(async () => {
   await act(async () => tree?.unmount()); tree = undefined; client.clear();
+  nativeUi.fontScale = 1;
   notifyManager.setScheduler((callback) => setTimeout(callback, 0));
   vi.restoreAllMocks();
 });
@@ -678,6 +679,82 @@ it('shares the compact typed-search action and keyboard guard without lifecycle 
  await act(async () => tree!.root.findByType('input').props.onSubmitEditing());
  expect(placesService.search).toHaveBeenCalledTimes(2);
  expect(placesService.nearby).not.toHaveBeenCalled();
+});
+
+it.each(['en', 'ja', 'ko'] as const)('preserves the Explore shell through no-match and explicit recovery in %s', async language => {
+ controls.language = language;
+ await translations.changeLanguage(language);
+ const pending = Promise.withResolvers<Place[]>();
+ vi.mocked(placesService.search).mockReset().mockReturnValueOnce(pending.promise)
+  .mockResolvedValueOnce([]).mockRejectedValueOnce(new Error('private provider detail'))
+  .mockResolvedValueOnce([{ ...destination, source: 'discovery' }]);
+ await act(async () => { tree = create(renderMap()); });
+ const map = tree!.root.findByType('map');
+ const sheet = tree!.root.findByType('dialog');
+ await act(async () => {
+  tree!.root.findByProps({ testID: 'home-map-scene' }).props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } });
+  map.props.onMapReady();
+  map.props.onRegionChangeComplete({ latitude: 1, longitude: 2, latitudeDelta: 0.01, longitudeDelta: 0.01 });
+ });
+ const shell = (message: string) => {
+  expect(tree!.root.findByType('map')).toBe(map);
+  expect(tree!.root.findByType('dialog')).toBe(sheet);
+  expect(sheet.findAllByType('header')).toHaveLength(1);
+  expect(sheet.props.snapPoints.every((point: number) => point > 0)).toBe(true);
+  const content = sheet.findAllByType('text').flatMap(text => text.children).join(' ');
+  expect(content).toContain(translations.t('map.title'));
+  expect(content).toContain(message);
+ };
+ await act(async () => tree!.root.findByType('input').props.onChangeText('zzqvargalaauditnonexistent'));
+ await press('search.categories.all');
+ await press('search.submit');
+ shell(translations.t('map.searching'));
+ await act(async () => pending.resolve([]));
+ shell(translations.t('map.empty'));
+ for (const lifecycle of ['focused', 'active'] as const) {
+  controls[lifecycle] = false; await act(async () => tree!.update(renderMap()));
+  controls[lifecycle] = true; await act(async () => tree!.update(renderMap()));
+  shell(translations.t('map.empty'));
+ }
+ const { focusManager, onlineManager } = await import('@tanstack/react-query');
+ await act(async () => {
+  focusManager.setFocused(false); focusManager.setFocused(true);
+  onlineManager.setOnline(false); onlineManager.setOnline(true);
+  await client.invalidateQueries();
+ });
+ expect(placesService.search).toHaveBeenCalledOnce();
+ nativeUi.fontScale = 1.5;
+ await act(async () => tree!.update(renderMap()));
+ await press('map.expand'); shell(translations.t('map.empty'));
+ await press('map.collapse'); shell(translations.t('map.empty'));
+ // Repeat the audit's named search, then Search this area and explicit Retry.
+ await act(async () => tree!.root.findByType('input').props.onChangeText('Destination'));
+ await press('search.submit');
+ await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ shell(translations.t('map.empty'));
+ await press('search.thisArea');
+ await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ shell(translations.t('service.failed'));
+ expect(JSON.stringify(tree!.toJSON())).not.toContain('private provider detail');
+ for (const lifecycle of ['focused', 'active'] as const) {
+  controls[lifecycle] = false; await act(async () => tree!.update(renderMap()));
+  controls[lifecycle] = true; await act(async () => tree!.update(renderMap()));
+  shell(translations.t('service.failed'));
+ }
+ expect(placesService.search).toHaveBeenCalledTimes(3);
+ await press('common.retry');
+ await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ shell(translations.t('map.results', { count: 1 }));
+ expect(tree!.root.findByType('marker').props.title).toBe(destination.name);
+ expect(placesService.search).toHaveBeenCalledTimes(4);
+ await act(async () => tree!.unmount()); tree = undefined;
+ await new Promise(resolve => setTimeout(resolve, 5));
+ await act(async () => { tree = create(renderMap()); });
+ expect(JSON.stringify(tree!.toJSON())).toContain(translations.t('map.start'));
+ expect(placesService.search).toHaveBeenCalledTimes(4);
+ expect(placesService.nearby).not.toHaveBeenCalled();
+ expect(placesService.details).not.toHaveBeenCalled();
+ expect(routeService.walking).not.toHaveBeenCalled();
 });
 
 it('keeps denied-GPS global selection separate from physical proximity and permits Directions', async () => {
