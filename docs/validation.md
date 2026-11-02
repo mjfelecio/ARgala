@@ -1,5 +1,261 @@
 # Foundation validation
 
+## Final ordinary-timing Android confirmation (#39) — 2026-11-02
+
+After the owner reconnected ADB, the existing Galaxy A53 / Android 16 development
+client loaded **`81e31c5377120345e77dcb4c8779bf59357fb648`** from this checkout's
+Metro with `EXPO_PUBLIC_VIRO_SPIKE=1` and USB reverse forwarding. The runtime
+fix remains `b60b1d0`. The installed Gorhom handle source matched the original
+SHA-256 recorded below; no timing alteration or application diagnostics remained.
+No APK was built or installed. English, font scale 1.1 and location enabled were
+retained, with no account/journal/preference changes.
+
+The original sequence passed at ordinary native timing: All → nonexistent query
+→ dismiss keyboard → Search retained the visible title, handle and empty message.
+Profile → Explore retained the empty sheet; its settled capture had no location-
+loading guidance. Expanded/collapsed empty states and a repeated explicit no-match
+search stayed visible. A subsequent named query and Search this area also kept
+the shell (both returned no matches within that search scope). Clearing the query
+and explicitly searching nearby returned **20 places**, visible in both detents.
+Selecting a real marker exposed the selected-place actions; another no-match
+search then replaced it with a visible empty sheet. Every settled capture retained
+the title and expansion control without a location-loading message.
+
+This completes the previously pending normal-timing device confirmation. It adds
+to the controlled failing/passing late-measurement reproduction below; it does
+not claim that the historical intermittent sequence spontaneously failed again.
+Slow/error and exact request-count assertions remain automated evidence. Broader
+AR/on-site checks and the separate locale-switch Details observation remain as
+recorded below. Private captures, UI trees and SHA-256 manifest are in
+`.superpowers/reviews/2026-11-02-explore-39/final-normal-manifest.json`; none are
+published. Metro was stopped after the check, as requested. A fresh
+`npm run check` passed strict TypeScript, zero-warning lint and **1,307 tests /
+118 files**; `git diff --check` passed.
+
+## Explore native opening race (#39) — 2026-11-02
+
+Fix: **`b60b1d0`**. The owner's additional observation was that failed returns
+lacked the transient location-loading message. Clean attempts still worked, so
+those attempts were not treated as evidence that the original report was false.
+The investigation isolated a native layout-ordering failure that produces the
+same completely blank dock.
+
+**Confirmed mechanism:** Explore set `animateOnMount={false}` on pinned Gorhom
+5.2.14. This initializes the SDK's mount-complete flag before its handle has been
+measured. If the index-prop effect runs before handle readiness, its snap request
+is discarded. When measurement arrives later with unchanged detents, the native
+reaction skips reevaluation because opening is already marked complete. The
+native position can remain at the initial window height and its derived index
+at `-1`; Android's actual BottomSheetBody hides the entire body at that index,
+including the handle. The white lower region is the uncovered scene, not an empty
+provider response replacing the sheet.
+
+**Controlled physical reproduction:** on the same Galaxy A53 / Android 16 APK,
+both existing native handle measurements (layout and Fabric bounding rectangle)
+were temporarily delayed by 400 ms, retaining their real measured height of
+24 dp. With GPS ready and scene geometry stable, the unchanged product behavior
+left selected-place and subsequent no-match sheets entirely invisible. Diagnostics
+showed search state reaching `empty` while native index remained `-1`, position
+914.29 dp. UIAutomator exposed neither the title nor expansion action. This was
+a deliberate late-measurement test, not a claim that the intermittent original
+sequence spontaneously failed during a clean run.
+
+The product fix enables the SDK's layout-aware mount opening, as the existing
+Directions/AR docks already do. With the **same 400 ms delay**, selected and
+no-match sheets opened with their title, handle and empty guidance visible;
+the native callback reached index `0` / position 663.83 dp. A location-loading
+message, new GPS sample, map remount or automatic provider retry is not required.
+The initial sheet now uses the library's normal mount animation.
+
+All temporary application diagnostics and the dependency timing alteration were
+removed. The SDK source was restored byte-for-byte (SHA-256
+`73e84c5fc33ac0dbb3893c3b55a9165d06f8f5257bfb50cf2e14a7a3e2ce3532`) before
+final checks/export. There is **no dependency patch, APK build, permission,
+location-lifecycle, provider-contract or persistence change** in the fix.
+Private before/after captures and geometry-only traces remain in
+`.superpowers/reviews/2026-11-02-explore-39/`; incidental captures outside ARgala
+were discarded. No diagnostic coordinates, queries, credentials or raw provider
+errors were logged by the probes.
+
+**Regressions:** the previous native boundary incorrectly opened every sheet as
+soon as readiness changed, masking a dropped initial request. Its visibility
+projection now distinguishes pending native opening from already-completed
+opening, retaining the real SDK prop validator/reactive-value hook. Four new
+cases exercise the actual HomePlaceSheet and EN/JA/KO MapScreen with a selected
+place → no-match remount, late native readiness, unchanged geometry, continuously
+ready GPS and production query defaults. They verify visible title/handle/status,
+retained map identity and exact request counts through focus/foreground changes.
+The driver projects opacity-hidden native children as absent; it does not establish
+full native lifecycle or animation equivalence.
+
+All four new cases were observed failing before the product fix (**4 failed /
+76 passed**). The focused four-suite run then passed **172 tests**. Final
+`npm run check` passed strict TypeScript, zero-warning lint and **1,307 tests /
+118 files**. `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android -- --max-workers 1`
+passed (8.5 MB Hermes bundle). `npm run check:native-patches` passed with zero
+updates; `git diff --check` passed. Independent source review found no blockers.
+The phone initially disconnected before the ordinary-timing pass. The owner
+subsequently reconnected it and that check passed, as recorded above. The
+controlled before/after and normal-timing device confirmation are both completed.
+Metro was stopped after verification, following the owner’s earlier request.
+
+## Connected Android issue QA and feasibility-page retirement — 2026-11-02
+
+The owner reconnected the phone after the initial offline pass below. Device
+captures cover approximately 14:15–14:47 Asia/Manila, first with `92d02b7`
+(runtime changes through `e95f5bb`), then **`2204375`** after the owner explicitly
+requested removal of the unused Viro feasibility page.
+
+**Device/build:** Samsung Galaxy A53 / SM-A536E, Android 16 / API 36,
+1080×2400, physical density 450 / existing override 420. Existing development
+APK 1.0.0, version code 1, updated 2026-10-30 09:20:50; SHA-256
+`ad5cc55cf6259bb4f93abd8ef9c0a702770aaa7a3045d850b8bc9d7de0403d0e`.
+Installed Google Play Services for AR reports `1.44.241490493`. USB reverse for
+8081 was restored and the implementation checkout's Metro served the phone.
+No APK was built or installed. Battery rose from 44% / 37.6°C to 48% / 37.1°C
+while USB charging.
+
+Private original screenshots, UIAutomator trees, camera-service snapshots and
+hash manifest remain in the ignored local directory
+`.superpowers/reviews/2026-11-02-issue-qa/`. They include personal camera, map and
+account content and must not be committed or published. UI trees can lag a
+transition; the settled captures and owner observations carry the results.
+
+| Area | Physical evidence and boundary |
+| --- | --- |
+| #39 Explore | At normal text (original 1.1), All + nonexistent query after keyboard dismissal retained the title, native handle and localized empty message. Profile return, a repeat, subsequent named query and Search this area also retained the shell. Explicit empty-query nearby search returned 20 places. The audit's blank dock was **not reproduced**; leave #39 open, with no speculative sheet fix. Slow/error rendering is automated evidence only. |
+| #40 Directions | Actual walking and walking→driving replacement previews showed the exact neutral waiting text and accurate displayed/selected mode in EN and JA at 1.1, and KO at 1.5. Location services were temporarily disabled to hold the waiting state. Expanded sheets exposed the full guidance; collapsed primary controls remained available. No new route result is claimed. Settings changes/navigation required a fresh explicit handoff; continuously focused live-locale behavior remains covered by component tests. |
+| #42 Explore | Selecting a real result opened its callout and selected-place sheet, with Google's marker toolbar absent in both detents. Google logo remained visible. ADB taps exercised Recenter in both detents and the sheet's Directions handoff. Open in Google Maps launched the actual Maps activity; returning retained selection. KO at 1.5 also retained selected-place/expanded controls and attribution. UIAutomator exposed translated labels; TalkBack traversal was not run. |
+| #41 original square, before retirement | The lazy page loaded from Metro, displayed preflight and reached live camera / Tracking ready. The owner confirmed finger-pad hold/release increments the interaction count. Background return showed explicit Retry. The owner then requested that this unused page be removed. |
+| #41 retained ring | The lazy page loaded, explicit Start opened the native camera and rendered Overview. The owner confirmed held open, reading controls and Close work; the tile displayed Opened. After a settled three-second Home interval, camera-service active clients were empty. Return restored the live ring and Opened state within its existing grace. This is a brief lifecycle check, not a complete spatial-stability or expiry test. |
+| Ring permission recovery | With camera grant temporarily revoked, explicit Start displayed localized camera guidance, Open device settings and Retry. Restoring the original grant and explicitly pressing Retry returned to the live ring. No system permission/install/update/decline prompt was forced. |
+| Removed feasibility page | Profile on the updated JavaScript showed the ring entry and no Viro feasibility action. Opening `argala://viro-spike` produced Expo Router's Unmatched Route page; the old AR page no longer opens. |
+
+**Additional unresolved observation:** after changing EN→JA through Settings,
+the retained Google selection had no usable details. Two explicit More Information
+presses did not restore the place during this run; no cause or provider-call
+count was established. A fresh explicit area search and marker selection supplied
+usable same-language data and allowed the JA Directions checks. This is separate
+from #39's entirely blank sheet: title/handle/recovery UI remained visible. Keep
+this recovery case for follow-up rather than treating it as a verified fix.
+
+**Restoration:** English app copy, original system font scale 1.1, system locale
+en-GB, activation radius 500 m, location enabled and camera granted. No bookmark,
+stamp, account, onboarding or radius edits were made by the automation. Font-scale
+changes recreated the Android activity; GPS was reacquired through explicit Retry
+when needed. The final app was backgrounded and camera-service active clients
+were empty. Metro was subsequently stopped at the owner’s request before
+preparing the pull request.
+
+**Removal verification:** two new/updated Profile/navigation assertions failed
+before implementation (retired action/route still present), then the focused
+Profile/navigation/native-startup/session run passed **81 tests / 4 files**.
+Final `npm run check` passed TypeScript, zero-warning lint and **1,303 tests /
+118 files**. The count decreases because obsolete entry tests were removed and a
+real Profile locale/remaining-entry regression was added. Final
+`EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android -- --max-workers 1` passed
+(8.5 MB Hermes bundle); `git diff --check` passed. A separate read-only review
+found no source blockers. Shared SceneBoundary/startup code remains because the
+retained session imports it; no dependency/native/provider changes.
+
+**Still pending:** on-site selected-destination GPS/admission, unsupported hardware,
+AR-services install/update/decline, a full ring chapter/page/font/locale sweep,
+controlled tracking-loss/world-frame stability, full text-size×locale×viewport
+matrix and TalkBack. No connected-Metro bundle-error overlay occurred, so the
+previous blank-after-error-dismiss scenario was not reproduced or patched.
+
+## Initial offline issue checks — 2026-11-02
+
+Baseline: `058f8bc` (`main`), branch `fix/explore-directions-android-qa`.
+Implementation revision: `e95f5bb` (with `6eb49a9` investigation coverage and
+`0934509` Directions guidance). Existing untracked owner reference
+material, preferences and account data are preserved. Paid place photos (#19)
+remain deferred; no dependency, native configuration, backend or schema changes.
+
+**#39 — investigation remains open.** The baseline relevant suites passed
+**152 tests / 3 files**. New real Explore screen probes pass against the unchanged
+sheet implementation in EN/JA/KO: deliberately nonexistent All query, delayed
+loading, empty response, tab refocus, foreground return, query invalidation,
+subsequent named search, Search this area, sanitized failure, explicit Retry,
+success and remount. They assert actual sheet title/status text and handle
+composition, positive snap points, retained map/sheet identity while mounted,
+collapsed/expanded states and normal → 1.5 font-scale configuration. They use
+`src/lib/query.ts` production defaults; four explicit submissions produce exactly
+four search calls, with no automatic nearby/details/routes calls or remount retry.
+
+No blank sheet was reproduced in these component probes. Native sheet layout,
+scroll offset, IME dismissal and touch delivery are mocked; they cannot identify
+whether the audit failure came from native layout/readiness, scroll state or
+another cause. No speculative sheet change or map remount recovery was applied.
+The reported sequence must still be repeated on the phone against this revision;
+#39 must remain open until native evidence establishes the cause or recovery.
+
+**#40 — mode-neutral waiting guidance.** `directions.waiting` now says
+“Waiting for your current location to plan the route…” with equivalent JA/KO
+resources. Three new real Directions screen regressions failed on the old copy
+before passing with the resource changes. They cover walking, driving and
+walking → driving replacement previews, live EN → JA → KO changes, selected
+and displayed mode labels, and the appropriate single request when fresh
+foreground location becomes available. No route-mode behavior changed.
+
+**#42 — intentional native toolbar suppression.** Explore passes
+`toolbarEnabled={false}` to MapView. The new regression failed with the prior
+undefined prop, then passed with suppression. Marker selection, Recenter in
+both detents, Directions handoff, expanded Open in Google Maps and actual
+provider-attribution links remain available without extra provider work.
+The test retains real attribution/linking code and mocks native boundaries.
+Google's native logo/legal placement and actual tap/TalkBack delivery still need
+Android verification.
+
+**#41 — development server evidence.** Following the [development-build workflow](https://docs.expo.dev/develop/development-builds/use-development-builds/),
+Metro was started from this implementation checkout with
+`EXPO_PUBLIC_VIRO_SPIKE=1 npx expo start --dev-client --localhost --port 8081`.
+The SDK 57 manifest and main Android development bundle returned HTTP 200.
+Both lazy screens (`destination-ar-screen`, `destination-ar-session-screen`)
+and both native scene modules (`destination-scene`, `destination-ring-scene`)
+returned HTTP 200 with JavaScript module payloads.
+These are host HTTP/compiler checks; they do not establish bundle evaluation in
+the installed APK or successful native AR. Private manifest/bundle captures stay
+outside Git because they include public runtime configuration.
+
+**Checks:** focused final run **159 passed / 3 files**;
+`npm run check` passed strict TypeScript, zero-warning lint and **1,305 tests /
+118 files**. `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android -- --max-workers 1`
+passed (8.5 MB Android Hermes bundle). `git diff --check` passed. The existing
+NO_COLOR/FORCE_COLOR environment warning appeared during bundling; no export
+failure. Follow-up `npm run typecheck` and `npm run lint` also passed after
+strengthening the sheet text/lifecycle assertions. The first manifest probe preceded Metro readiness and was refused;
+the subsequent manifest/main/lazy requests succeeded. Export/HTTP success is
+separate from an APK build and from device testing. No Edge/SQL checks were
+rerun for unchanged areas.
+
+**Review:** a separate read-only reviewer found no confirmed blocking source
+issues. Native rendering, focus delivery, keyboard behavior and hardware remain
+outside that source review. The Explore tests retain the suite's existing short
+async-flush convention; slow-CI timing sensitivity remains a minor test risk.
+
+**Device evidence and pending acceptance:** repeated `adb devices -l` checks
+through 14:08 Asia/Manila listed no connected or unauthorized device. The owner
+intends to reconnect; the audit's Galaxy A53 / Android 16 is historical context,
+not a device/APK identified during this run. Current APK version, native module
+capabilities, USB reverse forwarding and on-device JavaScript evaluation remain
+unverified. No APK was built or installed, no phone settings/session were changed,
+and no sensitive device screenshots were captured. Metro is left running on
+localhost:8081 with Viro opt-in and the warmed implementation revision above.
+Once ADB detects the phone, restore `adb reverse tcp:8081 tcp:8081` and connect the
+existing development client before attempting the physical checks.
+
+| Acceptance area | This run |
+| --- | --- |
+| #39 original no-match/keyboard dismissal → Profile return → named search → area search | Component probes pass; Android reproduction, native scroll/snap/layout tracing pending |
+| #40 walking/driving/replacement waiting and live EN/JA/KO labels | Real-screen component tests pass; phone presentation pending |
+| #42 selected marker, Recenter, replacement actions and attribution at both detents | Native prop/actions covered by tests; actual placement, taps and TalkBack pending |
+| Normal/large system text, short screens and EN/JA/KO on Android | Font-scale configuration/component composition only; native rendering pending |
+| #41 both prototype preflight, permission guidance, startup, camera, tracking, held interaction, background interruption and explicit recovery | Host lazy bundles compile/serve; installed-client/native scenarios pending |
+| Definite unsupported hardware, denied permission and AR-services install/update/decline | Not exercised; no hardware/support conclusion |
+| Connected-Metro blank-after-error-dismiss | Not reproduced on a device; no speculative product fix |
+| On-site GPS/admission and simulation | Neither run; host bundling grants no on-site or simulated acceptance |
+
 ## Design coherence refinement — 2026-10-31
 
 From main `775f9da`, the scoped cleanup preserves the approved October 30 compact

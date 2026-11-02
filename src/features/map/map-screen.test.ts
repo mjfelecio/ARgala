@@ -37,9 +37,10 @@ vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: (
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('@/features/places/service', () => ({ placesService: { search: vi.fn(), nearby: vi.fn(), details: vi.fn() } }));
 vi.mock('@/features/directions/service', () => ({ routeService: { walking: vi.fn() } }));
-vi.mock('./attributions', async () => {
+vi.mock('./attributions', async importOriginal => {
   const { createElement } = await import('react');
-  return { ProviderAttributions: (props: Record<string, unknown>) => createElement('aside', props), useOpenProviderLink: () => vi.fn() };
+  const actual = await importOriginal<typeof import('./attributions')>();
+  return { ...actual, ProviderAttributions: (props: React.ComponentProps<typeof actual.ProviderAttributions>) => createElement('aside', props, createElement(actual.ProviderAttributions, props)) };
 });
 vi.mock('@/ui/shared', async () => {
   const { createElement } = await import('react');
@@ -98,6 +99,8 @@ beforeEach(async () => {
 });
 afterEach(async () => {
   await act(async () => tree?.unmount()); tree = undefined; client.clear();
+  nativeUi.fontScale = 1;
+  nativeUi.sheetReady = true;
   notifyManager.setScheduler((callback) => setTimeout(callback, 0));
   vi.restoreAllMocks();
 });
@@ -638,6 +641,38 @@ it.each(['initial', 'handoff'] as const)('keeps exact-associated provider %s sel
  if (original) expect(tree!.root.findByType('map')).toBe(original);
  expect(placesService.details).not.toHaveBeenCalled();
 });
+it('suppresses the native marker toolbar while retaining selection, Recenter, sheet actions and credits', async () => {
+ const place: Place = { ...destination, source: 'discovery', mapsUri: 'https://maps.google.com/?cid=123',
+  attributions: [{ name: 'Synthetic provider credit', uri: 'https://example.com/credit' }] };
+ vi.mocked(placesService.nearby).mockResolvedValue([place]);
+ nativeUi.openURL.mockReset().mockResolvedValue(undefined);
+ await selectPlace();
+ const map = tree!.root.findByType('map');
+ expect(map.props.toolbarEnabled).toBe(false);
+ expect(map.props.customMapStyle).toBeDefined();
+ expect(JSON.stringify(tree!.toJSON())).toContain(place.name);
+ expect(JSON.stringify(tree!.toJSON())).toContain('Synthetic provider credit');
+ await press('map.recenter');
+ expect(controls.animate).toHaveBeenLastCalledWith(expect.objectContaining(controls.position), 400);
+ expect(router.push).not.toHaveBeenCalled();
+ await press('placeDetails.directions');
+ expect(router.push).toHaveBeenCalledExactlyOnceWith({ pathname: '/directions', params: { token: expect.any(String) } });
+ expect(routeService.walking).not.toHaveBeenCalled();
+ await press('map.expand');
+ expect(tree!.root.findByType('map')).toBe(map);
+ expect(map.props.toolbarEnabled).toBe(false);
+ await press('map.openGoogle');
+ expect(nativeUi.openURL).toHaveBeenCalledExactlyOnceWith(place.mapsUri);
+ const credit = tree!.root.findAllByType('text').find(text => text.props.accessibilityRole === 'link' && text.children.includes('Synthetic provider credit'))!;
+ await act(async () => credit.props.onPress());
+ expect(nativeUi.openURL).toHaveBeenLastCalledWith('https://example.com/credit');
+ await press('map.collapse');
+ await press('map.recenter');
+ expect(controls.animate).toHaveBeenCalledTimes(2);
+ expect(tree!.root.findByType('map')).toBe(map);
+ expect(placesService.nearby).toHaveBeenCalledOnce();
+ expect(placesService.details).not.toHaveBeenCalled();
+});
 it('submits text/category/settled area only on explicit Search This Area and never lifecycle refreshes', async () => {
  vi.mocked(placesService.search).mockResolvedValue([{ ...destination, source: 'discovery' }]);
  await act(async () => { tree = create(renderMap()); });
@@ -678,6 +713,114 @@ it('shares the compact typed-search action and keyboard guard without lifecycle 
  await act(async () => tree!.root.findByType('input').props.onSubmitEditing());
  expect(placesService.search).toHaveBeenCalledTimes(2);
  expect(placesService.nearby).not.toHaveBeenCalled();
+});
+
+it.each(['en', 'ja', 'ko'] as const)('preserves the Explore shell through no-match and explicit recovery in %s', async language => {
+ controls.language = language;
+ await translations.changeLanguage(language);
+ const pending = Promise.withResolvers<Place[]>();
+ vi.mocked(placesService.search).mockReset().mockReturnValueOnce(pending.promise)
+  .mockResolvedValueOnce([]).mockRejectedValueOnce(new Error('private provider detail'))
+  .mockResolvedValueOnce([{ ...destination, source: 'discovery' }]);
+ await act(async () => { tree = create(renderMap()); });
+ const map = tree!.root.findByType('map');
+ const sheet = tree!.root.findByType('dialog');
+ await act(async () => {
+  tree!.root.findByProps({ testID: 'home-map-scene' }).props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } });
+  map.props.onMapReady();
+  map.props.onRegionChangeComplete({ latitude: 1, longitude: 2, latitudeDelta: 0.01, longitudeDelta: 0.01 });
+ });
+ const shell = (message: string) => {
+  expect(tree!.root.findByType('map')).toBe(map);
+  expect(tree!.root.findByType('dialog')).toBe(sheet);
+  expect(sheet.findAllByType('header')).toHaveLength(1);
+  expect(sheet.props.snapPoints.every((point: number) => point > 0)).toBe(true);
+  const content = sheet.findAllByType('text').flatMap(text => text.children).join(' ');
+  expect(content).toContain(translations.t('map.title'));
+  expect(content).toContain(message);
+ };
+ await act(async () => tree!.root.findByType('input').props.onChangeText('zzqvargalaauditnonexistent'));
+ await press('search.categories.all');
+ await press('search.submit');
+ shell(translations.t('map.searching'));
+ await act(async () => pending.resolve([]));
+ shell(translations.t('map.empty'));
+ for (const lifecycle of ['focused', 'active'] as const) {
+  controls[lifecycle] = false; await act(async () => tree!.update(renderMap()));
+  controls[lifecycle] = true; await act(async () => tree!.update(renderMap()));
+  shell(translations.t('map.empty'));
+ }
+ const { focusManager, onlineManager } = await import('@tanstack/react-query');
+ await act(async () => {
+  focusManager.setFocused(false); focusManager.setFocused(true);
+  onlineManager.setOnline(false); onlineManager.setOnline(true);
+  await client.invalidateQueries();
+ });
+ expect(placesService.search).toHaveBeenCalledOnce();
+ nativeUi.fontScale = 1.5;
+ await act(async () => tree!.update(renderMap()));
+ await press('map.expand'); shell(translations.t('map.empty'));
+ await press('map.collapse'); shell(translations.t('map.empty'));
+ // Repeat the audit's named search, then Search this area and explicit Retry.
+ await act(async () => tree!.root.findByType('input').props.onChangeText('Destination'));
+ await press('search.submit');
+ await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ shell(translations.t('map.empty'));
+ await press('search.thisArea');
+ await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ shell(translations.t('service.failed'));
+ expect(JSON.stringify(tree!.toJSON())).not.toContain('private provider detail');
+ for (const lifecycle of ['focused', 'active'] as const) {
+  controls[lifecycle] = false; await act(async () => tree!.update(renderMap()));
+  controls[lifecycle] = true; await act(async () => tree!.update(renderMap()));
+  shell(translations.t('service.failed'));
+ }
+ expect(placesService.search).toHaveBeenCalledTimes(3);
+ await press('common.retry');
+ await act(async () => { await new Promise(resolve => setTimeout(resolve, 5)); });
+ shell(translations.t('map.results', { count: 1 }));
+ expect(tree!.root.findByType('marker').props.title).toBe(destination.name);
+ expect(placesService.search).toHaveBeenCalledTimes(4);
+ await act(async () => tree!.unmount()); tree = undefined;
+ await new Promise(resolve => setTimeout(resolve, 5));
+ await act(async () => { tree = create(renderMap()); });
+ expect(JSON.stringify(tree!.toJSON())).toContain(translations.t('map.start'));
+ expect(placesService.search).toHaveBeenCalledTimes(4);
+ expect(placesService.nearby).not.toHaveBeenCalled();
+ expect(placesService.details).not.toHaveBeenCalled();
+ expect(routeService.walking).not.toHaveBeenCalled();
+});
+
+it.each(['en', 'ja', 'ko'] as const)('reveals %s no-match content after delayed native layout while GPS stays ready', async language => {
+ controls.language=language; await translations.changeLanguage(language);
+ vi.mocked(placesService.nearby).mockResolvedValue([{ ...destination, source:'discovery' }]);
+ vi.mocked(placesService.search).mockReset().mockResolvedValue([]);
+ await selectPlace();
+ const map=tree!.root.findByType('map');
+ nativeUi.sheetReady=false;
+ await act(async()=>tree!.root.findByType('input').props.onChangeText('zzqvargalaauditnonexistent'));
+ await press('search.submit');
+ await act(async()=>{ await vi.waitFor(()=>expect(client.isFetching()).toBe(0)); });
+ const sheet=tree!.root.findByType('dialog');
+ expect(sheet.findAllByType('header')).toHaveLength(0);
+ nativeUi.sheetReady=true;
+ await act(async()=>tree!.update(renderMap()));
+ const assertVisible=()=>{
+  expect(tree!.root.findByType('map')).toBe(map);
+  expect(tree!.root.findByType('dialog')).toBe(sheet);
+  expect(sheet.findAllByType('header')).toHaveLength(1);
+  const text=sheet.findAllByType('text').flatMap(node=>node.children).join(' ');
+  expect(text).toContain(translations.t('map.title')); expect(text).toContain(translations.t('map.empty'));
+  expect(text).not.toContain(translations.t('location.loading'));
+ };
+ assertVisible();
+ for(const lifecycle of ['focused','active'] as const){
+  controls[lifecycle]=false;await act(async()=>tree!.update(renderMap()));
+  controls[lifecycle]=true;await act(async()=>tree!.update(renderMap()));
+  assertVisible();
+ }
+ expect(placesService.search).toHaveBeenCalledOnce(); expect(placesService.nearby).toHaveBeenCalledOnce();
+ expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
 });
 
 it('keeps denied-GPS global selection separate from physical proximity and permits Directions', async () => {

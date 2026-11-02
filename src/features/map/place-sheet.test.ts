@@ -14,9 +14,23 @@ beforeEach(async () => {
  translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
  props = { state: 'unsearched', selectedPlace: null, hasSelection: false, canRequest: true, resultCount: 0, attributions: React.createElement('aside', {}, 'Provider credit'), onRetrySearch: vi.fn(), onClosePlace: vi.fn(), onDetails: vi.fn(), onDirections: vi.fn(), onMeasuredHeight: vi.fn() };
 });
-afterEach(async () => { await act(async () => tree?.unmount()); nativeUi.fontScale=1; });
+afterEach(async () => { await act(async () => tree?.unmount()); nativeUi.fontScale=1; nativeUi.sheetReady=true; });
 async function render() { await act(async () => { tree = create(React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(HomePlaceSheet, props)))); }); }
 function content() { return JSON.stringify(tree.toJSON()); }
+it('opens an empty sheet after late native layout without a location message or geometry change', async () => {
+ props.containerHeight=720; props.maxHeight=540; props.state='empty'; nativeUi.sheetReady=false;
+ await render();
+ const sheet=tree.root.findByType('dialog');
+ expect(sheet.findAllByType('header')).toHaveLength(0);
+ nativeUi.sheetReady=true;
+ await act(async()=>tree.update(React.createElement(I18nextProvider,{i18n:translations},withHeroUI(React.createElement(HomePlaceSheet,props)))));
+ expect(tree.root.findByType('dialog')).toBe(sheet);
+ expect(sheet.findAllByType('header')).toHaveLength(1);
+ expect(sheet.findAllByType('text').some(node=>node.props.children===translations.t('map.title'))).toBe(true);
+ expect(content()).toContain(translations.t('map.empty'));
+ expect(vi.mocked(props.onMeasuredHeight).mock.calls.every(([height])=>Number.isFinite(height))).toBe(true);
+ expect(props.onRetrySearch).not.toHaveBeenCalled();
+});
 async function press(key: string) { const button=tree.root.findAllByType('button').find(b=>b.props.accessibilityLabel===translations.t(key)); expect(button).toBeDefined(); await act(async()=>button!.props.onPress()); }
 it('satisfies the installed bottom-sheet prop contract and updates layout without losing native offsets', async () => {
  props.containerHeight=720; await render();

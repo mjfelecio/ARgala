@@ -6,7 +6,7 @@ Status as of 2026-10-27: owner reports the ring prototype works well; this is no
 
 The existing approved Viro3.0.3 development APK can load this JavaScript through Metro. Native dependencies, configuration, recognizer and provider settings are unchanged. Follow the existing SDK57 dev-client launch flags and USB forwarding procedure in [the ring checklist](aclc-ar-ring-device-testing.md) when verification is resumed. No new APK is needed for the JS-only candidate; every later APK still needs separate per-build approval.
 
-Profile → ACLC ring prototype remains behind both `__DEV__` and `EXPO_PUBLIC_VIRO_SPIKE=1`. The actual ring route now uses the M3 session owner. The original Viro feasibility square retains its explicit-retry M1 startup behavior. Only labeled development samples are available; this route is not production destination admission or a GPS simulation result.
+Profile → ACLC ring prototype remains behind both `__DEV__` and `EXPO_PUBLIC_VIRO_SPIKE=1`. The actual ring route now uses the M3 session owner. The obsolete `/viro-spike` feasibility page was removed on 2026-11-02. Only labeled development samples are available; this route is not production destination admission or a GPS simulation result.
 
 A new owner is keyed by authenticated principal and has destination/admission/principal/provenance identity. The development admission ID is a component-owned correlation value, not a verified capability. The selected-destination integration now supplies a principal-scoped single-use entry and fresh foreground eligibility validator; see [its separate checklist](aclc-selected-flow-device-testing.md). URLs and cache presence are not admission.
 

@@ -7,13 +7,13 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { JournalContext, type JournalContextValue } from '@/features/journal/context';
 import { ProfileSettingsContent } from './profile-settings-content';
+import { router } from 'expo-router';
 
 vi.mock('expo-router', () => ({ useIsFocused: () => true, router: { push: vi.fn(), back: vi.fn(), canGoBack: () => true, navigate: vi.fn() } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: 'en', activationRadiusMeters: 100, storageError: null, save: vi.fn() }) }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: null }) }));
 vi.mock('@/features/auth/sign-out-action', () => ({ SignOutAction: () => null }));
 vi.mock('@/features/arrival-reminders/provider', () => ({ useArrivalReminders: () => null }));
-vi.mock('@/features/destination-ar/dev-entry', () => ({ ViroRingLaunch: () => null, ViroSpikeLaunch: () => null }));
 vi.mock('expo-constants', () => ({ default: { expoConfig: { version: '1.0.0' } } }));
 
 let tree: ReactTestRenderer | undefined;
@@ -28,7 +28,21 @@ beforeEach(async () => {
   translations = createInstance();
   await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
 });
-afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; nativeUi.fontScale = 1; });
+afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; nativeUi.fontScale = 1; vi.unstubAllEnvs(); });
+
+it('offers only the retained ring prototype in the development Profile', async () => {
+  Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
+  vi.mocked(router.push).mockClear();
+  await act(async () => { tree = create(withHeroUI(<I18nextProvider i18n={translations}><JournalContext.Provider value={journal}><ProfileSettingsContent entry="tab" /></JournalContext.Provider></I18nextProvider>)); });
+  for (const locale of ['en', 'ja', 'ko']) {
+    await act(async () => { await translations.changeLanguage(locale); });
+    const labels = tree!.root.findAllByType('button').map(node => node.props.accessibilityLabel);
+    expect(labels).not.toContain(translations.t('destinationAr.title'));
+    expect(labels).toContain(translations.t('destinationRing.title'));
+  }
+  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('destinationRing.title'))!.props.onPress());
+  expect(router.push).toHaveBeenCalledExactlyOnceWith('/viro-ring');
+});
 
 it.each(['tab', 'stack'] as const)('keeps growing guest content and settings in one scroll owner on %s', async entry => {
   await act(async () => { tree = create(withHeroUI(<I18nextProvider i18n={translations}><JournalContext.Provider value={journal}><ProfileSettingsContent entry={entry} /></JournalContext.Provider></I18nextProvider>)); });

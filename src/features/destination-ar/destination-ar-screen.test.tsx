@@ -7,7 +7,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import DestinationArScreen from './destination-ar-screen';
-import { ViroSpikeRoute, ViroSpikeLaunch, ViroRingRoute, ViroRingLaunch } from './dev-entry';
+import { ViroRingRoute, ViroRingLaunch } from './dev-entry';
 import { router } from 'expo-router';
 
 const native = vi.hoisted(() => ({
@@ -67,19 +67,6 @@ beforeEach(async () => {
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.clearAllTimers(); vi.useRealTimers(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
-it.each([false, true])('protects dead development entry when dev=%s but the build/opt-in guard is incomplete', async development => {
-  Object.assign(globalThis, { __DEV__: development });
-  vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', development ? '0' : '1');
-  await mount(React.createElement(ViroSpikeRoute));
-  expect(copy()).toContain(translations.t('destinationAr.unavailable'));
-  expect(native.get).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled(); expect(camera()).toHaveLength(0);
-});
-it('launches the opt-in spike from an explicit development action', async () => {
-  await mount(React.createElement(ViroSpikeLaunch));
-  await press('destinationAr.title');
-  expect(router.push).toHaveBeenCalledWith('/viro-spike');
-  expect(native.support).not.toHaveBeenCalled();
-});
 it('waits for explicit Start, measured bounds and native stack transition completion with installed focus hooks', async () => {
   await mount(); expect(native.support).not.toHaveBeenCalled();
   await act(async () => native.transitions.get('transitionStart')?.forEach(callback => callback({ data: { closing: false } })));
@@ -173,7 +160,7 @@ it.each([false, true])('protects the M2 route before native work when dev=%s and
   expect(copy()).toContain(translations.t('destinationAr.unavailable'));
   expect(native.get).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled(); expect(native.getSize).not.toHaveBeenCalled();
 });
-it('launches the separate M2 route explicitly while preserving the native-square entry', async () => {
+it('launches the retained ring route explicitly', async () => {
   await mount(React.createElement(ViroRingLaunch)); await press('destinationRing.title');
   expect(router.push).toHaveBeenCalledWith('/viro-ring'); expect(native.support).not.toHaveBeenCalled();
 });

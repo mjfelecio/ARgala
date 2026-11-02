@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { withUniwind } from 'uniwind';
 import { useTranslation } from 'react-i18next';
 import SettingsForm from './settings-form';
-import { ViroSpikeLaunch, ViroRingLaunch } from '@/features/destination-ar/dev-entry';
+import { ViroRingLaunch } from '@/features/destination-ar/dev-entry';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
 export function ProfileSettingsContent({ entry }: { entry: 'tab' | 'stack' }) {
@@ -21,7 +21,7 @@ export function ProfileSettingsContent({ entry }: { entry: 'tab' | 'stack' }) {
       <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('settings.profileTitle')}</Text>
     </View>
     <SettingsForm>
-      {entry === 'tab' && <><ViroRingLaunch /><ViroSpikeLaunch /></>}
+      {entry === 'tab' && <ViroRingLaunch />}
       <JournalProfileEntry />
     </SettingsForm>
   </StyledSafeAreaView>;

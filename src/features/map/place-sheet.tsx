@@ -72,8 +72,10 @@ export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelec
     onSettledHeight?.(settledHeight);
   }, [height, position, settledHeight, onMeasuredHeight, onSettledHeight]);
   const busy = state === 'loading';
+  // Keep native opening pending until the handle is measured. In 5.2.14,
+  // disabling mount animation can discard opening before layout is ready.
   return <BottomSheet ref={sheet} containerLayoutState={containerLayoutState} snapPoints={snapPoints}
-    index={0} enableDynamicSizing={false} enablePanDownToClose={false} animateOnMount={false}
+    index={0} enableDynamicSizing={false} enablePanDownToClose={false} animateOnMount
     animatedPosition={position} animatedIndex={animatedIndex} handleComponent={MapSheetHandle} backgroundStyle={backgroundStyle} handleIndicatorStyle={indicatorStyle}
     accessible={false} accessibilityLabel={t('map.title')}
     onChange={(index, top) => { setSettledIndex(index); if (snapPoints.length > 1) setExpanded(index > 0); reportPosition(top); onSettledHeight?.(Math.max(0, height - top)); }}>
