@@ -1,8 +1,8 @@
 # ARgala — Cinematic AR Experience and Rich Visual Stories
 
-**Owner-approved design — November 2, 2026 (Asia/Manila)**  
-**Decision owner:** ARgala developer/client liaison  
-**Target:** Existing Android Expo + React Native + native Viro/ARCore implementation  
+**Owner-approved design — November 2, 2026 (Asia/Manila)**
+**Decision owner:** ARgala developer/client liaison
+**Target:** Existing Android Expo + React Native + native Viro/ARCore implementation
 **Status:** Direction and outstanding media/audio decisions approved in conversation. Implementation planning permitted; no app code changes or deployment authorized by this document.
 
 > Execution note: the owner assigned implementation on2026-11-02 after PR43/44
