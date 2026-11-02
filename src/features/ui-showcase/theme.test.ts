@@ -20,8 +20,17 @@ it('emits HeroUI runtime colors even without matching utility classes', async ()
   expect(declarations.get('--color-accent-soft')).toBe('var(--color-mint)');
   expect(declarations.get('--color-accent-soft-foreground')).toBe('var(--color-brand-strong)');
   expect(declarations.get('--color-brand-strong')).toBe('#174D38');
-  expect(declarations.get('--color-mint')).toBe('#E7F4EC');
-  // Logo artwork keeps kit colors independently of the original green UI.
+  expect(declarations.get('--color-mint')).toBe('#E8F8F0');
+  expect(declarations.get('--color-page')).toBe('#FCFBF7');
+  expect(declarations.get('--color-warning-surface')).toBe('#FFF6E4');
+  expect(declarations.get('--color-warning-border')).toBe('#F2D393');
+  expect(declarations.get('--color-warning-foreground')).toBe('#865200');
+  expect(declarations.get('--color-page-mint')).toBe('var(--color-page)');
+  expect(declarations.get('--background')).toBe('var(--color-page)');
+  expect(declarations.get('--color-seafoam')).toBe('#42D5A5');
+  expect(declarations.get('--color-ar-panel')).toBe('#102724');
+  expect(declarations.get('--color-ar-edge')).toBe('#71DCD2');
+  // Logo geometry and identity remain locked.
   expect(declarations.get('--color-logo-seafoam')).toBe('#42D5A5');
   expect(declarations.get('--color-logo-ink')).toBe('var(--color-brand-strong)');
   expect(declarations.get('--color-logo-ivory')).toBe('#FCFBF7');
@@ -45,6 +54,11 @@ it('emits HeroUI runtime colors even without matching utility classes', async ()
   // Check emitted values, rather than trusting the kit's reference contrast report.
   for (const [foreground, background] of [
     ['--accent-foreground', '--accent'],
+    ['--color-warning-foreground', '--color-warning-surface'],
+    ['--color-ink', '--color-page'],
+    ['--color-ink-secondary', '--color-page'],
+    ['--color-white', '--color-ar-panel'],
+    ['--color-brand-strong', '--color-seafoam'],
     ['--color-logo-ink', '--color-logo-seafoam'],
     ['--color-logo-ink', '--color-logo-ivory'],
   ]) {
@@ -56,4 +70,12 @@ it('emits HeroUI runtime colors even without matching utility classes', async ()
   for (const name of ['default-hover', 'danger-hover', 'danger-soft-hover', 'default-foreground', 'accent-foreground']) {
     expect(declarations.has(`--color-${name}`), name).toBe(true);
   }
+});
+
+it('compiles explicit non-AR heading weights alongside the HeroUI font family aliases', async () => {
+  const entrypoint = new URL('../../../global.css', import.meta.url);
+  const compiler = await compile(await readFile(entrypoint, 'utf8'), {base:fileURLToPath(new URL('.', entrypoint)),onDependency(){}});
+  const output=compiler.build(['font-ui-semibold','font-ui-bold']);
+  expect(output).toMatch(/\.font-ui-semibold\s*\{[^}]*font-weight: 600;/);
+  expect(output).toMatch(/\.font-ui-bold\s*\{[^}]*font-weight: 700;/);
 });

@@ -17,7 +17,7 @@ export function useExplorerMapStyle(): MapStyleElement[] {
     { elementType: 'geometry', stylers: [{ color: land }] },
     { elementType: 'labels.text.fill', stylers: [{ color: text }] },
     { elementType: 'labels.text.stroke', stylers: [{ color: land }] },
-    { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: park }] },
+    { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: land }] },
     { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: park }] },
     { featureType: 'water', elementType: 'geometry', stylers: [{ color: water }] },
     { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: muted }] },

@@ -53,7 +53,7 @@ it('lists all nine provisional names with working stable-ID navigation and no se
 it.each(listDestinations())('opens $id directly, honestly representing incomplete content without paid requests', async destination => {
   controls.params = { destinationId: destination.id }; await mount();
   expect(output()).toContain(destination.provisionalName);
-  for (const key of ['destinations.provisional', 'destinations.contentPending', 'destinations.centerMissing', 'destinations.entranceMissing']) expect(output()).toContain(translations.t(key));
+  for (const key of ['destinations.contentPending', 'destinations.centerMissing', 'destinations.entranceMissing']) expect(output()).toContain(translations.t(key));
   expect(button('placeDetails.directions')?.props.disabled).toBe(true);
   expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
 });
@@ -73,7 +73,7 @@ it('uses history for Back and translates missing states with actual resources on
   for (const language of ['en', 'ko', 'ja'] as const) {
     controls.language = language;
     await act(async () => { await translations.changeLanguage(language); tree!.update(render()); });
-    for (const key of ['destinations.title', 'destinations.provisional', 'destinations.contentPending', 'destinations.centerMissing', 'destinations.entranceMissing']) {
+    for (const key of ['destinations.title', 'destinations.contentPending', 'destinations.centerMissing', 'destinations.entranceMissing']) {
       expect(translations.t(key)).not.toBe(key); expect(output()).toContain(translations.t(key));
     }
   }
@@ -126,7 +126,7 @@ it.each(['en', 'ja', 'ko'])('puts %s destination choices before optional content
   expect(action.props.className).toContain('bg-surface');
   const name = action.findAllByType('text').find(node => node.props.children === 'ACLC College of Ormoc')!;
   expect(name.props.className).toContain('text-card');
-  expect(action.findAllByType('text').map(node => node.props.children).flat()).toContain(translations.t('destinations.provisional'));
+  expect(action.findAllByType('text').map(node => node.props.children).flat()).not.toContain(translations.t('destinations.provisional'));
   expect(placesService.nearby).not.toHaveBeenCalled();
   expect(placesService.details).not.toHaveBeenCalled();
 });
@@ -137,4 +137,53 @@ it('keeps approved featured overview and history out of prearrival 2D details', 
  await mount();
  expect(output()).not.toContain('Private approved overview'); expect(output()).not.toContain('Private approved highlight');
  expect(output()).toContain(translations.t('arrival.teaser'));
+});
+
+it.each(['en', 'ja', 'ko'])('renders the %s catalog count from the preserved nine-destination total', async language => {
+  await translations.changeLanguage(language); await mount(<DestinationsScreen />);
+  const heading = translations.t('destinations.exploreCount', { count: 9 });
+  expect(heading).not.toBe('destinations.exploreCount');
+  expect(output()).toContain(heading);
+  expect(placesService.details).not.toHaveBeenCalled();
+  expect(placesService.nearby).not.toHaveBeenCalled();
+});
+
+it('groups truthful prearrival availability and verification with icons and decorative Journey artwork', async () => {
+ await mount();
+ const info=tree!.root.findByProps({testID:'destination-information'});
+ expect(info.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toContain('information-circle-outline');
+ expect(tree!.root.findByProps({testID:'destination-media-fallback'}).findAllByType('svg' as React.ElementType)).toHaveLength(1);
+ expect(button('placeDetails.directions')!.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toContain('navigate-outline');
+ for (const locale of ['en','ja','ko']) {
+  await act(async()=>{await translations.changeLanguage(locale);});
+  for(const key of ['destinations.storiesPending','destinations.visitForAr']) {
+    expect(translations.t(key)).not.toBe(key);expect(output()).toContain(translations.t(key));
+  }
+ }
+ expect(placesService.nearby).not.toHaveBeenCalled();expect(placesService.details).not.toHaveBeenCalled();
+});
+
+it('reports installed approved story availability without granting prearrival story access or changing bundled navigation', async () => {
+ const {contentManifestSchema}=await import('@/features/destination-content/model');
+ const {manifest}=await import('@/features/destination-content/test-fixtures');
+ controls.params={destinationId:'pilot-aclc'};
+ const state={manifest:contentManifestSchema.parse(manifest()),ready:true,checking:false,canCheck:true,authenticated:true,message:'content.cached' as const,error:null,checkUpdates:vi.fn()};
+ await mount(<DestinationContentContext.Provider value={state}><DestinationScreen/></DestinationContentContext.Provider>);
+ for(const locale of ['en','ja','ko']) {
+  controls.language=locale as 'en'|'ja'|'ko';
+  await act(async()=>{await translations.changeLanguage(locale);tree!.update(render(<DestinationContentContext.Provider value={state}><DestinationScreen/></DestinationContentContext.Provider>));});
+  expect(output()).toContain(translations.t('destinations.storiesOnSite'));
+  expect(output()).not.toContain(translations.t('destinations.storiesPending'));
+  expect(output()).not.toContain('Synthetic test');
+ }
+ expect(button('placeDetails.directions')!.props.disabled).not.toBe(true);
+ expect(placesService.nearby).not.toHaveBeenCalled();expect(placesService.details).not.toHaveBeenCalled();
+});
+
+it('removes provisional-name presentation from the catalog and preview while retaining readiness guidance', async()=>{
+ await mount(<DestinationsScreen/>);
+ expect(output()).not.toContain(translations.t('destinations.provisional'));
+ await act(async()=>tree!.update(render(<DestinationScreen/>)));
+ expect(output()).not.toContain(translations.t('destinations.provisional'));
+ expect(output()).toContain(translations.t('destinations.contentPending'));
 });

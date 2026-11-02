@@ -1,5 +1,90 @@
 # Foundation validation
 
+## Owner UI refinements and sticky settings drafts — 2026-11-02
+
+Owner feedback refines Saved, Featured/preview Nearby and Profile/Settings; the
+later tab instruction replaces both dot and underline with semibold selected
+text. [Full scope, review and evidence](design/seafoam-forest/OWNER-REFINEMENTS.md).
+
+Saved View now starts one missing lookup as its explicit user action before
+navigation. Details stays a disabled observer. Real cached names/addresses are
+shown only with known matching language and original source age; missing/expired
+content falls back to “Saved place”, with no automatic list fetch or persisted
+provider metadata. Success/failure handoff, duplicate taps, cache expiry/clear,
+wrong language, refocus, foreground return, remount and explicit retry are covered.
+The provisional-name presentation, verbose radius help and numeric radius input
+are removed. Slider/presets and precise restored values retain explicit Save.
+
+Dirty settings expose sticky Save/Undo only while the regular Save action is
+outside the measured scroll viewport. Undo restores both latest saved values,
+resets an unfinished slider preview and respects in-flight save guards. Errors
+are rendered on the sticky surface itself, with actual EN/JA/KO resources and
+live language changes. Visibility checks cover scrolling both directions and
+viewport/content layout changes; the page retains one scroll owner.
+
+Final `npm run check`: strict typecheck, zero-warning ESLint, **1,342 tests across
+118 files passed**. Final `npm run export:android` passed (8.5 MB Hermes bundle,
+`index-e43810c11b0659b797567cc588bef2cf.hbc`), and `git diff --check` passed. Focused
+behavior regressions were observed failing before correction. Independent review
+found two issues, both reproduced/fixed: fresh Nearby masked by expired Details,
+and sticky save errors appearing only offscreen. The final full check includes
+both regressions.
+
+Existing-APK captures confirm the initial language-padding/radius simplifications;
+they predate the final sticky and tab changes. The original Metro server stopped
+and was restarted. Latest native verification of sticky geometry/touch/error,
+final selected text, direct Saved View and polished Nearby loaded/error states
+remains pending; mocked tests and an export are not native acceptance. Private
+captures and exact caveats are linked above. No device preference, account or
+journal edits, APK build, new dependencies, native/Edge changes, push or merge.
+
+
+## Seven-screen Seafoam reference corrections — 2026-11-02
+
+Implemented on the existing `feat/seafoam-forest-ui` branch: `37e6ab7` completes
+shared/bookmark/sync/Passport/preview/Profile/Explore details and removes ordinary
+Place Details AR/coordinate rows; `8cab000` measures the complete compact Directions
+summary/recovery/action block. AR source, native materials, service/persistence
+interfaces and paid-request authority remain unchanged. See the pre-edit
+[reference checklist and evidence ledger](design/seafoam-forest/REFERENCE-CORRECTIONS.md).
+
+Final `npm run check` passed strict TypeScript, zero-warning ESLint and **1,332
+tests across 118 files**. Final `npm run export:android` passed Metro/Hermes export
+(`index-9fdca96e56b6a406da14c6d1d784d462.hbc`, 8.5 MB); no APK was built. Targeted
+regressions failed before behavioral changes; the independent review's two
+important findings (continuous progress geometry reset and installed-content
+availability) were reproduced, fixed and included in the green full suite.
+Warning foreground/surface contrast is 6.07:1; compiler tests verify emitted colors
+and explicit non-AR heading weights despite HeroUI's same-named family aliases.
+
+Existing Galaxy A53 / Android 16 development APK, local Metro, real signed-in
+state: normal EN captures represent all seven families. Narrow 360×800 logical
+units at 1.5 text covers EN/JA/KO Explore, Featured, destination preview, Saved,
+and actual loaded provider Details/walking Directions. The existing saved May
+Abohan record was explicitly opened/loaded; no names/addresses were fabricated.
+Normal EN also covers an actual nearby response, a loaded route, draft mode and
+expanded Journey. JA driving reached a real waiting/stale-location recovery
+banner; it does **not** establish loaded driving. New Save/Saved/check, row action
+icons, count=3 and real 0/9 progress are visible in the relevant captures.
+
+The native matrix remains partial: normal JA/KO, narrow Profile identity/language/
+radius, failed sync/guest, denied/provider failures, loaded driving, TalkBack,
+IME and outdoor GPS/navigation are unverified. Capture automation stopped
+obtaining fresh UIAutomator snapshots after the final display reset; stale XML,
+mislabeled files and loading states are excluded from loaded acceptance. Those
+code paths retain real-screen/hook/service regressions, which are separate from
+native acceptance. Private evidence and exact filename caveats are in the ledger;
+no account/location screenshots are committed. There is no complete comparable
+baseline capture set.
+
+Restored English (visually confirmed), font scale **1.1**, physical **1080×2400**
+with no size override, and preexisting density override **420**. Radius remains
+**500 m**; the three original bookmarks, zero stamps and account were not edited.
+Only explicit app actions submitted provider searches/details/routes. No AR entry,
+sync retry, permission revocation, reminder activation, external navigation,
+new build, push, PR, merge or deployment was performed.
+
+
 ## Final ordinary-timing Android confirmation (#39) — 2026-11-02
 
 After the owner reconnected ADB, the existing Galaxy A53 / Android 16 development
@@ -2321,3 +2406,35 @@ Final `npm run check -- -- --maxWorkers=2` passed strict TypeScript, zero-warnin
 ESLint and all 1,273 tests across 117 files. The targeted auth/map tests also
 passed (26 tests). `git diff --check` passed. No style-only implementation-mirroring
 tests were added; existing behavioral regressions remain intact.
+
+
+## Seafoam Forest UI refresh — 2026-11-02
+
+Implemented the approved ivory/forest/seafoam presentation across Explore,
+Featured/Passport, curated preview, Place Details, Saved Places, Profile/Settings
+and Directions. The owner's later instruction excludes AR design; original
+AR panel/edge colors and all destination-ar source remain unchanged. No native
+configuration, backend, provider-call authority or dependencies changed.
+
+`npm run check` passed strict TypeScript, zero-warning ESLint and **1,310 tests
+across 118 files**. Focused screen suites passed (95 tests), map/Directions suites
+passed (155), final journal/catalog/theme regressions passed (58).
+`npm run export:android` passed; this is not an APK build or physical provider
+acceptance. Independent read-only review found no significant regressions.
+
+Galaxy A53 SM-A536E / Android16, installed APK1.0.0/code1, 1080×2400, density420
+override and font1.1: inspected actual Explore, Featured, pilot preview, Profile
+and Saved states via local Metro/ADB. Featured was also inspected at360×800
+logical units/font1.5 with wrapping and scrolling; font/size restored. Captures
+remain private in `/tmp/argala-seafoam-captures/`. Missing Details and expired
+Directions have representative recovery captures. No Search, route computation,
+save/remove, sync Retry or AR admission was submitted. Account lifecycle sync
+may run under its existing contract. No APK built.
+
+Loaded provider/native route states, native Japanese/Korean/TalkBack and full
+permission/error/offline matrix remain unverified. There is no comparable
+prechange screenshot baseline; historical audits are reference only. Rural
+Google map regions still appear green on this renderer; exact mock map colors
+are not established. Issues#39–#42 are unchanged by this visual task (baseline
+already contains the#39 sheet-readiness correction). See the full
+[screen mapping and evidence](design/seafoam-forest/IMPLEMENTATION.md).

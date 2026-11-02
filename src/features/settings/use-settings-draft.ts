@@ -16,6 +16,7 @@ export function useSettingsDraft() {
   const submitting = useRef(false);
   const [draft, setDraft] = useState(() => initialDraft(settings, focused));
   const [busy, setBusy] = useState(false);
+  const [undoEpoch, setUndoEpoch] = useState(0);
   const [message, setMessage] = useState<'common.saved' | 'settings.saveFailed' | null>(null);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const { activationRadiusMeters, language } = settings;
@@ -37,6 +38,13 @@ export function useSettingsDraft() {
     if (submitting.current) return;
     setDraft(previous => ({ ...previous, language: next })); setMessage(null);
   }
+  function undo() {
+    if (submitting.current || !focused) return;
+    setDraft(initialDraft(settings, focused));
+    setMessage(null);
+    // A local, unfinished slider drag can exist without changing parent props.
+    setUndoEpoch(value => value + 1);
+  }
   async function save() {
     if (submitting.current || !focused || !dirty || !parsed.success) return;
     submitting.current = true; setBusy(true); setMessage(null);
@@ -54,5 +62,5 @@ export function useSettingsDraft() {
     }
   }
   return { focused: draft.focused, radius: draft.radius, language: draft.language, changeRadius, changeLanguage, busy, message,
-    dirty, valid: parsed.success, save, storageError: settings.storageError };
+    dirty, valid: parsed.success, save, undo, undoEpoch, storageError: settings.storageError };
 }

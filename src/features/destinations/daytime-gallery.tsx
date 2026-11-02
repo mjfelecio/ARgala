@@ -1,3 +1,6 @@
+import { JourneyMotif } from '@/ui/journey-motif';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColor } from 'heroui-native/hooks';
 import { useState, type ReactNode } from 'react';
 import { Image, Modal, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +15,7 @@ const StyledSafeAreaView = withUniwind(SafeAreaView);
 /** Bundled daytime photos only. No clock, camera, GPS or network ownership. */
 export function DaytimeGallery({ media, children }: { media: readonly DestinationMedia[]; children?: ReactNode }) {
   const { t } = useTranslation();
+  const accent = useThemeColor('accent');
   const { language } = useSettings();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
@@ -23,13 +27,15 @@ export function DaytimeGallery({ media, children }: { media: readonly Destinatio
     return selected && !failed.has(selected.id) ? <StyledImage source={selected.source} accessibilityLabel={alt!.value}
       className={full ? 'h-80 w-full rounded-card' : 'h-64 w-full rounded-card'} resizeMode={full ? 'contain' : 'cover'}
       onError={() => setFailed(previous => new Set([...previous, selected.id]))} />
-      : <View testID="destination-media-fallback" className="min-h-48 items-center justify-center rounded-card bg-mint p-6">
-        <Text className="font-sans text-base text-muted">{t(selected ? 'destinations.imageFailed' : 'destinations.previewMissing')}</Text>
+      : <View testID="destination-media-fallback" className="min-h-48 items-center justify-center gap-3 rounded-card bg-mint p-6">
+        <JourneyMotif contained />
+        <Ionicons name="images-outline" size={28} color={accent} accessible={false} />
+        <Text className="text-center font-sans text-base text-muted">{t(selected ? 'destinations.imageFailed' : 'destinations.previewMissing')}</Text>
       </View>;
   }
   return <View className="gap-4">
     <View className="gap-2">
-      <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{t('destinations.daytime')}</Text>
+      <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-foreground">{t('destinations.daytime')}</Text>
       <Text className="font-sans text-sm text-muted">{t('destinations.notLive')}</Text>
       {photo()}
       {selected && <>

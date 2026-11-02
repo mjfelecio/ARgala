@@ -25,41 +25,37 @@ beforeEach(async () => {
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.restoreAllMocks(); });
 async function mount(initial = '123', disabled = false) { await act(async () => { tree = create(<I18nextProvider i18n={translations}>{withHeroUI(<Harness initial={initial} disabled={disabled} />)}</I18nextProvider>); }); }
-const input = () => tree!.root.findByType('input');
 const thumb = () => tree!.root.findAllByType('view').find(node => node.props.role === 'slider')!;
-it('preserves a precise non-preset radius and synchronizes presets, entry and the real slider', async () => {
+it('preserves a precise restored radius and synchronizes presets with the real slider', async () => {
   await mount();
   expect(thumb().props.accessibilityValue).toMatchObject({ min: 10, max: 1000, now: 123 });
   for (const value of [50, 100, 200, 500]) {
     const preset = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('settings.meters', { count: value }))!;
     await act(async () => preset.props.onPress());
-    expect(input().props.value).toBe(String(value));
     expect(thumb().props.accessibilityValue.now).toBe(value);
   }
-  await act(async () => input().props.onChangeText('123'));
+  await act(async()=>{tree!.unmount();tree=undefined;});await mount('123');
   await act(async () => thumb().props.onAccessibilityAction({ nativeEvent: { actionName: 'increment' } }));
-  expect(input().props.value).toBe('130');
+  expect(thumb().props.accessibilityValue.now).toBe(130);
   await act(async () => thumb().props.onAccessibilityAction({ nativeEvent: { actionName: 'decrement' } }));
-  expect(input().props.value).toBe('120');
+  expect(thumb().props.accessibilityValue.now).toBe(120);
 });
 it.each(['10', '100', '123', '1000'])('represents valid integer %s exactly', async value => {
   await mount(value);
-  expect(input().props.value).toBe(value);
+  expect(tree!.root.findAllByType('input')).toHaveLength(0);
   expect(thumb().props.accessibilityValue.now).toBe(Number(value));
   expect(JSON.stringify(tree!.toJSON())).not.toContain(translations.t('settings.invalid'));
 });
-it.each(['9', '1001', '', '12.3', 'NaN'])('retains invalid keyboard draft %s with a localized error until explicit recovery', async value => {
-  await mount();
-  await act(async () => input().props.onChangeText(value));
-  expect(input().props.value).toBe(value);
+it.each(['9', '1001', '', '12.3', 'NaN'])('shows invalid restored value %s safely and recovers through a preset', async value => {
+  await mount(value);
   expect(JSON.stringify(tree!.toJSON())).toContain(translations.t('settings.invalid'));
-  await act(async () => input().props.onChangeText('10'));
-  expect(thumb().props.accessibilityValue.now).toBe(10);
+  const preset=tree!.root.findAllByType('button').find(n=>n.props.accessibilityLabel===translations.t('settings.meters',{count:100}))!;
+  await act(async()=>preset.props.onPress());
+  expect(thumb().props.accessibilityValue.now).toBe(100);
   expect(JSON.stringify(tree!.toJSON())).not.toContain(translations.t('settings.invalid'));
 });
-it('disables entry, presets and slider while saving', async () => {
+it('disables presets and slider while saving', async () => {
   await mount('123', true);
-  expect(input().props.editable).toBe(false);
   expect(thumb().props.accessibilityState.disabled).toBe(true);
   expect(tree!.root.findAllByType('button').filter(node => node.props.accessibilityLabel).every(node => node.props.accessibilityState.disabled)).toBe(true);
 });
@@ -78,28 +74,27 @@ it('uses 10 m detents and keeps gesture updates local until the real slider fini
   for (const translationX of [28, 56, 84]) {
     await act(async () => gesture('pan').handlers.update({ translationX, translationY: 0 }));
     expect(thumb().props.accessibilityValue.now % 10).toBe(0);
-    expect(input().props.value).toBe(String(thumb().props.accessibilityValue.now));
     expect(parentRender.mock.calls.length).toBe(renders);
   }
-  expect(input().props.value).toBe('420');
+  expect(thumb().props.accessibilityValue.now).toBe(420);
   await act(async () => gesture('pan').handlers.finalize());
   expect(parentRender.mock.calls.length).toBe(renders + 1);
   expect(parentRender.mock.lastCall).toEqual(['420']);
 });
-it('commits real track taps, clamps endpoints, and retains precise entry after slider interaction', async () => {
+it('commits real track taps, clamps endpoints, and restores a precise saved value after slider interaction', async () => {
   await mount(); await measureTrack();
   await act(async () => gesture('tap').handlers.end({ x: 150, y: 10 }, true));
-  expect(input().props.value).toBe('510');
+  expect(thumb().props.accessibilityValue.now).toBe(510);
   expect(parentRender.mock.lastCall).toEqual(['510']);
   await act(async () => gesture('tap').handlers.end({ x: 0, y: 10 }, true));
-  expect(input().props.value).toBe('10');
+  expect(thumb().props.accessibilityValue.now).toBe(10);
   await act(async () => thumb().props.onAccessibilityAction({ nativeEvent: { actionName: 'decrement' } }));
-  expect(input().props.value).toBe('10');
+  expect(thumb().props.accessibilityValue.now).toBe(10);
   await act(async () => gesture('tap').handlers.end({ x: 300, y: 10 }, true));
-  expect(input().props.value).toBe('1000');
+  expect(thumb().props.accessibilityValue.now).toBe(1000);
   await act(async () => thumb().props.onAccessibilityAction({ nativeEvent: { actionName: 'increment' } }));
-  expect(input().props.value).toBe('1000');
-  await act(async () => input().props.onChangeText('127'));
+  expect(thumb().props.accessibilityValue.now).toBe(1000);
+  await act(async()=>{tree!.unmount();tree=undefined;});await mount('127');
   expect(thumb().props.accessibilityValue.now).toBe(127);
   expect(parentRender.mock.lastCall).toEqual(['127']);
 });

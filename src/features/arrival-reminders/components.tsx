@@ -1,3 +1,5 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColor } from 'heroui-native/hooks';
 import { Text, View } from 'react-native';
 import { Button } from 'heroui-native/button';
 import { useTranslation } from 'react-i18next';
@@ -7,13 +9,13 @@ import { listFeaturedDestinations, destinationName, type Destination } from '@/f
 import { useArrivalReminders } from './provider';
 import { reminderDestination, type ReminderSelection } from './model';
 export function DestinationReminderAction({destination}:{destination:Destination}){
- const reminder=useArrivalReminders();const {t,i18n}=useTranslation();const active=useAppActive();const focused=useIsFocused();if(!reminder)return null;
+ const reminder=useArrivalReminders();const {t,i18n}=useTranslation();const accent=useThemeColor('accent');const active=useAppActive();const focused=useIsFocused();if(!reminder)return null;
  const {snapshot,controller}=reminder;const selected=snapshot.selections.find(s=>s.destinationId===destination.id);const available=!!reminderDestination(destination.id);const label=t(selected?'reminders.disable':'reminders.enable');
  const locale:ReminderSelection['locale']=i18n.resolvedLanguage==='ja'?'ja':i18n.resolvedLanguage==='ko'?'ko':'en';
  return <View className="gap-3"><Text className="font-sans text-sm text-muted">{t('reminders.explanation')}</Text>
   {!available&&<Text className="font-sans text-sm text-muted">{t('reminders.pointMissing')}</Text>}
   {selected?.claimed&&<Text className="font-sans text-sm text-muted">{t('reminders.used')}</Text>}
-  <Button variant="secondary" accessibilityLabel={label} isDisabled={!snapshot.ready||(snapshot.busy&&!selected)||!active||!focused||(!selected&&!available)} onPress={()=>{if(selected)void controller.disable(destination.id);else void reminder.enable(destination,locale);}}><Button.Label>{label}</Button.Label></Button>
+  <Button variant="outline" accessibilityLabel={label} isDisabled={!snapshot.ready||(snapshot.busy&&!selected)||!active||!focused||(!selected&&!available)} onPress={()=>{if(selected)void controller.disable(destination.id);else void reminder.enable(destination,locale);}}><Ionicons name={selected?'notifications-off-outline':'notifications-outline'} size={22} color={accent} accessible={false}/><Button.Label>{label}</Button.Label></Button>
   <ReminderFeedback/>
  </View>;
 }

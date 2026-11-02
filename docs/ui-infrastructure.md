@@ -1,5 +1,18 @@
 # Clean Explorer UI infrastructure
 
+## Approved Seafoam Forest screen refresh — 2026-11-02
+
+The later owner-approved eight-screen handoff supersedes earlier artwork-only
+visual restrictions below. Use ivory #FCFBF7 pages, white surfaces, #247A53
+primary controls, #174D38 headings/Passport, restrained #42D5A5
+seafoam accents and #E8F8F0 contextual mint. Later owner instruction excludes AR design from this task: retain its existing
+#102724 panels, #71DCD2 edges and all native presentation. Logos, launcher
+and Journey geometry remain locked. Natural map geography, route blue and all
+provider, navigation, permission, persistence, eligibility and lifecycle contracts
+remain in force. See the committed [refresh specification](../docs/design/seafoam-forest/DESIGN-SPEC.md) and
+[implementation evidence](../docs/design/seafoam-forest/IMPLEMENTATION.md). Earlier rollout passages are historical where
+they conflict with this visual approval.
+
 Phase 1 begins at stable main `69bebee`. The owner's October 18 architecture correction supersedes the handoff's older StyleSheet-only implementation advice. PR #6 remains unmerged; this integration does not copy its custom action components or TypeScript theme.
 
 ## Libraries and setup
@@ -92,3 +105,14 @@ The next shell pass adds the approved three-destination JavaScript Tabs navigato
 - Owner's HOP app root, CSS and Metro configuration: adapt provider/font-loading patterns, while replacing its older NativeWind v3 integration with the current UniWind API.
 
 See `docs/validation.md` for exact checks and native verification limits.
+
+## Heading weight aliases in the installed stack
+
+HeroUI uses `--font-medium`, `--font-semibold` and `--font-bold` for font-family
+aliases. With this Tailwind installation, `.font-semibold` therefore compiles
+only a family declaration. The seven refreshed non-AR screen families use the
+opt-in `font-ui-medium`, `font-ui-semibold` and `font-ui-bold` utilities from
+`global.css`, alongside `font-sans`, to select actual 500/600/700 native weights.
+The existing family aliases, bundled font definitions and AR presentation remain
+unchanged. The theme compiler regression and rendered Galaxy A53 captures verify
+this distinction; class names alone do not establish a rendered weight.

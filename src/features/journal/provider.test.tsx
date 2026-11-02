@@ -1,3 +1,5 @@
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/query';
 import { withHeroUI } from '@/test/native-ui';
 import React from 'react';
 import { act,create,type ReactTestRenderer } from 'react-test-renderer';
@@ -17,19 +19,21 @@ const runtime=vi.hoisted(()=>({values:new Map<string,string>(), get:vi.fn(),set:
 vi.mock('@react-native-async-storage/async-storage',()=>({default:{getItem:runtime.get,setItem:runtime.set}}));
 vi.mock('@/features/auth/provider',()=>({useAuth:()=>({session:runtime.session})}));
 vi.mock('@/features/auth/guest-context',()=>({useGuestAccess:()=>({enabled:runtime.guest})}));
-vi.mock('expo-router',()=>({router:{push:vi.fn(),navigate:vi.fn(),back:vi.fn(),canGoBack:()=>true}}));
+vi.mock('@/features/settings/provider',()=>({useSettings:()=>({language:'en'})}));
+vi.mock('@/features/places/service',()=>({placesService:{details:vi.fn(async()=>{throw new Error('Test offline');})}}));
+vi.mock('expo-router',()=>({useIsFocused:()=>true,router:{push:vi.fn(),navigate:vi.fn(),back:vi.fn(),canGoBack:()=>true}}));
 let tree:ReactTestRenderer; let journal:NonNullable<ReturnType<typeof useJournal>>; let establish:()=>void; let retryStamp:()=>void;
 const translations=createInstance();await translations.use(initReactI18next).init({...localizationOptions,lng:'en',react:{useSuspense:false}});
 function entry(overrides:Partial<PreparedArEntry>={}):PreparedArEntry{return {destination:getDestination('pilot-aclc')!,kind:'approved',simulated:false,language:'en',authorizeMount:()=>true,identity:{admissionId:'test-entry',destinationId:'pilot-aclc',principalId:'user-a',provenance:'verified'},...overrides};}
 let candidate=entry();
 let showSaved=false;
 function Probe(){const value=useJournal()!;const earn=useEarnedStamp(candidate);React.useEffect(()=>{journal=value;establish=earn.onEstablished;retryStamp=earn.retry;});return <><SavePlaceAction reference={{kind:'google',id:'ChIJ_test'}}/><JournalFeedback/>{showSaved&&<SavedPlacesScreen/>}<PassportSummary/></>;}
-const view=()=>withHeroUI(<I18nextProvider i18n={translations}><JournalProvider><Probe/></JournalProvider></I18nextProvider>);
+const view=()=>withHeroUI(<I18nextProvider i18n={translations}><QueryClientProvider client={queryClient}><JournalProvider><Probe/></JournalProvider></QueryClientProvider></I18nextProvider>);
 async function mount(){await act(async()=>{tree=create(view());});}
 async function press(key:string){const b=tree.root.findAll(x=>x.type==='button'&&x.props.accessibilityLabel===translations.t(key))[0];expect(b).toBeDefined();await act(async()=>{await b.props.onPress();});}
 const copy=()=>JSON.stringify(tree.toJSON());
 beforeEach(async()=>{Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true,__DEV__:false});runtime.values.clear();runtime.get.mockImplementation(async(k:string)=>runtime.values.get(k)??null);runtime.set.mockImplementation(async(k:string,v:string)=>{runtime.values.set(k,v);});runtime.session=null;runtime.guest=true;candidate=entry();showSaved=false;await translations.changeLanguage('en');});
-afterEach(async()=>{await act(async()=>tree?.unmount());vi.restoreAllMocks();});
+afterEach(async()=>{await act(async()=>tree?.unmount());queryClient.clear();vi.restoreAllMocks();});
 it.each(['en','ja','ko'])('renders real %s save/remove, failure and retry copy with live language updates',async locale=>{await translations.changeLanguage(locale);await mount();runtime.set.mockRejectedValueOnce(new Error('private raw error'));await press('journal.save');expect(copy()).toContain(translations.t('journal.saveFailed'));expect(copy()).not.toContain('private raw error');await press('journal.save');expect(journal.state.bookmarks).toHaveLength(1);expect(copy()).toContain(translations.t('journal.remove'));await translations.changeLanguage('en');await act(async()=>{});await press('journal.remove');expect(journal.state.bookmarks).toHaveLength(0);});
 it('hydrates guest bookmarks, merges into sign-in account and isolates the next account',async()=>{await mount();await press('journal.save');runtime.session={user:{id:'user-a'}};await act(async()=>tree.update(view()));expect(journal.principalId).toBe('user-a');expect(journal.state.bookmarks).toHaveLength(1);runtime.session={user:{id:'user-b'}};await act(async()=>tree.update(view()));expect(journal.state.bookmarks).toHaveLength(0);});
 it('does not stamp pending mount and stamps an established verified entry at most once',async()=>{runtime.session={user:{id:'user-a'}};await mount();expect(journal.state.stamps).toHaveLength(0);await act(async()=>{establish();establish();});expect(journal.state.stamps).toHaveLength(1);});
@@ -41,6 +45,7 @@ it('reopens a saved Google ID through explicit Details navigation without provid
 });
 it('keeps the pilot outside the nine-destination Passport total',async()=>{
  runtime.values.set('argala.journal.v1:guest',JSON.stringify({version:1,bookmarks:[],stamps:[{destinationId:'D01',visitedAt:100},{destinationId:'pilot-aclc',visitedAt:200}]}));await mount();expect(copy()).toContain(translations.t('journal.passportCount',{count:1,total:9}));expect(copy()).toContain(translations.t('journal.pilotVisited'));
+ const progress=tree.root.findAll(node=>node.type==='view'&&node.props.accessibilityRole==='progressbar')[0];expect(progress.props.accessibilityValue).toEqual({min:0,max:9,now:1});
 });
 
 it('does not publish a retired account write into the next account',async()=>{

@@ -81,7 +81,7 @@ export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelec
     onChange={(index, top) => { setSettledIndex(index); if (snapPoints.length > 1) setExpanded(index > 0); reportPosition(top); onSettledHeight?.(Math.max(0, height - top)); }}>
     <SheetScrollView className="flex-1" contentContainerClassName="gap-3 px-5 pb-6">
       <View className="flex-row flex-wrap items-center justify-between gap-2">
-        <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-foreground">{t('map.title')}</Text>
+        <Text accessibilityRole="header" className="shrink font-sans text-section font-ui-bold text-brand-strong">{t('map.title')}</Text>
         <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t(expanded ? 'map.collapse' : 'map.expand')} accessibilityState={{ expanded }}
           onPress={() => { const next = !expanded; setExpanded(next); sheet.current?.snapToIndex(next ? snapPoints.length - 1 : 0); }}>
           <Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={ink} />
@@ -99,7 +99,7 @@ export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelec
         {detailsLoading && <Message busy>{t('map.details')}</Message>}
         {!place && <><Message>{t('map.selectionUnavailable')}</Message></>}
         {place && <Card variant="transparent" className="gap-3 p-0 shadow-none">
-          <Card.Header><Text accessibilityRole="header" className="font-sans text-title font-bold text-foreground">{place.name}</Text></Card.Header>
+          <Card.Header><Text accessibilityRole="header" className="font-sans text-title font-ui-bold text-foreground">{place.name}</Text></Card.Header>
           <Card.Body className="gap-3">
             {selectionSummary && <Text className="font-sans text-sm text-muted">{selectionSummary}</Text>}
             {expanded && <>
@@ -116,7 +116,7 @@ export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelec
         {!detailsLoaded && <Button variant="outline" accessibilityLabel={t('ar.more')} onPress={onDetails} isDisabled={!canRequest || detailsLoading} accessibilityState={{ busy: !!detailsLoading, disabled: !canRequest || !!detailsLoading }}><Button.Label>{t('ar.more')}</Button.Label></Button>}
         <Button variant="ghost" accessibilityLabel={t('map.closePlace')} onPress={onClosePlace}><Button.Label>{t('map.closePlace')}</Button.Label></Button>
       </>}
-      {expanded && <Text className="font-sans text-xs font-medium text-muted">{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>}
+      {expanded && <Text className="font-sans text-xs font-ui-medium text-muted">{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>}
       {attributions}
     </SheetScrollView>
   </BottomSheet>;

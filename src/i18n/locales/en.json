@@ -93,7 +93,10 @@
     "versionUnavailable": "Unavailable",
     "unsaved": "You have unsaved changes.",
     "unchanged": "Your settings are up to date.",
-    "saving": "Saving settings…"
+    "saving": "Saving settings…",
+    "saveShort": "Save",
+    "undo": "Undo",
+    "undoChanges": "Undo settings changes"
   },
   "map": {
     "title": "Nearby places",
@@ -192,7 +195,7 @@
   },
   "placeDetails": {
     "title": "Place Details",
-    "unavailable": "This place is not available in memory.",
+    "unavailable": "Place details aren’t loaded yet.",
     "load": "Load Details",
     "loading": "Loading place details…",
     "back": "Back",
@@ -277,7 +280,13 @@
     "nearbyUnsearched": "Tap Explore Nearby to search around this destination.",
     "nearbyEmpty": "No places were returned within 500 m of this destination.",
     "fromDestination": "{{meters}} m from destination",
-    "nearbyLimit": "Search returns up to {{count}} places and may not include every nearby establishment."
+    "nearbyLimit": "Search returns up to {{count}} places and may not include every nearby establishment.",
+    "exploreCount": "Explore {{count}} destinations",
+    "storiesHeading": "Destination stories",
+    "storiesPending": "Approved stories are not yet available.",
+    "storiesOnSite": "Approved stories open in AR after a verified arrival.",
+    "visitForAr": "Visit to unlock camera AR",
+    "arrivalRequired": "Camera AR requires verified arrival and approved content."
   },
   "onboarding": {
     "tagline": "Discover places around you.",
@@ -444,7 +453,7 @@
     "remove": "Remove saved place",
     "savedTitle": "Saved Places",
     "savedEmpty": "Save a place from its map details to find it here.",
-    "googlePlace": "Saved Google place",
+    "googlePlace": "Saved place",
     "open": "Open place",
     "passportTitle": "Tourist Passport",
     "passportCount": "{{count}} of {{total}} destinations visited",
@@ -463,7 +472,19 @@
     "syncAuth": "Sign in again to sync your progress. Your local changes are safe.",
     "syncUnavailable": "Account sync is not available right now. Your local changes are safe.",
     "syncConflict": "Other changes are still arriving. Your local changes are safe. Retry sync.",
-    "syncDeviceLimit": "This account has reached its sync device limit. Your local changes remain saved."
+    "syncDeviceLimit": "This account has reached its sync device limit. Your local changes remain saved.",
+    "openShort": "View",
+    "removeShort": "Remove",
+    "saveShort": "Save",
+    "savedShort": "Saved",
+    "savedHeading": "Your saved places",
+    "savedCount_one": "{{count}} place saved",
+    "savedCount_other": "{{count}} places saved",
+    "googleMetadata": "Google Maps · Open to load details",
+    "featuredMetadata": "Featured destination",
+    "syncAttention": "Sync needs attention",
+    "passportFraction": "{{count}} / {{total}}",
+    "passportVisited": "destinations visited"
   },
   "content": {
     "title": "Destination content",

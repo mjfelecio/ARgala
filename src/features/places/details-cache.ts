@@ -11,7 +11,7 @@ import { isCompleteDiscoveryPlace, isReusablePlaceData } from './selection';
  * Unknown handoffs still need explicit recovery. Keep this aligned with the
  * shared field mask in supabase/functions/_shared/places.ts.
  */
-function reusableDetails(client: QueryClient, providerId: string | null, language: Language): { place: Place; updatedAt: number } | undefined {
+export function availablePlaceDetailsSnapshot(client: QueryClient, providerId: string | null, language: Language): { place: Place; updatedAt: number } | undefined {
   if (!providerId) return undefined;
   const full = client.getQueryState<Place>(['place-details', providerId, language]);
   if (full?.data?.providerId === providerId && isReusablePlaceData(full.dataUpdatedAt)) return { place: full.data, updatedAt: full.dataUpdatedAt };
@@ -24,12 +24,12 @@ function reusableDetails(client: QueryClient, providerId: string | null, languag
 }
 
 export function availablePlaceDetails(client: QueryClient, providerId: string | null, language: Language): Place | undefined {
-  return reusableDetails(client, providerId, language)?.place;
+  return availablePlaceDetailsSnapshot(client, providerId, language)?.place;
 }
 
 /** Disabled observers may seed from verified, same-language transient data. */
 export function placeDetailsOptions(client: QueryClient, providerId: string | null, language: Language) {
-  const cached = reusableDetails(client, providerId, language);
+  const cached = availablePlaceDetailsSnapshot(client, providerId, language);
   return {
     queryKey: ['place-details', providerId, language],
     queryFn: () => placesService.details(providerId!, language),

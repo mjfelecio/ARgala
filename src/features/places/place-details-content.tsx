@@ -25,24 +25,25 @@ export function PlaceDetailsContent({ place, approvedImage, actions }: { place: 
     </View> : null}
     <View className="gap-3">
       <View testID={image ? undefined : 'place-media-fallback'} className="flex-row items-start gap-3">
-        {!image && <View className="pt-2"><Ionicons name="location-outline" size={24} color={color} accessible={false} /></View>}
-        <Text selectable accessibilityRole="header" className="min-w-0 flex-1 font-sans text-hero font-bold text-foreground">{place.name}</Text>
+        {!image && <View className="size-12 items-center justify-center rounded-pill bg-mint"><Ionicons name="location-outline" size={24} color={color} accessible={false} /></View>}
+        <View className="min-w-0 flex-1 gap-2">
+          <Text selectable accessibilityRole="header" className="font-sans text-hero font-ui-bold text-brand-strong">{place.name}</Text>
+          {place.address?.trim() && <Text selectable className="font-sans text-base text-muted">{place.address}</Text>}
+        </View>
       </View>
-      <Text className="font-sans text-sm text-muted">{t('placeDetails.distanceUnavailable')}</Text>
     </View>
     {actions}
     {place.description?.trim() && <View className="gap-2">
       <Heading>{t('placeDetails.overview')}</Heading>
       <Text selectable className="font-sans text-base text-muted">{place.description}</Text>
     </View>}
-    <View className="gap-4 border-t border-outline pt-5">
+    {place.address?.trim() && <View className="gap-4 rounded-card bg-surface p-5">
       <Heading>{t('placeDetails.essentials')}</Heading>
       <View className="gap-5">
         {place.address?.trim() && <DataRow icon="location-outline" label={t('placeDetails.address')}>{place.address}</DataRow>}
-        <DataRow icon="compass-outline" label={t('placeDetails.coordinates')}>{t('placeDetails.coordinateValue', { latitude: place.coordinates.latitude.toFixed(5), longitude: place.coordinates.longitude.toFixed(5) })}</DataRow>
       </View>
-    </View>
-    <View className="gap-3 border-t border-outline pt-5">
+    </View>}
+    <View className="gap-3 rounded-card bg-surface p-5">
       <Heading>{t('placeDetails.source')}</Heading>
       {place.provider === 'google' && <StyledImage source={googleMapsAttribution} accessibilityLabel="Google Maps" className="h-[18px] w-[98px]" resizeMode="contain" />}
       <ProviderAttributions places={[place]} />
@@ -51,12 +52,12 @@ export function PlaceDetailsContent({ place, approvedImage, actions }: { place: 
   </View>;
 }
 function Heading({ children }: { children: ReactNode }) {
-  return <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{children}</Text>;
+  return <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-brand-strong">{children}</Text>;
 }
 function DataRow({ icon, label, children }: { icon: React.ComponentProps<typeof Ionicons>['name']; label: string; children: ReactNode }) {
   const color = useThemeColor('accent');
   return <View className="flex-row items-start gap-3">
-    <View className="pt-1"><Ionicons name={icon} size={20} color={color} /></View>
-    <View className="flex-1 gap-1"><Text className="font-sans text-xs font-medium text-muted">{label}</Text><Text selectable className="font-sans text-base text-foreground">{children}</Text></View>
+    <View className="pt-1"><Ionicons name={icon} size={20} color={color} accessible={false} /></View>
+    <View className="flex-1 gap-1"><Text className="font-sans text-xs font-ui-medium text-muted">{label}</Text><Text selectable className="font-sans text-base text-foreground">{children}</Text></View>
   </View>;
 }

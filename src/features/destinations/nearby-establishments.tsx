@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useIsFocused } from 'expo-router';
 import { Button } from 'heroui-native/button';
-import { Card } from 'heroui-native/card';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useThemeColor } from 'heroui-native/hooks';
 import { Spinner } from 'heroui-native/spinner';
 import { AR, DISCOVERY } from '@/config/limits';
 import { distanceMeters, isCoordinate } from '@/features/location/geo';
@@ -23,6 +24,7 @@ const StyledImage = withUniwind(Image);
 export function NearbyEstablishments({ destination }: { destination: Destination }) {
   const { t } = useTranslation();
   const { language } = useSettings();
+  const accent = useThemeColor('accent');
   const client = useQueryClient();
   const active = useAppActive(); const focused = useIsFocused();
   const navigating = useRef(false);
@@ -44,21 +46,28 @@ export function NearbyEstablishments({ destination }: { destination: Destination
     setPlaceSelection(client, place, language, nearby.dataUpdatedAt);
     router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
   }
-  return <View className="gap-3">
-    <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{t('destinations.nearbyTitle')}</Text>
+  return <View className="gap-4 rounded-card bg-surface p-5">
+    <View className="flex-row items-center gap-3">
+      <View className="size-12 items-center justify-center rounded-pill bg-mint" accessible={false}><Ionicons name="location-outline" size={24} color={accent} accessible={false}/></View>
+      <Text accessibilityRole="header" className="min-w-0 flex-1 font-sans text-section font-ui-semibold text-brand-strong">{t('destinations.nearbyTitle')}</Text>
+    </View>
     <Text className="font-sans text-sm text-muted">{t('destinations.nearbyRadius')}</Text>
     {!center && <Text className="font-sans text-sm text-muted">{t(destination.center ? 'destinations.centerInvalid' : 'destinations.centerMissing')}</Text>}
-    <Button variant="secondary" accessibilityLabel={t('destinations.exploreNearby')} isDisabled={!center || !active || !focused || nearby.isFetching}
-      accessibilityState={{ busy: nearby.isFetching }} onPress={search}><Button.Label>{t('destinations.exploreNearby')}</Button.Label></Button>
+    <Button variant="outline" accessibilityLabel={t('destinations.exploreNearby')} isDisabled={!center || !active || !focused || nearby.isFetching}
+      accessibilityState={{ busy: nearby.isFetching }} onPress={search}><Ionicons name="search-outline" size={20} color={accent} accessible={false}/><Button.Label>{t('destinations.exploreNearby')}</Button.Label></Button>
     {nearby.isFetching && <View accessibilityLiveRegion="polite" className="gap-2"><Spinner /><Text className="font-sans text-sm text-muted">{t('common.loading')}</Text></View>}
     {nearby.error && <Text selectable accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(edgeErrorMessageKey(nearby.error))}</Text>}
     {center && !nearby.data && !nearby.error && !nearby.isFetching && <Text className="font-sans text-sm text-muted">{t('destinations.nearbyUnsearched')}</Text>}
     {nearby.data && <>
       {places.length === 0 && <Text className="font-sans text-base text-muted">{t('destinations.nearbyEmpty')}</Text>}
-      {places.map(place => <Card key={place.id} className="gap-2 p-4 shadow-none">
-        <Button variant="secondary" className="justify-start" accessibilityLabel={place.name} onPress={() => select(place)}><Button.Label className="shrink text-left">{place.name}</Button.Label></Button>
-        <Text className="font-sans text-sm text-muted">{t('destinations.fromDestination', { meters: Math.round(distanceMeters(center!, place.coordinates)) })}</Text>
-      </Card>)}
+      {places.map(place => <Button key={place.id} variant="ghost" className="h-auto min-h-16! justify-start gap-3 rounded-input! border border-outline p-4" accessibilityLabel={place.name} onPress={() => select(place)}>
+        <Ionicons name="location-outline" size={22} color={accent} accessible={false}/>
+        <View className="min-w-0 flex-1 gap-1">
+          <Text className="font-sans text-card font-ui-semibold text-brand-strong">{place.name}</Text>
+          <Text className="font-sans text-sm text-muted">{t('destinations.fromDestination', { meters: Math.round(distanceMeters(center!, place.coordinates)) })}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={accent} accessible={false}/>
+      </Button>)}
       <StyledImage source={googleMapsAttribution} accessibilityLabel="Google Maps" className="h-[18px] w-[98px]" resizeMode="contain" />
       <ProviderAttributions places={nearby.data} />
       <Text className="font-sans text-sm text-muted">{t('destinations.nearbyLimit', { count: DISCOVERY.maxResults })}</Text>

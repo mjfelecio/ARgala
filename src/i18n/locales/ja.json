@@ -60,7 +60,10 @@
     "versionUnavailable": "情報なし",
     "unsaved": "保存されていない変更があります。",
     "unchanged": "設定は最新の状態です。",
-    "saving": "設定を保存中…"
+    "saving": "設定を保存中…",
+    "saveShort": "保存",
+    "undo": "元に戻す",
+    "undoChanges": "設定の変更を元に戻す"
   },
   "map": {
     "title": "近くの場所",
@@ -152,7 +155,7 @@
   },
   "placeDetails": {
     "title": "場所の詳細",
-    "unavailable": "メモリに場所の情報がありません。",
+    "unavailable": "場所の詳細はまだ読み込まれていません。",
     "load": "詳細を読み込む",
     "loading": "場所の詳細を読み込み中…",
     "back": "戻る",
@@ -236,7 +239,13 @@
     "nearbyUnsearched": "「周辺を探索」をタップして、この目的地の周辺を検索してください。",
     "nearbyEmpty": "この目的地から500m以内に検索結果がありませんでした。",
     "fromDestination": "目的地から{{meters}}m",
-    "nearbyLimit": "検索結果は最大{{count}}件です。周辺のすべての施設が含まれるとは限りません。"
+    "nearbyLimit": "検索結果は最大{{count}}件です。周辺のすべての施設が含まれるとは限りません。",
+    "exploreCount": "{{count}}か所の目的地を探索",
+    "storiesHeading": "目的地のストーリー",
+    "storiesPending": "承認済みのストーリーはまだありません。",
+    "storiesOnSite": "承認済みストーリーは到着確認後にARで読めます。",
+    "visitForAr": "現地でカメラARを利用",
+    "arrivalRequired": "カメラARには到着確認と承認済みコンテンツが必要です。"
   },
   "onboarding": {
     "tagline": "周辺の場所を見つけよう。",
@@ -403,7 +412,7 @@
     "remove": "保存した場所を削除",
     "savedTitle": "保存した場所",
     "savedEmpty": "地図の場所情報から保存すると、ここに表示されます。",
-    "googlePlace": "保存したGoogleの場所",
+    "googlePlace": "保存した場所",
     "open": "場所を開く",
     "passportTitle": "観光パスポート",
     "passportCount": "{{total}}か所中{{count}}か所を訪問",
@@ -422,7 +431,18 @@
     "syncAuth": "進捗を同期するには再度ログインしてください。端末の変更は保持されています。",
     "syncUnavailable": "現在アカウントの同期を利用できません。端末の変更は保持されています。",
     "syncConflict": "ほかの変更が届いています。端末の変更は保持されています。同期を再試行してください。",
-    "syncDeviceLimit": "このアカウントは同期端末数の上限に達しました。端末の変更は保存されています。"
+    "syncDeviceLimit": "このアカウントは同期端末数の上限に達しました。端末の変更は保存されています。",
+    "openShort": "表示",
+    "removeShort": "削除",
+    "saveShort": "保存",
+    "savedShort": "保存済み",
+    "savedHeading": "保存した場所",
+    "savedCount_other": "{{count}}件の場所を保存",
+    "googleMetadata": "Google Maps · 開いて詳細を読み込めます",
+    "featuredMetadata": "おすすめの目的地",
+    "syncAttention": "同期を確認してください",
+    "passportFraction": "{{count}} / {{total}}",
+    "passportVisited": "訪問した目的地"
   },
   "content": {
     "title": "目的地のコンテンツ",

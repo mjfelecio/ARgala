@@ -58,9 +58,9 @@ function render() {
 async function mount(entry: 'tab' | 'stack' = 'tab') { screen = entry; await act(async () => { tree = create(render()); }); }
 async function redraw() { await act(async () => tree!.update(render())); }
 const copy = () => JSON.stringify(tree!.toJSON());
-const input = () => tree!.root.findByType('input');
+const displayedRadius=()=>tree!.root.findAllByType('view').find(n=>n.props.role==='slider')!.props.accessibilityValue.now;
 function button(key: string) { return tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === i18n.t(key))!; }
-async function radius(value: string) { await act(async () => input().props.onChangeText(value)); }
+async function radius(value: string) { await act(async () => tree!.root.findByType(Slider).props.onChangeEnd(Number(value))); }
 async function language(label: string) { await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === label)!.props.onPress()); }
 async function save() { await act(async () => button('common.save').props.onPress()); }
 beforeEach(async () => {
@@ -79,66 +79,65 @@ beforeEach(async () => {
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; queryClient.clear(); vi.restoreAllMocks(); });
 it.each(['tab', 'stack'] as const)('saves both draft preferences explicitly from %s and preserves 123 m after reopening', async entry => {
+  boundary.stored=JSON.stringify({activationRadiusMeters:123,language:'en'});
   await mount(entry);
   expect(button('common.save').props.accessibilityState.disabled).toBe(true);
-  await radius('123'); await language('한국어');
+  await language('한국어');
   expect(i18n.language).toBe('en'); expect(boundary.setItem).not.toHaveBeenCalled();
   await save();
   expect(boundary.setItem).toHaveBeenCalledExactlyOnceWith('argala.preferences.v1', JSON.stringify({ activationRadiusMeters: 123, language: 'ko' }));
   expect(i18n.language).toBe('ko'); expect(copy()).toContain(i18n.t('common.saved'));
   await act(async () => tree!.unmount()); tree = undefined; await mount(entry);
-  expect(input().props.value).toBe('123'); expect(committed.language).toBe('ko');
+  expect(displayedRadius()).toBe(123); expect(committed.language).toBe('ko');
   expect(button('common.save').props.accessibilityState.disabled).toBe(true);
 });
-it.each(['9', '1001', '', '12.3', 'NaN'])('blocks invalid draft %s through the real screen, then permits recovery', async value => {
-  await mount(); await radius(value);
-  expect(copy()).toContain(i18n.t('settings.invalid'));
-  expect(button('common.save').props.accessibilityState.disabled).toBe(true);
-  await save(); expect(boundary.setItem).not.toHaveBeenCalled();
-  await radius('10'); await save(); expect(committed.activationRadiusMeters).toBe(10);
+it('offers only slider/presets with bounded values and requires explicit Save',async()=>{
+ await mount();expect(tree!.root.findAllByType('input')).toHaveLength(0);
+ await radius('1000');expect(displayedRadius()).toBe(1000);expect(boundary.setItem).not.toHaveBeenCalled();
+ await save();expect(committed.activationRadiusMeters).toBe(1000);
 });
 it('guards same-tick double saves, waits for persistence and retains failed drafts for explicit retry', async () => {
   const pending = Promise.withResolvers<void>();
   boundary.setItem.mockReturnValueOnce(pending.promise);
-  await mount(); await radius('123');
+  await mount(); await radius('200');
   const submit = button('common.save');
   await act(async () => { submit.props.onPress(); submit.props.onPress(); });
   expect(boundary.setItem).toHaveBeenCalledTimes(1);
   expect(copy()).not.toContain(i18n.t('common.saved'));
   expect(button('settings.saving').props.accessibilityState).toMatchObject({ busy: true, disabled: true });
   await act(async () => pending.reject(new Error('PRIVATE storage failure')));
-  expect(input().props.value).toBe('123'); expect(copy()).toContain(i18n.t('settings.saveFailed')); expect(copy()).not.toContain('PRIVATE');
+  expect(displayedRadius()).toBe(200); expect(copy()).toContain(i18n.t('settings.saveFailed')); expect(copy()).not.toContain('PRIVATE');
   await act(async () => { await i18n.changeLanguage('ja'); });
   expect(copy()).toContain(i18n.t('settings.saveFailed'));
-  await save(); expect(committed.activationRadiusMeters).toBe(123); expect(copy()).toContain(i18n.t('common.saved'));
+  await save(); expect(committed.activationRadiusMeters).toBe(200); expect(copy()).toContain(i18n.t('common.saved'));
 });
 it('drops unsaved edits on tab departure and starts pristine with installed focus hooks before navigation readiness', async () => {
   await mount(); await radius('500'); await language('日本語');
   boundary.focused = false; await redraw(); boundary.focused = true; await redraw();
-  expect(input().props.value).toBe('100'); expect(committed.language).toBe('en');
+  expect(displayedRadius()).toBe(100); expect(committed.language).toBe('en');
   expect(button('common.save').props.accessibilityState.disabled).toBe(true);
   expect(boundary.setItem).not.toHaveBeenCalled();
 });
 it('synchronizes an external save only when pristine and does not clobber dirty edits on rerender or language change', async () => {
   await mount();
   await act(async () => committed.save({ activationRadiusMeters: 123, language: 'ko' }));
-  expect(input().props.value).toBe('123');
+  expect(displayedRadius()).toBe(123);
   await radius('500');
   await act(async () => committed.save({ activationRadiusMeters: 200, language: 'ja' }));
-  await redraw(); expect(input().props.value).toBe('500');
+  await redraw(); expect(displayedRadius()).toBe(500);
   await save(); expect(committed).toMatchObject({ activationRadiusMeters: 500, language: 'ko' });
 });
-it.each(['ko', 'ja'])('relocalizes validation and storage errors through actual %s resources', async locale => {
+it.each(['ko', 'ja'])('relocalizes storage errors through actual %s resources', async locale => {
   boundary.getItem.mockRejectedValueOnce(new Error('PRIVATE disk failure'));
-  await mount(); await radius('0');
-  expect(copy()).toContain(i18n.t('settings.invalid')); expect(copy()).toContain(i18n.t('settings.loadFailed'));
+  await mount(); await radius('200');
+  expect(copy()).toContain(i18n.t('settings.loadFailed'));
   await act(async () => { await i18n.changeLanguage(locale); });
-  expect(copy()).toContain(i18n.t('settings.invalid')); expect(copy()).toContain(i18n.t('settings.loadFailed')); expect(copy()).not.toContain('PRIVATE');
+  expect(copy()).toContain(i18n.t('settings.loadFailed')); expect(copy()).not.toContain('PRIVATE');
   await radius('1000'); await save(); expect(copy()).not.toContain(i18n.t('settings.loadFailed'));
 });
 it('shows no stale saved success after a subsequent edit', async () => {
-  await mount(); await radius('123'); await save(); expect(copy()).toContain(i18n.t('common.saved'));
-  await radius('200'); expect(copy()).not.toContain(i18n.t('common.saved')); expect(copy()).toContain(i18n.t('settings.unsaved'));
+  await mount(); await radius('200'); await save(); expect(copy()).toContain(i18n.t('common.saved'));
+  await radius('500'); expect(copy()).not.toContain(i18n.t('common.saved')); expect(copy()).toContain(i18n.t('settings.unsaved'));
 });
 
 it.each(['tab', 'stack'] as const)('shows one compact title, real account/version and correct insets in %s', async entry => {
@@ -206,29 +205,29 @@ it.each([
 
 it('waits for a pending Save through blur/refocus and shows no stale success after an abandoned screen', async () => {
   const pending = Promise.withResolvers<void>(); boundary.setItem.mockReturnValueOnce(pending.promise);
-  await mount(); await radius('123'); await act(async () => button('common.save').props.onPress());
+  await mount(); await radius('200'); await act(async () => button('common.save').props.onPress());
   boundary.focused = false; await redraw();
   await act(async () => pending.resolve());
   expect(copy()).not.toContain(i18n.t('common.saved'));
   boundary.focused = true; await redraw();
-  expect(input().props.value).toBe('123'); expect(button('common.save').props.accessibilityState.disabled).toBe(true);
+  expect(displayedRadius()).toBe(200); expect(button('common.save').props.accessibilityState.disabled).toBe(true);
   expect(boundary.setItem).toHaveBeenCalledTimes(1);
 });
 it('allows an already submitted save to finish after unmount without updating another screen draft', async () => {
   const pending = Promise.withResolvers<void>(); boundary.setItem.mockReturnValueOnce(pending.promise);
-  await mount(); await radius('123'); await act(async () => button('common.save').props.onPress());
+  await mount(); await radius('200'); await act(async () => button('common.save').props.onPress());
   // Keep the provider mounted while the route leaves, just as the parent stack does.
   boundary.session = null;
   await act(async () => boundary.authChanged!('SIGNED_OUT', null));
   await act(async () => pending.resolve());
-  expect(committed.activationRadiusMeters).toBe(123);
+  expect(committed.activationRadiusMeters).toBe(200);
   expect(copy()).not.toContain(i18n.t('common.saved'));
 });
 it('keeps mount, drafts, locale changes, refocus, foreground return and remount free of paid requests and sensors', async () => {
   const fetch = vi.spyOn(globalThis, 'fetch');
   const listeners: ((state: import('react-native').AppStateStatus) => void)[] = [];
   vi.spyOn(AppState, 'addEventListener').mockImplementation((_event, listener) => { listeners.push(listener); return { remove: vi.fn() }; });
-  await mount(); await radius('123'); await language('한국어');
+  await mount(); await radius('200'); await language('한국어');
   await act(async () => { await i18n.changeLanguage('ja'); });
   boundary.focused = false; await redraw(); boundary.focused = true; await redraw();
   await act(async () => { listeners.forEach(listener => listener('background')); listeners.forEach(listener => listener('active')); });
@@ -247,7 +246,7 @@ it('commits a drag to the draft only on release, requires Save, and restores the
   });
   await act(async () => gesture().handlers.begin());
   await act(async () => gesture().handlers.update({ translationX: 28, translationY: 0 }));
-  expect(input().props.value).toBe('200');
+  expect(displayedRadius()).toBe(200);
   expect(button('common.save').props.accessibilityState.disabled).toBe(true);
   expect(boundary.setItem).not.toHaveBeenCalled();
   await act(async () => gesture().handlers.finalize());
@@ -256,15 +255,73 @@ it('commits a drag to the draft only on release, requires Save, and restores the
   await save();
   expect(committed.activationRadiusMeters).toBe(200);
   await act(async () => tree!.unmount()); tree = undefined; await mount();
-  expect(input().props.value).toBe('200');
+  expect(displayedRadius()).toBe(200);
 });
 it('abandons an unfinished slider interaction on blur even when the parent draft never changed', async () => {
   await mount();
   const slider = () => tree!.root.findByType(Slider);
   await act(async () => slider().props.onChange(500));
-  expect(input().props.value).toBe('500');
+  expect(displayedRadius()).toBe(500);
   boundary.focused = false; await redraw(); boundary.focused = true; await redraw();
-  expect(input().props.value).toBe('100');
+  expect(displayedRadius()).toBe(100);
   expect(button('common.save').props.accessibilityState.disabled).toBe(true);
   expect(boundary.setItem).not.toHaveBeenCalled();
+});
+
+const sticky=()=>tree!.root.findAllByProps({testID:'settings-draft-actions'})[0];
+async function measureSettings(viewport=600,top=1200,height=48){
+ await act(async()=>{
+  tree!.root.findByType('scroll' as React.ElementType).props.onLayout({nativeEvent:{layout:{height:viewport}}});
+  tree!.root.findByProps({testID:'settings-save-action'}).props.onLayout({nativeEvent:{layout:{y:top,height}}});
+ });
+}
+async function scrollSettings(y:number){await act(async()=>tree!.root.findByType('scroll' as React.ElementType).props.onScroll({nativeEvent:{contentOffset:{y},layoutMeasurement:{height:600}}}));}
+it('shows sticky Save/Undo only for dirty drafts while the regular Save is offscreen, including scrolling in both directions',async()=>{
+ await mount();await measureSettings();expect(sticky()).toBeUndefined();
+ await radius('500');expect(sticky()).toBeDefined();
+ await scrollSettings(601);expect(sticky()).toBeUndefined(); // Regular Save begins entering the viewport.
+ await scrollSettings(1250);expect(sticky()).toBeDefined(); // It has scrolled above the viewport.
+ await scrollSettings(700);expect(sticky()).toBeUndefined();
+ await scrollSettings(0);expect(sticky()).toBeDefined();
+ expect(boundary.setItem).not.toHaveBeenCalled();
+});
+it('Undo restores both drafts to the latest saved settings and discards an unfinished slider preview',async()=>{
+ await mount();await measureSettings();await language('한국어');
+ await act(async()=>tree!.root.findByType(Slider).props.onChange(500));expect(displayedRadius()).toBe(500);
+ await act(async()=>sticky().findAllByType('button').find(n=>n.props.accessibilityLabel===i18n.t('settings.undoChanges'))!.props.onPress());
+ expect(displayedRadius()).toBe(100);expect(sticky()).toBeUndefined();expect(boundary.setItem).not.toHaveBeenCalled();
+ await radius('500');await language('한국어');
+ await act(async()=>committed.save({activationRadiusMeters:200,language:'ja'}));
+ const writes=boundary.setItem.mock.calls.length;
+ await act(async()=>sticky().findAllByType('button').find(n=>n.props.accessibilityLabel===i18n.t('settings.undoChanges'))!.props.onPress());
+ expect(displayedRadius()).toBe(200);expect(sticky()).toBeUndefined();expect(boundary.setItem).toHaveBeenCalledTimes(writes);
+ expect(tree!.root.findAllByType('button').find(n=>n.props.accessibilityLabel==='日本語')!.props['aria-checked']).toBe(true);
+});
+it('sticky Save shares persistence and busy guards; errors retain edits and Undo never races a submitted save',async()=>{
+ const pending=Promise.withResolvers<void>();boundary.setItem.mockReturnValueOnce(pending.promise);
+ await mount();await measureSettings();await radius('500');
+ const action=sticky().findAllByType('button').find(n=>n.props.accessibilityLabel===i18n.t('common.save'))!;
+ await act(async()=>{action.props.onPress();action.props.onPress();});
+ expect(boundary.setItem).toHaveBeenCalledTimes(1);
+ const undo=sticky().findAllByType('button').find(n=>n.props.accessibilityLabel===i18n.t('settings.undoChanges'))!;
+ expect(undo.props.accessibilityState.disabled).toBe(true);
+ await act(async()=>undo.props.onPress());expect(displayedRadius()).toBe(500);
+ await act(async()=>pending.reject(new Error('PRIVATE disk failure')));
+ expect(sticky()).toBeDefined();expect(copy()).toContain(i18n.t('settings.saveFailed'));expect(copy()).not.toContain('PRIVATE');
+ for(const locale of ['en','ja','ko']) {
+  await act(async()=>{await i18n.changeLanguage(locale);});
+  expect(sticky().findAllByType('text').some(n=>n.props.children===i18n.t('settings.saveFailed'))).toBe(true);
+ }
+ await act(async()=>sticky().findAllByType('button').find(n=>n.props.accessibilityLabel===i18n.t('common.save'))!.props.onPress());
+ expect(committed.activationRadiusMeters).toBe(500);expect(sticky()).toBeUndefined();
+});
+it.each(['en','ja','ko'])('localizes sticky actions in %s and recomputes visibility after layout changes',async locale=>{
+ await mount();await act(async()=>{await i18n.changeLanguage(locale);});await radius('500');
+ expect(sticky()).toBeUndefined(); // Wait for actual layout rather than guessing visibility.
+ await measureSettings(600,900);expect(sticky()).toBeDefined();
+ for(const key of ['settings.saveShort','settings.undo','settings.undoChanges']){expect(i18n.t(key)).not.toBe(key);expect(copy()).toContain(i18n.t(key));}
+ await measureSettings(1000,900);expect(sticky()).toBeUndefined();
+ await measureSettings(600,400);expect(sticky()).toBeUndefined();
+ await measureSettings(600,900);expect(sticky()).toBeDefined();
+ boundary.focused=false;await redraw();expect(sticky()).toBeUndefined();
 });

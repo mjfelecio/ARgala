@@ -15,7 +15,7 @@ export const unstable_settings = { initialRouteName: '(tabs)' };
 export default function AppLayout() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const headerStyle = useResolveClassNames('bg-page-mint');
+  const headerStyle = useResolveClassNames('bg-page');
   const headerTitleStyle = useResolveClassNames('font-sans text-card font-semibold text-foreground');
   const headerTintColor = useThemeColor('accent');
   return <JournalProvider><DestinationContentProvider><ArrivalReminderProvider onOpenDestination={id => {

@@ -1,8 +1,5 @@
 import { Button } from 'heroui-native/button';
-import { Input } from 'heroui-native/input';
-import { Label } from 'heroui-native/label';
 import { Slider } from 'heroui-native/slider';
-import { TextField } from 'heroui-native/text-field';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
@@ -31,8 +28,8 @@ export function RadiusControl({ value, onChange, disabled = false }: {
   }
   return <View className="gap-4">
     <View className="flex-row flex-wrap items-center justify-between gap-2">
-      <Text className="font-sans text-card font-semibold text-foreground">{t('settings.activationRadius')}</Text>
-      <Text className="rounded-pill bg-accent px-3 py-1 font-sans text-sm font-semibold text-accent-foreground">{t('settings.meters', { count: current })}</Text>
+      <Text className="font-sans text-card font-ui-semibold text-foreground">{t('settings.activationRadius')}</Text>
+      <Text className="rounded-pill bg-accent px-3 py-1 font-sans text-sm font-ui-semibold text-accent-foreground">{t('settings.meters', { count: current })}</Text>
     </View>
     <Text className="font-sans text-sm text-muted">{t('settings.radiusDescription')}</Text>
     <Slider value={current} minValue={ACTIVATION.minMeters} maxValue={ACTIVATION.maxMeters} step={10} isDisabled={disabled}
@@ -56,11 +53,6 @@ export function RadiusControl({ value, onChange, disabled = false }: {
         <Button.Label>{t('settings.meters', { count: preset })}</Button.Label>
       </Button>)}
     </View>
-    <TextField isDisabled={disabled} isInvalid={!parsed.success}>
-      <Label><Label.Text className="font-sans text-sm font-semibold">{t('settings.radius')}</Label.Text></Label>
-      <Input value={draft.text} keyboardType="number-pad" accessibilityLabel={t('settings.radius')} onChangeText={next => edit(next, true)}
-        className="min-h-14 border border-outline bg-surface font-sans text-base android:border-outline" />
-    </TextField>
     {!parsed.success && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('settings.invalid')}</Text>}
   </View>;
 }

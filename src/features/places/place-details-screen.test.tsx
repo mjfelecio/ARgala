@@ -109,14 +109,14 @@ it.each(['en', 'ko', 'ja'] as const)('renders real sparse content, full long tex
   const sparse = { ...place, name: 'A long name 日本語 한국어 '.repeat(12), address: 'Real supplied address', attributions: [{ name: 'Real provider credit' }] };
   client.setQueryData(placeSelectionOptions('north').queryKey, sparse); await mount();
   expect(output()).toContain(sparse.name); expect(output()).toContain(sparse.address); expect(output()).toContain('Real provider credit');
-  expect(output()).toContain('Google Maps'); expect(output()).toContain(translations.t('placeDetails.coordinates'));
+  expect(output()).toContain('Google Maps'); expect(output()).not.toContain(translations.t('placeDetails.coordinates'));
   expect(output()).not.toContain('GPS LOCKED'); expect(output()).not.toContain('UNESCO'); expect(output()).not.toContain('min walk');
   expect(tree!.root.findAllByType('text').find(n => n.props.children === sparse.name)!.props.numberOfLines).toBeUndefined();
 });
 it('hides missing sections and never invents a distance from an old Map/AR position', async () => {
   client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
   expect(output()).not.toContain(translations.t('placeDetails.overview')); expect(output()).not.toContain(translations.t('placeDetails.address'));
-  expect(output()).toContain(translations.t('placeDetails.distanceUnavailable')); expect(tree!.root.findAllByProps({ testID: 'place-media-fallback' })).toHaveLength(1);
+  expect(output()).not.toContain(translations.t('placeDetails.distanceUnavailable')); expect(tree!.root.findAllByProps({ testID: 'place-media-fallback' })).toHaveLength(1);
 });
 it('renders a genuine description when available', async () => {
   client.setQueryData(['place-details', 'north', 'en'], { ...place, description: 'Provider-supplied overview', address: 'Provider address' }); await mount();
@@ -145,11 +145,11 @@ it.each(['en', 'ko', 'ja'])('presents an approved image only when explicitly sup
   expect(output()).toContain('Synthetic test illustration'); expect(output()).toContain('Synthetic fixture credit');
   expect(tree!.root.findAllByProps({ testID: 'place-media-fallback' })).toHaveLength(0);
 });
-it.each(['placeDetails.map', 'placeDetails.ar'])('hands off the selection through %s without provider work', async key => {
+it.each(['placeDetails.map'])('hands off the selection through %s without provider work', async key => {
   const { router } = await import('expo-router');
   client.setQueryData(placeSelectionOptions('north').queryKey, place); await mount();
   await press(key);
-  expect(router.dismissTo).toHaveBeenCalledExactlyOnceWith({ pathname: key === 'placeDetails.ar' ? '/ar' : '/', params: { placeId: 'north' } });
+  expect(router.dismissTo).toHaveBeenCalledExactlyOnceWith({ pathname: '/', params: { placeId: 'north' } });
   expect(client.getQueryData(placeSelectionOptions('north').queryKey)).toEqual(place); expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
 it('returns to its originating screen with Back, with a safe direct-entry fallback', async () => {
@@ -222,4 +222,14 @@ it('hands one Get Directions tap to the preview with a single-use intent and blo
   expect(router.push).toHaveBeenCalledOnce(); const destination = vi.mocked(router.push).mock.calls[0][0] as { pathname: string; params: { token: string } };
   expect(destination.pathname).toBe('/directions'); expect(claimRoutePreviewIntent(client, destination.params.token)).toMatchObject({ source: 'details', place });
   expect(claimRoutePreviewIntent(client, destination.params.token)).toBeNull(); expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+
+it('omits ordinary-place AR and raw coordinates while prioritizing the available address', async () => {
+  client.setQueryData(placeSelectionOptions('north').queryKey, { ...place, address: 'Actual returned street' }); await mount();
+  expect(button('placeDetails.ar')).toBeUndefined();
+  const texts = tree!.root.findAllByType('text').map(node => node.props.children);
+  expect(texts).not.toContain(translations.t('placeDetails.coordinates'));
+  expect(texts).not.toContain(translations.t('placeDetails.coordinateValue', { latitude: '10.00000', longitude: '124.00000' }));
+  expect(texts.indexOf('Actual returned street')).toBeLessThan(texts.indexOf(translations.t('placeDetails.directions')));
+  expect(texts).not.toContain(translations.t('placeDetails.distanceUnavailable'));
 });

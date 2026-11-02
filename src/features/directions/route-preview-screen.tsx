@@ -114,10 +114,18 @@ function Preview({ token }: { token: unknown }) {
   const [viewportWidth, setViewportWidth] = useState(0);
   const [primaryMeasurement, setPrimaryMeasurement] = useState<{ key: string; height: number } | null>(null);
   const { fontScale = 1 } = useWindowDimensions();
-  const primaryLayoutKey = JSON.stringify([viewportWidth, fontScale, i18n.resolvedLanguage, place?.name, !!place, desiredMode !== displayedMode, linkError]);
+  // Retire native callbacks whenever the rendered compact content changes. Sensor
+  // coordinates/timestamps and continuous distance counters are absent. Their
+  // updates must retain the measured block; native onLayout still measures reflow.
+  const primaryLayoutKey = JSON.stringify([viewportWidth, fontScale, i18n.resolvedLanguage,
+    place?.name, !!place, desiredMode, displayedMode, linkError, !!externalUrl,
+    configured, data?.status, data?.errorKey, preview.locationEnabled, preview.expired,
+    preview.needsRetry, usable, location.status, location.errorCode,
+    result?.route.distanceMeters, result?.route.durationSeconds, coordinates.length > 1,
+    navigation.started, navigation.status, navigation.canStart]);
   const sheetGeometry = routeSheetGeometry(viewportHeight, headerHeight, insets.bottom, fontScale,
     primaryMeasurement?.key === primaryLayoutKey ? primaryMeasurement.height : undefined);
-  const accent = useThemeColor('accent');
+  const [accent, onAccent] = useThemeColor(['accent', 'accent-foreground']);
   function toMap() {
     // Curated Home-map selection is deferred; never forward catalog IDs to Google's selection path.
     if (place?.provider === 'curated') { router.dismissTo('/'); return; }
@@ -138,7 +146,7 @@ function Preview({ token }: { token: unknown }) {
       <View testID="route-preview-header" className="absolute inset-x-0 top-0 px-4 pb-1" style={{ paddingTop: insets.top + 4 }} onLayout={event => setHeaderHeight(event.nativeEvent.layout.height)}>
         <View className="min-h-12 flex-row items-center gap-2 rounded-pill bg-surface pr-4 shadow-sm">
           <Button variant="ghost" className="size-12" isIconOnly accessibilityLabel={t('directions.back')} onPress={() => { if (router.canGoBack()) router.back(); else toMap(); }}><Ionicons name="arrow-back" size={22} color={accent} /></Button>
-          <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-foreground">{t('directions.title')}</Text>
+          <Text accessibilityRole="header" className="shrink font-sans text-card font-ui-semibold text-brand-strong">{t('directions.title')}</Text>
         </View>
       </View>
       <View testID="route-preview-dock" className="absolute inset-0" pointerEvents="box-none">
@@ -151,65 +159,65 @@ function Preview({ token }: { token: unknown }) {
               ? previous : { key: primaryLayoutKey, height: measuredHeight });
           }}>
           <View className="flex-row items-center justify-between gap-2">
-            <Text accessibilityRole="header" accessibilityLabel={place?.name} numberOfLines={2} className="flex-1 font-sans text-card font-semibold text-foreground">{place?.name ?? t('directions.title')}</Text>
+            <Text accessibilityRole="header" accessibilityLabel={place?.name} numberOfLines={2} className="flex-1 font-sans text-section font-ui-bold text-brand-strong">{place?.name ?? t('directions.title')}</Text>
             <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t(expanded ? 'map.collapse' : 'map.expand')} accessibilityState={{ expanded }} onPress={toggle}>
               <Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={accent} />
             </Button>
           </View>
           {place && <View className="gap-2">
-            <View className="flex-row flex-wrap gap-2">{(['walking', 'driving'] as const).map(mode => <Button key={mode} variant={desiredMode === mode ? 'primary' : 'outline'} className="h-auto min-h-12 shrink py-3" accessibilityLabel={t(`directions.${mode}`)} accessibilityState={{ selected: desiredMode === mode }} onPress={() => setDraftMode(mode)}><Button.Label className="shrink text-center">{t(`directions.${mode}`)}</Button.Label></Button>)}</View>
+            <View className="flex-row flex-wrap gap-2">{(['walking', 'driving'] as const).map(mode => <Button key={mode} variant={desiredMode === mode ? 'primary' : 'outline'} className="h-auto min-h-12 shrink py-3" accessibilityLabel={t(`directions.${mode}`)} accessibilityState={{ selected: desiredMode === mode }} onPress={() => setDraftMode(mode)}><Ionicons name={mode === 'walking' ? 'walk-outline' : 'car-outline'} size={20} color={desiredMode === mode ? onAccent : accent} accessible={false} /><Button.Label className="shrink text-center">{t(`directions.${mode}`)}</Button.Label></Button>)}</View>
             <Text className="font-sans text-xs text-muted">{t('directions.displayedMode', { mode: t(`directions.${displayedMode}`) })}</Text>
-            {desiredMode !== displayedMode && <Button className="h-auto min-h-12 py-3" accessibilityLabel={t('directions.previewMode')} isDisabled={!running || data?.status === 'pending'} onPress={previewMode}><Button.Label className="shrink text-center">{t('directions.previewMode')}</Button.Label></Button>}
-            <Button className="h-auto min-h-12 py-3" accessibilityLabel={t('directions.startNavigation')} isDisabled={!externalUrl || !running || linkPending} onPress={startExternalNavigation}><Button.Label className="shrink text-center">{t('directions.startNavigation')}</Button.Label></Button>
-            {linkError && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('directions.mapsFailed')}</Text>}
-          </View>}
-          </RoutePreviewPrimary>
-          {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} destinationTitle={featured ? destinationName(featured) : undefined} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
-          {featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
-          {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
-          {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}
           {result && coordinates.length > 1 && !navigation.started && <>
-            <Text className="font-sans text-title font-bold text-foreground">{t('map.routeSummary', { meters: result.route.distanceMeters, minutes: Math.ceil(result.route.durationSeconds / 60) })}</Text>
+            <View className="flex-row items-start gap-2"><Ionicons name={displayedMode === 'walking' ? 'walk-outline' : 'car-outline'} size={24} color={accent} accessible={false} /><Text className="min-w-0 flex-1 font-sans text-title font-ui-bold text-brand-strong">{t('map.routeSummary', { meters: result.route.distanceMeters, minutes: Math.ceil(result.route.durationSeconds / 60) })}</Text></View>
             <Text className="font-sans text-xs text-muted">{t(displayedMode === 'walking' ? 'directions.estimated' : 'directions.estimatedDriving')}</Text>
           </>}
-          {result && displayedMode === 'walking' && coordinates.length > 1 && !navigation.started && (navigation.canStart
-            ? <Button variant="primary" className="min-h-12" accessibilityLabel={t('directions.followWalk')} onPress={navigation.start}><Button.Label>{t('directions.followWalk')}</Button.Label></Button>
-            : <Text className="font-sans text-sm text-muted">{t('directions.navigationNeedsLocation')}</Text>)}
+          {place && preview.locationEnabled && data?.status === 'waiting' && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('directions.waiting')}</Text>}
+          {place && preview.locationEnabled && !usable && <View testID="route-location-banner" className="flex-row items-start gap-2 rounded-input bg-mint p-3"><Ionicons name="navigate-outline" size={20} color={accent} accessible={false} /><View className="min-w-0 flex-1 gap-2"><RoutePreviewLocationStatus location={location} />{location.status === 'ready' && <><Text className="font-sans text-sm text-muted">{t('directions.stale')}</Text><Button variant="outline" accessibilityLabel={t('location.retry')} onPress={location.retry}><Button.Label>{t('location.retry')}</Button.Label></Button></>}</View></View>}
+          {data?.status === 'waiting' && preview.expired && <Text className="font-sans text-sm text-muted">{t('directions.unavailable')}</Text>}
+          {data?.status === 'pending' && <View className="gap-2"><Spinner size="sm" /><Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t(displayedMode === 'driving' ? 'directions.drivingLoading' : 'map.routeLoading')}</Text></View>}
+          {data?.errorKey && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(data.errorKey)}</Text>}
+          {preview.needsRetry && <Button variant="outline" accessibilityLabel={t('directions.retry')} isDisabled={!running || !configured} onPress={preview.retry}><Button.Label>{t('directions.retry')}</Button.Label></Button>}
+          {place && !configured && <Text className="font-sans text-sm text-muted">{t('map.missingKey')}</Text>}
+          {place && !externalUrl && <Text className="font-sans text-sm text-muted">{t('directions.unavailable')}</Text>}
+          {result && displayedMode === 'walking' && coordinates.length > 1 && !navigation.started && !navigation.canStart && <Text className="font-sans text-sm text-muted">{t('directions.navigationNeedsLocation')}</Text>}
+            {desiredMode !== displayedMode && <Button className="h-auto min-h-12 py-3" accessibilityLabel={t('directions.previewMode')} isDisabled={!running || data?.status === 'pending'} onPress={previewMode}><Button.Label className="shrink text-center">{t('directions.previewMode')}</Button.Label></Button>}
+            <Button className="h-auto min-h-12 py-3" accessibilityLabel={t('directions.startNavigation')} isDisabled={!externalUrl || !running || linkPending} accessibilityState={{busy: linkPending}} onPress={startExternalNavigation}><Ionicons name="navigate-outline" size={22} color={onAccent} accessible={false} /><Button.Label className="shrink text-center">{t('directions.startNavigation')}</Button.Label></Button>
+            {linkError && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('directions.mapsFailed')}</Text>}
+          </View>}
+          {result && displayedMode === 'walking' && coordinates.length > 1 && !navigation.started && navigation.canStart && <Button variant="outline" className="min-h-12" accessibilityLabel={t('directions.followWalk')} onPress={navigation.start}><Button.Label>{t('directions.followWalk')}</Button.Label></Button>}
           {navigation.started && <View className="gap-2 rounded-card bg-surface-secondary p-3">
-            <Text accessibilityLiveRegion="polite" className="font-sans text-sm font-semibold text-foreground">{t(navigationStatusKey)}</Text>
+            <Text accessibilityLiveRegion="polite" className="font-sans text-sm font-ui-semibold text-foreground">{t(navigationStatusKey)}</Text>
             <Text className="font-sans text-sm text-foreground">{t('directions.remaining', { meters: Math.max(0, Math.round(navigation.remainingMeters)) })}</Text>
             {navigation.status === 'arrived'
               ? <Button variant="outline" accessibilityLabel={t('directions.returnToPreview')} onPress={navigation.stop}><Button.Label>{t('directions.returnToPreview')}</Button.Label></Button>
               : <Button variant="outline" accessibilityLabel={t('directions.stopNavigation')} onPress={navigation.stop}><Button.Label>{t('directions.stopNavigation')}</Button.Label></Button>}
           </View>}
-          {place && preview.locationEnabled && data?.status === 'waiting' && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('directions.waiting')}</Text>}
-          {place && preview.locationEnabled && !usable && <><RoutePreviewLocationStatus location={location} />{location.status === 'ready' && <><Text className="font-sans text-sm text-muted">{t('directions.stale')}</Text><Button variant="outline" accessibilityLabel={t('location.retry')} onPress={location.retry}><Button.Label>{t('location.retry')}</Button.Label></Button></>}</>}
-          {data?.status === 'waiting' && preview.expired && <Text className="font-sans text-sm text-muted">{t('directions.unavailable')}</Text>}
-          {data?.status === 'pending' && <View className="gap-2"><Spinner size="sm" /><Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t(displayedMode === 'driving' ? 'directions.drivingLoading' : 'map.routeLoading')}</Text></View>}
-          {data?.errorKey && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(data.errorKey)}</Text>}
-          {preview.needsRetry && <Button variant="outline" accessibilityLabel={t('directions.retry')} isDisabled={!running || !configured} onPress={preview.retry}><Button.Label>{t('directions.retry')}</Button.Label></Button>}
+          </RoutePreviewPrimary>
+          {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} destinationTitle={featured ? destinationName(featured) : undefined} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
+          {featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
+          {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {expanded && place && <View className="gap-4 border-t border-outline pt-4">
-            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.journey')}</Text>
+            <Text accessibilityRole="header" className="font-sans text-card font-ui-semibold text-brand-strong">{t('directions.journey')}</Text>
             <View className="flex-row items-start gap-3">
               <Ionicons name="radio-button-on-outline" size={20} color={accent} />
-              <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-sm font-semibold text-foreground">{t('directions.origin')}</Text>
+              <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-sm font-ui-semibold text-foreground">{t('directions.origin')}</Text>
                 <Text className="font-sans text-sm text-muted">{t('directions.originDescription')}</Text></View>
             </View>
             <View className="flex-row items-start gap-3">
               <Ionicons name="location-outline" size={20} color={accent} />
               <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-xs text-muted">{t('directions.destination')}</Text>
-                <Text className="font-sans text-base font-semibold text-foreground">{place.name}</Text>
+                <Text className="font-sans text-base font-ui-semibold text-foreground">{place.name}</Text>
                 {place.address && <Text className="font-sans text-sm text-muted">{place.address}</Text>}</View>
             </View>
           </View>}
           {expanded && result && <View className="gap-3 border-t border-outline pt-4">
-            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.information')}</Text>
+            <Text accessibilityRole="header" className="font-sans text-card font-ui-semibold text-brand-strong">{t('directions.information')}</Text>
             <Text className="font-sans text-sm text-muted">{t('directions.snapshot')}</Text>
             {result.route.warnings.map((warning, index) => <View key={index} className="flex-row items-start gap-2"><Ionicons name="warning-outline" size={20} color={accent} /><Text className="min-w-0 flex-1 font-sans text-sm text-foreground">{warning}</Text></View>)}
             <Text className="font-sans text-sm text-muted">{t(displayedMode === 'walking' ? 'map.walkingCaution' : 'directions.drivingCaution')}</Text>
           </View>}
           {expanded && navigation.started && <View className="gap-2 border-t border-outline pt-4">
-            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.navigationInformation')}</Text>
+            <Text accessibilityRole="header" className="font-sans text-card font-ui-semibold text-brand-strong">{t('directions.navigationInformation')}</Text>
             {navigation.status === 'uncertain' && <Text className="font-sans text-sm text-muted">{t('directions.navigationUncertainDetail')}</Text>}
             {navigation.status === 'off-route' && <Text className="font-sans text-sm text-muted">{t('directions.navigationOffRouteDetail')}</Text>}
             {navigation.status === 'arrived' && <Text className="font-sans text-sm text-muted">{t('directions.navigationArrival')}</Text>}
