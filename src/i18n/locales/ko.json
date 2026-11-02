@@ -523,6 +523,7 @@
     }
   },
   "destinationStories": {
+    "previewEntrance": "전체 시작 연출 미리 보기",
     "exit": "돌아가기",
     "chapter": "{{current}}장 / {{total}}장",
     "opened": "열어봄",

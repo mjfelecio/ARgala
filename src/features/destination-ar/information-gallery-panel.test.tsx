@@ -10,6 +10,7 @@ import type { ReadingSize } from './reading-preference';
 import type { RingContent } from './ring-content';
 import type { ArNativeStyle } from './native-styles';
 import type { FocusSelection } from './ring-controller';
+vi.mock('./holographic-assets', () => ({ holographicAssets: { frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => true }));
 vi.mock('@reactvision/react-viro', () => ({ ViroImage: 'image', ViroQuad: 'quad', ViroText: 'text', ViroNode: 'node', ViroAnimations: { registerAnimations: vi.fn() } }));
 const approved = (value: string) => ({ value, approvalReference: 'Synthetic test only' });
@@ -28,7 +29,7 @@ const view = () => <I18nextProvider i18n={translations}><Harness /></I18nextProv
 async function mount() { await act(async () => { tree = create(view()); }); }
 const action = (id: string) => tree.root.findAllByType('node' as React.ElementType).find(node => node.props.testID === `ring-action-${id}`)!;
 async function press(id: string) { await act(async () => action(id).props.onClick?.()); }
-const image = () => tree.root.findAllByType('image' as React.ElementType)[0];
+const image = () => tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'ring-gallery-image')!;
 const text = (id: string) => tree.root.findAllByType('text' as React.ElementType).find(node => node.props.testID === id)?.props.text as string | undefined;
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }); saved = undefined; enabled = true; currentContent = content; closed.mockClear();
@@ -91,7 +92,7 @@ it('lets the native renderer flow ordinary paragraphs across the actual box inst
 });
 it('keeps visible padding below reading controls and separates both action rows from content', async () => {
   currentContent = { ...content, approved: { ...content.approved!, media: [] } }; await mount();
-  const surface = tree.root.findAllByType('quad' as React.ElementType).find(node => node.props.width === 1.25)!;
+  const surface = tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'holographic-surface')!;
   const panelBottom = -surface.props.height / 2;
   for (const id of ['smaller', 'larger', 'close']) {
     const node = action(id); const fill = node.findByType('quad' as React.ElementType);
@@ -205,7 +206,7 @@ it('retires a failed image when its bundled source changes without poisoning the
 it('keeps one native image while advancing captions and prevents a late success from silently retrying a failed image', async () => {
   await mount(); const first = image(); const nativeSuccess = first.props.onLoadEnd;
   await act(async () => nativeSuccess({ nativeEvent: { success: true } }));
-  await press('next'); expect(image()).toBe(first); expect(tree.root.findAllByType('image' as React.ElementType)).toHaveLength(1);
+  await press('next'); expect(image()).toBe(first); expect(tree.root.findAllByType('image' as React.ElementType).filter(item => item.props.testID === 'ring-gallery-image')).toHaveLength(1);
   const currentFailure = image().props.onError;
   // A new source gets its own pending attempt; completion order stays fenced.
   currentContent = { ...content, approved: { ...content.approved!, media: [{ ...media, source: 2 }] } };

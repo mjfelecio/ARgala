@@ -1,3 +1,5 @@
+import { PageTransition } from './page-transition';
+import { HolographicFrame } from './holographic-frame';
 import { chapterPresentation } from './chapter-presentation';
 import { ArText } from './ar-text';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -26,7 +28,7 @@ const captionHeight = 0.2;
 const imageHeight = 0.46 - (contentBottom + captionHeight + 0.02);
 const imageY = contentBottom + captionHeight + 0.02 + imageHeight / 2;
 
-export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0 }: {
+export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, ordinal = 1, chapterCount = 1, openedCount = 0 }: {
   selection: FocusSelection; content: RingContent; previous?: ReadingCursor; reading: ReturnType<typeof useReadingSize>; enabled: boolean; style: ArNativeStyle; decorations?: boolean;
   onCursor(id: string, cursor: ReadingCursor): void; onClose(): void; onComplete(token: number): void;
   ordinal?: number; chapterCount?: number; openedCount?: number;
@@ -67,14 +69,15 @@ export function InformationPanel({ selection, content, previous, reading, enable
   return <ViroNode ref={ref} key={selection.token} testID="ring-focused-panel" position={transform.position} rotation={transform.rotation}
     scale={[transform.scale, transform.scale, transform.scale]} opacity={enabled ? 1 : 0.35}
     animation={{ name, run: false, onFinish: () => onComplete(selection.token), interruptible: true }}>
-    {decorations && <ViroQuad renderingOrder={0} ignoreEventHandling width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} materials="argalaRingEdge" />}
-    <ViroQuad renderingOrder={1} ignoreEventHandling width={ringMetrics.panelWidth} height={ringMetrics.panelHeight} position={[0, 0, 0.003]} opacity={0.96} materials="argalaRingSurface" />
+    <HolographicFrame width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={false} />
     <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.495 : 0.425, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.05 : 0.16} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 3.5 : 8, 'left', '600')} />
     {!closing && <>
       <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
       <ArText testID="ring-sample-label" position={[0.28, 0.555, 0.006]} width={0.56} height={0.06} text={content.approved ? t('destinationStories.openedCount', { count: openedCount, total: chapterCount }) : t('destinationRing.sampleLabel')} style={style.text(3)} />
+      <PageTransition identity={`${content.id}:${cursor.page}:${locale}:${reading.size}`} enabled={interactive} reduced={reduced}>
       {page.kind === 'image' ? <BundledGalleryPage key={`${page.media!.id}:${page.media!.source}`} page={page} size={reading.size} style={style} enabled={interactive} /> : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
         textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />}
+      </PageTransition>
       <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.4, pageRowY, 0.012]} enabled={interactive && cursor.page > 0} style={style}
         onPress={() => onCursor(content.id, cursorAtPage(pages, cursor.page - 1, locale, reading.size))} />
       <ArText testID="ring-page-indicator" position={[0, pageRowY, 0.012]} width={0.4} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />

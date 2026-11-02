@@ -4,4 +4,4 @@ export function introVariant({ ready, established, seen, reduced }: { ready: boo
   if (!ready || established) return 'none';
   return reduced ? 'reduced' : seen ? 'return' : 'full';
 }
-export const introDuration = (variant: IntroVariant) => variant === 'full' ? 2600 : variant === 'return' ? 650 : variant === 'reduced' ? 180 : 0;
+export const introDuration = (variant: IntroVariant) => variant === 'full' ? 3000 : variant === 'return' ? 650 : variant === 'reduced' ? 180 : 0;

@@ -564,6 +564,7 @@
     }
   },
   "destinationStories": {
+    "previewEntrance": "Preview full entrance",
     "exit": "Exit",
     "chapter": "Chapter {{current}} / {{total}}",
     "opened": "Opened",

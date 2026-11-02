@@ -159,3 +159,59 @@ Metro/React Compiler/Hermes export with the development flag disabled passed
 runtime guards prevent release evaluation rather than promising asset removal.
 No APK was built. Metro was stopped during final checks, then restarted for owner
 review; the app was left untouched and foreground/device sensors were not restarted.
+
+
+## Visible cinematic finish — owner correction, 2026-11-02
+
+The owner reported that the experience still looked basic and directed work away
+from content and video. This pass implements the approved visual language in the
+actual native ring: rounded matte/translucent forest surfaces, directional rim,
+seafoam corner brackets, distinct chapter symbols and a clearer cover hierarchy.
+The symbols describe the chapter category, not destination facts. Existing ARgala
+logo, ring headings, focused distance and real camera remain unchanged.
+
+Shared frames and chapter emblems use small authored SVG-derived PNG textures.
+`scripts/generate-ar-holographic-art.py` derives colors from global.css and renders
+through FFmpeg/librsvg. Review caught ImageMagick's internal SVG delegate flattening
+opacity and erasing symbols; those outputs were replaced. The generator checks
+actual decoded pixel alpha and distinct chapter pixel hashes. It is development
+tooling, not an app dependency. No blur, bloom or fake scene is claimed.
+
+Full entrance uses the approved three-second upper bound: the existing arch forms/scales,
+holds briefly, then yields to a staggered outward chapter deployment. Return stays
+650ms; reduced motion keeps the direct final-position transition. The explicit
+**Preview full entrance** development preflight action shows the full sequence
+without clearing stored intro history or changing admission. Verified destination
+entry does not expose this action. Ordinary tracking recovery cannot replay it.
+Reading-page changes use a140ms native fade/short translation inside the stationary
+frame, retain the mounted image across caption pages, and settle immediately when
+disabled/reduced. Review caught and fixed replay on unchanged Help/tracking return.
+
+Galaxy A53 screenshots confirm the new frame, actual camera transparency and
+recognizable book/clock/bulb symbols. The owner approved the new UI but reported
+held selection failed. The nearly transparent0.01-opacity hit quad was replaced by
+the visible frame image itself at normal node opacity, with accurate geometry hit
+tests and the existing single tile click owner. Decorative layers remain hit
+transparent. The real scene regression failed before that change and passed after;
+the owner then explicitly confirmed **“Yes, it opens.”** A captured native reader
+also shows the styled frame, reading text and controls. This does not establish
+short-tap reliability; the accepted finger-pad hold/release gesture remains.
+
+
+The owner found the initial entrance underwhelming: most covers left the view
+before registering. The revised path first unfolds every cover into separated
+forward lanes, briefly holds the complete cast, then uses staggered outward arcs
+to the original ring headings. Up to12 chapters use rows. New regressions cover
+forward visibility including cover bounds, separation, shared hold, staggered
+departure and final yaw through native normalization. Full entry is3000ms; return
+650ms and reduced180ms remain. The owner subsequently responded “Looks good” and
+requested sound/voice as the next enhancement. Private recordings are development
+evidence, not a release performance or exact-timing certification.
+
+Visual-stage verification: `VITEST_MAX_WORKERS=2 npm run check` passed strict
+TypeScript, zero-warning lint and **1,400 tests across125 files**. The original
+frame/identity/hit-surface regressions were demonstrated red before correction.
+Artwork generation checks passed. Read-only review verified the transparency,
+page recovery and hit-surface fixes. A single full native360° touch/recovery
+matrix, reduced-motion device run and release-performance acceptance remain
+pending. No APK was built, installed or upgraded.

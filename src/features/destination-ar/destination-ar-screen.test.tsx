@@ -16,6 +16,7 @@ const native = vi.hoisted(() => ({
   transitions: new Map<string, Set<(e: { data: { closing: boolean } }) => void>>(),
   get: vi.fn(), request: vi.fn(), support: vi.fn(), getSize: vi.fn(), setSize: vi.fn(),
 }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true }) }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
@@ -33,7 +34,7 @@ vi.mock('expo-router', async () => {
 // Only the native renderer is replaced. The screen, controller, permission/support
 // adapter, installed SDK hooks, shared controls and actual locale resources run.
 vi.mock('@reactvision/react-viro', () => ({
-  ViroARScene: 'native-scene', ViroNode: 'node', ViroQuad: 'quad', ViroText: 'viro-text',
+  ViroARScene: 'native-scene', ViroImage: 'viro-image', ViroNode: 'node', ViroQuad: 'quad', ViroText: 'viro-text',
   ViroARSceneNavigator: (props: { initialScene: { scene: () => React.JSX.Element } }) => React.createElement('native-navigator', props, React.createElement(props.initialScene.scene)),
   ViroMaterials: { createMaterials: vi.fn() }, ViroAnimations: { registerAnimations: vi.fn() },
   ViroTrackingStateConstants: { TRACKING_UNAVAILABLE: 1, TRACKING_LIMITED: 2, TRACKING_NORMAL: 3 },

@@ -66,7 +66,8 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
   const { systemVoice, soundEffects } = useSettings();
   const audioPreferences = useMemo(() => ({ systemVoice, soundEffects }), [systemVoice, soundEffects]);
   const reading = useReadingSize(); const introduction = useArIntroduction(identity); const reduced = useReducedMotion();
-  const variant = introVariant({ ready: true, established: false, seen: introduction.seen, reduced });
+  const [previewEntrance, setPreviewEntrance] = useState(false);
+  const variant = introVariant({ ready: true, established: false, seen: introduction.seen && !previewEntrance, reduced });
   const lifecycle = useArSession({ identity, tileIds: content.map(item => item.id), running: focused && active, transitionReady,
     entryReady, measured: scene.width > 0 && scene.height > 0 && NativeRing !== null && introduction.loaded, freshEligible, reveal: true, revealDurationMs: introDuration(variant) });
   const { startup, session, finishReveal, close } = lifecycle;
@@ -115,6 +116,7 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
       {session.phase === 'expired' ? <View className="gap-3 p-4"><Notice>{t('destinationSession.expired')}</Notice>
         <Action title={t('arrival.returnToMap')} onPress={() => { close(); onExit?.(); if (onReturn) onReturn(); else router.navigate('/'); }} />
       </View> : <ArPreflight noticeKey={preflightNoticeKey ?? (identity.provenance === 'verified' ? 'arrival.preflight' : 'destinationAr.prototype')} phase={startup.phase} errorCode={startup.errorCode} pending={startup.pending} canAskAgain={startup.canAskAgain} onStart={prompt => void startup.start(prompt)} />}
+      {identity.provenance === 'development' && isViroSpikeEnabled() && startup.phase === 'idle' && !startup.pending && <View className="px-4 pb-3"><Action title={t('destinationStories.previewEntrance')} onPress={() => { setPreviewEntrance(true); void startup.start(false); }} /></View>}
       {progressFeedback}
       {!session.established && guidance}
       {session.established && (startup.phase === 'checking' || startup.phase === 'prepared' || startup.phase === 'initializing') && <Notice>{t('destinationSession.restoring')}</Notice>}

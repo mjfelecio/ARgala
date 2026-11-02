@@ -62,6 +62,8 @@ General location-based discovery and the curated tourist catalog must coexist. A
 
 - Pinned Viro Android image completion emits a null payload after installing the bitmap; do not require `nativeEvent.success === true`. Explicit false and `onError` still fail. Fence retired image attempts and preserve caption/credit access through loading, failure and explicit Retry.
 
+- Chapter covers use their visible painted image as the high-accuracy native hit surface, with one completed-click owner on the tile. A near-zero-opacity hidden quad failed held selection on the Galaxy A53; do not use invisible geometry as a substitute. Decorative images and focused-reader backplates still explicitly ignore events.
+
 - While a Viro panel is focused, a held interaction on another visible tile collapses the current panel rather than switching focus. Keep transition/tracking/fresh-pose guards and read committed scene interactivity in native callbacks; retire queued selection/Close callbacks on unmount.
 
 - Keep Android `MapView.userInterfaceStyle` unset: the explicit light override crashes the tested Fabric build during native initial-prop conversion. Use the native default plus the shared CSS-derived custom map style; screen-level mocks do not verify native enum serialization.

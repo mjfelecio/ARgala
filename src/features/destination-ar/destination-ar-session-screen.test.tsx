@@ -14,6 +14,7 @@ const native = vi.hoisted(() => ({ active: true, focused: true, reduced: false, 
   principal: 'owner' as string | null, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
   transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), gallery: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(),
 }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: native.principal ? { user: { id: native.principal } } : null }) }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
@@ -156,7 +157,7 @@ it('restores the same approved image and caption page through the real screen se
   await mount(); await layout(); await start(); await ready(); await click('ring-tile-overview'); await finish(); await click('ring-action-next');
   const caption = text('ring-gallery-caption'); const page = text('ring-page-indicator');
   await active(false); await active(true); await ready([6, 3, 4], [1, 0, 0]);
-  expect(tree!.root.findByType('viro-image' as React.ElementType).props.source).toBe(1);
+  expect(tree!.root.findByProps({ testID: 'ring-gallery-image' }).props.source).toBe(1);
   expect(text('ring-gallery-caption')).toBe(caption); expect(text('ring-page-indicator')).toBe(page);
 });
 it('starts full native deployment only after ready and makes Skip settle to interactive canonical slots', async () => {
@@ -342,4 +343,22 @@ it('retires development sample completion when its principal leaves', async () =
   await act(async () => pending.reject(new Error('RETIRED_ASSET_ERROR')));
   expect(copy()).toContain(translations.t('destinationAr.unavailable')); expect(copy()).not.toContain(translations.t('destinationRing.contentFailed'));
   expect(native.getItem).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled();
+});
+
+it.each(['en', 'ja', 'ko'])('previews the full development entrance in %s without clearing history or replaying on tracking recovery', async locale => {
+  await translations.changeLanguage(locale);
+  await mount(() => React.createElement(SessionRoute)); await layout();
+  await press('destinationStories.previewEntrance'); await settle(); await ready([0, 2, 0], [0, 0, -1], false);
+  expect(tree!.root.findAllByType('node' as React.ElementType).filter(item => item.props.testID === 'cinematic-emblem')).toHaveLength(1);
+  await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
+  expect(tree!.root.findAllByType('node' as React.ElementType).filter(item => item.props.testID === 'cinematic-emblem')).toHaveLength(0);
+  await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
+  await ready(); expect(tree!.root.findAllByType('node' as React.ElementType).filter(item => item.props.testID === 'cinematic-emblem')).toHaveLength(0);
+  expect(native.setItem).not.toHaveBeenCalledWith(expect.stringContaining('ar-cinematic'), expect.anything());
+});
+
+it('keeps the development entrance preview out of verified destination admission', async () => {
+  await mount(() => React.createElement(DestinationArSessionExperience, { identity: { ...identity, provenance: 'verified' }, freshEligible: native.gate }));
+  expect(tree!.root.findAllByProps({ accessibilityLabel: translations.t('destinationStories.previewEntrance') })).toHaveLength(0);
+  expect(native.get).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled();
 });

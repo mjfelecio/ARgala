@@ -9,13 +9,14 @@ import { RingController } from './ring-controller';
 import type { PoseSample } from './types';
 import { useReadingSize } from './use-reading-size';
 const native = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn(), patches: [] as { id: string; patch: Record<string, unknown> }[], reduced: false }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => native.reduced }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
 vi.mock('uniwind', () => ({ useCSSVariable: () => ['#247A53', '#102724', '#71DCD2', '#FFFFFF', "'PlusJakartaSans'"] }));
 vi.mock('@reactvision/react-viro', async () => {
   const R = await import('react');
-  return { ViroARScene: 'native-scene', ViroQuad: 'quad', ViroText: 'viro-text', ViroARSceneNavigator: 'navigator',
+  return { ViroARScene: 'native-scene', ViroImage: 'viro-image', ViroQuad: 'quad', ViroText: 'viro-text', ViroARSceneNavigator: 'navigator',
     ViroNode: R.forwardRef((props: { testID?: string; children?: React.ReactNode }, ref) => {
       R.useImperativeHandle(ref, () => ({ setNativeProps: (patch: Record<string, unknown>) => native.patches.push({ id: props.testID ?? '', patch }) }), [props.testID]);
       return R.createElement('native-node', props, props.children);
@@ -110,7 +111,7 @@ it('closes the original focus from another tile without opening that tile and re
   const page = text('ring-page-indicator'); const body = text('ring-body');
   const other = node('ring-tile-overview');
   expect(other.props.onClick).toBeTypeOf('function');
-  const surface = other.findAllByType('quad' as React.ElementType).find(quad => quad.props.ignoreEventHandling === false)!;
+  const surface = other.findAllByType('viro-image' as React.ElementType).find(image => image.props.ignoreEventHandling === false)!;
   expect(surface.props.highAccuracyEvents).toBe(true);
   expect(other.findAllByType('quad' as React.ElementType).filter(quad => quad.props.onClick)).toHaveLength(0);
   expect(node('ring-root').props.opacity).toBe(0.4);
@@ -329,7 +330,7 @@ it('keeps decorative geometry out of native hit ordering and precisely tests onl
   for (const glyph of tree.root.findAllByType('viro-text' as React.ElementType)) expect(glyph.props.ignoreEventHandling).toBe(true);
   await press('ring-action-close'); await finish();
   const tile = node('ring-tile-history');
-  const activeSurface = tile.findAllByType('quad' as React.ElementType).find(quad => quad.props.ignoreEventHandling === false);
+  const activeSurface = tile.findAllByType('viro-image' as React.ElementType).find(image => image.props.ignoreEventHandling === false);
   expect(activeSurface?.props.highAccuracyEvents).toBe(true);
 });
 it.each([['overview', 0], ['history', 45], ['history', -135]] as const)('keeps both control columns usable for %s after yaw %s', async (id, yaw) => {
@@ -408,4 +409,38 @@ it('keeps the reading body below the chapter heading without overlapping the nat
   const headingBottom = heading.props.position[1] - heading.props.height * heading.props.scale[1] / 2;
   const bodyTop = body.props.position[1] + body.props.height * body.props.scale[1] / 2;
   expect(bodyTop).toBeLessThanOrEqual(headingBottom);
+});
+
+it('gives every cover an intentional chapter emblem and a holographic frame while retaining one held-click owner', async () => {
+  await mount(); await track(); await pose();
+  const cover = node('ring-tile-overview');
+  expect(cover.findAllByProps({ testID: 'chapter-emblem-overview' })).toHaveLength(1);
+  expect(cover.findAllByType('native-node' as React.ElementType).filter(item => item.props.testID === 'holographic-frame')).toHaveLength(1);
+  const target = cover.findAllByType('viro-image' as React.ElementType).filter(item => item.props.ignoreEventHandling === false);
+  expect(target).toHaveLength(1); expect(target[0].props.highAccuracyEvents).toBe(true);
+  expect(target[0].props.testID).toBe('holographic-surface'); expect(target[0].props.opacity ?? 1).toBe(1);
+  expect(cover.props.onClick).toBeTypeOf('function');
+  await press('ring-tile-overview'); await finish();
+  expect(node('ring-focused-panel').findAllByType('native-node' as React.ElementType).filter(item => item.props.testID === 'holographic-frame')).toHaveLength(1);
+});
+
+it('animates a page change inside the stationary focused frame and settles immediately for reduced motion', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  const frame = node('ring-focused-panel'); const position = frame.props.position;
+  expect(node('ring-page-content')).toBeDefined();
+  native.patches.length = 0; await press('ring-action-next');
+  expect(native.patches.some(item => item.id === 'ring-page-content' && (item.patch.animation as { run?: boolean } | undefined)?.run)).toBe(true);
+  expect(node('ring-focused-panel')).toBe(frame); expect(frame.props.position).toEqual(position);
+  native.reduced = true; native.patches.length = 0; await press('ring-action-previous');
+  expect(native.patches.filter(item => item.id === 'ring-page-content').at(-1)?.patch).toMatchObject({ opacity: 1, position: [0, 0, 0], animation: { run: false } });
+});
+
+it('keeps the same reading page still when Help or tracking ownership returns', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  native.patches.length = 0;
+  sceneOptions = { interactive: false }; await act(async () => tree.update(wrapper()));
+  sceneOptions = { interactive: true }; await act(async () => tree.update(wrapper()));
+  await track(2); await track(3);
+  expect(native.patches.filter(item => item.id === 'ring-page-content').some(item => (item.patch.animation as { run?: boolean } | undefined)?.run)).toBe(false);
+  expect(node('ring-page-content').props.position).toEqual([0, 0, 0]);
 });

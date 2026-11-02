@@ -523,6 +523,7 @@
     }
   },
   "destinationStories": {
+    "previewEntrance": "フル演出をプレビュー",
     "exit": "戻る",
     "chapter": "第{{current}}章 / {{total}}章",
     "opened": "閲覧済み",
