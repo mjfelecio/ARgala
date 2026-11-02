@@ -1,3 +1,4 @@
+import { arStoryReadiness } from './ar-content-readiness';
 import type { Language } from '../../../supabase/functions/_shared/contracts';
 import { destinationSchema, localizedContent, type Destination } from './catalog';
 
@@ -8,7 +9,7 @@ export function activationPolicy(destination: Destination | null) {
 }
 export function approvedArContent(destination: Destination | null, language: Language) {
   const parsed = destinationSchema.safeParse(destination);
-  if (!parsed.success) return [];
+  if (!parsed.success || parsed.data.id !== 'pilot-aclc' && !arStoryReadiness(parsed.data).ready) return [];
   return (parsed.data.ar?.tiles ?? []).flatMap(tile => {
     const title = localizedContent(tile.title, language);
     const body = localizedContent(tile.body, language);

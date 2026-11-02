@@ -11,17 +11,22 @@ const approvedHighlights = z.object({ value: z.array(text).min(1).readonly(), ap
 const translatedText = z.object({ en: approvedText.optional(), ko: approvedText.optional(), ja: approvedText.optional() }).strict();
 const copy = z.object({ overview: approvedText.optional(), highlights: approvedHighlights.optional() }).strict();
 const mediaSchema = z.object({
+  offlineRightsReference: text.optional(),
   id: text, source: z.number().int().positive(), credit: text, rightsReference: text, approvalReference: text,
   // A bundled require(...) asset only; no remote photo loading or provider-photo cache.
   alt: translatedText.extend({ en: approvedText }), caption: translatedText.optional(),
 }).strict();
 const arTileSchema = z.object({
+  presentation: z.enum(['photo', 'gallery', 'story']).optional(),
   id: text.max(80), role: z.enum(['overview', 'history']).optional(),
   title: translatedText, body: translatedText,
   mediaIds: z.array(text).refine(items => new Set(items).size === items.length).readonly().optional(),
 }).strict();
 const arSchema = z.object({
   schemaVersion: z.literal(1), contentVersion: text.max(80),
+  storyApproval: z.object({ contentVersion: text.max(80), approvalReference: text, reviewer: text, reviewedAt: z.iso.date(),
+    primaryChapterIds: z.array(text.max(80)).min(1).max(12).refine(ids => new Set(ids).size === ids.length).readonly(),
+  }).strict().optional(),
   activation: z.object({ point: coordinateSchema, pointApprovalReference: text,
     radiusMeters: z.number().finite().min(10).max(1000), radiusApprovalReference: text }).strict().optional(),
   providerAssociation: z.object({ providerId: detailsRequestSchema.shape.providerId, approvalReference: text }).strict().optional(),
