@@ -79,23 +79,37 @@ export function withHeroUI(children: React.ReactNode) {
 
 // The native sheet driver exposes gesture/position events; application composition stays real.
 vi.mock('@gorhom/bottom-sheet', async () => {
-  const { createElement, forwardRef, useImperativeHandle, useEffect } = await import('react');
+  const { createElement, forwardRef, useImperativeHandle, useEffect, useState } = await import('react');
   const { usePropsValidator } = await vi.importActual<typeof import('@gorhom/bottom-sheet/lib/typescript/hooks/usePropsValidator')>('@gorhom/bottom-sheet/lib/module/hooks/usePropsValidator.js');
   const { useReactiveSharedValue } = await vi.importActual<typeof import('@gorhom/bottom-sheet/lib/typescript/hooks/useReactiveSharedValue')>('@gorhom/bottom-sheet/lib/module/hooks/useReactiveSharedValue.js');
   return { default: forwardRef((props: BottomSheetProps, ref) => {
     const nativeIndex = useReactiveSharedValue(props.animateOnMount ? -1 : props.index ?? 0);
     const sheetReady = nativeUi.sheetReady;
-    // Model the index-prop effect and the native layout-ready reaction.
-    useEffect(() => { if (sheetReady) nativeIndex.set(props.index ?? 0); }, [nativeIndex, props.index, sheetReady]);
+    const [positioned, setPositioned] = useState(false);
+    const targetIndex = props.index ?? 0;
+    // The SDK drops the index-prop request before handle measurement. With
+    // animateOnMount=false it also marks opening complete before positioning;
+    // unchanged detents then cannot retry that opening on late measurement.
+    // Confirmed with the installed 5.2.14 native body and delayed handle callbacks.
+    useEffect(() => {
+      if (!nativeUi.sheetReady) return;
+      nativeIndex.set(targetIndex); setPositioned(true);
+    }, [nativeIndex, targetIndex]);
+    useEffect(() => {
+      if (!sheetReady || !props.animateOnMount) return;
+      nativeIndex.set(targetIndex); setPositioned(true);
+    }, [sheetReady, props.animateOnMount, nativeIndex, targetIndex]);
     // Keep the installed library's JS prop contract; mock only the native driver.
     usePropsValidator(props);
     useImperativeHandle(ref, () => ({ snapToIndex: (index: number) => {
       // SDK 5.2.14 discards imperative requests before native layout is ready.
       if (!nativeUi.sheetReady) return;
-      nativeIndex.set(index);
+      nativeIndex.set(index); setPositioned(true);
       (props.onChange as (index: number, position: number) => void)?.(index, props.containerLayoutState!.get().height - (props.snapPoints as number[])[index]);
     } }));
-    return createElement('dialog', { ...props, nativeIndex }, createElement((props.handleComponent as React.ElementType) ?? 'header', { accessible: true, animatedIndex: props.animatedIndex, animatedPosition: props.animatedPosition }), props.children as React.ReactNode);
+    // Project native visibility: Android hides the whole body, including the
+    // handle, while its derived index remains -1 outside the container.
+    return createElement('dialog', { ...props, nativeIndex }, positioned ? createElement((props.handleComponent as React.ElementType) ?? 'header', { accessible: true, animatedIndex: props.animatedIndex, animatedPosition: props.animatedPosition }) : null, positioned ? props.children as React.ReactNode : null);
   }), BottomSheetScrollView: 'section', BottomSheetHandle: 'header' };
 });
 

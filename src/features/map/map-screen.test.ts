@@ -100,6 +100,7 @@ beforeEach(async () => {
 afterEach(async () => {
   await act(async () => tree?.unmount()); tree = undefined; client.clear();
   nativeUi.fontScale = 1;
+  nativeUi.sheetReady = true;
   notifyManager.setScheduler((callback) => setTimeout(callback, 0));
   vi.restoreAllMocks();
 });
@@ -788,6 +789,38 @@ it.each(['en', 'ja', 'ko'] as const)('preserves the Explore shell through no-mat
  expect(placesService.nearby).not.toHaveBeenCalled();
  expect(placesService.details).not.toHaveBeenCalled();
  expect(routeService.walking).not.toHaveBeenCalled();
+});
+
+it.each(['en', 'ja', 'ko'] as const)('reveals %s no-match content after delayed native layout while GPS stays ready', async language => {
+ controls.language=language; await translations.changeLanguage(language);
+ vi.mocked(placesService.nearby).mockResolvedValue([{ ...destination, source:'discovery' }]);
+ vi.mocked(placesService.search).mockReset().mockResolvedValue([]);
+ await selectPlace();
+ const map=tree!.root.findByType('map');
+ nativeUi.sheetReady=false;
+ await act(async()=>tree!.root.findByType('input').props.onChangeText('zzqvargalaauditnonexistent'));
+ await press('search.submit');
+ await act(async()=>{ await vi.waitFor(()=>expect(client.isFetching()).toBe(0)); });
+ const sheet=tree!.root.findByType('dialog');
+ expect(sheet.findAllByType('header')).toHaveLength(0);
+ nativeUi.sheetReady=true;
+ await act(async()=>tree!.update(renderMap()));
+ const assertVisible=()=>{
+  expect(tree!.root.findByType('map')).toBe(map);
+  expect(tree!.root.findByType('dialog')).toBe(sheet);
+  expect(sheet.findAllByType('header')).toHaveLength(1);
+  const text=sheet.findAllByType('text').flatMap(node=>node.children).join(' ');
+  expect(text).toContain(translations.t('map.title')); expect(text).toContain(translations.t('map.empty'));
+  expect(text).not.toContain(translations.t('location.loading'));
+ };
+ assertVisible();
+ for(const lifecycle of ['focused','active'] as const){
+  controls[lifecycle]=false;await act(async()=>tree!.update(renderMap()));
+  controls[lifecycle]=true;await act(async()=>tree!.update(renderMap()));
+  assertVisible();
+ }
+ expect(placesService.search).toHaveBeenCalledOnce(); expect(placesService.nearby).toHaveBeenCalledOnce();
+ expect(placesService.details).not.toHaveBeenCalled(); expect(routeService.walking).not.toHaveBeenCalled();
 });
 
 it('keeps denied-GPS global selection separate from physical proximity and permits Directions', async () => {
