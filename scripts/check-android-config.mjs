@@ -1,12 +1,55 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { Buffer } from 'node:buffer';
+import { fileURLToPath } from 'node:url';
+import { getPngInfo } from '@expo/image-utils';
 
 // A nonfunctional marker verifies native injection without requiring a secret.
 const marker = 'argala-native-config-validation-only';
 const result = spawnSync('npx', ['expo', 'config', '--type', 'introspect', '--json'], { encoding: 'utf8', env: { ...process.env, GOOGLE_MAPS_ANDROID_API_KEY: marker } });
 assert.equal(result.status, 0, result.stderr);
 const config = JSON.parse(result.stdout);
+const staticConfig = JSON.parse(readFileSync(new URL('../app.json', import.meta.url), 'utf8')).expo;
+const splash = value => value.plugins.find(plugin => Array.isArray(plugin) && plugin[0] === 'expo-splash-screen')[1];
+assert.deepEqual(splash(config), splash(staticConfig), 'Static and dynamic splash configuration must agree');
+assert.deepEqual(splash(config), {
+  backgroundColor: '#174D38', image: './assets/images/splash-icon.png', imageWidth: 160,
+  dark: { backgroundColor: '#174D38', image: './assets/images/splash-icon.png' },
+});
+assert.equal(config.android.adaptiveIcon.backgroundColor, '#174D38');
+assert.deepEqual(config.android.adaptiveIcon, staticConfig.android.adaptiveIcon);
+assert.equal(config.icon, staticConfig.icon);
+const expectedAssets = [
+  [config.icon, 1024], [config.android.adaptiveIcon.foregroundImage, 1024],
+  [config.android.adaptiveIcon.backgroundImage, 1024], [config.android.adaptiveIcon.monochromeImage, 1024],
+  [splash(config).image, 1024], [config.web.favicon, 32],
+];
+for (const [asset, size] of expectedAssets) {
+  const png = readFileSync(new URL(`../${asset}`, import.meta.url));
+  assert.deepEqual(png.subarray(0, 8), Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), `${asset} must be PNG`);
+  assert.equal(png.readUInt32BE(16), size, `${asset} width`);
+  assert.equal(png.readUInt32BE(20), size, `${asset} height`);
+}
+// Reuse Expo's installed PNG reader: validate actual pixels, including antialiasing.
+// Keep all foreground pixels inside the central 66/108 safe circle, so OEM masks
+// and launcher motion cannot crop the arch. The themed layer must be white alpha.
+for (const asset of [config.android.adaptiveIcon.foregroundImage, config.android.adaptiveIcon.monochromeImage]) {
+  const { width, height, data } = await getPngInfo(fileURLToPath(new URL(`../${asset}`, import.meta.url)));
+  const radius = width * 33 / 108;
+  let visible = 0;
+  let transparent = 0;
+  for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+    const offset = (y * width + x) * 4;
+    if (!data[offset + 3]) { transparent++; continue; }
+    visible++;
+    assert.ok(Math.hypot(x - (width - 1) / 2, y - (height - 1) / 2) <= radius, `${asset} exceeds the adaptive icon safe circle`);
+    if (asset === config.android.adaptiveIcon.monochromeImage) {
+      assert.ok(data[offset] === 255 && data[offset + 1] === 255 && data[offset + 2] === 255, 'Themed icon must be white alpha');
+    }
+  }
+  assert.ok(visible > 0 && transparent > 0, `${asset} needs visible artwork and transparent margins`);
+}
 assert.equal(config.sdkVersion, '57.0.0');
 assert.deepEqual(config.platforms, ['android']);
 assert.equal(config.android.package, 'com.mjfelecio.argala');

@@ -8,6 +8,11 @@
 
 **[P] This document normalizes those references for native implementation.** It does not claim all normalized values came from the export or that the export has passed accessibility testing.
 
+The 2026-11-02 Seafoam Forest v2 identity keeps this green UI palette. Seafoam
+#42D5A5 and forest #174D38 apply to logo/Journey artwork and Android assets;
+the splash uses forest. Primary actions stay #247A53. See
+[brand provenance](../../brand-kit-rollout.md). UI typography and layout remain.
+
 ## 2. Color contract
 
 | Proposed token | Value | Basis / use |

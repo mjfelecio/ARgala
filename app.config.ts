@@ -16,7 +16,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     './plugins/with-save-only-media',
     'expo-router',
-    ['expo-splash-screen', { backgroundColor: '#ffffff', image: './assets/images/splash-icon.png', imageWidth: 76 }],
+    // app.json owns launcher/splash assets for both static and dynamic config.
+    ...(config.plugins?.filter(plugin => Array.isArray(plugin) && plugin[0] === 'expo-splash-screen') ?? []),
     ['expo-camera', { recordAudioAndroid: false, barcodeScannerEnabled: false }],
     ['expo-location', { isAndroidBackgroundLocationEnabled: true, isAndroidForegroundServiceEnabled: false }],
     ['expo-notifications', { defaultChannel: 'destination-nearby' }],

@@ -1,3 +1,4 @@
+import { BrandLogo } from '@/ui/brand-logo';
 import { ScrollView, View, type LayoutChangeEvent } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -16,15 +17,15 @@ export type HomeMapControlsProps = {
 };
 export function HomeMapControls({ onSearchNearby, onOpenDestinations, canSearch, searching, onLayout, query, onQueryChange, category = 'all', onCategoryChange, onSearchArea, canSearchArea, areaRadiusMeters }: HomeMapControlsProps) {
   const { t } = useTranslation();
-  const [ink, accent, onAccent] = useThemeColor(['default-foreground', 'accent', 'accent-foreground']);
+  const [ink, accent] = useThemeColor(['default-foreground', 'accent']);
   const searchDisabled = !canSearch || searching;
   const searchLabel = t(query?.trim() ? 'search.submit' : 'map.search');
   const submitSearch = () => { if (!searchDisabled) onSearchNearby(); };
 
   return <View testID="home-map-controls" className="gap-2 px-4 pb-2 pt-3" onLayout={onLayout} pointerEvents="box-none">
-    <View className="min-h-12 flex-row items-center gap-1 rounded-pill bg-surface px-2 py-1 shadow-sm">
-      <View className="size-8 items-center justify-center rounded-xl bg-accent" accessible={false} pointerEvents="none">
-        <Ionicons name="compass-outline" size={22} color={onAccent} />
+    <View className="min-h-12 flex-row items-center gap-1 rounded-pill bg-surface px-2 shadow-sm">
+      <View className="ml-2 size-8 items-center justify-center rounded-xl" accessible={false} pointerEvents="none">
+        <BrandLogo variant="mark" width={32} decorative />
       </View>
       {onQueryChange && <TextField className="min-w-0 flex-1">
         <Input value={query ?? ''} onChangeText={onQueryChange} maxLength={256} returnKeyType="search" onSubmitEditing={submitSearch}

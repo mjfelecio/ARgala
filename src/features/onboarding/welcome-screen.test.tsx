@@ -9,7 +9,8 @@ import { useSettings } from '@/features/settings/provider';
 import { useOnboarding } from './provider';
 import { onboardingStorageKey } from './completion';
 import WelcomeScreen from './welcome-screen';
-import { ScenicLandscape } from '@/ui/scenic-landscape';
+import { JourneyMotif } from '@/ui/journey-motif';
+import { BrandLogo } from '@/ui/brand-logo';
 
 const boundaries = vi.hoisted(() => ({ permission: vi.fn(), watch: vi.fn(), provider: vi.fn() }));
 vi.mock('expo-location', () => ({ requestForegroundPermissionsAsync: boundaries.permission, getForegroundPermissionsAsync: boundaries.permission, watchPositionAsync: boundaries.watch, watchHeadingAsync: boundaries.watch }));
@@ -111,10 +112,11 @@ it('has no sensor, network, or query side effects on mount, focus, foreground, l
   expect(boundaries.permission).not.toHaveBeenCalled(); expect(boundaries.watch).not.toHaveBeenCalled(); expect(boundaries.provider).not.toHaveBeenCalled();
 });
 
-it('retains the shared local scenic hero while language selection stays functional', async () => {
+it('uses the primary lockup and shared Journey motif while language selection stays functional', async () => {
   await mount();
-  expect(tree!.root.findAllByType(ScenicLandscape)).toHaveLength(1);
-  expect(tree!.root.findAllByType('svg' as React.ElementType)).toHaveLength(1);
+  expect(tree!.root.findAllByType(JourneyMotif)).toHaveLength(1);
+  expect(tree!.root.findByType(BrandLogo).props.variant).toBe('primary');
+  expect(tree!.root.findAllByType('svg' as React.ElementType)).toHaveLength(2);
   await select('ko');
   expect(copy()).toContain(localizationOptions.resources.ko.translation.onboarding.title);
   expect(boundaries.permission).not.toHaveBeenCalled();

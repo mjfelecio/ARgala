@@ -1,4 +1,5 @@
 import { withHeroUI } from '@/test/native-ui';
+import { BrandLogo } from '@/ui/brand-logo';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createInstance } from 'i18next';
@@ -31,7 +32,8 @@ it('dispatches typed search from one icon action or keyboard, while edits remain
   expect(input().props.maxLength).toBe(256);
   expect(input().props.returnKeyType).toBe('search');
   expect(button('Search Nearby')).toBeDefined();
-  expect(tree.root.findAllByType('icon' as React.ElementType).some(node => node.props.name === 'compass-outline')).toBe(true);
+  expect(tree.root.findByType(BrandLogo).props).toMatchObject({ variant: 'mark', width: 32, decorative: true });
+  expect(tree.root.findAllByType('icon' as React.ElementType).some(node => node.props.name === 'compass-outline')).toBe(false);
   await act(async () => input().props.onChangeText('museum'));
   expect(callbacks.onQueryChange).toHaveBeenCalledExactlyOnceWith('museum');
   expect(callbacks.onSearchNearby).not.toHaveBeenCalled();

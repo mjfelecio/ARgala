@@ -9,7 +9,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ScenicLandscape } from '@/ui/scenic-landscape';
+import { JourneyMotif } from '@/ui/journey-motif';
+import { BrandLogo } from '@/ui/brand-logo';
 import { withUniwind } from 'uniwind';
 import { useSettings } from '@/features/settings/provider';
 import { languageSchema } from '../../../supabase/functions/_shared/contracts';
@@ -32,7 +33,7 @@ export default function WelcomeScreen() {
   const submitting = useRef(false);
   const alive = useRef(true);
   const insets = useSafeAreaInsets();
-  const [accent, onAccent] = useThemeColor(['accent', 'accent-foreground']);
+  const onAccent = useThemeColor('accent-foreground');
   // Preview this screen without changing or persisting the global language.
   const t = (key: string) => translate(key, { lng: language });
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
@@ -50,11 +51,8 @@ export default function WelcomeScreen() {
     <ScrollView className="flex-1" contentContainerClassName="grow" showsVerticalScrollIndicator={false}>
       <View className="bg-mint" style={{ paddingTop: insets.top }}>
         <View className="min-h-72 items-center justify-center gap-3 overflow-hidden px-6 pb-12 pt-8">
-          <ScenicLandscape />
-          <View className="size-14 items-center justify-center rounded-input bg-surface" accessible={false}>
-            <Ionicons name="compass-outline" size={32} color={accent} />
-          </View>
-          <Text accessibilityRole="header" className="text-center font-sans text-hero font-bold text-brand-strong">ARgala</Text>
+          <JourneyMotif />
+          <BrandLogo variant="primary" width={144} />
           <Text className="text-center font-sans text-base text-brand-strong">{t('onboarding.tagline')}</Text>
         </View>
       </View>
