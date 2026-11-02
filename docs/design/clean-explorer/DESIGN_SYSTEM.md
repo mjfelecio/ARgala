@@ -1,5 +1,18 @@
 # ARgala design system
 
+## Approved Seafoam Forest screen refresh — 2026-11-02
+
+The later owner-approved eight-screen handoff supersedes earlier artwork-only
+visual restrictions below. Use ivory #FCFBF7 pages, white surfaces, #247A53
+primary controls, #174D38 headings/Passport/AR panels, restrained #42D5A5
+seafoam accents and #E8F8F0 contextual mint. Native Viro keeps its live camera
+and chapter interactions with forest surfaces/seafoam edges. Logos, launcher
+and Journey geometry remain locked. Natural map geography, route blue and all
+provider, navigation, permission, persistence, eligibility and lifecycle contracts
+remain in force. See the committed [refresh specification](../../../docs/design/seafoam-forest/DESIGN-SPEC.md) and
+[implementation evidence](../../../docs/design/seafoam-forest/IMPLEMENTATION.md). Earlier rollout passages are historical where
+they conflict with this visual approval.
+
 ## 1. Identity and authority
 
 **[C] Clean Explorer:** map-first, green and white, rounded pill buttons, clean information hierarchy, restrained tourism photography and outdoor-readable controls. The Home Map is the composition reference; AR is more immersive and information-light; details are editorial; auth uses a scenic header over a full-height white form; settings is a straightforward utility page.
