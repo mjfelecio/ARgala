@@ -67,11 +67,12 @@ export default function PlaceDetailsScreen() {
     {canLoad && <Button variant="outline" accessibilityLabel={t('placeDetails.load')} onPress={load} isDisabled={details.isFetching || !active || !focused} accessibilityState={{ busy: details.isFetching }}><Button.Label>{t('placeDetails.load')}</Button.Label></Button>}
   </>;
   const actions = <View className="gap-2">
-    {providerId && <SavePlaceAction reference={{kind:'google',id:providerId}}/>}<JournalFeedback/>
     <Button accessibilityLabel={t('placeDetails.directions')} onPress={directions}>
       <Ionicons name="navigate-outline" size={24} color={onAccent} /><Button.Label>{t('placeDetails.directions')}</Button.Label>
     </Button>
-    <View className="flex-row flex-wrap gap-2">
+    <JournalFeedback />
+    <View className="flex-row flex-wrap items-center gap-2">
+      {providerId && <SavePlaceAction reference={{kind:'google',id:providerId}} variant="ghost" />}
       <Button variant="ghost" className="min-w-32 grow shrink" accessibilityLabel={t('placeDetails.map')} onPress={() => navigateTo('/')}>
         <Ionicons name="map-outline" size={24} color={accent} /><Button.Label>{t('placeDetails.map')}</Button.Label>
       </Button>
@@ -81,10 +82,10 @@ export default function PlaceDetailsScreen() {
     </View>
     {recovery}
   </View>;
-  return <StyledSafeAreaView className="flex-1 bg-surface" edges={['top', 'bottom', 'left', 'right']}>
+  return <StyledSafeAreaView className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
     <View className="flex-row items-center gap-3 px-4 py-3">
       <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t('placeDetails.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }}><Ionicons name="arrow-back" size={24} color={accent} /></Button>
-      <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('placeDetails.title')}</Text>
+      <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-brand-strong">{t('placeDetails.title')}</Text>
     </View>
     <ScrollView className="flex-1" contentContainerClassName="grow gap-4 px-4 pb-8">
       {place ? <PlaceDetailsContent place={place} actions={actions} />

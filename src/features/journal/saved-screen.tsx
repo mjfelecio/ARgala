@@ -18,12 +18,12 @@ export default function SavedPlacesScreen() {
   const { t } = useTranslation();
   const journal = useJournal();
   const accent = useThemeColor('accent');
-  return <SafeArea className="flex-1 bg-page-mint" edges={['top', 'bottom', 'left', 'right']}>
+  return <SafeArea className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
     <View className="flex-row items-center gap-3 px-4 py-3">
       <Button isIconOnly variant="ghost" accessibilityLabel={t('common.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }}>
         <Ionicons name="arrow-back" size={24} color={accent} accessible={false} />
       </Button>
-      <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('journal.savedTitle')}</Text>
+      <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-brand-strong">{t('journal.savedTitle')}</Text>
     </View>
     <FlatList<Bookmark> className="flex-1" contentContainerClassName="px-4 pb-8"
       data={journal?.ready ? journal.state.bookmarks : []} keyExtractor={bookmarkKey}
@@ -35,14 +35,18 @@ export default function SavedPlacesScreen() {
       ItemSeparatorComponent={() => <View className="h-3" />}
       renderItem={({ item: reference }) => {
         const destination = reference.kind === 'featured' ? getDestination(reference.id) : null;
-        return <Surface className="gap-3 rounded-card p-4">
-          <Text className="font-sans text-card font-semibold text-foreground">{destination ? destinationName(destination) : t('journal.googlePlace')}</Text>
-          {reference.kind === 'google' && <Text selectable numberOfLines={2} ellipsizeMode="tail" accessibilityLabel={reference.id} className="font-sans text-xs text-muted">{reference.id}</Text>}
-          <Button accessibilityLabel={t('journal.open')} onPress={() => {
+        return <Surface className="flex-row flex-wrap items-center gap-3 rounded-card p-4">
+          <View className="size-12 items-center justify-center rounded-input bg-mint" accessible={false}><Ionicons name="location-outline" size={24} color={accent} /></View>
+          <View className="min-w-32 flex-1 gap-1">
+            <Text className="font-sans text-card font-semibold text-brand-strong">{destination ? destinationName(destination) : t('journal.googlePlace')}</Text>
+          </View>
+          <View className="gap-1">
+            <Button accessibilityLabel={t('journal.open')} onPress={() => {
             if (reference.kind === 'google') router.push({ pathname: '/place/[providerId]', params: { providerId: reference.id } });
             else router.push({ pathname: '/destinations/[destinationId]', params: { destinationId: reference.id } });
-          }}><Button.Label>{t('journal.open')}</Button.Label></Button>
-          <SavePlaceAction reference={reference} variant="ghost" />
+          }}><Button.Label>{t('journal.openShort')}</Button.Label></Button>
+            <SavePlaceAction reference={reference} variant="ghost" compact />
+          </View>
         </Surface>;
       }} />
   </SafeArea>;

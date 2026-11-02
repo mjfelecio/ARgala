@@ -138,7 +138,7 @@ function Preview({ token }: { token: unknown }) {
       <View testID="route-preview-header" className="absolute inset-x-0 top-0 px-4 pb-1" style={{ paddingTop: insets.top + 4 }} onLayout={event => setHeaderHeight(event.nativeEvent.layout.height)}>
         <View className="min-h-12 flex-row items-center gap-2 rounded-pill bg-surface pr-4 shadow-sm">
           <Button variant="ghost" className="size-12" isIconOnly accessibilityLabel={t('directions.back')} onPress={() => { if (router.canGoBack()) router.back(); else toMap(); }}><Ionicons name="arrow-back" size={22} color={accent} /></Button>
-          <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-foreground">{t('directions.title')}</Text>
+          <Text accessibilityRole="header" className="shrink font-sans text-card font-semibold text-brand-strong">{t('directions.title')}</Text>
         </View>
       </View>
       <View testID="route-preview-dock" className="absolute inset-0" pointerEvents="box-none">
@@ -151,7 +151,7 @@ function Preview({ token }: { token: unknown }) {
               ? previous : { key: primaryLayoutKey, height: measuredHeight });
           }}>
           <View className="flex-row items-center justify-between gap-2">
-            <Text accessibilityRole="header" accessibilityLabel={place?.name} numberOfLines={2} className="flex-1 font-sans text-card font-semibold text-foreground">{place?.name ?? t('directions.title')}</Text>
+            <Text accessibilityRole="header" accessibilityLabel={place?.name} numberOfLines={2} className="flex-1 font-sans text-card font-semibold text-brand-strong">{place?.name ?? t('directions.title')}</Text>
             <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t(expanded ? 'map.collapse' : 'map.expand')} accessibilityState={{ expanded }} onPress={toggle}>
               <Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={accent} />
             </Button>
@@ -169,7 +169,7 @@ function Preview({ token }: { token: unknown }) {
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {place && !Constants.expoConfig?.extra?.mapsConfigured && <Text className="font-sans text-base text-muted">{t('map.missingKey')}</Text>}
           {result && coordinates.length > 1 && !navigation.started && <>
-            <Text className="font-sans text-title font-bold text-foreground">{t('map.routeSummary', { meters: result.route.distanceMeters, minutes: Math.ceil(result.route.durationSeconds / 60) })}</Text>
+            <Text className="font-sans text-title font-bold text-brand-strong">{t('map.routeSummary', { meters: result.route.distanceMeters, minutes: Math.ceil(result.route.durationSeconds / 60) })}</Text>
             <Text className="font-sans text-xs text-muted">{t(displayedMode === 'walking' ? 'directions.estimated' : 'directions.estimatedDriving')}</Text>
           </>}
           {result && displayedMode === 'walking' && coordinates.length > 1 && !navigation.started && (navigation.canStart
@@ -189,7 +189,7 @@ function Preview({ token }: { token: unknown }) {
           {data?.errorKey && <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(data.errorKey)}</Text>}
           {preview.needsRetry && <Button variant="outline" accessibilityLabel={t('directions.retry')} isDisabled={!running || !configured} onPress={preview.retry}><Button.Label>{t('directions.retry')}</Button.Label></Button>}
           {expanded && place && <View className="gap-4 border-t border-outline pt-4">
-            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.journey')}</Text>
+            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-brand-strong">{t('directions.journey')}</Text>
             <View className="flex-row items-start gap-3">
               <Ionicons name="radio-button-on-outline" size={20} color={accent} />
               <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-sm font-semibold text-foreground">{t('directions.origin')}</Text>
@@ -203,13 +203,13 @@ function Preview({ token }: { token: unknown }) {
             </View>
           </View>}
           {expanded && result && <View className="gap-3 border-t border-outline pt-4">
-            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.information')}</Text>
+            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-brand-strong">{t('directions.information')}</Text>
             <Text className="font-sans text-sm text-muted">{t('directions.snapshot')}</Text>
             {result.route.warnings.map((warning, index) => <View key={index} className="flex-row items-start gap-2"><Ionicons name="warning-outline" size={20} color={accent} /><Text className="min-w-0 flex-1 font-sans text-sm text-foreground">{warning}</Text></View>)}
             <Text className="font-sans text-sm text-muted">{t(displayedMode === 'walking' ? 'map.walkingCaution' : 'directions.drivingCaution')}</Text>
           </View>}
           {expanded && navigation.started && <View className="gap-2 border-t border-outline pt-4">
-            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-foreground">{t('directions.navigationInformation')}</Text>
+            <Text accessibilityRole="header" className="font-sans text-card font-semibold text-brand-strong">{t('directions.navigationInformation')}</Text>
             {navigation.status === 'uncertain' && <Text className="font-sans text-sm text-muted">{t('directions.navigationUncertainDetail')}</Text>}
             {navigation.status === 'off-route' && <Text className="font-sans text-sm text-muted">{t('directions.navigationOffRouteDetail')}</Text>}
             {navigation.status === 'arrived' && <Text className="font-sans text-sm text-muted">{t('directions.navigationArrival')}</Text>}

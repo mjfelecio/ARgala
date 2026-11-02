@@ -236,7 +236,8 @@
     "nearbyUnsearched": "주변 탐색을 눌러 이 여행지 주변을 검색하세요.",
     "nearbyEmpty": "이 여행지에서 500m 이내에 검색된 장소가 없습니다.",
     "fromDestination": "여행지에서 {{meters}}m",
-    "nearbyLimit": "최대 {{count}}곳이 검색되며 모든 주변 시설이 포함되지는 않을 수 있습니다."
+    "nearbyLimit": "최대 {{count}}곳이 검색되며 모든 주변 시설이 포함되지는 않을 수 있습니다.",
+    "exploreCount": "여행지 {{count}}곳 둘러보기"
   },
   "onboarding": {
     "tagline": "주변의 장소를 발견하세요.",
@@ -422,7 +423,9 @@
     "syncAuth": "진행 상황을 동기화하려면 다시 로그인하세요. 기기의 변경 사항은 안전합니다.",
     "syncUnavailable": "현재 계정 동기화를 사용할 수 없습니다. 기기의 변경 사항은 안전합니다.",
     "syncConflict": "다른 변경 사항을 수신하고 있습니다. 기기의 변경 사항은 안전합니다. 동기화를 다시 시도하세요.",
-    "syncDeviceLimit": "이 계정의 동기화 기기 수가 한도에 도달했습니다. 기기의 변경 사항은 저장되어 있습니다."
+    "syncDeviceLimit": "이 계정의 동기화 기기 수가 한도에 도달했습니다. 기기의 변경 사항은 저장되어 있습니다.",
+    "openShort": "보기",
+    "removeShort": "삭제"
   },
   "content": {
     "title": "목적지 콘텐츠",

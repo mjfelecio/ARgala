@@ -277,7 +277,8 @@
     "nearbyUnsearched": "Tap Explore Nearby to search around this destination.",
     "nearbyEmpty": "No places were returned within 500 m of this destination.",
     "fromDestination": "{{meters}} m from destination",
-    "nearbyLimit": "Search returns up to {{count}} places and may not include every nearby establishment."
+    "nearbyLimit": "Search returns up to {{count}} places and may not include every nearby establishment.",
+    "exploreCount": "Explore {{count}} destinations"
   },
   "onboarding": {
     "tagline": "Discover places around you.",
@@ -463,7 +464,9 @@
     "syncAuth": "Sign in again to sync your progress. Your local changes are safe.",
     "syncUnavailable": "Account sync is not available right now. Your local changes are safe.",
     "syncConflict": "Other changes are still arriving. Your local changes are safe. Retry sync.",
-    "syncDeviceLimit": "This account has reached its sync device limit. Your local changes remain saved."
+    "syncDeviceLimit": "This account has reached its sync device limit. Your local changes remain saved.",
+    "openShort": "View",
+    "removeShort": "Remove"
   },
   "content": {
     "title": "Destination content",

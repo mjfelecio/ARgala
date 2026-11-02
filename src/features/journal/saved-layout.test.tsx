@@ -32,12 +32,11 @@ it('passes the complete 1,000-bookmark collection to a bounded virtualized list'
   expect(list.props.className).toContain('flex-1');
   expect(tree!.root.findAllByType('scroll' as React.ElementType)).toHaveLength(0);
 });
-it.each(['en', 'ja', 'ko'])('keeps %s long identifiers accessible and Open dominant without fetching', async locale => {
+it.each(['en', 'ja', 'ko'])('keeps %s identifiers private and Open explicit without fetching', async locale => {
   const fetch = vi.spyOn(globalThis, 'fetch');
   await translations.changeLanguage(locale); await mount();
-  const identifier = tree!.root.findAllByType('text').find(node => node.props.children === id)!;
-  expect(identifier.props.numberOfLines).toBe(2);
-  expect(identifier.props.accessibilityLabel).toBe(id);
+  expect(tree!.root.findAllByType('text').some(node => node.props.children === id || node.props.accessibilityLabel === id)).toBe(false);
+  expect(output()).toContain(translations.t('journal.googlePlace'));
   const open = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('journal.open'))!;
   const remove = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('journal.remove'))!;
   expect(remove.props.className).toContain('ghost');
@@ -46,7 +45,8 @@ it.each(['en', 'ja', 'ko'])('keeps %s long identifiers accessible and Open domin
   await act(async () => { await remove.props.onPress(); });
   expect(journal.save).toHaveBeenCalledExactlyOnceWith({ kind: 'google', id }, false);
   await act(async () => { await translations.changeLanguage(locale === 'en' ? 'ja' : 'en'); });
-  expect(output()).toContain(translations.t('journal.open'));
+  expect(output()).toContain(translations.t('journal.openShort'));
+  expect(output()).toContain(translations.t('journal.removeShort'));
   expect(fetch).not.toHaveBeenCalled(); fetch.mockRestore();
 });
 it.each(['en', 'ja', 'ko'])('keeps %s loading, failed read/retry and empty states distinct', async locale => {

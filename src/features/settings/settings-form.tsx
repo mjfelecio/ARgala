@@ -18,13 +18,13 @@ export default function SettingsForm({ children }: PropsWithChildren) {
   return <ScrollView className="flex-1" keyboardShouldPersistTaps="handled" contentContainerClassName="gap-6 px-5 pb-8 pt-2">
     <AccountSummary />
     {children}
-    <View className="gap-2 border-t border-outline pt-5">
-      <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{t('settings.language')}</Text>
+    <View className="gap-2 rounded-card bg-surface p-5">
+      <Text accessibilityRole="header" className="font-sans text-section font-semibold text-brand-strong">{t('settings.language')}</Text>
       <Text className="font-sans text-sm text-muted">{t('settings.languageDescription')}</Text>
       <LanguageControl value={language} onChange={changeLanguage} disabled={busy} />
     </View>
-    <View className="gap-3 border-t border-outline pt-5">
-      <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{t('settings.arLocation')}</Text>
+    <View className="gap-3 rounded-card bg-surface p-5">
+      <Text accessibilityRole="header" className="font-sans text-section font-semibold text-brand-strong">{t('settings.arLocation')}</Text>
       {/* Discard an unfinished local drag when leaving this screen. */}
       <RadiusControl key={String(focused)} value={radius} onChange={changeRadius} disabled={busy} />
       <Text className="font-sans text-sm text-foreground">{t('settings.deviceLocal')}</Text>

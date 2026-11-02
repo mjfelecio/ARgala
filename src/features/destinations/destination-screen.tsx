@@ -6,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { withUniwind } from 'uniwind';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
-import { Card } from 'heroui-native/card';
 import { useSettings } from '@/features/settings/provider';
 import { useAppActive } from '@/lib/use-app-active';
 import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
@@ -33,18 +32,19 @@ export default function DestinationScreen() {
     const token = createRoutePreviewIntent(client, routePlace, undefined, 'details', language, destination?.id);
     router.push({ pathname: '/directions', params: { token } });
   }
-  return <StyledSafeAreaView className="flex-1 bg-page-mint" edges={['top', 'bottom', 'left', 'right']}>
+  return <StyledSafeAreaView className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
     <View className="flex-row items-center gap-3 px-4 py-3">
       <Button variant="secondary" accessibilityLabel={t('placeDetails.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/destinations'); }}><Button.Label>{t('placeDetails.back')}</Button.Label></Button>
       <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-foreground">{t('destinations.title')}</Text>
     </View>
     <ScrollView contentContainerClassName="gap-5 px-4 pb-8">
       {destination ? <>
-        <DaytimeGallery key={`gallery:${destination.id}`} media={destination.media ?? []}><Card className="gap-3 p-5 shadow-none">
-          {!destination.verifiedName && <Text className="font-sans text-xs text-muted">{t('destinations.provisional')}</Text>}
-          <Text selectable accessibilityRole="header" className="font-sans text-hero font-bold text-foreground">{destinationName(destination)}</Text>
-        </Card></DaytimeGallery>
-        <Text className="font-sans text-base text-muted">{t('arrival.teaser')}</Text>
+        <View className="gap-3">
+          <Text selectable accessibilityRole="header" className="font-sans text-hero font-bold text-brand-strong">{destinationName(destination)}</Text>
+          {!destination.verifiedName && <Text className="font-sans text-sm text-muted">{t('destinations.provisional')}</Text>}
+          <Text className="font-sans text-base text-brand-strong">{t('arrival.teaser')}</Text>
+        </View>
+        <DaytimeGallery key={`gallery:${destination.id}`} media={destination.media ?? []} />
         <Text className="font-sans text-sm text-muted">{t('destinations.contentPending')}</Text>
         <DestinationReminderAction destination={destination} />
         <Button isDisabled={!routePlace || !active || !focused} accessibilityLabel={t('placeDetails.directions')} onPress={directions}><Button.Label>{t('placeDetails.directions')}</Button.Label></Button>

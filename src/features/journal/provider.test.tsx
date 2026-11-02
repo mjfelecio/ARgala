@@ -41,6 +41,7 @@ it('reopens a saved Google ID through explicit Details navigation without provid
 });
 it('keeps the pilot outside the nine-destination Passport total',async()=>{
  runtime.values.set('argala.journal.v1:guest',JSON.stringify({version:1,bookmarks:[],stamps:[{destinationId:'D01',visitedAt:100},{destinationId:'pilot-aclc',visitedAt:200}]}));await mount();expect(copy()).toContain(translations.t('journal.passportCount',{count:1,total:9}));expect(copy()).toContain(translations.t('journal.pilotVisited'));
+ const progress=tree.root.findAll(node=>node.type==='view'&&node.props.accessibilityRole==='progressbar')[0];expect(progress.props.accessibilityValue).toEqual({min:0,max:9,now:1});
 });
 
 it('does not publish a retired account write into the next account',async()=>{

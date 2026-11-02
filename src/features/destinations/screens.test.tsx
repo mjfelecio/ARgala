@@ -138,3 +138,12 @@ it('keeps approved featured overview and history out of prearrival 2D details', 
  expect(output()).not.toContain('Private approved overview'); expect(output()).not.toContain('Private approved highlight');
  expect(output()).toContain(translations.t('arrival.teaser'));
 });
+
+it.each(['en', 'ja', 'ko'])('renders the %s catalog count from the preserved nine-destination total', async language => {
+  await translations.changeLanguage(language); await mount(<DestinationsScreen />);
+  const heading = translations.t('destinations.exploreCount', { count: 9 });
+  expect(heading).not.toBe('destinations.exploreCount');
+  expect(output()).toContain(heading);
+  expect(placesService.details).not.toHaveBeenCalled();
+  expect(placesService.nearby).not.toHaveBeenCalled();
+});
