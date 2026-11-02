@@ -60,7 +60,10 @@
     "versionUnavailable": "情報なし",
     "unsaved": "保存されていない変更があります。",
     "unchanged": "設定は最新の状態です。",
-    "saving": "設定を保存中…"
+    "saving": "設定を保存中…",
+    "saveShort": "保存",
+    "undo": "元に戻す",
+    "undoChanges": "設定の変更を元に戻す"
   },
   "map": {
     "title": "近くの場所",
@@ -152,7 +155,7 @@
   },
   "placeDetails": {
     "title": "場所の詳細",
-    "unavailable": "メモリに場所の情報がありません。",
+    "unavailable": "場所の詳細はまだ読み込まれていません。",
     "load": "詳細を読み込む",
     "loading": "場所の詳細を読み込み中…",
     "back": "戻る",
@@ -409,7 +412,7 @@
     "remove": "保存した場所を削除",
     "savedTitle": "保存した場所",
     "savedEmpty": "地図の場所情報から保存すると、ここに表示されます。",
-    "googlePlace": "保存したGoogleの場所",
+    "googlePlace": "保存した場所",
     "open": "場所を開く",
     "passportTitle": "観光パスポート",
     "passportCount": "{{total}}か所中{{count}}か所を訪問",

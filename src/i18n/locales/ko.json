@@ -60,7 +60,10 @@
     "versionUnavailable": "정보 없음",
     "unsaved": "저장하지 않은 변경 사항이 있습니다.",
     "unchanged": "설정이 최신 상태입니다.",
-    "saving": "설정 저장 중…"
+    "saving": "설정 저장 중…",
+    "saveShort": "저장",
+    "undo": "되돌리기",
+    "undoChanges": "설정 변경 되돌리기"
   },
   "map": {
     "title": "주변 장소",
@@ -152,7 +155,7 @@
   },
   "placeDetails": {
     "title": "장소 상세 정보",
-    "unavailable": "메모리에 장소 정보가 없습니다.",
+    "unavailable": "장소 상세 정보를 아직 불러오지 않았어요.",
     "load": "상세 정보 불러오기",
     "loading": "장소 정보를 불러오는 중…",
     "back": "뒤로",
@@ -409,7 +412,7 @@
     "remove": "저장한 장소 삭제",
     "savedTitle": "저장한 장소",
     "savedEmpty": "지도의 장소 정보에서 저장하면 여기에 표시됩니다.",
-    "googlePlace": "저장한 Google 장소",
+    "googlePlace": "저장한 장소",
     "open": "장소 열기",
     "passportTitle": "관광 여권",
     "passportCount": "{{total}}곳 중 {{count}}곳 방문",

@@ -93,7 +93,10 @@
     "versionUnavailable": "Unavailable",
     "unsaved": "You have unsaved changes.",
     "unchanged": "Your settings are up to date.",
-    "saving": "Saving settings…"
+    "saving": "Saving settings…",
+    "saveShort": "Save",
+    "undo": "Undo",
+    "undoChanges": "Undo settings changes"
   },
   "map": {
     "title": "Nearby places",
@@ -192,7 +195,7 @@
   },
   "placeDetails": {
     "title": "Place Details",
-    "unavailable": "This place is not available in memory.",
+    "unavailable": "Place details aren’t loaded yet.",
     "load": "Load Details",
     "loading": "Loading place details…",
     "back": "Back",
@@ -450,7 +453,7 @@
     "remove": "Remove saved place",
     "savedTitle": "Saved Places",
     "savedEmpty": "Save a place from its map details to find it here.",
-    "googlePlace": "Saved Google place",
+    "googlePlace": "Saved place",
     "open": "Open place",
     "passportTitle": "Tourist Passport",
     "passportCount": "{{count}} of {{total}} destinations visited",
