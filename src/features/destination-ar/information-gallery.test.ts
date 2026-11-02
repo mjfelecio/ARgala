@@ -56,3 +56,25 @@ it('keeps the current image across reordered assets and clamps a shortened capti
   expect(next[restored.page].media?.id).toBe(second.id);
   expect(cursor.mediaId).toBe(second.id);
 });
+it('keeps a gallery visual-first and interleaves a visual story without losing prose or asset identity', () => {
+  const photos = [media, { ...media, id: 'second' }, { ...media, id: 'third' }];
+  const text = paginate('Synthetic body '.repeat(80), 'standard');
+  const gallery = galleryPages(text, photos, 'en', 'standard', String, 'Fallback', 'gallery');
+  expect(gallery.findIndex(page => page.kind === 'text')).toBe(gallery.filter(page => page.kind === 'image').length);
+  const story = galleryPages(text, photos, 'en', 'standard', String, 'Fallback', 'story');
+  expect(story.filter(page => page.kind === 'text').map(page => page.text)).toEqual(text.map(page => page.text));
+  const firstText = story.findIndex(page => page.kind === 'text');
+  expect(story[firstText - 1].media?.id).toBe(media.id);
+  expect(story[firstText + 1].media?.id).toBe('second');
+  const cursor = cursorAtPage(story, firstText + 1, 'en', 'standard');
+  expect(gallery[galleryCursor(gallery, cursor, 'en', 'standard').page].media?.id).toBe('second');
+});
+it('keeps the same caption source position when A+ repaginates metadata into narrower pages', () => {
+  const old = galleryPages(paginate('body', 'small'), [media], 'en', 'small', String, 'Fallback');
+  const index = old.findIndex(page => page.kind === 'image' && page.mediaPage === 2);
+  const cursor = cursorAtPage(old, index, 'en', 'small');
+  const large = galleryPages(paginate('body', 'large'), [media], 'en', 'large', String, 'Fallback');
+  const restored = large[galleryCursor(large, cursor, 'en', 'large').page];
+  expect(restored.media?.id).toBe(media.id);
+  expect(restored.start).toBeLessThanOrEqual(cursor.offset); expect(restored.end).toBeGreaterThan(cursor.offset);
+});

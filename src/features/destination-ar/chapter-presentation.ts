@@ -14,5 +14,5 @@ export function chapterPresentation(content: RingContent, locale: string, transl
   const body = ringCopy(content, 'body', locale, translate, exists);
   // The reader paginates the full title separately from the body's budget;
   // no factual heading depends on device-specific native cover clipping.
-  return { title, coverTitle, body, media: content.approved?.media ?? noMedia };
+  return { title, coverTitle, body, presentation: content.approved?.presentation ?? 'story', media: content.approved?.media ?? noMedia };
 }

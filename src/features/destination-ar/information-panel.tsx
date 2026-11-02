@@ -52,8 +52,8 @@ export function InformationPanel({ selection, content, previous, reading, enable
     let pages;
     try { pages = paginate(chapter.body, size, chapter.title); }
     catch { pages = paginate(t('destinationRing.contentFailed'), size); }
-    return galleryPages(pages, chapter.media, locale, size, credit => t('destinationRing.imageCredit', { credit }), t('destinations.englishFallback'));
-  }, [chapter.body, chapter.title, chapter.media, locale, t]);
+    return galleryPages(pages, chapter.media, locale, size, credit => t('destinationRing.imageCredit', { credit }), t('destinations.englishFallback'), chapter.presentation);
+  }, [chapter.body, chapter.title, chapter.media, chapter.presentation, locale, t]);
   const pages = useMemo(() => layout(reading.size), [layout, reading.size]);
   const cursor = galleryCursor(pages, previous, locale, reading.size);
   const page = pages[cursor.page]; const interactive = enabled && !moving;
