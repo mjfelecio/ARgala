@@ -1,5 +1,72 @@
 # Foundation validation
 
+## Explore native opening race (#39) — 2026-11-02
+
+Fix: **`b60b1d0`**. The owner's additional observation was that failed returns
+lacked the transient location-loading message. Clean attempts still worked, so
+those attempts were not treated as evidence that the original report was false.
+The investigation isolated a native layout-ordering failure that produces the
+same completely blank dock.
+
+**Confirmed mechanism:** Explore set `animateOnMount={false}` on pinned Gorhom
+5.2.14. This initializes the SDK's mount-complete flag before its handle has been
+measured. If the index-prop effect runs before handle readiness, its snap request
+is discarded. When measurement arrives later with unchanged detents, the native
+reaction skips reevaluation because opening is already marked complete. The
+native position can remain at the initial window height and its derived index
+at `-1`; Android's actual BottomSheetBody hides the entire body at that index,
+including the handle. The white lower region is the uncovered scene, not an empty
+provider response replacing the sheet.
+
+**Controlled physical reproduction:** on the same Galaxy A53 / Android 16 APK,
+both existing native handle measurements (layout and Fabric bounding rectangle)
+were temporarily delayed by 400 ms, retaining their real measured height of
+24 dp. With GPS ready and scene geometry stable, the unchanged product behavior
+left selected-place and subsequent no-match sheets entirely invisible. Diagnostics
+showed search state reaching `empty` while native index remained `-1`, position
+914.29 dp. UIAutomator exposed neither the title nor expansion action. This was
+a deliberate late-measurement test, not a claim that the intermittent original
+sequence spontaneously failed during a clean run.
+
+The product fix enables the SDK's layout-aware mount opening, as the existing
+Directions/AR docks already do. With the **same 400 ms delay**, selected and
+no-match sheets opened with their title, handle and empty guidance visible;
+the native callback reached index `0` / position 663.83 dp. A location-loading
+message, new GPS sample, map remount or automatic provider retry is not required.
+The initial sheet now uses the library's normal mount animation.
+
+All temporary application diagnostics and the dependency timing alteration were
+removed. The SDK source was restored byte-for-byte (SHA-256
+`73e84c5fc33ac0dbb3893c3b55a9165d06f8f5257bfb50cf2e14a7a3e2ce3532`) before
+final checks/export. There is **no dependency patch, APK build, permission,
+location-lifecycle, provider-contract or persistence change** in the fix.
+Private before/after captures and geometry-only traces remain in
+`.superpowers/reviews/2026-11-02-explore-39/`; incidental captures outside ARgala
+were discarded. No diagnostic coordinates, queries, credentials or raw provider
+errors were logged by the probes.
+
+**Regressions:** the previous native boundary incorrectly opened every sheet as
+soon as readiness changed, masking a dropped initial request. Its visibility
+projection now distinguishes pending native opening from already-completed
+opening, retaining the real SDK prop validator/reactive-value hook. Four new
+cases exercise the actual HomePlaceSheet and EN/JA/KO MapScreen with a selected
+place → no-match remount, late native readiness, unchanged geometry, continuously
+ready GPS and production query defaults. They verify visible title/handle/status,
+retained map identity and exact request counts through focus/foreground changes.
+The driver projects opacity-hidden native children as absent; it does not establish
+full native lifecycle or animation equivalence.
+
+All four new cases were observed failing before the product fix (**4 failed /
+76 passed**). The focused four-suite run then passed **172 tests**. Final
+`npm run check` passed strict TypeScript, zero-warning lint and **1,307 tests /
+118 files**. `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android -- --max-workers 1`
+passed (8.5 MB Hermes bundle). `npm run check:native-patches` passed with zero
+updates; `git diff --check` passed. Independent source review found no blockers.
+The phone disconnected before a final ordinary-timing pass with the restored
+SDK. That device check remains pending; the controlled before/after above is
+completed. #39 remains open for final device confirmation. Metro was stopped
+after verification, following the owner’s earlier request.
+
 ## Connected Android issue QA and feasibility-page retirement — 2026-11-02
 
 The owner reconnected the phone after the initial offline pass below. Device
