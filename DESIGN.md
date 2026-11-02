@@ -1,5 +1,15 @@
 # ARgala design authority
 
+## Cinematic AR assignment — 2026-11-02
+
+The owner separately assigned the approved [cinematic AR design](docs/design/cinematic-ar/DESIGN-SPEC.md).
+This supersedes the earlier refresh's AR exclusion only within that enhancement.
+Existing GPS/admission, native tracking, ring geometry, hold interactions and AR
+palette stay contractual. [Implementation and acceptance limits](docs/design/cinematic-ar/IMPLEMENTATION.md)
+include the failed native video feasibility gate; no video player or reviewed
+voice asset is claimed shipped.
+
+
 ## Approved Seafoam Forest screen refresh — 2026-11-02
 
 The later owner-approved eight-screen handoff supersedes earlier artwork-only

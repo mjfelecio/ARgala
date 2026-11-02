@@ -2438,3 +2438,56 @@ Google map regions still appear green on this renderer; exact mock map colors
 are not established. Issues#39–#42 are unchanged by this visual task (baseline
 already contains the#39 sheet-readiness correction). See the full
 [screen mapping and evidence](design/seafoam-forest/IMPLEMENTATION.md).
+
+
+## Cinematic AR handoff — 2026-11-02
+
+Worktree `.worktrees/cinematic-ar`, branch `feat/cinematic-ar-stories`, baseline
+`b794c96316b8dbb5a1cfcfa713bcfe7a2a1c4c81`. PR43 fixes39–42 and PR44 were confirmed
+merged before implementation. [Detailed behavior/evidence](design/cinematic-ar/IMPLEMENTATION.md)
+and [native video stop gate](design/cinematic-ar/VIDEO-FEASIBILITY.md).
+
+Implemented editorial media readiness, per-destination/provenance cinematic
+history, pure canonical deployment math, native Viro sequence and deterministic
+settlement/recovery, interactive dimmed neighbors, image-led galleries/visual
+stories, caption-offset restoration, independent saved audio toggles and a silent
+until-reviewed event adapter. Both audio defaults ON were explicitly owner-chosen.
+Independent review findings about storage Retry remount, native yaw normalization,
+caption reflow and partial-save audio resets received focused regressions/fixes.
+Reading-box overlap was rejected with a geometric regression; original native
+body bounds are retained. D01–D09 remain pending, not falsely approved.
+
+Verification actually run:
+
+- `npm run check`: strict TypeScript, zero-warning ESLint, **1,371 tests /123 files**
+  passed on final source. Focused regressions demonstrated the reported failures
+  before the corresponding changes; Settings/onboarding/AR targeted suite passed.
+- `npm run test:destination-content`: isolated PostgreSQL content contracts passed.
+- `npm run check:native-patches`: passed with0 dependency bytes updated.
+- `npm run check:android`: Android/SDK57 configuration passed.
+- `npm run export:android -- --max-workers 2`: final8.5MB Hermes export passed,
+  including the rasterized unchanged arch emblem. This is not an APK build.
+- `git diff --check`: passed.
+
+Galaxy A53 SM-A536E / Android16, existing Oct30 development client,1080×2400 /
+420dpi, unchanged font scale, USB Metro: actual Viro tracking-ready, ring/camera
+rendering, held Overview focus and brief background/return were observed. Raw
+captures stay private. First/return intro recordings were confounded by lazy
+bundling and temporary fixture Fast Refresh, so exact timing/full sweep/emblem
+visibility are **not accepted**. On-site admission and the full physical matrix
+were not tested.
+
+Video spike: original H.264/AAC test pattern rendered and advanced only on explicit
+Play; finish callbacks and held controls occurred. Owner confirmed video but not
+the first very quiet tone. Seeking/restart then produced repeated JavaScript error
+screens: Viro3.0.3 Android `seekToTime` dereferences null `NativeModules.UIManager`
+in this Fabric runtime. **Task7 stopped for owner decision.** The fixture is kept
+only in ignored scratch; all temporary app imports/scope edits were restored with
+SHA256 verification. Ordinary AR was restarted and rendered without that error;
+AR was then exited. No player, dependency, APK or compatibility patch was shipped.
+
+Still pending: exact native intro/recovery/focus acceptance, genuine approved rich
+D01–D09 media and translations, native video compatibility/seek/audio/lifecycle,
+reviewed EN/JA/KO voice/effects and audible settings behavior, TalkBack and release
+thermal/sunlight/performance/on-site checks. The source implementation is reviewable;
+the complete enhancement is not release accepted. No merge/deployment occurred.

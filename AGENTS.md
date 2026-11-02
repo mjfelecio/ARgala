@@ -171,3 +171,27 @@ Docs: https://docs.expo.dev/eas/index.md
 - Keep native additions optional at JavaScript startup so an older installed APK fails with localized guidance. Probe the exact installed module names before dynamically importing new native implementations.
 - Capture AR photos only by explicit action in the current live, focused foreground native frame. Use Viro screenshot with native gallery saving disabled; validate owned paths, fence late results, and clean temporary files while retaining leases for in-flight save/share. No uploads, camera history or broad photo-read permission. A dismissed share sheet is not evidence of delivery.
 - Gallery pages may use only explicitly bound approved bundled assets, retaining full text, localized alt/caption/credit and logical asset identity across reflow. Text-only remote updates cannot publish new assets or rights. Adaptive quality measures JS scheduling delay only and removes optional decoration; it is not native FPS or thermal evidence.
+
+## Cinematic AR stories — owner assignment 2026-11-02
+
+- The separately approved cinematic AR handoff is now assigned for implementation;
+  its scope is independent from the earlier Seafoam refresh's AR exclusion. See
+  `docs/design/cinematic-ar/DESIGN-SPEC.md` and implementation evidence. Keep native
+  AR admission, current palette, camera bounds and canonical ring headings intact.
+- Full launch-story readiness requires human editorial approval for the exact
+  content version, bound relevant bundled media, offline rights and reviewed
+  EN/JA/KO text/alt/captions. One cover under multiple IDs is still one cover.
+  Primary visual chapters are editor-selected; factual History and visitor
+  information can remain text-led where overall editorial approval allows it.
+  Readiness never grants location/admission or changes map/directions visibility.
+- Cinematic completion is per-install, destination and provenance scoped; it is
+  distinct from the legacy global help hint. Store only after native establishment
+  and settled/Skipped introduction. Recovery never replays deployment or resets
+  progress. Native motion uses relative shortest yaw steps because Viro normalizes
+  stored Euler angles between keyframes; final transforms remain canonical.
+- Initial presentation-history loading may gate startup; subsequent storage Retry
+  must never change native layout readiness or remount an established camera.
+- System Voice and Sound Effects default ON by owner decision, persist independently
+  in the existing preferences record and honor explicit Save/Undo. Partial language/
+  radius saves preserve audio opt-outs. Missing reviewed locale clips stay silent;
+  never substitute unapproved English audio. Native video remains feasibility gated.
