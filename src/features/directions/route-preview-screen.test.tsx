@@ -473,6 +473,48 @@ it('keeps travel mode as a draft and calculates driving only after explicit prev
  await press('directions.startNavigation');
  expect(new URL(nativeUi.openURL.mock.calls.at(-1)![0]).searchParams.get('travelmode')).toBe('driving');
 });
+it.each(['walking', 'driving', 'replacement'] as const)('uses mode-neutral location guidance for %s and live locale changes', async scenario => {
+ const mode = scenario === 'walking' ? 'walking' : 'driving';
+ if (scenario === 'replacement') {
+  handoff(); await mount();
+  controls.location.status = 'loading'; controls.location.position = null;
+  await update();
+  await press('directions.driving');
+  expect(output()).toContain(translations.t('directions.displayedMode', { mode: translations.t('directions.walking') }));
+  await press('directions.previewMode');
+  controls.token = (vi.mocked(router.setParams).mock.calls.at(-1)![0] as { token: string }).token;
+  await update();
+ } else {
+  controls.location.status = 'loading'; controls.location.position = null;
+  controls.token = createRoutePreviewIntent(client, place, undefined, 'details', 'en', undefined, mode);
+  await mount();
+ }
+ const messages = {
+  en: 'Waiting for your current location to plan the route…',
+  ja: 'ルートを計画するために現在地を確認中…',
+  ko: '경로를 계획하기 위해 현재 위치를 확인하는 중…',
+ };
+ for (const language of ['en', 'ja', 'ko'] as const) {
+  controls.language = language;
+  await act(async () => { await translations.changeLanguage(language); });
+  await update();
+  expect(output()).toContain(messages[language]);
+  expect(button(`directions.${mode}`)!.props.accessibilityState.selected).toBe(true);
+  expect(button(`directions.${mode === 'walking' ? 'driving' : 'walking'}`)!.props.accessibilityState.selected).toBe(false);
+  expect(output()).toContain(translations.t('directions.displayedMode', { mode: translations.t(`directions.${mode}`) }));
+  expect(routeService.walking).not.toHaveBeenCalled(); expect(routeService.preview).not.toHaveBeenCalled();
+ }
+ vi.mocked(routeService.preview).mockResolvedValue({ ...route, mode: 'driving' });
+ Object.assign(controls.location, { status: 'ready', position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now() });
+ await update();
+ expect(output()).not.toContain(messages.ko);
+ if (mode === 'walking') {
+  expect(routeService.walking).toHaveBeenCalledOnce(); expect(routeService.preview).not.toHaveBeenCalled();
+ } else {
+  expect(routeService.preview).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ mode: 'driving' }));
+  expect(routeService.walking).not.toHaveBeenCalled();
+ }
+});
 it('shows localized linking recovery while retaining the route preview', async () => {
  handoff(); await mount(); nativeUi.openURL.mockRejectedValue(new Error('private native detail'));
  await press('directions.startNavigation');
