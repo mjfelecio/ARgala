@@ -697,3 +697,67 @@ it('retires the compact layout callback on unmount before a new preview measures
  expect(tree!.root.findByType('dialog').props.snapPoints[0]).toBe(382);
  expect(map.props.style.height).toBe(362); expect(controls.fit).toHaveBeenCalledTimes(fits);
 });
+
+it.each(['walking', 'driving'] as const)('keeps displayed %s metrics and navigation inside the measured compact block', async mode => {
+ controls.token = createRoutePreviewIntent(client, place, {origin,destination:place.coordinates,route,mode}, 'map', 'en', undefined, mode);
+ await mount();
+ const primary = tree!.root.findByProps({testID:'route-preview-primary'});
+ const texts = primary.findAllByType('text').map(node => node.props.children);
+ expect(texts).toContain(translations.t('map.routeSummary', {meters:867,minutes:6}));
+ const start = primary.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('directions.startNavigation'))!;
+ expect(start.findAllByType('icon' as React.ElementType).some(node => node.props.name === 'navigate-outline' && node.props.accessible === false)).toBe(true);
+ for (const [key, name] of [['directions.walking','walk-outline'],['directions.driving','car-outline']]) {
+   const option = primary.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t(key))!;
+   expect(option.findAllByType('icon' as React.ElementType).some(node => node.props.name === name && node.props.accessible === false)).toBe(true);
+ }
+ expect(routeService.walking).not.toHaveBeenCalled(); expect(routeService.preview).not.toHaveBeenCalled();
+});
+it.each(['stale', 'denied'] as const)('measures compact %s recovery, retires its former callback and preserves external handoff authority', async state => {
+ handoff(); await mount(); await layout(); await primaryLayout(250);
+ const old = tree!.root.findByProps({testID:'route-preview-primary'}).props.onLayout;
+ if(state==='denied') controls.location.status='denied'; else controls.location.watcherTimestamp=Date.now()-60000;
+ await update(); await primaryLayout(390);
+ const primary = tree!.root.findByProps({testID:'route-preview-primary'});
+ expect(primary.findAllByType('button').some(node => node.props.accessibilityLabel===translations.t('location.retry'))).toBe(true);
+ expect(primary.findAllByProps({testID:'route-location-banner'}).length).toBeGreaterThan(0);
+ await act(async()=>old({nativeEvent:{layout:{height:120}}}));
+ expect(tree!.root.findByType('dialog').props.snapPoints[0]).toBe(462);
+ await press('directions.startNavigation'); expect(nativeUi.openURL).toHaveBeenCalledOnce();
+ expect(routeService.walking).not.toHaveBeenCalled(); expect(routeService.preview).not.toHaveBeenCalled();
+});
+it('includes pending and failed route recovery in the measured block and retires pending measurement', async () => {
+ const deferred = Promise.withResolvers<WalkingRoute>(); vi.mocked(routeService.walking).mockReturnValueOnce(deferred.promise);
+ handoff(false); await mount(); await layout();
+ const old = tree!.root.findByProps({testID:'route-preview-primary'}).props.onLayout;
+ expect(JSON.stringify(tree!.root.findByProps({testID:'route-preview-primary'}).findAllByType('text').map(node=>node.props.children))).toContain(translations.t('map.routeLoading'));
+ await act(async()=>deferred.reject(new EdgeRequestError('UPSTREAM_ERROR')));
+ const primary = tree!.root.findByProps({testID:'route-preview-primary'});
+ expect(primary.findAllByType('button').some(node=>node.props.accessibilityLabel===translations.t('directions.retry'))).toBe(true);
+ await primaryLayout(370); await act(async()=>old({nativeEvent:{layout:{height:120}}}));
+ expect(tree!.root.findByType('dialog').props.snapPoints[0]).toBe(442);
+ expect(routeService.walking).toHaveBeenCalledOnce();
+});
+
+it('retains measured compact controls and map geometry through continuous walking progress', async () => {
+ const target={...place,coordinates:{latitude:38.5,longitude:-120.1977}};
+ const walkingRoute={...route,encodedPolyline:'_p~iF~ps|U?gE?gE',distanceMeters:200};
+ controls.token=createRoutePreviewIntent(client,target,{origin,destination:target.coordinates,route:walkingRoute},'map','en');
+ await mount();await layout();await act(async()=>tree!.root.findByType('map').props.onMapReady());
+ await press('directions.followWalk');
+ for(const longitude of [-120.19995,-120.1998]) {
+  vi.mocked(Date.now).mockReturnValue(Date.now()+6000);
+  Object.assign(controls.location,{position:{latitude:38.5,longitude},positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();
+ }
+ expect(output()).toContain(translations.t('directions.navigationNavigating'));
+ await primaryLayout(390);await nativeLayout(360);
+ const primary=tree!.root.findByProps({testID:'route-preview-primary'});
+ const map=tree!.root.findByType('map');const height=map.props.style.height;const fits=controls.fit.mock.calls.length;
+ const before=primary.findAllByType('text').map(n=>n.props.children);
+ vi.mocked(Date.now).mockReturnValue(Date.now()+6000);
+ Object.assign(controls.location,{position:{latitude:38.5,longitude:-120.1996},positionTimestamp:Date.now(),watcherTimestamp:Date.now()});await update();
+ expect(tree!.root.findByProps({testID:'route-preview-primary'})).toBe(primary);
+ expect(primary.findAllByType('text').map(n=>n.props.children)).not.toEqual(before);
+ expect(tree!.root.findByType('map')).toBe(map);expect(map.props.style.height).toBe(height);
+ expect(tree!.root.findByType('dialog').props.snapPoints[0]).toBe(462);
+ expect(controls.fit).toHaveBeenCalledTimes(fits);expect(routeService.walking).not.toHaveBeenCalled();
+});
