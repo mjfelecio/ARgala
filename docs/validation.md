@@ -1,6 +1,70 @@
 # Foundation validation
 
-## Open-issue fixes and Android QA — 2026-11-02
+## Connected Android issue QA and feasibility-page retirement — 2026-11-02
+
+The owner reconnected the phone after the initial offline pass below. Device
+captures cover approximately 14:15–14:47 Asia/Manila, first with `92d02b7`
+(runtime changes through `e95f5bb`), then **`2204375`** after the owner explicitly
+requested removal of the unused Viro feasibility page.
+
+**Device/build:** Samsung Galaxy A53 / SM-A536E, Android 16 / API 36,
+1080×2400, physical density 450 / existing override 420. Existing development
+APK 1.0.0, version code 1, updated 2026-10-30 09:20:50; SHA-256
+`ad5cc55cf6259bb4f93abd8ef9c0a702770aaa7a3045d850b8bc9d7de0403d0e`.
+Installed Google Play Services for AR reports `1.44.241490493`. USB reverse for
+8081 was restored and the implementation checkout's Metro served the phone.
+No APK was built or installed. Battery rose from 44% / 37.6°C to 48% / 37.1°C
+while USB charging.
+
+Private original screenshots, UIAutomator trees, camera-service snapshots and
+hash manifest remain in the ignored local directory
+`.superpowers/reviews/2026-11-02-issue-qa/`. They include personal camera, map and
+account content and must not be committed or published. UI trees can lag a
+transition; the settled captures and owner observations carry the results.
+
+| Area | Physical evidence and boundary |
+| --- | --- |
+| #39 Explore | At normal text (original 1.1), All + nonexistent query after keyboard dismissal retained the title, native handle and localized empty message. Profile return, a repeat, subsequent named query and Search this area also retained the shell. Explicit empty-query nearby search returned 20 places. The audit's blank dock was **not reproduced**; leave #39 open, with no speculative sheet fix. Slow/error rendering is automated evidence only. |
+| #40 Directions | Actual walking and walking→driving replacement previews showed the exact neutral waiting text and accurate displayed/selected mode in EN and JA at 1.1, and KO at 1.5. Location services were temporarily disabled to hold the waiting state. Expanded sheets exposed the full guidance; collapsed primary controls remained available. No new route result is claimed. Settings changes/navigation required a fresh explicit handoff; continuously focused live-locale behavior remains covered by component tests. |
+| #42 Explore | Selecting a real result opened its callout and selected-place sheet, with Google's marker toolbar absent in both detents. Google logo remained visible. ADB taps exercised Recenter in both detents and the sheet's Directions handoff. Open in Google Maps launched the actual Maps activity; returning retained selection. KO at 1.5 also retained selected-place/expanded controls and attribution. UIAutomator exposed translated labels; TalkBack traversal was not run. |
+| #41 original square, before retirement | The lazy page loaded from Metro, displayed preflight and reached live camera / Tracking ready. The owner confirmed finger-pad hold/release increments the interaction count. Background return showed explicit Retry. The owner then requested that this unused page be removed. |
+| #41 retained ring | The lazy page loaded, explicit Start opened the native camera and rendered Overview. The owner confirmed held open, reading controls and Close work; the tile displayed Opened. After a settled three-second Home interval, camera-service active clients were empty. Return restored the live ring and Opened state within its existing grace. This is a brief lifecycle check, not a complete spatial-stability or expiry test. |
+| Ring permission recovery | With camera grant temporarily revoked, explicit Start displayed localized camera guidance, Open device settings and Retry. Restoring the original grant and explicitly pressing Retry returned to the live ring. No system permission/install/update/decline prompt was forced. |
+| Removed feasibility page | Profile on the updated JavaScript showed the ring entry and no Viro feasibility action. Opening `argala://viro-spike` produced Expo Router's Unmatched Route page; the old AR page no longer opens. |
+
+**Additional unresolved observation:** after changing EN→JA through Settings,
+the retained Google selection had no usable details. Two explicit More Information
+presses did not restore the place during this run; no cause or provider-call
+count was established. A fresh explicit area search and marker selection supplied
+usable same-language data and allowed the JA Directions checks. This is separate
+from #39's entirely blank sheet: title/handle/recovery UI remained visible. Keep
+this recovery case for follow-up rather than treating it as a verified fix.
+
+**Restoration:** English app copy, original system font scale 1.1, system locale
+en-GB, activation radius 500 m, location enabled and camera granted. No bookmark,
+stamp, account, onboarding or radius edits were made by the automation. Font-scale
+changes recreated the Android activity; GPS was reacquired through explicit Retry
+when needed. The final app was backgrounded and camera-service active clients
+were empty. Metro remains running for the existing client.
+
+**Removal verification:** two new/updated Profile/navigation assertions failed
+before implementation (retired action/route still present), then the focused
+Profile/navigation/native-startup/session run passed **81 tests / 4 files**.
+Final `npm run check` passed TypeScript, zero-warning lint and **1,303 tests /
+118 files**. The count decreases because obsolete entry tests were removed and a
+real Profile locale/remaining-entry regression was added. Final
+`EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android -- --max-workers 1` passed
+(8.5 MB Hermes bundle); `git diff --check` passed. A separate read-only review
+found no source blockers. Shared SceneBoundary/startup code remains because the
+retained session imports it; no dependency/native/provider changes.
+
+**Still pending:** on-site selected-destination GPS/admission, unsupported hardware,
+AR-services install/update/decline, a full ring chapter/page/font/locale sweep,
+controlled tracking-loss/world-frame stability, full text-size×locale×viewport
+matrix and TalkBack. No connected-Metro bundle-error overlay occurred, so the
+previous blank-after-error-dismiss scenario was not reproduced or patched.
+
+## Initial offline issue checks — 2026-11-02
 
 Baseline: `058f8bc` (`main`), branch `fix/explore-directions-android-qa`.
 Implementation revision: `e95f5bb` (with `6eb49a9` investigation coverage and
