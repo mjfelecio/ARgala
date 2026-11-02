@@ -37,9 +37,10 @@ vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: (
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('@/features/places/service', () => ({ placesService: { search: vi.fn(), nearby: vi.fn(), details: vi.fn() } }));
 vi.mock('@/features/directions/service', () => ({ routeService: { walking: vi.fn() } }));
-vi.mock('./attributions', async () => {
+vi.mock('./attributions', async importOriginal => {
   const { createElement } = await import('react');
-  return { ProviderAttributions: (props: Record<string, unknown>) => createElement('aside', props), useOpenProviderLink: () => vi.fn() };
+  const actual = await importOriginal<typeof import('./attributions')>();
+  return { ...actual, ProviderAttributions: (props: React.ComponentProps<typeof actual.ProviderAttributions>) => createElement('aside', props, createElement(actual.ProviderAttributions, props)) };
 });
 vi.mock('@/ui/shared', async () => {
   const { createElement } = await import('react');
@@ -637,6 +638,38 @@ it.each(['initial', 'handoff'] as const)('keeps exact-associated provider %s sel
  await press('placeDetails.view');
  expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'pilot-aclc' } });
  if (original) expect(tree!.root.findByType('map')).toBe(original);
+ expect(placesService.details).not.toHaveBeenCalled();
+});
+it('suppresses the native marker toolbar while retaining selection, Recenter, sheet actions and credits', async () => {
+ const place: Place = { ...destination, source: 'discovery', mapsUri: 'https://maps.google.com/?cid=123',
+  attributions: [{ name: 'Synthetic provider credit', uri: 'https://example.com/credit' }] };
+ vi.mocked(placesService.nearby).mockResolvedValue([place]);
+ nativeUi.openURL.mockReset().mockResolvedValue(undefined);
+ await selectPlace();
+ const map = tree!.root.findByType('map');
+ expect(map.props.toolbarEnabled).toBe(false);
+ expect(map.props.customMapStyle).toBeDefined();
+ expect(JSON.stringify(tree!.toJSON())).toContain(place.name);
+ expect(JSON.stringify(tree!.toJSON())).toContain('Synthetic provider credit');
+ await press('map.recenter');
+ expect(controls.animate).toHaveBeenLastCalledWith(expect.objectContaining(controls.position), 400);
+ expect(router.push).not.toHaveBeenCalled();
+ await press('placeDetails.directions');
+ expect(router.push).toHaveBeenCalledExactlyOnceWith({ pathname: '/directions', params: { token: expect.any(String) } });
+ expect(routeService.walking).not.toHaveBeenCalled();
+ await press('map.expand');
+ expect(tree!.root.findByType('map')).toBe(map);
+ expect(map.props.toolbarEnabled).toBe(false);
+ await press('map.openGoogle');
+ expect(nativeUi.openURL).toHaveBeenCalledExactlyOnceWith(place.mapsUri);
+ const credit = tree!.root.findAllByType('text').find(text => text.props.accessibilityRole === 'link' && text.children.includes('Synthetic provider credit'))!;
+ await act(async () => credit.props.onPress());
+ expect(nativeUi.openURL).toHaveBeenLastCalledWith('https://example.com/credit');
+ await press('map.collapse');
+ await press('map.recenter');
+ expect(controls.animate).toHaveBeenCalledTimes(2);
+ expect(tree!.root.findByType('map')).toBe(map);
+ expect(placesService.nearby).toHaveBeenCalledOnce();
  expect(placesService.details).not.toHaveBeenCalled();
 });
 it('submits text/category/settled area only on explicit Search This Area and never lifecycle refreshes', async () => {
