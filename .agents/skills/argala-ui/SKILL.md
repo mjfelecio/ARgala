@@ -21,6 +21,10 @@ The owner approved the product; do not launch another design questionnaire.
   The [infrastructure guide](../../../docs/ui-infrastructure.md) supersedes
   older font/StyleSheet advice. Installed component APIs take precedence over
   generic skill examples. Use Ionicons already present, not emoji controls.
+- Keep Seafoam Forest v2 logos/Journey in #42D5A5 seafoam / #174D38 forest,
+  with #FCFBF7 inverse and forest launcher/splash backgrounds. The owner retained
+  the existing #247A53 green UI and native AR palette (2026-11-02).
+  See [brand scope](../../../docs/brand-kit-rollout.md).
 - Retain bundled Plus Jakarta Sans, approved green/white/mint, route blue only
   for route/location meaning, existing radius/type scales and the 4-unit rhythm.
   [Design system](../../../docs/design/clean-explorer/DESIGN_SYSTEM.md).

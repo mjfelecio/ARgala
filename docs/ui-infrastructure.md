@@ -28,6 +28,19 @@ Only the approved light theme is selected with `Uniwind.setTheme('light')`. This
 
 Project tokens use `@theme static`, and HeroUI color overrides retain the library's `@theme inline static` declaration. The `static` flag is required for colors read by animation hooks or native props without a corresponding utility class; otherwise Tailwind can omit the variable and HeroUI can return an invalid color. The compiler regression exercises the actual CSS imports without utility candidates, independently of native component mocks. See [UniWind's runtime variable requirements](https://docs.uniwind.dev/api/use-css-variable).
 
+## Brand artwork
+
+The 2026-11-02 Seafoam Forest v2 identity retains the existing green UI and native
+AR palette. `global.css` adds only artwork tokens `logo-seafoam` (#42D5A5),
+`logo-ink` (alias of #174D38 stronger green) and `logo-ivory` (#FCFBF7).
+Shared `BrandLogo` variants render the supplied outlined paths
+through the existing SVG dependency; UI text stays Plus Jakarta Sans. The quiet
+`JourneyMotif` replaces Welcome/auth scenery within the existing hero geometry.
+
+Static `app.json` owns the new launcher layers and forest splash, including its
+dark-OS variant; dynamic config retains that same splash plugin. Android resources
+require a rebuilt APK. See [asset provenance and verification](brand-kit-rollout.md).
+
 ## Development showcase
 
 Rebuild/install the development APK after the native changes, then run:

@@ -1,4 +1,6 @@
 import { withHeroUI } from '@/test/native-ui';
+import { BrandLogo } from '@/ui/brand-logo';
+import { JourneyMotif } from '@/ui/journey-motif';
 import * as React from 'react';
 import { AuthApiError } from '@supabase/supabase-js';
 import { createInstance, type i18n } from 'i18next';
@@ -126,10 +128,17 @@ it('keeps white content growing through safe areas inside a keyboard-friendly sc
   const content = bottom.parent!;
   expect(content.props.className).toContain('grow');
   expect(content.props.className).toContain('rounded-b-none');
-  expect(tree!.root.findAllByType('svg' as React.ElementType)).toHaveLength(1);
+  expect(tree!.root.findAllByType('svg' as React.ElementType)).toHaveLength(2);
   expect(tree!.root.findAllByType('img' as React.ElementType)).toHaveLength(0);
   expect(copy()).not.toContain('alex.explorer'); expect(copy()).not.toContain('googleusercontent');
   expect(tree!.root.findAllByType('button').some(node => /back|戻る|뒤로/i.test(node.props.accessibilityLabel ?? ''))).toBe(false);
   expect(tree!.root.findAll(node => node.props.accessibilityRole === 'tablist')).toHaveLength(0);
   expect(tree!.root.findAllByType('input').every(input => input.props.allowFontScaling !== false)).toBe(true);
+});
+
+it('uses the horizontal outlined lockup and decorative Journey motif while retaining the keyboard scroll owner', async () => {
+  await mount();
+  expect(tree!.root.findByType(BrandLogo).props).toMatchObject({ variant: 'horizontal', width: 160 });
+  expect(tree!.root.findAllByType(JourneyMotif)).toHaveLength(1);
+  expect(tree!.root.findByType('scroll' as React.ElementType).props.keyboardShouldPersistTaps).toBe('handled');
 });

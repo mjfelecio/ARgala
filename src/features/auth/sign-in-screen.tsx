@@ -10,7 +10,8 @@ import { withUniwind } from 'uniwind';
 import { router } from 'expo-router';
 import { useGuestAccess } from './guest-context';
 import { getSupabase } from '@/lib/supabase';
-import { ScenicLandscape } from '@/ui/scenic-landscape';
+import { JourneyMotif } from '@/ui/journey-motif';
+import { BrandLogo } from '@/ui/brand-logo';
 import { CredentialsFields } from './credentials-fields';
 import { registrationSchema, signInSchema } from './credentials';
 import { authErrorMessageKey } from './errors';
@@ -25,7 +26,7 @@ export default function SignInScreen() {
   const guest=useGuestAccess();
   const [guestRequested,setGuestRequested]=useState(false);
   useEffect(()=>{if(guestRequested&&guest.enabled)router.replace('/');},[guestRequested,guest.enabled]);
-  const [accent, onAccent] = useThemeColor(['accent', 'accent-foreground']);
+  const onAccent = useThemeColor('accent-foreground');
   const [registering, setRegistering] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -59,10 +60,9 @@ export default function SignInScreen() {
       keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false}>
       <View className="bg-mint" style={{ paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}>
         <View className="min-h-56 items-end overflow-hidden px-6 pb-10 pt-4">
-          <ScenicLandscape />
+          <JourneyMotif />
           <View className="flex-row items-center gap-2 rounded-pill bg-surface px-4 py-2">
-            <Ionicons name="compass-outline" size={20} color={accent} accessible={false} />
-            <Text className="font-sans text-base font-semibold text-brand-strong">ARgala</Text>
+            <BrandLogo variant="horizontal" width={160} />
           </View>
         </View>
       </View>

@@ -1818,3 +1818,109 @@ and a synthetic test tag typing error; both were corrected through the supported
 installed handleStyle API/test boundary before the final successful check.
 `git diff --check` passes. No backend/native configuration changed; CI repeats
 Edge, Android export/config and isolated SQL checks before integration.
+
+## 2026-11-01 — brand artwork, original green UI retained
+
+The owner's final correction retains the existing UI and native AR colors.
+The final `global.css` is byte-identical to the previous theme after removing
+three artwork-only logo tokens. Control, field, tab, text and native AR consumer
+changes from the earlier full-palette rollout were reverted. New outlined
+Welcome/sign-in/Explore logos, the restrained Journey motif, launcher layers,
+favicon and navy splash remain. [Provenance and native limits](brand-kit-rollout.md).
+
+Final corrected-source checks:
+
+- `npm ci --no-audit --no-fund`: restored the lockfile; dependency patches verified.
+- `npm run check -- -- --maxWorkers=2`: strict TypeScript, zero-warning ESLint,
+  **1,272 tests /117 files** passed. Two workers bound local memory use.
+- `npx expo install --check`: dependencies up to date.
+- `npx expo-doctor`: **21/21** checks passed.
+- `npm run check:android`: passed final config introspection, static/dynamic
+  splash equality, icon-layer settings and PNG dimensions.
+- `npm run export:android -- --max-workers 2`: final corrected-source
+  Metro/Hermes Android export passed.
+- `git diff --check`: passed.
+
+Logo paths/transforms match the supplied outlined masters; the CSS compiler test
+retains original green/foreground assertions and checks independent artwork
+colors. Welcome/auth/Explore tests keep behavioral assertions, translations and
+keyboard/scroll ownership. Source-image review covered proportional marks at
+32/64, primary/horizontal lettering, circle/rounded launcher masks and a themed
+mask illustration. The derived mask contains only white visible pixels with
+transparent margins; these are source proofs, not Android launcher results.
+
+A brief Galaxy A53/Android16 development-client attempt preceded the owner's
+palette correction; it does not establish final native acceptance. Account data,
+onboarding, language, font scale and OS theme were preserved, and the app/test
+connection was stopped. No paid Search/Walk action or APK build was performed.
+Final EN/JA/KO normal/large-text, keyboard/loading/error/dock screenshots and
+native logo readability remain pending. Launcher icons and cold-start splash
+(including dark OS mode) require a separately approved rebuilt preview APK.
+
+## 2026-11-02 — Seafoam Forest v2 branding
+
+This revision supersedes the v1 artwork/launch colors in the 2026-11-01 entry.
+The supplied v2 guide, PDF, token/contrast references and optional UI assets were
+reviewed. The original green UI remains unchanged outside three artwork-only
+CSS tokens: #42D5A5 seafoam, #174D38 forest (alias of stronger green) and #FCFBF7
+inverse. A direct comparison against the starting commit confirmed every other
+byte of `global.css` is unchanged. No screen semantics, map colors, native AR
+colors, sensors, permissions, routes, provider contracts or dependencies changed.
+
+Welcome uses the primary lockup, sign-in the horizontal lockup, and Explore a
+compact decorative arch. Exact filled v2 Journey paths replace old abstract
+scenery only inside the existing Welcome/auth hero; no extra patterns are added
+to maps, camera, destination photography or utility pages. Shared SVG rendering
+retains source proportions, outlined bold AR / regular gala, clear space and
+accessible/decorative ownership. All five selected SVG masters match the supplied v2 content after normalizing
+blank-line trailing whitespace; paths, colors and transforms remain exact. [Asset provenance and decisions](brand-kit-rollout.md).
+
+The new logo/theme tests were observed failing against v1 colors and the old
+stroked Journey interpretation before the update (six failures), then passing.
+The five targeted screen/logo/theme files pass 44 tests, retaining behavior,
+actual locale resources, keyboard/scroll ownership and explicit search intent.
+Real CSS compilation independently checks emitted hook colors and contrast for
+white/app-green, forest/seafoam and forest/ivory pairs.
+
+Android introspection verifies static/dynamic splash equality, forest backgrounds,
+light/dark splash assets and icon layer dimensions. The PNG pixel check first
+reproduced the supplied adaptive foreground extending outside the central safe
+circle (342.03 px radius against a 312.89 px limit on its 1024 px canvas). Uniform
+10% centered padding retains exact geometry and colors; both final foreground
+and monochrome layers have radius 308.80 px and matching bounds (276,296–749,731).
+Every visible mask pixel is white with alpha, with transparent margins. The square
+icon and background are opaque; splash and favicon retain supplied transparency.
+
+[Source artwork proof](design/seafoam-forest/asset-proof.png) was visually inspected
+for 32/64 dp marks/icons, 144/160 dp lockups, forest inverse artwork, Journey's
+filled path and 10% treatment, launcher mask simulations and splash source. These
+are source rasterizations, not Android Yoga/launcher/splash screenshots.
+
+`adb devices -l` returned no connected devices during this revision. No APK build,
+install, device setting/data change or paid provider action was performed. The
+prior v1 phone review does not establish v2 acceptance. A separately approved
+preview APK must still verify launcher/themed masks and cold-start splash in both
+OS themes. The EN/JA/KO normal/large-text screen matrix, keyboard, loading/error,
+collapsed/expanded dock and TalkBack checks remain device work. Native AR code
+and appearance were untouched; live AR/GPS/Maps were not retested.
+
+Final checks passed on the completed v2 source:
+
+- `npm run check -- -- --maxWorkers=2`: strict TypeScript, zero-warning ESLint,
+  **1,273 tests across 117 files**.
+- `npm run check:android`: SDK/native configuration, static/dynamic launch assets,
+  PNG sizes, adaptive safe-circle alpha and themed-mask checks.
+- `npm run export:android -- --max-workers 2`: Android Metro/Hermes export.
+- `npx expo install --check`: dependencies up to date; `npx expo-doctor`:
+  **21/21 checks**.
+- Geometry regeneration produced identical output; `git diff --check` passed.
+
+The initial full check caught a missing explicit Node Buffer import in the
+extended validation script; it was corrected before the passing run. A restricted
+sandbox introspection attempt returned empty output; the same Android check
+passed with normal host access. No package or lockfile changed.
+
+An independent read-only review found no Critical or Important issue, independently
+confirmed supplied source content, unchanged base CSS and matching icon alpha/safe areas,
+and reiterated the native acceptance gaps above. Its note to supersede the prior
+v1 validation entry is covered by this section. No native success is inferred.

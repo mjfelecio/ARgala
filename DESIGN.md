@@ -21,6 +21,15 @@ radii. HeroUI Native owns primitives; UniWind owns presentation. Read installed
 component source before applying newer documentation. No parallel TS theme,
 NativeWind migration, @expo/ui replacement or dependency pack for this cleanup.
 
+## Brand artwork
+
+Seafoam Forest v2 (2026-11-02) retains the original green UI palette. Outlined
+primary/horizontal/arch logos and Journey artwork use #42D5A5 seafoam with #174D38
+forest or #FCFBF7 inverse. Launcher/splash backgrounds use forest. Artwork-only
+CSS tokens keep these separate from UI semantics; primary actions stay #247A53.
+Existing text, surfaces, fields, tabs, maps and native AR colors remain.
+See [brand provenance](docs/brand-kit-rollout.md).
+
 ## Composition
 
 Name/task first; one prominent next action. Group related content, disclose
