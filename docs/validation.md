@@ -2321,3 +2321,35 @@ Final `npm run check -- -- --maxWorkers=2` passed strict TypeScript, zero-warnin
 ESLint and all 1,273 tests across 117 files. The targeted auth/map tests also
 passed (26 tests). `git diff --check` passed. No style-only implementation-mirroring
 tests were added; existing behavioral regressions remain intact.
+
+
+## Seafoam Forest UI refresh — 2026-11-02
+
+Implemented the approved ivory/forest/seafoam presentation across Explore,
+Featured/Passport, curated preview, Place Details, Saved Places, Profile/Settings
+and Directions. The owner's later instruction excludes AR design; original
+AR panel/edge colors and all destination-ar source remain unchanged. No native
+configuration, backend, provider-call authority or dependencies changed.
+
+`npm run check` passed strict TypeScript, zero-warning ESLint and **1,310 tests
+across 118 files**. Focused screen suites passed (95 tests), map/Directions suites
+passed (155), final journal/catalog/theme regressions passed (58).
+`npm run export:android` passed; this is not an APK build or physical provider
+acceptance. Independent read-only review found no significant regressions.
+
+Galaxy A53 SM-A536E / Android16, installed APK1.0.0/code1, 1080×2400, density420
+override and font1.1: inspected actual Explore, Featured, pilot preview, Profile
+and Saved states via local Metro/ADB. Featured was also inspected at360×800
+logical units/font1.5 with wrapping and scrolling; font/size restored. Captures
+remain private in `/tmp/argala-seafoam-captures/`. Missing Details and expired
+Directions have representative recovery captures. No Search, route computation,
+save/remove, sync Retry or AR admission was submitted. Account lifecycle sync
+may run under its existing contract. No APK built.
+
+Loaded provider/native route states, native Japanese/Korean/TalkBack and full
+permission/error/offline matrix remain unverified. There is no comparable
+prechange screenshot baseline; historical audits are reference only. Rural
+Google map regions still appear green on this renderer; exact mock map colors
+are not established. Issues#39–#42 are unchanged by this visual task (baseline
+already contains the#39 sheet-readiness correction). See the full
+[screen mapping and evidence](design/seafoam-forest/IMPLEMENTATION.md).

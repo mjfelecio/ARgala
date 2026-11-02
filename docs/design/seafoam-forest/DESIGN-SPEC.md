@@ -1,5 +1,11 @@
 # ARgala — Seafoam Forest UI Refresh, Approved Design Specification
 
+> **Later owner scope correction:** AR design is excluded from this task and
+> reserved for a separate task. Retain the existing native AR presentation,
+> including panel #102724 and edge #71DCD2. This overrides every AR recoloring
+> instruction in this archived handoff, including implementation Task 8.
+
+
 **Owner approval:** 2026-11-02 (Asia/Manila)  
 **Direction:** Option B — lively, modern exploration app  
 **Status:** Eight visual references approved; no app implementation authorized/performed by this package.  

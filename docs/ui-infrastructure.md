@@ -4,9 +4,9 @@
 
 The later owner-approved eight-screen handoff supersedes earlier artwork-only
 visual restrictions below. Use ivory #FCFBF7 pages, white surfaces, #247A53
-primary controls, #174D38 headings/Passport/AR panels, restrained #42D5A5
-seafoam accents and #E8F8F0 contextual mint. Native Viro keeps its live camera
-and chapter interactions with forest surfaces/seafoam edges. Logos, launcher
+primary controls, #174D38 headings/Passport, restrained #42D5A5
+seafoam accents and #E8F8F0 contextual mint. Later owner instruction excludes AR design from this task: retain its existing
+#102724 panels, #71DCD2 edges and all native presentation. Logos, launcher
 and Journey geometry remain locked. Natural map geography, route blue and all
 provider, navigation, permission, persistence, eligibility and lifecycle contracts
 remain in force. See the committed [refresh specification](../docs/design/seafoam-forest/DESIGN-SPEC.md) and

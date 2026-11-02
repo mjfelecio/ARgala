@@ -1,5 +1,11 @@
 # ARgala Seafoam Forest — Implementation Plan
 
+> **Later owner scope correction:** AR design is excluded from this task and
+> reserved for a separate task. Retain the existing native AR presentation,
+> including panel #102724 and edge #71DCD2. This overrides every AR recoloring
+> instruction in this archived handoff, including implementation Task 8.
+
+
 > **For agentic workers:** Follow the repository's current `AGENTS.md` and applicable skills. Use `superpowers:subagent-driven-development` or `superpowers:executing-plans` where available, and implement this plan task by task. The owner has approved the visual direction; obtain fresh approval only for material changes in product behavior, outside-scope dependencies or deployment.
 
 **Goal:** Implement the complete approved eight-screen Seafoam Forest UI refresh on ARgala Android without functional regression.
