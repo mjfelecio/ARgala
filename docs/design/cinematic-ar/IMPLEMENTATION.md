@@ -114,3 +114,48 @@ Final code commits: `9ef435e` readiness/intro foundation, `108bbb4` audio settin
 After fixture removal the ordinary native ring was observed running again without
 its video error screen. AR was exited to release the camera. No approved video,
 voice clip or native dependency was installed; no PR was pushed, merged or deployed.
+
+
+## Image priority follow-up — 2026-11-02
+
+The owner deferred video work and requested sample photos. The photo area now
+uses the compact heading space (0.405 versus 0.28 native units, about45% taller),
+without changing the square frame, camera distance, caption or controls. Loading
+and failure retain the caption/credit; an explicit native Retry replaces only
+its image attempt and obeys Help, tracking and transition interaction fences.
+Source replacement resets a failed image; caption navigation retains the bitmap.
+
+The owner's “image unavailable” report reproduced on a valid bundled JPEG.
+Installed Viro3.0.3 Android `VRTImage` emits `onLoadEndViro` with a null payload
+**after** its download listener sets the bitmap. Requiring a true `success`
+field rejected real successful loads. The application now accepts that native
+completion while still failing explicit false and `onError`; retired callbacks
+cannot change the current attempt. The empty-payload regression failed before
+the fix and passed afterward. No dependency patch was needed.
+
+On the existing Galaxy A53 development APK, the corrected callback visibly
+rendered the licensed ACLC **Iriga** campus photo in the native focused panel.
+That photo is explicitly not ACLC Ormoc. The reproducible development ring now
+contains it and a generic landscape, with source/license records in
+`assets/development/ar-gallery/README.md` and sample captions in EN/JA/KO.
+Overview demonstrates a gallery and History a mixed visual story. These are
+sample fixtures, not destination approval, geographic authority or Passport
+content. Both development gates precede module evaluation. Static export can
+still include development assets; runtime gating does not assert bundle removal.
+
+Device checks used the existing APK and USB Metro; no build/install or OS setting
+changes. This follow-up observed battery42% to37%; testing remained brief. The
+native image callback/bitmap fix was observed with the temporary sample fixture;
+the final permanent loader is covered by component tests, with a complete final
+on-device gallery/navigation/language matrix still pending. Video remains behind
+the documented stop gate. No video correction was attempted in this follow-up.
+
+
+Final follow-up verification: `npm run check` passed strict TypeScript,
+zero-warning lint and **1,390 tests across125 files**. Native dependency patch
+verification passed with0 files updated; `git diff --check` passed. Android
+Metro/React Compiler/Hermes export with the development flag disabled passed
+(8.6MB). Both JPEG assets remain statically included (about282KB combined);
+runtime guards prevent release evaluation rather than promising asset removal.
+No APK was built. Metro was stopped during final checks, then restarted for owner
+review; the app was left untouched and foreground/device sensors were not restarted.

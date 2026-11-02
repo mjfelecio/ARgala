@@ -2491,3 +2491,35 @@ D01–D09 media and translations, native video compatibility/seek/audio/lifecycl
 reviewed EN/JA/KO voice/effects and audible settings behavior, TalkBack and release
 thermal/sunlight/performance/on-site checks. The source implementation is reviewable;
 the complete enhancement is not release accepted. No merge/deployment occurred.
+
+
+### Image priority and Android completion fix — 2026-11-02
+
+The owner deferred video and allowed labelled sample photos. A valid bundled JPEG
+reproduced “image unavailable”: pinned Android VRTImage completes with a null
+load-end payload after bitmap installation, whereas the application required
+`success === true`. Completion without that field now succeeds; explicit false
+and onError still fail. The focused native gallery offers fenced explicit Retry,
+retains caption/credit through loading/error, and uses a45% taller photo region
+within the original square frame and camera distance.
+
+On the Galaxy A53 SM-A536E/Android16 using the existing Oct30 development APK,
+the corrected callback visibly rendered the ACLC Iriga sample in the focused
+native panel. It is **not ACLC Ormoc**. The permanent development prototype now
+includes that licensed photo and a generic landscape, with localized sample
+warnings and attribution in `assets/development/ar-gallery/README.md`. Both
+runtime development guards precede module evaluation; sample content grants no
+verified destination or Passport authority. Final permanent-loader behavior is
+covered by real session component tests; its complete physical gallery/language
+matrix remains pending. Temporary fixture imports and diagnostic logging were
+removed. No native module, video code, OS setting or APK was changed.
+
+Verification: `npm run check` passed TypeScript, zero-warning lint and
+**1,390 tests across125 files**. The image empty-event regression was demonstrated
+failing before the fix; gated loader and route failure/retry tests were also red
+before implementation. `npm run check:native-patches` passed (0 files updated).
+An independent review found no important issue. Its simultaneous targeted run
+hit an existing timing test timeout under memory pressure; the final complete
+suite above passed after avoiding concurrent checks. Android export is recorded
+in the cinematic implementation evidence. Video stays deferred and the existing
+release-acceptance limitations still apply.

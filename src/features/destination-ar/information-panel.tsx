@@ -1,6 +1,6 @@
 import { chapterPresentation } from './chapter-presentation';
 import { ArText } from './ar-text';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ViroAnimations, ViroImage, ViroNode, ViroQuad } from '@reactvision/react-viro';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +21,9 @@ const contentBottom = pageRowY + nativePanelActionHeight / 2 + 0.02;
 const bodyHeight = 0.5;
 const bodyY = contentBottom + bodyHeight / 2;
 const captionHeight = 0.2;
-const imageHeight = bodyHeight - captionHeight - 0.02;
+// Photo pages use the heading space; the chapter counter, caption and controls
+// keep their existing bounds. Text pages retain the original heading/body.
+const imageHeight = 0.46 - (contentBottom + captionHeight + 0.02);
 const imageY = contentBottom + captionHeight + 0.02 + imageHeight / 2;
 
 export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0 }: {
@@ -67,11 +69,11 @@ export function InformationPanel({ selection, content, previous, reading, enable
     animation={{ name, run: false, onFinish: () => onComplete(selection.token), interruptible: true }}>
     {decorations && <ViroQuad renderingOrder={0} ignoreEventHandling width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} materials="argalaRingEdge" />}
     <ViroQuad renderingOrder={1} ignoreEventHandling width={ringMetrics.panelWidth} height={ringMetrics.panelHeight} position={[0, 0, 0.003]} opacity={0.96} materials="argalaRingSurface" />
-    <ArText position={[0, closing ? 0 : 0.425, 0.006]} width={1.12} height={0.16} text={chapter.coverTitle} style={style.text(8, 'left', '600')} />
+    <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.495 : 0.425, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.05 : 0.16} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 3.5 : 8, 'left', '600')} />
     {!closing && <>
       <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
       <ArText testID="ring-sample-label" position={[0.28, 0.555, 0.006]} width={0.56} height={0.06} text={content.approved ? t('destinationStories.openedCount', { count: openedCount, total: chapterCount }) : t('destinationRing.sampleLabel')} style={style.text(3)} />
-      {page.kind === 'image' ? <BundledGalleryPage key={page.media!.id} page={page} size={reading.size} style={style} /> : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
+      {page.kind === 'image' ? <BundledGalleryPage key={`${page.media!.id}:${page.media!.source}`} page={page} size={reading.size} style={style} enabled={interactive} /> : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
         textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />}
       <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.4, pageRowY, 0.012]} enabled={interactive && cursor.page > 0} style={style}
         onPress={() => onCursor(content.id, cursorAtPage(pages, cursor.page - 1, locale, reading.size))} />
@@ -92,15 +94,39 @@ export function InformationPanel({ selection, content, previous, reading, enable
 
 
 
-/** A single bundled image owns only its loading state, never native hit events. */
-function BundledGalleryPage({ page, size, style }: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle }) {
-  const { t } = useTranslation(); const [failed, setFailed] = useState(false);
+/** Keep the native image mounted through caption pages, but replace an attempt
+ * on explicit Retry. A bundled source replacement starts clean under its key.
+ */
+function BundledGalleryPage(props: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean }) {
+  const [attempt, setAttempt] = useState(0);
+  return <GalleryImageAttempt key={attempt} {...props} onRetry={() => setAttempt(previous => previous + 1)} />;
+}
+function GalleryImageAttempt({ page, size, style, enabled, onRetry }: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean; onRetry(): void }) {
+  const { t } = useTranslation(); const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>('loading');
+  const alive = useRef(false); const settled = useRef(false);
+  useLayoutEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  function finish(success: boolean) {
+    if (!alive.current || settled.current) return;
+    settled.current = true; setStatus(success ? 'ready' : 'failed');
+  }
+  function fail() { if (alive.current) { settled.current = true; setStatus('failed'); } }
   return <>
-    {failed ? <ArText testID="ring-gallery-error" position={[0, imageY, 0.006]} width={readingContentWidth} height={imageHeight}
-      text={t('destinationRing.imageFailed')} style={style.text(4)} /> :
+    {status === 'failed' ? <>
+      <ArText testID="ring-gallery-error" position={[0, imageY + 0.095, 0.008]} width={readingContentWidth} height={0.18}
+        text={t('destinationRing.imageFailed')} style={style.text(4)} />
+      <NativePanelAction id="image-retry" label={t('common.retry')} position={[0, imageY - 0.11, 0.012]} width={0.46}
+        enabled={enabled} style={style} onPress={onRetry} />
+    </> : <>
       <ViroImage testID="ring-gallery-image" source={page.media!.source} position={[0, imageY, 0.006]} width={readingContentWidth} height={imageHeight}
         renderingOrder={2} ignoreEventHandling resizeMode="ScaleToFit" imageClipMode="ClipToBounds"
-        onError={() => setFailed(true)} onLoadEnd={event => { if (!event.nativeEvent.success) setFailed(true); }} />}
+        onError={fail} onLoadEnd={event => {
+          // Pinned Android VRTImage emits completion only after setting the
+          // bitmap, with no success field. Explicit false and onError still fail.
+          finish(event.nativeEvent?.success !== false);
+        }} />
+      {status === 'loading' && <ArText testID="ring-gallery-loading" position={[0, imageY, 0.008]} width={readingContentWidth} height={imageHeight}
+        text={t('common.loading')} style={style.text(4)} />}
+    </>}
     <ArText testID="ring-gallery-caption" position={[0, contentBottom + captionHeight / 2, 0.006]} width={readingContentWidth} height={captionHeight} text={page.flowText ?? page.text}
       textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[size].fontSize, 'left')} />
   </>;

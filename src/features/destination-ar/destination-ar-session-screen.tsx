@@ -20,6 +20,7 @@ import { useArSession } from './use-ar-session';
 import { useReadingSize } from './use-reading-size';
 import { introDuration, introVariant } from './intro-policy';
 import { useArIntroduction } from './use-ar-introduction';
+import { loadDevelopmentGalleryContent } from './development-gallery-loader';
 import { loadRingScene } from './ring-loader';
 import type { RingControls, RingMetrics } from './destination-ring-scene';
 import type { SessionIdentity } from './session';
@@ -33,8 +34,27 @@ export default function DevelopmentSessionRoute() {
   const { session } = useAuth(); const { t } = useTranslation(); const principalId = session?.user.id;
   const scopeId = useId(); // Development correlation only; never verified admission authority.
   const identity = useMemo<SessionIdentity>(() => ({ admissionId: `development-${scopeId}`, destinationId: 'development-aclc', principalId: principalId ?? '', provenance: 'development' }), [principalId, scopeId]);
-  return principalId ? <DestinationArSessionExperience key={principalId} identity={identity} freshEligible={isViroSpikeEnabled} />
+  return principalId ? <DevelopmentGallerySession key={principalId} identity={identity} />
     : <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
+}
+
+function DevelopmentGallerySession({ identity }: { identity: SessionIdentity }) {
+  const { t } = useTranslation();
+  const [attempt, setAttempt] = useState(0);
+  const [content, setContent] = useState<readonly RingContent[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    let current = true;
+    void loadDevelopmentGalleryContent().then(value => {
+      if (!current) return;
+      if (value) setContent(value); else setFailed(true);
+    }).catch(() => { if (current) setFailed(true); });
+    return () => { current = false; };
+  }, [attempt]);
+  if (content) return <DestinationArSessionExperience identity={identity} freshEligible={isViroSpikeEnabled} content={content} />;
+  return <Screen><Notice>{t(failed ? 'destinationRing.contentFailed' : 'common.loading')}</Notice>
+    {failed && <Action title={t('common.retry')} onPress={() => { setFailed(false); setAttempt(value => value + 1); }} />}
+  </Screen>;
 }
 
 type Props = { identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };

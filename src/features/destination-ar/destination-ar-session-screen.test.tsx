@@ -12,7 +12,7 @@ import { ViroRingRoute } from './dev-entry';
 import { router } from 'expo-router';
 const native = vi.hoisted(() => ({ active: true, focused: true, reduced: false, eligible: true,
   principal: 'owner' as string | null, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
-  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(),
+  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), gallery: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(),
 }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: native.principal ? { user: { id: native.principal } } : null }) }));
@@ -20,6 +20,7 @@ vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem
 vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get, requestCameraPermissionsAsync: native.request } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true }) }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
+vi.mock('./development-gallery-loader', () => ({ loadDevelopmentGalleryContent: native.gallery }));
 vi.mock('./ring-loader', () => ({ loadRingScene: native.load }));
 vi.mock('@/features/ar-photo/ar-photo-controls', async () => { const R = await import('react'); return { ArPhotoControls: (props: Record<string, unknown>) => R.createElement('photo-controls', props) }; });
 vi.mock('expo-router', async () => {
@@ -115,7 +116,7 @@ beforeEach(async () => {
   native.active = native.focused = native.eligible = true; native.reduced = false; native.principal = 'owner'; native.transitions.clear();
   vi.spyOn(Reanimated, 'useReducedMotion').mockImplementation(() => native.reduced);
   native.get.mockReset().mockResolvedValue(granted); native.request.mockReset().mockResolvedValue({ ...granted, granted: false, status: 'denied' });
-  native.screenshot.mockReset();
+  native.screenshot.mockReset(); native.gallery.mockReset().mockImplementation(async () => (await import('./development-ring-content')).developmentRingContent);
   native.support.mockReset().mockImplementation(callback => callback('SUPPORTED')); nativeUi.modules.VRTARSceneNavigatorModule = { isARSupportedOnDevice: native.support };
   native.getItem.mockReset().mockImplementation(async key => key.startsWith('argala.ar-') ? 'complete' : null); native.setItem.mockReset().mockResolvedValue(undefined);
   native.gate.mockReset().mockImplementation(() => native.eligible); native.load.mockReset().mockImplementation(async () => (await import('./destination-ring-scene')).DestinationRingSceneHost);
@@ -320,4 +321,25 @@ it('keeps the same native navigator while retrying an intro-history storage fail
   await act(async () => { void tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('common.retry'))!.props.onPress(); });
   expect(cameras()[0]).toBe(camera);
   await act(async () => read.resolve(null)); expect(cameras()[0]).toBe(camera);
+});
+
+it.each(['en', 'ja', 'ko'])('loads development samples before native startup with localized %s failure and explicit retry', async locale => {
+  await translations.changeLanguage(locale);
+  const pending = Promise.withResolvers<never>(); native.gallery.mockReturnValueOnce(pending.promise);
+  await mount(() => React.createElement(SessionRoute));
+  expect(copy()).toContain(translations.t('common.loading'));
+  expect(native.getItem).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled(); expect(native.load).not.toHaveBeenCalled();
+  await act(async () => pending.reject(new Error('PRIVATE_ASSET_ERROR')));
+  expect(copy()).toContain(translations.t('destinationRing.contentFailed')); expect(copy()).not.toContain('PRIVATE_ASSET_ERROR');
+  await act(async () => { await translations.changeLanguage(locale === 'en' ? 'ja' : 'en'); });
+  expect(copy()).toContain(translations.t('destinationRing.contentFailed')); expect(native.gallery).toHaveBeenCalledOnce();
+  await press('common.retry'); expect(native.gallery).toHaveBeenCalledTimes(2);
+  await layout(); await start(); await ready(); expect(cameras()).toHaveLength(1);
+});
+it('retires development sample completion when its principal leaves', async () => {
+  const pending = Promise.withResolvers<never>(); native.gallery.mockReturnValueOnce(pending.promise);
+  await mount(() => React.createElement(SessionRoute)); native.principal = null; await update();
+  await act(async () => pending.reject(new Error('RETIRED_ASSET_ERROR')));
+  expect(copy()).toContain(translations.t('destinationAr.unavailable')); expect(copy()).not.toContain(translations.t('destinationRing.contentFailed'));
+  expect(native.getItem).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled();
 });
