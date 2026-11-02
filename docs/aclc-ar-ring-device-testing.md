@@ -13,7 +13,7 @@ EXPO_PUBLIC_VIRO_SPIKE=1 npx expo start --dev-client --localhost --port 8081
 adb reverse tcp:8081 tcp:8081
 ```
 
-Open the development client with SDK57 onboarding/Fab/auto-launch suppression, then Profile → **ACLC ring prototype** → Start. The original **Viro feasibility test** square remains available for comparison. Release builds and disabled-opt-in links render unavailable without native support/permission/preference work.
+Open the development client with SDK57 onboarding/Fab/auto-launch suppression, then Profile → **ACLC ring prototype** → Start. The obsolete **Viro feasibility test** square page was removed on 2026-11-02; use the ring prototype for current development checks. Release builds and disabled-opt-in links render unavailable without native support/permission/preference work.
 
 A lost USB reverse mapping can show the development `Could not load bundle` overlay. Restore forwarding and reopen the client; do not classify that as unsupported AR hardware or an Android native crash. Warm Metro's lazy screen/scene modules before timed physical tests. Module preloading/export is bundling evidence, never tracking evidence. Start/Retry only when the owner is holding the phone upright toward a textured, well-lit area. Initial horizontal pose acquisition has the existing20s deadline.
 
