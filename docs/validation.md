@@ -1,5 +1,37 @@
 # Foundation validation
 
+## Final ordinary-timing Android confirmation (#39) — 2026-11-02
+
+After the owner reconnected ADB, the existing Galaxy A53 / Android 16 development
+client loaded **`81e31c5377120345e77dcb4c8779bf59357fb648`** from this checkout's
+Metro with `EXPO_PUBLIC_VIRO_SPIKE=1` and USB reverse forwarding. The runtime
+fix remains `b60b1d0`. The installed Gorhom handle source matched the original
+SHA-256 recorded below; no timing alteration or application diagnostics remained.
+No APK was built or installed. English, font scale 1.1 and location enabled were
+retained, with no account/journal/preference changes.
+
+The original sequence passed at ordinary native timing: All → nonexistent query
+→ dismiss keyboard → Search retained the visible title, handle and empty message.
+Profile → Explore retained the empty sheet; its settled capture had no location-
+loading guidance. Expanded/collapsed empty states and a repeated explicit no-match
+search stayed visible. A subsequent named query and Search this area also kept
+the shell (both returned no matches within that search scope). Clearing the query
+and explicitly searching nearby returned **20 places**, visible in both detents.
+Selecting a real marker exposed the selected-place actions; another no-match
+search then replaced it with a visible empty sheet. Every settled capture retained
+the title and expansion control without a location-loading message.
+
+This completes the previously pending normal-timing device confirmation. It adds
+to the controlled failing/passing late-measurement reproduction below; it does
+not claim that the historical intermittent sequence spontaneously failed again.
+Slow/error and exact request-count assertions remain automated evidence. Broader
+AR/on-site checks and the separate locale-switch Details observation remain as
+recorded below. Private captures, UI trees and SHA-256 manifest are in
+`.superpowers/reviews/2026-11-02-explore-39/final-normal-manifest.json`; none are
+published. Metro was stopped after the check, as requested. A fresh
+`npm run check` passed strict TypeScript, zero-warning lint and **1,307 tests /
+118 files**; `git diff --check` passed.
+
 ## Explore native opening race (#39) — 2026-11-02
 
 Fix: **`b60b1d0`**. The owner's additional observation was that failed returns
@@ -62,10 +94,10 @@ All four new cases were observed failing before the product fix (**4 failed /
 118 files**. `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android -- --max-workers 1`
 passed (8.5 MB Hermes bundle). `npm run check:native-patches` passed with zero
 updates; `git diff --check` passed. Independent source review found no blockers.
-The phone disconnected before a final ordinary-timing pass with the restored
-SDK. That device check remains pending; the controlled before/after above is
-completed. #39 remains open for final device confirmation. Metro was stopped
-after verification, following the owner’s earlier request.
+The phone initially disconnected before the ordinary-timing pass. The owner
+subsequently reconnected it and that check passed, as recorded above. The
+controlled before/after and normal-timing device confirmation are both completed.
+Metro was stopped after verification, following the owner’s earlier request.
 
 ## Connected Android issue QA and feasibility-page retirement — 2026-11-02
 
