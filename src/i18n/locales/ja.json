@@ -63,7 +63,10 @@
     "saving": "設定を保存中…",
     "saveShort": "保存",
     "undo": "元に戻す",
-    "undoChanges": "設定の変更を元に戻す"
+    "undoChanges": "設定の変更を元に戻す",
+    "arAudio": "ARオーディオ",
+    "systemVoice": "システム音声",
+    "soundEffects": "効果音"
   },
   "map": {
     "title": "近くの場所",

@@ -96,7 +96,10 @@
     "saving": "Saving settings…",
     "saveShort": "Save",
     "undo": "Undo",
-    "undoChanges": "Undo settings changes"
+    "undoChanges": "Undo settings changes",
+    "arAudio": "AR audio",
+    "systemVoice": "System Voice",
+    "soundEffects": "Sound Effects"
   },
   "map": {
     "title": "Nearby places",

@@ -85,7 +85,7 @@ it.each(['tab', 'stack'] as const)('saves both draft preferences explicitly from
   await language('한국어');
   expect(i18n.language).toBe('en'); expect(boundary.setItem).not.toHaveBeenCalled();
   await save();
-  expect(boundary.setItem).toHaveBeenCalledExactlyOnceWith('argala.preferences.v1', JSON.stringify({ activationRadiusMeters: 123, language: 'ko' }));
+  expect(boundary.setItem).toHaveBeenCalledExactlyOnceWith('argala.preferences.v1', JSON.stringify({ activationRadiusMeters: 123, language: 'ko', systemVoice: true, soundEffects: true }));
   expect(i18n.language).toBe('ko'); expect(copy()).toContain(i18n.t('common.saved'));
   await act(async () => tree!.unmount()); tree = undefined; await mount(entry);
   expect(displayedRadius()).toBe(123); expect(committed.language).toBe('ko');
@@ -324,4 +324,24 @@ it.each(['en','ja','ko'])('localizes sticky actions in %s and recomputes visibil
  await measureSettings(600,400);expect(sticky()).toBeUndefined();
  await measureSettings(600,900);expect(sticky()).toBeDefined();
  boundary.focused=false;await redraw();expect(sticky()).toBeUndefined();
+});
+it.each(['en', 'ja', 'ko'])('saves independent %s sound drafts with explicit Save, Undo and reopening', async locale => {
+  boundary.stored = JSON.stringify({ activationRadiusMeters: 123, language: locale }); await mount('stack');
+  const toggle = (key: string) => tree!.root.findAll(node => node.props.role === 'switch' && node.type === 'button' && node.props.accessibilityLabel === i18n.t(key))[0];
+  expect(toggle('settings.systemVoice').props.accessibilityState.checked).toBe(true);
+  await act(async () => toggle('settings.systemVoice').props.onPress());
+  expect(committed.systemVoice).toBe(true); expect(boundary.setItem).not.toHaveBeenCalled();
+  await save(); expect(committed).toMatchObject({ systemVoice: false, soundEffects: true, activationRadiusMeters: 123, language: locale });
+  await act(async () => toggle('settings.soundEffects').props.onPress());
+  const scroll = tree!.root.findByType('scroll' as React.ElementType);
+  await act(async () => { scroll.props.onLayout({ nativeEvent: { layout: { height: 400 } } }); tree!.root.findByProps({ testID: 'settings-save-action' }).props.onLayout({ nativeEvent: { layout: { y: 1000, height: 48 } } }); });
+  await act(async () => button('settings.undoChanges').props.onPress());
+  expect(toggle('settings.soundEffects').props.accessibilityState.checked).toBe(true);
+  await act(async () => tree!.unmount()); tree = undefined; await mount('stack');
+  expect(committed).toMatchObject({ systemVoice: false, soundEffects: true });
+});
+it('preserves explicit audio opt-outs when a caller saves only language and radius', async () => {
+  boundary.stored = JSON.stringify({ activationRadiusMeters: 123, language: 'en', systemVoice: false, soundEffects: false }); await mount();
+  await act(async () => committed.save({ activationRadiusMeters: 123, language: 'ko' }));
+  expect(committed).toMatchObject({ language: 'ko', systemVoice: false, soundEffects: false });
 });

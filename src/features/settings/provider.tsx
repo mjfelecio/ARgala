@@ -3,9 +3,9 @@ import { createContext, useContext, useEffect, useRef, useState, type PropsWithC
 import { useTranslation } from 'react-i18next';
 import i18n, { deviceLanguage } from '@/i18n';
 import { Notice, Screen } from '@/ui/shared';
-import { preferencesSchema, readPreferences, type Preferences } from './preferences';
+import { preferencesSchema, readPreferences, type Preferences, type PreferencesInput } from './preferences';
 const storageKey = 'argala.preferences.v1';
-const SettingsContext = createContext<(Preferences & { storageError: string | null; save: (value: Preferences) => Promise<void> }) | null>(null);
+const SettingsContext = createContext<(Preferences & { storageError: string | null; save: (value: PreferencesInput) => Promise<void> }) | null>(null);
 export function SettingsProvider({ children }: PropsWithChildren) {
   const { t } = useTranslation();
   const [preferences, setPreferences] = useState(() => readPreferences(null, deviceLanguage));
@@ -19,8 +19,8 @@ export function SettingsProvider({ children }: PropsWithChildren) {
     }).catch(() => { if (alive) { setStorageError('settings.loadFailed'); setReady(true); } });
     return () => { alive = false; };
   }, []);
-  async function save(value: Preferences) {
-    const next = preferencesSchema.parse(value);
+  async function save(value: PreferencesInput) {
+    const next = preferencesSchema.parse({ ...value, systemVoice: value.systemVoice ?? preferences.systemVoice, soundEffects: value.soundEffects ?? preferences.soundEffects });
     if (saving.current) throw new Error('A settings save is already in progress.');
     saving.current = true;
     try { await AsyncStorage.setItem(storageKey, JSON.stringify(next)); await i18n.changeLanguage(next.language); setPreferences(next); setStorageError(null); }

@@ -63,7 +63,10 @@
     "saving": "설정 저장 중…",
     "saveShort": "저장",
     "undo": "되돌리기",
-    "undoChanges": "설정 변경 되돌리기"
+    "undoChanges": "설정 변경 되돌리기",
+    "arAudio": "AR 오디오",
+    "systemVoice": "시스템 음성",
+    "soundEffects": "효과음"
   },
   "map": {
     "title": "주변 장소",

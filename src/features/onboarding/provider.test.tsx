@@ -64,7 +64,7 @@ it('saves existing radius and chosen language before committing completion, dedu
   expect(runtime.setItem).not.toHaveBeenCalledWith(key, 'complete');
   await act(async () => { saving.resolve(); await Promise.all([first, second]); });
   expect(runtime.setItem.mock.calls.map(([k, value]) => [k, k === preferencesKey ? JSON.parse(value) : value])).toEqual([
-    [key, 'pending'], [preferencesKey, { language: 'ko', activationRadiusMeters: 345 }], [key, 'complete'],
+    [key, 'pending'], [preferencesKey, { language: 'ko', activationRadiusMeters: 345, systemVoice: true, soundEffects: true }], [key, 'complete'],
   ]);
   expect(onboarding.status).toBe('completed');
   expect(settings).toMatchObject({ language: 'ko', activationRadiusMeters: 345 });
