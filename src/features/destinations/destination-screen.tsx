@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { withUniwind, useCSSVariable } from 'uniwind';
+import { withUniwind } from 'uniwind';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
 import { useSettings } from '@/features/settings/provider';
@@ -25,7 +25,6 @@ export default function DestinationScreen() {
   const { t } = useTranslation();
   const { language } = useSettings();
   const [accent, onAccent] = useThemeColor(['accent', 'accent-foreground']);
-  const warning = useCSSVariable('--color-warning-foreground') as string;
   const client = useQueryClient();
   const active = useAppActive(); const focused = useIsFocused();
   const navigating = useRef(false);
@@ -49,9 +48,6 @@ export default function DestinationScreen() {
       {destination ? <>
         <View className="gap-3">
           <Text selectable accessibilityRole="header" className="font-sans text-hero font-ui-bold text-brand-strong">{destinationName(destination)}</Text>
-          {!destination.verifiedName && <View className="flex-row items-center gap-2 self-start rounded-pill bg-warning-surface px-3 py-2">
-            <Ionicons name="time-outline" size={20} color={warning} accessible={false} /><Text className="shrink font-sans text-sm text-warning-foreground">{t('destinations.provisional')}</Text>
-          </View>}
           <Text className="font-sans text-base text-brand-strong">{t('arrival.teaser')}</Text>
         </View>
         <DaytimeGallery key={`gallery:${destination.id}`} media={destination.media ?? []} />

@@ -29,7 +29,7 @@ export default function DestinationsScreen() {
         <Text className="font-sans text-sm text-muted">{t('destinations.intro')}</Text>
       </View>
       {listFeaturedDestinations().map(destination => <Button key={destination.id} variant="ghost" className="h-auto min-h-16! justify-start gap-3 rounded-card! bg-surface! p-4"
-        accessibilityLabel={destinationName(destination)} accessibilityHint={!destination.verifiedName ? t('destinations.provisional') : undefined} onPress={() => {
+        accessibilityLabel={destinationName(destination)} onPress={() => {
           if (destination.center) { setFeaturedSelection(client, destination.id); router.navigate({ pathname: '/', params: { featuredDestinationId: destination.id } }); }
           else router.navigate({ pathname: '/destinations/[destinationId]', params: { destinationId: destination.id } });
         }}>
@@ -40,7 +40,6 @@ export default function DestinationsScreen() {
           <Text className="font-sans text-card font-ui-semibold text-brand-strong">{destinationName(destination)}</Text>
           <View className="flex-row flex-wrap gap-x-2 gap-y-1">
             <Text className="font-sans text-xs text-muted">{destination.id}</Text>
-            {!destination.verifiedName && <Text className="shrink font-sans text-xs text-muted">{t('destinations.provisional')}</Text>}
           </View>
         </View>
         <Ionicons name="chevron-forward" size={20} color={accent} accessible={false} />

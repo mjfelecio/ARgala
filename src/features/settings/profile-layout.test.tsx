@@ -69,3 +69,9 @@ it('groups the actual identity and actionable Saved row, keeping decorative icon
  expect(saved.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toEqual(['bookmark-outline','chevron-forward']);
  expect(saved.findAllByType('icon' as React.ElementType).every(node=>node.props.accessible===false)).toBe(true);
 });
+
+it('keeps radius controls concise without the removed numeric entry or technical help',async()=>{
+ await act(async()=>{tree=create(withHeroUI(<I18nextProvider i18n={translations}><JournalContext.Provider value={journal}><ProfileSettingsContent entry="tab"/></JournalContext.Provider></I18nextProvider>));});
+ expect(tree!.root.findAllByType('input')).toHaveLength(0);
+ expect(tree!.root.findAllByType('text').some(n=>String(n.props.children).startsWith('Activation is independent'))).toBe(false);
+});

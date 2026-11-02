@@ -244,7 +244,7 @@ it('lets Explore own its floating search bar without a navigator header', async 
  expect(tabs.props.screenOptions.header).toBeUndefined();
 });
 
-it('marks the active Explore and Profile tab labels with a decorative seafoam dot', async () => {
+it('emphasizes selected Explore and Profile labels without a dot or underline', async () => {
  await mount(React.createElement(AppTabs));
  const routes=tree!.root.findAllByType('route' as React.ElementType);
  for(const index of [0,2]) {
@@ -252,7 +252,9 @@ it('marks the active Explore and Profile tab labels with a decorative seafoam do
   expect(typeof label).toBe('function');
   let active!:ReactTestRenderer;let inactive!:ReactTestRenderer;
   await act(async()=>{active=create(label({focused:true,color:'green',children:'Label'}));inactive=create(label({focused:false,color:'gray',children:'Label'}));});
-  expect(active.root.findAllByProps({testID:'active-tab-indicator'})).toHaveLength(1);
+  expect(active.root.findAllByProps({testID:'active-tab-indicator'})).toHaveLength(0);
+  expect(active.root.findByType('text').props.className).toContain('font-ui-semibold');
+  expect(inactive.root.findByType('text').props.className).not.toContain('font-ui-semibold');
   expect(inactive.root.findAllByProps({testID:'active-tab-indicator'})).toHaveLength(0);
   await act(async()=>{active.unmount();inactive.unmount();});
  }

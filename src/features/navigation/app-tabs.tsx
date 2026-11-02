@@ -11,7 +11,7 @@ export function AppTabs() {
   const insets = useSafeAreaInsets();
   const [active, inactive] = useThemeColor(['accent', 'muted']);
   const barStyle = useResolveClassNames('h-16 border-t-0 bg-page shadow-none');
-  const labelStyle = useResolveClassNames('font-sans text-xs font-ui-medium');
+  const labelStyle = useResolveClassNames('font-sans text-xs');
   return <Tabs initialRouteName="index" backBehavior="initialRoute" screenOptions={{
     headerShown: false,
     tabBarActiveTintColor: active,
@@ -35,8 +35,7 @@ export function AppTabs() {
 }
 
 function TabLabel({focused,color,children}:{focused:boolean;color:ColorValue;children:string}) {
- return <View className="items-center gap-1">
-   <Text className="font-sans text-xs font-ui-medium" style={{color}}>{children}</Text>
-   {focused ? <View testID="active-tab-indicator" className="size-1.5 rounded-pill bg-seafoam" accessible={false} importantForAccessibility="no-hide-descendants"/> : <View className="size-1.5" accessible={false}/>}
+ return <View className="items-center">
+   <Text className={`font-sans text-xs ${focused ? 'font-ui-semibold' : ''}`} style={{color}}>{children}</Text>
  </View>;
 }

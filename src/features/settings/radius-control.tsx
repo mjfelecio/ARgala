@@ -1,8 +1,5 @@
 import { Button } from 'heroui-native/button';
-import { Input } from 'heroui-native/input';
-import { Label } from 'heroui-native/label';
 import { Slider } from 'heroui-native/slider';
-import { TextField } from 'heroui-native/text-field';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
@@ -56,11 +53,6 @@ export function RadiusControl({ value, onChange, disabled = false }: {
         <Button.Label>{t('settings.meters', { count: preset })}</Button.Label>
       </Button>)}
     </View>
-    <TextField isDisabled={disabled} isInvalid={!parsed.success}>
-      <Label><Label.Text className="font-sans text-sm font-ui-semibold">{t('settings.radius')}</Label.Text></Label>
-      <Input value={draft.text} keyboardType="number-pad" accessibilityLabel={t('settings.radius')} onChangeText={next => edit(next, true)}
-        className="min-h-14 border border-outline bg-surface font-sans text-base android:border-outline" />
-    </TextField>
     {!parsed.success && <Text accessibilityRole="alert" accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t('settings.invalid')}</Text>}
   </View>;
 }
