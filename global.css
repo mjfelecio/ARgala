@@ -39,6 +39,9 @@
   --color-ink-secondary: #3F4942;
   --color-outline: #E2EBE5;
   --color-error: #BA1A1A;
+  --color-warning-surface: #FFF6E4;
+  --color-warning-border: #F2D393;
+  --color-warning-foreground: #865200;
 
   --text-hero: 1.75rem;
   --text-hero--line-height: 2.125rem;
@@ -142,3 +145,9 @@
   line-height: var(--text-card--line-height);
   font-weight: 600;
 }
+
+/* HeroUI owns --font-semibold/--font-bold as family aliases. Use explicit
+ * weights on refreshed non-AR screens so those aliases cannot erase hierarchy. */
+@utility font-ui-medium { font-weight: 500; }
+@utility font-ui-semibold { font-weight: 600; }
+@utility font-ui-bold { font-weight: 700; }

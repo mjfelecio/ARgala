@@ -34,7 +34,7 @@ export function HomeMapControls({ onSearchNearby, onOpenDestinations, canSearch,
       </TextField>}
       <Button variant="ghost" isIconOnly={!!onQueryChange} className={onQueryChange ? 'min-h-12 min-w-12 rounded-pill' : 'h-auto min-h-12 flex-1 rounded-pill py-2'}
         accessibilityLabel={searchLabel} isDisabled={searchDisabled} accessibilityState={{ disabled: searchDisabled, busy: searching }} onPress={submitSearch}>
-        {!onQueryChange && <Button.Label className="flex-1 font-medium">{searchLabel}</Button.Label>}
+        {!onQueryChange && <Button.Label className="flex-1 font-ui-medium">{searchLabel}</Button.Label>}
         {searching ? <Spinner size="sm" color={accent} /> : <Ionicons name="search-outline" size={22} color={ink} accessible={false} />}
       </Button>
     </View>

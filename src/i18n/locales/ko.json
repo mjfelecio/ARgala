@@ -237,7 +237,12 @@
     "nearbyEmpty": "이 여행지에서 500m 이내에 검색된 장소가 없습니다.",
     "fromDestination": "여행지에서 {{meters}}m",
     "nearbyLimit": "최대 {{count}}곳이 검색되며 모든 주변 시설이 포함되지는 않을 수 있습니다.",
-    "exploreCount": "여행지 {{count}}곳 둘러보기"
+    "exploreCount": "여행지 {{count}}곳 둘러보기",
+    "storiesHeading": "여행지 이야기",
+    "storiesPending": "승인된 이야기가 아직 없어요.",
+    "storiesOnSite": "승인된 이야기는 도착 확인 후 AR에서 열려요.",
+    "visitForAr": "현장에서 카메라 AR 열기",
+    "arrivalRequired": "카메라 AR에는 도착 확인과 승인된 콘텐츠가 필요해요."
   },
   "onboarding": {
     "tagline": "주변의 장소를 발견하세요.",
@@ -425,7 +430,16 @@
     "syncConflict": "다른 변경 사항을 수신하고 있습니다. 기기의 변경 사항은 안전합니다. 동기화를 다시 시도하세요.",
     "syncDeviceLimit": "이 계정의 동기화 기기 수가 한도에 도달했습니다. 기기의 변경 사항은 저장되어 있습니다.",
     "openShort": "보기",
-    "removeShort": "삭제"
+    "removeShort": "삭제",
+    "saveShort": "저장",
+    "savedShort": "저장됨",
+    "savedHeading": "저장한 장소",
+    "savedCount_other": "저장한 장소 {{count}}개",
+    "googleMetadata": "Google Maps · 열어서 상세 정보 불러오기",
+    "featuredMetadata": "추천 여행지",
+    "syncAttention": "동기화 확인이 필요해요",
+    "passportFraction": "{{count}} / {{total}}",
+    "passportVisited": "방문한 여행지"
   },
   "content": {
     "title": "목적지 콘텐츠",

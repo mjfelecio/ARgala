@@ -278,7 +278,12 @@
     "nearbyEmpty": "No places were returned within 500 m of this destination.",
     "fromDestination": "{{meters}} m from destination",
     "nearbyLimit": "Search returns up to {{count}} places and may not include every nearby establishment.",
-    "exploreCount": "Explore {{count}} destinations"
+    "exploreCount": "Explore {{count}} destinations",
+    "storiesHeading": "Destination stories",
+    "storiesPending": "Approved stories are not yet available.",
+    "storiesOnSite": "Approved stories open in AR after a verified arrival.",
+    "visitForAr": "Visit to unlock camera AR",
+    "arrivalRequired": "Camera AR requires verified arrival and approved content."
   },
   "onboarding": {
     "tagline": "Discover places around you.",
@@ -466,7 +471,17 @@
     "syncConflict": "Other changes are still arriving. Your local changes are safe. Retry sync.",
     "syncDeviceLimit": "This account has reached its sync device limit. Your local changes remain saved.",
     "openShort": "View",
-    "removeShort": "Remove"
+    "removeShort": "Remove",
+    "saveShort": "Save",
+    "savedShort": "Saved",
+    "savedHeading": "Your saved places",
+    "savedCount_one": "{{count}} place saved",
+    "savedCount_other": "{{count}} places saved",
+    "googleMetadata": "Google Maps · Open to load details",
+    "featuredMetadata": "Featured destination",
+    "syncAttention": "Sync needs attention",
+    "passportFraction": "{{count}} / {{total}}",
+    "passportVisited": "destinations visited"
   },
   "content": {
     "title": "Destination content",

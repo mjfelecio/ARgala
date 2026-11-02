@@ -18,11 +18,10 @@ export function ProfileSettingsContent({ entry }: { entry: 'tab' | 'stack' }) {
     <View className="flex-row items-center gap-3 px-4 py-3">
       {entry === 'stack' && <Button isIconOnly variant="ghost" accessibilityLabel={t('common.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }}><Ionicons name="arrow-back" color={accent} size={24} /></Button>}
       {entry === 'tab' && <Ionicons name="compass-outline" color={accent} size={28} accessible={false} />}
-      <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-brand-strong">{t('settings.profileTitle')}</Text>
+      <Text accessibilityRole="header" className="shrink font-sans text-section font-ui-semibold text-brand-strong">{t('settings.profileTitle')}</Text>
     </View>
-    <SettingsForm>
+    <SettingsForm identityChildren={<JournalProfileEntry />}>
       {entry === 'tab' && <ViroRingLaunch />}
-      <JournalProfileEntry />
     </SettingsForm>
   </StyledSafeAreaView>;
 }

@@ -31,8 +31,8 @@ export function RadiusControl({ value, onChange, disabled = false }: {
   }
   return <View className="gap-4">
     <View className="flex-row flex-wrap items-center justify-between gap-2">
-      <Text className="font-sans text-card font-semibold text-foreground">{t('settings.activationRadius')}</Text>
-      <Text className="rounded-pill bg-accent px-3 py-1 font-sans text-sm font-semibold text-accent-foreground">{t('settings.meters', { count: current })}</Text>
+      <Text className="font-sans text-card font-ui-semibold text-foreground">{t('settings.activationRadius')}</Text>
+      <Text className="rounded-pill bg-accent px-3 py-1 font-sans text-sm font-ui-semibold text-accent-foreground">{t('settings.meters', { count: current })}</Text>
     </View>
     <Text className="font-sans text-sm text-muted">{t('settings.radiusDescription')}</Text>
     <Slider value={current} minValue={ACTIVATION.minMeters} maxValue={ACTIVATION.maxMeters} step={10} isDisabled={disabled}
@@ -57,7 +57,7 @@ export function RadiusControl({ value, onChange, disabled = false }: {
       </Button>)}
     </View>
     <TextField isDisabled={disabled} isInvalid={!parsed.success}>
-      <Label><Label.Text className="font-sans text-sm font-semibold">{t('settings.radius')}</Label.Text></Label>
+      <Label><Label.Text className="font-sans text-sm font-ui-semibold">{t('settings.radius')}</Label.Text></Label>
       <Input value={draft.text} keyboardType="number-pad" accessibilityLabel={t('settings.radius')} onChangeText={next => edit(next, true)}
         className="min-h-14 border border-outline bg-surface font-sans text-base android:border-outline" />
     </TextField>

@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 import { localizationOptions } from '@/i18n/options';
 import { JournalContext, type JournalContextValue } from './context';
 import SavedPlacesScreen from './saved-screen';
+import { SavePlaceAction } from './actions';
 vi.mock('expo-router', () => ({ router: { push: vi.fn(), navigate: vi.fn(), back: vi.fn(), canGoBack: () => true } }));
 let tree: ReactTestRenderer | undefined;
 let translations: i18n;
@@ -63,4 +64,58 @@ it.each(['en', 'ja', 'ko'])('keeps %s loading, failed read/retry and empty state
   await act(async () => tree!.update(render()));
   expect(output()).toContain(translations.t('journal.savedEmpty'));
   expect(output()).not.toContain(translations.t('journal.loadFailed'));
+});
+
+it('renders the real saved count, honest metadata and decorative View/remove icons', async () => {
+  journal.state.bookmarks.push({kind: 'featured', id: 'D01'}); await mount();
+  for (const locale of ['en', 'ja', 'ko']) {
+    await act(async () => { await translations.changeLanguage(locale); });
+    expect(output()).toContain(translations.t('journal.savedHeading'));
+    expect(output()).toContain(translations.t('journal.savedCount', {count: 2}));
+    expect(output()).toContain(translations.t('journal.googleMetadata'));
+    const buttons = tree!.root.findAllByType('button');
+    for (const [key, icon] of [['journal.open', 'chevron-forward'], ['journal.remove', 'trash-outline']]) {
+      const action = buttons.find(node => node.props.accessibilityLabel === translations.t(key))!;
+      expect(action.findAllByType('icon' as React.ElementType).some(node => node.props.name === icon && node.props.accessible === false)).toBe(true);
+    }
+  }
+});
+it.each(['local', 'pending', 'syncing', 'synced', 'failed'] as const)('presents truthful %s sync status without initiating work', async phase => {
+  journal.principalId = 'account'; journal.sync = {phase}; await mount();
+  const warning = tree!.root.findAllByProps({testID: 'journal-sync-warning'});
+  expect(warning.length).toBe(phase === 'failed' ? 1 : 0);
+  if (phase === 'failed') {
+    expect(output()).toContain(translations.t('journal.syncAttention'));
+    const retry = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('journal.retrySync'))!;
+    expect(retry.props.className).toContain('outline');
+    await act(async () => retry.props.onPress()); expect(journal.syncNow).toHaveBeenCalledOnce();
+  } else expect(journal.syncNow).not.toHaveBeenCalled();
+});
+it('keeps a guest quiet even with a retired account failure', async () => {
+  journal.sync = {phase:'failed',error:'journal.syncAuth'}; await mount();
+  expect(tree!.root.findAllByProps({testID:'journal-sync-warning'})).toHaveLength(0);
+  expect(output()).toContain(translations.t('journal.localOnly'));
+  expect(output()).not.toContain(translations.t('journal.syncAuth'));
+});
+
+it('shows bookmark toggle state, a visible saved check and busy coalescing without confusing row removal', async () => {
+  journal.state.bookmarks=[];
+  const gate=Promise.withResolvers<boolean>(); vi.mocked(journal.save).mockReturnValueOnce(gate.promise);
+  const action=()=>withHeroUI(<I18nextProvider i18n={translations}><JournalContext.Provider value={journal}><SavePlaceAction reference={{kind:'google',id}} /></JournalContext.Provider></I18nextProvider>);
+  await act(async()=>{tree=create(action());});
+  const save=tree!.root.findAllByType('button').find(node=>node.props.accessibilityLabel===translations.t('journal.save'))!;
+  expect(save.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toContain('bookmark-outline');
+  await act(async()=>{void save.props.onPress();void save.props.onPress();});
+  expect(save.props.accessibilityState.busy).toBe(true);expect(journal.save).toHaveBeenCalledOnce();
+  journal={...journal,state:{...journal.state,bookmarks:[{kind:'google',id}]}};
+  await act(async()=>{gate.resolve(true);tree!.update(action());});
+  const saved=tree!.root.findAllByType('button').find(node=>node.props.accessibilityLabel===translations.t('journal.remove'))!;
+  expect(saved.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toEqual(['bookmark','checkmark']);
+  expect(output()).toContain(translations.t('journal.savedShort'));
+  expect(saved.props.accessibilityState.busy).toBe(false);
+});
+
+it.each([['en','Google Maps · Open to load details'],['ja','Google Maps · 開いて詳細を読み込めます'],['ko','Google Maps · 열어서 상세 정보 불러오기']])('describes the explicit Details loading step in %s', async (locale,copy) => {
+ await translations.changeLanguage(locale);await mount();
+ expect(output()).toContain(copy);
 });

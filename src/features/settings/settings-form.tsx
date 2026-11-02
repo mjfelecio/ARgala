@@ -10,21 +10,24 @@ import { LanguageControl } from './language-control';
 import { RadiusControl } from './radius-control';
 import { useSettingsDraft } from './use-settings-draft';
 import { ReminderSettings } from '@/features/arrival-reminders/components';
-import type { PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
 
-export default function SettingsForm({ children }: PropsWithChildren) {
+export default function SettingsForm({ children, identityChildren }: PropsWithChildren<{ identityChildren?: ReactNode }>) {
   const { t } = useTranslation();
   const { focused, radius, language, changeRadius, changeLanguage, busy, message, dirty, valid, save, storageError } = useSettingsDraft();
   return <ScrollView className="flex-1" keyboardShouldPersistTaps="handled" contentContainerClassName="gap-6 px-5 pb-8 pt-2">
-    <AccountSummary />
+    <View testID="profile-identity-group" className="gap-4 rounded-card bg-surface p-4">
+      <AccountSummary />
+      {identityChildren}
+    </View>
     {children}
     <View className="gap-2 rounded-card bg-surface p-5">
-      <Text accessibilityRole="header" className="font-sans text-section font-semibold text-brand-strong">{t('settings.language')}</Text>
+      <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-brand-strong">{t('settings.language')}</Text>
       <Text className="font-sans text-sm text-muted">{t('settings.languageDescription')}</Text>
       <LanguageControl value={language} onChange={changeLanguage} disabled={busy} />
     </View>
     <View className="gap-3 rounded-card bg-surface p-5">
-      <Text accessibilityRole="header" className="font-sans text-section font-semibold text-brand-strong">{t('settings.arLocation')}</Text>
+      <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-brand-strong">{t('settings.arLocation')}</Text>
       {/* Discard an unfinished local drag when leaving this screen. */}
       <RadiusControl key={String(focused)} value={radius} onChange={changeRadius} disabled={busy} />
       <Text className="font-sans text-sm text-foreground">{t('settings.deviceLocal')}</Text>

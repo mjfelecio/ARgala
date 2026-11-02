@@ -46,13 +46,13 @@ export default function PlaceDetailsScreen() {
     setRequestedKey(requestKey);
     void client.fetchQuery(options).catch(() => {});
   }
-  function navigateTo(pathname: '/' | '/ar') {
+  function viewOnMap() {
     if (!place || !active || !focused || navigating.current) return;
     navigating.current = true;
     setPlaceSelection(client, place, full ? language : undefined, options.initialDataUpdatedAt);
     // Pop the details page back to the existing tab navigator, selecting its
     // destination tab. This also handles a direct link without duplicating tabs.
-    router.dismissTo({ pathname, params: { placeId: place.providerId } });
+    router.dismissTo({ pathname: '/', params: { placeId: place.providerId } });
   }
   function directions() {
     if (!place || !active || !focused || navigating.current) return;
@@ -72,20 +72,17 @@ export default function PlaceDetailsScreen() {
     </Button>
     <JournalFeedback />
     <View className="flex-row flex-wrap items-center gap-2">
-      {providerId && <SavePlaceAction reference={{kind:'google',id:providerId}} variant="ghost" />}
-      <Button variant="ghost" className="min-w-32 grow shrink" accessibilityLabel={t('placeDetails.map')} onPress={() => navigateTo('/')}>
-        <Ionicons name="map-outline" size={24} color={accent} /><Button.Label>{t('placeDetails.map')}</Button.Label>
+      <Button variant="outline" className="min-w-32 flex-1 bg-surface" accessibilityLabel={t('placeDetails.map')} onPress={viewOnMap}>
+        <Ionicons name="map-outline" size={24} color={accent} accessible={false} /><Button.Label>{t('placeDetails.map')}</Button.Label>
       </Button>
-      <Button variant="ghost" className="min-w-32 grow shrink" accessibilityLabel={t('placeDetails.ar')} onPress={() => navigateTo('/ar')}>
-        <Ionicons name="scan-outline" size={24} color={accent} /><Button.Label>{t('placeDetails.ar')}</Button.Label>
-      </Button>
+      {providerId && <SavePlaceAction reference={{kind:'google',id:providerId}} variant="outline" className="min-w-32 flex-1 bg-surface" />}
     </View>
     {recovery}
   </View>;
   return <StyledSafeAreaView className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
     <View className="flex-row items-center gap-3 px-4 py-3">
       <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t('placeDetails.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }}><Ionicons name="arrow-back" size={24} color={accent} /></Button>
-      <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-brand-strong">{t('placeDetails.title')}</Text>
+      <Text accessibilityRole="header" className="shrink font-sans text-section font-ui-semibold text-brand-strong">{t('placeDetails.title')}</Text>
     </View>
     <ScrollView className="flex-1" contentContainerClassName="grow gap-4 px-4 pb-8">
       {place ? <PlaceDetailsContent place={place} actions={actions} />

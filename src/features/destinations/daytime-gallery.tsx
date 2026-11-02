@@ -1,3 +1,4 @@
+import { JourneyMotif } from '@/ui/journey-motif';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColor } from 'heroui-native/hooks';
 import { useState, type ReactNode } from 'react';
@@ -27,13 +28,14 @@ export function DaytimeGallery({ media, children }: { media: readonly Destinatio
       className={full ? 'h-80 w-full rounded-card' : 'h-64 w-full rounded-card'} resizeMode={full ? 'contain' : 'cover'}
       onError={() => setFailed(previous => new Set([...previous, selected.id]))} />
       : <View testID="destination-media-fallback" className="min-h-48 items-center justify-center gap-3 rounded-card bg-mint p-6">
-        <Ionicons name="images-outline" size={36} color={accent} accessible={false} />
+        <JourneyMotif contained />
+        <Ionicons name="images-outline" size={28} color={accent} accessible={false} />
         <Text className="text-center font-sans text-base text-muted">{t(selected ? 'destinations.imageFailed' : 'destinations.previewMissing')}</Text>
       </View>;
   }
   return <View className="gap-4">
     <View className="gap-2">
-      <Text accessibilityRole="header" className="font-sans text-section font-semibold text-foreground">{t('destinations.daytime')}</Text>
+      <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-foreground">{t('destinations.daytime')}</Text>
       <Text className="font-sans text-sm text-muted">{t('destinations.notLive')}</Text>
       {photo()}
       {selected && <>

@@ -20,12 +20,12 @@ export default function DestinationsScreen() {
   return <StyledSafeAreaView className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
     <View className="flex-row items-center gap-3 px-4 py-3">
       <Button isIconOnly variant="ghost" accessibilityLabel={t('placeDetails.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }}><Ionicons name="arrow-back" size={24} color={accent} accessible={false} /></Button>
-      <Text accessibilityRole="header" className="shrink font-sans text-section font-semibold text-brand-strong">{t('destinations.title')}</Text>
+      <Text accessibilityRole="header" className="shrink font-sans text-section font-ui-semibold text-brand-strong">{t('destinations.title')}</Text>
     </View>
     <ScrollView className="flex-1" contentContainerClassName="gap-4 px-4 pb-8">
       <PassportSummary/>
       <View className="gap-2">
-        <Text accessibilityRole="header" className="font-sans text-section font-bold text-brand-strong">{t('destinations.exploreCount', { count: destinationIds.length })}</Text>
+        <Text accessibilityRole="header" className="font-sans text-section font-ui-bold text-brand-strong">{t('destinations.exploreCount', { count: destinationIds.length })}</Text>
         <Text className="font-sans text-sm text-muted">{t('destinations.intro')}</Text>
       </View>
       {listFeaturedDestinations().map(destination => <Button key={destination.id} variant="ghost" className="h-auto min-h-16! justify-start gap-3 rounded-card! bg-surface! p-4"
@@ -37,7 +37,7 @@ export default function DestinationsScreen() {
           <Ionicons name="location-outline" size={24} color={accent} />
         </View>
         <View className="min-w-0 flex-1 gap-1">
-          <Text className="font-sans text-card font-semibold text-brand-strong">{destinationName(destination)}</Text>
+          <Text className="font-sans text-card font-ui-semibold text-brand-strong">{destinationName(destination)}</Text>
           <View className="flex-row flex-wrap gap-x-2 gap-y-1">
             <Text className="font-sans text-xs text-muted">{destination.id}</Text>
             {!destination.verifiedName && <Text className="shrink font-sans text-xs text-muted">{t('destinations.provisional')}</Text>}

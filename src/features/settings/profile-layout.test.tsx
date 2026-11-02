@@ -60,3 +60,12 @@ it.each(['tab', 'stack'] as const)('keeps growing guest content and settings in 
     expect(tree!.root.findAllByType('safe-area' as React.ElementType).at(-1)!.props.edges).toEqual(entry === 'tab' ? ['top', 'left', 'right'] : ['top', 'bottom', 'left', 'right']);
   }
 });
+
+it('groups the actual identity and actionable Saved row, keeping decorative icons out of accessibility', async () => {
+ await act(async()=>{tree=create(withHeroUI(<I18nextProvider i18n={translations}><JournalContext.Provider value={journal}><ProfileSettingsContent entry="tab" /></JournalContext.Provider></I18nextProvider>));});
+ const group=tree!.root.findByProps({testID:'profile-identity-group'});
+ expect(group.findAllByType('text').some(node=>node.props.children===translations.t('settings.myAccount'))).toBe(true);
+ const saved=group.findAllByType('button').find(node=>node.props.accessibilityLabel===translations.t('journal.savedTitle'))!;
+ expect(saved.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toEqual(['bookmark-outline','chevron-forward']);
+ expect(saved.findAllByType('icon' as React.ElementType).every(node=>node.props.accessible===false)).toBe(true);
+});
