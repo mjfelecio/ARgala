@@ -1949,3 +1949,22 @@ acceptance matrix is recorded in the [device proof report](brand-device-proof-20
 Raw captures/recording and their hashed manifest are retained locally under the
 gitignored `.superpowers/reviews/2026-11-02-seafoam-forest/`, because they include
 live map and personal keyboard/status content; the report links the review gallery.
+
+### 2026-11-02 — owner-reviewed brand spacing adjustments
+
+Centered the auth page's ARgala pill horizontally within the existing hero. Added
+8 dp of left margin to Explore's decorative search-bar logo to balance the
+trailing search icon. Removed the search surface's extra 4 dp top/bottom padding,
+reducing its normal baseline from approximately 56 to 48 dp while retaining the
+48 dp input minimum and content growth for larger text. Colors, logo sizing,
+input behavior, search intent, navigation and sensor ownership are unchanged.
+
+The owner verified all three adjustments on the connected phone and reported
+that everything looked good. Further captures stopped at the owner's request;
+the earlier screenshot gallery records the preceding revision. Temporary auth
+preview wiring was fully removed. No APK build or dependency change was needed.
+
+Final `npm run check -- -- --maxWorkers=2` passed strict TypeScript, zero-warning
+ESLint and all 1,273 tests across 117 files. The targeted auth/map tests also
+passed (26 tests). `git diff --check` passed. No style-only implementation-mirroring
+tests were added; existing behavioral regressions remain intact.

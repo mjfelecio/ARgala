@@ -59,7 +59,7 @@ export default function SignInScreen() {
     <ScrollView className="flex-1" contentContainerClassName="grow" keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag" showsVerticalScrollIndicator={false}>
       <View className="bg-mint" style={{ paddingTop: insets.top, paddingLeft: insets.left, paddingRight: insets.right }}>
-        <View className="min-h-56 items-end overflow-hidden px-6 pb-10 pt-4">
+        <View className="min-h-56 items-center overflow-hidden px-6 pb-10 pt-4">
           <JourneyMotif />
           <View className="flex-row items-center gap-2 rounded-pill bg-surface px-4 py-2">
             <BrandLogo variant="horizontal" width={160} />

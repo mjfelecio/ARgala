@@ -23,8 +23,8 @@ export function HomeMapControls({ onSearchNearby, onOpenDestinations, canSearch,
   const submitSearch = () => { if (!searchDisabled) onSearchNearby(); };
 
   return <View testID="home-map-controls" className="gap-2 px-4 pb-2 pt-3" onLayout={onLayout} pointerEvents="box-none">
-    <View className="min-h-12 flex-row items-center gap-1 rounded-pill bg-surface px-2 py-1 shadow-sm">
-      <View className="size-8 items-center justify-center rounded-xl" accessible={false} pointerEvents="none">
+    <View className="min-h-12 flex-row items-center gap-1 rounded-pill bg-surface px-2 shadow-sm">
+      <View className="ml-2 size-8 items-center justify-center rounded-xl" accessible={false} pointerEvents="none">
         <BrandLogo variant="mark" width={32} decorative />
       </View>
       {onQueryChange && <TextField className="min-w-0 flex-1">
