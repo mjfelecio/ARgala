@@ -38,21 +38,22 @@ export function HomeMapControls({ onSearchNearby, onOpenDestinations, canSearch,
         {searching ? <Spinner size="sm" color={accent} /> : <Ionicons name="search-outline" size={22} color={ink} accessible={false} />}
       </Button>
     </View>
-    <View className="flex-row items-center gap-2">
-      <Button size="sm" variant="secondary" className="h-auto min-h-12 shrink-0 rounded-pill bg-surface px-3 py-2" accessibilityLabel={t('destinations.title')} onPress={onOpenDestinations}>
+    {/* Slim 36dp surfaces retain 48dp touch bounds inside their rail. */}
+    <View className="min-h-12 flex-row items-center gap-2">
+      <Button size="sm" variant="secondary" hitSlop={{top:6,bottom:6}} className="h-auto min-h-9! shrink-0 rounded-pill bg-surface px-3 py-1!" accessibilityLabel={t('destinations.title')} onPress={onOpenDestinations}>
         <Ionicons name="library-outline" size={18} color={ink} accessible={false} /><Button.Label>{t('destinations.shortTitle')}</Button.Label>
       </Button>
-      {onCategoryChange && <ScrollView className="min-w-0 flex-1" horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 py-1" keyboardShouldPersistTaps="handled">
+      {onCategoryChange && <ScrollView className="min-w-0 flex-1" horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="min-h-12 items-center gap-2 py-1.5" keyboardShouldPersistTaps="handled">
         {(['all', 'attractions', 'restaurants', 'hotels', 'shopping'] as const).map(value => <Button key={value} size="sm" variant={category === value ? 'primary' : 'secondary'}
-          className="h-auto min-h-12 rounded-pill px-3 py-2" accessibilityLabel={t(`search.categories.${value}`)} accessibilityState={{ selected: category === value }} onPress={() => onCategoryChange(value)}>
+          hitSlop={{top:6,bottom:6}} className="h-auto min-h-9! rounded-pill px-3 py-1!" accessibilityLabel={t(`search.categories.${value}`)} accessibilityState={{ selected: category === value }} onPress={() => onCategoryChange(value)}>
           <Button.Label>{t(`search.categories.${value}`)}</Button.Label>
         </Button>)}
       </ScrollView>}
     </View>
-    {onSearchArea && <Button size="sm" variant="primary" className="h-auto min-h-12 self-center rounded-pill px-4 py-2"
+    {onSearchArea && <View className="-mt-2 min-h-12 items-center justify-center self-center" pointerEvents="box-none"><Button size="sm" variant="primary" hitSlop={{top:6,bottom:6}} className="h-auto min-h-9! rounded-pill px-4 py-1!"
       accessibilityLabel={t('search.thisArea')} accessibilityHint={areaRadiusMeters ? t('search.areaExtent', { meters: Math.round(areaRadiusMeters) }) : undefined}
       isDisabled={!canSearchArea || searching} onPress={onSearchArea}>
       <Button.Label>{t('search.thisArea')}</Button.Label>
-    </Button>}
+    </Button></View>}
   </View>;
 }
