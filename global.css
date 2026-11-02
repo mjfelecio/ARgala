@@ -12,14 +12,16 @@
   --font-semibold: 'PlusJakartaSans';
   --font-bold: 'PlusJakartaSans';
 
-  /* Seafoam Forest v2 artwork; core controls retain the approved app green. */
+  /* Approved Seafoam Forest UI; logo geometry and primary actions stay locked. */
   --color-logo-seafoam: #42D5A5;
   --color-logo-ink: var(--color-brand-strong);
   --color-logo-ivory: #FCFBF7;
 
   --color-brand-primary: #247A53;
   --color-brand-strong: #174D38;
-  --color-mint: #E7F4EC;
+  --color-mint: #E8F8F0;
+  --color-seafoam: #42D5A5;
+  --color-page: #FCFBF7;
   --color-white: #FFFFFF;
   --color-ink: #1C2923;
   --color-route: #2A72E5;
@@ -32,7 +34,8 @@
   --color-map-road-major: #F8ECD2;
   --color-map-road-outline: #D5DDD2;
   --color-route-area: color-mix(in srgb, var(--color-route) 8%, transparent);
-  --color-page-mint: #EEFDF3;
+  /* Compatibility alias for older screen compositions. */
+  --color-page-mint: var(--color-page);
   --color-ink-secondary: #3F4942;
   --color-outline: #E2EBE5;
   --color-error: #BA1A1A;
@@ -63,7 +66,7 @@
 @layer theme {
   :root {
     @variant light {
-      --background: var(--color-page-mint);
+      --background: var(--color-page);
       --foreground: var(--color-ink);
       --surface: var(--color-white);
       --surface-foreground: var(--color-ink);

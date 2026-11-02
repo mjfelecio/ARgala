@@ -9,7 +9,7 @@ export function AppTabs() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [active, inactive] = useThemeColor(['accent', 'muted']);
-  const barStyle = useResolveClassNames('h-16 border-t-0 bg-page-mint shadow-none');
+  const barStyle = useResolveClassNames('h-16 border-t-0 bg-page shadow-none');
   const labelStyle = useResolveClassNames('font-sans text-xs font-medium');
   return <Tabs initialRouteName="index" backBehavior="initialRoute" screenOptions={{
     headerShown: false,
