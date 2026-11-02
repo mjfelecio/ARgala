@@ -17,7 +17,7 @@ export function captureBasis(pose: PoseSample): Basis | null {
   return { forward: [x, 0, z], right: [-z, 0, x], yaw: degrees(Math.atan2(-x, -z) * 180 / Math.PI) };
 }
 export function buildRingSlots(entries: readonly RingEntry[], basis: Basis): RingSlot[] {
-  if (entries.length > 8 || new Set(entries.map(item => item.id)).size !== entries.length) throw new Error('Invalid ring entries');
+  if (entries.length > 12 || new Set(entries.map(item => item.id)).size !== entries.length) throw new Error('Invalid ring entries');
   const overview = entries.filter(item => item.role === 'overview');
   const history = entries.filter(item => item.role === 'history');
   if (overview.length > 1 || history.length > 1) throw new Error('Duplicate ring roles');

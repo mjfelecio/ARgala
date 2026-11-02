@@ -1,30 +1,55 @@
 import { graphemeSegments } from 'unicode-segmenter/grapheme';
 import type { ReadingSize } from './reading-preference';
-export type ContentPage = { start: number; end: number; text: string };
+import { graphemeAdvance, readingEmBudget } from './reading-widths';
+export type ContentPage = { start: number; end: number; text: string; flowText?: string };
 export type ReadingCursor = { page: number; offset: number; locale: string; size: ReadingSize; mediaId?: string; mediaPage?: number };
-// Conservative trial budgets, NOT a measurement of native font fit (Gate B).
+// Horizontal budgets follow the rendered box and font point-to-world scale.
+// Vertical line budgets remain conservative; native device fit is a separate check.
 export const readingMetrics = {
-  small: { columns: 21, lines: 6, fontSize: 4 },
-  standard: { columns: 18, lines: 5, fontSize: 5 },
-  large: { columns: 14, lines: 4, fontSize: 6 },
+  small: { columns: readingEmBudget(4), lines: 6, fontSize: 4 },
+  standard: { columns: readingEmBudget(5), lines: 5, fontSize: 5 },
+  large: { columns: readingEmBudget(6), lines: 4, fontSize: 6 },
 } as const;
-export function paginate(text: string, size: ReadingSize): ContentPage[] {
-  if (text.length > 24000) throw new Error('AR content exceeds layout budget');
+export function paginate(text: string, size: ReadingSize, heading = '', maxLines?: 1 | 2): ContentPage[] {
+  // Heading presentation cannot consume the existing body allowance. Each
+  // field stays bounded, and offsets refer to the complete displayed source.
+  if (text.length > 24000 || heading.length > 24000) throw new Error('AR content exceeds layout budget');
+  if (heading) text = `${heading}\n\n${text}`;
   if (!text) return [{ start: 0, end: 0, text: '' }];
   const budget = readingMetrics[size]; const pages: ContentPage[] = [];
-  let start = 0; let end = 0; let line = ''; let units = 0; let lines: string[] = [];
-  function finishPage() { pages.push({ start, end, text: lines.join('\n') }); start = end; lines = []; }
-  function finishLine() { lines.push(line); line = ''; units = 0; if (lines.length === budget.lines) finishPage(); }
+  const lineLimit = maxLines ?? budget.lines;
+  type Part = { segment: string; index: number };
+  let start = 0; let end = 0; let parts: Part[] = []; let units = 0; let lines: string[] = [];
+  let flow: { text: string; separator: string }[] = [];
+  function finishPage() {
+    // Soft row boundaries are a pagination estimate, not display instructions.
+    // Viro flows ordinary words across its actual box. Explicit paragraph and
+    // long-token/CJK breaks remain hard, avoiding pinned WordWrap's overflow.
+    const flowText = flow.map((line, index) => line.text + (index < flow.length - 1 ? line.separator : '')).join('');
+    pages.push({ start, end, text: lines.join('\n'), flowText }); start = end; lines = []; flow = [];
+  }
+  function finishLine(line: Part[], sourceEnd: number, separator = '\n') {
+    end = sourceEnd; const value = line.map(part => part.segment).join('');
+    lines.push(value); flow.push({ text: value, separator });
+    if (lines.length === lineLimit) finishPage();
+  }
   for (const part of graphemeSegments(text)) {
     if (part.segment === '\n' || part.segment === '\r\n' || part.segment === '\r') {
-      end = part.index + part.segment.length; finishLine(); continue;
+      finishLine(parts, part.index + part.segment.length); parts = []; units = 0; continue;
     }
-    // A complete grapheme stays together; non-Latin glyphs get a full cell.
-    const width = part.segment === '\t' ? 2 : part.segment === ' ' ? 0.35 : part.segment.codePointAt(0)! > 255 ? 1.2 : 0.55;
-    if (line && units + width > budget.columns) finishLine();
-    line += part.segment; units += width; end = part.index + part.segment.length;
+    const width = graphemeAdvance(part.segment, budget.fontSize);
+    while (parts.length && units + width > budget.columns) {
+      let split = parts.length;
+      for (let index = parts.length - 1; index >= 0; index--) {
+        if (parts[index].segment === ' ' || parts[index].segment === '\t') { split = index + 1; break; }
+      }
+      const line = parts.slice(0, split); const last = line[line.length - 1];
+      finishLine(line, last.index + last.segment.length, last.segment === ' ' || last.segment === '\t' ? '' : '\n');
+      parts = parts.slice(split); units = parts.reduce((total, item) => total + graphemeAdvance(item.segment, budget.fontSize), 0);
+    }
+    parts.push(part); units += width;
   }
-  if (line || !lines.length && start < end) finishLine();
+  if (parts.length) { const last = parts[parts.length - 1]; finishLine(parts, last.index + last.segment.length); }
   if (lines.length) finishPage();
   return pages;
 }

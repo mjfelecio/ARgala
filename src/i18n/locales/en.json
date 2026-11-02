@@ -334,8 +334,8 @@
     "page": "{{current}} / {{total}}",
     "smaller": "A−",
     "larger": "A+",
-    "empty": "No sample text available.",
-    "contentFailed": "This sample text could not be laid out. Close the panel and try another sample.",
+    "empty": "No chapter text available.",
+    "contentFailed": "This chapter could not be displayed. Close it and try another chapter.",
     "load-failed": "Reading size could not be loaded. Using the default for now.",
     "save-failed": "Reading size could not be saved. Your current size still works in this session.",
     "retry": "Retry size preference",
@@ -343,19 +343,23 @@
     "mock": {
       "overview": {
         "title": "Overview",
-        "body": "This is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring."
+        "body": "This is development sample text, not approved destination information.\n\nA destination story begins with an introduction: what visitors can discover and why the place matters. Approved content will appear here after editorial review.\n\nOpen another chapter to explore a different part of the story. Your reading size and position stay with this session."
       },
       "history": {
         "title": "History",
-        "body": "This is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring."
+        "body": "This is development sample text, not a historical account.\n\nOrigins\nA researched chapter would introduce the origins of this place, with sources for every factual claim.\n\nChange over time\nShort paragraphs give each period room to breathe. Page controls let visitors read at their own pace while the panel stays in the scene.\n\nPeople and memory\nCommunity stories require permission, careful attribution and review. No names, dates or events in this sample describe a real destination."
       },
       "notes": {
         "title": "Visitor notes",
-        "body": "This is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring."
+        "body": "Development layout sample. No real visitor rules, prices or opening hours are provided.\n\nBefore your visit\nReviewed access information belongs here. Changing details need a verification date.\n\nWhile exploring\nKeep pathways clear and pay attention to your surroundings when using the camera. Close the panel whenever you need an unobstructed view."
       },
       "facts": {
         "title": "Facts",
-        "body": "This is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring.\n\nThis is development sample text, not approved information about ACLC or any visitor destination. It exercises reading layout, page navigation and adjustable text. No dates, historical claims, visitor rules or location details are being asserted. Please use the controls to test the panel, then close it to return to the surrounding ring."
+        "body": "Development sample only. These are content guidelines, not destination facts.\n\nOne idea at a time\nA useful fact chapter explains a small number of interesting, verified details.\n\nA reason to look closer\nApproved copy can help visitors notice something meaningful. It must never imply that the camera recognizes an object.\n\nSource before story\nUnverified claims stay out of the published experience."
+      },
+      "highlights": {
+        "title": "Highlights",
+        "body": "Development sample only. No real features or attractions are described.\n\nWhat to notice\nThis chapter will hold approved descriptions of features visitors can see at the destination.\n\nImages with context\nA licensed image can open a chapter. Its full caption and credit remain available through the page controls."
       }
     },
     "hold": "Hold, then release",
@@ -370,7 +374,7 @@
       "save-failed": "The introduction preference could not be saved. You can retry."
     },
     "skip": "Skip introduction",
-    "reveal": "Look around as the sample panels appear. You can skip this introduction.",
+    "reveal": "Look around as the chapters appear. You can skip this introduction.",
     "restoring": "Restoring your reading progress. Move gently to reacquire tracking.",
     "retryTracking": "Retry tracking",
     "expired": "This AR session has expired. Return to Explore to verify arrival and start a new session."
@@ -530,5 +534,20 @@
       "share-unavailable": "Photo sharing is unavailable on this device.",
       "preview-failed": "The photo preview could not be opened. Discard it and capture a new photo."
     }
+  },
+  "destinationStories": {
+    "exit": "Exit",
+    "chapter": "Chapter {{current}} / {{total}}",
+    "opened": "Opened",
+    "openedCount": "{{count}}/{{total}} opened",
+    "available": "{{count}} chapters to explore",
+    "available_one": "{{count}} chapter to explore",
+    "available_other": "{{count}} chapters to explore",
+    "unlocked": "AR experience unlocked",
+    "preflightTitle": "Get ready to explore",
+    "exploreHint": "Look around to discover chapters. Use your finger pad to hold a tile briefly, then release.",
+    "helpTitle": "Explore this place",
+    "dismissHelp": "Back to exploring",
+    "readerTitle": "Destination stories"
   }
 }

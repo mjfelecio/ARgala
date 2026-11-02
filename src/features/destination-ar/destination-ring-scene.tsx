@@ -34,6 +34,7 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
   const trackingRef = useRef<TrackingState>('unavailable'); const ring = useRef<ViroNode>(null); const panelFrame = useRef<ViroNode>(null);
   const [selection, setSelection] = useState<FocusSelection | null>(null);
   const [cursors, setCursors] = useState<Record<string, ReadingCursor>>(() => initialProgress?.cursors ?? {});
+  const [openedIds, setOpenedIds] = useState<readonly string[]>(() => (initialProgress?.openedIds ?? []).filter(id => snapshot.some(item => item.id === id)));
   const counts = useRef({ received: 0, applied: 0 });
   const closingCommitted = useRef(false);
   const interactiveRef = useRef(false);
@@ -42,7 +43,7 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
     interactiveRef.current = interactive;
     return () => { interactiveRef.current = false; };
   }, [interactive]);
-  useEffect(() => { onProgress?.({ selectedId: selection?.id ?? null, cursors }); }, [onProgress, selection, cursors]);
+  useEffect(() => { onProgress?.({ selectedId: selection?.id ?? null, cursors, openedIds }); }, [onProgress, selection, cursors, openedIds]);
   useLayoutEffect(() => {
     if (frame) ring.current?.setNativeProps({ position: controller.ringPosition! });
   }, [controller, frame]);
@@ -53,8 +54,10 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
     if (selection) panelFrame.current?.setNativeProps({ position: closingCommitted.current ? controller.ringPosition! : selection.origin });
   }, [controller, selection]);
   const recenter = useCallback(() => {
+    const openingId = controller.selection?.phase === 'opening' ? controller.selection.id : null;
     const success = controller.recenter(performance.now()); onRecenterResult?.(success);
     if (!success) return;
+    if (openingId) setOpenedIds(previous => previous.includes(openingId) ? previous : [...previous, openingId]);
     setFrame({ slots: controller.slots, position: controller.ringPosition! });
     setSelection(controller.selection);
   }, [controller, onRecenterResult]);
@@ -102,16 +105,23 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
     if (next) setSelection(next);
   }
   function close() { if (!interactiveRef.current) return; const next = controller.close(performance.now()); if (next) setSelection(next); }
-  function complete(token: number) { if (controller.complete(token)) setSelection(controller.selection); }
+  function complete(token: number) {
+    if (!interactiveRef.current || trackingRef.current !== 'normal') return;
+    if (controller.complete(token)) {
+      const focused = controller.selection;
+      if (focused?.phase === 'focused') setOpenedIds(previous => previous.includes(focused.id) ? previous : [...previous, focused.id]);
+      setSelection(focused);
+    }
+  }
   const selectedContent = snapshot.find(item => item.id === selection?.id);
   return <ViroARScene anchorDetectionTypes="None" onTrackingUpdated={track} onCameraTransformUpdate={pose}>
     {/* The pinned bridge anchors direct AR-scene children. Keep moving/animated
         nodes beneath a zero-origin frame so their transforms share camera space. */}
     <ViroNode testID="ring-native-frame" position={[0, 0, 0]}>
     {frame && <ViroNode ref={ring} testID="ring-root" position={frame.position} opacity={(selection ? 0.25 : 1) * (tracking === 'normal' ? 1 : 0.35)}>
-      {frame.slots.slice(0, Math.max(0, visibleTileCount)).map(slot => selection?.id === slot.id ? null : <InformationTile key={slot.id} slot={slot} content={snapshot.find(item => item.id === slot.id)!} enabled={interactive && tracking === 'normal' && (!selection || selection.phase === 'focused')} style={style} onSelect={select} decorations={quality === 'standard'} />)}
+      {frame.slots.slice(0, Math.max(0, visibleTileCount)).map((slot, index) => selection?.id === slot.id ? null : <InformationTile key={slot.id} slot={slot} ordinal={index + 1} chapterCount={snapshot.length} opened={openedIds.includes(slot.id)} content={snapshot.find(item => item.id === slot.id)!} enabled={interactive && tracking === 'normal' && (!selection || selection.phase === 'focused')} style={style} onSelect={select} decorations={quality === 'standard'} />)}
     </ViroNode>}
-    {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel selection={selection} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style} decorations={quality === 'standard'}
+    {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel selection={selection} ordinal={frame!.slots.findIndex(slot => slot.id === selection.id) + 1} chapterCount={snapshot.length} openedCount={openedIds.length} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style} decorations={quality === 'standard'}
       onCursor={(id, cursor) => setCursors(previous => ({ ...previous, [id]: cursor }))} onClose={close} onComplete={complete} /></ViroNode>}
     </ViroNode>
   </ViroARScene>;

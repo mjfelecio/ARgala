@@ -9,6 +9,15 @@ function initialize(session: ArSession, now = 1000) {
   return token;
 }
 function live(session: ArSession) { const token = initialize(session); expect(session.ready(token, 1010, false)).toBe(true); return token; }
+it('retains whitelisted media identity and opened chapter IDs through established restoration', () => {
+  const session = create(); const token = live(session);
+  const progress = { selectedId: 'history', openedIds: ['history', 'history', 'foreign'], cursors: { history: { page: 3, offset: 0, locale: 'en', size: 'large' as const, mediaId: 'photo-one', mediaPage: 2 } } };
+  session.saveProgress(token, progress);
+  session.suspend(2000); const next = session.begin(identity, 3000)!;
+  session.authorizeMount(next, identity, 3001, () => false); session.ready(next, 3010, false);
+  expect(session.getSnapshot().progress).toMatchObject({ openedIds: ['history'], cursors: { history: { mediaId: 'photo-one', mediaPage: 2 } } });
+  session.close(); expect(session.getSnapshot().progress).toMatchObject({ openedIds: [] });
+});
 it('keeps admission pending until tracking-ready and revalidates immediately before mount', () => {
   const session = create(); const eligible = vi.fn(() => true);
   const token = session.begin(identity, 1000)!; expect(session.getSnapshot().established).toBe(false);
@@ -61,7 +70,7 @@ it('retains whitelisted logical progress without poses or arbitrary caller field
   const progress = { selectedId: 'history', cursors: { history: { page: 2, offset: 50, locale: 'en', size: 'large' as const, position: [1, 2, 3] } }, position: [4, 5, 6] };
   session.saveProgress(token, progress); progress.cursors.history.page = 90;
   session.suspend(2000); const next = session.begin(identity, 3000)!; session.authorizeMount(next, identity, 3001, () => false);
-  expect(session.getSnapshot().progress).toEqual({ selectedId: 'history', cursors: { history: { page: 2, offset: 50, locale: 'en', size: 'large' } } });
+  expect(session.getSnapshot().progress).toEqual({ selectedId: 'history', openedIds: [], cursors: { history: { page: 2, offset: 50, locale: 'en', size: 'large' } } });
   expect(JSON.stringify(session.getSnapshot())).not.toContain('position');
   session.saveProgress(token, { selectedId: null, cursors: {} }); expect(session.getSnapshot().progress.selectedId).toBe('history');
 });

@@ -52,6 +52,27 @@ it('waits for normal horizontal pose, then publishes native translation without 
   expect((last.patch.position as number[])[0]).toBeGreaterThan(3.8);
   expect(node('ring-tile-overview').props.rotation).toEqual([0, 0, 0]);
 });
+it('counts only completed chapter focus, never collapse intent or stale completions', async () => {
+  const progress = vi.fn(); sceneOptions = { onProgress: progress };
+  await mount(); await track(); await pose();
+  await press('ring-tile-history');
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual([]);
+  await finish(); expect(progress.mock.lastCall?.[0].openedIds).toEqual(['history']);
+  const retainedFinish = node('ring-focused-panel').props.animation.onFinish;
+  await press('ring-tile-overview'); await finish();
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual(['history']);
+  expect(text('ring-opened-history')).toBe(translations.t('destinationStories.opened'));
+  await act(async () => retainedFinish());
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual(['history']);
+  await pose(initial, 1100); await press('ring-tile-overview'); await finish();
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual(['history', 'overview']);
+});
+it('records an accepted opening when explicit Recenter settles its focus transition', async () => {
+  const progress = vi.fn(); sceneOptions = { onProgress: progress };
+  await mount(); await track(); await pose(); await press('ring-tile-history');
+  await act(async () => controls!.recenter());
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual(['history']);
+});
 it('reduces only decoration under sustained scheduling delay while retaining focused content, controls and frame', async () => {
   await mount(); await track(); await pose(); await press('ring-tile-history'); await finish(); await press('ring-action-next');
   const panel = node('ring-focused-panel'); const position = panel.props.position; const rotation = panel.props.rotation;
@@ -228,9 +249,9 @@ it('omits empty optional content and redistributes remaining slots without blank
 it('keeps oversized content recoverable through font reflow instead of throwing in a native control', async () => {
   translations.addResource('en', 'translation', 'destinationRing.mock.history.body', 'x'.repeat(24001));
   await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
-  expect(text('ring-body').replaceAll('\n', '')).toContain('This sample text could not');
+  expect(text('ring-body').replaceAll('\n', '')).toContain('This chapter could not');
   await press('ring-action-larger');
-  expect(text('ring-body').replaceAll('\n', '')).toContain('This sample text could not');
+  expect(text('ring-body').replaceAll('\n', '')).toContain('This chapter could not');
 });
 
 it.each([false, true])('moves the closing frame with the ring until restore (tracking interruption=%s)', async interrupted => {
@@ -279,7 +300,7 @@ it('uses readable-resolution glyph textures while preserving world-space text bo
   const body = tree.root.findAllByType('viro-text' as React.ElementType).find(item => item.props.testID === 'ring-body')!;
   expect(body.props.style.fontSize).toBeGreaterThanOrEqual(32);
   expect(body.props.width * body.props.scale[0]).toBeCloseTo(1.08);
-  expect(body.props.height * body.props.scale[1]).toBeCloseTo(0.44);
+  expect(body.props.height * body.props.scale[1]).toBeCloseTo(0.5);
   expect(body.props.style.fontSize * body.props.scale[0]).toBe(5);
 });
 it('gives Close a larger visible surface with separated control rows and preserves interaction gates', async () => {
@@ -344,9 +365,9 @@ it('restores only logical selection/page after a fresh frame and keeps its new p
   sceneOptions = { initialProgress: { selectedId: 'history', cursors: { history: { page: 2, offset: 400, locale: 'en', size: 'standard' } } }, onProgress: progress };
   await mount(); expect(node('ring-focused-panel')).toBeUndefined(); await track();
   await pose({ position: [8, 4, -2], forward: [1, 0, 0] });
-  expect(node('ring-focused-panel').props.position).toEqual([9.5, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^3 /);
+  expect(node('ring-focused-panel').props.position).toEqual([9.5, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^4 /);
   await track(2); await track(3); await pose({ position: [10, 4, -2], forward: [0, 0, 1] }, 1100);
-  expect(node('ring-focused-panel').props.position).toEqual([9.5, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^3 /);
+  expect(node('ring-focused-panel').props.position).toEqual([9.5, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^4 /);
   await press('ring-action-close'); await finish(); expect(progress.mock.lastCall?.[0].selectedId).toBeNull();
   expect(JSON.stringify(progress.mock.calls)).not.toContain('position');
 });

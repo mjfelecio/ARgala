@@ -28,7 +28,7 @@ vi.mock('expo-router', async () => {
 });
 vi.mock('@reactvision/react-viro', async () => {
   const R = await import('react');
-  return { ViroARScene: 'native-scene', ViroQuad: 'quad', ViroText: 'viro-text',
+  return { ViroARScene: 'native-scene', ViroQuad: 'quad', ViroText: 'viro-text', ViroImage: 'viro-image',
     ViroNode: R.forwardRef((props: { children?: React.ReactNode }, ref) => { R.useImperativeHandle(ref, () => ({ setNativeProps: vi.fn() })); return R.createElement('node', props, props.children); }),
     ViroARSceneNavigator: R.forwardRef((props: { initialScene: { scene: () => React.JSX.Element } }, ref) => {
       R.useImperativeHandle(ref, () => ({ arSceneNavigator: { takeScreenshot: native.screenshot } }), []);
@@ -51,6 +51,32 @@ async function settle() { await act(async () => { await vi.dynamicImportSettled(
 async function start() { await press('destinationAr.start'); await settle(); }
 const cameras = () => tree!.root.findAllByType('native-navigator' as React.ElementType);
 const copy = () => JSON.stringify(tree!.toJSON());
+it.each(['en', 'ja', 'ko'])('opens bounded %s help without remounting the camera and fences retained native actions', async locale => {
+  await translations.changeLanguage(locale); await mount(); await layout(); await start(); await ready();
+  const camera = cameras()[0]; const retained = node('ring-tile-history').props.onClick;
+  await press('destinationRing.help');
+  expect(copy()).toContain(translations.t('destinationStories.helpTitle'));
+  expect(node('ring-tile-history').props.onClick).toBeUndefined();
+  await act(async () => retained()); expect(node('ring-focused-panel')).toBeUndefined();
+  expect(cameras()[0]).toBe(camera);
+  expect(tree!.root.findAllByType('photo-controls' as React.ElementType)).toHaveLength(0);
+  await press('destinationStories.dismissHelp');
+  await ready(); await click('ring-tile-history'); await finish();
+  expect(node('ring-focused-panel')).toBeDefined();
+  expect(native.support).toHaveBeenCalledOnce();
+});
+it('bounds the complete top utility stack to the measured short scene and keeps one scroll owner', async () => {
+  await mount(); await layout(); await start(); await ready();
+  await act(async () => tree!.root.findByProps({ testID: 'destination-ar-scene' }).props.onLayout({ nativeEvent: { layout: { width: 320, height: 360 } } }));
+  await press('destinationRing.help');
+  await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
+  const top = tree!.root.findAllByType('safe-area' as React.ElementType).find(node => node.props.testID === 'ar-top-utilities')!;
+  expect(top.props.style.maxHeight).toBe(360);
+  const body = tree!.root.findByProps({ testID: 'ar-utility-body' });
+  expect(body.findAllByProps({ testID: 'ar-help' })).toHaveLength(1);
+  expect(body.findAllByProps({ accessibilityLabel: translations.t('destinationStories.dismissHelp') }).length).toBeGreaterThan(0);
+  expect(cameras()).toHaveLength(1);
+});
 it('hands photo capture only to the current live navigator and retires the old frame callback on background', async () => {
   await mount(); await layout(); expect(tree!.root.findAllByType('photo-controls' as React.ElementType)).toHaveLength(0);
   await start(); await ready();
@@ -119,6 +145,16 @@ it('releases rendering on background, restores logical panel/page/size from a ne
   expect(native.getItem).toHaveBeenCalledTimes(2); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled(); expect(native.gate).not.toHaveBeenCalled();
   await act(async () => oldTracking(2, 1)); expect(copy()).not.toContain(translations.t('destinationAr.trackingLost'));
 });
+it('restores the same approved image and caption page through the real screen session owner', async () => {
+  const approved = (value: string) => ({ value, approvalReference: 'Synthetic test only' });
+  const media = { id: 'test-cover', source: 1, credit: 'Test credit', approvalReference: 'test', rightsReference: 'test', alt: { en: approved('Test image') }, caption: { en: approved('Complete synthetic caption '.repeat(20)) } };
+  child = () => <DestinationArSessionExperience identity={identity} freshEligible={native.gate} content={[{ id: 'overview', role: 'overview', approved: { title: { en: approved('Test chapter') }, body: { en: approved('Complete body') }, media: [media] } }]} />;
+  await mount(); await layout(); await start(); await ready(); await click('ring-tile-overview'); await finish(); await click('ring-action-next');
+  const caption = text('ring-gallery-caption'); const page = text('ring-page-indicator');
+  await active(false); await active(true); await ready([6, 3, 4], [1, 0, 0]);
+  expect(tree!.root.findByType('viro-image' as React.ElementType).props.source).toBe(1);
+  expect(text('ring-gallery-caption')).toBe(caption); expect(text('ring-page-indicator')).toBe(page);
+});
 it('stages the first reveal only after ready, pauses on loss and makes Skip explicit', async () => {
   native.getItem.mockResolvedValue(null); await mount(); await layout(); await start(); expect(node('ring-tile-overview')).toBeUndefined();
   await ready(); expect(node('ring-tile-overview')).toBeDefined(); expect(node('ring-tile-history')).toBeUndefined();
@@ -132,7 +168,7 @@ it('stages the first reveal only after ready, pauses on loss and makes Skip expl
 it('skips staged reveal for reduced motion while retaining the native content boundary', async () => {
   native.reduced = true; native.getItem.mockResolvedValue(null); await mount(); await layout(); await start(); await ready();
   expect(node('ring-tile-history')).toBeDefined(); await click('ring-tile-history'); await finish();
-  expect(tree!.root.findByType('safe-area' as React.ElementType).findAllByType('text').flatMap(value => value.children).join(' ')).not.toContain('This is development sample text');
+  expect(tree!.root.findAllByType('safe-area' as React.ElementType).flatMap(area => area.findAllByType('text')).flatMap(value => value.children).join(' ')).not.toContain('This is development sample text');
 });
 it('does not auto-restart initial or recovering installation interruptions', async () => {
   await mount(); await layout(); await start(); await active(false); await active(true);
