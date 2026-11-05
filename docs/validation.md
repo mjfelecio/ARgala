@@ -2673,3 +2673,31 @@ The gallery, originals, verification metadata and100MB archive remain local and
 gitignored under `.superpowers/reviews/2026-11-05-ui-capture/` and its sibling ZIP.
 They contain real account identity, map context and the owner-selected camera
 scene, so this source PR does not publish the capture files.
+
+
+### PR45 SDK57 compatibility follow-up — 2026-11-05
+
+The first [PR validation run](https://github.com/mjfelecio/ARgala/actions/runs/42041662243)
+passed application and Edge checks, then failed the online Expo compatibility
+check. Newly published SDK57 metadata recommended ten patch updates: Expo57.0.32,
+Constants57.0.23, Dev Client57.0.21, Location57.0.23, Media Library57.0.6,
+Notifications57.0.25, Router57.0.30, Sharing57.0.25, Splash Screen57.0.11 and
+Task Manager57.0.22. These remain within the existing SDK57 line; compatibility
+validation stays enabled without offline-mode or package exclusions.
+
+Before retargeting the Router patch, the new tarball's pristine
+`build/fork/useLinking.native.js` was compared with the previous pristine source
+reconstructed from the checked patch. Both SHA256 values were
+`0fbfda707ec97b73bd6cc2305aab6db4c327cf92c9e526dd0c40d59a0d909546`.
+The exact-version manifest now targets57.0.30 with unchanged transformations;
+source/version mismatch still fails installation. Camera and Maps patch versions
+are unchanged. Native APK/UAT for these package patches requires a future rebuilt
+APK; no APK build/install was authorized or performed for this merge follow-up,
+and earlier phone captures retain their explicitly recorded pre-update runtime.
+
+Post-update local verification passed: `VITEST_MAX_WORKERS=2 npm run check`
+(TypeScript, zero-warning lint,1,438 tests/126 files), online
+`CI=1 npx expo install --check`, Expo Doctor21/21, Android configuration,
+zero-update native patch verification and Android export (8.6MB Hermes).
+Independent follow-up review confirmed the lockfile, unchanged patch
+transformations and preserved fail-closed version/source guards.
