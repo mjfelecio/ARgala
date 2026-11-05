@@ -1,6 +1,6 @@
 {
   "package": "expo-router",
-  "version": "57.0.29",
+  "version": "57.0.30",
   "files": [
     {
       "path": "build/fork/useLinking.native.js",

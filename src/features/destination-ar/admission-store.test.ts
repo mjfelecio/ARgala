@@ -85,3 +85,16 @@ it('captures an approved content revision per entry without granting geographic 
  expect(second.destination.ar?.contentVersion).toBe('test-2');
  expect(store.begin(lease, 'pilot-aclc', 'approved', 'en')).toBeNull();
 });
+
+it('rechecks the latest raw approved-radius reading at pending mount and tracking establishment', () => {
+ const store = new ArAdmissionStore('owner'); store.select('pilot-aclc'); const lease = store.acquire('pilot-aclc')!;
+ const reading = (timestamp: number, meters: number): ArrivalInput => ({ running: true, watcherStatus: 'ready', sample: {
+  position: { latitude: point.latitude + meters / 111195, longitude: point.longitude }, accuracy: 50, timestamp,
+ } });
+ for (const time of [10000, 13000]) { vi.mocked(Date.now).mockReturnValue(time); store.publish(lease, reading(time, 45)); }
+ const entry = store.take(store.begin(lease, 'pilot-aclc', 'draft', 'en'), 'pilot-aclc')!;
+ expect(entry).not.toBeNull(); expect(entry.authorizeMount()).toBe(true);
+ vi.mocked(Date.now).mockReturnValue(16000); store.publish(lease, reading(16000, 51));
+ // The same callback is used immediately before native mount and first tracking-ready.
+ expect(entry.authorizeMount()).toBe(false); expect(store.getSnapshot()?.eligible).toBe(false);
+});

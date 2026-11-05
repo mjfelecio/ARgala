@@ -1,3 +1,4 @@
+import { Switch } from 'heroui-native/switch';
 import { Button } from 'heroui-native/button';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Text, View } from 'react-native';
@@ -13,7 +14,7 @@ import { useCallback, useRef, useState, type PropsWithChildren, type ReactNode }
 
 export default function SettingsForm({ children, identityChildren }: PropsWithChildren<{ identityChildren?: ReactNode }>) {
   const { t } = useTranslation();
-  const { focused, radius, language, changeRadius, changeLanguage, busy, message, dirty, valid, save, undo, undoEpoch, storageError } = useSettingsDraft();
+  const { focused, radius, language, changeRadius, changeLanguage, systemVoice, soundEffects, changeAudio, busy, message, dirty, valid, save, undo, undoEpoch, storageError } = useSettingsDraft();
   const viewport = useRef(0);
   const offset = useRef(0);
   const saveBox = useRef<{y:number;height:number}|null>(null);
@@ -56,6 +57,13 @@ export default function SettingsForm({ children, identityChildren }: PropsWithCh
       <RadiusControl key={`${focused}:${undoEpoch}`} value={radius} onChange={changeRadius} disabled={busy} />
       <Text className="font-sans text-sm text-foreground">{t('settings.deviceLocal')}</Text>
       <DeviceSettingsAction />
+    </View>
+    <View className="gap-3 rounded-card bg-surface p-5">
+      <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-brand-strong">{t('settings.arAudio')}</Text>
+      {(['systemVoice', 'soundEffects'] as const).map(key => <View key={key} className="min-h-12 flex-row items-center gap-5">
+        <Text className="flex-1 font-sans text-base text-foreground">{t(`settings.${key}`)}</Text>
+        <Switch accessibilityLabel={t(`settings.${key}`)} hitSlop={10} isSelected={key === 'systemVoice' ? systemVoice : soundEffects} isDisabled={busy} onSelectedChange={value => changeAudio(key, value)} />
+      </View>)}
     </View>
     <ReminderSettings />
     <AboutSettings />

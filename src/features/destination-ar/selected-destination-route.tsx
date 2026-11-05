@@ -53,7 +53,7 @@ function ClaimedEntry({ store, id, token }: { store: ArAdmissionStore | null; id
   if (entry.kind === 'draft') { if (!draft) return <Unavailable loading />; content = draft; }
   else {
     const ids = new Set(approvedArContent(entry.destination, entry.language).map(tile => tile.id));
-    content = (entry.destination.ar?.tiles ?? []).filter(tile => ids.has(tile.id)).map(tile => ({ id: tile.id, role: tile.role, approved: { title: tile.title, body: tile.body, media: (tile.mediaIds ?? []).flatMap(id => entry.destination.media?.find(media => media.id === id) ?? []) } }));
+    content = (entry.destination.ar?.tiles ?? []).filter(tile => ids.has(tile.id)).map(tile => ({ id: tile.id, role: tile.role, approved: { title: tile.title, body: tile.body, presentation: tile.presentation, media: (tile.mediaIds ?? []).flatMap(id => entry.destination.media?.find(media => media.id === id) ?? []) } }));
   }
   return content.length ? <PreparedScene entry={entry} store={store} content={content} /> : <Unavailable />;
 }

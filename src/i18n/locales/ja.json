@@ -1,5 +1,6 @@
 {
   "common": {
+    "loading": "読み込み中…",
     "retry": "再試行",
     "save": "設定を保存",
     "saved": "設定を保存しました。",
@@ -63,7 +64,10 @@
     "saving": "設定を保存中…",
     "saveShort": "保存",
     "undo": "元に戻す",
-    "undoChanges": "設定の変更を元に戻す"
+    "undoChanges": "設定の変更を元に戻す",
+    "arAudio": "ARオーディオ",
+    "systemVoice": "システム音声",
+    "soundEffects": "効果音"
   },
   "map": {
     "title": "近くの場所",
@@ -290,6 +294,10 @@
     }
   },
   "destinationRing": {
+    "samples": {
+      "campus": "サンプル写真：ACLCイリガ校。ACLCオルモック校ではありません。",
+      "scenery": "サンプルの風景写真。ACLCオルモック校の写真ではありません。"
+    },
     "title": "ACLC リング試作",
     "live": "端末を回してサンプルのタイルを見つけてください。指の腹で長押ししてから離すと操作できます。",
     "prototype": "開発用のサンプルです。承認済みの観光情報や位置確認ではありません。",
@@ -515,6 +523,9 @@
     }
   },
   "destinationStories": {
+    "audioPreview": "合成音声のプレビューです。読み上げ内容と発音は確認待ちです。",
+    "systemInitialized": "ARを起動しました。",
+    "previewEntrance": "フル演出をプレビュー",
     "exit": "戻る",
     "chapter": "第{{current}}章 / {{total}}章",
     "opened": "閲覧済み",

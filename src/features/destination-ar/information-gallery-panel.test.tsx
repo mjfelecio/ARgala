@@ -10,6 +10,7 @@ import type { ReadingSize } from './reading-preference';
 import type { RingContent } from './ring-content';
 import type { ArNativeStyle } from './native-styles';
 import type { FocusSelection } from './ring-controller';
+vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => true }));
 vi.mock('@reactvision/react-viro', () => ({ ViroImage: 'image', ViroQuad: 'quad', ViroText: 'text', ViroNode: 'node', ViroAnimations: { registerAnimations: vi.fn() } }));
 const approved = (value: string) => ({ value, approvalReference: 'Synthetic test only' });
@@ -28,7 +29,7 @@ const view = () => <I18nextProvider i18n={translations}><Harness /></I18nextProv
 async function mount() { await act(async () => { tree = create(view()); }); }
 const action = (id: string) => tree.root.findAllByType('node' as React.ElementType).find(node => node.props.testID === `ring-action-${id}`)!;
 async function press(id: string) { await act(async () => action(id).props.onClick?.()); }
-const image = () => tree.root.findAllByType('image' as React.ElementType)[0];
+const image = () => tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'ring-gallery-image')!;
 const text = (id: string) => tree.root.findAllByType('text' as React.ElementType).find(node => node.props.testID === id)?.props.text as string | undefined;
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }); saved = undefined; enabled = true; currentContent = content; closed.mockClear();
@@ -91,7 +92,7 @@ it('lets the native renderer flow ordinary paragraphs across the actual box inst
 });
 it('keeps visible padding below reading controls and separates both action rows from content', async () => {
   currentContent = { ...content, approved: { ...content.approved!, media: [] } }; await mount();
-  const surface = tree.root.findAllByType('quad' as React.ElementType).find(node => node.props.width === 1.25)!;
+  const surface = tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'holographic-surface')!;
   const panelBottom = -surface.props.height / 2;
   for (const id of ['smaller', 'larger', 'close']) {
     const node = action(id); const fill = node.findByType('quad' as React.ElementType);
@@ -164,4 +165,70 @@ it('retires queued page and size callbacks when Help disables the current native
   expect(saved).toBeUndefined();
   enabled = true; await act(async () => tree.update(view())); await press('next');
   expect(saved?.mediaPage).toBe(1);
+});
+
+it('gives photos the chapter-heading space while keeping captions and controls inside the original frame', async () => {
+  await mount();
+  const photo = image(); const caption = tree.root.findAllByType('text' as React.ElementType).find(node => node.props.testID === 'ring-gallery-caption')!;
+  const meta = tree.root.findAllByType('text' as React.ElementType).find(node => node.props.testID === 'ring-chapter-position')!;
+  const title = tree.root.findAllByType('text' as React.ElementType).find(node => node.props.testID === 'ring-chapter-title')!;
+  expect(title.props.text).toContain('Synthetic title');
+  expect(photo.props.position[1] + photo.props.height / 2).toBeLessThan(title.props.position[1] - title.props.height * title.props.scale[1] / 2);
+  expect(photo.props.height).toBeGreaterThanOrEqual(0.4);
+  expect(photo.props.position[1] + photo.props.height / 2).toBeLessThan(meta.props.position[1] - meta.props.height * meta.props.scale[1] / 2);
+  expect(photo.props.position[1] - photo.props.height / 2).toBeGreaterThan(caption.props.position[1] + caption.props.height * caption.props.scale[1] / 2);
+  expect(caption.props.position[1] - caption.props.height * caption.props.scale[1] / 2).toBeGreaterThan(action('next').props.position[1] + 0.09);
+  expect(tree.root.findAllByType('node' as React.ElementType).find(node => node.props.testID === 'ring-focused-panel')!.props).toMatchObject({ position: transform.position, rotation: transform.rotation, scale: [1, 1, 1] });
+});
+it.each(['en', 'ja', 'ko'])('shows %s loading, retries explicitly and ignores retired native completion callbacks', async locale => {
+  await translations.changeLanguage(locale); await mount(); expect(text('ring-gallery-loading')).toBe(translations.t('common.loading'));
+  const first = image(); const retainedFailure = first.props.onLoadEnd;
+  await act(async () => first.props.onLoadEnd({ nativeEvent: { success: false } }));
+  expect(text('ring-gallery-error')).toBe(translations.t('destinationRing.imageFailed'));
+  const retainedRetry = action('image-retry').props.onClick;
+  enabled = false; await act(async () => tree.update(view())); await act(async () => retainedRetry());
+  expect(image()).toBeUndefined();
+  enabled = true; await act(async () => tree.update(view())); await press('image-retry');
+  expect(image().props.source).toBe(1); expect(text('ring-gallery-loading')).toBe(translations.t('common.loading'));
+  await act(async () => retainedFailure({ nativeEvent: { success: false } }));
+  expect(text('ring-gallery-error')).toBeUndefined();
+  await act(async () => image().props.onLoadEnd({ nativeEvent: { success: true } }));
+  expect(text('ring-gallery-loading')).toBeUndefined(); expect(text('ring-gallery-error')).toBeUndefined();
+});
+it('retires a failed image when its bundled source changes without poisoning the replacement', async () => {
+  await mount(); const old = image(); const oldFinish = old.props.onLoadEnd; await act(async () => old.props.onError({ nativeEvent: { error: 'PRIVATE' } }));
+  currentContent = { ...content, approved: { ...content.approved!, media: [{ ...media, source: 2 }] } };
+  await act(async () => tree.update(view())); expect(image().props.source).toBe(2);
+  await act(async () => oldFinish({ nativeEvent: { success: false } }));
+  expect(text('ring-gallery-error')).toBeUndefined();
+});
+
+it('keeps one native image while advancing captions and prevents a late success from silently retrying a failed image', async () => {
+  await mount(); const first = image(); const nativeSuccess = first.props.onLoadEnd;
+  await act(async () => nativeSuccess({ nativeEvent: { success: true } }));
+  await press('next'); expect(image()).toBe(first); expect(tree.root.findAllByType('image' as React.ElementType).filter(item => item.props.testID === 'ring-gallery-image')).toHaveLength(1);
+  const currentFailure = image().props.onError;
+  // A new source gets its own pending attempt; completion order stays fenced.
+  currentContent = { ...content, approved: { ...content.approved!, media: [{ ...media, source: 2 }] } };
+  await act(async () => tree.update(view()));
+  const pending = image().props.onLoadEnd;
+  await act(async () => pending({ nativeEvent: { success: false } }));
+  await act(async () => pending({ nativeEvent: { success: true } }));
+  expect(text('ring-gallery-error')).toBe(translations.t('destinationRing.imageFailed')); expect(image()).toBeUndefined();
+  await act(async () => currentFailure()); expect(text('ring-gallery-error')).toBe(translations.t('destinationRing.imageFailed'));
+});
+it('shows a current native image failure after an earlier successful decode without exposing the native message', async () => {
+  await mount(); const current = image(); const failure = current.props.onError;
+  await act(async () => current.props.onLoadEnd({ nativeEvent: { success: true } }));
+  await act(async () => failure({ nativeEvent: { error: 'PRIVATE_NATIVE_ERROR' } }));
+  expect(text('ring-gallery-error')).toBe(translations.t('destinationRing.imageFailed'));
+  expect(JSON.stringify(tree.toJSON())).not.toContain('PRIVATE_NATIVE_ERROR');
+});
+it('accepts the installed Android Viro successful-load event with no success field', async () => {
+  await mount();
+  // Pinned Android VRTImage.imageDownloadDidFinish emits onLoadEndViro with a
+  // null event map after setting the bitmap, despite the JS success:boolean type.
+  await act(async () => image().props.onLoadEnd({ nativeEvent: {} }));
+  expect(image()).toBeDefined(); expect(text('ring-gallery-loading')).toBeUndefined();
+  expect(text('ring-gallery-error')).toBeUndefined(); expect(action('image-retry')).toBeUndefined();
 });

@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from 'expo-router/native-stack';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
+import { useSettings } from '@/features/settings/provider';
 import { useAuth } from '@/features/auth/provider';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
 import { useAppActive } from '@/lib/use-app-active';
@@ -17,7 +18,11 @@ import { ArIntroductionNotice } from './ar-introduction-notice';
 import { developmentRingContent, type RingContent } from './development-ring-content';
 import { useArSession } from './use-ar-session';
 import { useReadingSize } from './use-reading-size';
+import { introDuration, introVariant } from './intro-policy';
 import { useArIntroduction } from './use-ar-introduction';
+import type { AudioManifest } from './system-audio';
+import { loadDevelopmentSystemAudio } from './development-audio-loader';
+import { loadDevelopmentGalleryContent } from './development-gallery-loader';
 import { loadRingScene } from './ring-loader';
 import type { RingControls, RingMetrics } from './destination-ring-scene';
 import type { SessionIdentity } from './session';
@@ -31,19 +36,45 @@ export default function DevelopmentSessionRoute() {
   const { session } = useAuth(); const { t } = useTranslation(); const principalId = session?.user.id;
   const scopeId = useId(); // Development correlation only; never verified admission authority.
   const identity = useMemo<SessionIdentity>(() => ({ admissionId: `development-${scopeId}`, destinationId: 'development-aclc', principalId: principalId ?? '', provenance: 'development' }), [principalId, scopeId]);
-  return principalId ? <DestinationArSessionExperience key={principalId} identity={identity} freshEligible={isViroSpikeEnabled} />
+  return principalId ? <DevelopmentGallerySession key={principalId} identity={identity} />
     : <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
 }
 
-type Props = { identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
-export function DestinationArSessionExperience({ identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
+function DevelopmentGallerySession({ identity }: { identity: SessionIdentity }) {
+  const { t } = useTranslation();
+  const [attempt, setAttempt] = useState(0);
+  const [content, setContent] = useState<readonly RingContent[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [audioManifest, setAudioManifest] = useState<AudioManifest | undefined>();
+  useEffect(() => {
+    let current = true;
+    void loadDevelopmentSystemAudio().then(value => { if (current) setAudioManifest(value ?? undefined); }).catch(() => { /* Optional audio never blocks AR entry. */ });
+    void loadDevelopmentGalleryContent().then(value => {
+      if (!current) return;
+      if (value) setContent(value); else setFailed(true);
+    }).catch(() => { if (current) setFailed(true); });
+    return () => { current = false; };
+  }, [attempt]);
+  if (content) return <DestinationArSessionExperience identity={identity} freshEligible={isViroSpikeEnabled} content={content} audioManifest={audioManifest} />;
+  return <Screen><Notice>{t(failed ? 'destinationRing.contentFailed' : 'common.loading')}</Notice>
+    {failed && <Action title={t('common.retry')} onPress={() => { setFailed(false); setAttempt(value => value + 1); }} />}
+  </Screen>;
+}
+
+type Props = { audioManifest?: AudioManifest; identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
+export function DestinationArSessionExperience({ audioManifest, identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
   const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
   const [transitionReady, setTransitionReady] = useState(true); const [scene, setScene] = useState({ width: 0, height: 0 });
   const [NativeRing, setNativeRing] = useState<Awaited<ReturnType<typeof loadRingScene>> | null>(null);
-  const reading = useReadingSize(); const introduction = useArIntroduction(); const reduced = useReducedMotion();
+  const { systemVoice, soundEffects } = useSettings();
+  const audioPreferences = useMemo(() => ({ systemVoice, soundEffects }), [systemVoice, soundEffects]);
+  const audition = identity.provenance === 'development' && isViroSpikeEnabled() ? audioManifest : undefined;
+  const reading = useReadingSize(); const introduction = useArIntroduction(identity); const reduced = useReducedMotion();
+  const [previewEntrance, setPreviewEntrance] = useState(false);
+  const variant = introVariant({ ready: true, established: false, seen: introduction.seen && !previewEntrance, reduced });
   const lifecycle = useArSession({ identity, tileIds: content.map(item => item.id), running: focused && active, transitionReady,
-    entryReady, measured: scene.width > 0 && scene.height > 0 && NativeRing !== null, freshEligible, reveal: !introduction.seen && !reduced });
+    entryReady, measured: scene.width > 0 && scene.height > 0 && NativeRing !== null && introduction.loaded, freshEligible, reveal: true, revealDurationMs: introDuration(variant) });
   const { startup, session, finishReveal, close } = lifecycle;
   useEffect(() => { if (session.established) onEstablished?.(); }, [session.established, onEstablished]);
   const completeIntroduction = introduction.complete;
@@ -60,7 +91,6 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
     void loadRingScene().then(component => { if (current) setNativeRing(() => component); }).catch(() => { if (current) reportFailure(); });
     return () => { current = false; };
   }, [startup.phase, startup.attempt, NativeRing, reportFailure]);
-  useEffect(() => { if (session.phase === 'reveal' && (introduction.seen || reduced)) finishReveal(); }, [session.phase, introduction.seen, reduced, finishReveal]);
   useEffect(() => { if (session.phase === 'exploring' && !introduction.seen && !introduction.pending) void completeIntroduction(); }, [session.phase, introduction.seen, introduction.pending, completeIntroduction]);
   const [capture, setCapture] = useState<NativeCapture | null>(null);
   const controls = useRef<RingControls | null>(null); const acceptControls = useCallback((value: RingControls | null) => { controls.current = value; setCapture(() => value?.capture ?? null); }, []);
@@ -78,7 +108,8 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
       <SceneBoundary key={startup.attempt} onFailure={startup.onFailure}>
         <NativeRing onReady={startup.onReady} onTracking={lifecycle.onTracking} onControls={acceptControls} onRecenterResult={recenterResult}
           onMetrics={help && identity.provenance === 'development' ? setMetrics : undefined} reading={reading} content={content} initialProgress={session.progress} onProgress={lifecycle.onProgress}
-          visibleTileCount={session.revealedCount} interactive={exploring && !help} />
+          audioPreferences={audioPreferences} audioManifest={audition} firstVisit={!introduction.seen || previewEntrance && identity.provenance === 'development'}
+          visibleTileCount={session.phase === 'reveal' ? Infinity : session.revealedCount} deployment={session.phase === 'reveal' ? variant : undefined} interactive={exploring && !help} />
       </SceneBoundary>
     </View>}
     <ArUtilityChrome viewportHeight={scene.height} titleKey="destinationRing.title" title={title} onReturn={onReturn} onExit={() => { close(); onExit?.(); }} actions={startup.phase === 'live' ? <>
@@ -90,6 +121,8 @@ export function DestinationArSessionExperience({ identity, freshEligible, conten
       {session.phase === 'expired' ? <View className="gap-3 p-4"><Notice>{t('destinationSession.expired')}</Notice>
         <Action title={t('arrival.returnToMap')} onPress={() => { close(); onExit?.(); if (onReturn) onReturn(); else router.navigate('/'); }} />
       </View> : <ArPreflight noticeKey={preflightNoticeKey ?? (identity.provenance === 'verified' ? 'arrival.preflight' : 'destinationAr.prototype')} phase={startup.phase} errorCode={startup.errorCode} pending={startup.pending} canAskAgain={startup.canAskAgain} onStart={prompt => void startup.start(prompt)} />}
+      {audition && startup.phase === 'idle' && <View className="px-4 pb-3"><Notice>{t('destinationStories.audioPreview')}</Notice></View>}
+      {identity.provenance === 'development' && isViroSpikeEnabled() && startup.phase === 'idle' && !startup.pending && <View className="px-4 pb-3"><Action title={t('destinationStories.previewEntrance')} onPress={() => { setPreviewEntrance(true); void startup.start(false); }} /></View>}
       {progressFeedback}
       {!session.established && guidance}
       {session.established && (startup.phase === 'checking' || startup.phase === 'prepared' || startup.phase === 'initializing') && <Notice>{t('destinationSession.restoring')}</Notice>}

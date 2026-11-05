@@ -16,7 +16,10 @@ const native = vi.hoisted(() => ({
   transitions: new Map<string, Set<(e: { data: { closing: boolean } }) => void>>(),
   get: vi.fn(), request: vi.fn(), support: vi.fn(), getSize: vi.fn(), setSize: vi.fn(),
 }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
+vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true }) }));
+vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getSize, setItem: native.setSize } }));
 vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get, requestCameraPermissionsAsync: native.request } }));
 vi.mock('expo-router', async () => {
@@ -31,7 +34,7 @@ vi.mock('expo-router', async () => {
 // Only the native renderer is replaced. The screen, controller, permission/support
 // adapter, installed SDK hooks, shared controls and actual locale resources run.
 vi.mock('@reactvision/react-viro', () => ({
-  ViroARScene: 'native-scene', ViroNode: 'node', ViroQuad: 'quad', ViroText: 'viro-text',
+  ViroARScene: 'native-scene', ViroImage: 'viro-image', ViroNode: 'node', ViroQuad: 'quad', ViroText: 'viro-text',
   ViroARSceneNavigator: (props: { initialScene: { scene: () => React.JSX.Element } }) => React.createElement('native-navigator', props, React.createElement(props.initialScene.scene)),
   ViroMaterials: { createMaterials: vi.fn() }, ViroAnimations: { registerAnimations: vi.fn() },
   ViroTrackingStateConstants: { TRACKING_UNAVAILABLE: 1, TRACKING_LIMITED: 2, TRACKING_NORMAL: 3 },
@@ -182,4 +185,13 @@ it('keeps ring startup behind real focus/transition gates and exposes only utili
   native.focused = false; await act(async () => tree!.update(wrapper(child()))); expect(camera()).toHaveLength(0);
   native.focused = true; await act(async () => tree!.update(wrapper(child()))); expect(camera()).toHaveLength(0);
   expect(copy()).toContain(translations.t('destinationAr.interrupted'));
+});
+it.each(['ja', 'ko'])('also supplies CJK glyph coverage to the older %s native square', async locale => {
+  await translations.changeLanguage(locale); await mount(); await layout(); await press('destinationAr.start');
+  await act(async () => { await vi.dynamicImportSettled(); });
+  const scene = tree!.root.findByType('native-scene' as React.ElementType);
+  await act(async () => { scene.props.onTrackingUpdated(3, 1); scene.props.onCameraTransformUpdate({ position: [0, 2, 0], forward: [0, 0, -1] }); });
+  const glyph = tree!.root.findByType('viro-text' as React.ElementType);
+  expect(glyph.props.text).toBe(translations.t('destinationAr.square'));
+  expect(glyph.props.style.fontFamily).toBe('PlusJakartaSans, NotoSansCJK');
 });

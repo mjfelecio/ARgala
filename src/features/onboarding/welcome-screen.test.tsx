@@ -56,7 +56,7 @@ it.each(['en', 'ko', 'ja'] as const)('previews %s copy locally, then persists th
   expect(runtime.setItem).not.toHaveBeenCalled();
   await act(async () => { button(resources.continue).props.onPress(); });
   expect(state).toMatchObject({ status: 'completed', language, radius: 285, queries: 0 });
-  expect(JSON.parse(runtime.values.get('argala.preferences.v1')!)).toEqual({ language, activationRadiusMeters: 285 });
+  expect(JSON.parse(runtime.values.get('argala.preferences.v1')!)).toEqual({ language, activationRadiusMeters: 285, systemVoice: true, soundEffects: true });
   expect(runtime.values.get(onboardingStorageKey)).toBe('complete');
   await act(async () => { tree!.unmount(); }); tree = undefined; await mount();
   expect(state).toMatchObject({ status: 'completed', language, radius: 285 });

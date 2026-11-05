@@ -2438,3 +2438,266 @@ Google map regions still appear green on this renderer; exact mock map colors
 are not established. Issues#39–#42 are unchanged by this visual task (baseline
 already contains the#39 sheet-readiness correction). See the full
 [screen mapping and evidence](design/seafoam-forest/IMPLEMENTATION.md).
+
+
+## Cinematic AR handoff — 2026-11-02
+
+Worktree `.worktrees/cinematic-ar`, branch `feat/cinematic-ar-stories`, baseline
+`b794c96316b8dbb5a1cfcfa713bcfe7a2a1c4c81`. PR43 fixes39–42 and PR44 were confirmed
+merged before implementation. [Detailed behavior/evidence](design/cinematic-ar/IMPLEMENTATION.md)
+and [native video stop gate](design/cinematic-ar/VIDEO-FEASIBILITY.md).
+
+Implemented editorial media readiness, per-destination/provenance cinematic
+history, pure canonical deployment math, native Viro sequence and deterministic
+settlement/recovery, interactive dimmed neighbors, image-led galleries/visual
+stories, caption-offset restoration, independent saved audio toggles and a silent
+until-reviewed event adapter. Both audio defaults ON were explicitly owner-chosen.
+Independent review findings about storage Retry remount, native yaw normalization,
+caption reflow and partial-save audio resets received focused regressions/fixes.
+Reading-box overlap was rejected with a geometric regression; original native
+body bounds are retained. D01–D09 remain pending, not falsely approved.
+
+Verification actually run:
+
+- `npm run check`: strict TypeScript, zero-warning ESLint, **1,371 tests /123 files**
+  passed on final source. Focused regressions demonstrated the reported failures
+  before the corresponding changes; Settings/onboarding/AR targeted suite passed.
+- `npm run test:destination-content`: isolated PostgreSQL content contracts passed.
+- `npm run check:native-patches`: passed with0 dependency bytes updated.
+- `npm run check:android`: Android/SDK57 configuration passed.
+- `npm run export:android -- --max-workers 2`: final8.5MB Hermes export passed,
+  including the rasterized unchanged arch emblem. This is not an APK build.
+- `git diff --check`: passed.
+
+Galaxy A53 SM-A536E / Android16, existing Oct30 development client,1080×2400 /
+420dpi, unchanged font scale, USB Metro: actual Viro tracking-ready, ring/camera
+rendering, held Overview focus and brief background/return were observed. Raw
+captures stay private. First/return intro recordings were confounded by lazy
+bundling and temporary fixture Fast Refresh, so exact timing/full sweep/emblem
+visibility are **not accepted**. On-site admission and the full physical matrix
+were not tested.
+
+Video spike: original H.264/AAC test pattern rendered and advanced only on explicit
+Play; finish callbacks and held controls occurred. Owner confirmed video but not
+the first very quiet tone. Seeking/restart then produced repeated JavaScript error
+screens: Viro3.0.3 Android `seekToTime` dereferences null `NativeModules.UIManager`
+in this Fabric runtime. **Task7 stopped for owner decision.** The fixture is kept
+only in ignored scratch; all temporary app imports/scope edits were restored with
+SHA256 verification. Ordinary AR was restarted and rendered without that error;
+AR was then exited. No player, dependency, APK or compatibility patch was shipped.
+
+Still pending: exact native intro/recovery/focus acceptance, genuine approved rich
+D01–D09 media and translations, native video compatibility/seek/audio/lifecycle,
+reviewed EN/JA/KO voice/effects and audible settings behavior, TalkBack and release
+thermal/sunlight/performance/on-site checks. The source implementation is reviewable;
+the complete enhancement is not release accepted. No merge/deployment occurred.
+
+
+### Image priority and Android completion fix — 2026-11-02
+
+The owner deferred video and allowed labelled sample photos. A valid bundled JPEG
+reproduced “image unavailable”: pinned Android VRTImage completes with a null
+load-end payload after bitmap installation, whereas the application required
+`success === true`. Completion without that field now succeeds; explicit false
+and onError still fail. The focused native gallery offers fenced explicit Retry,
+retains caption/credit through loading/error, and uses a45% taller photo region
+within the original square frame and camera distance.
+
+On the Galaxy A53 SM-A536E/Android16 using the existing Oct30 development APK,
+the corrected callback visibly rendered the ACLC Iriga sample in the focused
+native panel. It is **not ACLC Ormoc**. The permanent development prototype now
+includes that licensed photo and a generic landscape, with localized sample
+warnings and attribution in `assets/development/ar-gallery/README.md`. Both
+runtime development guards precede module evaluation; sample content grants no
+verified destination or Passport authority. Final permanent-loader behavior is
+covered by real session component tests; its complete physical gallery/language
+matrix remains pending. Temporary fixture imports and diagnostic logging were
+removed. No native module, video code, OS setting or APK was changed.
+
+Verification: `npm run check` passed TypeScript, zero-warning lint and
+**1,390 tests across125 files**. The image empty-event regression was demonstrated
+failing before the fix; gated loader and route failure/retry tests were also red
+before implementation. `npm run check:native-patches` passed (0 files updated).
+An independent review found no important issue. Its simultaneous targeted run
+hit an existing timing test timeout under memory pressure; the final complete
+suite above passed after avoiding concurrent checks. Android export is recorded
+in the cinematic implementation evidence. Video stays deferred and the existing
+release-acceptance limitations still apply.
+
+
+### Cinematic native presentation and audible preview — 2026-11-02
+
+The owner redirected work from content/video to the AR experience. Native covers
+now use authored rounded/translucent forest frames, seafoam corners and distinct
+chapter emblems. The owner called the new UI “awesome”; initial held selection
+failed against a0.01-opacity hidden quad. Replacing that quad with the actual
+painted image as the sole high-accuracy hit surface restored opening, explicitly
+confirmed by the owner. Reader frames/decorations still ignore hits. No short-tap
+or native gesture patch is claimed.
+
+Initial entrance feedback exposed covers leaving view too early. The revised
+three-second path presents a separated forward cast, holds it briefly and sends
+chapters to their original ring headings in staggered arcs. Return650ms and
+reduced180ms stay. Native page feedback is140ms inside a stable frame, retaining
+image instances; unchanged Help/tracking return does not replay it. A one-shot
+220ms edge acknowledgement accompanies settlement/focus. The owner subsequently
+responded “Looks good” and requested audio.
+
+Original effects and three synthetic voice drafts are now bundled only for the
+guarded development audition. Production manifest remains empty pending exact
+script/recording/language approval. Galaxy A53 owner confirmed **“Heard the voice
+and effects”** for startup/deployment. JA/KO pronunciation, every-cue loudness,
+all native interruption cells and release performance remain pending. The existing
+APK was used; no build, install, OS-volume change, provider action, merge or
+deployment was performed. Full source/asset/review limits are in
+`docs/design/cinematic-ar/IMPLEMENTATION.md` and `AUDIO-REVIEW.md`.
+
+Visual stage full check passed **1,400 tests across125 files**, TypeScript and
+zero-warning lint. Audio/edge focused suite passed **145 tests across5 files**.
+RED→GREEN regressions cover active hit geometry, forward cast visibility,
+page/edge replay, optional audio not blocking entry, late assets without camera
+remount/startup speech, preview gates and stale native sound completion.
+Final whole-change checks and export are recorded in implementation evidence.
+
+
+Final audio/edge source verification: **1,413 tests across126 files**, strict
+TypeScript and zero-warning lint passed via `VITEST_MAX_WORKERS=2 npm run check`.
+Dependency patches verified with0 updates. Android export passed at8.6MB with the
+development flag disabled; this is a JS/assets export, not an APK build. Preview
+assets are statically included but runtime/provenance/model gates reject release
+audition. `git diff --check` passed. Camera/app owners were released after the
+English audible check. No release/localization approval is inferred from it.
+
+
+### Native Japanese/Korean glyph correction — 2026-11-02
+
+The owner reported missing-glyph boxes, rather than line-wrap errors. Pinned Viro
+resolves its own Android system fonts; React Native's normal fallback did not
+reach its text renderer. A shared native family list now appends `NotoSansCJK`
+for every ring cover, reader and control, including the older square prototype.
+The primary family and existing geometry remain unchanged. The Galaxy A53 has
+`NotoSansCJK-Regular.ttc`; the installed Viro loader loaded its collection faces.
+No new font package, native configuration or APK was required.
+
+Regressions using actual locale resources failed before the fix and passed with
+the explicit fallback across both native scene paths. Galaxy A53 SM-A536E,
+Android16, existing development APK installed2026-10-30,1080×2400,420dpi and
+original1.1 font scale: Japanese cover `概要`, Japanese photo caption/reading
+controls and Korean photo caption/reading controls rendered recognizable glyphs
+without the reported boxes. Language changes were temporary in-memory previews;
+English was restored without changing saved preferences. This verifies glyph
+coverage, not editorial translation, pronunciation, all text sizes or TalkBack.
+
+Private camera screenshots remain gitignored in
+`.superpowers/reviews/2026-11-02-cjk-arrival/`. Combined source verification with
+the arrival fixes passed strict TypeScript, zero-warning lint and **1,438 tests
+across126 files** through `VITEST_MAX_WORKERS=2 npm run check`. Android JS/assets
+export passed (8.6MB Hermes); neither operation is an APK build.
+
+
+### Featured arrival and development simulation — 2026-11-02
+
+The owner reported a nonresponsive simulation action and overly strict real
+arrival requirements. Directions previously retired its admission source when a
+failed/expired route preview disabled GPS, even though its simulation action was
+still available. The source now retains its focused foreground lease and
+publishes pending/no sample when GPS is disabled. Real entry remains unavailable
+without fresh continuous GPS. Captured real/simulated actions are also fenced to
+the committed foreground/selection scope, including the interval before passive
+cleanup; delayed imports cannot reuse a later lease. Equivalent rerenders retain
+their action identity.
+
+Provisional arrival calibration changed from20m accuracy and three samples over
+6s to **50m accuracy and two samples over3s**. Eligibility compares reported
+distance directly to the destination's unchanged radius, rather than subtracting
+accuracy from the usable radius.10s freshness, continuous-watcher health,
+implausible-jump guards and selected-entry checks immediately before first mount
+and first tracking-ready remain. Existing established-session recovery is
+unchanged. These thresholds still require outdoor boundary/accuracy measurement;
+this test did not simulate real GPS or claim a verified on-site visit.
+
+RED→GREEN regressions cover disabled-preview simulation, stale callbacks during
+commit/blur/selection, stable equivalent rerenders and final-mount rejection just
+outside the unchanged radius. Screen coverage checks Explore's simulated route
+transfer and excludes borrowing the pilot draft for D01–D09.
+
+Physical Galaxy A53 retest used Catalog → ACLC pilot → Explore's explicit
+`Simulate arrival · development only` button. It opened the selected-destination
+AR preflight with Start/Preview controls and the simulated-arrival disclaimer.
+An earlier snapshot was taken before the navigation transition finished; the
+repeat check waited for the resulting screen. Simulation grants no Passport
+credit. Directions' failed-preview branch was verified by its screen regression,
+not a paid route request on the phone. English was restored and the app was
+backgrounded to release its camera/location owners after testing (battery16%).
+
+Combined final checks: `VITEST_MAX_WORKERS=2 npm run check` passed strict
+TypeScript, zero-warning lint and **1,438 tests across126 files**;
+`npm run check:native-patches` passed with0 updates; Android JS/assets export
+passed (8.6MB Hermes); `git diff --check` passed. Read-only review found no
+remaining concrete correctness issue in the changed paths. No APK build, native
+dependency/configuration change, paid Places/details/routes action, merge or
+deployment occurred. Camera screenshots, UI dumps and verification logs are gitignored in
+`.superpowers/reviews/2026-11-02-cjk-arrival/`.
+
+
+### Cinematic branch capture and demonstration evidence — 2026-11-05
+
+Galaxy A53 SM-A536E / Android16, the existing2026-10-30 development APK, current
+cinematic JavaScript at `cb04595`,1080×2400,420dpi and original1.1 font scale.
+Captured **41 unretouched screenshots and four silent native screen recordings**
+covering the UI changes since2026-10-31: Explore before/after explicit search,
+selected places, Featured/Passport, Destination Preview, Profile/audio/radius,
+sticky Save/Undo, Saved Places, explicit loaded Details and expired reuse recovery,
+walking-route preview/expanded Journey/warnings, Welcome EN/JA/KO and authentication.
+These are physical app captures; none are the supplied design references.
+
+Native AR coverage includes selected-destination simulated entry, the cinematic
+gallery entrance, holographic covers, held chapter opening, image/caption/control
+rendering, Help and Japanese/Korean glyphs. An owner-assisted backward movement
+produced a complete reading-panel retake. The four retained MP4s passed metadata
+inspection and full video decode; all PNGs passed integrity/dimension checks and
+the local gallery links/archive passed verification. Recordings have no audio
+track, so they do not provide additional voice/loudness acceptance. Real on-site
+arrival, outdoor calibration and production media/translation approval remain
+pending. Launcher/native splash were excluded because the installed binary
+predates those assets; no APK build or installation occurred.
+
+The temporary audio draft was undone. English,500m radius, both enabled audio
+settings and completed onboarding were verified restored. Authentication captures
+used owner-approved sign-out; the owner then entered credentials privately and
+sign-in succeeded. Filled credential fields were neither read nor captured.
+Existing bookmarks were retained. Camera/location ownership was released for the
+final catalog screen; Metro remained available for the owner.
+
+The gallery, originals, verification metadata and100MB archive remain local and
+gitignored under `.superpowers/reviews/2026-11-05-ui-capture/` and its sibling ZIP.
+They contain real account identity, map context and the owner-selected camera
+scene, so this source PR does not publish the capture files.
+
+
+### PR45 SDK57 compatibility follow-up — 2026-11-05
+
+The first [PR validation run](https://github.com/mjfelecio/ARgala/actions/runs/42041662243)
+passed application and Edge checks, then failed the online Expo compatibility
+check. Newly published SDK57 metadata recommended ten patch updates: Expo57.0.32,
+Constants57.0.23, Dev Client57.0.21, Location57.0.23, Media Library57.0.6,
+Notifications57.0.25, Router57.0.30, Sharing57.0.25, Splash Screen57.0.11 and
+Task Manager57.0.22. These remain within the existing SDK57 line; compatibility
+validation stays enabled without offline-mode or package exclusions.
+
+Before retargeting the Router patch, the new tarball's pristine
+`build/fork/useLinking.native.js` was compared with the previous pristine source
+reconstructed from the checked patch. Both SHA256 values were
+`0fbfda707ec97b73bd6cc2305aab6db4c327cf92c9e526dd0c40d59a0d909546`.
+The exact-version manifest now targets57.0.30 with unchanged transformations;
+source/version mismatch still fails installation. Camera and Maps patch versions
+are unchanged. Native APK/UAT for these package patches requires a future rebuilt
+APK; no APK build/install was authorized or performed for this merge follow-up,
+and earlier phone captures retain their explicitly recorded pre-update runtime.
+
+Post-update local verification passed: `VITEST_MAX_WORKERS=2 npm run check`
+(TypeScript, zero-warning lint,1,438 tests/126 files), online
+`CI=1 npx expo install --check`, Expo Doctor21/21, Android configuration,
+zero-update native patch verification and Android export (8.6MB Hermes).
+Independent follow-up review confirmed the lockfile, unchanged patch
+transformations and preserved fail-closed version/source guards.

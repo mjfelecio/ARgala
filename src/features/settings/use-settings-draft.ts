@@ -5,6 +5,7 @@ import { useSettings } from './provider';
 
 function initialDraft(preferences: Preferences, focused: boolean) {
   return { radius: String(preferences.activationRadiusMeters), language: preferences.language,
+    systemVoice: preferences.systemVoice, soundEffects: preferences.soundEffects, baselineVoice: preferences.systemVoice, baselineEffects: preferences.soundEffects,
     baselineRadius: preferences.activationRadiusMeters, baselineLanguage: preferences.language, focused };
 }
 export function useSettingsDraft() {
@@ -19,17 +20,17 @@ export function useSettingsDraft() {
   const [undoEpoch, setUndoEpoch] = useState(0);
   const [message, setMessage] = useState<'common.saved' | 'settings.saveFailed' | null>(null);
   useEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
-  const { activationRadiusMeters, language } = settings;
+  const { activationRadiusMeters, language, systemVoice, soundEffects } = settings;
   // Adjust the draft before rendering children when its saved baseline or focus
   // changes. Dirty edits survive external saves; leaving the route abandons them.
-  if (draft.baselineRadius !== activationRadiusMeters || draft.baselineLanguage !== language || draft.focused !== focused) {
-    const pristine = draft.radius === String(draft.baselineRadius) && draft.language === draft.baselineLanguage;
-    setDraft(!focused || pristine ? initialDraft({ activationRadiusMeters, language }, focused)
-      : { ...draft, baselineRadius: activationRadiusMeters, baselineLanguage: language, focused });
+  if (draft.baselineRadius !== activationRadiusMeters || draft.baselineLanguage !== language || draft.focused !== focused || draft.baselineVoice !== systemVoice || draft.baselineEffects !== soundEffects) {
+    const pristine = draft.radius === String(draft.baselineRadius) && draft.language === draft.baselineLanguage && draft.systemVoice === draft.baselineVoice && draft.soundEffects === draft.baselineEffects;
+    setDraft(!focused || pristine ? initialDraft({ activationRadiusMeters, language, systemVoice, soundEffects }, focused)
+      : { ...draft, baselineRadius: activationRadiusMeters, baselineLanguage: language, baselineVoice: systemVoice, baselineEffects: soundEffects, focused });
     if (!focused && message !== null) setMessage(null);
   }
-  const dirty = draft.radius !== String(activationRadiusMeters) || draft.language !== language;
-  const parsed = preferencesSchema.safeParse({ activationRadiusMeters: draft.radius.trim() === '' ? NaN : Number(draft.radius), language: draft.language });
+  const dirty = draft.radius !== String(activationRadiusMeters) || draft.language !== language || draft.systemVoice !== systemVoice || draft.soundEffects !== soundEffects;
+  const parsed = preferencesSchema.safeParse({ activationRadiusMeters: draft.radius.trim() === '' ? NaN : Number(draft.radius), language: draft.language, systemVoice: draft.systemVoice, soundEffects: draft.soundEffects });
   function changeRadius(radius: string) {
     if (submitting.current) return;
     setDraft(previous => ({ ...previous, radius })); setMessage(null);
@@ -37,6 +38,10 @@ export function useSettingsDraft() {
   function changeLanguage(next: Preferences['language']) {
     if (submitting.current) return;
     setDraft(previous => ({ ...previous, language: next })); setMessage(null);
+  }
+  function changeAudio(key: 'systemVoice' | 'soundEffects', value: boolean) {
+    if (submitting.current) return;
+    setDraft(previous => ({ ...previous, [key]: value })); setMessage(null);
   }
   function undo() {
     if (submitting.current || !focused) return;
@@ -61,6 +66,6 @@ export function useSettingsDraft() {
       if (alive.current) setBusy(false);
     }
   }
-  return { focused: draft.focused, radius: draft.radius, language: draft.language, changeRadius, changeLanguage, busy, message,
+  return { focused: draft.focused, radius: draft.radius, language: draft.language, changeRadius, changeLanguage, systemVoice: draft.systemVoice, soundEffects: draft.soundEffects, changeAudio, busy, message,
     dirty, valid: parsed.success, save, undo, undoEpoch, storageError: settings.storageError };
 }

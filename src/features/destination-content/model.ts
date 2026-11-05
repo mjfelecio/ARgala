@@ -39,8 +39,8 @@ export function resolveContent(destination: Destination | null, manifest: Conten
   return update ? destinationSchema.parse({ ...destination, ar: {
     ...destination.ar, schemaVersion: 1, contentVersion: update.contentVersion,
     tiles: update.tiles.map(tile => {
-      const mediaIds = destination.ar?.tiles.find(bundled => bundled.id === tile.id)?.mediaIds;
-      return { ...tile, ...(mediaIds ? { mediaIds } : {}) };
+      const bundled = destination.ar?.tiles.find(bundled => bundled.id === tile.id);
+      return { ...tile, ...(bundled?.mediaIds ? { mediaIds: bundled.mediaIds } : {}), ...(bundled?.presentation ? { presentation: bundled.presentation } : {}) };
     }),
   } }) : destination;
 }

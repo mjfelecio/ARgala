@@ -1,4 +1,6 @@
 import { useLayoutEffect, useRef } from 'react';
+import { HolographicFrame } from './holographic-frame';
+import { ChapterEmblem } from './chapter-emblem';
 import { chapterPresentation } from './chapter-presentation';
 import { ArText } from './ar-text';
 import { ViroNode, ViroQuad } from '@reactvision/react-viro';
@@ -11,12 +13,12 @@ export function InformationTile({ content, slot, enabled, style, onSelect, decor
   const { t, i18n } = useTranslation();
   const chapter = chapterPresentation(content, i18n.resolvedLanguage ?? i18n.language, key => t(key), key => i18n.exists(key));
   return <ViroNode testID={`ring-tile-${content.id}`} position={slot.position} rotation={slot.rotation} onClick={enabled ? () => onSelect(content.id) : undefined}>
-    {decorations && <ViroQuad renderingOrder={0} ignoreEventHandling width={0.71} height={0.71} materials="argalaRingEdge" />}
-    <ViroQuad renderingOrder={1} highAccuracyEvents ignoreEventHandling={!enabled} width={0.68} height={0.68} position={[0, 0, 0.003]} opacity={0.94} materials="argalaRingSurface" />
-    <ArText position={[0, 0.24, 0.006]} width={0.61} height={0.07} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3)} />
-    <ArText position={[0, 0.035, 0.006]} width={0.59} height={0.25} text={chapter.coverTitle} style={style.text(6, 'center', '600')} />
-    {opened && <ArText testID={`ring-opened-${content.id}`} position={[0, -0.14, 0.006]} width={0.59} height={0.06} text={t('destinationStories.opened')} style={style.text(3)} />}
-    <ArText position={[0, -0.24, 0.006]} width={0.61} height={0.07} text={content.approved ? t('destinationRing.hold') : t('destinationRing.sampleLabel')} style={style.text(3)} />
+    <HolographicFrame width={0.71} height={0.71} decorations={decorations} interactiveSurface={enabled} />
+    <ArText position={[0, 0.275, 0.006]} width={0.61} height={0.07} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3)} />
+    <ChapterEmblem content={content} />
+    <ArText position={[0, -0.055, 0.006]} width={0.59} height={0.14} text={chapter.coverTitle} style={style.text(5.5, 'center', '600')} />
+    {opened && <ArText testID={`ring-opened-${content.id}`} position={[0, -0.205, 0.006]} width={0.59} height={0.06} text={t('destinationStories.opened')} style={style.text(3)} />}
+    <ArText position={[0, -0.28, 0.006]} width={0.61} height={0.07} text={content.approved ? t('destinationRing.hold') : t('destinationRing.sampleLabel')} style={style.text(3)} />
   </ViroNode>;
 }
 export function NativePanelAction({ id, label, position, width = 0.28, enabled, style, onPress, renderingOrder = 2, primary = false }: {

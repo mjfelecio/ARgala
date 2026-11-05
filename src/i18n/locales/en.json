@@ -96,7 +96,10 @@
     "saving": "Saving settings…",
     "saveShort": "Save",
     "undo": "Undo",
-    "undoChanges": "Undo settings changes"
+    "undoChanges": "Undo settings changes",
+    "arAudio": "AR audio",
+    "systemVoice": "System Voice",
+    "soundEffects": "Sound Effects"
   },
   "map": {
     "title": "Nearby places",
@@ -331,6 +334,10 @@
     }
   },
   "destinationRing": {
+    "samples": {
+      "campus": "Sample photo: ACLC Iriga City Campus. This is not ACLC Ormoc.",
+      "scenery": "Sample landscape photo. This does not show ACLC Ormoc."
+    },
     "title": "ACLC ring prototype",
     "live": "Look around to find the sample tiles. Use your finger pad to hold a tile briefly, then release.",
     "prototype": "Development samples only. No approved destination content or location verification.",
@@ -557,6 +564,9 @@
     }
   },
   "destinationStories": {
+    "audioPreview": "Synthetic audio preview. Voice wording and pronunciation are awaiting review.",
+    "systemInitialized": "AR initialized.",
+    "previewEntrance": "Preview full entrance",
     "exit": "Exit",
     "chapter": "Chapter {{current}} / {{total}}",
     "opened": "Opened",

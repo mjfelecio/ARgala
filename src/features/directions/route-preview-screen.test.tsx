@@ -23,7 +23,7 @@ vi.mock('expo-router', () => ({ useLocalSearchParams: () => ({ token: controls.t
   router: { back: vi.fn(), canGoBack: () => controls.canBack, push: vi.fn(), navigate: vi.fn(), dismissTo: vi.fn(), setParams: vi.fn() } }));
 vi.mock('expo-constants', () => ({ default: { get expoConfig() { return { extra: { mapsConfigured: controls.mapsConfigured } }; } } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language }) }));
-vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: () => ({ ...controls.location, sampleReceivedAt: Date.now(), retry: controls.retry }) }));
+vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: vi.fn(() => ({ ...controls.location, sampleReceivedAt: Date.now(), retry: controls.retry })) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
 vi.mock('@/features/places/service', () => ({ placesService: { details: vi.fn(), nearby: vi.fn() } }));
 vi.mock('./service', () => ({ routeService: { walking: vi.fn(), preview: vi.fn() } }));
@@ -760,4 +760,27 @@ it('retains measured compact controls and map geometry through continuous walkin
  expect(tree!.root.findByType('map')).toBe(map);expect(map.props.style.height).toBe(height);
  expect(tree!.root.findByType('dialog').props.snapPoints[0]).toBe(462);
  expect(controls.fit).toHaveBeenCalledTimes(fits);expect(routeService.walking).not.toHaveBeenCalled();
+});
+
+it('simulates featured arrival after a failed preview without enabling GPS or a provider retry', async () => {
+ const { AdmissionContext } = await import('@/features/destination-ar/admission-context');
+ const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+ const { getDestination } = await import('@/features/destinations/catalog');
+ const { destinationToRoutePlace } = await import('@/features/destinations/routing');
+ Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
+ const store = new ArAdmissionStore('owner'); const target = destinationToRoutePlace(getDestination('pilot-aclc')!)!;
+ controls.token = createRoutePreviewIntent(client, target, undefined, 'details', 'en', 'pilot-aclc');
+ vi.mocked(routeService.walking).mockRejectedValue(new Error('private provider failure'));
+ try {
+  await act(async () => { tree = create(<AdmissionContext.Provider value={store}>{render()}</AdmissionContext.Provider>); });
+  expect(button('arrival.simulate')).toBeDefined(); expect(routeService.walking).toHaveBeenCalledOnce();
+  const { useDeviceLocation } = await import('@/features/location/use-device-location');
+  expect(vi.mocked(useDeviceLocation).mock.calls.at(-1)?.[0]?.enabled).toBe(false);
+  expect(store.getSnapshot()?.eligible).toBe(false);
+  await press('arrival.simulate'); await act(async () => { await vi.dynamicImportSettled(); });
+  expect(router.push).toHaveBeenCalledWith(expect.objectContaining({ pathname: '/destination-ar/[destinationId]' }));
+  const navigation = vi.mocked(router.push).mock.calls.at(-1)![0] as unknown as { params: { entryToken: string } };
+  expect(store.take(navigation.params.entryToken, 'pilot-aclc')).toMatchObject({ simulated: true, identity: { provenance: 'development' } });
+  expect(store.getSnapshot()?.eligible).toBe(false); expect(routeService.walking).toHaveBeenCalledOnce();
+ } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
 });

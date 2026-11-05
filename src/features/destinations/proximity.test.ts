@@ -10,10 +10,10 @@ function admitted() {
   for (const time of [10000, 13000, 16000]) model.update(input(time), time);
   return model;
 }
-it('requires three distinct continuous readings spanning six seconds', () => {
+it('requires two distinct continuous readings spanning three seconds', () => {
   const model = new DestinationProximity('pilot-aclc', policy);
   expect(model.update(input(10000), 10000).eligible).toBe(false);
-  expect(model.update(input(13000), 13000).eligible).toBe(false);
+  expect(model.update(input(13000), 13000).eligible).toBe(true);
   expect(model.update(input(16000), 16000).eligible).toBe(true);
 });
 it('does not count duplicate samples or a burst with insufficient elapsed time', () => {
@@ -24,8 +24,8 @@ it('does not count duplicate samples or a burst with insufficient elapsed time',
 it.each([
   { ...input(16000), running: false },
   { ...input(16000), watcherStatus: 'error' as const },
-  { ...input(16000), sample: null }, input(16000, 0, null), input(16000, 0, -1), input(16000, 0, 21),
-  input(16000, 0, NaN), input(27001), input(5999), input(16000, 46, 5),
+  { ...input(16000), sample: null }, input(16000, 0, null), input(16000, 0, -1), input(16000, 0, 51),
+  input(16000, 0, NaN), input(27001), input(5999), input(16000, 51, 5),
 ])('immediately revokes new admission on uncertain location %j', bad => {
   expect(admitted().update(bad, 26000).eligible).toBe(false);
 });
@@ -40,7 +40,7 @@ it('rejects backwards samples without letting the old stream reacquire', () => {
   expect(model.update(input(15000), 17000).eligible).toBe(false);
   expect(model.update(input(16000), 17000).eligible).toBe(false);
   expect(model.update(input(18000), 18000).eligible).toBe(false);
-  expect(model.update(input(21000), 21000).eligible).toBe(false);
+  expect(model.update(input(21000), 21000).eligible).toBe(true);
   expect(model.update(input(24000), 24000).eligible).toBe(true);
 });
 it('rejects an implausible jump instead of admitting a teleported near fix', () => {
@@ -48,15 +48,16 @@ it('rejects an implausible jump instead of admitting a teleported near fix', () 
   model.update(input(10000, 400), 10000);
   expect(model.update(input(13000), 13000).eligible).toBe(false);
   expect(model.update(input(16000), 16000).eligible).toBe(false);
-  expect(model.update(input(19000), 19000).eligible).toBe(false);
+  expect(model.update(input(19000), 19000).eligible).toBe(true);
   expect(model.update(input(22000), 22000).eligible).toBe(true);
 });
 it('dedupes milestones and keeps dismissal through jitter, but resets after corroborated exit', () => {
   const model = admitted();
-  expect(model.snapshot().milestone).toBe('arrived');
+  expect(model.snapshot().eligible).toBe(true);
+  expect(model.snapshot().milestone).toBeNull();
   model.dismiss();
   expect(model.update(input(19000), 19000).showInvitation).toBe(false);
-  expect(model.update(input(22000, 46), 22000).eligible).toBe(false);
+  expect(model.update(input(22000, 51), 22000).eligible).toBe(false);
   expect(model.update(input(25000), 25000).showInvitation).toBe(false);
   for (const time of [35000, 38000, 41000]) model.update(input(time, 75), time);
   for (const time of [51000, 54000, 57000]) model.update(input(time), time);
@@ -71,4 +72,11 @@ it('does not corroborate across a gap with no fresh stream', () => {
   model.update(input(10000), 10000);
   model.update(input(13000), 13000);
   expect(model.update(input(30000), 30000).eligible).toBe(false);
+});
+
+it('admits two current readings over three seconds with practical accuracy inside the approved radius', () => {
+ const model = new DestinationProximity('pilot-aclc', policy);
+ expect(model.update(input(10000, 45, 50), 10000).eligible).toBe(false);
+ expect(model.update(input(13000, 45, 50), 13000).eligible).toBe(true);
+ expect(model.update(input(16000, 51, 50), 16000).eligible).toBe(false);
 });

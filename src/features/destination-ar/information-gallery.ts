@@ -3,7 +3,7 @@ import { paginate, type ContentPage, type ReadingCursor } from './content-layout
 import type { ReadingSize } from './reading-preference';
 
 export type GalleryPage = ContentPage & ({ kind: 'text'; media?: never; mediaPage?: never } | { kind: 'image'; media: DestinationMedia; mediaPage: number });
-export function galleryPages(textPages: readonly ContentPage[], media: readonly DestinationMedia[], locale: string, size: ReadingSize, credit: (value: string) => string, englishFallback: string): GalleryPage[] {
+export function galleryPages(textPages: readonly ContentPage[], media: readonly DestinationMedia[], locale: string, size: ReadingSize, credit: (value: string) => string, englishFallback: string, presentation: 'photo' | 'gallery' | 'story' = 'story'): GalleryPage[] {
   const language = locale.startsWith('ja') ? 'ja' : locale.startsWith('ko') ? 'ko' : 'en';
   const images = media.map(item => {
     const alt = localizedContent(item.alt, language);
@@ -17,7 +17,11 @@ export function galleryPages(textPages: readonly ContentPage[], media: readonly 
       ...page, kind: 'image', media: item, mediaPage: index,
     }));
   });
-  return [...(images[0] ?? []), ...textPages.map(page => ({ ...page, kind: 'text' as const })), ...images.slice(1).flat()];
+  const prose = textPages.map(page => ({ ...page, kind: 'text' as const }));
+  if (presentation !== 'story') return [...images.flat(), ...prose];
+  // Manual visual sequence. Source offsets and media/caption identity are
+  // untouched, so changing treatment, locale or text size preserves the cursor.
+  return [...images.flatMap((pages, index) => [...pages, ...(prose[index] ? [prose[index]] : [])]), ...prose.slice(images.length)];
 }
 export function cursorAtPage(pages: readonly GalleryPage[], page: number, locale: string, size: ReadingSize): ReadingCursor {
   const index = Math.min(pages.length - 1, Math.max(0, page)); const selected = pages[index];
@@ -28,7 +32,13 @@ export function galleryCursor(pages: readonly GalleryPage[], previous: ReadingCu
   if (!previous) return cursorAtPage(pages, 0, locale, size);
   if (previous?.mediaId) {
     const matches = pages.flatMap((page, index) => page.media?.id === previous.mediaId ? [index] : []);
-    if (matches.length) return cursorAtPage(pages, matches[Math.min(matches.length - 1, Math.max(0, previous.mediaPage ?? 0))], locale, size);
+    if (matches.length) {
+      const byOffset = previous.locale === locale ? matches.find(index => pages[index].start <= previous.offset && pages[index].end > previous.offset) : undefined;
+      const index = previous.locale === locale
+        ? byOffset ?? matches.at(-1)!
+        : matches[Math.min(matches.length - 1, Math.max(0, previous.mediaPage ?? 0))];
+      return cursorAtPage(pages, index, locale, size);
+    }
   }
   const textPages = pages.filter(page => !page.media);
   // Mixed-page indices are not text indices. Preserve source offsets through

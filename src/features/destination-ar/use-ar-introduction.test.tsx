@@ -50,3 +50,17 @@ it.each(['en', 'ja', 'ko'].flatMap(locale => ['load', 'save'].map(operation => [
   expect(copy()).toContain(translations.t(`destinationSession.intro.${operation}-failed`));
   await retry(); expect(current.error).toBeNull();
 });
+it('isolates destination cinematic completion from the legacy global hint and development provenance', async () => {
+  function Scoped({ destination, provenance = 'verified' }: { destination: string; provenance?: 'verified' | 'development' }) {
+    const intro = useArIntroduction({ destinationId: destination, provenance }); React.useEffect(() => { current = intro; }); return null;
+  }
+  storage.getItem.mockImplementation(async (key: string) => key === 'argala.ar-introduction.v1' ? 'complete' : null);
+  await act(async () => { tree = create(React.createElement(Scoped, { destination: 'D01' })); });
+  expect(current.seen).toBe(false); await act(async () => current.complete());
+  const destinationKey = storage.setItem.mock.calls[0][0]; expect(destinationKey).not.toBe('argala.ar-introduction.v1');
+  storage.getItem.mockImplementation(async (key: string) => key === destinationKey ? 'complete' : null);
+  await act(async () => tree!.unmount());
+  await act(async () => { tree = create(React.createElement(Scoped, { destination: 'D01' })); }); expect(current.seen).toBe(true);
+  await act(async () => tree!.update(React.createElement(Scoped, { destination: 'D02' }))); expect(current.seen).toBe(false);
+  await act(async () => tree!.update(React.createElement(Scoped, { destination: 'D01', provenance: 'development' }))); expect(current.seen).toBe(false);
+});
