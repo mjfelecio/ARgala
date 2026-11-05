@@ -2638,3 +2638,38 @@ remaining concrete correctness issue in the changed paths. No APK build, native
 dependency/configuration change, paid Places/details/routes action, merge or
 deployment occurred. Camera screenshots, UI dumps and verification logs are gitignored in
 `.superpowers/reviews/2026-11-02-cjk-arrival/`.
+
+
+### Cinematic branch capture and demonstration evidence — 2026-11-05
+
+Galaxy A53 SM-A536E / Android16, the existing2026-10-30 development APK, current
+cinematic JavaScript at `cb04595`,1080×2400,420dpi and original1.1 font scale.
+Captured **41 unretouched screenshots and four silent native screen recordings**
+covering the UI changes since2026-10-31: Explore before/after explicit search,
+selected places, Featured/Passport, Destination Preview, Profile/audio/radius,
+sticky Save/Undo, Saved Places, explicit loaded Details and expired reuse recovery,
+walking-route preview/expanded Journey/warnings, Welcome EN/JA/KO and authentication.
+These are physical app captures; none are the supplied design references.
+
+Native AR coverage includes selected-destination simulated entry, the cinematic
+gallery entrance, holographic covers, held chapter opening, image/caption/control
+rendering, Help and Japanese/Korean glyphs. An owner-assisted backward movement
+produced a complete reading-panel retake. The four retained MP4s passed metadata
+inspection and full video decode; all PNGs passed integrity/dimension checks and
+the local gallery links/archive passed verification. Recordings have no audio
+track, so they do not provide additional voice/loudness acceptance. Real on-site
+arrival, outdoor calibration and production media/translation approval remain
+pending. Launcher/native splash were excluded because the installed binary
+predates those assets; no APK build or installation occurred.
+
+The temporary audio draft was undone. English,500m radius, both enabled audio
+settings and completed onboarding were verified restored. Authentication captures
+used owner-approved sign-out; the owner then entered credentials privately and
+sign-in succeeded. Filled credential fields were neither read nor captured.
+Existing bookmarks were retained. Camera/location ownership was released for the
+final catalog screen; Metro remained available for the owner.
+
+The gallery, originals, verification metadata and100MB archive remain local and
+gitignored under `.superpowers/reviews/2026-11-05-ui-capture/` and its sibling ZIP.
+They contain real account identity, map context and the owner-selected camera
+scene, so this source PR does not publish the capture files.
