@@ -1,8 +1,9 @@
 # Viro Android tap correction
 
 Owner-approved on 2026-11-08, replacing the temporary hold/release workaround.
-This is a native runtime candidate; a rebuilt APK and Galaxy A53 acceptance are
-still required. Do not deliver the new tap guidance to an older native runtime.
+The [approved development APK](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/0a665a49-e6f9-4698-8d81-dec0b31faa03) has been built, and its patched listener
+has been verified in DEX. Galaxy A53 physical acceptance remains pending. Do not
+deliver the new tap guidance to an older native runtime.
 
 ## Recognizer and packaging
 
@@ -44,7 +45,8 @@ The production replacement remains Java 17 bytecode.
 - An archive test compares every resource, native library and class entry,
   allowing only the listener to differ, and checks Java 17 bytecode.
 - Temporary Gradle fixtures reject changed package/AAR/class identities,
-  including changed class-check metadata after extraction is already up to date.
+  including reused configuration-cache entries and changed class-check metadata
+  after extraction is already up to date.
 - The normal project suite retains scene hit ownership, disabled controls,
   queued-callback fences and actual EN/JA/KO guidance coverage. CI runs both suites.
 
@@ -57,5 +59,6 @@ transitions. Verify Next/Previous, Close, text-size controls and available Retry
 each accepted tap must act once, with no page skipping or hold/finger-pad hint.
 Check rapid taps against transition guards, gesture cancellation/multitouch,
 Help, tracking interruption and background/refocus. Recheck JA/KO guidance and
-glyphs. Record results in the session device checklist. No APK has been built or
-installed for this correction yet.
+glyphs. Record results in the session device checklist. The approved rebuild completed on 2026-11-08 from `900116a`; see the
+[build record](../../docs/validation.md#approved-tap-fix-development-apk--2026-11-08).
+No phone was connected, so installation and physical acceptance remain pending.

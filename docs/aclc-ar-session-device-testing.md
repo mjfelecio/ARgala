@@ -1,11 +1,12 @@
 # ACLC M3 lifecycle verification
 
 2026-11-08 native interaction follow-up: a separately approved tap-on-release
-candidate now replaces the historical hold/release workaround. It requires a
-rebuilt APK together with the pending SDK maintenance patches; the historical
+candidate now replaces the historical hold/release workaround. The approved
+rebuild includes it together with the SDK maintenance patches; the historical
 JS-only/native-unchanged statements below do not apply to this candidate. See the
 [native patch and acceptance checklist](../patches/viro-touch/README.md).
-No new APK, installation or physical tap verification has occurred.
+The [new development APK](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/0a665a49-e6f9-4698-8d81-dec0b31faa03) passed final-APK checks.
+No phone was connected, so installation and physical tap verification remain NOT RUN.
 
 | New candidate scenario | Required observation | Result |
 | --- | --- | --- |

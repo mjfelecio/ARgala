@@ -2753,8 +2753,50 @@ Verification observed in this worktree:
   native patch verification and diff checking. The later configuration-cache
   guard regression was fixed and verified locally after that review.
 
-**No APK build, installation or physical tap verification occurred.** Native
-APK integration and Galaxy A53 short-tap reliability remain pending the separate
-per-build approval and physical acceptance in the
-[session checklist](aclc-ar-session-device-testing.md). No real GPS, provider,
+These implementation checks preceded the separately approved APK build recorded
+below. Galaxy A53 short-tap reliability remains pending physical acceptance in
+the [session checklist](aclc-ar-session-device-testing.md). No real GPS, provider,
 new content, video or native performance result is claimed by these checks.
+
+
+### Approved tap-fix development APK — 2026-11-08
+
+The owner explicitly approved this one build with “proceed” after reviewing the
+prepared tap fix and completed source checks. Only one build was submitted.
+
+- [EAS build](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/0a665a49-e6f9-4698-8d81-dec0b31faa03): **FINISHED**, completed
+  `2026-11-08T09:31:55.124Z` (17:31:55 Asia/Manila).
+- Source: `900116a38a24f74d87826e04438b94ab7a8d82f3` on `fix/ar-panel-taps`.
+  EAS CLI27.5.0; Android `development` profile, internal APK, existing remote
+  keystore reused with `--freeze-credentials`. Includes the native tap fix and
+  already-merged SDK57 maintenance patches (Expo57.0.32 / Router57.0.30).
+- Cloud install applied five dependency-file patches; subsequent verification
+  reported zero updates. Cloud Expo Doctor passed21/21. Actual Gradle
+  extract/compile/repackage tasks for the replacement Viro renderer ran, followed
+  by **BUILD SUCCESSFUL in14m12s** and `:app:assembleDebug`.
+- [Download APK](https://expo.dev/artifacts/eas/0katb4Q7NwGpFEGeG7riitfl4YgAwWjxT-hwUFZ6wtM.apk): **309,649,208 bytes**
+  (about295MiB). Authenticated EAS download succeeded; a retained local copy is at
+  `/home/kirbysmashyeet/.cache/argala/builds/0a665a49-e6f9-4698-8d81-dec0b31faa03/argala-development.apk`.
+- APK SHA-256: `1a261cd4b63a2029d9f1b47eee9121ddd34d1f66fb82da82ca8e9b2ebe3bceac`.
+- DEX inspection located exactly one `ViroTouchGestureListener` definition in
+  `classes2.dex`, including the new tap detector, gesture/dispatch ownership
+  fields, `onSingleTapUp`, `onDown` and cancellation/retirement methods. The
+  retained older M1 APK was a negative control and lacks these members. ARM64
+  Viro renderer/ARCore libraries are present in the new APK.
+- Android AAPT2 final-manifest inspection passed: package
+  `com.mjfelecio.argala`, versionCode1, minimum24 / target36, debuggable development
+  build, optional camera/AR-camera features and ARCore metadata, nonempty native
+  Maps key metadata (value not recorded), camera and foreground location permissions
+  declared, opt-in background-location capability present. `RECORD_AUDIO`,
+  `FOREGROUND_SERVICE_LOCATION` and broad media-read permissions are absent.
+- The development server was started from this worktree with
+  `EXPO_PUBLIC_VIRO_SPIKE=1`, dev-client/LAN mode on8081; its status endpoint
+  returned `packager-status:running`.
+
+**Installation and physical verification NOT RUN:** repeated ADB checks found
+no connected device. No user session/preferences were changed, camera opened,
+or real GPS/provider/tap behavior exercised. Final-APK inspection proves
+packaging, not physical touch reliability. The pending owner-assisted A53 gate
+remains the20-cycle/control/lifecycle/JA/KO checklist above. Private submission,
+build logs and inspection reports remain gitignored under
+`.superpowers/builds/ar-panel-taps/`.
