@@ -2701,3 +2701,160 @@ Post-update local verification passed: `VITEST_MAX_WORKERS=2 npm run check`
 zero-update native patch verification and Android export (8.6MB Hermes).
 Independent follow-up review confirmed the lockfile, unchanged patch
 transformations and preserved fail-closed version/source guards.
+
+
+### Native AR tap-on-release candidate — 2026-11-08
+
+The owner approved replacing the temporary finger-pad hold/release workaround
+with ordinary tap-on-release, batching the native correction with the already
+merged SDK57 maintenance updates. Viro remains pinned at3.0.3. The original
+packaged listener was exercised with Android API36 MotionEvents in Robolectric:
+stationary release at50ms produced no renderer events, and ordinary repeated
+taps/jitter, cancellation and duplicate-release cases reproduced failures.
+These tests load the actual resolved AAR listener and mock only the renderer/JNI
+boundary; they do not exercise native C++ hit routing or a phone.
+
+The reviewed Java replacement uses Android GestureDetector.onSingleTapUp with
+long-press and double-tap recognition disabled, preserves existing native
+gesture routing, and fences duplicate/canceled/pointer-change fallback. Existing
+JavaScript completed-click ownership, visible hit geometry and current-state
+interaction guards remain. EN/JA/KO square, cover, ring and cinematic guidance
+now uses taps. This guidance belongs with the patched native runtime.
+
+The existing patch runner verifies package/AAR identity before installing a
+text-only Gradle hook. Gradle verifies the original listener class, compiles
+Java17 bytecode, and publishes a generated renderer AAR through the existing
+default artifact with task dependencies. Archive comparison proves every other
+class, resource and native-library entry is byte-identical. No generated Android
+source or modified binary AAR is committed. See
+[patch details and acceptance checklist](../patches/viro-touch/README.md).
+
+Verification observed in this worktree:
+
+- `VITEST_MAX_WORKERS=2 npm run check`: strict TypeScript, zero-warning lint,
+  **1,440 tests/126 files passed**. Actual EN/JA/KO guidance tests were observed
+  failing before the copy changes; checksum installer regression also failed
+  before its fix. Baseline main passed1,438 tests before implementation.
+- `npm run test:viro-touch`: **13 tests passed** (12 native gesture cases and
+  one archive comparison). Covers stationary10/49/50/51/100/200/500/700ms, jitter,
+  legacy MOVE dispatch, rapid taps, cancel/new gesture, pointer/scale/rotation
+  fallback guards, destroy, interception and duplicate UP.
+- Temporary Gradle fixtures reject changed versions, AARs and class-check
+  metadata, including reused configuration-cache entries and already-extracted
+  outputs. A stale-metadata acceptance regression was observed failing, then
+  corrected with explicit file-content providers and a class-hash task input.
+  Configuration-cache reuse with forced extract/compile/repackage also passed.
+- Repeated postinstall and `npm run check:native-patches` passed with zero updates.
+  Online `CI=1 npx expo install --check` passed; Expo Doctor **21/21**;
+  `npm run check:android` passed; Android export produced an **8.6MB Hermes**
+  bundle. The final native test script passed targeted zero-warning lint;
+  `git diff --check` passed.
+- One fresh-context read-only review found no blockers and independently ran
+  native patch verification and diff checking. The later configuration-cache
+  guard regression was fixed and verified locally after that review.
+
+These implementation checks preceded the separately approved APK build recorded
+below. Galaxy A53 short-tap reliability remains pending physical acceptance in
+the [session checklist](aclc-ar-session-device-testing.md). No real GPS, provider,
+new content, video or native performance result is claimed by these checks.
+
+
+### Approved tap-fix development APK — 2026-11-08
+
+The owner explicitly approved this one build with “proceed” after reviewing the
+prepared tap fix and completed source checks. Only one build was submitted.
+
+- [EAS build](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/0a665a49-e6f9-4698-8d81-dec0b31faa03): **FINISHED**, completed
+  `2026-11-08T09:31:55.124Z` (17:31:55 Asia/Manila).
+- Source: `900116a38a24f74d87826e04438b94ab7a8d82f3` on `fix/ar-panel-taps`.
+  EAS CLI27.5.0; Android `development` profile, internal APK, existing remote
+  keystore reused with `--freeze-credentials`. Includes the native tap fix and
+  already-merged SDK57 maintenance patches (Expo57.0.32 / Router57.0.30).
+- Cloud install applied five dependency-file patches; subsequent verification
+  reported zero updates. Cloud Expo Doctor passed21/21. Actual Gradle
+  extract/compile/repackage tasks for the replacement Viro renderer ran, followed
+  by **BUILD SUCCESSFUL in14m12s** and `:app:assembleDebug`.
+- [Download APK](https://expo.dev/artifacts/eas/0katb4Q7NwGpFEGeG7riitfl4YgAwWjxT-hwUFZ6wtM.apk): **309,649,208 bytes**
+  (about295MiB). Authenticated EAS download succeeded; a retained local copy is at
+  `/home/kirbysmashyeet/.cache/argala/builds/0a665a49-e6f9-4698-8d81-dec0b31faa03/argala-development.apk`.
+- APK SHA-256: `1a261cd4b63a2029d9f1b47eee9121ddd34d1f66fb82da82ca8e9b2ebe3bceac`.
+- DEX inspection located exactly one `ViroTouchGestureListener` definition in
+  `classes2.dex`, including the new tap detector, gesture/dispatch ownership
+  fields, `onSingleTapUp`, `onDown` and cancellation/retirement methods. The
+  retained older M1 APK was a negative control and lacks these members. ARM64
+  Viro renderer/ARCore libraries are present in the new APK.
+- Android AAPT2 final-manifest inspection passed: package
+  `com.mjfelecio.argala`, versionCode1, minimum24 / target36, debuggable development
+  build, optional camera/AR-camera features and ARCore metadata, nonempty native
+  Maps key metadata (value not recorded), camera and foreground location permissions
+  declared, opt-in background-location capability present. `RECORD_AUDIO`,
+  `FOREGROUND_SERVICE_LOCATION` and broad media-read permissions are absent.
+- The development server was started from this worktree with
+  `EXPO_PUBLIC_VIRO_SPIKE=1`, dev-client/LAN mode on8081; its status endpoint
+  returned `packager-status:running`.
+
+At build completion no device was connected, so installation/physical checks
+were initially deferred. The subsequent owner-authorized device session is
+recorded below. Private build logs and inspection reports remain gitignored
+under `.superpowers/builds/ar-panel-taps/`.
+
+
+### A53 tap-fix installation and physical session — 2026-11-08
+
+The owner reconnected ADB and explicitly confirmed the phone was upright and
+ready. Device: Galaxy A53 SM-A536E, Android16, USB-connected, unlocked and charging;
+battery38% at installation. The previous installed APK (last updated2026-10-30)
+was retained privately before updating, with SHA-256
+`ad5cc55cf6259bb4f93abd8ef9c0a702770aaa7a3045d850b8bc9d7de0403d0e`.
+
+- The host's ADB28.0.2 streamed install stopped with no Android failure detail,
+  leaving the old package unchanged. `adb install --no-streaming -r` then returned
+  **Success**. On-device `base.apk` SHA-256 exactly matches the approved artifact
+  `1a261cd4b63a2029d9f1b47eee9121ddd34d1f66fb82da82ca8e9b2ebe3bceac`.
+  No uninstall or data clear was performed.
+- Signed-in Profile, English and the saved500m radius remained present. Opened
+  the existing development ring through Profile, with SDK57 development-launch
+  suppression flags and USB reverse8081. Real ARCore camera/tracking established
+  and the native Overview cover displayed the new tap guidance.
+- The owner explicitly answered **“Yes, one quick tap opens it”**, then reported
+  that the other reader controls were **equally accurate**. These are actual
+  finger-interaction observations, distinct from synthetic ADB tap checks.
+- Help remained over the real camera; a tap on the exposed cover while Help was
+  open did not open a reader after dismissing Help. Home removed ARgala from the
+  active CameraService client section. Foreground return restored the real camera,
+  ring and session-only Opened marker. No native restart/error screen was seen.
+- Japanese and Korean were selected and explicitly saved through Profile. Each
+  locale started native AR and displayed actual CJK cover, caption and control
+  glyphs without the former missing-character symbols. A synthetic quick Next
+  tap in Japanese advanced the native reader from1/7 to2/7 once. The current
+  framing cropped the sides of the large reader; this is glyph/interaction
+  evidence, not full-panel framing acceptance. English was explicitly saved
+  again, with the saved500m radius still visible.
+- The app PID remained25413 through these checks; the filtered process log had
+  no fatal-exception/signal markers. No general crash-rate, FPS, outdoor GPS,
+  paid Google request, real-destination admission or release-performance claim
+  follows from this development session.
+
+In response to the20-cycle open/close prompt, the owner reported **no misses or
+double actions**, but clarified that a noticeable delay occurs **before the
+response starts**, rather than only while the animation finishes. The functional
+tap gate is accepted; this is not a latency/performance pass.
+
+Additional synthetic device input exercised DOWN → MOVE → CANCEL and a short
+swipe: neither opened the closed cover, and a subsequent normal synthetic tap
+reopened the reader. Physical multitouch and forced tracking-loss checks remain
+unverified; the automated native regressions cover those recognizer branches.
+
+Latency follow-up: source inspection found no added timer in the normal
+tap-on-release callback. Existing open/close motion is280ms and page feedback
+is140ms. Those intentional durations do not establish the cause of a reported
+pre-response delay. A short private screen trace was captured with a temporary
+touch marker (restored to0 afterward); attempted Runtime inspection did not
+return command results. The session did not reliably isolate native dispatch
+from JS/rendering time, and the trace is not a release latency/FPS benchmark.
+Do not dismiss the observed lag as development overhead without further profiling.
+No latency-related production code or further APK build was introduced.
+
+The app was backgrounded after the checks to release the camera. Camera captures,
+the timing trace, sanitized UI dumps and the previous APK remain private and
+gitignored under `.superpowers/builds/ar-panel-taps/device/`.

@@ -61,3 +61,28 @@ it('validates every patch before writing any dependency', () => {
   expect(f.run().status).not.toBe(0);
   expect(f.source()).toBe('mode = PERFORMANCE\n');
 });
+
+it('rejects a changed binary archive before modifying any dependency', () => {
+  const f = fixture();
+  const patchFile = join(f.directory, 'camera.json');
+  const patch = JSON.parse(readFileSync(patchFile, 'utf8'));
+  patch.binaryChecksums = [{ path: 'renderer.aar', sha256: '3d801aa532c1cec3ee3838d05dd4cec22e5cb311d679e984e8b47833a2d74060' }];
+  writeFileSync(patchFile, JSON.stringify(patch));
+  writeFileSync(join(f.dependency, 'renderer.aar'), 'unexpected binary');
+  expect(f.run().stderr).toContain('Native patch binary mismatch');
+  expect(f.source()).toBe('mode = PERFORMANCE\n');
+});
+
+it('accepts the expected binary without rewriting its contents on repeated installs', () => {
+  const f = fixture();
+  const patchFile = join(f.directory, 'camera.json');
+  const patch = JSON.parse(readFileSync(patchFile, 'utf8'));
+  // SHA-256 of the literal string "abc".
+  patch.binaryChecksums = [{ path: 'renderer.aar', sha256: 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad' }];
+  writeFileSync(patchFile, JSON.stringify(patch));
+  writeFileSync(join(f.dependency, 'renderer.aar'), 'abc');
+  expect(f.run().status).toBe(0);
+  expect(f.run().status).toBe(0);
+  expect(f.run(true).status).toBe(0);
+  expect(readFileSync(join(f.dependency, 'renderer.aar'), 'utf8')).toBe('abc');
+});

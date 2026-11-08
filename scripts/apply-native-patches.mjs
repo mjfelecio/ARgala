@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -14,6 +15,10 @@ export function applyNativePatches(root = projectRoot, directory = resolve(proje
     const packageRoot = resolve(root, 'node_modules', patch.package);
     const installed = JSON.parse(readFileSync(resolve(packageRoot, 'package.json'), 'utf8'));
     if (installed.version !== patch.version) throw new Error(`Native patch requires ${patch.package}@${patch.version}; found ${installed.version}. Review the patch before upgrading.`);
+    for (const binary of patch.binaryChecksums ?? []) {
+      const digest = createHash('sha256').update(readFileSync(resolve(packageRoot, binary.path))).digest('hex');
+      if (digest !== binary.sha256) throw new Error(`Native patch binary mismatch: ${patch.package}/${binary.path}. Review the installed archive.`);
+    }
     for (const file of patch.files) {
       const path = resolve(packageRoot, file.path);
       const original = readFileSync(path, 'utf8');

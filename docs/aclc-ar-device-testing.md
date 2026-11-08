@@ -2,6 +2,14 @@
 
 Historical M1 checkpoint: the unused `/viro-spike` page and Profile action were removed on 2026-11-02. The observations below remain historical evidence; use the [ring/session checklist](aclc-ar-session-device-testing.md) for current device testing.
 
+2026-11-08 follow-up: the owner approved replacing the temporary held gesture
+with normal tap-on-release and batching its native correction with the pending
+SDK maintenance rebuild. The [guarded Java replacement](../patches/viro-touch/README.md)
+has automated gesture/archive coverage. Its approved rebuild and final-APK
+checks are recorded in [validation](validation.md#approved-tap-fix-development-apk--2026-11-08). The APK is now installed on the A53; the owner confirmed normal
+taps and accurate reader controls. See the current session checklist for sampled
+checks and remaining gates. Earlier hold acceptance below remains historical.
+
 Status: the approved [development APK](https://expo.dev/artifacts/eas/xCwGwSwy5ztzenU8RU19Z06JjtsDUhrH3bOPLc8VdUw.apk) was built successfully from `fa29e8e`; installed APK identity verified; physical camera/tracking observed; the owner accepts held interaction as passable using the finger pad. Short taps remain unreliable; remaining AR-services and presentation checks are pending. [EAS build](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/91f33401-365b-4ec0-b0c2-23c1f0c4ec25). M2 scene/ring implementation must wait for physical Gate A. The full approved product flow and lifecycle clarifications are in the [implementation plan](superpowers/plans/2026-10-25-aclc-viro-vertical-slice.md).
 
 ## What this checkpoint adds

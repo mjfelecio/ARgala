@@ -131,10 +131,10 @@ it('never prompts after Allow if its permission read finishes after SDK focus is
 });
 
 it.each([
-  ['en', 'Use your finger pad to hold the square briefly, then release.', 'Hold, then release', 'Interaction received'],
-  ['ko', '손가락 끝의 넓은 부분으로 사각형을 잠시 누른 뒤 떼세요.', '길게 누른 뒤 떼기', '상호작용 확인됨'],
-  ['ja', '指の腹で四角形をしばらく押してから離してください。', '長押しして離す', '操作を確認'],
-])('localizes %s hold guidance and completed native interaction feedback', async (language, guidance, action, received) => {
+  ['en', 'Tap the square to interact.', 'Tap to interact', 'Interaction received'],
+  ['ko', '사각형을 탭하여 조작하세요.', '탭하여 조작', '상호작용 확인됨'],
+  ['ja', '四角形をタップして操作してください。', 'タップして操作', '操作を確認'],
+])('localizes %s tap guidance and completed native interaction feedback', async (language, guidance, action, received) => {
   await translations.changeLanguage(language);
   await mount(); await layout(); await press('destinationAr.start');
   await act(async () => { await vi.dynamicImportSettled(); });

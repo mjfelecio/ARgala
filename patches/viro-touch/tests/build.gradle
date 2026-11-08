@@ -1,0 +1,63 @@
+plugins { id 'java' }
+
+repositories {
+    mavenCentral()
+    google { content { includeGroupByRegex 'androidx\\..*' } }
+}
+configurations { renderer; androidCompile; testAars }
+configurations.testCompileClasspath.extendsFrom(configurations.androidCompile)
+configurations.testRuntimeClasspath.extendsFrom(configurations.androidCompile)
+dependencies {
+    renderer project(path: ':viro_renderer', configuration: 'default')
+    androidCompile 'org.robolectric:android-all:16-robolectric-13921718-2'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation('org.robolectric:robolectric:4.17') {
+        exclude group: 'androidx.test', module: 'monitor'
+        exclude group: 'androidx.test.espresso', module: 'espresso-idling-resource'
+    }
+    testAars 'androidx.test:monitor:1.8.0@aar'
+    testAars 'androidx.test.espresso:espresso-idling-resource:3.7.0@aar'
+}
+
+// Resolve the same default AAR that the APK consumes, including its builtBy task.
+def extractRenderer = tasks.register('extractRenderer', Copy) {
+    dependsOn configurations.renderer
+    inputs.files configurations.renderer
+    from { zipTree(configurations.renderer.singleFile) }
+    include 'classes.jar'
+    into layout.buildDirectory.dir('renderer')
+}
+dependencies {
+    testImplementation files(extractRenderer.map { new File(it.destinationDir, 'classes.jar') })
+}
+def extractTestAars = tasks.register('extractTestAars', Sync) {
+    inputs.files configurations.testAars
+    configurations.testAars.each { archive ->
+        from(zipTree(archive)) {
+            include 'classes.jar'
+            rename 'classes.jar', "${archive.name}.jar"
+        }
+    }
+    into layout.buildDirectory.dir('test-aars')
+}
+dependencies {
+    testImplementation files(extractTestAars.map { fileTree(it.destinationDir) })
+}
+sourceSets.test.java.srcDirs = ['src']
+// Robolectric's API 36 framework is Java 21; the replacement remains Java 17.
+java { toolchain { languageVersion = JavaLanguageVersion.of(21) } }
+def testCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(21) }
+project(':viro_renderer').tasks.withType(JavaCompile).configureEach {
+    javaCompiler = testCompiler
+}
+tasks.named('compileTestJava') { dependsOn extractRenderer, extractTestAars }
+test {
+    useJUnit()
+    maxHeapSize = '1536m'
+    // API 36's ApplicationSharedMemory uses this Robolectric interceptor.
+    jvmArgs '--add-opens=java.base/jdk.internal.access=ALL-UNNAMED'
+    systemProperty 'robolectric.dependency.repo.url', 'https://repo.maven.apache.org/maven2'
+    systemProperty 'argala.originalRenderer', new File(project(':viro_renderer').projectDir, 'viro_renderer-release.aar').absolutePath
+    systemProperty 'argala.patchedRenderer', configurations.renderer.singleFile.absolutePath
+    testLogging { events 'failed', 'skipped'; exceptionFormat 'short' }
+}

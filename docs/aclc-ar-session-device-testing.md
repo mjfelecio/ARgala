@@ -1,5 +1,25 @@
 # ACLC M3 lifecycle verification
 
+2026-11-08 native interaction follow-up: a separately approved tap-on-release
+candidate now replaces the historical hold/release workaround. The approved
+rebuild includes it together with the SDK maintenance patches; the historical
+JS-only/native-unchanged statements below do not apply to this candidate. See the
+[native patch and acceptance checklist](../patches/viro-touch/README.md).
+The [new development APK](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/0a665a49-e6f9-4698-8d81-dec0b31faa03) passed final-APK checks.
+Installed on the Galaxy A53 (SM-A536E / Android16) after the owner reconnected
+ADB. The owner confirmed a normal quick tap opens the panel and reported the
+reader controls are equally accurate. Help/resume and native JA/KO checks passed;
+English was restored. In response to the20-cycle prompt, the owner reported
+no missed or duplicate actions, while noting a delay before the response starts.
+This passes the functional tap gate; input-latency profiling remains a follow-up.
+
+| New candidate scenario | Required observation | Result |
+| --- | --- | --- |
+| Ordinary taps | 20 consecutive tap/open-close cycles, one completion each, no hold/finger-pad requirement | OWNER PASS — no misses or double actions reported for the20-cycle prompt; pre-response lag remains |
+| Reader controls | Next/Previous, Close, A−/A+, available Retry; no double actions or page skipping | OWNER PASS — reader controls reported equally accurate; native JA Next separately observed advancing1/7→2/7 once. Retry was not needed |
+| Guards and recovery | Rapid taps during transitions, cancellation/multitouch, Help, tracking loss and background/refocus | PARTIAL — Help blocked a cover tap; Home released camera; return restored ring/opened marker. Synthetic native DOWN/MOVE/CANCEL and short swipe left the ring closed; next tap reopened. Physical multitouch and forced tracking loss not exercised |
+| Locale | Tap guidance and actual JA/KO glyphs on the rebuilt native runtime | PASS for sampled native covers, captions and reader controls; English restored and500m retained |
+
 Status as of 2026-10-27: owner reports the ring prototype works well; this is not a complete lifecycle/GPS pass. Implementation prepared for offline review; **M3 physical verification NOT RUN**. The owner stopped ADB verification and deferred it to2026-10-26. Do not start device commands until the owner resumes verification. The camera was released during the previous M2 trial; the task Metro server is stopped. No M3 APK was built or installed.
 
 ## Scope and entry

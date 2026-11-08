@@ -1,0 +1,22 @@
+{
+  "package": "@reactvision/react-viro",
+  "version": "3.0.3",
+  "binaryChecksums": [
+    {
+      "path": "android/viro_renderer/viro_renderer-release.aar",
+      "sha256": "cd654a19066b50c2b408c64c3ae2a6d1529ebd1c5dd3238a026bf4720727bdc7"
+    }
+  ],
+  "listenerClassSha256": "88ba3ea396bad71be2d793378eca591ca2466a6f1583eb5cff75de6d2e830275",
+  "files": [
+    {
+      "path": "android/viro_renderer/build.gradle",
+      "changes": [
+        {
+          "before": "artifacts.add(\"default\", file('viro_renderer-release.aar'))",
+          "after": "// ARgala: compile the version-checked tap correction during the native build.\napply from: new File(projectDir, '../../../../../patches/viro-touch/renderer.gradle')"
+        }
+      ]
+    }
+  ]
+}
