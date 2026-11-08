@@ -1,0 +1,3 @@
+// The standalone Java test project supplies Android's real framework classes.
+// Production obtains this extension from the Android application plugin instead.
+extensions.add('android', [bootClasspath: rootProject.configurations.androidCompile])

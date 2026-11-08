@@ -1,5 +1,19 @@
 # ACLC M3 lifecycle verification
 
+2026-11-08 native interaction follow-up: a separately approved tap-on-release
+candidate now replaces the historical hold/release workaround. It requires a
+rebuilt APK together with the pending SDK maintenance patches; the historical
+JS-only/native-unchanged statements below do not apply to this candidate. See the
+[native patch and acceptance checklist](../patches/viro-touch/README.md).
+No new APK, installation or physical tap verification has occurred.
+
+| New candidate scenario | Required observation | Result |
+| --- | --- | --- |
+| Ordinary taps | 20 consecutive tap/open-close cycles, one completion each, no hold/finger-pad requirement | NOT RUN |
+| Reader controls | Next/Previous, Close, A−/A+, available Retry; no double actions or page skipping | NOT RUN |
+| Guards and recovery | Rapid taps during transitions, cancellation/multitouch, Help, tracking loss and background/refocus | NOT RUN |
+| Locale | Tap guidance and actual JA/KO glyphs on the rebuilt native runtime | NOT RUN |
+
 Status as of 2026-10-27: owner reports the ring prototype works well; this is not a complete lifecycle/GPS pass. Implementation prepared for offline review; **M3 physical verification NOT RUN**. The owner stopped ADB verification and deferred it to2026-10-26. Do not start device commands until the owner resumes verification. The camera was released during the previous M2 trial; the task Metro server is stopped. No M3 APK was built or installed.
 
 ## Scope and entry

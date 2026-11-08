@@ -1,0 +1,5 @@
+rootProject.name = 'argala-viro-touch-tests'
+include ':viro_renderer', ':app'
+def nodeModules = providers.gradleProperty('viroNodeModules').getOrElse('../../../node_modules')
+project(':viro_renderer').projectDir = file("${nodeModules}/@reactvision/react-viro/android/viro_renderer")
+project(':app').projectDir = file('android-classpath')

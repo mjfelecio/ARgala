@@ -1,0 +1,87 @@
+import groovy.json.JsonSlurper
+import java.security.MessageDigest
+import java.util.zip.ZipFile
+
+// This is applied by Viro's existing AAR wrapper, outside generated android/.
+// Package installs only apply the text hook; compilation happens in Gradle.
+def patchDirectory = new File(projectDir, '../../../../../patches/viro-touch')
+// Explicit file-content providers also invalidate configuration-cache entries.
+// JsonSlurper.parse(File) alone can leave a stale identity in a reused entry.
+def patchFile = layout.projectDirectory.file('../../../../../patches/react-viro+3.0.3.json')
+def patch = new JsonSlurper().parseText(providers.fileContents(patchFile).asText.get())
+def packageFile = layout.projectDirectory.file('../../package.json')
+def installed = new JsonSlurper().parseText(providers.fileContents(packageFile).asText.get())
+if (installed.version != patch.version) {
+    throw new GradleException("ARgala Viro touch patch requires ${patch.version}; review before upgrading.")
+}
+def originalAarFile = layout.projectDirectory.file('viro_renderer-release.aar')
+def originalAar = originalAarFile.asFile
+def sha256 = { InputStream stream ->
+    def digest = MessageDigest.getInstance('SHA-256')
+    byte[] buffer = new byte[65536]
+    int count
+    while ((count = stream.read(buffer)) != -1) digest.update(buffer, 0, count)
+    digest.digest().encodeHex().toString()
+}
+// Check on every configuration, even if generated outputs are up to date/cached.
+def archiveHash = MessageDigest.getInstance('SHA-256')
+        .digest(providers.fileContents(originalAarFile).asBytes.get()).encodeHex().toString()
+if (archiveHash != patch.binaryChecksums[0].sha256) {
+    throw new GradleException('ARgala Viro renderer archive mismatch; review the installed binary.')
+}
+
+def originalDirectory = layout.buildDirectory.dir('argala-viro/original')
+def originalJar = originalDirectory.map { it.file('classes.jar') }
+def listenerPath = 'com/viro/core/internal/ViroTouchGestureListener.class'
+def extract = tasks.register('extractArgalaViroRenderer', Sync) {
+    inputs.property 'listenerClassSha256', patch.listenerClassSha256
+    from zipTree(originalAar)
+    include 'classes.jar'
+    into originalDirectory
+    doLast {
+        new ZipFile(originalJar.get().asFile).withCloseable { jar ->
+            def entry = jar.getEntry(listenerPath)
+            if (entry == null || jar.getInputStream(entry).withCloseable(sha256) != patch.listenerClassSha256) {
+                throw new GradleException('ARgala Viro listener class mismatch; review before compiling.')
+            }
+        }
+    }
+}
+def compile = tasks.register('compileArgalaViroTouch', JavaCompile) {
+    dependsOn extract
+    source new File(patchDirectory, 'src/com/viro/core/internal/ViroTouchGestureListener.java')
+    classpath = files(originalJar, providers.provider {
+        def android = rootProject.findProject(':app')?.extensions?.findByName('android')
+        if (android == null) throw new GradleException('ARgala Viro touch patch needs the app Android boot classpath.')
+        android.bootClasspath
+    })
+    destinationDirectory = layout.buildDirectory.dir('argala-viro/compiled')
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+// Zip rather than Jar preserves the original manifest and every other entry.
+def patchedClasses = tasks.register('packageArgalaViroClasses', Zip) {
+    dependsOn compile
+    from({ zipTree(originalJar.get().asFile) }) { exclude listenerPath }
+    from compile.flatMap { it.destinationDirectory }
+    archiveFileName = 'classes.jar'
+    destinationDirectory = layout.buildDirectory.dir('argala-viro/patched')
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+def patchedRenderer = tasks.register('packageArgalaViroRenderer', Zip) {
+    from(zipTree(originalAar)) { exclude 'classes.jar' }
+    from patchedClasses.flatMap { it.archiveFile }
+    archiveFileName = 'viro_renderer-argala.aar'
+    destinationDirectory = layout.buildDirectory.dir('argala-viro')
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+artifacts.add('default', patchedRenderer) {
+    type = 'aar'
+    builtBy patchedRenderer
+}

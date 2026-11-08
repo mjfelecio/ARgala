@@ -66,6 +66,7 @@
   "scripts": {
     "postinstall": "node scripts/apply-native-patches.mjs",
     "check:native-patches": "node scripts/apply-native-patches.mjs --check",
+    "test:viro-touch": "node scripts/test-viro-touch.mjs",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",

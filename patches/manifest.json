@@ -1,5 +1,6 @@
 [
   "expo-camera+57.0.6.json",
   "react-native-maps+1.27.2.json",
-  "expo-router+57.0.30.json"
+  "expo-router+57.0.30.json",
+  "react-viro+3.0.3.json"
 ]

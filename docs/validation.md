@@ -2701,3 +2701,60 @@ Post-update local verification passed: `VITEST_MAX_WORKERS=2 npm run check`
 zero-update native patch verification and Android export (8.6MB Hermes).
 Independent follow-up review confirmed the lockfile, unchanged patch
 transformations and preserved fail-closed version/source guards.
+
+
+### Native AR tap-on-release candidate — 2026-11-08
+
+The owner approved replacing the temporary finger-pad hold/release workaround
+with ordinary tap-on-release, batching the native correction with the already
+merged SDK57 maintenance updates. Viro remains pinned at3.0.3. The original
+packaged listener was exercised with Android API36 MotionEvents in Robolectric:
+stationary release at50ms produced no renderer events, and ordinary repeated
+taps/jitter, cancellation and duplicate-release cases reproduced failures.
+These tests load the actual resolved AAR listener and mock only the renderer/JNI
+boundary; they do not exercise native C++ hit routing or a phone.
+
+The reviewed Java replacement uses Android GestureDetector.onSingleTapUp with
+long-press and double-tap recognition disabled, preserves existing native
+gesture routing, and fences duplicate/canceled/pointer-change fallback. Existing
+JavaScript completed-click ownership, visible hit geometry and current-state
+interaction guards remain. EN/JA/KO square, cover, ring and cinematic guidance
+now uses taps. This guidance belongs with the patched native runtime.
+
+The existing patch runner verifies package/AAR identity before installing a
+text-only Gradle hook. Gradle verifies the original listener class, compiles
+Java17 bytecode, and publishes a generated renderer AAR through the existing
+default artifact with task dependencies. Archive comparison proves every other
+class, resource and native-library entry is byte-identical. No generated Android
+source or modified binary AAR is committed. See
+[patch details and acceptance checklist](../patches/viro-touch/README.md).
+
+Verification observed in this worktree:
+
+- `VITEST_MAX_WORKERS=2 npm run check`: strict TypeScript, zero-warning lint,
+  **1,440 tests/126 files passed**. Actual EN/JA/KO guidance tests were observed
+  failing before the copy changes; checksum installer regression also failed
+  before its fix. Baseline main passed1,438 tests before implementation.
+- `npm run test:viro-touch`: **13 tests passed** (12 native gesture cases and
+  one archive comparison). Covers stationary10/49/50/51/100/200/500/700ms, jitter,
+  legacy MOVE dispatch, rapid taps, cancel/new gesture, pointer/scale/rotation
+  fallback guards, destroy, interception and duplicate UP.
+- Temporary Gradle fixtures reject changed versions, AARs and class-check
+  metadata, including reused configuration-cache entries and already-extracted
+  outputs. A stale-metadata acceptance regression was observed failing, then
+  corrected with explicit file-content providers and a class-hash task input.
+  Configuration-cache reuse with forced extract/compile/repackage also passed.
+- Repeated postinstall and `npm run check:native-patches` passed with zero updates.
+  Online `CI=1 npx expo install --check` passed; Expo Doctor **21/21**;
+  `npm run check:android` passed; Android export produced an **8.6MB Hermes**
+  bundle. The final native test script passed targeted zero-warning lint;
+  `git diff --check` passed.
+- One fresh-context read-only review found no blockers and independently ran
+  native patch verification and diff checking. The later configuration-cache
+  guard regression was fixed and verified locally after that review.
+
+**No APK build, installation or physical tap verification occurred.** Native
+APK integration and Galaxy A53 short-tap reliability remain pending the separate
+per-build approval and physical acceptance in the
+[session checklist](aclc-ar-session-device-testing.md). No real GPS, provider,
+new content, video or native performance result is claimed by these checks.

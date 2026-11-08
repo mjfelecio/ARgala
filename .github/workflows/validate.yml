@@ -20,6 +20,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: npm run check:native-patches
+      - run: npm run test:viro-touch
       - run: npm run check:edge
       - run: npm run lint:edge
       - run: npx expo install --check

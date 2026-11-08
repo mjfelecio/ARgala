@@ -18,7 +18,7 @@ export function InformationTile({ content, slot, enabled, style, onSelect, decor
     <ChapterEmblem content={content} />
     <ArText position={[0, -0.055, 0.006]} width={0.59} height={0.14} text={chapter.coverTitle} style={style.text(5.5, 'center', '600')} />
     {opened && <ArText testID={`ring-opened-${content.id}`} position={[0, -0.205, 0.006]} width={0.59} height={0.06} text={t('destinationStories.opened')} style={style.text(3)} />}
-    <ArText position={[0, -0.28, 0.006]} width={0.61} height={0.07} text={content.approved ? t('destinationRing.hold') : t('destinationRing.sampleLabel')} style={style.text(3)} />
+    <ArText position={[0, -0.28, 0.006]} width={0.61} height={0.07} text={content.approved ? t('destinationRing.tap') : t('destinationRing.sampleLabel')} style={style.text(3)} />
   </ViroNode>;
 }
 export function NativePanelAction({ id, label, position, width = 0.28, enabled, style, onPress, renderingOrder = 2, primary = false }: {

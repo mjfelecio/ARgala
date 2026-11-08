@@ -319,10 +319,10 @@
     "prepared": "Waiting for the screen to finish appearing…",
     "initializing": "Starting AR tracking. Move the phone slowly over a well-lit, textured area.",
     "interrupted": "The test was interrupted. Retry explicitly to check permissions and start a new native scene.",
-    "live": "Tracking ready. Use your finger pad to hold the square briefly, then release.",
+    "live": "Tracking ready. Tap the square to interact.",
     "trackingLost": "Tracking is limited. Move the phone slowly toward a well-lit, textured area.",
-    "square": "ACLC\nNative square\nHold, then release",
-    "squareTapped": "ACLC\nInteraction received\nHold again",
+    "square": "ACLC\nNative square\nTap to interact",
+    "squareTapped": "ACLC\nInteraction received\nTap again",
     "errors": {
       "native-unavailable": "This APK does not contain the native Viro integration. Install the new development build.",
       "unsupported": "This device does not support the native AR test. Map features remain available.",
@@ -339,11 +339,11 @@
       "scenery": "Sample landscape photo. This does not show ACLC Ormoc."
     },
     "title": "ACLC ring prototype",
-    "live": "Look around to find the sample tiles. Use your finger pad to hold a tile briefly, then release.",
+    "live": "Look around to find the sample tiles. Tap a tile to open it.",
     "prototype": "Development samples only. No approved destination content or location verification.",
     "recenter": "Recenter",
     "help": "Help",
-    "helpText": "Turn to discover the ring. Hold and release a tile to bring it closer. Hold and release controls to turn pages, change text size or close. To return to the ring, hold and release another visible tile; it will not open that tile. Recenter uses your current view.",
+    "helpText": "Turn to discover the ring. Tap a tile to bring it closer. Tap controls to turn pages, change text size or close. To return to the ring, tap another visible tile; it will not open that tile. Recenter uses your current view.",
     "close": "Close",
     "previous": "Previous",
     "next": "Next",
@@ -378,7 +378,7 @@
         "body": "Development sample only. No real features or attractions are described.\n\nWhat to notice\nThis chapter will hold approved descriptions of features visitors can see at the destination.\n\nImages with context\nA licensed image can open a chapter. Its full caption and credit remain available through the page controls."
       }
     },
-    "hold": "Hold, then release",
+    "tap": "Tap to open",
     "poseRequired": "Face ahead and move the phone gently before recentering.",
     "poseRate": "Pose callbacks: {{received}}/s · position outputs: {{applied}}/s",
     "imageCredit": "Credit: {{credit}}",
@@ -576,7 +576,7 @@
     "available_other": "{{count}} chapters to explore",
     "unlocked": "AR experience unlocked",
     "preflightTitle": "Get ready to explore",
-    "exploreHint": "Look around to discover chapters. Use your finger pad to hold a tile briefly, then release.",
+    "exploreHint": "Look around to discover chapters. Tap a tile to open it.",
     "helpTitle": "Explore this place",
     "dismissHelp": "Back to exploring",
     "readerTitle": "Destination stories"
