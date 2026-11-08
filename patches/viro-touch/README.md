@@ -2,8 +2,10 @@
 
 Owner-approved on 2026-11-08, replacing the temporary hold/release workaround.
 The [approved development APK](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/0a665a49-e6f9-4698-8d81-dec0b31faa03) has been built, and its patched listener
-has been verified in DEX. Galaxy A53 physical acceptance remains pending. Do not
-deliver the new tap guidance to an older native runtime.
+has been verified in DEX and installed on the Galaxy A53. The owner confirmed
+normal quick taps and accurate reader controls, then reported no missed or
+duplicate actions for the20-cycle check. Pre-response latency remains a separate
+follow-up. Do not deliver this guidance to an older runtime.
 
 ## Recognizer and packaging
 
@@ -61,4 +63,8 @@ Check rapid taps against transition guards, gesture cancellation/multitouch,
 Help, tracking interruption and background/refocus. Recheck JA/KO guidance and
 glyphs. Record results in the session device checklist. The approved rebuild completed on 2026-11-08 from `900116a`; see the
 [build record](../../docs/validation.md#approved-tap-fix-development-apk--2026-11-08).
-No phone was connected, so installation and physical acceptance remain pending.
+The owner later connected the A53 and confirmed normal taps/reader controls.
+Help/resume and sampled JA/KO glyph checks passed; English was restored. The
+owner reported no misses/doubles for the20-cycle check, with pre-response lag.
+Synthetic cancellation/swipe recovery passed; physical multitouch and forced
+tracking loss remain unverified. Input-latency attribution is still open.

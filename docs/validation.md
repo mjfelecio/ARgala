@@ -2793,10 +2793,68 @@ prepared tap fix and completed source checks. Only one build was submitted.
   `EXPO_PUBLIC_VIRO_SPIKE=1`, dev-client/LAN mode on8081; its status endpoint
   returned `packager-status:running`.
 
-**Installation and physical verification NOT RUN:** repeated ADB checks found
-no connected device. No user session/preferences were changed, camera opened,
-or real GPS/provider/tap behavior exercised. Final-APK inspection proves
-packaging, not physical touch reliability. The pending owner-assisted A53 gate
-remains the20-cycle/control/lifecycle/JA/KO checklist above. Private submission,
-build logs and inspection reports remain gitignored under
-`.superpowers/builds/ar-panel-taps/`.
+At build completion no device was connected, so installation/physical checks
+were initially deferred. The subsequent owner-authorized device session is
+recorded below. Private build logs and inspection reports remain gitignored
+under `.superpowers/builds/ar-panel-taps/`.
+
+
+### A53 tap-fix installation and physical session — 2026-11-08
+
+The owner reconnected ADB and explicitly confirmed the phone was upright and
+ready. Device: Galaxy A53 SM-A536E, Android16, USB-connected, unlocked and charging;
+battery38% at installation. The previous installed APK (last updated2026-10-30)
+was retained privately before updating, with SHA-256
+`ad5cc55cf6259bb4f93abd8ef9c0a702770aaa7a3045d850b8bc9d7de0403d0e`.
+
+- The host's ADB28.0.2 streamed install stopped with no Android failure detail,
+  leaving the old package unchanged. `adb install --no-streaming -r` then returned
+  **Success**. On-device `base.apk` SHA-256 exactly matches the approved artifact
+  `1a261cd4b63a2029d9f1b47eee9121ddd34d1f66fb82da82ca8e9b2ebe3bceac`.
+  No uninstall or data clear was performed.
+- Signed-in Profile, English and the saved500m radius remained present. Opened
+  the existing development ring through Profile, with SDK57 development-launch
+  suppression flags and USB reverse8081. Real ARCore camera/tracking established
+  and the native Overview cover displayed the new tap guidance.
+- The owner explicitly answered **“Yes, one quick tap opens it”**, then reported
+  that the other reader controls were **equally accurate**. These are actual
+  finger-interaction observations, distinct from synthetic ADB tap checks.
+- Help remained over the real camera; a tap on the exposed cover while Help was
+  open did not open a reader after dismissing Help. Home removed ARgala from the
+  active CameraService client section. Foreground return restored the real camera,
+  ring and session-only Opened marker. No native restart/error screen was seen.
+- Japanese and Korean were selected and explicitly saved through Profile. Each
+  locale started native AR and displayed actual CJK cover, caption and control
+  glyphs without the former missing-character symbols. A synthetic quick Next
+  tap in Japanese advanced the native reader from1/7 to2/7 once. The current
+  framing cropped the sides of the large reader; this is glyph/interaction
+  evidence, not full-panel framing acceptance. English was explicitly saved
+  again, with the saved500m radius still visible.
+- The app PID remained25413 through these checks; the filtered process log had
+  no fatal-exception/signal markers. No general crash-rate, FPS, outdoor GPS,
+  paid Google request, real-destination admission or release-performance claim
+  follows from this development session.
+
+In response to the20-cycle open/close prompt, the owner reported **no misses or
+double actions**, but clarified that a noticeable delay occurs **before the
+response starts**, rather than only while the animation finishes. The functional
+tap gate is accepted; this is not a latency/performance pass.
+
+Additional synthetic device input exercised DOWN → MOVE → CANCEL and a short
+swipe: neither opened the closed cover, and a subsequent normal synthetic tap
+reopened the reader. Physical multitouch and forced tracking-loss checks remain
+unverified; the automated native regressions cover those recognizer branches.
+
+Latency follow-up: source inspection found no added timer in the normal
+tap-on-release callback. Existing open/close motion is280ms and page feedback
+is140ms. Those intentional durations do not establish the cause of a reported
+pre-response delay. A short private screen trace was captured with a temporary
+touch marker (restored to0 afterward); attempted Runtime inspection did not
+return command results. The session did not reliably isolate native dispatch
+from JS/rendering time, and the trace is not a release latency/FPS benchmark.
+Do not dismiss the observed lag as development overhead without further profiling.
+No latency-related production code or further APK build was introduced.
+
+The app was backgrounded after the checks to release the camera. Camera captures,
+the timing trace, sanitized UI dumps and the previous APK remain private and
+gitignored under `.superpowers/builds/ar-panel-taps/device/`.
