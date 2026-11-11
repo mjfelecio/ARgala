@@ -15,6 +15,10 @@ they conflict with this visual approval.
 
 ARgala is an Android-only travel discovery app built with Expo SDK 57 and strict TypeScript. It combines Google-powered discovery around arbitrary coordinates, walking route display, and existing GPS/compass camera overlays. The approved ACLC blueprint adds selected-featured-destination Viro/ARCore local tracking, beginning with a development-only native feasibility checkpoint. Prioritize mobile performance and Android-supported APIs. This supersedes the earlier blanket exclusion of ARCore; it does not authorize geospatial anchors, object recognition or AR navigation.
 
+## Focused AR panel comfort — 2026-11-11
+
+The owner requested that the expanded hologram sit farther back. The selected-destination ring uses a 2.25-unit focused-panel distance, superseding the earlier 1.5-unit direction. Keep stable orientation, tracking and recenter semantics; verify readability and touch on the physical device.
+
 ## Project sources and scope
 
 - [Architecture and foundation requirements](docs/superpowers/specs/2026-10-17-argala-design.md) record the supplied briefs and approved architectural decisions.

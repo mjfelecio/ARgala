@@ -16,6 +16,8 @@ import { ArPreflight } from './ar-preflight';
 import { ArUtilityChrome } from './ar-utility-chrome';
 import { ArIntroductionNotice } from './ar-introduction-notice';
 import { developmentRingContent, type RingContent } from './development-ring-content';
+import { previewStoryContent } from './development-featured-media';
+import { listDestinations, destinationName, destinationIds, type DestinationId } from '@/features/destinations/catalog';
 import { useArSession } from './use-ar-session';
 import { useReadingSize } from './use-reading-size';
 import { introDuration, introVariant } from './intro-policy';
@@ -35,9 +37,19 @@ import type { NativeCapture } from '@/features/ar-photo/types';
 export default function DevelopmentSessionRoute() {
   const { session } = useAuth(); const { t } = useTranslation(); const principalId = session?.user.id;
   const scopeId = useId(); // Development correlation only; never verified admission authority.
-  const identity = useMemo<SessionIdentity>(() => ({ admissionId: `development-${scopeId}`, destinationId: 'development-aclc', principalId: principalId ?? '', provenance: 'development' }), [principalId, scopeId]);
-  return principalId ? <DevelopmentGallerySession key={principalId} identity={identity} />
-    : <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
+  const [selection, setSelection] = useState<DestinationId | 'gallery' | null>(null);
+  const identity = useMemo<SessionIdentity>(() => ({ admissionId: `development-${scopeId}-${selection ?? 'none'}`, destinationId: `development-${selection ?? 'none'}`, principalId: principalId ?? '', provenance: 'development' }), [principalId, scopeId, selection]);
+  if (!principalId || !isViroSpikeEnabled()) return <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
+  if (selection === 'gallery') return <DevelopmentGallerySession key={`${principalId}:${identity.admissionId}`} identity={identity} />;
+  if (selection) return <DestinationArSessionExperience key={`${principalId}:${identity.admissionId}`} identity={identity} freshEligible={isViroSpikeEnabled}
+    title={destinationName(listDestinations().find(item => item.id === selection)!)} content={previewStoryContent(selection)}
+    preflightNoticeKey="featuredResearch.notice" onReturn={() => setSelection(null)} />;
+  return <Screen><Notice>{t('featuredResearch.notice')}</Notice>
+    <Text className="font-sans text-lg text-foreground">{t('featuredResearch.title')}</Text>
+    {destinationIds.map(id => <Action key={id} title={destinationName(listDestinations().find(item => item.id === id)!)} onPress={() => setSelection(id)} />)}
+    <Action title={t('destinationRing.title')} onPress={() => setSelection('gallery')} />
+    <Action title={t('common.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }} />
+  </Screen>;
 }
 
 function DevelopmentGallerySession({ identity }: { identity: SessionIdentity }) {

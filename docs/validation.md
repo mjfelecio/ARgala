@@ -1,5 +1,48 @@
 # Foundation validation
 
+## ACLC real-arrival device verification — 2026-11-11
+
+The owner reported being at ACLC. On the connected Galaxy A53 / Android 16,
+using the installed development APK and current Metro bundle, the normal
+Explore → Featured Destinations → ACLC map selection progressed from
+“Checking stable arrival” to “Arrival verified for the selected destination”
+and “AR experience unlocked”. The simulation action was not used.
+
+“Launch draft AR” opened the selected-destination preflight. Starting native AR
+reached the live rear-camera scene and four ACLC chapter covers; an ADB tap
+opened Overview with its research text and reader controls. A brief Home/app
+return restored the camera and the same focused Overview at page 1 of 2.
+Temporary device captures were deleted after inspection.
+
+This verifies a successful real-GPS admission and AR handoff at the reported
+site, including one brief established-session recovery. ACLC content still uses
+the draft/development provenance path and does not grant a Passport stamp.
+Outside-radius rejection, boundary calibration, expired-session recovery,
+walking routes and the other destinations were not field-tested in this check.
+No source behavior or native configuration changed, and no APK was built.
+
+## Featured research preview — 2026-11-11
+
+The development selector has research stories and one or two locally bundled
+photos for all nine featured destinations. Seven have a second source-identified
+image; [research and provenance](featured-research-preview.md) records the
+unverified claims and [the Android guide](featured-preview-android-testing.md)
+gives the presentation sequence and limits. These are simulated development
+sessions, not real-arrival admission or Passport authority.
+
+On a Galaxy A53 running Android 16 with the existing development APK and USB
+Metro, Lake Janagdan reached the native camera and rendered both overview images
+through the page controls. The long credit wrapped onto a page by itself in that
+check; the subsequent shorter credits have automated coverage but have not been
+rechecked in the native reader. The other eight destinations, all translations,
+outdoor GPS and route entrances were not checked in this device session.
+
+After shortening the credits, `npm run check` passed typecheck, lint and 1,447
+tests across 128 files; `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android --
+--max-workers 1` passed the Android Metro/Hermes export. This is not an APK build.
+No new APK was built. On-site admission integration and the destination and
+entrance checks remain outstanding.
+
 ## Owner UI refinements and sticky settings drafts — 2026-11-02
 
 Owner feedback refines Saved, Featured/preview Nearby and Profile/Settings; the
@@ -2858,3 +2901,69 @@ No latency-related production code or further APK build was introduced.
 The app was backgrounded after the checks to release the camera. Camera captures,
 the timing trace, sanitized UI dumps and the previous APK remain private and
 gitignored under `.superpowers/builds/ar-panel-taps/device/`.
+
+### Featured destination research previews — 2026-11-09
+
+The existing development-only AR entry now offers nine explicitly labeled
+research previews. These have development provenance, do not use destination GPS
+admission or confer Passport authority, and are unavailable without both Viro
+development guards. English draft copy falls back for JA/KO. Lake Danao includes
+one sourced development photograph; the other chapters are presently text-led.
+The catalog, routing entrances and production approval records remain unchanged.
+See [research leads](featured-research-preview.md) and [Lake Danao draft](lake-danao-ar-research-draft.md).
+
+Automated checks exercise real locale fallback and selecting/exiting a preview
+through the real session with native boundaries mocked. They do not establish
+physical-device camera, touch, native image rendering, translated glyphs, on-site
+location, or the current accuracy of research claims. No APK was built.
+
+Verification: `npm run check` passed typecheck, lint and 1,442 tests across
+127 files; `npm run export:android` passed and included the preview JPEG. Export
+is not a native build. `adb devices` reported no connected device.
+
+On 2026-11-11, the D05 development research preview was updated to describe
+Sal’s Pineapple Plantation as a probable match for the owner's diversion-road
+field. The source and plus-code lead are recorded in the research notes; no
+coordinate, entrance, real admission or catalog approval was changed.
+
+### Featured preview media and draft translations — 2026-11-11
+
+The guarded development selector now displays sourced test photographs in all nine
+destination overviews. All nine story sets
+have draft Japanese and Korean resources. Lake Danao's photo overview uses those
+resources as well. No destination location, entry permission or approval is
+asserted. Photo provenance and limitations are in [research notes](featured-research-preview.md).
+The new resource tests exercise all story locales with fallback disabled and the
+native reader's photo-overview content mapping with image modules mocked. Native
+photo loading, CJK glyphs, touch, tracking and on-site location remain unverified.
+
+Verification on 2026-11-11: `npm run check` passed typecheck, lint and 1,445
+tests across 128 files. `npm run export:android` passed and listed all nine
+research image files; this is not an APK build. Galaxy A53 SM-A536E / Android 16
+was authorized over USB, with the existing debuggable build (last updated
+2026-11-08) and Metro over USB reverse. The current development JS bundle loaded,
+but the app stayed on its startup Loading screen; neither the selector nor a
+native AR scene was reached. A temporary diagnostic, removed after the check,
+reported guest enabled, auth restoration pending and onboarding still loading.
+A clean process restart reproduced the Loading screen after USB reverse was
+restored. Phone data was not cleared and no credentials or coordinates were logged.
+The root cause of the pending auth restore was not established. No device image,
+touch, tracking, CJK or GPS acceptance is claimed; no APK was built.
+
+### Focused AR panel comfort — 2026-11-11
+
+The owner reported the expanded hologram was too close on the Galaxy A53.
+Focused ring distance was changed from 1.5 to 2.25 Viro units; focus orientation,
+recenter, tracking and control geometry remain unchanged. Targeted geometry and
+scene tests cover focused selection, same-frame tracking recovery, recenter and
+logical restoration. `npm run check` passed typecheck, lint and 1,445 tests
+across 128 files. Before this change, the device displayed the Lake Danao camera
+and focused panel. After the change, a device attempt returned an AR startup
+Retry state, so the new distance and readability were not physically accepted.
+No APK was built.
+
+Follow-up on the same Galaxy A53: the development preview reached native camera
+tracking, an ADB tap opened Lake Danao’s overview, and the photograph rendered
+at the 2.25-unit focus setting. The focused panel was still partly outside the
+left edge at the phone’s observed tilted orientation. This single observation
+does not establish comfort, stable framing or physical short-tap reliability.

@@ -580,5 +580,109 @@
     "helpTitle": "Explore this place",
     "dismissHelp": "Back to exploring",
     "readerTitle": "Destination stories"
+  },
+  "featuredResearch": {
+    "title": "Featured destination research previews",
+    "notice": "Development preview: researched draft, not verified arrival. Translations await review.",
+    "stories": {
+      "D01": [
+        {
+          "title": "A living lake",
+          "body": "Lake Danao lies among the forested uplands of Ormoc. The freshwater lake and its surroundings are part of a protected natural park."
+        },
+        {
+          "title": "Life and livelihoods",
+          "body": "Researchers working with local fishers studied the lake from 2021 to 2022, recording eight fish species and examining their local use as food."
+        },
+        {
+          "title": "A protected place",
+          "body": "Lake Danao and its surroundings were declared a protected natural park in 1998. The lake is part of a landscape connected to water, wildlife and nearby communities."
+        }
+      ],
+      "D02": [
+        {
+          "title": "A highland lake",
+          "body": "Lake Kasudsuran is a lake in the uplands of Ormoc. City planning material places it in Barangay Ga-as."
+        },
+        {
+          "title": "Exploring the uplands",
+          "body": "The lake is one of Ormoc’s smaller lakes. Access and trail conditions can change; confirm arrangements locally before visiting."
+        }
+      ],
+      "D03": [
+        {
+          "title": "Lake Janagdan",
+          "body": "Lake Janagdan is a small upland lake in Barangay Cabintan, Ormoc, according to the city’s ecological profile."
+        },
+        {
+          "title": "Among the mountains",
+          "body": "Local travel writing describes Lake Janagdan as part of the Mt. Aminduen area. Trail and access details require local confirmation."
+        }
+      ],
+      "D04": [
+        {
+          "title": "Where land meets sea",
+          "body": "The mangroves of Naungan lie along Ormoc Bay, near the mouth of the Pagsangaan River. Part of this coastal forest has been used as a public park."
+        },
+        {
+          "title": "People and mangroves",
+          "body": "The Naungan-San Juan Mangrove Planters Association and the local government have worked together on mangrove conservation and an ecotourism site."
+        }
+      ],
+      "D05": [
+        {
+          "title": "Sal’s Pineapple Plantation",
+          "body": "Sal’s Pineapple Plantation is a likely match for the fields beside Ormoc’s diversion road. Local guides identify it as a pineapple plantation in Ormoc."
+        },
+        {
+          "title": "Ormoc’s Queen pineapple",
+          "body": "Queen pineapple is grown in Ormoc and other parts of Leyte, according to Visayas State University. The fruit is celebrated in Ormoc’s Piña Festival."
+        },
+        {
+          "title": "Visiting the fields",
+          "body": "Travel listings identify a location in Ormoc, but a public entrance and present access arrangements have not been confirmed. The fields are working farmland."
+        }
+      ],
+      "D06": [
+        {
+          "title": "Leyte Golf and Country Club",
+          "body": "Leyte Golf and Country Club is a golf course in Ormoc. Golf guides describe an 18-hole course."
+        },
+        {
+          "title": "A place to play",
+          "body": "Golf combines a course landscape with practice and play. Confirm the present visitor arrangements and actual entrance with the operator."
+        }
+      ],
+      "D07": [
+        {
+          "title": "Alto Peak",
+          "body": "Alto Peak is a mountain associated with the uplands near Ormoc and the Mt. Aminduen area."
+        },
+        {
+          "title": "The mountain landscape",
+          "body": "Local hiking accounts connect the mountain area with Lake Janagdan. Trails, guides and access conditions should be confirmed locally before a visit."
+        }
+      ],
+      "D08": [
+        {
+          "title": "Heaven’s Peak",
+          "body": "Heaven’s Peak is described in local travel writing as a garden viewpoint in Barangay Cabintan, Ormoc."
+        },
+        {
+          "title": "The upland view",
+          "body": "Visitors come for the garden and its mountain outlook. Check current opening and access information locally before visiting."
+        }
+      ],
+      "D09": [
+        {
+          "title": "Sabin Resort Hotel",
+          "body": "Sabin Resort Hotel is listed by the Department of Tourism in Barangay Bantigue, Ormoc City."
+        },
+        {
+          "title": "By the bay",
+          "body": "The hotel describes beachfront and dining facilities. Availability and services may change; confirm directly before visiting."
+        }
+      ]
+    }
   }
 }

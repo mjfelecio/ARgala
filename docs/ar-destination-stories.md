@@ -9,7 +9,7 @@ Verified arrival offers an explicit launch; it never opens the camera automatica
 Chapter covers show their sequence, title and an Opened indicator. Overview is
 ahead, History is to the right, and optional chapters occupy the remaining ring.
 All 1–12 chapters accepted by the catalog can render. The square panels remain at
-the approved 1.5-unit focused distance. Native held interaction, tracking guards,
+a 2.25-unit focused distance (owner-requested comfort adjustment on 2026-11-11). Native held interaction, tracking guards,
 collapse-on-other-tile and explicit Recenter remain unchanged.
 
 The reader leads with the first approved bound image, then complete text, then

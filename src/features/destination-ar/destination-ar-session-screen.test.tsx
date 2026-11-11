@@ -22,6 +22,7 @@ vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get,
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true }) }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
 vi.mock('./development-audio-loader', () => ({ loadDevelopmentSystemAudio: native.audio }));
+vi.mock('./development-featured-media-assets', () => ({ featuredPreviewAssets: { D01: 1, D02: 2, D03: 3, D04: 4, D05: 5, D06: 6, D07: 7, D08: 8, D09: 9 }, additionalPreviewAssets: { D01: 101, D03: 103, D04: 104, D05: 105, D06: 106, D07: 107, D09: 109 } }));
 vi.mock('./development-gallery-loader', () => ({ loadDevelopmentGalleryContent: native.gallery }));
 vi.mock('./ring-loader', () => ({ loadRingScene: native.load }));
 vi.mock('@/features/ar-photo/ar-photo-controls', async () => { const R = await import('react'); return { ArPhotoControls: (props: Record<string, unknown>) => R.createElement('photo-controls', props) }; });
@@ -147,7 +148,7 @@ it('releases rendering on background, restores logical panel/page/size from a ne
   await act(async () => native.transitions.get('transitionStart')?.forEach(cb => cb({ data: { closing: false } })));
   await active(true); expect(cameras()).toHaveLength(0);
   await act(async () => native.transitions.get('transitionEnd')?.forEach(cb => cb({ data: { closing: false } }))); await settle(); await ready([6, 3, 4], [1, 0, 0]);
-  expect(node('ring-focused-panel').props.position).toEqual([7.5, 3, 4]); expect(text('ring-page-indicator')).toBe(page);
+  expect(node('ring-focused-panel').props.position).toEqual([8.25, 3, 4]); expect(text('ring-page-indicator')).toBe(page);
   expect(native.getItem).toHaveBeenCalledTimes(2); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled(); expect(native.gate).not.toHaveBeenCalled();
   await act(async () => oldTracking(2, 1)); expect(copy()).not.toContain(translations.t('destinationAr.trackingLost'));
 });
@@ -201,7 +202,7 @@ it('expires at five minutes, prevents fresh remote entry and closes before Exit 
   await press('destinationAr.exit'); expect(router.back).toHaveBeenCalled();
 });
 it('keys real route ownership by authentication identity and never revives the former native frame', async () => {
-  await mount(() => React.createElement(SessionRoute)); await layout(); await start(); await ready();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await start(); await ready();
   native.principal = 'other-owner'; await update(); expect(cameras()).toHaveLength(0); expect(copy()).toContain(translations.t('destinationAr.idle'));
   expect(native.support).toHaveBeenCalledOnce(); native.principal = null; await update(); expect(cameras()).toHaveLength(0); expect(copy()).toContain(translations.t('destinationAr.unavailable'));
 });
@@ -257,7 +258,7 @@ it.each(['en', 'ja', 'ko'])('offers %s explicit Retry for prolonged tracking los
   const page = text('ring-page-indicator'); await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
   await act(async () => { await vi.advanceTimersByTimeAsync(6000); }); expect(native.support).toHaveBeenCalledOnce(); expect(cameras()).toHaveLength(1);
   native.eligible = false; await press('destinationSession.retryTracking'); await settle(); expect(node('ring-focused-panel')).toBeUndefined();
-  await ready([9, 2, 1], [0, 0, 1]); expect(node('ring-focused-panel').props.position).toEqual([9, 2, 2.5]); expect(text('ring-page-indicator')).toBe(page);
+  await ready([9, 2, 1], [0, 0, 1]); expect(node('ring-focused-panel').props.position).toEqual([9, 2, 3.25]); expect(text('ring-page-indicator')).toBe(page);
   expect(native.gate).not.toHaveBeenCalled(); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled();
 });
 it('does not automatically repeat an interrupted explicit tracking recovery', async () => {
@@ -328,7 +329,7 @@ it('keeps the same native navigator while retrying an intro-history storage fail
 it.each(['en', 'ja', 'ko'])('loads development samples before native startup with localized %s failure and explicit retry', async locale => {
   await translations.changeLanguage(locale);
   const pending = Promise.withResolvers<never>(); native.gallery.mockReturnValueOnce(pending.promise);
-  await mount(() => React.createElement(SessionRoute));
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title');
   expect(copy()).toContain(translations.t('common.loading'));
   expect(native.getItem).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled(); expect(native.load).not.toHaveBeenCalled();
   await act(async () => pending.reject(new Error('PRIVATE_ASSET_ERROR')));
@@ -340,7 +341,7 @@ it.each(['en', 'ja', 'ko'])('loads development samples before native startup wit
 });
 it('retires development sample completion when its principal leaves', async () => {
   const pending = Promise.withResolvers<never>(); native.gallery.mockReturnValueOnce(pending.promise);
-  await mount(() => React.createElement(SessionRoute)); native.principal = null; await update();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); native.principal = null; await update();
   await act(async () => pending.reject(new Error('RETIRED_ASSET_ERROR')));
   expect(copy()).toContain(translations.t('destinationAr.unavailable')); expect(copy()).not.toContain(translations.t('destinationRing.contentFailed'));
   expect(native.getItem).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled();
@@ -348,7 +349,7 @@ it('retires development sample completion when its principal leaves', async () =
 
 it.each(['en', 'ja', 'ko'])('previews the full development entrance in %s without clearing history or replaying on tracking recovery', async locale => {
   await translations.changeLanguage(locale);
-  await mount(() => React.createElement(SessionRoute)); await layout();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout();
   await press('destinationStories.previewEntrance'); await settle(); await ready([0, 2, 0], [0, 0, -1], false);
   expect(tree!.root.findAllByType('node' as React.ElementType).filter(item => item.props.testID === 'cinematic-emblem')).toHaveLength(1);
   await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
@@ -368,7 +369,7 @@ const auditionClip = (source: number) => ({ source, rightsReference: 'Synthetic 
 const auditionManifest = { voices: { en: auditionClip(201), ja: auditionClip(202), ko: auditionClip(203) }, effects: { deployed: auditionClip(204), focused: auditionClip(205), trackingLost: auditionClip(206), pageChanged: auditionClip(207), closed: auditionClip(208) } };
 it.each(['en', 'ja', 'ko'])('auditions %s voice on explicit full preview and plays event effects without stale native finishes interrupting them', async locale => {
   native.audio.mockResolvedValue(auditionManifest); await translations.changeLanguage(locale);
-  await mount(() => React.createElement(SessionRoute)); await layout(); await press('destinationStories.previewEntrance'); await settle(); await ready([0, 2, 0], [0, 0, -1], false);
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await press('destinationStories.previewEntrance'); await settle(); await ready([0, 2, 0], [0, 0, -1], false);
   const sound = () => tree!.root.findAllByType('viro-sound' as React.ElementType)[0];
   expect(sound().props.source).toBe(auditionManifest.voices[locale as 'en' | 'ja' | 'ko'].source);
   const oldFinish = sound().props.onFinish; await act(async () => oldFinish());
@@ -382,15 +383,32 @@ it.each(['en', 'ja', 'ko'])('auditions %s voice on explicit full preview and pla
 });
 it('keeps failed optional audition loading from blocking native entry or exposing diagnostic messages', async () => {
   native.audio.mockRejectedValue(new Error('PRIVATE_AUDIO_ERROR'));
-  await mount(() => React.createElement(SessionRoute)); await layout(); await start(); await ready();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await start(); await ready();
   expect(cameras()).toHaveLength(1); expect(copy()).not.toContain('PRIVATE_AUDIO_ERROR');
 });
 it('starts AR while optional audio is pending and accepts late effects without remounting or speaking late', async () => {
   const pending = Promise.withResolvers<typeof auditionManifest>(); native.audio.mockReturnValueOnce(pending.promise);
-  await mount(() => React.createElement(SessionRoute)); await layout(); await start(); await ready();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await start(); await ready();
   const camera = cameras()[0];
   await act(async () => pending.resolve(auditionManifest)); expect(cameras()[0]).toBe(camera);
   expect(tree!.root.findAllByType('viro-sound' as React.ElementType)).toHaveLength(0);
   await click('ring-tile-history'); await finish();
   expect(tree!.root.findByType('viro-sound' as React.ElementType).props.source).toBe(205);
+});
+
+it('offers development destination previews without starting the camera and can enter and leave a selected story', async () => {
+  await mount(() => React.createElement(SessionRoute));
+  expect(copy()).toContain('Lake Danao Natural Park');
+  expect(copy()).toContain('Sabin Resort Hotel');
+  expect(native.support).not.toHaveBeenCalled();
+  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === 'Lake Danao Natural Park')!.props.onPress());
+  await layout();
+  expect(copy()).toContain(translations.t('featuredResearch.notice'));
+  expect(copy()).not.toContain(translations.t('destinationAr.prototype'));
+  await start(); await ready();
+  expect(cameras()).toHaveLength(1);
+  expect(copy()).toContain(translations.t('destinationRing.prototype'));
+  await press('destinationAr.exit');
+  expect(cameras()).toHaveLength(0);
+  expect(copy()).toContain('Sabin Resort Hotel');
 });

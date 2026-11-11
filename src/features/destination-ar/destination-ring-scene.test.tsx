@@ -93,13 +93,13 @@ it('captures current-view focus once, ignores transition conflicts, closes and r
   await pose({ position: [4, 2, 3], forward: [1, 0, 0] }, 1100);
   await press('ring-tile-history'); await press('ring-action-next');
   expect(text('ring-page-indicator')).toMatch(/^1 /);
-  await finish(); expect(node('ring-focused-panel').props.position).toEqual([5.5, 2, 3]);
+  await finish(); expect(node('ring-focused-panel').props.position).toEqual([6.25, 2, 3]);
   await press('ring-action-next'); expect(text('ring-page-indicator')).toMatch(/^2 /);
   await pose({ position: [6, 2, 3], forward: [0, 0, 1] }, 1200);
-  expect(node('ring-focused-panel').props.position).toEqual([5.5, 2, 3]);
+  expect(node('ring-focused-panel').props.position).toEqual([6.25, 2, 3]);
   await act(async () => controls!.recenter());
   expect(text('ring-page-indicator')).toMatch(/^2 /);
-  expect(node('ring-focused-panel').props.position).toEqual([6, 2, 4.5]);
+  expect(node('ring-focused-panel').props.position).toEqual([6, 2, 5.25]);
   await press('ring-action-close'); await finish(); expect(node('ring-focused-panel')).toBeUndefined();
   expect(node('ring-tile-history')).toBeDefined();
 });
@@ -206,12 +206,12 @@ it('pauses transitions and retains focus/page through same-frame tracking loss a
   await track(2);
   expect(native.patches.filter(item => item.id === 'ring-focused-panel').at(-1)!.patch.animation).toMatchObject({ run: false });
   await track(3); await pose({ ...initial, forward: [1, 0, 0] }, 1100); await finish();
-  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -1.5]);
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
   await press('ring-action-next'); const page = text('ring-page-indicator');
   await track(2); await press('ring-action-next');
   await track(3); await pose({ position: [2, 2, 0], forward: [0, 0, 1] }, 1200);
   expect(text('ring-page-indicator')).toBe(page);
-  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -1.5]);
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
 });
 it.each(['en', 'ja', 'ko'].flatMap(locale => ['load', 'save'].map(operation => [locale, operation])))('uses real %s content and localized %s preference failure/recovery without raw errors', async (locale, operation) => {
   await translations.changeLanguage(locale);
@@ -233,7 +233,7 @@ it('keeps selection after recenter cancels an unfinished native transition', asy
   await pose({ position: [1, 2, 1], forward: [1, 0, 0] }, 1100);
   await act(async () => controls!.recenter());
   await act(async () => stale());
-  expect(node('ring-focused-panel').props.position).toEqual([2.5, 2, 1]);
+  expect(node('ring-focused-panel').props.position).toEqual([3.25, 2, 1]);
   expect(text('ring-page-indicator')).toMatch(/^1 /);
 });
 it('omits empty optional content and redistributes remaining slots without blank tiles', async () => {
@@ -287,7 +287,7 @@ it('resets an imperatively translated zero-origin panel frame on recenter', asyn
   await pose({ position: [0.4, 0, 0], forward: [0, 0, -1] }, 1100); native.patches.length = 0;
   await act(async () => controls!.recenter());
   expect(native.patches.filter(item => item.id === 'ring-panel-frame').at(-1)?.patch.position).toEqual([0, 0, 0]);
-  expect(node('ring-focused-panel').props.position).toEqual([0.4, 0, -1.5]);
+  expect(node('ring-focused-panel').props.position).toEqual([0.4, 0, -2.25]);
 });
 it('commits recenter origin even when it equals the original declarative ring position', async () => {
   await mount(); await track(); await pose();
@@ -367,9 +367,9 @@ it('restores only logical selection/page after a fresh frame and keeps its new p
   sceneOptions = { initialProgress: { selectedId: 'history', cursors: { history: { page: 2, offset: 400, locale: 'en', size: 'standard' } } }, onProgress: progress };
   await mount(); expect(node('ring-focused-panel')).toBeUndefined(); await track();
   await pose({ position: [8, 4, -2], forward: [1, 0, 0] });
-  expect(node('ring-focused-panel').props.position).toEqual([9.5, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^4 /);
+  expect(node('ring-focused-panel').props.position).toEqual([10.25, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^4 /);
   await track(2); await track(3); await pose({ position: [10, 4, -2], forward: [0, 0, 1] }, 1100);
-  expect(node('ring-focused-panel').props.position).toEqual([9.5, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^4 /);
+  expect(node('ring-focused-panel').props.position).toEqual([10.25, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^4 /);
   await press('ring-action-close'); await finish(); expect(progress.mock.lastCall?.[0].selectedId).toBeNull();
   expect(JSON.stringify(progress.mock.calls)).not.toContain('position');
 });
