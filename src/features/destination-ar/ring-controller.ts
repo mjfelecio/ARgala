@@ -38,7 +38,9 @@ export class RingController {
     return { captured, position: [...this.position] };
   }
   get ringPosition(): Vector3 | null { return this.position ? [...this.position] : null; }
-  hasFreshPose(now: number) { return !!this.fresh(now); }
+  // Finishing an accepted animation is not a new interaction. Retain its
+  // authority through scheduling delay, but require this tracking epoch's pose.
+  hasTrackingPose() { return this.tracking === 'normal' && this.latest !== null; }
   private fresh(now: number) { return this.tracking === 'normal' && this.latest && now >= this.sampledAt && now - this.sampledAt <= 500; }
   select(id: string, now: number): FocusSelection | null {
     if (this.selection || !this.fresh(now) || !this.position) return null;

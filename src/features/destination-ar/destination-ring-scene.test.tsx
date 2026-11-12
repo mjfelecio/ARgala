@@ -505,3 +505,9 @@ it.each(['ja', 'ko'])('passes an explicit CJK fallback for every %s native cover
   expect(text('ring-body')).toContain(translations.t('destinationRing.mock.history.title'));
   expect(text('ring-page-indicator')).toBeDefined();
 });
+
+it('settles an already accepted Close when its callback is delayed without a tracking-epoch change', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish(); await press('ring-action-close');
+  vi.setSystemTime(2200); await finish();
+  expect(node('ring-focused-panel')).toBeUndefined();
+});

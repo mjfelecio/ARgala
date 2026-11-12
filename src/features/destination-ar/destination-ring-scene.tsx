@@ -68,7 +68,7 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
   useEffect(() => { onProgress?.({ selectedId: selection?.phase === 'closing' ? null : selection?.id ?? null, cursors, openedIds }); }, [onProgress, selection, cursors, openedIds]);
   const flushCompletion = useCallback(() => {
     const token = completedTransition.current;
-    if (token === null || !alive.current || !interactiveRef.current || !controller.hasFreshPose(performance.now())) return;
+    if (token === null || !alive.current || !interactiveRef.current || !controller.hasTrackingPose()) return;
     completedTransition.current = null;
     if (!controller.complete(token)) return;
     const focused = controller.selection;
