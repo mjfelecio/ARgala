@@ -10,7 +10,7 @@ import type { ReadingSize } from './reading-preference';
 import type { RingContent } from './ring-content';
 import type { ArNativeStyle } from './native-styles';
 import type { FocusSelection } from './ring-controller';
-vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => true }));
 vi.mock('@reactvision/react-viro', () => ({ ViroImage: 'image', ViroQuad: 'quad', ViroText: 'text', ViroNode: 'node', ViroAnimations: { registerAnimations: vi.fn() } }));
 const approved = (value: string) => ({ value, approvalReference: 'Synthetic test only' });
@@ -231,4 +231,10 @@ it('accepts the installed Android Viro successful-load event with no success fie
   await act(async () => image().props.onLoadEnd({ nativeEvent: {} }));
   expect(image()).toBeDefined(); expect(text('ring-gallery-loading')).toBeUndefined();
   expect(text('ring-gallery-error')).toBeUndefined(); expect(action('image-retry')).toBeUndefined();
+});
+
+it('binds a separate clean reader surface while preserving the shared tile artwork', async () => {
+ await mount();
+ const surface = tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'holographic-surface')!;
+ expect(surface.props.source).toBe(109); expect(surface.props.ignoreEventHandling).toBe(true);
 });

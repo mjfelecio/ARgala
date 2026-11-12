@@ -2,6 +2,7 @@
 export const holographicAssets = {
   glint: require('../../../assets/ar/holographic-glint.png') as number,
   frame: require('../../../assets/ar/holographic-frame.png') as number,
+  reader: require('../../../assets/ar/holographic-reader.png') as number,
   overview: require('../../../assets/ar/chapter-overview.png') as number,
   history: require('../../../assets/ar/chapter-history.png') as number,
   highlights: require('../../../assets/ar/chapter-highlights.png') as number,

@@ -81,7 +81,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
   return <ViroNode ref={ref} key={selection.token} testID="ring-focused-panel" position={transform.position} rotation={transform.rotation}
     scale={[transform.scale, transform.scale, transform.scale]} opacity={enabled ? 1 : 0.35}
     animation={animation}>
-    <HolographicFrame width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={false} />
+    <HolographicFrame reader width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={false} />
     <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.495 : 0.425, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.05 : 0.16} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 3.5 : 8, 'left', '600')} />
     {!closing && <>
       {decorations && <HolographicGlint id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
