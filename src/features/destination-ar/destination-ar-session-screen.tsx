@@ -150,6 +150,7 @@ export function DestinationArSessionExperience({ audioManifest, identity, freshE
         {help && <View testID="ar-help" className="gap-3 rounded-card bg-ar-panel p-4">
           <Text accessibilityRole="header" className="font-sans text-card font-semibold text-white">{t('destinationStories.helpTitle')}</Text>
           <Text className="font-sans text-sm text-white">{t('destinationStories.exploreHint')}{'\n\n'}{t('destinationRing.helpText')}</Text>
+          <Text className="font-sans text-sm text-white">{t('destinationRing.recenterRecovery')}</Text>
           {identity.provenance === 'development' && <Text className="font-sans text-xs text-white">{t('destinationRing.poseRate', metrics)}</Text>}
           <Button variant="secondary" accessibilityLabel={t('destinationStories.dismissHelp')} onPress={() => setHelp(false)}><Button.Label>{t('destinationStories.dismissHelp')}</Button.Label></Button>
         </View>}

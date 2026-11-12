@@ -62,6 +62,8 @@ it.each(['en', 'ja', 'ko'])('opens bounded %s help without remounting the camera
   const camera = cameras()[0]; const retained = node('ring-tile-history').props.onClick;
   await press('destinationRing.help');
   expect(copy()).toContain(translations.t('destinationStories.helpTitle'));
+  expect(translations.getResource(locale, 'translation', 'destinationRing.recenterRecovery')).toBeTruthy();
+  expect(copy()).toContain(translations.t('destinationRing.recenterRecovery'));
   expect(node('ring-tile-history').props.onClick).toBeUndefined();
   await act(async () => retained()); expect(node('ring-focused-panel')).toBeUndefined();
   expect(cameras()[0]).toBe(camera);

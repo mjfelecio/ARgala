@@ -344,6 +344,7 @@
     "recenter": "Recenter",
     "help": "Help",
     "previewLoadFailed": "The AR preview could not be loaded. Try again or go back.",
+    "recenterRecovery": "If the AR panels appear misplaced or stop responding correctly, try Recenter to restore their positioning.",
     "helpText": "Turn to discover the ring. Tap a tile to bring it closer. Tap controls to turn pages, change text size or close. To return to the ring, tap another visible tile; it will not open that tile. Recenter uses your current view.",
     "close": "Close",
     "previous": "Previous",
