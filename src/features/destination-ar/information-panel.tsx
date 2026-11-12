@@ -17,17 +17,12 @@ import type { useReadingSize } from './use-reading-size';
 import { galleryPages, galleryCursor, cursorAtPage, type GalleryPage } from './information-gallery';
 import { NativePanelAction, nativePanelActionHeight } from './information-tile';
 import { readingContentWidth } from './reading-widths';
+import { readerLayout } from './reader-layout';
 
-const bottomRowY = -ringMetrics.panelHeight / 2 + 0.04 + nativePanelActionHeight / 2;
-const pageRowY = bottomRowY + nativePanelActionHeight + 0.04;
-const contentBottom = pageRowY + nativePanelActionHeight / 2 + 0.02;
-const bodyHeight = 0.5;
-const bodyY = contentBottom + bodyHeight / 2;
-const captionHeight = 0.2;
-// Photo pages use the heading space; the chapter counter, caption and controls
-// keep their existing bounds. Text pages retain the original heading/body.
-const imageHeight = 0.46 - (contentBottom + captionHeight + 0.02);
-const imageY = contentBottom + captionHeight + 0.02 + imageHeight / 2;
+const { height: bodyHeight, y: bodyY } = readerLayout.body;
+const { height: imageHeight, y: imageY } = readerLayout.image;
+const { height: captionHeight, y: captionY } = readerLayout.caption;
+const legacySizeY = readerLayout.toolbar.y - nativePanelActionHeight - 0.04;
 export type ReadingCommand = (delta: -1 | 1) => void;
 
 export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, onPageChange, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0, externalReadingControls = false, onReadingControls }: {
@@ -90,7 +85,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
     scale={[transform.scale, transform.scale, transform.scale]} opacity={enabled ? 1 : 0.35}
     animation={animation}>
     <HolographicFrame reader width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={false} />
-    <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.495 : 0.425, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.05 : 0.16} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 3.5 : 8, 'left', '600')} />
+    <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.49 : 0.44, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.07 : 0.14} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 4 : 6, 'left', '600')} />
     {!closing && <>
       {decorations && <HolographicGlint id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
       <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
@@ -99,16 +94,19 @@ export function InformationPanel({ selection, content, previous, reading, enable
       {page.kind === 'image' ? <BundledGalleryPage key={`${page.media!.id}:${page.media!.source}`} page={page} size={reading.size} style={style} enabled={interactive} /> : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
         textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />}
       </PageTransition>
-      <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.4, pageRowY, 0.012]} enabled={interactive && cursor.page > 0} style={style}
+      {selection.phase === 'focused' && <ViroNode testID="ring-reader-toolbar" position={[0, readerLayout.toolbar.y, 0.012]}>
+      <ViroQuad testID="ring-reader-toolbar-surface" renderingOrder={0} ignoreEventHandling width={readerLayout.toolbar.width} height={readerLayout.toolbar.height} materials="argalaRingSurface" />
+      <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.555, 0, 0.004]} enabled={interactive && cursor.page > 0} style={style}
         onPress={() => changePage(cursor.page - 1)} />
-      <ArText testID="ring-page-indicator" position={[0, pageRowY, 0.012]} width={0.4} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />
-      <NativePanelAction id="next" label={t('destinationRing.next')} width={0.34} position={[0.4, pageRowY, 0.012]} enabled={interactive && cursor.page < pages.length - 1} style={style}
+      <ArText testID="ring-page-indicator" position={[-0.25, 0, 0.004]} width={0.2} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />
+      <NativePanelAction id="next" label={t('destinationRing.next')} width={0.34} position={[0.055, 0, 0.004]} enabled={interactive && cursor.page < pages.length - 1} style={style}
         onPress={() => changePage(cursor.page + 1)} />
+      <NativePanelAction id="close" primary label={t('destinationRing.close')} width={0.46} position={[0.485, 0, 0.004]} enabled={interactive} style={style} onPress={onClose} />
+      </ViroNode>}
       {!externalReadingControls && <>
-        <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.42, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />
-        <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[-0.17, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
+        <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.15, legacySizeY, 0.012]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />
+        <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[0.15, legacySizeY, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
       </>}
-      <NativePanelAction id="close" primary label={t('destinationRing.close')} width={0.46} position={[0.28, bottomRowY, 0.012]} enabled={interactive} style={style} onPress={onClose} />
       {reading.error && !externalReadingControls && <ViroNode position={[0, 0, 0.025]}>
         <ViroQuad renderingOrder={4} ignoreEventHandling width={1.12} height={0.5} materials="argalaRingSurface" />
         <ArText renderingOrder={5} testID="ring-reading-error" position={[0, 0.06, 0.004]} width={1.02} height={0.23} text={t(`destinationRing.${reading.error}`)} style={style.text(4)} />
@@ -153,7 +151,7 @@ function GalleryImageAttempt({ page, size, style, enabled, onRetry }: { page: Ga
       {status === 'loading' && <ArText testID="ring-gallery-loading" position={[0, imageY, 0.008]} width={readingContentWidth} height={imageHeight}
         text={t('common.loading')} style={style.text(4)} />}
     </>}
-    <ArText testID="ring-gallery-caption" position={[0, contentBottom + captionHeight / 2, 0.006]} width={readingContentWidth} height={captionHeight} text={page.flowText ?? page.text}
+    <ArText testID="ring-gallery-caption" position={[0, captionY, 0.006]} width={readingContentWidth} height={captionHeight} text={page.flowText ?? page.text}
       textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[size].fontSize, 'left')} />
   </>;
 }

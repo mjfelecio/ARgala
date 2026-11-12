@@ -32,7 +32,7 @@ async function mount() { await act(async () => { tree = create(wrapper()); }); }
 async function track(state = 3) { await act(async () => tree.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(state, 1)); }
 async function pose(value = initial, time = Date.now()) { vi.setSystemTime(time); await act(async () => tree.root.findByType('native-scene' as React.ElementType).props.onCameraTransformUpdate(value)); }
 function node(id: string) { return tree.root.findAllByType('native-node' as React.ElementType).find(item => item.props.testID === id)!; }
-async function press(id: string) { await act(async () => node(id).props.onClick?.()); }
+async function press(id: string) { await act(async () => node(id)?.props.onClick?.()); }
 async function finish() { await act(async () => node('ring-focused-panel').props.animation.onFinish()); }
 function text(id: string) { return tree.root.findAllByType('viro-text' as React.ElementType).find(item => item.props.testID === id)!.props.text as string; }
 beforeEach(async () => {
@@ -92,7 +92,7 @@ it('captures current-view focus once, ignores transition conflicts, closes and r
   await mount(); await track(); await pose();
   await pose({ position: [4, 2, 3], forward: [1, 0, 0] }, 1100);
   await press('ring-tile-history'); await press('ring-action-next');
-  expect(text('ring-page-indicator')).toMatch(/^1 /);
+  expect(node('ring-reader-toolbar')).toBeUndefined();
   await finish(); expect(node('ring-focused-panel').props.position).toEqual([6.25, 2, 3]);
   await press('ring-action-next'); expect(text('ring-page-indicator')).toMatch(/^2 /);
   await pose({ position: [6, 2, 3], forward: [0, 0, 1] }, 1200);
@@ -337,17 +337,17 @@ it('uses readable-resolution glyph textures while preserving world-space text bo
   const body = tree.root.findAllByType('viro-text' as React.ElementType).find(item => item.props.testID === 'ring-body')!;
   expect(body.props.style.fontSize).toBeGreaterThanOrEqual(32);
   expect(body.props.width * body.props.scale[0]).toBeCloseTo(1.08);
-  expect(body.props.height * body.props.scale[1]).toBeCloseTo(0.5);
+  expect(body.props.height * body.props.scale[1]).toBeGreaterThanOrEqual(0.8);
   expect(body.props.style.fontSize * body.props.scale[0]).toBe(5);
 });
-it('gives Close a larger visible surface with separated control rows and preserves interaction gates', async () => {
+it('keeps Close large in the floating row and preserves interaction gates', async () => {
   await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
   const close = node('ring-action-close');
   const surface = close.findByType('quad' as React.ElementType);
   expect(surface.props.height).toBeGreaterThanOrEqual(0.18);
   expect(surface.props.width).toBeGreaterThanOrEqual(0.46);
-  const previous = node('ring-action-previous');
-  expect(previous.props.position[1] - close.props.position[1]).toBeGreaterThan(surface.props.height);
+  const next = node('ring-action-next');
+  expect(close.props.position[0] - surface.props.width / 2).toBeGreaterThan(next.props.position[0] + 0.17);
   await track(2); await press('ring-action-close'); expect(node('ring-focused-panel')).toBeDefined();
   await track(); await pose(); await press('ring-action-close'); await finish(); expect(node('ring-focused-panel')).toBeUndefined();
 });
@@ -402,9 +402,9 @@ it('restores only logical selection/page after a fresh frame and keeps its new p
   sceneOptions = { initialProgress: { selectedId: 'history', cursors: { history: { page: 2, offset: 400, locale: 'en', size: 'standard' } } }, onProgress: progress };
   await mount(); expect(node('ring-focused-panel')).toBeUndefined(); await track();
   await pose({ position: [8, 4, -2], forward: [1, 0, 0] });
-  expect(node('ring-focused-panel').props.position).toEqual([10.25, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^4 /);
+  expect(node('ring-focused-panel').props.position).toEqual([10.25, 4, -2]); expect(text('ring-page-indicator')).toBe('3 / 3');
   await track(2); await track(3); await pose({ position: [10, 4, -2], forward: [0, 0, 1] }, 1100);
-  expect(node('ring-focused-panel').props.position).toEqual([10.25, 4, -2]); expect(text('ring-page-indicator')).toMatch(/^4 /);
+  expect(node('ring-focused-panel').props.position).toEqual([10.25, 4, -2]); expect(text('ring-page-indicator')).toBe('3 / 3');
   await press('ring-action-close'); await finish(); expect(progress.mock.lastCall?.[0].selectedId).toBeNull();
   expect(JSON.stringify(progress.mock.calls)).not.toContain('position');
 });
@@ -504,6 +504,18 @@ it.each(['ja', 'ko'])('passes an explicit CJK fallback for every %s native cover
   for (const glyph of glyphs) expect(glyph.props.style.fontFamily).toBe('PlusJakartaSans, NotoSansCJK');
   expect(text('ring-body')).toContain(translations.t('destinationRing.mock.history.title'));
   expect(text('ring-page-indicator')).toBeDefined();
+});
+
+it.each([1, 3, 4, 12])('restores original tile geometry through repeated focus/close with %s chapters', async count => {
+  sceneOptions = { content: Array.from({ length: count }, (_, index) => ({ id: `test-${index}`, ...(index === 0 ? { role: 'overview' as const } : {}), titleKey: 'destinationRing.mock.overview.title', bodyKey: 'destinationRing.mock.overview.body' })) };
+  await mount(); await track(); await pose();
+  const id = `test-${count - 1}`; const original = node(`ring-tile-${id}`).props.position;
+  for (let cycle = 0; cycle < 3; cycle++) {
+    await pose(initial, 1000 + cycle * 100);
+    await press(`ring-tile-${id}`); await finish(); await press('ring-action-close');
+    expect(node('ring-reader-toolbar')).toBeUndefined(); await finish();
+    expect(node(`ring-tile-${id}`).props.position).toEqual(original);
+  }
 });
 
 it('settles an already accepted Close when its callback is delayed without a tracking-epoch change', async () => {

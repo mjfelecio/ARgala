@@ -8,7 +8,8 @@ import { useTranslation } from 'react-i18next';
 import type { RingContent } from './development-ring-content';
 import type { RingSlot } from './scene-geometry';
 import type { ArNativeStyle } from './native-styles';
-export const nativePanelActionHeight = 0.18;
+import { nativePanelActionHeight } from './reader-layout';
+export { nativePanelActionHeight } from './reader-layout';
 export function InformationTile({ content, slot, enabled, style, onSelect, decorations = true, ordinal = 1, chapterCount = 1, opened = false }: { content: RingContent; slot: RingSlot; enabled: boolean; style: ArNativeStyle; onSelect(id: string): void; decorations?: boolean; ordinal?: number; chapterCount?: number; opened?: boolean }) {
   const { t, i18n } = useTranslation();
   const chapter = chapterPresentation(content, i18n.resolvedLanguage ?? i18n.language, key => t(key), key => i18n.exists(key));

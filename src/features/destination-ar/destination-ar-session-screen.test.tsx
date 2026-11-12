@@ -454,3 +454,11 @@ it.each(['en', 'ja', 'ko'])('keeps %s reading preference recovery in the screen 
   expect(copy()).toContain(translations.t('destinationRing.save-failed'));
   await press('common.retry'); expect(copy()).not.toContain(translations.t('destinationRing.save-failed'));
 });
+
+it('restores an accepted closing transition as collapsed after background retirement', async () => {
+  await mount(); await layout(); await start(); await ready(); await click('ring-tile-history'); await finish();
+  await click('ring-action-next'); await click('ring-action-close');
+  await active(false); await active(true); await settle(); await ready();
+  expect(node('ring-focused-panel')).toBeUndefined(); expect(node('ring-tile-history')).toBeDefined();
+  await click('ring-tile-history'); await finish(); expect(text('ring-page-indicator')).toMatch(/^2 /);
+});

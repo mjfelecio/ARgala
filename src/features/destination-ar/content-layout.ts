@@ -1,16 +1,17 @@
 import { graphemeSegments } from 'unicode-segmenter/grapheme';
 import type { ReadingSize } from './reading-preference';
 import { graphemeAdvance, readingEmBudget } from './reading-widths';
+import { readerLayout, readerLineBudget } from './reader-layout';
 export type ContentPage = { start: number; end: number; text: string; flowText?: string };
 export type ReadingCursor = { page: number; offset: number; locale: string; size: ReadingSize; mediaId?: string; mediaPage?: number };
 // Horizontal budgets follow the rendered box and font point-to-world scale.
 // Vertical line budgets remain conservative; native device fit is a separate check.
 export const readingMetrics = {
-  small: { columns: readingEmBudget(4), lines: 6, fontSize: 4 },
-  standard: { columns: readingEmBudget(5), lines: 5, fontSize: 5 },
-  large: { columns: readingEmBudget(6), lines: 4, fontSize: 6 },
+  small: { columns: readingEmBudget(4), lines: readerLineBudget(readerLayout.body.height, 4), fontSize: 4 },
+  standard: { columns: readingEmBudget(5), lines: readerLineBudget(readerLayout.body.height, 5), fontSize: 5 },
+  large: { columns: readingEmBudget(6), lines: readerLineBudget(readerLayout.body.height, 6), fontSize: 6 },
 } as const;
-export function paginate(text: string, size: ReadingSize, heading = '', maxLines?: 1 | 2): ContentPage[] {
+export function paginate(text: string, size: ReadingSize, heading = '', maxLines?: number): ContentPage[] {
   // Heading presentation cannot consume the existing body allowance. Each
   // field stays bounded, and offsets refer to the complete displayed source.
   if (text.length > 24000 || heading.length > 24000) throw new Error('AR content exceeds layout budget');

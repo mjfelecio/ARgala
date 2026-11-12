@@ -90,17 +90,15 @@ it('lets the native renderer flow ordinary paragraphs across the actual box inst
   expect(body.props.textLineBreakMode).toBe('WordWrap');
   expect(body.props.text.split('\n\n')[1]).not.toContain('\n');
 });
-it('keeps visible padding below reading controls and separates both action rows from content', async () => {
+it('keeps floating controls clear of the canvas and separates legacy probe size controls', async () => {
   currentContent = { ...content, approved: { ...content.approved!, media: [] } }; await mount();
   const surface = tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'holographic-surface')!;
-  const panelBottom = -surface.props.height / 2;
-  for (const id of ['smaller', 'larger', 'close']) {
+  const row = tree.root.findAllByType('node' as React.ElementType).find(node => node.props.testID === 'ring-reader-toolbar')!;
+  for (const id of ['previous', 'next', 'close']) {
     const node = action(id); const fill = node.findByType('quad' as React.ElementType);
-    const bottom = node.props.position[1] - fill.props.height / 2;
-    expect(bottom - panelBottom).toBeGreaterThanOrEqual(0.039);
+    expect(row.props.position[1] + node.props.position[1] + fill.props.height / 2).toBeLessThanOrEqual(-surface.props.height / 2 - 0.039);
   }
-  const previous = action('previous'); const smaller = action('smaller');
-  expect(previous.props.position[1] - 0.09 - (smaller.props.position[1] + 0.09)).toBeGreaterThanOrEqual(0.039);
+  expect(row.props.position[1] - 0.09 - (action('smaller').props.position[1] + 0.09)).toBeGreaterThanOrEqual(0.039);
 });
 it('keeps long full chapter titles readable beyond their bounded cover label', async () => {
   const title = 'Verified long chapter title '.repeat(5);
@@ -177,7 +175,7 @@ it('gives photos the chapter-heading space while keeping captions and controls i
   expect(photo.props.height).toBeGreaterThanOrEqual(0.4);
   expect(photo.props.position[1] + photo.props.height / 2).toBeLessThan(meta.props.position[1] - meta.props.height * meta.props.scale[1] / 2);
   expect(photo.props.position[1] - photo.props.height / 2).toBeGreaterThan(caption.props.position[1] + caption.props.height * caption.props.scale[1] / 2);
-  expect(caption.props.position[1] - caption.props.height * caption.props.scale[1] / 2).toBeGreaterThan(action('next').props.position[1] + 0.09);
+  expect(caption.props.position[1] - caption.props.height * caption.props.scale[1] / 2).toBeGreaterThan(tree.root.findAllByType('node' as React.ElementType).find(node => node.props.testID === 'ring-reader-toolbar')!.props.position[1] + 0.09);
   expect(tree.root.findAllByType('node' as React.ElementType).find(node => node.props.testID === 'ring-focused-panel')!.props).toMatchObject({ position: transform.position, rotation: transform.rotation, scale: [1, 1, 1] });
 });
 it.each(['en', 'ja', 'ko'])('shows %s loading, retries explicitly and ignores retired native completion callbacks', async locale => {
@@ -237,4 +235,20 @@ it('binds a separate clean reader surface while preserving the shared tile artwo
  await mount();
  const surface = tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'holographic-surface')!;
  expect(surface.props.source).toBe(109); expect(surface.props.ignoreEventHandling).toBe(true);
+});
+
+it('places the native reader row outside the canvas with reachable controls and no active row while moving', async () => {
+  await mount();
+  const row = tree.root.findAllByType('node' as React.ElementType).find(node => node.props.testID === 'ring-reader-toolbar');
+  expect(row).toBeDefined();
+  const surface = tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'holographic-surface')!;
+  expect(row!.props.position[1] + 0.09).toBeLessThanOrEqual(-surface.props.height / 2 - 0.039);
+  for (const id of ['previous', 'next', 'close']) expect(action(id).findAllByType('quad' as React.ElementType)[0].props.height).toBeGreaterThanOrEqual(0.18);
+});
+
+it('gives the photograph a dominant aspect-fit region and keeps metadata separate', async () => {
+  await mount(); expect(image().props.height).toBeGreaterThanOrEqual(0.75);
+  expect(image().props.resizeMode).toBe('ScaleToFit');
+  const caption = tree.root.findAllByType('text' as React.ElementType).find(node => node.props.testID === 'ring-gallery-caption')!;
+  expect(image().props.position[1] - image().props.height / 2).toBeGreaterThan(caption.props.position[1] + caption.props.height * caption.props.scale[1] / 2);
 });
