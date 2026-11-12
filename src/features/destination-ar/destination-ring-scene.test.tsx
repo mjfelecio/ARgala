@@ -204,7 +204,7 @@ it.each(['open', 'dismiss', 'close'])('retires retained %s callbacks on unmount'
 it('pauses transitions and retains focus/page through same-frame tracking loss after turning', async () => {
   await mount(); await track(); await pose(); await press('ring-tile-overview');
   await track(2);
-  expect(native.patches.filter(item => item.id === 'ring-focused-panel').at(-1)!.patch.animation).toMatchObject({ run: false });
+  expect(node('ring-focused-panel').props.animation).toMatchObject({ run: false });
   await track(3); await pose({ ...initial, forward: [1, 0, 0] }, 1100); await finish();
   expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
   await press('ring-action-next'); const page = text('ring-page-indicator');
@@ -212,6 +212,41 @@ it('pauses transitions and retains focus/page through same-frame tracking loss a
   await track(3); await pose({ position: [2, 2, 0], forward: [0, 0, 1] }, 1200);
   expect(text('ring-page-indicator')).toBe(page);
   expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
+});
+
+it.each(['tracking', 'help'])('retains closing completion across a %s fence until safe reconciliation', async fence => {
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  await press('ring-action-close'); const completedClose = node('ring-focused-panel').props.animation.onFinish;
+  if (fence === 'tracking') await track(2);
+  else { sceneOptions = { interactive: false }; await act(async () => tree.update(wrapper())); }
+  await act(async () => completedClose());
+  expect(node('ring-focused-panel')).toBeDefined();
+  if (fence === 'tracking') { await track(3); expect(node('ring-focused-panel')).toBeDefined(); await pose(initial, 1100); }
+  else { sceneOptions = { interactive: true }; await act(async () => tree.update(wrapper())); }
+  expect(node('ring-focused-panel')).toBeUndefined();
+  expect(node('ring-tile-history')).toBeDefined();
+});
+
+it('records accepted Close as collapsed restoration intent before its native animation finishes', async () => {
+  const progress = vi.fn(); sceneOptions = { onProgress: progress };
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  await act(async () => {
+    node('ring-action-close').props.onClick();
+    // AppState can retire the scene before React commits selection state.
+    expect(progress.mock.lastCall?.[0].selectedId).toBeNull();
+  });
+  expect(progress.mock.lastCall?.[0].selectedId).toBeNull();
+  expect(node('ring-focused-panel')).toBeDefined();
+});
+
+it('keeps one declarative animation owner through unrelated rerenders and tracking pause/resume', async () => {
+  await mount(); await track(); await pose(); await press('ring-tile-history');
+  const animation = node('ring-focused-panel').props.animation;
+  expect(animation.run).toBe(true);
+  sceneOptions = { firstVisit: true }; await act(async () => tree.update(wrapper()));
+  expect(node('ring-focused-panel').props.animation).toBe(animation);
+  await track(2); expect(node('ring-focused-panel').props.animation.run).toBe(false);
+  await track(3); expect(node('ring-focused-panel').props.animation.run).toBe(true);
 });
 it.each(['en', 'ja', 'ko'].flatMap(locale => ['load', 'save'].map(operation => [locale, operation])))('uses real %s content and localized %s preference failure/recovery without raw errors', async (locale, operation) => {
   await translations.changeLanguage(locale);

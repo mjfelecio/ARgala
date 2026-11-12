@@ -53,12 +53,30 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
   const counts = useRef({ received: 0, applied: 0 });
   const closingCommitted = useRef(false);
   const interactiveRef = useRef(false);
+  const alive = useRef(false);
+  const completedTransition = useRef<number | null>(null);
+  const progressOwner = useRef({ onProgress, cursors, openedIds });
+  useLayoutEffect(() => { progressOwner.current = { onProgress, cursors, openedIds }; }, [onProgress, cursors, openedIds]);
+  useLayoutEffect(() => { alive.current = true; return () => { alive.current = false; completedTransition.current = null; }; }, []);
   useLayoutEffect(() => {
     // Queued native clicks must read committed ownership, including retirement.
     interactiveRef.current = interactive;
     return () => { interactiveRef.current = false; };
   }, [interactive]);
-  useEffect(() => { onProgress?.({ selectedId: selection?.id ?? null, cursors, openedIds }); }, [onProgress, selection, cursors, openedIds]);
+  useEffect(() => { onProgress?.({ selectedId: selection?.phase === 'closing' ? null : selection?.id ?? null, cursors, openedIds }); }, [onProgress, selection, cursors, openedIds]);
+  const flushCompletion = useCallback(() => {
+    const token = completedTransition.current;
+    if (token === null || !alive.current || !interactiveRef.current || !controller.hasFreshPose(performance.now())) return;
+    completedTransition.current = null;
+    if (!controller.complete(token)) return;
+    const focused = controller.selection;
+    if (focused?.phase === 'focused') {
+      audioEvent('focused', String(focused.token));
+      setOpenedIds(previous => previous.includes(focused.id) ? previous : [...previous, focused.id]);
+    } else if (!focused) audioEvent('closed', String(token));
+    setSelection(focused);
+  }, [controller, audioEvent]);
+  useLayoutEffect(() => { void Promise.resolve().then(flushCompletion); }, [interactive, tracking, flushCompletion]);
   useLayoutEffect(() => {
     if (frame) ring.current?.setNativeProps({ position: controller.ringPosition! });
   }, [controller, frame]);
@@ -72,6 +90,7 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
     const openingId = controller.selection?.phase === 'opening' ? controller.selection.id : null;
     const success = controller.recenter(performance.now()); onRecenterResult?.(success);
     if (!success) return;
+    completedTransition.current = null;
     if (openingId) setOpenedIds(previous => previous.includes(openingId) ? previous : [...previous, openingId]);
     setFrame({ slots: controller.slots, position: controller.ringPosition! });
     setSelection(controller.selection);
@@ -110,6 +129,9 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
         if (closingCommitted.current && controller.selection?.phase === 'closing') panelFrame.current?.setNativeProps({ position: update.position });
       }
     }
+    // NORMAL alone is not a fresh recovered pose. Reconcile a retained finish
+    // only after the controller has accepted this frame's pose sample.
+    flushCompletion();
   }
   function select(id: string) {
     if (!interactiveRef.current || controller.selection?.id === id) return;
@@ -117,19 +139,23 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
     // An already focused panel closes; another tile never replaces it directly.
     const now = performance.now();
     const next = controller.selection ? controller.close(now) : controller.select(id, now);
-    if (next) setSelection(next);
+    if (next) commitSelection(next);
   }
-  function close() { if (!interactiveRef.current) return; const next = controller.close(performance.now()); if (next) setSelection(next); }
-  function complete(token: number) {
-    if (!interactiveRef.current || trackingRef.current !== 'normal') return;
-    if (controller.complete(token)) {
-      const focused = controller.selection;
-      if (focused?.phase === 'focused') audio.event('focused', String(focused.token));
-      else if (!focused) audio.event('closed', String(token));
-      if (focused?.phase === 'focused') setOpenedIds(previous => previous.includes(focused.id) ? previous : [...previous, focused.id]);
-      setSelection(focused);
+  function commitSelection(next: FocusSelection) {
+    if (next.phase === 'closing') {
+      const progress = progressOwner.current;
+      // Capture the accepted intent before an immediately following AppState
+      // event can unmount this frame and discard an uncommitted React update.
+      progress.onProgress?.({ selectedId: null, cursors: progress.cursors, openedIds: progress.openedIds });
     }
+    setSelection(next);
   }
+  function close() { if (!interactiveRef.current) return; const next = controller.close(performance.now()); if (next) commitSelection(next); }
+  const complete = useCallback((token: number) => {
+    if (!alive.current || controller.selection?.token !== token || controller.selection.phase === 'focused') return;
+    completedTransition.current = token;
+    flushCompletion();
+  }, [controller, flushCompletion]);
   const selectedContent = snapshot.find(item => item.id === selection?.id);
   return <ViroARScene anchorDetectionTypes="None" onTrackingUpdated={track} onCameraTransformUpdate={pose}>
     {/* The pinned bridge anchors direct AR-scene children. Keep moving/animated
