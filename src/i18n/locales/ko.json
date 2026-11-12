@@ -502,6 +502,9 @@
   "arPhoto": {
     "capture": "사진 촬영",
     "capturing": "촬영 중…",
+    "preparing": "AR 사진을 준비하고 있어요…",
+    "loadingPreview": "사진을 불러오는 중…",
+    "review": "저장하거나 공유하기 전에 사진을 확인하세요.",
     "preview": "AR 사진",
     "image": "촬영한 AR 사진",
     "save": "갤러리에 저장",

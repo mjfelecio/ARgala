@@ -543,6 +543,9 @@
   "arPhoto": {
     "capture": "Capture photo",
     "capturing": "Capturing…",
+    "preparing": "Preparing your AR photo…",
+    "loadingPreview": "Loading your photo…",
+    "review": "Review your photo before saving or sharing.",
     "preview": "AR photo",
     "image": "Captured AR photo",
     "save": "Save to gallery",
