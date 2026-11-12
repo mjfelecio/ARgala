@@ -6,10 +6,11 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { DestinationRingScene, type RingControls } from './destination-ring-scene';
 import { RingController } from './ring-controller';
+import { ViroMaterials } from '@reactvision/react-viro';
 import type { PoseSample } from './types';
 import { useReadingSize } from './use-reading-size';
 const native = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn(), patches: [] as { id: string; patch: Record<string, unknown> }[], reduced: false }));
-vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, toolbar: 110, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, toolbar: 110, actionMask: 111, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => native.reduced }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
@@ -524,4 +525,11 @@ it('settles an already accepted Close when its callback is delayed without a tra
   await mount(); await track(); await pose(); await press('ring-tile-history'); await finish(); await press('ring-action-close');
   vi.setSystemTime(2200); await finish();
   expect(node('ring-focused-panel')).toBeUndefined();
+});
+
+it('rounds native button materials without replacing their visible quad hit geometry', async () => {
+ await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+ const surface = node('ring-action-close').findByType('quad' as React.ElementType);
+ expect(surface.props).toMatchObject({width:0.46,height:0.18,highAccuracyEvents:true,ignoreEventHandling:false,materials:'argalaRingRoundedAction'});
+ expect(ViroMaterials.createMaterials).toHaveBeenCalledWith(expect.objectContaining({argalaRingRoundedAction: expect.objectContaining({diffuseTexture:111,diffuseColor:'#247A53',blendMode:'Alpha'})}));
 });

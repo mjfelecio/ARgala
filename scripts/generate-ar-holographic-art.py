@@ -32,6 +32,7 @@ write('holographic-frame', frame_body)
 # The reader keeps the matte/rim; cover corner brackets remain unchanged.
 write('holographic-reader', re.sub(r'<path[^>]+/>', '', frame_body))
 write('holographic-toolbar', f'<rect x="2" y="2" width="828" height="124" rx="20" fill="{forest}" fill-opacity=".93" stroke="{edge}" stroke-opacity=".4" stroke-width="2"/>', size=(832, 128), view_box='0 0 832 128')
+write('holographic-action-mask', '<rect x="1" y="1" width="510" height="254" rx="36" fill="#FFFFFF"/>', size=(512, 256), view_box='0 0 512 256')
 write('holographic-glint', f'<rect x="5" y="5" width="502" height="502" rx="30" fill="none" stroke="{edge}" stroke-width="7"/>')
 paths = {
  'overview': '<path d="M156 184Q206 163 256 188Q306 163 356 184V328Q306 307 256 332Q206 307 156 328Z M256 188V332 M183 218Q207 208 229 218 M283 218Q307 208 329 218 M183 253H229 M283 253H329"/>',
@@ -51,6 +52,8 @@ def pixels(name):
 frame = pixels('holographic-frame')
 assert 190 < frame[(256 * 512 + 256) * 4 + 3] < 245, 'Frame must retain camera transparency'
 assert frame[3] == 0, 'Rounded exterior must be transparent'
+action = pixels('holographic-action-mask')
+assert action[3] == 0 and action[(128 * 512 + 256) * 4 + 3] == 255, 'Action mask must have transparent corners and an opaque center'
 hashes = set()
 for name in paths:
     image = pixels(f'chapter-{name}')

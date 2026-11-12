@@ -30,7 +30,7 @@ export function NativePanelAction({ id, label, position, width = 0.28, enabled, 
   // A rotated backplate AABB can sort ahead of an actual button. Test the
   // visible quad triangles only; its parent remains the sole click owner.
   return <ViroNode testID={`ring-action-${id}`} position={position} opacity={enabled ? 1 : 0.35} onClick={enabled ? () => current.current?.() : undefined}>
-    <ViroQuad renderingOrder={renderingOrder} highAccuracyEvents ignoreEventHandling={!enabled} width={width} height={nativePanelActionHeight} materials={primary ? 'argalaRingAction' : 'argalaRingSurface'} />
+    <ViroQuad renderingOrder={renderingOrder} highAccuracyEvents ignoreEventHandling={!enabled} width={width} height={nativePanelActionHeight} materials={primary ? 'argalaRingRoundedAction' : 'argalaRingRoundedSurface'} />
     <ArText renderingOrder={renderingOrder + 1} position={[0, 0, 0.004]} width={width - 0.02} height={0.15} text={label} style={style.text(4)} />
   </ViroNode>;
 }

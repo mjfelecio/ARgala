@@ -4,6 +4,7 @@ export const holographicAssets = {
   frame: require('../../../assets/ar/holographic-frame.png') as number,
   reader: require('../../../assets/ar/holographic-reader.png') as number,
   toolbar: require('../../../assets/ar/holographic-toolbar.png') as number,
+  actionMask: require('../../../assets/ar/holographic-action-mask.png') as number,
   overview: require('../../../assets/ar/chapter-overview.png') as number,
   history: require('../../../assets/ar/chapter-history.png') as number,
   highlights: require('../../../assets/ar/chapter-highlights.png') as number,
