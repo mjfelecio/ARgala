@@ -9,7 +9,7 @@ import { RingController } from './ring-controller';
 import type { PoseSample } from './types';
 import { useReadingSize } from './use-reading-size';
 const native = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn(), patches: [] as { id: string; patch: Record<string, unknown> }[], reduced: false }));
-vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, toolbar: 110, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => native.reduced }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
@@ -460,7 +460,9 @@ it('gives every cover an intentional chapter emblem and a holographic frame whil
   expect(target[0].props.testID).toBe('holographic-surface'); expect(target[0].props.opacity ?? 1).toBe(1);
   expect(cover.props.onClick).toBeTypeOf('function');
   await press('ring-tile-overview'); await finish();
-  expect(node('ring-focused-panel').findAllByType('native-node' as React.ElementType).filter(item => item.props.testID === 'holographic-frame')).toHaveLength(1);
+  const focusedSurfaces = node('ring-focused-panel').findAllByType('viro-image' as React.ElementType).filter(item => item.props.testID === 'holographic-surface');
+  expect(focusedSurfaces.filter(item => item.props.source === 109)).toHaveLength(1);
+  expect(focusedSurfaces.filter(item => item.props.source === 110)).toHaveLength(1);
 });
 
 it('animates a page change inside the stationary focused frame and settles immediately for reduced motion', async () => {

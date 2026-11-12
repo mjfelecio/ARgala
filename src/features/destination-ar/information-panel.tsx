@@ -84,7 +84,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
   return <ViroNode ref={ref} key={selection.token} testID="ring-focused-panel" position={transform.position} rotation={transform.rotation}
     scale={[transform.scale, transform.scale, transform.scale]} opacity={enabled ? 1 : 0.35}
     animation={animation}>
-    <HolographicFrame reader width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={false} />
+    <HolographicFrame variant="reader" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={false} />
     <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.49 : 0.44, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.07 : 0.14} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 4 : 6, 'left', '600')} />
     {!closing && <>
       {decorations && <HolographicGlint id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
@@ -95,7 +95,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
         textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />}
       </PageTransition>
       {selection.phase === 'focused' && <ViroNode testID="ring-reader-toolbar" position={[0, readerLayout.toolbar.y, 0.012]}>
-      <ViroQuad testID="ring-reader-toolbar-surface" renderingOrder={0} ignoreEventHandling width={readerLayout.toolbar.width} height={readerLayout.toolbar.height} materials="argalaRingSurface" />
+      <HolographicFrame variant="toolbar" width={readerLayout.toolbar.width} height={readerLayout.toolbar.height} decorations={false} />
       <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.555, 0, 0.004]} enabled={interactive && cursor.page > 0} style={style}
         onPress={() => changePage(cursor.page - 1)} />
       <ArText testID="ring-page-indicator" position={[-0.25, 0, 0.004]} width={0.2} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />

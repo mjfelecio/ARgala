@@ -13,9 +13,10 @@ def token(name):
 forest, edge = token('ar-panel'), token('ar-edge')
 out = root / 'assets/ar'
 out.mkdir(exist_ok=True)
-def write(name, body, size=512):
+def write(name, body, size=512, view_box='0 0 512 512'):
     svg = out / f'{name}.svg'
-    svg.write_text(f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 512 512">{body}</svg>\n')
+    width, height = size if isinstance(size, tuple) else (size, size)
+    svg.write_text(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="{view_box}">{body}</svg>\n')
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', str(svg), '-frames:v', '1', '-threads', '1', str(out / f'{name}.png')], check=True)
 
 # A matte surface with a directional edge reflection, not a fabricated camera blur.
@@ -30,6 +31,7 @@ frame_body = f'''
 write('holographic-frame', frame_body)
 # The reader keeps the matte/rim; cover corner brackets remain unchanged.
 write('holographic-reader', re.sub(r'<path[^>]+/>', '', frame_body))
+write('holographic-toolbar', f'<rect x="2" y="2" width="828" height="124" rx="20" fill="{forest}" fill-opacity=".93" stroke="{edge}" stroke-opacity=".4" stroke-width="2"/>', size=(832, 128), view_box='0 0 832 128')
 write('holographic-glint', f'<rect x="5" y="5" width="502" height="502" rx="30" fill="none" stroke="{edge}" stroke-width="7"/>')
 paths = {
  'overview': '<path d="M156 184Q206 163 256 188Q306 163 356 184V328Q306 307 256 332Q206 307 156 328Z M256 188V332 M183 218Q207 208 229 218 M283 218Q307 208 329 218 M183 253H229 M283 253H329"/>',
