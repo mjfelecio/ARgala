@@ -60,12 +60,14 @@ function DevelopmentGallerySession({ identity }: { identity: SessionIdentity }) 
   const [audioManifest, setAudioManifest] = useState<AudioManifest | undefined>();
   useEffect(() => {
     let current = true;
+    const timer = setTimeout(() => { current = false; setFailed(true); }, 20000);
     void loadDevelopmentSystemAudio().then(value => { if (current) setAudioManifest(value ?? undefined); }).catch(() => { /* Optional audio never blocks AR entry. */ });
     void loadDevelopmentGalleryContent().then(value => {
       if (!current) return;
+      clearTimeout(timer);
       if (value) setContent(value); else setFailed(true);
-    }).catch(() => { if (current) setFailed(true); });
-    return () => { current = false; };
+    }).catch(() => { if (current) { clearTimeout(timer); setFailed(true); } });
+    return () => { current = false; clearTimeout(timer); };
   }, [attempt]);
   if (content) return <DestinationArSessionExperience identity={identity} freshEligible={isViroSpikeEnabled} content={content} audioManifest={audioManifest} />;
   return <Screen><Notice>{t(failed ? 'destinationRing.contentFailed' : 'common.loading')}</Notice>

@@ -347,6 +347,18 @@ it('retires development sample completion when its principal leaves', async () =
   expect(native.getItem).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled();
 });
 
+it.each(['en', 'ja', 'ko'])('bounds unresolved %s gallery loading and retires its late completion after explicit retry', async locale => {
+  await translations.changeLanguage(locale);
+  const pending = Promise.withResolvers<readonly import('./ring-content').RingContent[]>(); native.gallery.mockReturnValueOnce(pending.promise);
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title');
+  await act(async () => { await vi.advanceTimersByTimeAsync(20000); });
+  expect(copy()).toContain(translations.t('destinationRing.contentFailed'));
+  expect(native.support).not.toHaveBeenCalled();
+  await press('common.retry'); await layout();
+  await act(async () => pending.resolve([]));
+  await start(); await ready(); expect(cameras()).toHaveLength(1);
+});
+
 it.each(['en', 'ja', 'ko'])('previews the full development entrance in %s without clearing history or replaying on tracking recovery', async locale => {
   await translations.changeLanguage(locale);
   await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout();
