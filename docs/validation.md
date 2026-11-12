@@ -15,11 +15,23 @@ leases, native camera bounds and session/admission contracts are unchanged.
 `index-04b74095aa25afd71cdd3283584a6134.hbc`. Diff checks passed before commit;
 fresh read-only code review found no confirmed issues.
 
-The A53 was connected at 13% battery, then disconnected; charging was requested.
-This capture UI has **not yet been visually verified on Android**. Short-screen
-Yoga, real image decoding/orientation, spinner/status-bar appearance, TalkBack,
-physical touch and gallery/share/background trials remain unverified. Earlier
-reader captures do not establish these results. No APK was built.
+The owner reconnected the Galaxy A53 / Android 16 and explicitly authorized
+low-battery testing. Using the existing development APK and current Metro source,
+real processing feedback, bitmap-loading spinner, disabled-before-ready actions,
+upright contained photo, ivory/forest layout and scrolling were observed. The
+owner approved the visual result. A controlled Save showed success and its exact
+MediaStore row was confirmed. Discard returned to the same live reader and
+emptied the temporary cache while retaining the saved row. That test gallery
+row was subsequently removed. Another capture + Android Back returned live
+with an empty temporary cache and restored AR status-bar text. The Android
+share chooser was observed/canceled without selecting a recipient; full tracking
+recovery specifically after sharing remains unverified. Private screenshots and
+a 20-second device recording are indexed in the report.
+
+Short/narrow/landscape/large-text native layout, JA/KO, TalkBack and forced failure
+trials remain separate coverage gaps. No settings were changed or GPS arrival
+simulated as real. Battery was 12%→10%; camera was released after the checks.
+No source behavior changed during verification and no APK was built.
 
 ## AR stability and reader refinement — 2026-11-12
 
@@ -1789,7 +1801,7 @@ remain deferred. Current changes stack on unmerged draft M3 PR27.
 ## 2026-10-27 — integrated ACLC off-site device trial
 
 Owner explicitly resumed ADB testing. Source `c09ce99`, Galaxy A53 SM-A536E,
-Android16/API36; existing installed version1.0.0/code1 APK SHA256
+Android 16/API36; existing installed version1.0.0/code1 APK SHA256
 `0b756a3f883042a70c70d44d28d44fffad4a726828867e881a1d0a5daa5dff95`.
 No APK build, native correction or recognizer patch. Battery36%, USB charging,
 36.5°C at start. Metro ran with the development opt-in over USB reverse8081.
@@ -1962,7 +1974,7 @@ independently reviewable; PR29 and this branch are not merged by this stage.
 
 ## 2026-10-28 — client-progress phone sweep
 
-Source `3cffea9`, existing Viro development APK on Galaxy A53 SM-A536E/Android16;
+Source `3cffea9`, existing Viro development APK on Galaxy A53 SM-A536E/Android 16;
 no new APK/build or application-code change. Owner chose the laptop-connected
 development-server presentation. Fresh `npm run check` passed lint/typecheck and
 99 files/1,045 tests. Full scenario/configuration details are recorded in
@@ -2160,7 +2172,7 @@ this JavaScript change through Metro.
 ## Unattended Android smoke — 2026-10-30
 
 Owner authorized ADB testing without touching/moving the phone or assisting with
-sign-in. Device: Samsung Galaxy A53 SM-A536E, Android16; USB charging, battery19%
+sign-in. Device: Samsung Galaxy A53 SM-A536E, Android 16; USB charging, battery19%
 at start. The specifically approved development APK
 [EAS2cd68ffa](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/2cd68ffa-4cf1-4754-8762-c59ed01ec044)
 finished successfully from `ec66c48`. Downloaded archive309846604 bytes, SHA256
@@ -2386,7 +2398,7 @@ keyboard/scroll ownership. Source-image review covered proportional marks at
 mask illustration. The derived mask contains only white visible pixels with
 transparent margins; these are source proofs, not Android launcher results.
 
-A brief Galaxy A53/Android16 development-client attempt preceded the owner's
+A brief Galaxy A53/Android 16 development-client attempt preceded the owner's
 palette correction; it does not establish final native acceptance. Account data,
 onboarding, language, font scale and OS theme were preserved, and the app/test
 connection was stopped. No paid Search/Walk action or APK build was performed.
@@ -2521,7 +2533,7 @@ passed (155), final journal/catalog/theme regressions passed (58).
 `npm run export:android` passed; this is not an APK build or physical provider
 acceptance. Independent read-only review found no significant regressions.
 
-Galaxy A53 SM-A536E / Android16, installed APK1.0.0/code1, 1080×2400, density420
+Galaxy A53 SM-A536E / Android 16, installed APK1.0.0/code1, 1080×2400, density420
 override and font1.1: inspected actual Explore, Featured, pilot preview, Profile
 and Saved states via local Metro/ADB. Featured was also inspected at360×800
 logical units/font1.5 with wrapping and scrolling; font/size restored. Captures
@@ -2568,7 +2580,7 @@ Verification actually run:
   including the rasterized unchanged arch emblem. This is not an APK build.
 - `git diff --check`: passed.
 
-Galaxy A53 SM-A536E / Android16, existing Oct30 development client,1080×2400 /
+Galaxy A53 SM-A536E / Android 16, existing Oct30 development client,1080×2400 /
 420dpi, unchanged font scale, USB Metro: actual Viro tracking-ready, ring/camera
 rendering, held Overview focus and brief background/return were observed. Raw
 captures stay private. First/return intro recordings were confounded by lazy
@@ -2602,7 +2614,7 @@ and onError still fail. The focused native gallery offers fenced explicit Retry,
 retains caption/credit through loading/error, and uses a45% taller photo region
 within the original square frame and camera distance.
 
-On the Galaxy A53 SM-A536E/Android16 using the existing Oct30 development APK,
+On the Galaxy A53 SM-A536E/Android 16 using the existing Oct30 development APK,
 the corrected callback visibly rendered the ACLC Iriga sample in the focused
 native panel. It is **not ACLC Ormoc**. The permanent development prototype now
 includes that licensed photo and a generic landscape, with localized sample
@@ -2680,7 +2692,7 @@ No new font package, native configuration or APK was required.
 
 Regressions using actual locale resources failed before the fix and passed with
 the explicit fallback across both native scene paths. Galaxy A53 SM-A536E,
-Android16, existing development APK installed2026-10-30,1080×2400,420dpi and
+Android 16, existing development APK installed2026-10-30,1080×2400,420dpi and
 original1.1 font scale: Japanese cover `概要`, Japanese photo caption/reading
 controls and Korean photo caption/reading controls rendered recognizable glyphs
 without the reported boxes. Language changes were temporary in-memory previews;
@@ -2741,7 +2753,7 @@ deployment occurred. Camera screenshots, UI dumps and verification logs are giti
 
 ### Cinematic branch capture and demonstration evidence — 2026-11-05
 
-Galaxy A53 SM-A536E / Android16, the existing2026-10-30 development APK, current
+Galaxy A53 SM-A536E / Android 16, the existing2026-10-30 development APK, current
 cinematic JavaScript at `cb04595`,1080×2400,420dpi and original1.1 font scale.
 Captured **41 unretouched screenshots and four silent native screen recordings**
 covering the UI changes since2026-10-31: Explore before/after explicit search,
@@ -2901,7 +2913,7 @@ under `.superpowers/builds/ar-panel-taps/`.
 ### A53 tap-fix installation and physical session — 2026-11-08
 
 The owner reconnected ADB and explicitly confirmed the phone was upright and
-ready. Device: Galaxy A53 SM-A536E, Android16, USB-connected, unlocked and charging;
+ready. Device: Galaxy A53 SM-A536E, Android 16, USB-connected, unlocked and charging;
 battery38% at installation. The previous installed APK (last updated2026-10-30)
 was retained privately before updating, with SHA-256
 `ad5cc55cf6259bb4f93abd8ef9c0a702770aaa7a3045d850b8bc9d7de0403d0e`.

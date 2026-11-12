@@ -1,7 +1,7 @@
 # AR Capture Polish Implementation Plan
 
 **Status:** Owner approved the chat plan and ivory/forest direction on November 12, 2026.
-**Execution:** Tasks 1–2 implemented in `7122e58`; full check passes 1,485 tests/130 files and Android export. Task 3 code review passed; native evidence pending the charged/reconnected A53. See [implementation report](../../ar-capture-polish.md).
+**Execution:** Tasks 1–2 implemented in `7122e58`; full check passes 1,485 tests/130 files and Android export. Task 3 code review passed. Native core capture/loading/preview/save/discard/Back/return checks passed on A53; owner accepted the visual result. Native stress/localization/failure gaps are explicitly recorded. See [implementation report](../../ar-capture-polish.md).
 
 **Goal:** Make screenshot processing and review feel integrated with the polished app.
 **Architecture:** Keep capture controller/service ownership; isolate URI-keyed preview presentation and bitmap readiness. Use HeroUI, UniWind and existing CSS tokens. No new dependencies or APK.

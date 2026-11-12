@@ -56,28 +56,61 @@ and storage boundaries are mocked. Viewport tests cover 800/360/1600 heights,
 are sizing/behavior checks; they do not prove Android Yoga, physical touch or
 visual quality. Export is not an APK build.
 
-## Review and remaining device acceptance
+## Review and physical Android verification
 
 A fresh read-only review inspected the task diff against baseline `1b5f2c5`,
 including the new preview, plan and surrounding session/resource integration.
 It reported no confirmed P0–P3 findings. It did not independently run tests or
 use the phone.
 
-The A53 was connected at 13% battery when this task began, then disconnected.
-The owner was asked to charge it. No native screenshot or capture trial of this
-new UI is claimed. Earlier reader screenshots in the AR refinement report are
-not evidence of this capture redesign.
+The owner reconnected the A53 and explicitly authorized verification despite
+low battery. Using the existing November 8 development APK with source
+`7122e58` through USB Metro on Android 16, the capture UI was exercised at 12%
+battery, 1080×2400 physical resolution, 420 density override and 1.1 font scale.
+A disconnected USB-forwarding error in the development launcher was resolved
+by restoring the port reverse and opening the existing client; no APK was built.
 
-When charged and available, use the existing development APK and Metro to check:
+Observed native results:
 
-- Capture → visible preparation feedback → loaded preview → Discard/Android Back;
-  camera/reader resumes and temporary ownership retires.
-- Actual bitmap decoding and orientation, portrait/landscape composition,
-  processing spinner, safe areas and status-bar restoration.
-- Short/narrow screen, large text, EN/JA/KO labels, scrolling, error recovery,
-  TalkBack announcements and native touch pass-through while feedback appears.
-- Save success/failure and share chooser/background leases as separately recorded
-  device scenarios; mocked successes do not establish gallery/share delivery.
+- Real camera plus Viro chapter tile captured into an upright photograph.
+- Capture retained its label, showed the spinner and preparation message, and
+  kept camera/ring geometry visible while processing.
+- The preview displayed its bitmap-loading spinner with Save/Share disabled
+  and Discard available, then decoded the actual photograph and enabled actions.
+- Ivory/forest hierarchy, rounded photo canvas, full-width actions, safe areas,
+  dark status-bar text and complete aspect-contained portrait rendered as intended.
+- Scrolling exposed the full explanatory notes without hiding action access.
+  These scroll interactions were performed by the owner during the recording.
+- The Android image share chooser was observed and dismissed with Back; no
+  recipient or external delivery was selected. Restoring-AR guidance appeared
+  afterward; stable tracking recovery specifically after the chooser was not
+  confirmed in that trial.
+- A subsequent controlled Save displayed “Saving…” then “Saved to gallery”.
+  A MediaStore query for the exact generated filename confirmed the gallery row.
+- Discard returned directly to the live focused reader at page 1/5. The app's
+  capture cache was empty afterward while the saved gallery row remained.
+  Only that newly created test gallery row was then deleted; an exact-name query
+  returned no result. Existing gallery items were untouched.
+- A third capture followed by Android Back returned to the same live reader,
+  restored light AR status-bar text and left the temporary capture cache empty.
+- The owner explicitly reported: **“Looks good to me, I've verified it.”**
+
+Private native evidence under `.superpowers/reviews/ar-capture-20261112/`:
+`processing.png`, `bitmap-loading.png`, `preview-en.png`,
+`preview-notes-scrolled.png`, `saving.png`, `saved-success.png`,
+`returned-reader-after-discard.png`, `returned-reader-after-back.png`, and
+`capture-flow-initial.mp4` (20-second actual
+device recording). These show a neutral camera area without incidental people.
+They are not generated mockups and are excluded from Git.
+
+The core capture/processing/preview, Save, Discard, Back and direct return checks
+passed, and the visual result is accepted by the owner. Battery declined from
+12% to 10% during the brief camera trials, which the owner explicitly authorized.
+AR was exited to release the camera after verification.
+Remaining stress/coverage cells are separate: short/narrow layout, landscape,
+large text, native JA/KO copy, TalkBack, forced decode/storage/permission failures and full share/background/tracking recovery. Automated
+coverage is not reported as hardware success for these cells. No settings
+changes, real-GPS arrival or Passport grant were used for this verification.
 
 Keep private native evidence outside Git and exclude incidental people. No APK
 build, merge, push or deployment was performed. Presentation sign-off remains
