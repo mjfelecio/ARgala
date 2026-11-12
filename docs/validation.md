@@ -1,5 +1,26 @@
 # Foundation validation
 
+## AR capture processing and review — 2026-11-12
+
+Source commit `7122e58` adds the owner-selected ivory/forest photo review,
+responsive contained canvas, stable Capture feedback, URI-fenced bitmap
+loading/deadline, and readiness-gated Save/Share. Capture controller/service,
+leases, native camera bounds and session/admission contracts are unchanged.
+[Implementation and outstanding native checks](ar-capture-polish.md).
+
+`npm run check` passed TypeScript, zero-warning lint and **1,485 tests across
+130 files**. The focused photo/session suite passed **123 tests / 4 files**.
+`EXPO_OFFLINE=1 EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android -- --max-workers
+1` passed with 74 assets and 8.6 MB Hermes bundle
+`index-04b74095aa25afd71cdd3283584a6134.hbc`. Diff checks passed before commit;
+fresh read-only code review found no confirmed issues.
+
+The A53 was connected at 13% battery, then disconnected; charging was requested.
+This capture UI has **not yet been visually verified on Android**. Short-screen
+Yoga, real image decoding/orientation, spinner/status-bar appearance, TalkBack,
+physical touch and gallery/share/background trials remain unverified. Earlier
+reader captures do not establish these results. No APK was built.
+
 ## AR stability and reader refinement — 2026-11-12
 
 Implemented on `feat/ar-experience-refinement`, through runtime commit
