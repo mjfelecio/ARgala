@@ -23,7 +23,9 @@ Do not present simulated admission as verified location behavior.
 - Open each of the nine destinations. Confirm its title, chapter covers, overview
   photograph, caption/credit and the rest of its story correspond to the chosen
   location. Note any inaccurate or uncertain photo, claim or name for review.
-- Test actual finger taps and close/reopen, Back and Recenter. Turn toward other
+- Test actual finger taps and close/reopen, Back and Recenter. While focused, use
+  the floating Previous/page/Next/Close row below the content; A−/A+ belong to the
+  bottom screen toolbar alongside Recenter and Capture Photo. Turn toward other
   chapters and check that they remain stable and open in the intended order.
 - Test one first-visit entrance and a return, Skip, tracking loss/recovery and
   background/foreground. Watch for drifting, blocked controls or repeated prompts.

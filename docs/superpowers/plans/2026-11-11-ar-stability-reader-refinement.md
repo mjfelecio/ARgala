@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Use `superpowers:executing-plans` after owner approval, implementing and verifying each task in order. Do not begin implementation from this document until approved.
 
-**Status:** Investigation and proposed implementation only; awaiting owner approval.
+**Status:** Owner approved implementation on November 12, 2026; work in progress. Builds, merge and deployment remain separately gated.
 
 **Goal:** Make first entry and panel collapse recoverable and reliable, then create a spacious, photo-led native reader without changing the accepted ring or arrival rules.
 
@@ -11,6 +11,18 @@
 **Tech stack:** Expo 57.0.32, React 19.2.3, React Native 0.86.3, Viro 3.0.3, TypeScript, existing HeroUI/UniWind and Vitest. No dependency or native-runtime change is proposed.
 
 **Spec:** Owner's “ARgala — AR Experience Stability and Reader UX Refinement” request, November 11, 2026. Project authority: `AGENTS.md`, `DESIGN.md`, `docs/ar-destination-stories.md`, and the existing cinematic AR specification, subject to later owner decisions.
+
+## Execution status — November 12, 2026
+
+| Tasks | Status |
+| --- | --- |
+| 1–4 loading, transitions, Help, clean reader surface | Implemented and committed; source regressions pass. Cold first navigation and five warm reopens passed on A53. |
+| 5–7 screen toolbar, spatial row, photo-first reader | Implemented and committed. Final text/photo/credit, rounded container/buttons and screen size controls observed. Controlled ADB page/size/rapid-Close trials passed; full finger/fit matrix remains task 9. |
+| 8 automated checks | Latest typecheck/lint and 1,475 tests / 130 files pass; final Android export passes with 74 assets. No APK build. |
+| 9 physical verification | Partial device acceptance recorded. Final rounded geometry, ADB paging/size/rapid-Close, Capture/Discard and brief return observed. Longer return restored focus but tracking remained limited. Stopped at 15% battery; finger/interrupted-transition/CJK/portrait/short-view matrix remains open. |
+| 10 report and one-branch handoff | Implementation report records exact checks, private screenshots and gaps. Independent read-only review completed; its important short-toolbar recovery finding was fixed and regression-tested. |
+
+The checklists below preserve the approved task specification; this status table and implementation report distinguish implemented code from remaining physical acceptance.
 
 ## Global constraints
 
@@ -150,7 +162,7 @@ The screen toolbar uses the existing bottom safe-area owner and bounded hit regi
 - Large CJK captions and the existing portrait photo must retain subjects, attribution access and cursor identity through reflow/restoration.
 - Short viewports and large Android text must leave screen controls reachable and native hit regions unobstructed without resizing the camera.
 
-## Ordered implementation tasks — pending approval
+## Ordered implementation tasks — approved November 12, 2026
 
 ### 1. Diagnose and repair first-route loading
 
@@ -271,10 +283,10 @@ The screen toolbar uses the existing bottom safe-area owner and bounded hit regi
 
 ## Decisions, risks and recommendation
 
-The only approval needed now is approval of this implementation plan and its recommended layout approach. No new library, build, destination content or GPS wiring decision is requested. Initial geometry values remain subject to physical fit testing; material deviations will be brought back with evidence.
+The implementation plan and layout approach were approved on November 12. No new library, build, destination content or GPS wiring decision is requested. Initial geometry values remain subject to physical fit testing; material deviations will be brought back with evidence.
 
-The first-entry failure's precise underlying trigger remains unresolved and is the first investigation gate after approval. No native animation change should be shipped solely because a mocked event sequence fails; validate the fix on the installed renderer. Camera/toolbar hit routing, typography and aspect-ratio comfort remain physical acceptance gates.
+The first-entry trace localized a successful import followed by a stalled fallback reveal; the precise upstream renderer trigger remains unresolved. An explicit loading owner passed the recorded cold/warm device trials. No native animation change should be shipped solely because a mocked event sequence fails; validate the fix on the installed renderer. Camera/toolbar hit routing, typography and aspect-ratio comfort remain physical acceptance gates.
 
 For the defense, prioritize loading recovery and deterministic Close first, then the separate clean reader frame, existing-toolbar extension, spatial row and larger contained photos. These can be attempted within the current native capabilities. Defer video, content replacement, new entrance calibration, all-nine GPS admission wiring and any broad architecture/dependency upgrade. If time becomes limited, keep verified stability fixes and only the visual changes that pass the actual device matrix; do not label the entire experience presentation-ready based on tests/export alone.
 
-**Approval gate:** no refinement application code, test files or native assets have been modified in the repository. This document records the proposal for review; implementation waits for the owner.
+**Original approval gate:** implementation waited for owner review. The owner approved all ten tasks on November 12; implementation and remaining verification are recorded above and in `docs/ar-reader-refinement-implementation.md`. Separate APK approval still applies.

@@ -19,12 +19,18 @@ Long cover titles are abbreviated by grapheme; their full title is included in
 the reading text. Images use more vertical space than the previous strip.
 Ordinary paragraphs flow across the native reading box; page estimates do not
 force narrow display rows. Explicit paragraphs and protective long-token/CJK
-breaks remain intact. Reading controls retain a visible bottom inset and row gap.
+breaks remain intact. The expanded reader uses a separate clean matte texture, preserving the original
+chapter-cover artwork. Text uses a 0.82-unit region and contained photographs a
+0.76-unit region, with separate caption/credit space. Previous, page count, Next
+and Close sit together in a floating native row beneath the content canvas; the
+row shares its transition/frame owner and retires while opening or closing.
 
 Exit, destination and Help occupy the top utility surface. Recenter and Capture
-occupy a separate bounded bottom surface. Help scrolls within its visible card
+occupy a separate bounded bottom surface, alongside contextual A−/A+ while
+a chapter is focused. The parent owns the single reading preference and its
+localized error/Retry feedback; commands are fenced to that chapter and frame. Help scrolls within its visible card
 and pauses native interaction without remounting the camera or pausing expiry.
-Detailed stories and reading controls remain in Viro; only definite unsupported
+Detailed stories and page/Close controls remain in Viro; only definite unsupported
 hardware can enter the existing continuously eligible on-site reader.
 
 ## Progress and restoration
@@ -66,6 +72,9 @@ Check for updates workflow and cannot install new media, locations or authority.
 No new schema, endpoint, permissions or native dependencies are introduced.
 
 ## Acceptance
+
+The November 12 refinement and current device limits are recorded in
+[the implementation report](ar-reader-refinement-implementation.md).
 
 Automated checks cover chapter capacity, focus/opening semantics, mixed-page
 reflow, logical restoration, actual locales, Help fencing, failure recovery and

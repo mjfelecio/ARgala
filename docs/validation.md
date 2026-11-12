@@ -1,5 +1,40 @@
 # Foundation validation
 
+## AR stability and reader refinement — 2026-11-12
+
+Implemented on `feat/ar-experience-refinement`, through runtime commit
+`1088e58`. [Implementation report](ar-reader-refinement-implementation.md)
+records the traced first-navigation import/reveal stall, transition ownership
+fixes, new toolbar/reader geometry, independent review and physical evidence.
+The focus distance remains 2.25 units; destination content, native dependencies,
+GPS admission and Passport authority did not change.
+
+Final `npm run check` passed TypeScript, zero-warning ESLint and **1,475 tests
+across 130 files**. `EXPO_OFFLINE=1 EXPO_PUBLIC_VIRO_SPIKE=1 npm run
+export:android -- --max-workers 1` passed with 74 assets and Hermes bundle
+`index-109acfaf1181f7755821e04437e2b547.hbc`. `git diff --check` passed before
+runtime commits. This was an export, not a new APK build.
+
+With the existing development APK and USB Metro on Galaxy A53 / Android 16:
+a fresh first prototype navigation and five warm reopens passed; bounded native
+startup Retry recovered a stationary tracking timeout. Final rounded controls,
+clean text surface and larger landscape photo/credit rendered natively. ADB
+Previous, A+/A−, Close and three rapid Close taps worked in observed trials;
+Close restored the original cover without Recenter, and reopening retained the
+photo page. Capture opened its real preview and Discard returned to the live
+camera. Upright Recenter restored useful framing. A brief Home/app return
+retained the focused photo at page 2/5. A longer background trial restored the
+photo/page but remained in limited tracking; stable recovery is unverified. The
+app was backgrounded to release the camera at 15% battery. Private final screenshots are indexed
+in the report and excluded from Git.
+
+This does not establish full physical acceptance. Remaining checks include
+finger-tap reliability, controlled tracking loss/background during transitions,
+Recenter during transitions, portrait media, large/JA/KO native rendering,
+short viewport/large system text, bright/dim contrast and the real-arrival flow.
+The current on-site GPS flow was not rerun and no simulation counts as arrival.
+No new APK, deployment, merge or push occurred.
+
 ## ACLC real-arrival device verification — 2026-11-11
 
 The owner reported being at ACLC. On the connected Galaxy A53 / Android 16,
