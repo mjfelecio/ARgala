@@ -5,6 +5,8 @@ import type { NativeStackNavigationProp } from 'expo-router/native-stack';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
+import { useThemeColor } from 'heroui-native/hooks';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSettings } from '@/features/settings/provider';
 import { useAuth } from '@/features/auth/provider';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
@@ -78,6 +80,7 @@ function DevelopmentGallerySession({ identity }: { identity: SessionIdentity }) 
 type Props = { audioManifest?: AudioManifest; identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
 export function DestinationArSessionExperience({ audioManifest, identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
   const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
+  const utilityInk = useThemeColor('foreground');
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
   const [transitionReady, setTransitionReady] = useState(true); const [scene, setScene] = useState({ width: 0, height: 0 });
   const [NativeRing, setNativeRing] = useState<Awaited<ReturnType<typeof loadRingScene>> | null>(null);
@@ -115,6 +118,7 @@ export function DestinationArSessionExperience({ audioManifest, identity, freshE
   const [poseRequired, setPoseRequired] = useState(false); const recenterResult = useCallback((success: boolean) => setPoseRequired(!success), []);
   const [help, setHelp] = useState(false); const [metrics, setMetrics] = useState<RingMetrics>({ received: 0, applied: 0 });
   const exploring = session.phase === 'exploring'; const revealing = session.phase === 'reveal' || session.phase === 'limited' && session.revealedCount < content.length;
+  const compactUtilities = scene.height > 0 && scene.height < 600;
   const showLiveGuidance = session.phase === 'limited' || revealing || identity.provenance !== 'verified' || poseRequired || help;
   if (startup.errorCode === 'unsupported' && unsupportedFallback && focused && active) return <>{unsupportedFallback}</>;
   return <View testID="destination-ar-scene" className="flex-1 bg-ink" onLayout={event => {
@@ -134,8 +138,8 @@ export function DestinationArSessionExperience({ audioManifest, identity, freshE
       <Button variant="secondary" accessibilityLabel={t('destinationRing.help')} accessibilityState={{ expanded: help }} onPress={() => setHelp(value => !value)}><Button.Label>{t('destinationRing.help')}</Button.Label></Button>
     </> : undefined} bottom={startup.phase === 'live' && !help ? <>
       <View className="flex-row items-center gap-2" pointerEvents="box-none">
-      <Button variant="secondary" className="min-h-12" accessibilityLabel={t('destinationRing.recenter')} isDisabled={!exploring} onPress={() => controls.current?.recenter()}><Button.Label>{t('destinationRing.recenter')}</Button.Label></Button>
-      {exploring && focused && active && <ArPhotoControls capture={capture} running sessionKey={JSON.stringify([identity.principalId, identity.admissionId, identity.destinationId, identity.provenance, startup.attempt])} />}
+      <Button variant="secondary" isIconOnly={compactUtilities} className={compactUtilities ? 'size-12 p-0' : 'min-h-12'} accessibilityLabel={t('destinationRing.recenter')} isDisabled={!exploring} onPress={() => controls.current?.recenter()}>{compactUtilities ? <Ionicons name="scan-outline" size={22} color={utilityInk} accessible={false} /> : <Button.Label>{t('destinationRing.recenter')}</Button.Label>}</Button>
+      {exploring && focused && active && <ArPhotoControls capture={capture} running compact={compactUtilities} sessionKey={JSON.stringify([identity.principalId, identity.admissionId, identity.destinationId, identity.provenance, startup.attempt])} />}
       </View>
       {readerControls?.readerAvailable && exploring && focused && active && <View testID="ar-reading-controls" className="flex-row items-center gap-2" pointerEvents="box-none">
         <Button variant="secondary" className="min-h-12 min-w-12 px-3" accessibilityLabel={t('destinationRing.decreaseTextSize')} isDisabled={reading.size === 'small'} onPress={() => readerControls.changeReadingSize?.(-1)}><Button.Label>{t('destinationRing.smaller')}</Button.Label></Button>

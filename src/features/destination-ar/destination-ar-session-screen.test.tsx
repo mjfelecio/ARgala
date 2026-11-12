@@ -462,3 +462,21 @@ it('restores an accepted closing transition as collapsed after background retire
   expect(node('ring-focused-panel')).toBeUndefined(); expect(node('ring-tile-history')).toBeDefined();
   await click('ring-tile-history'); await finish(); expect(text('ring-page-indicator')).toMatch(/^2 /);
 });
+
+it('bounds short-screen reading failure recovery without changing native camera bounds', async () => {
+  const originalScale = nativeUi.fontScale; nativeUi.fontScale = 1.5; native.setItem.mockRejectedValueOnce(new Error('PRIVATE'));
+  try {
+    await mount(); await layout(); await start(); await ready(); await click('ring-tile-history'); await finish(); await click('ring-action-larger');
+    await act(async () => tree!.root.findByProps({ testID: 'destination-ar-scene' }).props.onLayout({ nativeEvent: { layout: { width: 320, height: 360 } } }));
+    const bottom = tree!.root.findAllByType('safe-area' as React.ElementType).find(value => value.props.testID === 'ar-bottom-utilities')!;
+    expect(bottom.props.style.maxHeight).toBe(144);
+    expect(tree!.root.findByProps({ testID: 'ar-bottom-utility-body' })).toBeDefined();
+    await act(async () => bottom.props.onLayout({ nativeEvent: { layout: { height: 144 } } }));
+    const top = tree!.root.findAllByType('safe-area' as React.ElementType).find(value => value.props.testID === 'ar-top-utilities')!;
+    expect(top.props.style.maxHeight).toBe(216);
+    const cameraBounds = tree!.root.findAllByType('view').find(value => value.props.style?.position === 'absolute' && value.findAllByType('native-navigator' as React.ElementType).length === 1)!;
+    expect(cameraBounds.props.style).toMatchObject({ width: 320, height: 360 });
+    expect(tree!.root.findByType('photo-controls' as React.ElementType).props.compact).toBe(true);
+    await press('common.retry'); expect(copy()).not.toContain(translations.t('destinationRing.save-failed'));
+  } finally { nativeUi.fontScale = originalScale; }
+});

@@ -4,11 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { withUniwind } from 'uniwind';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
+import { useThemeColor } from 'heroui-native/hooks';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { ArPhotoController } from './controller';
 import { createPhotoService } from './service';
 import type { NativeCapture, PhotoSnapshot } from './types';
 export type { NativePhotoResult } from './types';
-export type ArPhotoControlsProps = { capture: NativeCapture | null; sessionKey: string; running: boolean };
+export type ArPhotoControlsProps = { capture: NativeCapture | null; sessionKey: string; running: boolean; compact?: boolean };
 const StyledImage = withUniwind(Image);
 const SafePreview = withUniwind(SafeAreaView);
 
@@ -16,12 +18,13 @@ const SafePreview = withUniwind(SafeAreaView);
  * sessionKey, and supplies running only for live/exploring focused foreground AR.
  * Removing this child retires old callbacks before another owner can capture.
  */
-export function ArPhotoControls({ capture, sessionKey, running }: ArPhotoControlsProps) {
-  return running && capture ? <PhotoOwner key={sessionKey} capture={capture} /> : null;
+export function ArPhotoControls({ capture, sessionKey, running, compact = false }: ArPhotoControlsProps) {
+  return running && capture ? <PhotoOwner key={sessionKey} capture={capture} compact={compact} /> : null;
 }
 
-function PhotoOwner({ capture }: { capture: NativeCapture }) {
+function PhotoOwner({ capture, compact }: { capture: NativeCapture; compact: boolean }) {
   const { t } = useTranslation();
+  const utilityInk = useThemeColor('foreground');
   const [state, setState] = useState<PhotoSnapshot>({ photoUri: null, saved: false, busy: null, error: null });
   const latestCapture = useRef(capture);
   const [controller] = useState(() => new ArPhotoController(createPhotoService(), setState));
@@ -33,8 +36,8 @@ function PhotoOwner({ capture }: { capture: NativeCapture }) {
   const error = state.error ? <Text accessibilityRole="alert" accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(`arPhoto.errors.${state.error}`)}</Text> : null;
   const busy = state.busy !== null;
   return <View testID="ar-photo-controls" pointerEvents="box-none" className="shrink gap-2">
-    <Button variant="secondary" className="min-h-12" accessibilityLabel={t('arPhoto.capture')} isDisabled={busy || state.photoUri !== null} onPress={() => void controller.capture()}>
-      <Button.Label>{t(state.busy === 'capture' ? 'arPhoto.capturing' : 'arPhoto.capture')}</Button.Label>
+    <Button variant="secondary" isIconOnly={compact} className={compact ? 'size-12 p-0' : 'min-h-12'} accessibilityLabel={t('arPhoto.capture')} accessibilityState={{ busy }} isDisabled={busy || state.photoUri !== null} onPress={() => void controller.capture()}>
+      {compact ? <Ionicons name={busy ? 'hourglass-outline' : 'camera-outline'} size={22} color={utilityInk} accessible={false} /> : <Button.Label>{t(state.busy === 'capture' ? 'arPhoto.capturing' : 'arPhoto.capture')}</Button.Label>}
     </Button>
     {!state.photoUri && error}
     {state.photoUri && <Modal visible onRequestClose={() => controller.discard()}>

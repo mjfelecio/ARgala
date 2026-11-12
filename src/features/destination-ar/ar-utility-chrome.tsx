@@ -10,7 +10,9 @@ const SafeOverlay = withUniwind(SafeAreaView);
 export function ArUtilityChrome({ children, actions, bottom, viewportHeight, titleKey = 'destinationAr.title', title, onReturn, onExit }: { children: React.ReactNode; actions?: React.ReactNode; bottom?: React.ReactNode; viewportHeight?: number; titleKey?: string; title?: string; onReturn?(): void; onExit?(): void }) {
   const { t } = useTranslation();
   const [bottomHeight, setBottomHeight] = useState(0);
-  const maxHeight = viewportHeight && viewportHeight > 0 ? Math.max(0, viewportHeight - (bottom ? bottomHeight : 0)) : undefined;
+  const bottomMaxHeight = viewportHeight && viewportHeight > 0 ? viewportHeight * 0.4 : undefined;
+  const bottomOccupation = Math.min(bottomHeight, bottomMaxHeight ?? bottomHeight);
+  const maxHeight = viewportHeight && viewportHeight > 0 ? Math.max(0, viewportHeight - (bottom ? bottomOccupation : 0)) : undefined;
   // Keep overlay hit bounds at visible controls, leaving the measured native
   // scene reachable below them. box-none alone is not a physical touch test.
   return <><SafeOverlay testID="ar-top-utilities" style={{ maxHeight }} className="absolute left-0 right-0 top-0" edges={['top', 'left', 'right']} pointerEvents="box-none">
@@ -23,8 +25,10 @@ export function ArUtilityChrome({ children, actions, bottom, viewportHeight, tit
     </View>
     <ScrollView testID="ar-utility-body" className="grow-0 shrink">{children}</ScrollView>
   </SafeOverlay>
-    {bottom && <SafeOverlay testID="ar-bottom-utilities" onLayout={event => setBottomHeight(event.nativeEvent.layout.height)} className="absolute bottom-0 left-0 right-0" edges={['bottom', 'left', 'right']} pointerEvents="box-none">
-      <View className="items-center px-4 pb-3" pointerEvents="box-none"><View className="flex-row flex-wrap items-center justify-center gap-3 rounded-card bg-ar-panel p-2">{bottom}</View></View>
+    {bottom && <SafeOverlay testID="ar-bottom-utilities" style={{ maxHeight: bottomMaxHeight }} onLayout={event => setBottomHeight(event.nativeEvent.layout.height)} className="absolute bottom-0 left-0 right-0" edges={['bottom', 'left', 'right']} pointerEvents="box-none">
+      <ScrollView testID="ar-bottom-utility-body" className="grow-0 shrink" contentContainerClassName="items-center px-4 pb-3" pointerEvents="box-none">
+        <View className="flex-row flex-wrap items-center justify-center gap-3 rounded-card bg-ar-panel p-2">{bottom}</View>
+      </ScrollView>
     </SafeOverlay>}
   </>;
 }
