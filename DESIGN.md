@@ -64,10 +64,11 @@ No fixed-height text rows or app-wide font-scaling cap. [Design system §§3–7
 ## Protected recent decisions
 
 Do not undo the compact branded Explore header/pinned Featured shortcut, measured
-Directions collapsed primary group, 1.5-unit AR focused-panel distance, or
+Directions collapsed primary group, 2.25-unit AR focused-panel distance (owner comfort adjustment, 2026-11-11), or
 collapse-on-other-tile held interaction. [Latest refinement](docs/ui-refinements-2026-10-30.md).
-Keep full native scene bounds independent of chrome/sheets and retain the accepted
-finger-pad brief hold/release instruction, not a short-tap promise.
+Keep full native scene bounds independent of chrome/sheets and retain the version-guarded
+native tap-on-release contract, accurate visible hit geometry and physical
+acceptance requirement.
 
 Selected-destination AR uses [Destination Stories](docs/ar-destination-stories.md):
 native chapter covers and image/text reading pages, bounded top/bottom utilities,

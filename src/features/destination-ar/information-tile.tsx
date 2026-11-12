@@ -8,7 +8,8 @@ import { useTranslation } from 'react-i18next';
 import type { RingContent } from './development-ring-content';
 import type { RingSlot } from './scene-geometry';
 import type { ArNativeStyle } from './native-styles';
-export const nativePanelActionHeight = 0.18;
+import { nativePanelActionHeight } from './reader-layout';
+export { nativePanelActionHeight } from './reader-layout';
 export function InformationTile({ content, slot, enabled, style, onSelect, decorations = true, ordinal = 1, chapterCount = 1, opened = false }: { content: RingContent; slot: RingSlot; enabled: boolean; style: ArNativeStyle; onSelect(id: string): void; decorations?: boolean; ordinal?: number; chapterCount?: number; opened?: boolean }) {
   const { t, i18n } = useTranslation();
   const chapter = chapterPresentation(content, i18n.resolvedLanguage ?? i18n.language, key => t(key), key => i18n.exists(key));
@@ -29,7 +30,7 @@ export function NativePanelAction({ id, label, position, width = 0.28, enabled, 
   // A rotated backplate AABB can sort ahead of an actual button. Test the
   // visible quad triangles only; its parent remains the sole click owner.
   return <ViroNode testID={`ring-action-${id}`} position={position} opacity={enabled ? 1 : 0.35} onClick={enabled ? () => current.current?.() : undefined}>
-    <ViroQuad renderingOrder={renderingOrder} highAccuracyEvents ignoreEventHandling={!enabled} width={width} height={nativePanelActionHeight} materials={primary ? 'argalaRingAction' : 'argalaRingSurface'} />
+    <ViroQuad renderingOrder={renderingOrder} highAccuracyEvents ignoreEventHandling={!enabled} width={width} height={nativePanelActionHeight} materials={primary ? 'argalaRingRoundedAction' : 'argalaRingRoundedSurface'} />
     <ArText renderingOrder={renderingOrder + 1} position={[0, 0, 0.004]} width={width - 0.02} height={0.15} text={label} style={style.text(4)} />
   </ViroNode>;
 }

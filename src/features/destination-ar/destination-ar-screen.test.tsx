@@ -16,9 +16,10 @@ const native = vi.hoisted(() => ({
   transitions: new Map<string, Set<(e: { data: { closing: boolean } }) => void>>(),
   get: vi.fn(), request: vi.fn(), support: vi.fn(), getSize: vi.fn(), setSize: vi.fn(),
 }));
-vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, toolbar: 110, actionMask: 111, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true }) }));
+vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: { user: { id: 'test-owner' } } }) }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getSize, setItem: native.setSize } }));
 vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get, requestCameraPermissionsAsync: native.request } }));

@@ -97,13 +97,15 @@ The owner approved the product; do not launch another design questionnaire.
 
 - Dark translucent panels, restrained cyan/teal edges and emerald accents extend
   Clean Explorer (blueprint D35/D47). No cockpit, radar or unrelated neon shell.
-- Rich information/pagination/A−/A+ remain Viro-native; 2D overlays are only
-  utilities/status/recovery. Bounds follow visible content, `box-none`; don't
+- Rich information, pagination and Close remain Viro-native. Contextual A−/A+
+  share the screen-level utility toolbar with Recenter/Capture, using the existing
+  parent reading preference. Bounds follow visible content, `box-none`; don't
   expand transparent overlays over the whole touch scene.
-- Preserve 1.5-unit focused-panel distance, stable captured orientation, current
+- Preserve the owner-accepted 2.25-unit focused-panel distance, stable captured orientation, current
   transition/tracking/fresh-pose guards and collapse-on-other-visible-tile behavior.
-- Tell users to use the finger pad, hold briefly, then release. Short-tap
-  unreliability in Viro 3.0.3 is accepted; never add a native tap correction.
+- Preserve the version/checksum-guarded Viro 3.0.3 tap-on-release patch and
+  single completed-click owners. Physical finger reliability and native hit
+  routing require device acceptance; do not reintroduce a minimum hold.
 - Never trade admission, GPS freshness, restoration deadlines or live-frame
   ownership for appearance. Test contrast against light/dark camera backgrounds,
   physical panel comfort and held native hits separately from mocked callbacks.

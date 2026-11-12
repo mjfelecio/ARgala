@@ -2,6 +2,7 @@ import { arFontFamily } from './native-fonts';
 import { useEffect } from 'react';
 import { ViroMaterials } from '@reactvision/react-viro';
 import { useCSSVariable } from 'uniwind';
+import { holographicAssets } from './holographic-assets';
 /** Adapt the existing CSS theme only where the native 3D renderer needs values. */
 export function useArNativeStyle() {
   const [brand, surface, edge, text, font] = useCSSVariable(['--color-brand-primary', '--color-ar-panel', '--color-ar-edge', '--color-white', '--font-sans']) as string[];
@@ -10,6 +11,8 @@ export function useArNativeStyle() {
       argalaRingSurface: { diffuseColor: surface, lightingModel: 'Constant' },
       argalaRingEdge: { diffuseColor: edge, lightingModel: 'Constant' },
       argalaRingAction: { diffuseColor: brand, lightingModel: 'Constant' },
+      argalaRingRoundedSurface: { diffuseColor: surface, diffuseTexture: holographicAssets.actionMask, blendMode: 'Alpha', lightingModel: 'Constant' },
+      argalaRingRoundedAction: { diffuseColor: brand, diffuseTexture: holographicAssets.actionMask, blendMode: 'Alpha', lightingModel: 'Constant' },
     });
   }, [brand, surface, edge]);
   return {

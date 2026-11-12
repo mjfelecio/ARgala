@@ -13,20 +13,26 @@ def token(name):
 forest, edge = token('ar-panel'), token('ar-edge')
 out = root / 'assets/ar'
 out.mkdir(exist_ok=True)
-def write(name, body, size=512):
+def write(name, body, size=512, view_box='0 0 512 512'):
     svg = out / f'{name}.svg'
-    svg.write_text(f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 512 512">{body}</svg>\n')
+    width, height = size if isinstance(size, tuple) else (size, size)
+    svg.write_text(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="{view_box}">{body}</svg>\n')
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', str(svg), '-frames:v', '1', '-threads', '1', str(out / f'{name}.png')], check=True)
 
 # A matte surface with a directional edge reflection, not a fabricated camera blur.
-write('holographic-frame', f'''
+frame_body = f'''
 <defs><linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
 <stop stop-color="{edge}" stop-opacity=".14"/><stop offset=".35" stop-color="{forest}" stop-opacity=".38"/><stop offset="1" stop-color="{forest}" stop-opacity=".55"/></linearGradient>
 <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="{edge}" stop-opacity=".95"/><stop offset=".5" stop-color="{edge}" stop-opacity=".3"/><stop offset="1" stop-color="{edge}" stop-opacity=".8"/></linearGradient></defs>
 <rect x="5" y="5" width="502" height="502" rx="30" fill="{forest}" fill-opacity=".78"/>
 <rect x="5" y="5" width="502" height="502" rx="30" fill="url(#glass)" stroke="url(#rim)" stroke-width="3"/>
 <path d="M27 66V42Q27 27 42 27H66 M446 27H470Q485 27 485 42V66 M485 446V470Q485 485 470 485H446 M66 485H42Q27 485 27 470V446" fill="none" stroke="{edge}" stroke-opacity=".9" stroke-width="5" stroke-linecap="round"/>
-''')
+'''
+write('holographic-frame', frame_body)
+# The reader keeps the matte/rim; cover corner brackets remain unchanged.
+write('holographic-reader', re.sub(r'<path[^>]+/>', '', frame_body))
+write('holographic-toolbar', f'<rect x="2" y="2" width="828" height="124" rx="20" fill="{forest}" fill-opacity=".93" stroke="{edge}" stroke-opacity=".4" stroke-width="2"/>', size=(832, 128), view_box='0 0 832 128')
+write('holographic-action-mask', '<rect x="1" y="1" width="510" height="254" rx="36" fill="#FFFFFF"/>', size=(512, 256), view_box='0 0 512 256')
 write('holographic-glint', f'<rect x="5" y="5" width="502" height="502" rx="30" fill="none" stroke="{edge}" stroke-width="7"/>')
 paths = {
  'overview': '<path d="M156 184Q206 163 256 188Q306 163 356 184V328Q306 307 256 332Q206 307 156 328Z M256 188V332 M183 218Q207 208 229 218 M283 218Q307 208 329 218 M183 253H229 M283 253H329"/>',
@@ -46,6 +52,8 @@ def pixels(name):
 frame = pixels('holographic-frame')
 assert 190 < frame[(256 * 512 + 256) * 4 + 3] < 245, 'Frame must retain camera transparency'
 assert frame[3] == 0, 'Rounded exterior must be transparent'
+action = pixels('holographic-action-mask')
+assert action[3] == 0 and action[(128 * 512 + 256) * 4 + 3] == 255, 'Action mask must have transparent corners and an opaque center'
 hashes = set()
 for name in paths:
     image = pixels(f'chapter-{name}')

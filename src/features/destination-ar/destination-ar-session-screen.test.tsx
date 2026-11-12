@@ -14,7 +14,7 @@ const native = vi.hoisted(() => ({ active: true, focused: true, reduced: false, 
   principal: 'owner' as string | null, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
   transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), gallery: vi.fn(), audio: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(),
 }));
-vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
+vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, toolbar: 110, actionMask: 111, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: native.principal ? { user: { id: native.principal } } : null }) }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
@@ -22,6 +22,7 @@ vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get,
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true }) }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
 vi.mock('./development-audio-loader', () => ({ loadDevelopmentSystemAudio: native.audio }));
+vi.mock('./development-featured-media-assets', () => ({ featuredPreviewAssets: { D01: 1, D02: 2, D03: 3, D04: 4, D05: 5, D06: 6, D07: 7, D08: 8, D09: 9 }, additionalPreviewAssets: { D01: 101, D03: 103, D04: 104, D05: 105, D06: 106, D07: 107, D09: 109 } }));
 vi.mock('./development-gallery-loader', () => ({ loadDevelopmentGalleryContent: native.gallery }));
 vi.mock('./ring-loader', () => ({ loadRingScene: native.load }));
 vi.mock('@/features/ar-photo/ar-photo-controls', async () => { const R = await import('react'); return { ArPhotoControls: (props: Record<string, unknown>) => R.createElement('photo-controls', props) }; });
@@ -61,6 +62,8 @@ it.each(['en', 'ja', 'ko'])('opens bounded %s help without remounting the camera
   const camera = cameras()[0]; const retained = node('ring-tile-history').props.onClick;
   await press('destinationRing.help');
   expect(copy()).toContain(translations.t('destinationStories.helpTitle'));
+  expect(translations.getResource(locale, 'translation', 'destinationRing.recenterRecovery')).toBeTruthy();
+  expect(copy()).toContain(translations.t('destinationRing.recenterRecovery'));
   expect(node('ring-tile-history').props.onClick).toBeUndefined();
   await act(async () => retained()); expect(node('ring-focused-panel')).toBeUndefined();
   expect(cameras()[0]).toBe(camera);
@@ -105,7 +108,10 @@ it.each(['UNSUPPORTED', 'SUPPORTED', 'TRANSIENT', 'UNKNOWN', 'FAILED', 'MISSING'
   if (result === 'UNSUPPORTED') { expect(native.get).not.toHaveBeenCalled(); expect(cameras()).toHaveLength(0); expect(native.load).not.toHaveBeenCalled(); }
 });
 function node(id: string) { return tree!.root.findAllByType('node' as React.ElementType).find(value => value.props.testID === id)!; }
-async function click(id: string) { await act(async () => node(id).props.onClick?.()); }
+async function click(id: string) {
+  if (id === 'ring-action-larger' || id === 'ring-action-smaller') return press(id === 'ring-action-larger' ? 'destinationRing.increaseTextSize' : 'destinationRing.decreaseTextSize');
+  await act(async () => node(id).props.onClick?.());
+}
 function text(id: string) { return tree!.root.findAllByType('viro-text' as React.ElementType).find(value => value.props.testID === id)!.props.text as string; }
 async function ready(position = [0, 2, 0], forward = [0, 0, -1], settleIntro = true) {
   await act(async () => { const scene = tree!.root.findByType('native-scene' as React.ElementType); scene.props.onTrackingUpdated(3, 1); scene.props.onCameraTransformUpdate({ position, forward }); });
@@ -147,7 +153,7 @@ it('releases rendering on background, restores logical panel/page/size from a ne
   await act(async () => native.transitions.get('transitionStart')?.forEach(cb => cb({ data: { closing: false } })));
   await active(true); expect(cameras()).toHaveLength(0);
   await act(async () => native.transitions.get('transitionEnd')?.forEach(cb => cb({ data: { closing: false } }))); await settle(); await ready([6, 3, 4], [1, 0, 0]);
-  expect(node('ring-focused-panel').props.position).toEqual([7.5, 3, 4]); expect(text('ring-page-indicator')).toBe(page);
+  expect(node('ring-focused-panel').props.position).toEqual([8.25, 3, 4]); expect(text('ring-page-indicator')).toBe(page);
   expect(native.getItem).toHaveBeenCalledTimes(2); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled(); expect(native.gate).not.toHaveBeenCalled();
   await act(async () => oldTracking(2, 1)); expect(copy()).not.toContain(translations.t('destinationAr.trackingLost'));
 });
@@ -201,7 +207,7 @@ it('expires at five minutes, prevents fresh remote entry and closes before Exit 
   await press('destinationAr.exit'); expect(router.back).toHaveBeenCalled();
 });
 it('keys real route ownership by authentication identity and never revives the former native frame', async () => {
-  await mount(() => React.createElement(SessionRoute)); await layout(); await start(); await ready();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await start(); await ready();
   native.principal = 'other-owner'; await update(); expect(cameras()).toHaveLength(0); expect(copy()).toContain(translations.t('destinationAr.idle'));
   expect(native.support).toHaveBeenCalledOnce(); native.principal = null; await update(); expect(cameras()).toHaveLength(0); expect(copy()).toContain(translations.t('destinationAr.unavailable'));
 });
@@ -257,7 +263,7 @@ it.each(['en', 'ja', 'ko'])('offers %s explicit Retry for prolonged tracking los
   const page = text('ring-page-indicator'); await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
   await act(async () => { await vi.advanceTimersByTimeAsync(6000); }); expect(native.support).toHaveBeenCalledOnce(); expect(cameras()).toHaveLength(1);
   native.eligible = false; await press('destinationSession.retryTracking'); await settle(); expect(node('ring-focused-panel')).toBeUndefined();
-  await ready([9, 2, 1], [0, 0, 1]); expect(node('ring-focused-panel').props.position).toEqual([9, 2, 2.5]); expect(text('ring-page-indicator')).toBe(page);
+  await ready([9, 2, 1], [0, 0, 1]); expect(node('ring-focused-panel').props.position).toEqual([9, 2, 3.25]); expect(text('ring-page-indicator')).toBe(page);
   expect(native.gate).not.toHaveBeenCalled(); expect(native.get).toHaveBeenCalledTimes(2); expect(native.request).not.toHaveBeenCalled();
 });
 it('does not automatically repeat an interrupted explicit tracking recovery', async () => {
@@ -328,7 +334,7 @@ it('keeps the same native navigator while retrying an intro-history storage fail
 it.each(['en', 'ja', 'ko'])('loads development samples before native startup with localized %s failure and explicit retry', async locale => {
   await translations.changeLanguage(locale);
   const pending = Promise.withResolvers<never>(); native.gallery.mockReturnValueOnce(pending.promise);
-  await mount(() => React.createElement(SessionRoute));
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title');
   expect(copy()).toContain(translations.t('common.loading'));
   expect(native.getItem).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled(); expect(native.load).not.toHaveBeenCalled();
   await act(async () => pending.reject(new Error('PRIVATE_ASSET_ERROR')));
@@ -340,15 +346,27 @@ it.each(['en', 'ja', 'ko'])('loads development samples before native startup wit
 });
 it('retires development sample completion when its principal leaves', async () => {
   const pending = Promise.withResolvers<never>(); native.gallery.mockReturnValueOnce(pending.promise);
-  await mount(() => React.createElement(SessionRoute)); native.principal = null; await update();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); native.principal = null; await update();
   await act(async () => pending.reject(new Error('RETIRED_ASSET_ERROR')));
   expect(copy()).toContain(translations.t('destinationAr.unavailable')); expect(copy()).not.toContain(translations.t('destinationRing.contentFailed'));
   expect(native.getItem).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled();
 });
 
+it.each(['en', 'ja', 'ko'])('bounds unresolved %s gallery loading and retires its late completion after explicit retry', async locale => {
+  await translations.changeLanguage(locale);
+  const pending = Promise.withResolvers<readonly import('./ring-content').RingContent[]>(); native.gallery.mockReturnValueOnce(pending.promise);
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title');
+  await act(async () => { await vi.advanceTimersByTimeAsync(20000); });
+  expect(copy()).toContain(translations.t('destinationRing.contentFailed'));
+  expect(native.support).not.toHaveBeenCalled();
+  await press('common.retry'); await layout();
+  await act(async () => pending.resolve([]));
+  await start(); await ready(); expect(cameras()).toHaveLength(1);
+});
+
 it.each(['en', 'ja', 'ko'])('previews the full development entrance in %s without clearing history or replaying on tracking recovery', async locale => {
   await translations.changeLanguage(locale);
-  await mount(() => React.createElement(SessionRoute)); await layout();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout();
   await press('destinationStories.previewEntrance'); await settle(); await ready([0, 2, 0], [0, 0, -1], false);
   expect(tree!.root.findAllByType('node' as React.ElementType).filter(item => item.props.testID === 'cinematic-emblem')).toHaveLength(1);
   await act(async () => { await vi.advanceTimersByTimeAsync(3000); });
@@ -368,7 +386,7 @@ const auditionClip = (source: number) => ({ source, rightsReference: 'Synthetic 
 const auditionManifest = { voices: { en: auditionClip(201), ja: auditionClip(202), ko: auditionClip(203) }, effects: { deployed: auditionClip(204), focused: auditionClip(205), trackingLost: auditionClip(206), pageChanged: auditionClip(207), closed: auditionClip(208) } };
 it.each(['en', 'ja', 'ko'])('auditions %s voice on explicit full preview and plays event effects without stale native finishes interrupting them', async locale => {
   native.audio.mockResolvedValue(auditionManifest); await translations.changeLanguage(locale);
-  await mount(() => React.createElement(SessionRoute)); await layout(); await press('destinationStories.previewEntrance'); await settle(); await ready([0, 2, 0], [0, 0, -1], false);
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await press('destinationStories.previewEntrance'); await settle(); await ready([0, 2, 0], [0, 0, -1], false);
   const sound = () => tree!.root.findAllByType('viro-sound' as React.ElementType)[0];
   expect(sound().props.source).toBe(auditionManifest.voices[locale as 'en' | 'ja' | 'ko'].source);
   const oldFinish = sound().props.onFinish; await act(async () => oldFinish());
@@ -382,15 +400,83 @@ it.each(['en', 'ja', 'ko'])('auditions %s voice on explicit full preview and pla
 });
 it('keeps failed optional audition loading from blocking native entry or exposing diagnostic messages', async () => {
   native.audio.mockRejectedValue(new Error('PRIVATE_AUDIO_ERROR'));
-  await mount(() => React.createElement(SessionRoute)); await layout(); await start(); await ready();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await start(); await ready();
   expect(cameras()).toHaveLength(1); expect(copy()).not.toContain('PRIVATE_AUDIO_ERROR');
 });
 it('starts AR while optional audio is pending and accepts late effects without remounting or speaking late', async () => {
   const pending = Promise.withResolvers<typeof auditionManifest>(); native.audio.mockReturnValueOnce(pending.promise);
-  await mount(() => React.createElement(SessionRoute)); await layout(); await start(); await ready();
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await start(); await ready();
   const camera = cameras()[0];
   await act(async () => pending.resolve(auditionManifest)); expect(cameras()[0]).toBe(camera);
   expect(tree!.root.findAllByType('viro-sound' as React.ElementType)).toHaveLength(0);
   await click('ring-tile-history'); await finish();
   expect(tree!.root.findByType('viro-sound' as React.ElementType).props.source).toBe(205);
+});
+
+it('offers development destination previews without starting the camera and can enter and leave a selected story', async () => {
+  await mount(() => React.createElement(SessionRoute));
+  expect(copy()).toContain('Lake Danao Natural Park');
+  expect(copy()).toContain('Sabin Resort Hotel');
+  expect(native.support).not.toHaveBeenCalled();
+  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === 'Lake Danao Natural Park')!.props.onPress());
+  await layout();
+  expect(copy()).toContain(translations.t('featuredResearch.notice'));
+  expect(copy()).not.toContain(translations.t('destinationAr.prototype'));
+  await start(); await ready();
+  expect(cameras()).toHaveLength(1);
+  expect(copy()).toContain(translations.t('destinationRing.prototype'));
+  await press('destinationAr.exit');
+  expect(cameras()).toHaveLength(0);
+  expect(copy()).toContain('Sabin Resort Hotel');
+});
+
+it('exposes contextual reading commands in the bounded screen toolbar and fences a retired chapter command', async () => {
+  await mount(); await layout(); await start(); await ready();
+  const sizes = () => tree!.root.findAllByType('button').filter(value => value.props.accessibilityLabel === translations.t('destinationRing.increaseTextSize'));
+  expect(sizes()).toHaveLength(0);
+  await click('ring-tile-history'); await finish();
+  expect(sizes()).toHaveLength(1);
+  expect(node('ring-action-larger')).toBeUndefined();
+  const retired = sizes()[0].props.onPress; const camera = cameras()[0];
+  await click('ring-action-larger'); expect(native.setItem).toHaveBeenCalledWith('argala.ar-reading.v1', expect.stringContaining('large'));
+  expect(sizes()[0].props.disabled).toBe(true); expect(cameras()[0]).toBe(camera);
+  await click('ring-action-close'); expect(sizes()).toHaveLength(0); await finish();
+  await ready(); await click('ring-tile-overview'); await finish(); const writes = native.setItem.mock.calls.length;
+  await act(async () => retired()); expect(native.setItem).toHaveBeenCalledTimes(writes);
+  await press('destinationRing.help'); expect(sizes()).toHaveLength(0);
+});
+
+it.each(['en', 'ja', 'ko'])('keeps %s reading preference recovery in the screen toolbar through native remount', async locale => {
+  await translations.changeLanguage(locale); native.setItem.mockRejectedValueOnce(new Error('PRIVATE_WRITE'));
+  await mount(); await layout(); await start(); await ready(); await click('ring-tile-history'); await finish(); await click('ring-action-larger');
+  expect(copy()).toContain(translations.t('destinationRing.save-failed')); expect(copy()).not.toContain('PRIVATE_WRITE');
+  await active(false); await active(true); await settle(); await ready();
+  expect(copy()).toContain(translations.t('destinationRing.save-failed'));
+  await press('common.retry'); expect(copy()).not.toContain(translations.t('destinationRing.save-failed'));
+});
+
+it('restores an accepted closing transition as collapsed after background retirement', async () => {
+  await mount(); await layout(); await start(); await ready(); await click('ring-tile-history'); await finish();
+  await click('ring-action-next'); await click('ring-action-close');
+  await active(false); await active(true); await settle(); await ready();
+  expect(node('ring-focused-panel')).toBeUndefined(); expect(node('ring-tile-history')).toBeDefined();
+  await click('ring-tile-history'); await finish(); expect(text('ring-page-indicator')).toMatch(/^2 /);
+});
+
+it('bounds short-screen reading failure recovery without changing native camera bounds', async () => {
+  const originalScale = nativeUi.fontScale; nativeUi.fontScale = 1.5; native.setItem.mockRejectedValueOnce(new Error('PRIVATE'));
+  try {
+    await mount(); await layout(); await start(); await ready(); await click('ring-tile-history'); await finish(); await click('ring-action-larger');
+    await act(async () => tree!.root.findByProps({ testID: 'destination-ar-scene' }).props.onLayout({ nativeEvent: { layout: { width: 320, height: 360 } } }));
+    const bottom = tree!.root.findAllByType('safe-area' as React.ElementType).find(value => value.props.testID === 'ar-bottom-utilities')!;
+    expect(bottom.props.style.maxHeight).toBe(144);
+    expect(tree!.root.findByProps({ testID: 'ar-bottom-utility-body' })).toBeDefined();
+    await act(async () => bottom.props.onLayout({ nativeEvent: { layout: { height: 144 } } }));
+    const top = tree!.root.findAllByType('safe-area' as React.ElementType).find(value => value.props.testID === 'ar-top-utilities')!;
+    expect(top.props.style.maxHeight).toBe(216);
+    const cameraBounds = tree!.root.findAllByType('view').find(value => value.props.style?.position === 'absolute' && value.findAllByType('native-navigator' as React.ElementType).length === 1)!;
+    expect(cameraBounds.props.style).toMatchObject({ width: 320, height: 360 });
+    expect(tree!.root.findByType('photo-controls' as React.ElementType).props.compact).toBe(true);
+    await press('common.retry'); expect(copy()).not.toContain(translations.t('destinationRing.save-failed'));
+  } finally { nativeUi.fontScale = originalScale; }
 });

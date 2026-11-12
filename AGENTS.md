@@ -15,6 +15,16 @@ they conflict with this visual approval.
 
 ARgala is an Android-only travel discovery app built with Expo SDK 57 and strict TypeScript. It combines Google-powered discovery around arbitrary coordinates, walking route display, and existing GPS/compass camera overlays. The approved ACLC blueprint adds selected-featured-destination Viro/ARCore local tracking, beginning with a development-only native feasibility checkpoint. Prioritize mobile performance and Android-supported APIs. This supersedes the earlier blanket exclusion of ARCore; it does not authorize geospatial anchors, object recognition or AR navigation.
 
+## Focused AR panel comfort — 2026-11-11
+
+The owner requested that the expanded hologram sit farther back. The selected-destination ring uses a 2.25-unit focused-panel distance, superseding the earlier 1.5-unit direction. Keep stable orientation, tracking and recenter semantics; verify readability and touch on the physical device.
+
+## AR reader lifecycle and controls — 2026-11-12
+
+- The development preview route uses an explicit, bounded module-loading owner. Retire late results on timeout, Retry, unmount or principal replacement; a resolved import must not leave a suspended first-navigation fallback indefinitely visible. This gate grants no native or geographic admission.
+- Native focus/close completion belongs to its transition token and surviving frame. Retain valid completion through Help/tracking fences; reconcile after a pose in the current NORMAL tracking epoch. Finishing an accepted command is separate from authorizing a new interaction: selection, Close and Recenter retain their fresh-pose checks. Commit accepted Close restoration intent before an immediate background event can discard a React update. Never recenter implicitly on Close.
+- The selected-destination reader keeps its 2.25-unit focus distance, original canvas footprint and separate clean reader texture. Preserve the unexpanded tile texture. Page navigation and Close share the focused native frame below the content; contextual A−/A+ use the existing parent reading preference in the bounded screen toolbar. Commands are chapter-token/frame fenced; no per-pose React publication or second reading-size state. Text/photo/metadata budgets share `reader-layout.ts`; full-screen camera measurements remain independent of chrome occupation. Standalone legacy probes without a screen reading owner retain native size/error recovery.
+
 ## Project sources and scope
 
 - [Architecture and foundation requirements](docs/superpowers/specs/2026-10-17-argala-design.md) record the supplied briefs and approved architectural decisions.

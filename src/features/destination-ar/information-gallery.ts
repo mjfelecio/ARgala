@@ -1,6 +1,7 @@
 import { localizedContent, type DestinationMedia } from '@/features/destinations/catalog';
-import { paginate, type ContentPage, type ReadingCursor } from './content-layout';
+import { paginate, readingMetrics, type ContentPage, type ReadingCursor } from './content-layout';
 import type { ReadingSize } from './reading-preference';
+import { readerLayout, readerLineBudget } from './reader-layout';
 
 export type GalleryPage = ContentPage & ({ kind: 'text'; media?: never; mediaPage?: never } | { kind: 'image'; media: DestinationMedia; mediaPage: number });
 export function galleryPages(textPages: readonly ContentPage[], media: readonly DestinationMedia[], locale: string, size: ReadingSize, credit: (value: string) => string, englishFallback: string, presentation: 'photo' | 'gallery' | 'story' = 'story'): GalleryPage[] {
@@ -11,9 +12,9 @@ export function galleryPages(textPages: readonly ContentPage[], media: readonly 
     const metadata = [alt?.englishFallback ? englishFallback : undefined, alt?.value,
       caption?.englishFallback && !alt?.englishFallback ? englishFallback : undefined,
       caption?.value !== alt?.value ? caption?.value : undefined, credit(item.credit)].filter(Boolean).join('\n');
-    // Reserve the top half of the existing text area for the image. Keep the
-    // same glyph widths, with fewer lines; every caption/credit remains reachable.
-    return paginate(metadata, size, '', size === 'large' ? 1 : 2).map((page, index): GalleryPage => ({
+    // Metadata has its own measured region below the photograph. Keep complete
+    // source offsets and repeat the same image through caption/credit pages.
+    return paginate(metadata, size, '', readerLineBudget(readerLayout.caption.height, readingMetrics[size].fontSize)).map((page, index): GalleryPage => ({
       ...page, kind: 'image', media: item, mediaPage: index,
     }));
   });

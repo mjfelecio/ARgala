@@ -1,5 +1,116 @@
 # Foundation validation
 
+## AR capture processing and review — 2026-11-12
+
+Source commit `7122e58` adds the owner-selected ivory/forest photo review,
+responsive contained canvas, stable Capture feedback, URI-fenced bitmap
+loading/deadline, and readiness-gated Save/Share. Capture controller/service,
+leases, native camera bounds and session/admission contracts are unchanged.
+[Implementation and outstanding native checks](ar-capture-polish.md).
+
+`npm run check` passed TypeScript, zero-warning lint and **1,485 tests across
+130 files**. The focused photo/session suite passed **123 tests / 4 files**.
+`EXPO_OFFLINE=1 EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android -- --max-workers
+1` passed with 74 assets and 8.6 MB Hermes bundle
+`index-04b74095aa25afd71cdd3283584a6134.hbc`. Diff checks passed before commit;
+fresh read-only code review found no confirmed issues.
+
+The owner reconnected the Galaxy A53 / Android 16 and explicitly authorized
+low-battery testing. Using the existing development APK and current Metro source,
+real processing feedback, bitmap-loading spinner, disabled-before-ready actions,
+upright contained photo, ivory/forest layout and scrolling were observed. The
+owner approved the visual result. A controlled Save showed success and its exact
+MediaStore row was confirmed. Discard returned to the same live reader and
+emptied the temporary cache while retaining the saved row. That test gallery
+row was subsequently removed. Another capture + Android Back returned live
+with an empty temporary cache and restored AR status-bar text. The Android
+share chooser was observed/canceled without selecting a recipient; full tracking
+recovery specifically after sharing remains unverified. Private screenshots and
+a 20-second device recording are indexed in the report.
+
+Short/narrow/landscape/large-text native layout, JA/KO, TalkBack and forced failure
+trials remain separate coverage gaps. No settings were changed or GPS arrival
+simulated as real. Battery was 12%→10%; camera was released after the checks.
+No source behavior changed during verification and no APK was built.
+
+## AR stability and reader refinement — 2026-11-12
+
+Implemented on `feat/ar-experience-refinement`, through runtime commit
+`1088e58`. [Implementation report](ar-reader-refinement-implementation.md)
+records the traced first-navigation import/reveal stall, transition ownership
+fixes, new toolbar/reader geometry, independent review and physical evidence.
+The focus distance remains 2.25 units; destination content, native dependencies,
+GPS admission and Passport authority did not change.
+
+Final `npm run check` passed TypeScript, zero-warning ESLint and **1,475 tests
+across 130 files**. `EXPO_OFFLINE=1 EXPO_PUBLIC_VIRO_SPIKE=1 npm run
+export:android -- --max-workers 1` passed with 74 assets and Hermes bundle
+`index-109acfaf1181f7755821e04437e2b547.hbc`. `git diff --check` passed before
+runtime commits. This was an export, not a new APK build.
+
+With the existing development APK and USB Metro on Galaxy A53 / Android 16:
+a fresh first prototype navigation and five warm reopens passed; bounded native
+startup Retry recovered a stationary tracking timeout. Final rounded controls,
+clean text surface and larger landscape photo/credit rendered natively. ADB
+Previous, A+/A−, Close and three rapid Close taps worked in observed trials;
+Close restored the original cover without Recenter, and reopening retained the
+photo page. Capture opened its real preview and Discard returned to the live
+camera. Upright Recenter restored useful framing. A brief Home/app return
+retained the focused photo at page 2/5. A longer background trial restored the
+photo/page but remained in limited tracking; stable recovery is unverified. The
+app was backgrounded to release the camera at 15% battery. Private final screenshots are indexed
+in the report and excluded from Git.
+
+This does not establish full physical acceptance. Remaining checks include
+finger-tap reliability, controlled tracking loss/background during transitions,
+Recenter during transitions, portrait media, large/JA/KO native rendering,
+short viewport/large system text, bright/dim contrast and the real-arrival flow.
+The current on-site GPS flow was not rerun and no simulation counts as arrival.
+No new APK, deployment, merge or push occurred.
+
+## ACLC real-arrival device verification — 2026-11-11
+
+The owner reported being at ACLC. On the connected Galaxy A53 / Android 16,
+using the installed development APK and current Metro bundle, the normal
+Explore → Featured Destinations → ACLC map selection progressed from
+“Checking stable arrival” to “Arrival verified for the selected destination”
+and “AR experience unlocked”. The simulation action was not used.
+
+“Launch draft AR” opened the selected-destination preflight. Starting native AR
+reached the live rear-camera scene and four ACLC chapter covers; an ADB tap
+opened Overview with its research text and reader controls. A brief Home/app
+return restored the camera and the same focused Overview at page 1 of 2.
+Temporary device captures were deleted after inspection.
+
+This verifies a successful real-GPS admission and AR handoff at the reported
+site, including one brief established-session recovery. ACLC content still uses
+the draft/development provenance path and does not grant a Passport stamp.
+Outside-radius rejection, boundary calibration, expired-session recovery,
+walking routes and the other destinations were not field-tested in this check.
+No source behavior or native configuration changed, and no APK was built.
+
+## Featured research preview — 2026-11-11
+
+The development selector has research stories and one or two locally bundled
+photos for all nine featured destinations. Seven have a second source-identified
+image; [research and provenance](featured-research-preview.md) records the
+unverified claims and [the Android guide](featured-preview-android-testing.md)
+gives the presentation sequence and limits. These are simulated development
+sessions, not real-arrival admission or Passport authority.
+
+On a Galaxy A53 running Android 16 with the existing development APK and USB
+Metro, Lake Janagdan reached the native camera and rendered both overview images
+through the page controls. The long credit wrapped onto a page by itself in that
+check; the subsequent shorter credits have automated coverage but have not been
+rechecked in the native reader. The other eight destinations, all translations,
+outdoor GPS and route entrances were not checked in this device session.
+
+After shortening the credits, `npm run check` passed typecheck, lint and 1,447
+tests across 128 files; `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android --
+--max-workers 1` passed the Android Metro/Hermes export. This is not an APK build.
+No new APK was built. On-site admission integration and the destination and
+entrance checks remain outstanding.
+
 ## Owner UI refinements and sticky settings drafts — 2026-11-02
 
 Owner feedback refines Saved, Featured/preview Nearby and Profile/Settings; the
@@ -1690,7 +1801,7 @@ remain deferred. Current changes stack on unmerged draft M3 PR27.
 ## 2026-10-27 — integrated ACLC off-site device trial
 
 Owner explicitly resumed ADB testing. Source `c09ce99`, Galaxy A53 SM-A536E,
-Android16/API36; existing installed version1.0.0/code1 APK SHA256
+Android 16/API36; existing installed version1.0.0/code1 APK SHA256
 `0b756a3f883042a70c70d44d28d44fffad4a726828867e881a1d0a5daa5dff95`.
 No APK build, native correction or recognizer patch. Battery36%, USB charging,
 36.5°C at start. Metro ran with the development opt-in over USB reverse8081.
@@ -1863,7 +1974,7 @@ independently reviewable; PR29 and this branch are not merged by this stage.
 
 ## 2026-10-28 — client-progress phone sweep
 
-Source `3cffea9`, existing Viro development APK on Galaxy A53 SM-A536E/Android16;
+Source `3cffea9`, existing Viro development APK on Galaxy A53 SM-A536E/Android 16;
 no new APK/build or application-code change. Owner chose the laptop-connected
 development-server presentation. Fresh `npm run check` passed lint/typecheck and
 99 files/1,045 tests. Full scenario/configuration details are recorded in
@@ -2061,7 +2172,7 @@ this JavaScript change through Metro.
 ## Unattended Android smoke — 2026-10-30
 
 Owner authorized ADB testing without touching/moving the phone or assisting with
-sign-in. Device: Samsung Galaxy A53 SM-A536E, Android16; USB charging, battery19%
+sign-in. Device: Samsung Galaxy A53 SM-A536E, Android 16; USB charging, battery19%
 at start. The specifically approved development APK
 [EAS2cd68ffa](https://expo.dev/accounts/mjfelecios-team/projects/argala/builds/2cd68ffa-4cf1-4754-8762-c59ed01ec044)
 finished successfully from `ec66c48`. Downloaded archive309846604 bytes, SHA256
@@ -2287,7 +2398,7 @@ keyboard/scroll ownership. Source-image review covered proportional marks at
 mask illustration. The derived mask contains only white visible pixels with
 transparent margins; these are source proofs, not Android launcher results.
 
-A brief Galaxy A53/Android16 development-client attempt preceded the owner's
+A brief Galaxy A53/Android 16 development-client attempt preceded the owner's
 palette correction; it does not establish final native acceptance. Account data,
 onboarding, language, font scale and OS theme were preserved, and the app/test
 connection was stopped. No paid Search/Walk action or APK build was performed.
@@ -2422,7 +2533,7 @@ passed (155), final journal/catalog/theme regressions passed (58).
 `npm run export:android` passed; this is not an APK build or physical provider
 acceptance. Independent read-only review found no significant regressions.
 
-Galaxy A53 SM-A536E / Android16, installed APK1.0.0/code1, 1080×2400, density420
+Galaxy A53 SM-A536E / Android 16, installed APK1.0.0/code1, 1080×2400, density420
 override and font1.1: inspected actual Explore, Featured, pilot preview, Profile
 and Saved states via local Metro/ADB. Featured was also inspected at360×800
 logical units/font1.5 with wrapping and scrolling; font/size restored. Captures
@@ -2469,7 +2580,7 @@ Verification actually run:
   including the rasterized unchanged arch emblem. This is not an APK build.
 - `git diff --check`: passed.
 
-Galaxy A53 SM-A536E / Android16, existing Oct30 development client,1080×2400 /
+Galaxy A53 SM-A536E / Android 16, existing Oct30 development client,1080×2400 /
 420dpi, unchanged font scale, USB Metro: actual Viro tracking-ready, ring/camera
 rendering, held Overview focus and brief background/return were observed. Raw
 captures stay private. First/return intro recordings were confounded by lazy
@@ -2503,7 +2614,7 @@ and onError still fail. The focused native gallery offers fenced explicit Retry,
 retains caption/credit through loading/error, and uses a45% taller photo region
 within the original square frame and camera distance.
 
-On the Galaxy A53 SM-A536E/Android16 using the existing Oct30 development APK,
+On the Galaxy A53 SM-A536E/Android 16 using the existing Oct30 development APK,
 the corrected callback visibly rendered the ACLC Iriga sample in the focused
 native panel. It is **not ACLC Ormoc**. The permanent development prototype now
 includes that licensed photo and a generic landscape, with localized sample
@@ -2581,7 +2692,7 @@ No new font package, native configuration or APK was required.
 
 Regressions using actual locale resources failed before the fix and passed with
 the explicit fallback across both native scene paths. Galaxy A53 SM-A536E,
-Android16, existing development APK installed2026-10-30,1080×2400,420dpi and
+Android 16, existing development APK installed2026-10-30,1080×2400,420dpi and
 original1.1 font scale: Japanese cover `概要`, Japanese photo caption/reading
 controls and Korean photo caption/reading controls rendered recognizable glyphs
 without the reported boxes. Language changes were temporary in-memory previews;
@@ -2642,7 +2753,7 @@ deployment occurred. Camera screenshots, UI dumps and verification logs are giti
 
 ### Cinematic branch capture and demonstration evidence — 2026-11-05
 
-Galaxy A53 SM-A536E / Android16, the existing2026-10-30 development APK, current
+Galaxy A53 SM-A536E / Android 16, the existing2026-10-30 development APK, current
 cinematic JavaScript at `cb04595`,1080×2400,420dpi and original1.1 font scale.
 Captured **41 unretouched screenshots and four silent native screen recordings**
 covering the UI changes since2026-10-31: Explore before/after explicit search,
@@ -2802,7 +2913,7 @@ under `.superpowers/builds/ar-panel-taps/`.
 ### A53 tap-fix installation and physical session — 2026-11-08
 
 The owner reconnected ADB and explicitly confirmed the phone was upright and
-ready. Device: Galaxy A53 SM-A536E, Android16, USB-connected, unlocked and charging;
+ready. Device: Galaxy A53 SM-A536E, Android 16, USB-connected, unlocked and charging;
 battery38% at installation. The previous installed APK (last updated2026-10-30)
 was retained privately before updating, with SHA-256
 `ad5cc55cf6259bb4f93abd8ef9c0a702770aaa7a3045d850b8bc9d7de0403d0e`.
@@ -2858,3 +2969,69 @@ No latency-related production code or further APK build was introduced.
 The app was backgrounded after the checks to release the camera. Camera captures,
 the timing trace, sanitized UI dumps and the previous APK remain private and
 gitignored under `.superpowers/builds/ar-panel-taps/device/`.
+
+### Featured destination research previews — 2026-11-09
+
+The existing development-only AR entry now offers nine explicitly labeled
+research previews. These have development provenance, do not use destination GPS
+admission or confer Passport authority, and are unavailable without both Viro
+development guards. English draft copy falls back for JA/KO. Lake Danao includes
+one sourced development photograph; the other chapters are presently text-led.
+The catalog, routing entrances and production approval records remain unchanged.
+See [research leads](featured-research-preview.md) and [Lake Danao draft](lake-danao-ar-research-draft.md).
+
+Automated checks exercise real locale fallback and selecting/exiting a preview
+through the real session with native boundaries mocked. They do not establish
+physical-device camera, touch, native image rendering, translated glyphs, on-site
+location, or the current accuracy of research claims. No APK was built.
+
+Verification: `npm run check` passed typecheck, lint and 1,442 tests across
+127 files; `npm run export:android` passed and included the preview JPEG. Export
+is not a native build. `adb devices` reported no connected device.
+
+On 2026-11-11, the D05 development research preview was updated to describe
+Sal’s Pineapple Plantation as a probable match for the owner's diversion-road
+field. The source and plus-code lead are recorded in the research notes; no
+coordinate, entrance, real admission or catalog approval was changed.
+
+### Featured preview media and draft translations — 2026-11-11
+
+The guarded development selector now displays sourced test photographs in all nine
+destination overviews. All nine story sets
+have draft Japanese and Korean resources. Lake Danao's photo overview uses those
+resources as well. No destination location, entry permission or approval is
+asserted. Photo provenance and limitations are in [research notes](featured-research-preview.md).
+The new resource tests exercise all story locales with fallback disabled and the
+native reader's photo-overview content mapping with image modules mocked. Native
+photo loading, CJK glyphs, touch, tracking and on-site location remain unverified.
+
+Verification on 2026-11-11: `npm run check` passed typecheck, lint and 1,445
+tests across 128 files. `npm run export:android` passed and listed all nine
+research image files; this is not an APK build. Galaxy A53 SM-A536E / Android 16
+was authorized over USB, with the existing debuggable build (last updated
+2026-11-08) and Metro over USB reverse. The current development JS bundle loaded,
+but the app stayed on its startup Loading screen; neither the selector nor a
+native AR scene was reached. A temporary diagnostic, removed after the check,
+reported guest enabled, auth restoration pending and onboarding still loading.
+A clean process restart reproduced the Loading screen after USB reverse was
+restored. Phone data was not cleared and no credentials or coordinates were logged.
+The root cause of the pending auth restore was not established. No device image,
+touch, tracking, CJK or GPS acceptance is claimed; no APK was built.
+
+### Focused AR panel comfort — 2026-11-11
+
+The owner reported the expanded hologram was too close on the Galaxy A53.
+Focused ring distance was changed from 1.5 to 2.25 Viro units; focus orientation,
+recenter, tracking and control geometry remain unchanged. Targeted geometry and
+scene tests cover focused selection, same-frame tracking recovery, recenter and
+logical restoration. `npm run check` passed typecheck, lint and 1,445 tests
+across 128 files. Before this change, the device displayed the Lake Danao camera
+and focused panel. After the change, a device attempt returned an AR startup
+Retry state, so the new distance and readability were not physically accepted.
+No APK was built.
+
+Follow-up on the same Galaxy A53: the development preview reached native camera
+tracking, an ADB tap opened Lake Danao’s overview, and the photograph rendered
+at the 2.25-unit focus setting. The focused panel was still partly outside the
+left edge at the phone’s observed tilted orientation. This single observation
+does not establish comfort, stable framing or physical short-tap reliability.

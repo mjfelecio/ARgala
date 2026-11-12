@@ -11,7 +11,7 @@ import { developmentRingContent, type RingContent } from './development-ring-con
 import { RingController, type FocusSelection } from './ring-controller';
 import { useArNativeStyle } from './native-styles';
 import { InformationTile } from './information-tile';
-import { InformationPanel } from './information-panel';
+import { InformationPanel, type ReadingCommand } from './information-panel';
 import { useReadingSize } from './use-reading-size';
 import { useArVisualQuality } from './use-ar-visual-quality';
 import type { ReadingCursor } from './content-layout';
@@ -19,16 +19,16 @@ import type { PoseSample, TrackingState, Vector3 } from './types';
 import type { RingSlot } from './scene-geometry';
 import type { LogicalArProgress } from './session';
 import type { NativeCapture } from '@/features/ar-photo/types';
-export type RingControls = { recenter(): void; capture?: NativeCapture };
+export type RingControls = { recenter(): void; capture?: NativeCapture; readerAvailable?: boolean; changeReadingSize?: ReadingCommand };
 export type RingMetrics = { received: number; applied: number };
 type Props = { onReady(): void; onTracking(state: TrackingState): void; onControls?(controls: RingControls | null): void; onRecenterResult?(success: boolean): void; onMetrics?(metrics: RingMetrics): void; content?: readonly RingContent[]; reading?: ReturnType<typeof useReadingSize>; initialProgress?: LogicalArProgress; onProgress?(progress: LogicalArProgress): void; visibleTileCount?: number; interactive?: boolean; deployment?: IntroVariant; firstVisit?: boolean; audioPreferences?: AudioPreferences; audioManifest?: AudioManifest };
 
 /** A single native coordinate frame. No destination/GPS admission is granted. */
 export function DestinationRingScene(props: Props) {
-  return props.reading ? <RingScene {...props} reading={props.reading} /> : <OwnedReadingRingScene {...props} />;
+  return props.reading ? <RingScene {...props} reading={props.reading} externalReadingControls /> : <OwnedReadingRingScene {...props} />;
 }
 function OwnedReadingRingScene(props: Props) { const reading = useReadingSize(); return <RingScene {...props} reading={reading} />; }
-function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetrics, content = developmentRingContent, reading, initialProgress, onProgress, visibleTileCount = Infinity, interactive = true, deployment, firstVisit = false, audioPreferences, audioManifest }: Props & { reading: ReturnType<typeof useReadingSize> }) {
+function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetrics, content = developmentRingContent, reading, initialProgress, onProgress, visibleTileCount = Infinity, interactive = true, deployment, firstVisit = false, audioPreferences, audioManifest, externalReadingControls = false }: Props & { reading: ReturnType<typeof useReadingSize>; externalReadingControls?: boolean }) {
   const { t, i18n } = useTranslation(); const style = useArNativeStyle();
   const [restored] = useState(initialProgress);
   const [snapshot] = useState(() => content.filter(item => ringCopy(item, 'body', i18n.resolvedLanguage ?? i18n.language, key => t(key), key => i18n.exists(key)).trim()));
@@ -48,17 +48,37 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
   const quality = useArVisualQuality(interactive && tracking === 'normal');
   const trackingRef = useRef<TrackingState>('unavailable'); const ring = useRef<ViroNode>(null); const panelFrame = useRef<ViroNode>(null);
   const [selection, setSelection] = useState<FocusSelection | null>(null);
+  const readingCommand = useRef<ReadingCommand | null>(null);
+  const acceptReadingCommand = useCallback((command: ReadingCommand | null) => { readingCommand.current = command; }, []);
   const [cursors, setCursors] = useState<Record<string, ReadingCursor>>(() => initialProgress?.cursors ?? {});
   const [openedIds, setOpenedIds] = useState<readonly string[]>(() => (initialProgress?.openedIds ?? []).filter(id => snapshot.some(item => item.id === id)));
   const counts = useRef({ received: 0, applied: 0 });
   const closingCommitted = useRef(false);
   const interactiveRef = useRef(false);
+  const alive = useRef(false);
+  const completedTransition = useRef<number | null>(null);
+  const progressOwner = useRef({ onProgress, cursors, openedIds });
+  useLayoutEffect(() => { progressOwner.current = { onProgress, cursors, openedIds }; }, [onProgress, cursors, openedIds]);
+  useLayoutEffect(() => { alive.current = true; return () => { alive.current = false; completedTransition.current = null; }; }, []);
   useLayoutEffect(() => {
     // Queued native clicks must read committed ownership, including retirement.
     interactiveRef.current = interactive;
     return () => { interactiveRef.current = false; };
   }, [interactive]);
-  useEffect(() => { onProgress?.({ selectedId: selection?.id ?? null, cursors, openedIds }); }, [onProgress, selection, cursors, openedIds]);
+  useEffect(() => { onProgress?.({ selectedId: selection?.phase === 'closing' ? null : selection?.id ?? null, cursors, openedIds }); }, [onProgress, selection, cursors, openedIds]);
+  const flushCompletion = useCallback(() => {
+    const token = completedTransition.current;
+    if (token === null || !alive.current || !interactiveRef.current || !controller.hasTrackingPose()) return;
+    completedTransition.current = null;
+    if (!controller.complete(token)) return;
+    const focused = controller.selection;
+    if (focused?.phase === 'focused') {
+      audioEvent('focused', String(focused.token));
+      setOpenedIds(previous => previous.includes(focused.id) ? previous : [...previous, focused.id]);
+    } else if (!focused) audioEvent('closed', String(token));
+    setSelection(focused);
+  }, [controller, audioEvent]);
+  useLayoutEffect(() => { void Promise.resolve().then(flushCompletion); }, [interactive, tracking, flushCompletion]);
   useLayoutEffect(() => {
     if (frame) ring.current?.setNativeProps({ position: controller.ringPosition! });
   }, [controller, frame]);
@@ -72,11 +92,17 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
     const openingId = controller.selection?.phase === 'opening' ? controller.selection.id : null;
     const success = controller.recenter(performance.now()); onRecenterResult?.(success);
     if (!success) return;
+    completedTransition.current = null;
     if (openingId) setOpenedIds(previous => previous.includes(openingId) ? previous : [...previous, openingId]);
     setFrame({ slots: controller.slots, position: controller.ringPosition! });
     setSelection(controller.selection);
   }, [controller, onRecenterResult]);
-  useEffect(() => { onControls?.({ recenter }); return () => onControls?.(null); }, [onControls, recenter]);
+  const readerToken = selection?.token;
+  const readerAvailable = selection?.phase === 'focused' && interactive && tracking === 'normal';
+  const changeReadingSize = useCallback<ReadingCommand>(delta => {
+    if (alive.current && interactiveRef.current && trackingRef.current === 'normal' && controller.selection?.phase === 'focused' && controller.selection.token === readerToken) readingCommand.current?.(delta);
+  }, [controller, readerToken]);
+  useEffect(() => { onControls?.({ recenter, readerAvailable, changeReadingSize }); return () => onControls?.(null); }, [onControls, recenter, readerAvailable, changeReadingSize]);
   useEffect(() => {
     if (!onMetrics) return;
     let started = performance.now(); let baseline = { ...counts.current };
@@ -110,6 +136,9 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
         if (closingCommitted.current && controller.selection?.phase === 'closing') panelFrame.current?.setNativeProps({ position: update.position });
       }
     }
+    // NORMAL alone is not a fresh recovered pose. Reconcile a retained finish
+    // only after the controller has accepted this frame's pose sample.
+    flushCompletion();
   }
   function select(id: string) {
     if (!interactiveRef.current || controller.selection?.id === id) return;
@@ -117,19 +146,23 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
     // An already focused panel closes; another tile never replaces it directly.
     const now = performance.now();
     const next = controller.selection ? controller.close(now) : controller.select(id, now);
-    if (next) setSelection(next);
+    if (next) commitSelection(next);
   }
-  function close() { if (!interactiveRef.current) return; const next = controller.close(performance.now()); if (next) setSelection(next); }
-  function complete(token: number) {
-    if (!interactiveRef.current || trackingRef.current !== 'normal') return;
-    if (controller.complete(token)) {
-      const focused = controller.selection;
-      if (focused?.phase === 'focused') audio.event('focused', String(focused.token));
-      else if (!focused) audio.event('closed', String(token));
-      if (focused?.phase === 'focused') setOpenedIds(previous => previous.includes(focused.id) ? previous : [...previous, focused.id]);
-      setSelection(focused);
+  function commitSelection(next: FocusSelection) {
+    if (next.phase === 'closing') {
+      const progress = progressOwner.current;
+      // Capture the accepted intent before an immediately following AppState
+      // event can unmount this frame and discard an uncommitted React update.
+      progress.onProgress?.({ selectedId: null, cursors: progress.cursors, openedIds: progress.openedIds });
     }
+    setSelection(next);
   }
+  function close() { if (!interactiveRef.current) return; const next = controller.close(performance.now()); if (next) commitSelection(next); }
+  const complete = useCallback((token: number) => {
+    if (!alive.current || controller.selection?.token !== token || controller.selection.phase === 'focused') return;
+    completedTransition.current = token;
+    flushCompletion();
+  }, [controller, flushCompletion]);
   const selectedContent = snapshot.find(item => item.id === selection?.id);
   return <ViroARScene anchorDetectionTypes="None" onTrackingUpdated={track} onCameraTransformUpdate={pose}>
     {/* The pinned bridge anchors direct AR-scene children. Keep moving/animated
@@ -145,7 +178,7 @@ function RingScene({ onReady, onTracking, onControls, onRecenterResult, onMetric
       })}
     </ViroNode>}
     {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel selection={selection} ordinal={frame!.slots.findIndex(slot => slot.id === selection.id) + 1} chapterCount={snapshot.length} openedCount={openedIds.length} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style} decorations={quality === 'standard'}
-      onCursor={(id, cursor) => setCursors(previous => ({ ...previous, [id]: cursor }))} onClose={close} onComplete={complete} onPageChange={pageSound} /></ViroNode>}
+      onCursor={(id, cursor) => setCursors(previous => ({ ...previous, [id]: cursor }))} onClose={close} onComplete={complete} onPageChange={pageSound} externalReadingControls={externalReadingControls} onReadingControls={acceptReadingCommand} /></ViroNode>}
     </ViroNode>
   </ViroARScene>;
 }
