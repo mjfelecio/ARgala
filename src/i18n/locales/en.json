@@ -350,6 +350,8 @@
     "previous": "Previous",
     "next": "Next",
     "page": "{{current}} / {{total}}",
+    "decreaseTextSize": "Decrease text size",
+    "increaseTextSize": "Increase text size",
     "smaller": "A−",
     "larger": "A+",
     "empty": "No chapter text available.",

@@ -310,6 +310,8 @@
     "previous": "前へ",
     "next": "次へ",
     "page": "{{current}} / {{total}}",
+    "decreaseTextSize": "文字を小さくする",
+    "increaseTextSize": "文字を大きくする",
     "smaller": "A−",
     "larger": "A+",
     "empty": "章の文章がありません。",

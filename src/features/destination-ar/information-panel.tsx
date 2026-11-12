@@ -28,11 +28,13 @@ const captionHeight = 0.2;
 // keep their existing bounds. Text pages retain the original heading/body.
 const imageHeight = 0.46 - (contentBottom + captionHeight + 0.02);
 const imageY = contentBottom + captionHeight + 0.02 + imageHeight / 2;
+export type ReadingCommand = (delta: -1 | 1) => void;
 
-export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, onPageChange, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0 }: {
+export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, onPageChange, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0, externalReadingControls = false, onReadingControls }: {
   selection: FocusSelection; content: RingContent; previous?: ReadingCursor; reading: ReturnType<typeof useReadingSize>; enabled: boolean; style: ArNativeStyle; decorations?: boolean;
   onPageChange?(): void; onCursor(id: string, cursor: ReadingCursor): void; onClose(): void; onComplete(token: number): void;
   ordinal?: number; chapterCount?: number; openedCount?: number;
+  externalReadingControls?: boolean; onReadingControls?(command: ReadingCommand | null): void;
 }) {
   const { t, i18n } = useTranslation(); const ref = useRef<ViroNode>(null); const reduced = useReducedMotion();
   const moving = selection.phase !== 'focused'; const closing = selection.phase === 'closing';
@@ -74,10 +76,16 @@ export function InformationPanel({ selection, content, previous, reading, enable
   function changePage(page: number) {
     onCursor(content.id, cursorAtPage(pages, page, locale, reading.size)); onPageChange?.();
   }
-  function changeSize(delta: number) {
+  const changeSize = useCallback((delta: -1 | 1) => {
     const next = readingSizes[Math.min(2, Math.max(0, readingSizes.indexOf(reading.size) + delta))];
     onCursor(content.id, galleryCursor(layout(next), cursor, locale, next)); reading.change(delta);
-  }
+  }, [reading, onCursor, content.id, layout, cursor, locale]);
+  useLayoutEffect(() => {
+    if (!interactive) { onReadingControls?.(null); return; }
+    let current = true;
+    onReadingControls?.(delta => { if (current) changeSize(delta); });
+    return () => { current = false; onReadingControls?.(null); };
+  }, [interactive, changeSize, onReadingControls]);
   return <ViroNode ref={ref} key={selection.token} testID="ring-focused-panel" position={transform.position} rotation={transform.rotation}
     scale={[transform.scale, transform.scale, transform.scale]} opacity={enabled ? 1 : 0.35}
     animation={animation}>
@@ -96,10 +104,12 @@ export function InformationPanel({ selection, content, previous, reading, enable
       <ArText testID="ring-page-indicator" position={[0, pageRowY, 0.012]} width={0.4} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />
       <NativePanelAction id="next" label={t('destinationRing.next')} width={0.34} position={[0.4, pageRowY, 0.012]} enabled={interactive && cursor.page < pages.length - 1} style={style}
         onPress={() => changePage(cursor.page + 1)} />
-      <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.42, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />
-      <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[-0.17, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
+      {!externalReadingControls && <>
+        <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.42, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />
+        <NativePanelAction id="larger" label={t('destinationRing.larger')} width={0.2} position={[-0.17, bottomRowY, 0.012]} enabled={interactive && reading.size !== 'large'} style={style} onPress={() => changeSize(1)} />
+      </>}
       <NativePanelAction id="close" primary label={t('destinationRing.close')} width={0.46} position={[0.28, bottomRowY, 0.012]} enabled={interactive} style={style} onPress={onClose} />
-      {reading.error && <ViroNode position={[0, 0, 0.025]}>
+      {reading.error && !externalReadingControls && <ViroNode position={[0, 0, 0.025]}>
         <ViroQuad renderingOrder={4} ignoreEventHandling width={1.12} height={0.5} materials="argalaRingSurface" />
         <ArText renderingOrder={5} testID="ring-reading-error" position={[0, 0.06, 0.004]} width={1.02} height={0.23} text={t(`destinationRing.${reading.error}`)} style={style.text(4)} />
         <NativePanelAction renderingOrder={5} id="preference-retry" label={t('common.retry')} width={0.45} position={[0, -0.155, 0.006]} enabled={interactive && !reading.pending} style={style} onPress={() => void reading.retry()} />

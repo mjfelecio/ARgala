@@ -33,7 +33,7 @@ function PhotoOwner({ capture }: { capture: NativeCapture }) {
   const error = state.error ? <Text accessibilityRole="alert" accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(`arPhoto.errors.${state.error}`)}</Text> : null;
   const busy = state.busy !== null;
   return <View testID="ar-photo-controls" pointerEvents="box-none" className="shrink gap-2">
-    <Button variant="secondary" accessibilityLabel={t('arPhoto.capture')} isDisabled={busy || state.photoUri !== null} onPress={() => void controller.capture()}>
+    <Button variant="secondary" className="min-h-12" accessibilityLabel={t('arPhoto.capture')} isDisabled={busy || state.photoUri !== null} onPress={() => void controller.capture()}>
       <Button.Label>{t(state.busy === 'capture' ? 'arPhoto.capturing' : 'arPhoto.capture')}</Button.Label>
     </Button>
     {!state.photoUri && error}

@@ -108,7 +108,10 @@ it.each(['UNSUPPORTED', 'SUPPORTED', 'TRANSIENT', 'UNKNOWN', 'FAILED', 'MISSING'
   if (result === 'UNSUPPORTED') { expect(native.get).not.toHaveBeenCalled(); expect(cameras()).toHaveLength(0); expect(native.load).not.toHaveBeenCalled(); }
 });
 function node(id: string) { return tree!.root.findAllByType('node' as React.ElementType).find(value => value.props.testID === id)!; }
-async function click(id: string) { await act(async () => node(id).props.onClick?.()); }
+async function click(id: string) {
+  if (id === 'ring-action-larger' || id === 'ring-action-smaller') return press(id === 'ring-action-larger' ? 'destinationRing.increaseTextSize' : 'destinationRing.decreaseTextSize');
+  await act(async () => node(id).props.onClick?.());
+}
 function text(id: string) { return tree!.root.findAllByType('viro-text' as React.ElementType).find(value => value.props.testID === id)!.props.text as string; }
 async function ready(position = [0, 2, 0], forward = [0, 0, -1], settleIntro = true) {
   await act(async () => { const scene = tree!.root.findByType('native-scene' as React.ElementType); scene.props.onTrackingUpdated(3, 1); scene.props.onCameraTransformUpdate({ position, forward }); });
@@ -425,4 +428,29 @@ it('offers development destination previews without starting the camera and can 
   await press('destinationAr.exit');
   expect(cameras()).toHaveLength(0);
   expect(copy()).toContain('Sabin Resort Hotel');
+});
+
+it('exposes contextual reading commands in the bounded screen toolbar and fences a retired chapter command', async () => {
+  await mount(); await layout(); await start(); await ready();
+  const sizes = () => tree!.root.findAllByType('button').filter(value => value.props.accessibilityLabel === translations.t('destinationRing.increaseTextSize'));
+  expect(sizes()).toHaveLength(0);
+  await click('ring-tile-history'); await finish();
+  expect(sizes()).toHaveLength(1);
+  expect(node('ring-action-larger')).toBeUndefined();
+  const retired = sizes()[0].props.onPress; const camera = cameras()[0];
+  await click('ring-action-larger'); expect(native.setItem).toHaveBeenCalledWith('argala.ar-reading.v1', expect.stringContaining('large'));
+  expect(sizes()[0].props.disabled).toBe(true); expect(cameras()[0]).toBe(camera);
+  await click('ring-action-close'); expect(sizes()).toHaveLength(0); await finish();
+  await ready(); await click('ring-tile-overview'); await finish(); const writes = native.setItem.mock.calls.length;
+  await act(async () => retired()); expect(native.setItem).toHaveBeenCalledTimes(writes);
+  await press('destinationRing.help'); expect(sizes()).toHaveLength(0);
+});
+
+it.each(['en', 'ja', 'ko'])('keeps %s reading preference recovery in the screen toolbar through native remount', async locale => {
+  await translations.changeLanguage(locale); native.setItem.mockRejectedValueOnce(new Error('PRIVATE_WRITE'));
+  await mount(); await layout(); await start(); await ready(); await click('ring-tile-history'); await finish(); await click('ring-action-larger');
+  expect(copy()).toContain(translations.t('destinationRing.save-failed')); expect(copy()).not.toContain('PRIVATE_WRITE');
+  await active(false); await active(true); await settle(); await ready();
+  expect(copy()).toContain(translations.t('destinationRing.save-failed'));
+  await press('common.retry'); expect(copy()).not.toContain(translations.t('destinationRing.save-failed'));
 });

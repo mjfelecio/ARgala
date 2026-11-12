@@ -107,7 +107,11 @@ export function DestinationArSessionExperience({ audioManifest, identity, freshE
   }, [startup.phase, startup.attempt, NativeRing, reportFailure]);
   useEffect(() => { if (session.phase === 'exploring' && !introduction.seen && !introduction.pending) void completeIntroduction(); }, [session.phase, introduction.seen, introduction.pending, completeIntroduction]);
   const [capture, setCapture] = useState<NativeCapture | null>(null);
-  const controls = useRef<RingControls | null>(null); const acceptControls = useCallback((value: RingControls | null) => { controls.current = value; setCapture(() => value?.capture ?? null); }, []);
+  const [readerControls, setReaderControls] = useState<RingControls | null>(null);
+  const controls = useRef<RingControls | null>(null); const acceptControls = useCallback((value: RingControls | null) => {
+    controls.current = value; setCapture(() => value?.capture ?? null);
+    setReaderControls(previous => previous?.readerAvailable === value?.readerAvailable && previous?.changeReadingSize === value?.changeReadingSize ? previous : value);
+  }, []);
   const [poseRequired, setPoseRequired] = useState(false); const recenterResult = useCallback((success: boolean) => setPoseRequired(!success), []);
   const [help, setHelp] = useState(false); const [metrics, setMetrics] = useState<RingMetrics>({ received: 0, applied: 0 });
   const exploring = session.phase === 'exploring'; const revealing = session.phase === 'reveal' || session.phase === 'limited' && session.revealedCount < content.length;
@@ -129,8 +133,18 @@ export function DestinationArSessionExperience({ audioManifest, identity, freshE
     <ArUtilityChrome viewportHeight={scene.height} titleKey="destinationRing.title" title={title} onReturn={onReturn} onExit={() => { close(); onExit?.(); }} actions={startup.phase === 'live' ? <>
       <Button variant="secondary" accessibilityLabel={t('destinationRing.help')} accessibilityState={{ expanded: help }} onPress={() => setHelp(value => !value)}><Button.Label>{t('destinationRing.help')}</Button.Label></Button>
     </> : undefined} bottom={startup.phase === 'live' && !help ? <>
+      <View className="flex-row items-center gap-2" pointerEvents="box-none">
       <Button variant="secondary" className="min-h-12" accessibilityLabel={t('destinationRing.recenter')} isDisabled={!exploring} onPress={() => controls.current?.recenter()}><Button.Label>{t('destinationRing.recenter')}</Button.Label></Button>
       {exploring && focused && active && <ArPhotoControls capture={capture} running sessionKey={JSON.stringify([identity.principalId, identity.admissionId, identity.destinationId, identity.provenance, startup.attempt])} />}
+      </View>
+      {readerControls?.readerAvailable && exploring && focused && active && <View testID="ar-reading-controls" className="flex-row items-center gap-2" pointerEvents="box-none">
+        <Button variant="secondary" className="min-h-12 min-w-12 px-3" accessibilityLabel={t('destinationRing.decreaseTextSize')} isDisabled={reading.size === 'small'} onPress={() => readerControls.changeReadingSize?.(-1)}><Button.Label>{t('destinationRing.smaller')}</Button.Label></Button>
+        <Button variant="secondary" className="min-h-12 min-w-12 px-3" accessibilityLabel={t('destinationRing.increaseTextSize')} isDisabled={reading.size === 'large'} onPress={() => readerControls.changeReadingSize?.(1)}><Button.Label>{t('destinationRing.larger')}</Button.Label></Button>
+      </View>}
+      {reading.error && <View testID="ar-reading-feedback" className="w-full gap-2">
+        <Text accessibilityRole="alert" className="font-sans text-sm text-white">{t(`destinationRing.${reading.error}`)}</Text>
+        <Action title={t('common.retry')} onPress={() => void reading.retry()} disabled={reading.pending} />
+      </View>}
     </> : undefined}>
       {session.phase === 'expired' ? <View className="gap-3 p-4"><Notice>{t('destinationSession.expired')}</Notice>
         <Action title={t('arrival.returnToMap')} onPress={() => { close(); onExit?.(); if (onReturn) onReturn(); else router.navigate('/'); }} />

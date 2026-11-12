@@ -417,13 +417,17 @@ it('reveals Overview first and blocks native interaction until the reveal allows
 });
 it('keeps the actual reading controller and unsaved size/error above a remounting native scene', async () => {
   native.setItem.mockRejectedValueOnce(new Error('PRIVATE_WRITE_ERROR'));
-  function Owner({ visible }: { visible: boolean }) { const reading = useReadingSize(); return visible ? React.createElement(DestinationRingScene, { reading, onReady: ready, onTracking: () => {} }) : null; }
+  let ownedReading: ReturnType<typeof useReadingSize>;
+  function Owner({ visible }: { visible: boolean }) {
+    const reading = useReadingSize(); React.useEffect(() => { ownedReading = reading; });
+    return visible ? React.createElement(DestinationRingScene, { reading, onReady: ready, onTracking: () => {}, onControls: (value: RingControls | null) => { controls = value; } }) : null;
+  }
   const owned = (visible: boolean) => React.createElement(I18nextProvider, { i18n: translations }, React.createElement(Owner, { visible }));
   await act(async () => { tree = create(owned(true)); }); await track(); await pose(); await press('ring-tile-history'); await finish();
-  await press('ring-action-larger'); expect(text('ring-reading-error')).toBe(translations.t('destinationRing.save-failed'));
+  await act(async () => controls!.changeReadingSize!(1)); expect(ownedReading!.error).toBe('save-failed');
   await act(async () => tree.update(owned(false))); await act(async () => tree.update(owned(true)));
   await track(); await pose(); await press('ring-tile-history'); await finish();
-  expect(text('ring-reading-error')).toBe(translations.t('destinationRing.save-failed')); expect(native.getItem).toHaveBeenCalledOnce();
+  expect(ownedReading!.error).toBe('save-failed'); expect(native.getItem).toHaveBeenCalledOnce();
   const body = tree.root.findAllByType('viro-text' as React.ElementType).find(item => item.props.testID === 'ring-body')!;
   expect(body.props.style.fontSize * body.props.scale[0]).toBe(6);
 });
