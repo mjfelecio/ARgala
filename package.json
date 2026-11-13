@@ -31,6 +31,7 @@
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.4",
     "expo-task-manager": "~57.0.22",
+    "expo-updates": "~57.0.28",
     "heroui-native": "1.0.10",
     "i18next": "^26.4.7",
     "react": "19.2.3",
