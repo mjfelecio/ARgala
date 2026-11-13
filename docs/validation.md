@@ -1,5 +1,29 @@
 # Foundation validation
 
+## Expo Update configuration — 2026-11-13
+
+Installed SDK 57 `expo-updates` and ran `eas update:configure` for the existing
+project. The `development` and `preview` build profiles use matching update
+channels; the CLI-selected runtime policy is `appVersion`. Native changes,
+including dependency or native configuration changes, require a new build and
+an app version change before publishing incompatible JavaScript; the policy does
+not detect native changes automatically. Keep update exports on the matching EAS
+environment so public configuration matches the intended build.
+
+`npm run check` passed (1,485 tests / 130 files), as did `npm run check:android`
+and `npm run export:android`. Resolved public configuration contains the existing
+project ID, matching update URL and runtime policy. `npx expo install --check`
+and `npx expo-doctor` reported six SDK patch-version mismatches (Expo, Constants,
+Linking, Router, Sharing and Task Manager); they were not upgraded here because
+the project has version-guarded patches. npm reported 15 dependency audit
+findings during installation.
+
+No APK was built and no update was published. Existing APKs cannot acquire the
+new native update module over the air. A future authorized preview build and a
+published, matching preview update are required to verify actual delivery on a
+device. A preview release may need up to two cold launches; development builds
+load updates through their Extensions UI.
+
 ## AR capture processing and review — 2026-11-12
 
 Source commit `7122e58` adds the owner-selected ivory/forest photo review,
