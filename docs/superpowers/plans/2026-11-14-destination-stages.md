@@ -30,10 +30,12 @@ Installed Expo57/React/Viro3.0.3, no new dependencies/native changes.
 
 ## Task 3: Native acceptance and other destinations (gated)
 
-- [ ] Wait for owner notification before connecting to the phone.
-- [ ] Review D01 gallery/stage on A53; save only meaningful navigation samples.
-- [ ] After acceptance, implement remaining eight profiles and expose completed
-      destinations only. Repeat full checks and all9/53-photo/20-chapter sweep.
+- [x] Wait for owner notification before connecting to the phone.
+- [x] Review D01 gallery/stage on A53; save only meaningful navigation samples.
+- [x] After acceptance, implement remaining eight profiles and expose completed
+      destinations only. Full checks and the English all-nine/53-photo/20-chapter
+      entry sweep passed. Every story/metadata page and full locale/size/native
+      performance acceptance remain separate checks; see validation evidence.
 - [ ] Stop new visuals by Nov19; stabilize Nov20. Keep Classic for Nov21 if Exhibit
       is not accepted. Obtain specific approval before any APK packaging build.
 

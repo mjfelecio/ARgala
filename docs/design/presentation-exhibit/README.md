@@ -231,3 +231,16 @@ restoration for every destination. Profile/loader/selector failures were observe
 before implementation. Independent review passed 265 tests in nine files with no
 findings. New A53 sweep evidence is recorded separately in `docs/validation.md`;
 these automated checks alone are not full native or owner visual acceptance.
+
+
+The subsequent English A53 entry/gallery sweep reached all nine stages, rendered
+all 53 photos and opened all 20 chapter targets across passes. This is an entry
+and image-rendering sweep, not every story/metadata page or every locale/size.
+D08 Help, size and background recovery retained the photograph. A fresh D09
+Capture/preview/Discard and gallery Close passed. Laptop sleep interrupted the
+USB development connection during an earlier attempt; reconnecting and repeating
+the affected images passed. Precise coverage, one unexplained navigation reset,
+performance observations and remaining acceptance limits are in the latest
+`docs/validation.md` section. The phone was left at the Exhibit selector with no
+active camera client. Only two stage screenshots and one 18-second navigation
+clip were added to the existing local progress gallery.

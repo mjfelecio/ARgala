@@ -3260,3 +3260,93 @@ screens stay private. New-stage full photo/metadata/locale/size, Help/recenter/
 background/capture recovery and performance coverage remain incomplete; existing
 mocked lifecycle coverage does not replace device acceptance. No Save, Share,
 on-site GPS/Passport claim, publication or D02–D09 rollout occurred.
+
+## Nine-destination gallery-first Exhibit rollout — 2026-11-14
+
+Implemented and committed as `3541b48` on `feat/presentation-spatial-exhibit`,
+worktree 254a. Owner confirmed Danao paging stable, approved the destination-specific
+approach, and explicitly requested the other eight. All nine development Exhibit
+choices now bind their own immutable profile, gallery media and stage scenery.
+Classic stays the default; geographic admission, camera/capture lifecycle,
+Passport, ACLC and existing native configuration are preserved.
+
+Final `npm run check` passed strict TypeScript, zero-warning lint and **1,554 tests
+in 136 files**. Tests exercise all nine actual scenes/all 20 chapter openings, all 53
+gallery photo sources, full captions/credits for 27 destination × language cases and
+per-destination session-screen background restoration. Profile/loader/selector
+cases failed before implementation and passed after. Independent fresh review:
+no actionable findings; 265 tests in nine files passed. Some adversarial loader races
+and arrival-name isolation remain covered by D01 cases plus inspection rather
+than an exhaustive destination-switch matrix.
+
+Final Android export passed 111 assets and an 8,780,168-byte Hermes
+`index-bc58c99a3011417a15ce6a56d65b83bf.hbc`. All 53 original photo SHA-256 values are
+unchanged and present. No dependency/native changes, new APK build/install, OTA,
+Places/Routes action, push/merge or external publication occurred. Original SDK/auth
+working-tree changes remain excluded from these commits.
+
+Physical continuation used the same SM-A536E / Android 16 accepted development APK,
+1080 × 2400, 420 dpi, font scale 1.1, dark OS and USB Metro from worktree 254a. All nine
+native stages reached tracking-ready and rendered distinct symbolic scenery.
+The first new fern view was too wide; its shared new-scenery group was narrowed
+and raised with a RED→GREEN framing check, then verified natively. Danao's
+accepted composition stays unchanged. New scenes use 6–15 static contour meshes,
+no particles, shaders, lighting or per-frame JavaScript updates.
+
+The completed English native sweep is recorded by destination below. Every photo
+has a settled real-device frame (with a longer repeat for D08 Photo 4), and every
+chapter target was opened across these passes. This checks reachability and
+sampled reader/caption rendering, not every story page or every metadata page.
+
+| Destination | Gallery photos | Chapter entries |
+| --- | --- | --- |
+| D01 Lake Danao | 7 rendered | 3 opened |
+| D02 Lake Kasudsuran | 5 rendered | 2 opened |
+| D03 Lake Janagdan | 6 rendered | 2 opened |
+| D04 Ormoc Mangrove Eco-Park | 6 rendered | 2 opened across passes |
+| D05 Sal’s Pineapple Plantation | 6 rendered after transport restore | 3 opened |
+| D06 Leyte Golf and Country Club | 6 rendered | 2 opened |
+| D07 Alto Peak | 5 rendered | 2 opened |
+| D08 Heaven’s Peak | 6 rendered, Photo 4 repeated after loading | 2 opened |
+| D09 Sabin Resort Hotel | 6 rendered | 2 opened |
+
+Synthetic selections sent while a transition or fresh-pose fence was still
+settling were repeated from the inspected settled screen. Missed automation taps
+and host-terminated shell sequences are not counted as completed native cases.
+
+A USB reconnection during the pause removed adb reverse. Cached covers worked,
+while uncached pineapple photos failed. Restoring TCP 8081 forwarding and
+repeating the affected images succeeded, including the tractor story photo and
+final cloud photograph.
+These are development-server asset checks, not standalone APK WAN-offline proof.
+A 3-second gallery sweep caught Heaven's Peak Photo 4 still loading; revisiting with
+more time rendered it correctly. Captions and metadata controls remained available during
+loading/failure, and captions/credits stay separate from photo navigation.
+
+Heaven's Peak retained Gallery Photo 5 through Help, A+ large/A- standard and a
+Home/MainActivity foreground return. Standard/large metadata counts changed 1/2 → 1/4
+without changing the photo. A subsequent capture showed Preparing, then Explore
+was visible at the next inspection; no process death or crash-buffer entry was
+found and PID 15201 survived. The owner confirmed leaving the phone alone and
+that the laptop had slept. This is consistent with the observed development
+connection interruption; the precise navigation-reset mechanism was not
+established. A fresh Sabin capture without that background step
+successfully opened the real upright AR photo preview. Discard returned to the
+same gallery, Previous 6 → 5 worked, and Close restored the coastal stage. Save and
+Share were not invoked. This passes the fresh capture path, not a diagnosis of
+the earlier interruption or exhaustive capture/recovery combinations.
+
+One late warm-run snapshot reported PSS 1,946,500 KB / RSS 1,600,789 KB / swap PSS 440,194 KB.
+It is a single observation, not an FPS benchmark or leak determination. Automated
+Viro handlers and synthetic ADB gestures do not replace fresh physical finger,
+TalkBack, all locale/size combinations, controlled tracking-loss or on-site GPS/
+Passport acceptance. Owner's earlier physical Danao quick-tap/stability acceptance
+and complete Classic sweep remain separate evidence. The final native camera-service snapshot showed no active camera clients after
+Exit returned to the Exhibit selector. Final all-nine visual acceptance and
+standalone packaging remain owner review/build gates.
+
+Minimal curated samples remain outside Git at
+`~/Pictures/ARgala-progress/2026-11-14/`, with source captions and SHA-256 index.
+Only two stage screenshots (fern/fields) and one 18-second coast gallery/capture
+navigation clip were added for this rollout. Raw photo-verification indexes,
+failed captures and private account/map screens are excluded from that gallery.
