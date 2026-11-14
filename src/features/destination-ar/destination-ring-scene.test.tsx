@@ -5,6 +5,8 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { DestinationRingScene, type RingControls } from './destination-ring-scene';
+import { exhibitPresentation } from './exhibit-ring-scene';
+import { previewStoryContent } from './development-featured-media';
 import { RingController } from './ring-controller';
 import { ViroMaterials } from '@reactvision/react-viro';
 import type { PoseSample } from './types';
@@ -532,4 +534,49 @@ it('rounds native button materials without replacing their visible quad hit geom
  const surface = node('ring-action-close').findByType('quad' as React.ElementType);
  expect(surface.props).toMatchObject({width:0.46,height:0.18,highAccuracyEvents:true,ignoreEventHandling:false,materials:'argalaRingRoundedAction'});
  expect(ViroMaterials.createMaterials).toHaveBeenCalledWith(expect.objectContaining({argalaRingRoundedAction: expect.objectContaining({diffuseTexture:111,diffuseColor:'#247A53',blendMode:'Alpha'})}));
+});
+
+it('keeps Exhibit animation completion and native frame state independent from a later Classic session', async () => {
+  sceneOptions = { content: previewStoryContent('D01'), presentation: exhibitPresentation };
+  await mount(); await track(); await pose();
+  expect(node('ring-tile-chapter-2').props.position[2]).toBeLessThan(-1.8);
+  expect(tree.root.findAllByProps({ testID: 'exhibit-cover-photo' })).toHaveLength(2);
+  expect(tree.root.findAllByProps({ testID: 'chapter-emblem-chapter-2' })).toHaveLength(1);
+  await press('ring-tile-overview');
+  const retainedFinish = node('ring-focused-panel').props.animation.onFinish;
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaExhibitRingFocus');
+  await finish();
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
+  const image = tree.root.findByProps({ testID: 'ring-gallery-image' });
+  await act(async () => image.props.onLoadEnd({ nativeEvent: null }));
+  expect(native.patches.some(item => (item.patch.animation as { name?: string; run?: boolean } | undefined)?.name === 'argalaExhibitPhotoPageReveal' && (item.patch.animation as { run: boolean }).run)).toBe(true);
+  let clock = Date.now(); vi.mocked(performance.now).mockImplementation(() => clock);
+  for (let index = 0; index < 3; index++) { clock += 1400; await act(async () => { await vi.advanceTimersByTimeAsync(1000); }); }
+  expect(tree.root.findByProps({ testID: 'ring-gallery-image' })).toBe(image);
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
+  await act(async () => tree.unmount());
+  vi.mocked(performance.now).mockImplementation(() => Date.now());
+  sceneOptions = { content: previewStoryContent('D01') };
+  await mount(); await track(); await pose(); await press('ring-tile-chapter-2');
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingFocus');
+  expect(node('ring-focused-panel').props.animation.run).toBe(true);
+  await act(async () => retainedFinish());
+  expect(node('ring-focused-panel').props.animation.run).toBe(true);
+  expect(node('ring-reader-toolbar')).toBeUndefined();
+  await finish(); expect(node('ring-reader-toolbar')).toBeDefined();
+});
+
+
+it('settles Exhibit photos directly under reduced motion while preserving all controls', async () => {
+  native.reduced = true; sceneOptions = { content: previewStoryContent('D01'), presentation: exhibitPresentation };
+  await mount(); await track(); await pose(); await press('ring-tile-overview'); await finish();
+  const image = tree.root.findByProps({ testID: 'ring-gallery-image' });
+  await act(async () => image.props.onLoadEnd({ nativeEvent: null }));
+  expect(native.patches.some(item => {
+    const animation = item.patch.animation as { name?: string; run?: boolean } | undefined;
+    return animation?.name === 'argalaExhibitPhotoPageReveal' && animation.run;
+  })).toBe(false);
+  expect(node('ring-reader-toolbar')).toBeDefined();
+  expect(node('ring-action-close')).toBeDefined();
+  expect(node('ring-action-next')).toBeDefined();
 });

@@ -28,6 +28,7 @@ import type { AudioManifest } from './system-audio';
 import { loadDevelopmentSystemAudio } from './development-audio-loader';
 import { loadDevelopmentGalleryContent } from './development-gallery-loader';
 import { loadRingScene } from './ring-loader';
+import { loadExhibitScene, type PresentationMode } from './exhibit-loader';
 import type { RingControls, RingMetrics } from './destination-ring-scene';
 import type { SessionIdentity } from './session';
 import { ArPhotoControls } from '@/features/ar-photo/ar-photo-controls';
@@ -40,17 +41,51 @@ export default function DevelopmentSessionRoute() {
   const { session } = useAuth(); const { t } = useTranslation(); const { language } = useSettings(); const principalId = session?.user.id;
   const scopeId = useId(); // Development correlation only; never verified admission authority.
   const [selection, setSelection] = useState<DestinationId | 'gallery' | null>(null);
-  const identity = useMemo<SessionIdentity>(() => ({ admissionId: `development-${scopeId}-${selection ?? 'none'}`, destinationId: `development-${selection ?? 'none'}`, principalId: principalId ?? '', provenance: 'development' }), [principalId, scopeId, selection]);
+  const [mode, setMode] = useState<PresentationMode>('classic');
+  const identity = useMemo<SessionIdentity>(() => ({ admissionId: `development-${scopeId}-${mode}-${selection ?? 'none'}`, destinationId: mode === 'exhibit' ? `development-exhibit-${selection ?? 'none'}` : `development-${selection ?? 'none'}`, principalId: principalId ?? '', provenance: 'development' }), [principalId, scopeId, selection, mode]);
   if (!principalId || !isViroSpikeEnabled()) return <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
+  if (selection === 'D01' && mode === 'exhibit') return <ExhibitSession key={`${principalId}:${identity.admissionId}`} identity={identity} onReturn={() => setSelection(null)} onClassic={() => setMode('classic')} />;
   if (selection === 'gallery') return <DevelopmentGallerySession key={`${principalId}:${identity.admissionId}`} identity={identity} />;
   if (selection) return <DestinationArSessionExperience key={`${principalId}:${identity.admissionId}`} identity={identity} freshEligible={isViroSpikeEnabled}
     title={destinationName(listDestinations().find(item => item.id === selection)!, language)} content={previewStoryContent(selection)}
-    preflightNoticeKey="featuredResearch.notice" onReturn={() => setSelection(null)} />;
+    developmentNoticeKey="presentation.session" preflightNoticeKey="featuredResearch.notice" onReturn={() => setSelection(null)} />;
   return <Screen><Notice>{t('featuredResearch.notice')}</Notice>
     <Text className="font-sans text-lg text-foreground">{t('featuredResearch.title')}</Text>
-    {destinationIds.map(id => <Action key={id} title={destinationName(listDestinations().find(item => item.id === id)!, language)} onPress={() => setSelection(id)} />)}
-    <Action title={t('destinationRing.title')} onPress={() => setSelection('gallery')} />
+    <View className="flex-row gap-3">{(['classic', 'exhibit'] as const).map(value => <Button key={value} variant={mode === value ? 'primary' : 'outline'} className="min-h-12 flex-1" accessibilityLabel={t(`presentation.${value}`)} accessibilityState={{ selected: mode === value }} onPress={() => setMode(value)}><Button.Label>{t(`presentation.${value}`)}</Button.Label></Button>)}</View>
+    {mode === 'exhibit' && <Notice>{t('presentation.danaoOnly')}</Notice>}
+    {mode === 'exhibit' ? <Action title={t('presentation.openDanao')} onPress={() => setSelection('D01')} /> : <>{destinationIds.map(id => <Action key={id} title={destinationName(listDestinations().find(item => item.id === id)!, language)} onPress={() => setSelection(id)} />)}
+    <Action title={t('destinationRing.title')} onPress={() => setSelection('gallery')} /></>}
     <Action title={t('common.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }} />
+  </Screen>;
+}
+
+/** Optional native code is resolved before permission/startup work. Timeouts,
+ * Retry, blur, principal replacement and unmount retire late import results. */
+function ExhibitSession({ identity, onReturn, onClassic }: { identity: SessionIdentity; onReturn(): void; onClassic(): void }) {
+  const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
+  const [Scene, setScene] = useState<Awaited<ReturnType<typeof loadExhibitScene>>>(null);
+  const [attempt, setAttempt] = useState(0); const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (!focused || !active || failed || Scene) return;
+    let current = true;
+    const timer = setTimeout(() => { current = false; setFailed(true); }, 20000);
+    void loadExhibitScene('D01').then(component => {
+      if (!current) return;
+      clearTimeout(timer);
+      if (component) setScene(() => component); else setFailed(true);
+    }).catch(() => { if (current) { clearTimeout(timer); setFailed(true); } });
+    return () => { current = false; clearTimeout(timer); };
+  }, [attempt, focused, active, failed, Scene]);
+  const sceneLoader = useCallback(async () => Scene!, [Scene]);
+  const { language } = useSettings();
+  if (Scene) return <DestinationArSessionExperience identity={identity} freshEligible={isViroSpikeEnabled}
+    sceneLoader={sceneLoader} content={previewStoryContent('D01')}
+    title={destinationName(listDestinations().find(item => item.id === 'D01')!, language)}
+    developmentNoticeKey="presentation.session" preflightNoticeKey="featuredResearch.notice" onReturn={onReturn} />;
+  return <Screen><Notice busy={!failed}>{t(failed ? 'presentation.loadFailed' : 'common.loading')}</Notice>
+    {failed && <Action title={t('common.retry')} onPress={() => { setFailed(false); setAttempt(value => value + 1); }} />}
+    <Action title={t('presentation.useClassic')} onPress={onClassic} />
+    <Action title={t('common.back')} onPress={onReturn} />
   </Screen>;
 }
 
@@ -77,8 +112,8 @@ function DevelopmentGallerySession({ identity }: { identity: SessionIdentity }) 
   </Screen>;
 }
 
-type Props = { audioManifest?: AudioManifest; identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
-export function DestinationArSessionExperience({ audioManifest, identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
+type Props = { sceneLoader?: typeof loadRingScene; audioManifest?: AudioManifest; identity: SessionIdentity; freshEligible(): boolean; content?: readonly RingContent[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
+export function DestinationArSessionExperience({ sceneLoader = loadRingScene, audioManifest, identity, freshEligible, content = developmentRingContent, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey = 'destinationRing.prototype', preflightNoticeKey }: Props) {
   const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
   const utilityInk = useThemeColor('foreground');
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
@@ -105,9 +140,9 @@ export function DestinationArSessionExperience({ audioManifest, identity, freshE
     if (startup.phase !== 'prepared' || NativeRing) return;
     let current = true;
     // Final authorization waits for this module, not just the permission promise.
-    void loadRingScene().then(component => { if (current) setNativeRing(() => component); }).catch(() => { if (current) reportFailure(); });
+    void sceneLoader().then(component => { if (current) setNativeRing(() => component); }).catch(() => { if (current) reportFailure(); });
     return () => { current = false; };
-  }, [startup.phase, startup.attempt, NativeRing, reportFailure]);
+  }, [startup.phase, startup.attempt, NativeRing, reportFailure, sceneLoader]);
   useEffect(() => { if (session.phase === 'exploring' && !introduction.seen && !introduction.pending) void completeIntroduction(); }, [session.phase, introduction.seen, introduction.pending, completeIntroduction]);
   const [capture, setCapture] = useState<NativeCapture | null>(null);
   const [readerControls, setReaderControls] = useState<RingControls | null>(null);

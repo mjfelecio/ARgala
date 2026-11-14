@@ -699,5 +699,14 @@
         }
       ]
     }
+  },
+  "presentation": {
+    "classic": "Classic",
+    "exhibit": "Exhibit",
+    "danaoOnly": "Explore the first Lake Danao spatial exhibit. Classic contains all nine destinations.",
+    "openDanao": "Open Lake Danao Exhibit",
+    "loadFailed": "The spatial exhibit could not load. Retry or continue with Classic.",
+    "useClassic": "Continue with Classic",
+    "session": "Presentation session"
   }
 }

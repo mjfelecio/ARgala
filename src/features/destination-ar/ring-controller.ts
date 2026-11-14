@@ -15,7 +15,7 @@ export class RingController {
   private position: Vector3 | null = null;
   private snap = true;
   private serial = 0;
-  constructor(private readonly entries: readonly RingEntry[]) {}
+  constructor(private readonly entries: readonly RingEntry[], private readonly buildSlots = buildRingSlots) {}
   track(state: TrackingState) {
     if (state !== this.tracking) this.latest = null;
     if (state === 'normal' && this.tracking !== 'normal') this.snap = true;
@@ -27,7 +27,7 @@ export class RingController {
     let captured = false;
     if (!this.basis) {
       this.basis = captureBasis(sample); if (!this.basis) return { captured: false };
-      this.slots = buildRingSlots(this.entries, this.basis); captured = true;
+      this.slots = this.buildSlots(this.entries, this.basis); captured = true;
     }
     if (!this.snap && now - this.publishedAt < 1000 / 30) return { captured };
     const distance = this.position ? Math.hypot(...sample.position.map((v, i) => v - this.position![i])) : Infinity;
@@ -66,7 +66,7 @@ export class RingController {
   recenter(now: number) {
     if (!this.fresh(now)) return false;
     const basis = captureBasis(this.latest!); if (!basis) return false;
-    this.basis = basis; this.slots = buildRingSlots(this.entries, basis);
+    this.basis = basis; this.slots = this.buildSlots(this.entries, basis);
     this.position = [...this.latest!.position]; this.publishedAt = now; this.snap = true;
     ++this.serial;
     if (this.selection) {

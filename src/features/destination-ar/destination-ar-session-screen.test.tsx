@@ -10,7 +10,7 @@ import { localizationOptions } from '@/i18n/options';
 import SessionRoute, { DestinationArSessionExperience } from './destination-ar-session-screen';
 import { ViroRingRoute } from './dev-entry';
 import { router } from 'expo-router';
-const native = vi.hoisted(() => ({ active: true, focused: true, reduced: false, eligible: true,
+const native = vi.hoisted(() => ({ exhibit: vi.fn(), active: true, focused: true, reduced: false, eligible: true,
   principal: 'owner' as string | null, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
   transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), gallery: vi.fn(), audio: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(),
 }));
@@ -25,6 +25,7 @@ vi.mock('./development-audio-loader', () => ({ loadDevelopmentSystemAudio: nativ
 vi.mock('./development-featured-media-assets', () => ({ featuredPreviewAssets: { D01: 1, D02: 2, D03: 3, D04: 4, D05: 5, D06: 6, D07: 7, D08: 8, D09: 9 }, additionalPreviewAssets: { D01: 101, D03: 103, D04: 104, D05: 105, D06: 106, D07: 107, D09: 109 } }));
 vi.mock('./development-gallery-loader', () => ({ loadDevelopmentGalleryContent: native.gallery }));
 vi.mock('./ring-loader', () => ({ loadRingScene: native.load }));
+vi.mock('./exhibit-loader', () => ({ loadExhibitScene: native.exhibit }));
 vi.mock('@/features/ar-photo/ar-photo-controls', async () => { const R = await import('react'); return { ArPhotoControls: (props: Record<string, unknown>) => R.createElement('photo-controls', props) }; });
 vi.mock('expo-router', async () => {
   const require = createRequire(import.meta.url); const focus = require('expo-router/build/react-navigation/core/useIsFocused');
@@ -127,6 +128,7 @@ beforeEach(async () => {
   native.screenshot.mockReset(); native.audio.mockReset().mockResolvedValue(null); native.gallery.mockReset().mockImplementation(async () => (await import('./development-ring-content')).developmentRingContent);
   native.support.mockReset().mockImplementation(callback => callback('SUPPORTED')); nativeUi.modules.VRTARSceneNavigatorModule = { isARSupportedOnDevice: native.support };
   native.getItem.mockReset().mockImplementation(async key => key.startsWith('argala.ar-') ? 'complete' : null); native.setItem.mockReset().mockResolvedValue(undefined);
+  native.exhibit.mockReset().mockResolvedValue(null);
   native.gate.mockReset().mockImplementation(() => native.eligible); native.load.mockReset().mockImplementation(async () => (await import('./destination-ring-scene')).DestinationRingSceneHost);
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, resources: structuredClone(localizationOptions.resources), lng: 'en', react: { useSuspense: false } });
   child = () => React.createElement(DestinationArSessionExperience, { identity, freshEligible: native.gate });
@@ -424,7 +426,7 @@ it('offers development destination previews without starting the camera and can 
   expect(copy()).not.toContain(translations.t('destinationAr.prototype'));
   await start(); await ready();
   expect(cameras()).toHaveLength(1);
-  expect(copy()).toContain(translations.t('destinationRing.prototype'));
+  expect(copy()).toContain(translations.t('presentation.session'));
   await press('destinationAr.exit');
   expect(cameras()).toHaveLength(0);
   expect(copy()).toContain('Sabin Resort Hotel');
@@ -479,4 +481,76 @@ it('bounds short-screen reading failure recovery without changing native camera 
     expect(tree!.root.findByType('photo-controls' as React.ElementType).props.compact).toBe(true);
     await press('common.retry'); expect(copy()).not.toContain(translations.t('destinationRing.save-failed'));
   } finally { nativeUi.fontScale = originalScale; }
+});
+
+
+it('defaults to Classic and bounds a timed-out Exhibit import without requesting native permissions', async () => {
+  const late = Promise.withResolvers<typeof import('./destination-ring-scene').DestinationRingSceneHost>();
+  native.exhibit.mockReturnValueOnce(late.promise);
+  await mount(() => React.createElement(SessionRoute));
+  const mode = () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('presentation.classic'))!;
+  expect(mode().props.accessibilityState.selected).toBe(true);
+  await press('presentation.exhibit');
+  const name = translations.getResource('en', 'translation', 'presentation.openDanao');
+  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === name)!.props.onPress());
+  expect(native.exhibit).toHaveBeenCalledWith('D01');
+  expect(native.support).not.toHaveBeenCalled(); expect(native.get).not.toHaveBeenCalled();
+  await act(async () => { await vi.advanceTimersByTimeAsync(20000); });
+  expect(copy()).toContain(translations.t('presentation.loadFailed'));
+  await act(async () => late.resolve((await import('./destination-ring-scene')).DestinationRingSceneHost));
+  await settle(); expect(copy()).toContain(translations.t('presentation.loadFailed'));
+  await press('presentation.useClassic'); await layout();
+  expect(copy()).toContain(translations.t('destinationAr.idle'));
+  await start(); expect(native.load).toHaveBeenCalledOnce();
+});
+
+
+it('retires an Exhibit import on focus loss and principal replacement without borrowing the next owner', async () => {
+  const late = Promise.withResolvers<typeof import('./destination-ring-scene').DestinationRingSceneHost>();
+  const current = Promise.withResolvers<typeof import('./destination-ring-scene').DestinationRingSceneHost>();
+  native.exhibit.mockReturnValueOnce(late.promise).mockReturnValueOnce(current.promise);
+  await mount(() => React.createElement(SessionRoute)); await press('presentation.exhibit'); await press('presentation.openDanao');
+  native.focused = false; await update();
+  await act(async () => late.resolve((await import('./destination-ring-scene')).DestinationRingSceneHost)); await settle();
+  expect(native.support).not.toHaveBeenCalled(); expect(cameras()).toHaveLength(0);
+  native.focused = true; await update();
+  expect(native.exhibit).toHaveBeenCalledTimes(2);
+  native.principal = 'replacement-owner'; await update();
+  // The new principal's loader fails explicitly; the retired owner's completion
+  // cannot make it prepared or begin support/permission work.
+  await act(async () => current.resolve((await import('./destination-ring-scene')).DestinationRingSceneHost)); await settle();
+  expect(copy()).toContain(translations.t('presentation.loadFailed'));
+  expect(native.support).not.toHaveBeenCalled(); expect(cameras()).toHaveLength(0);
+});
+
+it.each(['en', 'ja', 'ko'])('localizes %s Exhibit failure and keeps explicit Retry and Classic recovery', async locale => {
+  native.exhibit.mockRejectedValueOnce(new Error('PRIVATE_EXHIBIT_ERROR'));
+  await translations.changeLanguage(locale);
+  await mount(() => React.createElement(SessionRoute)); await press('presentation.exhibit'); await press('presentation.openDanao'); await settle();
+  expect(copy()).toContain(translations.t('presentation.loadFailed'));
+  expect(copy()).not.toContain('PRIVATE_EXHIBIT_ERROR');
+  native.exhibit.mockImplementationOnce(async () => (await import('./destination-ring-scene')).DestinationRingSceneHost);
+  await press('common.retry'); await settle(); await layout();
+  expect(copy()).toContain(translations.t('destinationAr.idle'));
+  expect(native.support).not.toHaveBeenCalled();
+  await start(); await ready(); expect(cameras()).toHaveLength(1);
+  const key = tree!.root.findByType('photo-controls' as React.ElementType).props.sessionKey;
+  expect(key).toContain('development-exhibit-D01');
+});
+
+it('runs the actual D01 Exhibit host through the shared session and capture services', async () => {
+  native.exhibit.mockImplementationOnce(async () => (await import('./exhibit-ring-scene')).ExhibitRingSceneHost);
+  await mount(() => React.createElement(SessionRoute)); await press('presentation.exhibit'); await press('presentation.openDanao'); await settle();
+  await layout(); await start(); await ready();
+  expect(node('ring-tile-chapter-2').props.position[2]).toBeLessThan(-1.8);
+  expect(tree!.root.findAllByProps({ testID: 'exhibit-cover-photo' })).toHaveLength(2);
+  await click('ring-tile-overview'); await finish();
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaExhibitRingFocus');
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
+  expect(tree!.root.findByType('photo-controls' as React.ElementType).props.capture).toBeTypeOf('function');
+  await press('destinationAr.exit');
+  expect(cameras()).toHaveLength(0);
+  await press('presentation.classic');
+  expect(copy()).toContain('Sabin Resort Hotel');
+  expect(native.load).not.toHaveBeenCalled();
 });
