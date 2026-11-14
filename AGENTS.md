@@ -221,3 +221,17 @@ Docs: https://docs.expo.dev/eas/index.md
   in the existing preferences record and honor explicit Save/Undo. Partial language/
   radius saves preserve audio opt-outs. Missing reviewed locale clips stay silent;
   never substitute unapproved English audio. Native video remains feasibility gated.
+
+## App navigation sample gallery — owner request 2026-11-14
+
+When testing by navigating through the app, capture only important milestones,
+meaningful before/after changes and representative successful states. Keep a
+minimal, curated gallery of screenshots and short screen recordings for progress
+updates and presentation content; do not record every tap or unrelated tooling.
+Use `~/Pictures/ARgala-progress/YYYY-MM-DD/` for durable samples outside Git.
+Include a small index with each sample's screen/flow, result, device, source
+revision and any development/simulation caveat. Prefer settled, readable states;
+exclude account details, credentials, precise location and unrelated personal
+content. Keep raw troubleshooting captures separate from the curated gallery.
+Mention the gallery path when new samples are added. This applies to app
+navigation testing, not ordinary code edits or command-line checks.
