@@ -1,5 +1,6 @@
 import { destinationIds, getDestination, type DestinationId, type DestinationMedia } from '@/features/destinations/catalog';
 import type { Basis, RingEntry, RingSlot } from './scene-geometry';
+import { buildPhotoIslandSlots } from './photo-islands';
 
 /** Display media only. This neither creates a chapter nor grants admission. */
 export function exhibitGalleryMedia(destinationId: string): readonly DestinationMedia[] {
@@ -13,6 +14,7 @@ export type ExhibitStageProfile = Readonly<{
   theme: 'shoreline' | 'fern' | 'basin' | 'roots' | 'fields' | 'fairway' | 'ridges' | 'garden' | 'coast';
   gallery: readonly [x: number, y: number, forward: number];
   stations: readonly (readonly [x: number, y: number, forward: number])[];
+  photoIslands?: readonly Readonly<{ angle: number; mediaIds: readonly [string, string] }>[];
 }>;
 
 function profile(destinationId: DestinationId, theme: ExhibitStageProfile['theme'], gallery: ExhibitStageProfile['gallery'], stations: ExhibitStageProfile['stations']): ExhibitStageProfile {
@@ -44,6 +46,7 @@ export function buildStageSlots(entries: readonly RingEntry[], basis: Basis): Ri
   return buildDestinationStageSlots(danaoStageProfile, entries, basis);
 }
 export function buildDestinationStageSlots(stage: ExhibitStageProfile, entries: readonly RingEntry[], basis: Basis): RingSlot[] {
+  if (stage.photoIslands) return buildPhotoIslandSlots(stage, entries, basis);
   if (entries.length !== stage.stations.length + 1 || entries[0]?.id !== stage.galleryId || new Set(entries.map(item => item.id)).size !== entries.length) throw new Error('Invalid exhibit stage');
   return entries.map((entry, index) => {
     const [x, y, z] = index === 0 ? stage.gallery : stage.stations[index - 1];
