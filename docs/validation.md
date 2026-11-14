@@ -3059,3 +3059,70 @@ Final `npm run check` passed strict TypeScript, zero-warning lint and **1,478 te
 The offline `docs/design/presentation-exhibit/D01-REVIEW.html` illustration uses the real D01 story/media bindings and is explicitly labeled **browser illustration, not Android/Viro evidence**. Headless Chrome UI smoke checked 9 locale/chapter combinations, 21 localized photo views, image resolution, photo navigation and Close. Wide English, Japanese reader and narrow Korean renders were inspected; the wide capture is committed beside the illustration. Browser flowing text does not emulate native pagination or CJK rendering.
 
 The owner explicitly chose to continue offline. No phone is connected; the installed compatible development client/APK identity, physical taps, native alpha/hit behavior, CJK glyph appearance, offline client delivery, tracking/recovery/capture and native frame pacing/memory remain unverified. No APK build/install, native/dependency upgrade, push or merge was performed. Atmospheric particles, deeper polish and rollout to the other eight destinations are intentionally pending owner feedback on this first slice and Galaxy A53 acceptance. Presentation cutoff awaits Jelzon's deadline; reserve final testing/packaging/recovery and deliver Classic if Exhibit is not accepted. See the prototype review README for the device matrix.
+
+## Presentation AR device corrections and sample gallery — 2026-11-14
+
+This connected-device pass supersedes the earlier offline-only status above.
+Galaxy A53 SM-A536E / Android 16, 1080×2400, override 420 dpi, system font scale
+1.1, dark OS. Existing development APK SHA-256
+`1a261cd4b63a2029d9f1b47eee9121ddd34d1f66fb82da82ca8e9b2ebe3bceac`
+matches the previously accepted native tap-patched client. Source `6983671` plus
+these JavaScript corrections ran over USB Metro. No APK build/install or native
+upgrade occurred. Battery began at 15%; the owner explicitly requested continued
+testing at low charge (3% at the end).
+
+The owner reported expanded Exhibit panels overlapping. Exhibit now removes all
+chapter-cover geometry through opening, focused reading and closing, restores
+the arc after Close completes, and rejects callbacks from retired covers. Classic
+keeps its existing visible-neighbor behavior. An inner decorative rule crossing
+Exhibit titles is suppressed. Focus stays at 2.25 units. Capture feedback now
+occupies a full-width sibling below the shared Recenter/Capture row, retaining
+announcements and bounded scrolling without squeezing one button's column.
+
+Observed on this phone:
+
+- Classic D01: tracking-ready, supplied photo/caption/creator/license/year, Next
+  1/13→2/13, Close to cover and Exit releasing CameraService.
+- Exhibit D01: supplied photo covers and arc, isolated expanded reader, Close
+  restoring the arc, and brief Home/app recovery restoring the focused photo at
+  1/13. Background released the camera. The owner separately reported reliable
+  physical quick taps on panels/Next/Close; visual direction is not accepted yet.
+- Capture: actual processing and failure layouts inspected. The initial failure
+  was before native dispatch: Metro could not resolve the lazy file-service
+  import through an external dependency symlink. Making the same dependencies
+  local to the worktree resolved it without changing application capture code.
+  Real preview then opened; Discard returned to the arc and emptied the cache.
+  Save/Share were not invoked in this pass.
+- Languages: actual Japanese D01 cover/body/caption/credit/control glyphs and
+  Korean cover/caption/control glyphs rendered. Japanese overview traversed
+  through 11/12 with all five photos visible in inspected samples. Korean
+  synthetic Next/Close taps during the short recording did not advance the
+  reader, so that clip documents opening only. English was explicitly saved
+  back; the existing 500 m activation preference and other settings were kept.
+- Classic D08: first entrance completed; all eight overview pages were traversed
+  using 100 ms synthetic taps, with all three photographs (including the 8 MB
+  first photo), captions and credit pages observed. Close restored its cover.
+  This is not the full two-chapter/six-photo D08 matrix.
+
+Exhibit covers also displayed with phone Wi-Fi/data off and USB Metro connected.
+This establishes WAN-offline development-client loading, not standalone APK
+operation. Original Wi-Fi on/data off was restored. Native frame pacing was not
+measured; isolated memory snapshots do not establish a performance or leak result.
+The full nine-destination/20-chapter/53-photo native matrix, all locale/reading-size
+combinations, TalkBack, short/large-text conditions, controlled tracking and
+transition interruptions, real GPS/routes and owner visual acceptance remain open.
+
+Final `npm run check` passed strict TypeScript, zero-warning lint and **1,484 tests
+across 132 files**. Focused regressions demonstrated the reported failures before
+fixes; independent reviews found no critical/important issues. Android export
+passed: 8.7 MB Hermes `index-03d2c413d259192f92db272c47f3a6e6.hbc`, 111 assets,
+and all 53 original photo SHA-256 signatures verified. `git diff --check` passed.
+
+Owner-requested navigation samples are retained outside Git at
+`~/Pictures/ARgala-progress/2026-11-14/`: six screenshots, one 12.5-second clip and
+a captioned index. Account/location screens and raw troubleshooting captures are
+excluded from that gallery. The navigation-only, minimal-capture rule is committed
+in AGENTS.md and copied to the owner's main checkout. Other preexisting SDK/auth
+changes remain separate. No push/merge or external publication occurred. Exhibit
+rollout remains limited to D01 pending the agreed review gate; the presentation
+cutoff still awaits Jelzon's deadline.

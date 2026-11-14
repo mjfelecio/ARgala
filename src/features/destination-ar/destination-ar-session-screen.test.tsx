@@ -26,7 +26,7 @@ vi.mock('./development-featured-media-assets', () => ({ featuredPreviewAssets: {
 vi.mock('./development-gallery-loader', () => ({ loadDevelopmentGalleryContent: native.gallery }));
 vi.mock('./ring-loader', () => ({ loadRingScene: native.load }));
 vi.mock('./exhibit-loader', () => ({ loadExhibitScene: native.exhibit }));
-vi.mock('@/features/ar-photo/ar-photo-controls', async () => { const R = await import('react'); return { ArPhotoControls: (props: Record<string, unknown>) => R.createElement('photo-controls', props) }; });
+vi.mock('@/features/ar-photo/ar-photo-controls', async () => { const R = await import('react'); return { ArPhotoControls: ({ leadingAction, ...props }: Record<string, unknown>) => props.running && props.capture ? R.createElement('photo-controls', props, leadingAction as React.ReactNode) : leadingAction ?? null }; });
 vi.mock('expo-router', async () => {
   const require = createRequire(import.meta.url); const focus = require('expo-router/build/react-navigation/core/useIsFocused');
   native.context = require('expo-router/build/react-navigation/core/NavigationContext').NavigationContext; native.focusContext = focus.IsFocusedContext;

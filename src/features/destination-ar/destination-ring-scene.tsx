@@ -28,6 +28,7 @@ export type RingScenePresentation = Readonly<{
   Tile: typeof InformationTile;
   Frame: typeof HolographicFrame;
   revealImages: boolean;
+  isolateReader: boolean;
 }>;
 type Props = { presentation?: RingScenePresentation; onReady(): void; onTracking(state: TrackingState): void; onControls?(controls: RingControls | null): void; onRecenterResult?(success: boolean): void; onMetrics?(metrics: RingMetrics): void; content?: readonly RingContent[]; reading?: ReturnType<typeof useReadingSize>; initialProgress?: LogicalArProgress; onProgress?(progress: LogicalArProgress): void; visibleTileCount?: number; interactive?: boolean; deployment?: IntroVariant; firstVisit?: boolean; audioPreferences?: AudioPreferences; audioManifest?: AudioManifest };
 
@@ -155,6 +156,9 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
   }
   function select(id: string) {
     if (!interactiveRef.current || controller.selection?.id === id) return;
+    // Exhibit removes neighboring chapter geometry while the reader is present.
+    // A queued click from a retired cover cannot collapse that isolated reader.
+    if (presentation?.isolateReader && controller.selection) return;
     // Native completed clicks can arrive before React commits the new selection.
     // An already focused panel closes; another tile never replaces it directly.
     const now = performance.now();
@@ -185,7 +189,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
     {frame && <ViroNode ref={ring} testID="ring-root" position={frame.position} opacity={(selection ? 0.4 : 1) * (tracking === 'normal' ? 1 : 0.35)}>
       {deployment === 'full' && controller.basis && <CinematicEmblem basis={controller.basis} animationPrefix={animationPrefix} />}
       {frame.slots.slice(0, Math.max(0, visibleTileCount)).map((slot, index) => {
-        if (selection?.id === slot.id) return null;
+        if (selection && (presentation?.isolateReader || selection.id === slot.id)) return null;
         const tile = (localSlot: RingSlot) => <Tile slot={localSlot} ordinal={index + 1} chapterCount={snapshot.length} opened={openedIds.includes(slot.id)} content={snapshot.find(item => item.id === slot.id)!} enabled={!deployment && interactive && tracking === 'normal' && (!selection || selection.phase === 'focused')} style={style} onSelect={select} decorations={quality === 'standard'} />;
         return deployment && controller.basis ? <CinematicTile key={slot.id} slot={slot} basis={controller.basis} variant={deployment} ordinal={index} peers={frame.slots} animationPrefix={animationPrefix}>{tile({ ...slot, position: [0, 0, 0], rotation: [0, 0, 0] })}</CinematicTile> : <React.Fragment key={slot.id}>{tile(slot)}</React.Fragment>;
       })}

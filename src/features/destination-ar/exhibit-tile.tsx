@@ -14,7 +14,7 @@ export function ExhibitTile({ content, slot, enabled, style, onSelect, decoratio
   const [failed, setFailed] = useState(false);
   const alive = useRef(false);
   useLayoutEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
-  return <ViroNode testID={`ring-tile-${content.id}`} position={slot.position} rotation={slot.rotation} onClick={enabled ? () => onSelect(content.id) : undefined}>
+  return <ViroNode testID={`ring-tile-${content.id}`} position={slot.position} rotation={slot.rotation} onClick={enabled ? () => { if (alive.current) onSelect(content.id); } : undefined}>
     <ExhibitFrame width={0.71} height={0.71} decorations={decorations} interactiveSurface={enabled} />
     <ArText position={[0, 0.28, 0.006]} width={0.61} height={0.07} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3)} />
     {photo && !failed ? <ViroImage testID="exhibit-cover-photo" source={photo.source} width={0.59} height={0.30} position={[0, 0.075, 0.007]}

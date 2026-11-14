@@ -11,6 +11,8 @@ export function ExhibitFrame(props: ComponentProps<typeof HolographicFrame>) {
       <ViroQuad width={width} height={height} materials="argalaRingSurface" opacity={0.75} renderingOrder={-2} ignoreEventHandling />
       <ViroQuad position={[0, height / 2, 0.001]} width={width * 0.75} height={0.003} materials="argalaRingEdge" opacity={0.7} renderingOrder={-1} ignoreEventHandling />
     </ViroNode>}
-    <HolographicFrame {...props} decorations={props.variant === 'reader' ? false : decorations} />
+    {/* Classic's inner rule crosses the photo-led title. Exhibit owns its
+        perimeter accents and keeps both cover and reader content clear. */}
+    <HolographicFrame {...props} decorations={false} />
   </ViroNode>;
 }

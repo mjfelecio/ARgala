@@ -580,3 +580,32 @@ it('settles Exhibit photos directly under reduced motion while preserving all co
   expect(node('ring-action-close')).toBeDefined();
   expect(node('ring-action-next')).toBeDefined();
 });
+
+it('keeps decorative rules out of Exhibit cover titles and reader content', async () => {
+  sceneOptions = { content: previewStoryContent('D01'), presentation: exhibitPresentation };
+  await mount(); await track(); await pose();
+  expect(tree.root.findAllByProps({ testID: 'holographic-rule' })).toHaveLength(0);
+  await press('ring-tile-overview'); await finish();
+  expect(tree.root.findAllByProps({ testID: 'holographic-rule' })).toHaveLength(0);
+  expect(node('ring-reader-toolbar')).toBeDefined();
+});
+
+it('isolates the Exhibit reader throughout opening, focus and Close, retiring hidden chapter clicks', async () => {
+  sceneOptions = { content: previewStoryContent('D01'), presentation: exhibitPresentation };
+  await mount(); await track(); await pose();
+  const retiredSelection = node('ring-tile-chapter-2').props.onClick;
+  await press('ring-tile-overview');
+  for (const id of ['overview', 'chapter-2', 'chapter-3']) expect(node(`ring-tile-${id}`)).toBeUndefined();
+  await finish();
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
+  await act(async () => retiredSelection());
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaExhibitRingFocus');
+  expect(node('ring-focused-panel').props.animation.run).toBe(false);
+  await press('ring-action-close');
+  for (const id of ['overview', 'chapter-2', 'chapter-3']) expect(node(`ring-tile-${id}`)).toBeUndefined();
+  await finish();
+  expect(node('ring-focused-panel')).toBeUndefined();
+  for (const id of ['overview', 'chapter-2', 'chapter-3']) expect(node(`ring-tile-${id}`)).toBeDefined();
+  await act(async () => retiredSelection());
+  expect(node('ring-focused-panel')).toBeUndefined();
+});

@@ -8,7 +8,7 @@ import type { ComponentProps } from 'react';
 // controller, tokens, deadlines, refs and native navigator; no state is global.
 export const exhibitPresentation: RingScenePresentation = Object.freeze({
   animationPrefix: 'argalaExhibit', buildSlots: buildExhibitSlots,
-  Tile: ExhibitTile, Frame: ExhibitFrame, revealImages: true,
+  Tile: ExhibitTile, Frame: ExhibitFrame, revealImages: true, isolateReader: true,
 });
 export function ExhibitRingSceneHost(props: ComponentProps<typeof DestinationRingSceneHost>) {
   return <DestinationRingSceneHost {...props} presentation={exhibitPresentation} />;
