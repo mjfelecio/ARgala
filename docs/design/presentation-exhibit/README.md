@@ -2,6 +2,39 @@
 
 ## Photo Islands — owner-selected direction, November 14
 
+### Latest refinement: larger standalone photographs
+
+The first A53 review found the photos too small and the arrangement too loose.
+The owner requested more intentional collage groupings, standalone pictures
+without text underneath, and closer browsing images. The phone then powered off;
+this refinement is prepared offline and still needs physical review.
+
+Each Danao bay now has a lead image (width1.18 at2.1 units, raised slightly to the
+left) and a smaller companion (width1.02 at2.2 units, lower to the right). The
+welcome image is width1.20 at2.1 units. The lead image's angular width is roughly
+twice that of the first prototype's painted image. All covers preserve original
+aspect ratios and use ScaleToFit; count, action labels and the look-around line
+are removed from successful photo covers. Captions/credits and photo position
+remain in the existing opened gallery. A failed cover retains a centered,
+localized gallery-opening affordance inside its frame.
+
+Bay centers are now −95°, +65° and +165° so the larger welcome has clear space.
+Asymmetric photo offsets, vertical steps and shallow depth separate each pair;
+story controls remain below with their own clearance. Reader distance remains
+2.25 units. Classic, the old Danao front stage, eight other destinations, gallery
+ownership and all lifecycle contracts are unchanged. The browser illustration
+shows the revision separately from actual app samples; it is not native evidence.
+
+Offline gate: `npm run check` passed1,566 tests in137 files, strict TypeScript
+and zero-warning lint. Android export passed111 assets. Independent review found
+no confirmed material issue and passed93 geometry/scene tests. The refined browser
+view exercised all seven Danao photos and three chapters with no load/script
+errors; covers fit its illustrative view when faced directly. Native acceptance
+still requires the reconnected A53. No new app-navigation sample was captured
+after the phone powered off.
+
+### Initial native slice and preceding decisions
+
 After reviewing the all-nine stage rollout, the owner requested more reason to
 look around through AR. An interactive browser comparison explored the existing
 front stage, Open Circle, Panoramic Ribbon and Photo Islands. The owner explicitly

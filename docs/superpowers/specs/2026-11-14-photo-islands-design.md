@@ -8,9 +8,17 @@ and optional stories distributed around them, rather than see everything ahead.
 ## Spatial composition
 
 Start with Lake Danao. Retain a photo-gallery welcome at the captured entrance.
-Place three small bays at −95°, +35° and +150° relative to that entrance, on a
-2.6-unit radius. Each bay contains two different supplied photographs separated
-by 18° and a larger optional story tile underneath. Danao's seven original
+The first native review found the 2.6-unit, captioned cards too small and loosely
+placed. The owner's refinement requests larger, closer standalone photographs,
+with context revealed only after opening. Compose three bays at −95°, +65° and
++165°. Each pair has a dominant photo to the left (1.18 wide, 2.1 units away,
+−16° offset, y0.22) and a smaller, lower photo to the right (1.02 wide, 2.2 units
+away, +18° offset, y−0.10). The welcome is 1.20 wide at 2.1 units, y0.18.
+Keep original photo aspect ratios and complete images, with no count, caption,
+gallery action label or look-around text beneath any successful photo cover.
+Optional story controls sit separately below the pair at y−0.88, radius2.45;
+they do not form a photo caption. Their reader content remains optional.
+Danao's seven original
 photos therefore each have a visible entrance, including the welcome. Photos
 are gallery entrances, never synthetic chapters or evidence that they illustrate
 the nearby chapter. The bay locations are symbolic display geometry, not GPS.
@@ -33,7 +41,8 @@ selected chapters or openings. Gallery browsing cannot create Passport progress.
 Stale/disabled/retired image callbacks must not change cursor or focus.
 
 Stories retain their stable IDs, content, reader cursors and opening semantics.
-Reader remains flat, 1.25 units square, at 2.25 units. Reading preference,
+Reader remains flat, 1.25 units square, at 2.25 units. Bringing browse covers
+closer does not change the reader distance. Reading preference,
 captions, credits, capture and existing lifecycle/interaction fences remain owned
 by their existing services. Use the visible photo as its accurate native hit
 surface; decorative layers ignore events.

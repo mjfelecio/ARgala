@@ -17,7 +17,9 @@ Viro 3.0.3, Vitest/react-test-renderer. No dependencies or native changes.
 
 - Danao first; physical Galaxy A53 review before expanding to eight other stages.
 - Reader: flat 1.25-unit square, 2.25-unit distance; no page reveal/glint.
-- Three bays at −95°, +35°, +150°; 2.6-unit radius, photo centers ±9° per bay.
+- Refined bays at −95°, +65°, +165°. Dominant/secondary photos at 2.1/2.2 units,
+  widths1.18/1.02, yaw offsets−16°/+18° and y0.22/−0.10; welcome width1.20 at2.1.
+- Successful photo covers have no labels or text below; original aspect preserved.
 - Classic selectable; old front-stage profiles/presentation retained.
 - No changes to content, capture services, admission, camera lifecycle or Passport.
 - Scene state remains per mount. No per-pose React publications or JS frame loop.
@@ -77,10 +79,27 @@ logical progress recognizes every entrance as the existing gallery.
 **Files:** Update presentation Exhibit README and validation evidence, preserving
 unrelated pending auth/SDK edits. Minimal device gallery outside repository.
 
-- [ ] Use the existing accepted development APK and Metro; no APK build.
+- [x] Use the existing accepted development APK and Metro; no APK build.
 - [ ] Verify tracking-ready, turn to all 3 bays, all 7 image entrances, galleries,
   each story, rapid paging, Close, Recenter and temporary tracking/Help recovery.
 - [ ] Capture only important actual-navigation screenshots/short clip, inspect
   evidence, and release camera on Exit. Record exact native verification limits.
 - [ ] Show Danao for owner review. Extend islands to other destinations only
   after physical acceptance; do not infer approval from automated screenshots.
+
+### Task 4: Owner refinement — larger standalone photo collages
+
+**Files:** `photo-islands.ts/test`, `danao-stage.tsx`, `exhibit-ring-scene.tsx`,
+`photo-island-scenery.tsx`, `destination-ring-scene.test.tsx`, design/validation docs.
+
+- [x] Pin closer asymmetric pair geometry, image aspect/full coverage and absence
+  of photo labels through failing geometry/real-scene tests.
+- [x] Implement shared `photoIslandCoverSize(profile, entrance)` from the bundled
+  content dimensions, using it for both cover geometry and focus/Close scale.
+- [x] Keep one dominant and one supporting image per bay, move the forward bay
+  away from the wider welcome, and keep story surfaces vertically separate.
+- [x] Preserve exact-media opening, context/caption/credit access in the reader,
+  Classic, old Danao fallback and eight other destinations.
+- [x] Run focused tests, `npm run check`, Android export and review the diff.
+- [ ] Revisit on A53 after the owner reconnects it; power-off interrupted review.
+  Do not connect while charging without the owner's notification.

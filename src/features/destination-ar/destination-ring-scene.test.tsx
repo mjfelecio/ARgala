@@ -615,7 +615,7 @@ it('opens a gallery independently of chapters and restores the same photo after 
   const progress = vi.fn(); sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, onProgress: progress };
   await mount(); await track(); await pose();
   expect(node('exhibit-gallery-entry')).toBeDefined();
-  expect(tree.root.findByProps({ testID: 'exhibit-gallery-cover' }).props).toMatchObject({ resizeMode: 'ScaleToFill', imageClipMode: 'ClipToBounds' });
+  expect(tree.root.findByProps({ testID: 'exhibit-gallery-cover' }).props).toMatchObject({ resizeMode: 'ScaleToFit', imageClipMode: 'ClipToBounds' });
   expect(tree.root.findAllByType('polyline' as React.ElementType).length).toBeGreaterThan(0);
   const retiredEntry = node('exhibit-gallery-entry').props.onClick;
   await press('exhibit-gallery-entry');
@@ -860,19 +860,27 @@ it('recenters a photo-island focus without counting it as a story or replaying p
   expect(progress.mock.lastCall?.[0].openedIds).toEqual(['chapter-3']);
 });
 
-it.each(['en', 'ja', 'ko'])('keeps %s photo-island cover labels localized and native hit surfaces explicit', async locale => {
+it.each(['en', 'ja', 'ko'])('shows %s photo context only after opening and keeps native image hits explicit', async locale => {
   await translations.changeLanguage(locale);
   sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation };
   await mount(); await track(); await pose();
   expect(translations.getResource(locale, 'translation', 'presentation.galleryOpen')).toBeTruthy();
-  expect(translations.getResource(locale, 'translation', 'presentation.islandsLookAround')).toBeTruthy();
-  expect(text('exhibit-islands-hint')).toBe(translations.t('presentation.islandsLookAround'));
+  expect(tree.root.findAllByProps({ testID: 'exhibit-islands-hint' })).toHaveLength(0);
   const covers = tree.root.findAllByType('viro-image' as React.ElementType).filter(image => String(image.props.testID).startsWith('exhibit-island-cover-'));
   expect(covers).toHaveLength(6);
-  for (const cover of covers) expect(cover.props).toMatchObject({ highAccuracyEvents: true, ignoreEventHandling: false, resizeMode: 'ScaleToFill' });
+  for (const cover of covers) expect(cover.props).toMatchObject({ highAccuracyEvents: true, ignoreEventHandling: false, resizeMode: 'ScaleToFit', position: [0, 0, 0.007] });
+  const entrances = exhibitGalleryEntries(danaoStagePresentation.stage!.profile);
+  for (const entry of entrances) {
+    const cover = node(entry.mediaId ? `exhibit-island-entry-${entry.mediaId}` : 'exhibit-gallery-entry');
+    expect(cover.findAllByType('viro-text' as React.ElementType)).toHaveLength(0);
+  }
   for (const line of tree.root.findAllByType('polyline' as React.ElementType)) expect(line.props.ignoreEventHandling).toBe(true);
   sceneOptions = { ...sceneOptions, interactive: false }; await act(async () => tree.update(wrapper()));
   for (const cover of covers) expect(cover.props.ignoreEventHandling).toBe(true);
+  sceneOptions = { ...sceneOptions, interactive: true }; await act(async () => tree.update(wrapper()));
+  await press(`exhibit-island-entry-${entrances[1].mediaId}`); await finish();
+  expect(text('exhibit-photo-position')).toBe(translations.t('presentation.photoPosition', { current: 2, total: 7 }));
+  expect(text('ring-gallery-caption').trim().length).toBeGreaterThan(0);
 });
 
 it('keeps the accepted Danao front stage available and other destinations outside the islands rollout', async () => {

@@ -547,9 +547,12 @@ it('runs the actual D01 Exhibit host through the shared session and capture serv
   native.exhibit.mockImplementationOnce(async () => (await import('./exhibit-ring-scene')).ExhibitRingSceneHost);
   await mount(() => React.createElement(SessionRoute)); await press('presentation.exhibit'); await selectDestination('D01'); await settle();
   await layout(); await start(); await ready();
-  expect(node('ring-tile-chapter-2').props.position[2]).toBeLessThan(-1.8);
+  const bay = node('ring-tile-chapter-2').props.position as number[];
+  expect(Math.atan2(bay[0], -bay[2]) * 180 / Math.PI).toBeCloseTo(65);
+  expect(Math.hypot(bay[0], bay[2])).toBeCloseTo(2.45);
   expect(node('exhibit-gallery-entry')).toBeDefined();
   expect(tree!.root.findAllByProps({ testID: 'exhibit-gallery-cover' })).toHaveLength(1);
+  expect(tree!.root.findByProps({ testID: 'exhibit-gallery-cover' }).props.resizeMode).toBe('ScaleToFit');
   await click('ring-tile-overview'); await finish();
   expect(node('ring-focused-panel').props.animation.name).toBe('argalaExhibitDanaoRingFocus');
   expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);

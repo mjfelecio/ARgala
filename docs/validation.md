@@ -3383,3 +3383,34 @@ on-site GPS/Passport authority or establish all-locale/size/performance results.
 Minimal actual-navigation samples are stored outside Git at
 `~/Pictures/ARgala-progress/2026-11-14/`, separately from browser concepts and
 private diagnostics in `/tmp/argala-photo-islands-device-2026-11-14/`.
+
+### Owner refinement: larger standalone photographs — offline
+
+The owner found the initial bays too small and loosely placed, requesting larger
+standalone images with context only after opening and possibly nearer covers.
+The phone powered off during review, so no further ADB interaction occurred for
+this refinement. The first native render above concerns the earlier geometry.
+
+The revised Danao welcome is width1.20 at2.1 units. Bay images alternate a
+width1.18/radius2.1 raised lead and width1.02/radius2.2 lower companion, keeping
+original bundled aspect ratios and complete images. Successful photo covers
+have no text below; gallery captions/credits remain available after opening.
+Bay centers−95/+65/+165 avoid the larger welcome; stories have vertical clearance.
+Reader distance remains2.25. All other stages and Classic retain their behavior.
+
+Targeted geometry/scene/gallery regressions passed128 tests/4 files. Full checking
+initially found a session-screen assertion that assumed the old35° forward bay;
+it now verifies the intended65°/2.45-unit story position in the actual host.
+That session suite passed87 tests. Independent read-only review passed93 tests
+in2 files and found no confirmed material issue. Native fit, physical quick taps,
+alpha/depth and visual acceptance remain pending after the owner reconnects.
+No APK or native build was performed; browser illustrations are kept separate
+from the real-app sample gallery.
+
+Final offline gate: `npm run check` passed strict TypeScript, zero-warning lint
+and **1,566 tests / 137 files**. Android export passed with111 assets and Hermes
+`index-81362df873b6d18d2bb8c778190b3a9a.hbc`. The updated illustrative browser
+preview passed seven source-image decodes/opens, three story opens, context
+reveal, Close, straight-on image fit in its simulated view, no browser/HTTP
+errors and no overflow at390px; desktop/mobile renders were visually inspected.
+These browser checks do not establish native fit or physical-device acceptance.

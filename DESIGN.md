@@ -7,6 +7,9 @@ and instructed implementation. Restore looking around by distributing small phot
 bays around the visitor, with optional stories below. Keep the gallery welcome
 ahead, the flat 2.25-unit reader and the stable stationary page swaps. Start with
 Danao; native spacing/tap review gates extension to the other eight destinations.
+The owner's first native refinement makes successful photo covers image-only,
+larger and closer, with original aspect ratios and a deliberate lead/companion
+composition. Context appears after opening; the reader remains at 2.25 units.
 Classic and the preceding front-stage composition remain fallbacks. Photos are
 gallery entrances, never chapters or Passport events. See the
 [approved direction](docs/superpowers/specs/2026-11-14-photo-islands-design.md).

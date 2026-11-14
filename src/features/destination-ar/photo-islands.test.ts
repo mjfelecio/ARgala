@@ -1,11 +1,12 @@
 import { expect, it } from 'vitest';
 import { danaoStageProfile, buildDestinationStageSlots } from './exhibit-stage';
-import { createPhotoIslandsProfile, exhibitGalleryEntries, exhibitSceneEntries, isExhibitGalleryEntry } from './photo-islands';
+import { createPhotoIslandsProfile, exhibitGalleryEntries, exhibitSceneEntries, isExhibitGalleryEntry, photoIslandCoverSize } from './photo-islands';
+import presentationContent from './featured-presentation-content.json';
 import { previewStoryContent } from './development-featured-media';
 import { captureBasis } from './scene-geometry';
 import { RingController } from './ring-controller';
 
-const makeProfile = () => createPhotoIslandsProfile(danaoStageProfile, [-95, 35, 150]);
+const makeProfile = () => createPhotoIslandsProfile(danaoStageProfile, [-95, 65, 165]);
 const initial = { position: [0, 2, 0] as [number, number, number], forward: [0, 0, -1] as [number, number, number] };
 
 it('gives every Danao photograph a distinct entrance without creating chapters', () => {
@@ -29,12 +30,17 @@ it('places separate photo bays around the captured basis with vertical story cle
   const profile = makeProfile(); const entries = exhibitSceneEntries(profile, previewStoryContent('D01'));
   const slots = buildDestinationStageSlots(profile, entries, captureBasis(initial)!);
   expect(slots.map(slot => slot.id)).toEqual(entries.map(entry => entry.id));
-  expect(slots[0].position).toEqual([0, 0.18, -2.4]);
-  expect(slots.slice(1, 7).map(slot => slot.angle)).toEqual([256, 274, 26, 44, 141, 159]);
-  expect(slots.slice(7).map(slot => slot.angle)).toEqual([265, 35, 150]);
-  for (const slot of slots.slice(1)) expect(Math.hypot(slot.position[0], slot.position[2])).toBeCloseTo(2.6);
+  expect(slots[0].position).toEqual([0, 0.18, -2.1]);
+  expect(slots.slice(1, 7).map(slot => slot.angle)).toEqual([249, 283, 49, 83, 149, 183]);
+  expect(slots.slice(7).map(slot => slot.angle)).toEqual([265, 65, 165]);
+  slots.slice(1, 7).forEach((slot, index) => {
+    expect(Math.hypot(slot.position[0], slot.position[2])).toBeCloseTo(index % 2 ? 2.2 : 2.1);
+    expect(slot.position[1]).toBe(index % 2 ? -0.1 : 0.22);
+  });
   for (const slot of slots.slice(7)) {
-    expect(slot.position[1] + 0.52 / 2).toBeLessThan(0.16 - 0.64 / 2 - 0.05);
+    const entries = exhibitGalleryEntries(profile).slice(1);
+    const photoBottom = Math.min(...entries.map((entry, i) => slots[i + 1].position[1] - photoIslandCoverSize(profile, entry).height / 2));
+    expect(slot.position[1] + 0.52 / 2).toBeLessThan(photoBottom - 0.05);
     expect(slot.scale).toBeCloseTo(1.08 / 1.25);
   }
   const turned = buildDestinationStageSlots(profile, entries, captureBasis({ ...initial, forward: [1, 0, 0] })!);
@@ -44,6 +50,23 @@ it('places separate photo bays around the captured basis with vertical story cle
   });
   expect(() => buildDestinationStageSlots(profile, entries.slice(1), captureBasis(initial)!)).toThrow();
   expect(() => buildDestinationStageSlots(profile, [entries[0], ...entries.slice(2), entries[1]], captureBasis(initial)!)).toThrow();
+});
+
+it('uses original photo proportions and larger image-only covers that fit a portrait view', () => {
+  const profile = makeProfile(); const entrances = exhibitGalleryEntries(profile);
+  const slots = buildDestinationStageSlots(profile, exhibitSceneEntries(profile, previewStoryContent('D01')), captureBasis(initial)!);
+  entrances.forEach((entry, index) => {
+    const size = photoIslandCoverSize(profile, entry);
+    const media = presentationContent.media.find(photo => photo.id === (entry.mediaId ?? profile.media[0].id))!;
+    expect(size.height / size.width).toBeCloseTo(media.height / media.width);
+    expect(size.width).toBe(index === 0 ? 1.2 : index % 2 ? 1.18 : 1.02);
+    expect(slots[index].scale).toBeCloseTo(size.width / 1.25);
+    const radius = Math.hypot(slots[index].position[0], slots[index].position[2]);
+    // Border-inclusive angular width stays under 34 degrees; actual A53 fit
+    // remains a device check. Primary photos roughly double the old image span.
+    expect(2 * Math.atan((size.width + 0.04) / (2 * radius)) * 180 / Math.PI).toBeLessThan(34);
+    if (index % 2) expect((size.width / radius) / (0.73 / 2.6)).toBeGreaterThan(1.9);
+  });
 });
 
 it('focuses each photo from its own transform and closes back without rotating the captured basis', () => {
