@@ -21,7 +21,7 @@ export function createPhotoIslandsProfile(front: ExhibitStageProfile, angles: re
 }
 
 export function exhibitGalleryEntries(profile: ExhibitStageProfile): readonly ExhibitGalleryEntrance[] {
-  return [{ id: profile.galleryId }, ...(profile.photoIslands ?? []).flatMap(bay => bay.mediaIds.map(mediaId => ({ id: `${profile.galleryId}-photo-${mediaId}`, mediaId })))];
+  return [{ id: profile.galleryId, ...(profile.photoIslands ? { mediaId: profile.media[0].id } : {}) }, ...(profile.photoIslands ?? []).flatMap(bay => bay.mediaIds.map(mediaId => ({ id: `${profile.galleryId}-photo-${mediaId}`, mediaId })))];
 }
 export function isExhibitGalleryEntry(profile: ExhibitStageProfile, id: string): boolean {
   return exhibitGalleryEntries(profile).some(entry => entry.id === id);

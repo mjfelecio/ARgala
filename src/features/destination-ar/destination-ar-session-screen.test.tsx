@@ -579,7 +579,7 @@ it('restores the native Exhibit gallery photo across background and commits Clos
   await settle(); expect(cameras()).toHaveLength(0);
   await active(true); await settle(); await ready();
   expect(node('ring-focused-panel')).toBeUndefined(); expect(node('exhibit-gallery-entry')).toBeDefined();
-  await click('exhibit-gallery-entry'); await finish(); expect(text('exhibit-photo-position')).toBe('Photo 2 / 7');
+  await click('exhibit-gallery-entry'); await finish(); expect(text('exhibit-photo-position')).toBe('Photo 1 / 7');
   expect(tree!.root.findByType('photo-controls' as React.ElementType).props.capture).toBeTypeOf('function');
 });
 

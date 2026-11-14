@@ -84,7 +84,7 @@ unrelated pending auth/SDK edits. Minimal device gallery outside repository.
   each story, rapid paging, Close, Recenter and temporary tracking/Help recovery.
 - [ ] Capture only important actual-navigation screenshots/short clip, inspect
   evidence, and release camera on Exit. Record exact native verification limits.
-- [ ] Show Danao for owner review. Extend islands to other destinations only
+- [x] Show Danao for owner review. Extend islands to other destinations only
   after physical acceptance; do not infer approval from automated screenshots.
 
 ### Task 4: Owner refinement — larger standalone photo collages
@@ -101,5 +101,22 @@ unrelated pending auth/SDK edits. Minimal device gallery outside repository.
 - [x] Preserve exact-media opening, context/caption/credit access in the reader,
   Classic, old Danao fallback and eight other destinations.
 - [x] Run focused tests, `npm run check`, Android export and review the diff.
-- [ ] Revisit on A53 after the owner reconnects it; power-off interrupted review.
+- [x] Revisit on A53 after the owner reconnects it; power-off interrupted review.
   Do not connect while charging without the owner's notification.
+
+### Task 5: Match standalone welcome context to its displayed photograph
+
+Native retesting found the now-unlabeled welcome picture still resumed another
+gallery photo after Next/Close. Bind its descriptor to its displayed media ID,
+as with every other standalone photo. Keep the old labeled front-stage gallery
+resumable, logical cursor/background restoration intact, and stable main IDs.
+
+- [x] Reproduce on A53 and observe the real-scene regression fail before fixing.
+- [x] Bind explicit welcome media only for islands and classify its main surface
+  by gallery ID, retaining the existing accepted-selection/cursor fence.
+- [x] Cover intentional photo selection, background restoration, retired clicks,
+  chapter separation and old front-stage resume; independent180-test review clean.
+- [x] Run full check:1,566 tests/137files, TypeScript/zero-warninglint; Android
+  export111assets, Hermes index-d92db1b42eabc08c0729df7f67d3ea53.hbc.
+- [x] Repeat native photo1→Next→Close→welcome and confirm photo1 context, then
+  complete owner physical bay/spacing review before the eight-destination rollout.

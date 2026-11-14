@@ -12,7 +12,7 @@ const initial = { position: [0, 2, 0] as [number, number, number], forward: [0, 
 it('gives every Danao photograph a distinct entrance without creating chapters', () => {
   const profile = makeProfile(); const entries = exhibitGalleryEntries(profile);
   expect(entries).toHaveLength(7);
-  expect(entries[0]).toEqual({ id: profile.galleryId }); // Welcome resumes, never resets.
+  expect(entries[0]).toEqual({ id: profile.galleryId, mediaId: profile.media[0].id }); // A photo opens its own context.
   expect(entries.slice(1).map(entry => entry.mediaId)).toEqual(profile.media.slice(1).map(photo => photo.id));
   expect(new Set(entries.map(entry => entry.id)).size).toBe(7);
   for (const entry of entries) expect(isExhibitGalleryEntry(profile, entry.id)).toBe(true);

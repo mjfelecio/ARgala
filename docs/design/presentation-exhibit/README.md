@@ -33,6 +33,19 @@ errors; covers fit its illustrative view when faced directly. Native acceptance
 still requires the reconnected A53. No new app-navigation sample was captured
 after the phone powered off.
 
+The reconnected A53 exposed one follow-up interaction mismatch: after paging,
+tapping the unlabeled paddleboarder welcome could resume a different photo.
+Every standalone photo, including welcome, now explicitly opens its depicted
+image and context. Saved focus still restores its cursor; labeled front-stage
+galleries retain their accepted resume behavior. Native identity and the shared
+gallery/transition owner stay intact. A real-scene regression failed first;
+full1,566-test check/export passed after the correction. Native repeat and bay
+spacing/tap review continue on the same existing development APK.
+
+The owner then accepted the refined Danao on the physical A53: “Looks good and
+taps are reliable,” answering the three-pair/picture/Next/Close review prompt.
+This clears the agreed checkpoint for the remaining eight destinations.
+
 ### Initial native slice and preceding decisions
 
 After reviewing the all-nine stage rollout, the owner requested more reason to

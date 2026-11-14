@@ -33,8 +33,10 @@ only explicit Recenter or a new native frame changes it.
 ## Interaction and ownership
 
 A bay photo opens the existing full destination gallery at that exact media ID.
-Next/Previous continue through the same ordered gallery. The welcome entrance
-resumes the existing gallery cursor. All entrances have distinct native focus
+Next/Previous continue through the same ordered gallery. The standalone welcome
+photograph also opens its own context. Progress survives Close and background
+restoration; a deliberate photo tap chooses that image. The old labeled
+front-stage gallery continues to resume. All entrances have distinct native focus
 IDs so focus/Close use the selected tile's actual transform. Logical restoration
 stores only the existing gallery cursor/focused flag, never photo entrances as
 selected chapters or openings. Gallery browsing cannot create Passport progress.

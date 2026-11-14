@@ -187,7 +187,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
     if (next) {
       const entrance = stage && exhibitGalleryEntries(stage.profile).find(entry => entry.id === id);
       // A retired/blocked tap must never reset the shared gallery cursor. The
-      // welcome resumes; a specific photo explicitly starts at that media ID.
+      // labeled galleries resume; every standalone photo starts at its media ID.
       if (next.phase === 'opening' && entrance?.mediaId) setGalleryCursor({ page: 0, offset: 0,
         locale: i18n.resolvedLanguage ?? i18n.language, size: reading.size, mediaId: entrance.mediaId, mediaPage: 0 });
       commitSelection(next);

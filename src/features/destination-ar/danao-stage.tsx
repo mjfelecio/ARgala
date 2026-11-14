@@ -39,7 +39,7 @@ export function ExhibitGalleryEntry({ profile, entry = { id: profile.galleryId }
   useLayoutEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   const select = useCoverAction(enabled, () => onSelect(entry.id));
   const photo = profile.media.find(photo => photo.id === entry.mediaId) ?? profile.media[0];
-  const island = !!entry.mediaId;
+  const island = entry.id !== profile.galleryId;
   if (profile.photoIslands) {
     const { width, height } = photoIslandCoverSize(profile, entry);
     return <ViroNode testID={island ? `exhibit-island-entry-${photo.id}` : 'exhibit-gallery-entry'} position={slot.position} rotation={slot.rotation} onClick={enabled ? select : undefined}>

@@ -3414,3 +3414,47 @@ preview passed seven source-image decodes/opens, three story opens, context
 reveal, Close, straight-on image fit in its simulated view, no browser/HTTP
 errors and no overflow at390px; desktop/mobile renders were visually inspected.
 These browser checks do not establish native fit or physical-device acceptance.
+
+### Refined Photo Islands native return and pictured context — 2026-11-14
+
+After the owner reopened the A53, USB/Metro8081 was restored and the same
+November8 development APK used (SM-A536E/Android16,1080×2400,density420,font1.1).
+The owner had accepted the refined browser's museum direction; native bay/touch
+acceptance remains separate. Explicit Exhibit→Danao→Start reached tracking-ready.
+The larger welcome photo rendered without labels. An early tilted view clipped
+its left edge slightly; the subsequent settled first view showed the complete
+image within the screen width. Photo1 context, Next→Photo2 and Close were observed.
+
+This exposed a semantic mismatch after removing the gallery label: the static
+welcome picture could open a different, previously viewed image. The standalone
+welcome now binds its own media ID, while old labeled galleries still resume.
+Gallery progress remains retained through Close and background restoration;
+only a new accepted image tap chooses that picture. Main native IDs, camera,
+2.25-unit reader, capture service and chapter/Passport boundaries are unchanged.
+
+The real-scene regression failed before correction. Final `npm run check` passed
+TypeScript, zero-warning lint and **1,566 tests/137files**. Android export passed
+111assets, Hermes `index-d92db1b42eabc08c0729df7f67d3ea53.hbc`. Independent read-only
+follow-up passed180 tests/3files with no confirmed issue. No APK was built.
+
+Native repeat paged to Photo2, closed and then opened the welcome picture at its
+correct Photo1 context. Several short synthetic taps during the return did not
+select; an180ms stationary ADB gesture on the settled image did. The short video
+shows a gap while browse geometry/images return after Close. This is not proof
+of physical quick-tap reliability or a diagnosed input failure. The owner is
+reviewing actual turns, three-bay reachability, size and finger taps before the
+other eight destinations receive this layout. All-locale/size and controlled
+tracking/background/capture combinations for the refinement remain unverified.
+
+Private navigation diagnostics: `/tmp/argala-photo-islands-refined-device-2026-11-14/`.
+Only useful, inspected samples will join the existing local curated gallery;
+raw Maps/account views and browser concepts stay separate. The camera was
+confirmed released at the temporary Exit for the correction, then explicitly
+reopened for owner review. No on-site GPS/Passport authority follows from it.
+
+The owner subsequently reported **“Looks good and taps are reliable”** after the
+prompt to turn to the three photo pairs and try a picture, Next and Close. This
+accepts the refined Danao direction/spacing and physical taps for rollout. It is
+owner-reported device evidence; it is not an independent seven-entry sweep or
+every locale, size and lifecycle combination. Expansion to the other eight
+destinations is now authorized by the agreed Danao-first checkpoint.

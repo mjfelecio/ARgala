@@ -611,7 +611,7 @@ it('isolates the Exhibit reader throughout opening, focus and Close, retiring hi
   expect(node('ring-focused-panel')).toBeUndefined();
 });
 
-it('opens a gallery independently of chapters and restores the same photo after Close', async () => {
+it('retains gallery progress after Close but opens the visible welcome photograph on a new tap', async () => {
   const progress = vi.fn(); sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, onProgress: progress };
   await mount(); await track(); await pose();
   expect(node('exhibit-gallery-entry')).toBeDefined();
@@ -628,17 +628,17 @@ it('opens a gallery independently of chapters and restores the same photo after 
   expect(progress.mock.lastCall?.[0]).toMatchObject({ selectedId: null, openedIds: [], exhibitGallery: { focused: true } });
   await press('ring-action-gallery-photo-next');
   expect(text('exhibit-photo-position')).toBe(translations.t('presentation.photoPosition', { current: 2, total: 7 }));
-  const source = tree.root.findByProps({ testID: 'ring-gallery-image' }).props.source;
   expect(node('ring-body')).toBeUndefined();
   expect(progress.mock.lastCall?.[0].openedIds).toEqual([]);
   await press('ring-action-close');
   expect(progress.mock.lastCall?.[0].exhibitGallery.focused).toBe(false);
   expect(node('exhibit-gallery-entry')).toBeUndefined();
   await finish();
+  expect(progress.mock.lastCall?.[0].exhibitGallery.cursor.mediaId).toBe(danaoStagePresentation.stage!.profile.media[1].id);
   await act(async () => retiredEntry());
   expect(node('ring-focused-panel')).toBeUndefined();
   await press('exhibit-gallery-entry'); await finish();
-  expect(tree.root.findByProps({ testID: 'ring-gallery-image' }).props.source).toBe(source);
+  expect(tree.root.findByProps({ testID: 'ring-gallery-image' }).props.source).toBe(danaoStagePresentation.stage!.profile.media[0].source);
 });
 
 it('retains gallery completion through Help and tracking loss and restores only after a current pose', async () => {
@@ -791,7 +791,7 @@ it.each(['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09'] as const
   await act(async () => retiredNext?.());
   expect(progress.mock.lastCall?.[0].openedIds).toEqual(content.map(chapter => chapter.id));
   await press('exhibit-gallery-entry'); await finish();
-  expect(text('exhibit-photo-position')).toBe(`Photo ${profile.media.length} / ${profile.media.length}`);
+  expect(text('exhibit-photo-position')).toBe(`Photo ${profile.photoIslands ? 1 : profile.media.length} / ${profile.media.length}`);
   expect(native.patches.some(item => (item.patch.animation as { run?: boolean; name?: string } | undefined)?.run && (item.patch.animation as { name: string }).name.includes('PageReveal'))).toBe(false);
 });
 
@@ -816,7 +816,7 @@ it('opens each Danao photo island at its exact image while retaining only galler
     await finish(); expect(node(`exhibit-island-entry-${entry.mediaId}`)).toBeDefined();
   }
   await press('exhibit-gallery-entry'); await finish();
-  expect(progress.mock.lastCall?.[0].exhibitGallery.cursor.mediaId).toBe(entrances.at(-1)!.mediaId);
+  expect(progress.mock.lastCall?.[0].exhibitGallery.cursor.mediaId).toBe(profile.media[0].id);
 });
 
 it('fences queued photo-island taps, retains cursor through Help, and restores a gallery after a new frame', async () => {
@@ -871,7 +871,7 @@ it.each(['en', 'ja', 'ko'])('shows %s photo context only after opening and keeps
   for (const cover of covers) expect(cover.props).toMatchObject({ highAccuracyEvents: true, ignoreEventHandling: false, resizeMode: 'ScaleToFit', position: [0, 0, 0.007] });
   const entrances = exhibitGalleryEntries(danaoStagePresentation.stage!.profile);
   for (const entry of entrances) {
-    const cover = node(entry.mediaId ? `exhibit-island-entry-${entry.mediaId}` : 'exhibit-gallery-entry');
+    const cover = node(entry.id === danaoStagePresentation.stage!.profile.galleryId ? 'exhibit-gallery-entry' : `exhibit-island-entry-${entry.mediaId}`);
     expect(cover.findAllByType('viro-text' as React.ElementType)).toHaveLength(0);
   }
   for (const line of tree.root.findAllByType('polyline' as React.ElementType)) expect(line.props.ignoreEventHandling).toBe(true);
@@ -891,4 +891,7 @@ it('keeps the accepted Danao front stage available and other destinations outsid
   await mount(); await track(); await pose(); await press('exhibit-gallery-entry'); await finish();
   expect(text('exhibit-photo-position')).toBe('Photo 1 / 7');
   expect(node('exhibit-photo-island-scenery')).toBeUndefined();
+  await press('ring-action-gallery-photo-next'); await press('ring-action-close'); await finish();
+  await press('exhibit-gallery-entry'); await finish();
+  expect(text('exhibit-photo-position')).toBe('Photo 2 / 7');
 });
