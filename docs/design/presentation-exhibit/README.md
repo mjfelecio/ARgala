@@ -64,9 +64,13 @@ by default; accepted front profiles and the Danao front presentation are retaine
 Offline gate: **1,586 tests/138files**, strict TypeScript, zero-warning lint and
 Android export111assets passed. Fresh independent review passed200 tests/4files
 with no confirmed material issue, including actual allnine gallery/chapter/
-background owners. New native sweep is pending: the connected phone entered its
-charging screensaver/keyguard while offline checks ran; the owner was asked to
-unlock it. This is distinct from the earlier accepted front-stage allnine sweep.
+background owners. After unlocking and explicitly reloading the client, the new
+A53 sweep passed allnine welcome→Photo1→Photo2→Close paths. The owner turned to
+Pineapple's portrait bay; its full sign photo and story clearance were inspected,
+and tapping it opened the matching Photo4. This is representative native coverage,
+not all53 individual entrances, every chapter or locale. Exact remaining limits,
+capture/restoration observations and external gallery evidence are recorded in
+`docs/validation.md`, separately from the earlier accepted front-stage sweep.
 See [rollout plan](../../superpowers/plans/2026-11-14-photo-islands-rollout.md).
 
 ### Initial native slice and preceding decisions

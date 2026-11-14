@@ -56,7 +56,13 @@ tests and documentation. Existing source profiles remain unchanged for rollback.
 - [x] Enable all9 islands through stable immutable presentations. Generalize
   static bay bases with the destination's existing welcome scenery.
 - [x] Verify targeted tests, full `npm run check`, Android export and fresh review.
-- [ ] Sweep allnine on A53 using existing APK; inspect representative portraits,
+- [x] Sweep allnine on A53 using existing APK; inspect representative portraits,
   gallery/chapter/Close, capture preview/Discard, and release camera on Exit.
-- [ ] Add minimal inspected external gallery samples; update exact validation
+- [x] Add minimal inspected external gallery samples; update exact validation
   coverage/limits, commit only task changes and leave unrelated SDK/auth work.
+
+Native evidence: source3b824ae, existing Nov8 client. Allnine welcome/gallery1→2/
+Close checks passed; D05 full portrait selection, chapter2 paging and capture/
+Discard passed. Exit released the camera. Two screenshots and one eight-second
+navigation clip added externally. Exact limits are in `docs/validation.md`:
+representative native checks, not all53 entrances/all20 chapters/JA/KO/FPS.

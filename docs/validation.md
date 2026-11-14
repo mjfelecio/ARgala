@@ -3488,3 +3488,54 @@ it. ADB remained connected and the process existed. Wake did not dismiss the
 screensaver; the owner was asked to unlock. Do not diagnose an app crash or infer
 new physical results from this state. The earlier allnine front-stage sweep and
 owner's refined Danao acceptance remain separate evidence.
+
+### Allnine Photo Islands — A53 entry/gallery sweep
+
+After the owner unlocked the phone, the retained old front-stage scene was exited
+and the Expo development client explicitly reloaded. The following observations
+use source `3b824ae`, the existing November8 APK, Galaxy A53 SM-A536E/Android16,
+1080×2400, density420, font scale1.1, English and dark OS. No APK was rebuilt,
+installed or upgraded. Actual ARCore tracking and app controls were used; no
+synthetic poses, GPS samples or admission were injected.
+
+Allnine destinations reached tracking-ready and showed their image-only welcome.
+For each, opening the welcome, advancing from Photo1 to2 and Close restored the
+complete welcome and its destination scenery. Photo denominators remained D01=7,
+D02/D07=5 and allothers=6. Full near-square Janagdan, long Mangrove/Golf headers
+and the high-resolution Heaven's Peak entrance rendered correctly. Native photo
+captions and Previous/Next/Close controls were visible. These are two-photo entry
+checks per destination, not a fresh native sweep of all53 individual entrances.
+
+The owner physically turned to Pineapple Plantation's portrait bay. Its full
+SAL Queen sign photograph fit without cropping, with a visible gap before the
+chapter2 control below. An actual native image hit opened the matching Photo4/6
+and its caption; Close returned to that same bay. The taller companion's complete
+standalone fit and Alto Peak's portrait bay were not independently inspected.
+One synthetic Next attempt missed as the physical phone view moved; the captured
+state remained Photo4, so it is not recorded as successful Photo5 coverage.
+
+The same bay's chapter2 opened with1/3 session-only chapter progress, independently
+of gallery activity. After the phone settled, Next reached page2/3 and Previous
+returned to1/3. Close eventually restored the photo-only browse scene; an earlier
+post-Close frame still showed its cover texture at reader size before settling.
+The frame remained anchored as the owner turned; off-axis reader edges moved
+outside the camera view. Automated taps taken at stale projected positions missed
+and were retried against the visible controls. No coordinate/pose override or
+implicit recenter was used.
+
+Capture reached preview twice. The first preview followed a physical turn toward
+an empty wall; after owner Discard, the same focused chapter/page returned. A
+second capture visibly included the standalone welcome photograph and field lines
+in the native camera composite. Save/Share were not invoked.
+The second Discard restored that same browse photograph and field scenery.
+Final Exit returned to the Exhibit selector; Android camera diagnostics reported
+`Active Camera Clients: []`.
+
+Two inspected original screenshots were added to the external progress gallery:
+`16-heavens-peak-standalone-islands.png` and
+`17-sabin-islands-photo-context.png`. One eight-second navigation clip,
+`18-pineapple-islands-capture-discard.mp4`, shows preview→Discard→browse. Its
+off-axis camera framing is preserved; no Save/Share occurred. The gallery's SHA256
+index was verified for all18 samples. Portrait diagnostics include personal room background and remain
+private. This sweep does not establish on-site GPS/Passport behavior, all20 new
+native chapter entrances, JA/KO glyphs, all reading sizes or measured FPS/memory.
