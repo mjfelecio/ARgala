@@ -1,4 +1,40 @@
-# D01 first spatial prototype review
+# D01 destination stage and gallery
+
+## Current owner decisions — 2026-11-14
+
+Jelzon confirmed **November 21**. The owner reports the complete Classic device
+sweep passed and approved the corrected first Exhibit. Classic is the accepted
+presentation fallback. The owner then selected destination-specific stages and
+approved the Danao gallery-first browser concept: photographs lead, stories are
+optional. Target new visual completion Nov19 and reserve Nov20 for stabilization.
+The [approved stage illustration](D01-STAGE-REVIEW.html) is preserved separately
+from native device evidence; it is a browser design preview, not an AR screenshot.
+
+The new D01 implementation adds one prominent gallery entrance containing all
+seven supplied photos, three compact story stations and six symbolic ridge/ripple
+contours. The entrance preview fills its wide frame; the opened gallery uses
+aspect-fit images so the complete original is available. Previous/Next changes
+photographs directly; long captions and credits have separate text controls.
+The initial native version omits the browser thumbnail strip for viewing space.
+The existing reader stays at 2.25 units. All stage geometry retires during focus
+and Close; only completed Close restores it. Gallery progress is separate from
+chapter openings and Passport. Help, reduced motion/effects and tracking fences
+quiet ornament without removing content or controls.
+
+The previous faceted prototype remains an immutable internal rollback profile;
+Classic stays selectable and default. The new stage is D01-only until native
+review. Do not extend to D02–D09 before acceptance of this version. See the
+[design](../../superpowers/specs/2026-11-14-destination-stages-design.md) and
+[implementation plan](../../superpowers/plans/2026-11-14-destination-stages.md).
+
+**No phone connection was made during this implementation:** the owner is
+charging the A53 and will announce availability. Native appearance, tap routing,
+CJK/large captions, alpha rendering, capture, recovery and performance for the new
+stage remain unverified. Existing physical results below concern the earlier
+prototype. Source checks and an export do not establish device acceptance or
+produce a standalone APK. No APK build/install/publication was performed.
+
+## Earlier first prototype
 
 Classic is the content-complete fallback (commit `9960138`). The first Exhibit slice is limited to Lake Danao: three faceted chapter panels, chapter-specific cover photos, a text-led middle chapter, layered frames, native entrance/focus and short photo reveals. The flat reader stays at 2.25 units; content and credits remain complete. No atmospheric particles or other-destination rollout has started.
 
@@ -12,6 +48,25 @@ The source workspace's uncommitted SDK/auth changes were copied for compatibilit
 
 ## Galaxy A53 acceptance gate
 
+For the **new gallery-first stage**, after the owner announces the phone is ready:
+
+- Enter Exhibit → Lake Danao; inspect the wide photo entrance, all three story
+  stations and ridge/ripple contours. No selection should happen during intro.
+- Open Gallery and browse photos1–7 directly. More text/Back changes only caption
+  or credit pages; Previous/Next changes the photograph. Check first/last disabled
+  states, complete credits, native image failure/Retry and enlarged JA/KO captions.
+- While gallery/story focus is opening, focused or closing, verify no stage covers
+  or scenery overlap it. Close returns to the same composition; reopen keeps the
+  last photo. Check physical quick taps, not only synthetic ADB taps.
+- Background/recover while focused, and immediately after accepted Close; retain
+  the correct open/collapsed state and gallery photo. Help must quiet ornament,
+  fence taps and keep the camera frame. Recenter remains explicit.
+- Compare Capture/Discard, native readability and warm repeated photo navigation
+  with Classic. Save a minimal representative screenshot/short clip only during
+  this navigation; record source/client/device and development caveats.
+
+The following earlier-prototype matrix remains useful for regression:
+
 Record client/APK identity, JS revision, device/Android version, battery, font scale, language and lighting. Compare Classic and Exhibit in brief batches using the same client and environment:
 
 - All nine Classic destinations, all 20 chapters and all 53 photos; confirm offline availability after client/asset preparation.
@@ -20,7 +75,10 @@ Record client/APK identity, JS revision, device/Android version, battery, font s
 - Capture, Help, explicit Recenter, tracking loss/recovery, background/return and exit/reentry; no camera overlap or implicit recenter.
 - Native frame pacing and memory during repeated photo navigation. JS scheduling pressure is not renderer FPS. Include D08 large photographs in later rollout checks.
 
-Collect owner feedback on this first slice **before further polish or extending to the other eight destinations**. The owner reports that quick finger taps work reliably, but has not yet reviewed the visual direction. The targeted A53 results below do not complete the full acceptance matrix or establish native performance acceptance. Once Jelzon's deadline arrives, set the feature cutoff with final testing, packaging and recovery reserved; deliver Classic if Exhibit is not accepted.
+The owner subsequently approved this first slice and reported that the complete
+Classic sweep passed. The targeted agent-run A53 observations below remain
+distinct from that later owner acceptance and do not establish native performance
+acceptance. The new gallery/stage above needs its own D01 review before extension.
 
 ## Targeted Galaxy A53 results — 2026-11-14
 

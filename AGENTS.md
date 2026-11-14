@@ -235,3 +235,14 @@ exclude account details, credentials, precise location and unrelated personal
 content. Keep raw troubleshooting captures separate from the curated gallery.
 Mention the gallery path when new samples are added. This applies to app
 navigation testing, not ordinary code edits or command-line checks.
+
+## Exhibit gallery and focused commands — 2026-11-14
+
+- Destination galleries are photo-browsing affordances, separate from chapter
+  IDs, opening counts and Passport. Validate session-only gallery cursors against
+  explicit destination media IDs; mode/principal/admission replacement or terminal
+  expiry retires them. Classic has no gallery progress unless explicitly configured.
+- Focused page and reading-size callbacks must check the surviving controller's
+  focused phase and transition token as well as committed interactivity/tracking.
+  Enabled React props alone leave a window after Close is accepted but before its
+  render commits. Gallery and chapter commands share this ownership fence.

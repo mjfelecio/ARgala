@@ -5,7 +5,7 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { DestinationRingScene, type RingControls } from './destination-ring-scene';
-import { exhibitPresentation } from './exhibit-ring-scene';
+import { exhibitPresentation, danaoStagePresentation } from './exhibit-ring-scene';
 import { previewStoryContent } from './development-featured-media';
 import { RingController } from './ring-controller';
 import { ViroMaterials } from '@reactvision/react-viro';
@@ -19,7 +19,7 @@ vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
 vi.mock('uniwind', () => ({ useCSSVariable: () => ['#247A53', '#102724', '#71DCD2', '#FFFFFF', "'PlusJakartaSans'"] }));
 vi.mock('@reactvision/react-viro', async () => {
   const R = await import('react');
-  return { ViroARScene: 'native-scene', ViroImage: 'viro-image', ViroQuad: 'quad', ViroText: 'viro-text', ViroARSceneNavigator: 'navigator',
+  return { ViroARScene: 'native-scene', ViroImage: 'viro-image', ViroQuad: 'quad', ViroPolyline: 'polyline', ViroText: 'viro-text', ViroARSceneNavigator: 'navigator',
     ViroNode: R.forwardRef((props: { testID?: string; children?: React.ReactNode }, ref) => {
       R.useImperativeHandle(ref, () => ({ setNativeProps: (patch: Record<string, unknown>) => native.patches.push({ id: props.testID ?? '', patch }) }), [props.testID]);
       return R.createElement('native-node', props, props.children);
@@ -608,4 +608,127 @@ it('isolates the Exhibit reader throughout opening, focus and Close, retiring hi
   for (const id of ['overview', 'chapter-2', 'chapter-3']) expect(node(`ring-tile-${id}`)).toBeDefined();
   await act(async () => retiredSelection());
   expect(node('ring-focused-panel')).toBeUndefined();
+});
+
+it('opens a gallery independently of chapters and restores the same photo after Close', async () => {
+  const progress = vi.fn(); sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, onProgress: progress };
+  await mount(); await track(); await pose();
+  expect(node('exhibit-gallery-entry')).toBeDefined();
+  expect(tree.root.findByProps({ testID: 'exhibit-gallery-cover' }).props).toMatchObject({ resizeMode: 'ScaleToFill', imageClipMode: 'ClipToBounds' });
+  expect(tree.root.findAllByType('polyline' as React.ElementType).length).toBeGreaterThan(0);
+  const retiredEntry = node('exhibit-gallery-entry').props.onClick;
+  await press('exhibit-gallery-entry');
+  expect(node('exhibit-gallery-entry')).toBeUndefined();
+  expect(node('ring-tile-chapter-2')).toBeUndefined();
+  expect(tree.root.findAllByType('polyline' as React.ElementType)).toHaveLength(0);
+  await finish();
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
+  expect(text('exhibit-photo-position')).toBe(translations.t('presentation.photoPosition', { current: 1, total: 7 }));
+  expect(progress.mock.lastCall?.[0]).toMatchObject({ selectedId: null, openedIds: [], exhibitGallery: { focused: true } });
+  await press('ring-action-gallery-photo-next');
+  expect(text('exhibit-photo-position')).toBe(translations.t('presentation.photoPosition', { current: 2, total: 7 }));
+  const source = tree.root.findByProps({ testID: 'ring-gallery-image' }).props.source;
+  expect(node('ring-body')).toBeUndefined();
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual([]);
+  await press('ring-action-close');
+  expect(progress.mock.lastCall?.[0].exhibitGallery.focused).toBe(false);
+  expect(node('exhibit-gallery-entry')).toBeUndefined();
+  await finish();
+  await act(async () => retiredEntry());
+  expect(node('ring-focused-panel')).toBeUndefined();
+  await press('exhibit-gallery-entry'); await finish();
+  expect(tree.root.findByProps({ testID: 'ring-gallery-image' }).props.source).toBe(source);
+});
+
+it('retains gallery completion through Help and tracking loss and restores only after a current pose', async () => {
+  sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation };
+  await mount(); await track(); await pose(); await press('exhibit-gallery-entry');
+  const done = node('ring-focused-panel')?.props.animation.onFinish;
+  expect(done).toBeTypeOf('function');
+  sceneOptions = { ...sceneOptions, interactive: false }; await act(async () => tree.update(wrapper()));
+  await act(async () => done());
+  expect(node('ring-action-gallery-photo-next')).toBeUndefined();
+  await track(2); await track();
+  sceneOptions = { ...sceneOptions, interactive: true }; await act(async () => tree.update(wrapper()));
+  expect(node('ring-action-gallery-photo-next')).toBeUndefined();
+  await pose(initial, 1100);
+  expect(node('ring-action-gallery-photo-next')).toBeDefined();
+  await press('ring-action-gallery-photo-next');
+  const restore = { selectedId: null, cursors: {}, openedIds: [], exhibitGallery: { focused: true,
+    cursor: { page: 0, offset: 0, locale: 'en', size: 'standard' as const, mediaId: 'D01-ext-11', mediaPage: 0 } } };
+  await act(async () => tree.unmount()); sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, initialProgress: restore };
+  await mount(); await track(); await pose();
+  expect(text('exhibit-photo-position')).toBe(translations.t('presentation.photoPosition', { current: 2, total: 7 }));
+  expect(node('exhibit-gallery-entry')).toBeUndefined();
+});
+
+it('keeps Danao scenery noninteractive and retires it for Help and reduced motion', async () => {
+  sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation };
+  await mount(); await track(); await pose();
+  const decoration = tree.root.findAllByType('polyline' as React.ElementType);
+  expect(decoration.length).toBeGreaterThan(0); expect(decoration.length).toBeLessThanOrEqual(64);
+  for (const node of decoration) expect(node.props.ignoreEventHandling).toBe(true);
+  const entry = node('exhibit-gallery-entry');
+  expect(entry.findAllByType('viro-image' as React.ElementType).some(image => image.props.highAccuracyEvents && !image.props.ignoreEventHandling)).toBe(true);
+  sceneOptions = { ...sceneOptions, interactive: false }; await act(async () => tree.update(wrapper()));
+  expect(tree.root.findAllByType('polyline' as React.ElementType)).toHaveLength(0);
+  await act(async () => tree.unmount()); native.reduced = true;
+  sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation };
+  await mount(); await track(); await pose();
+  expect(node('exhibit-gallery-entry')).toBeDefined();
+  expect(tree.root.findAllByType('polyline' as React.ElementType)).toHaveLength(0);
+});
+
+it('keeps the stage chapter denominator at three and never counts the gallery as an opening', async () => {
+  const progress = vi.fn(); sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, onProgress: progress };
+  await mount(); await track(); await pose(); await press('exhibit-gallery-entry');
+  await act(async () => controls!.recenter());
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual([]);
+  await press('ring-action-close'); await finish();
+  await press('ring-tile-overview'); await finish();
+  expect(text('ring-chapter-position')).toBe(translations.t('destinationStories.chapter', { current: 1, total: 3 }));
+  expect(text('ring-sample-label')).toBe(translations.t('destinationStories.openedCount', { count: 1, total: 3 }));
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual(['overview']);
+  expect(progress.mock.lastCall?.[0].exhibitGallery.focused).toBe(false);
+});
+
+it('rejects a queued gallery page command after Close is accepted but before React commits', async () => {
+  const progress = vi.fn(); sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, onProgress: progress };
+  await mount(); await track(); await pose(); await press('exhibit-gallery-entry'); await finish();
+  const next = node('ring-action-gallery-photo-next').props.onClick;
+  const close = node('ring-action-close').props.onClick;
+  await act(async () => { close(); next(); });
+  expect(progress.mock.lastCall?.[0].exhibitGallery).toMatchObject({ focused: false, cursor: { mediaId: 'D01-preview' } });
+  await finish(); await press('exhibit-gallery-entry'); await finish();
+  expect(text('exhibit-photo-position')).toBe('Photo 1 / 7');
+});
+
+it('also fences queued Classic page commands after accepted Close', async () => {
+  const progress = vi.fn(); sceneOptions = { onProgress: progress };
+  await mount(); await track(); await pose(); await press('ring-tile-history'); await finish();
+  const next = node('ring-action-next').props.onClick; const close = node('ring-action-close').props.onClick;
+  await act(async () => { close(); next(); });
+  expect(progress.mock.lastCall?.[0].cursors.history).toBeUndefined();
+  await finish(); await press('ring-tile-history'); await finish();
+  expect(text('ring-page-indicator')).toMatch(/^1 /);
+});
+
+it('keeps stage ornament quiet when Help is opened during the introduction', async () => {
+  sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, deployment: 'return', interactive: false, effectsEnabled: false };
+  await mount(); await track(); await pose();
+  expect(node('exhibit-gallery-entry')).toBeDefined();
+  expect(tree.root.findAllByType('polyline' as React.ElementType)).toHaveLength(0);
+});
+
+it('does not let a retired Danao gallery completion affect a new Classic frame', async () => {
+  sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation };
+  await mount(); await track(); await pose(); await press('exhibit-gallery-entry');
+  const done = node('ring-focused-panel').props.animation.onFinish;
+  await act(async () => tree.unmount());
+  sceneOptions = { content: previewStoryContent('D01') }; await mount(); await track(); await pose(); await press('ring-tile-chapter-2');
+  await act(async () => done());
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaRingFocus');
+  expect(node('ring-focused-panel').props.animation.run).toBe(true);
+  expect(node('exhibit-gallery-entry')).toBeUndefined();
+  await finish(); expect(node('ring-reader-toolbar')).toBeDefined();
 });

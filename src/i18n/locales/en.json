@@ -707,6 +707,13 @@
     "openDanao": "Open Lake Danao Exhibit",
     "loadFailed": "The spatial exhibit could not load. Retry or continue with Classic.",
     "useClassic": "Continue with Classic",
-    "session": "Presentation session"
+    "session": "Presentation session",
+    "galleryTitle": "Photo gallery",
+    "galleryExplore": "Explore in pictures",
+    "galleryCount": "{{count}} photographs · Open gallery",
+    "photoPosition": "Photo {{current}} / {{total}}",
+    "captionBack": "Back",
+    "captionMore": "More text",
+    "readStory": "Read story"
   }
 }

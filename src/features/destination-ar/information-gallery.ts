@@ -4,7 +4,7 @@ import type { ReadingSize } from './reading-preference';
 import { readerLayout, readerLineBudget } from './reader-layout';
 
 export type GalleryPage = ContentPage & ({ kind: 'text'; media?: never; mediaPage?: never } | { kind: 'image'; media: DestinationMedia; mediaPage: number });
-export function galleryPages(textPages: readonly ContentPage[], media: readonly DestinationMedia[], locale: string, size: ReadingSize, credit: (value: string) => string, englishFallback: string, presentation: 'photo' | 'gallery' | 'story' = 'story'): GalleryPage[] {
+export function galleryPages(textPages: readonly ContentPage[], media: readonly DestinationMedia[], locale: string, size: ReadingSize, credit: (value: string) => string, englishFallback: string, presentation: 'photo' | 'gallery' | 'story' = 'story', captionHeight: number = readerLayout.caption.height): GalleryPage[] {
   const language = locale.startsWith('ja') ? 'ja' : locale.startsWith('ko') ? 'ko' : 'en';
   const images = media.map(item => {
     const alt = localizedContent(item.alt, language);
@@ -14,7 +14,7 @@ export function galleryPages(textPages: readonly ContentPage[], media: readonly 
       caption?.value !== alt?.value ? caption?.value : undefined, credit(item.credit)].filter(Boolean).join('\n');
     // Metadata has its own measured region below the photograph. Keep complete
     // source offsets and repeat the same image through caption/credit pages.
-    return paginate(metadata, size, '', readerLineBudget(readerLayout.caption.height, readingMetrics[size].fontSize)).map((page, index): GalleryPage => ({
+    return paginate(metadata, size, '', readerLineBudget(captionHeight, readingMetrics[size].fontSize)).map((page, index): GalleryPage => ({
       ...page, kind: 'image', media: item, mediaPage: index,
     }));
   });

@@ -665,6 +665,13 @@
     "openDanao": "다나오 호수 공간 전시 열기",
     "loadFailed": "공간 전시를 불러오지 못했습니다. 다시 시도하거나 클래식으로 계속하세요.",
     "useClassic": "클래식으로 계속",
-    "session": "프레젠테이션 세션"
+    "session": "프레젠테이션 세션",
+    "galleryTitle": "사진 갤러리",
+    "galleryExplore": "사진으로 둘러보기",
+    "galleryCount": "사진 {{count}}장 · 갤러리 열기",
+    "photoPosition": "사진 {{current}} / {{total}}",
+    "captionBack": "이전",
+    "captionMore": "설명 더 보기",
+    "readStory": "이야기 읽기"
   }
 }

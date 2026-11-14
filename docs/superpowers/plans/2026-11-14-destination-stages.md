@@ -11,21 +11,21 @@ Installed Expo57/React/Viro3.0.3, no new dependencies/native changes.
 
 ## Task 1: Gallery data, progress and frame contracts
 
-- [ ] Cover all 53 catalog photos, D01's seven and chapter-count separation.
-- [ ] Validate optional Exhibit gallery progress against explicit media IDs;
+- [x] Cover all 53 catalog photos, D01's seven and chapter-count separation.
+- [x] Validate optional Exhibit gallery progress against explicit media IDs;
       preserve Classic's existing shape and all identity/expiry fences.
-- [ ] Implement immutable D01 composition and separate gallery focus target.
-- [ ] Verify pure/session tests RED→GREEN.
+- [x] Implement immutable D01 composition and separate gallery focus target.
+- [x] Verify pure/session tests RED→GREEN.
 
 ## Task 2: Native Danao stage and gallery
 
-- [ ] Cover actual scene gallery selection, paging, isolated geometry, completion,
+- [x] Cover actual scene gallery selection, paging, isolated geometry, completion,
       reading controls, image recovery, Help/tracking and background restoration.
-- [ ] Implement gallery entrance, distinct story stations, native shoreline/ridge
+- [x] Implement gallery entrance, distinct story stations, native shoreline/ridge
       accents and bounded entrance/reveal using the existing focus/controller.
-- [ ] Reuse image completion/error handling; give metadata its own pagination.
-- [ ] Add EN/JA/KO interface copy, preserving unrelated locale changes.
-- [ ] Run focused scene/screen/session tests, npm run check, Android export and
+- [x] Reuse image completion/error handling; give metadata its own pagination.
+- [x] Add EN/JA/KO interface copy, preserving unrelated locale changes.
+- [x] Run focused scene/screen/session tests, npm run check, Android export and
       all-photo hash checks. Record exact evidence and commit D01.
 
 ## Task 3: Native acceptance and other destinations (gated)

@@ -3157,3 +3157,64 @@ no product code changed during this additional pass. The camera was released on
 final Exit, and English, font scale 1.1 and original network settings were kept.
 The curated gallery remains six screenshots and one short clip; additional raw
 navigation evidence is separate. No further APK build, install or publication.
+
+
+### Danao destination stage and photo gallery — offline checkpoint, 2026-11-14
+
+The owner confirmed the November 21 presentation deadline, reported a successful
+complete Classic device sweep, and accepted the corrected original Exhibit. That
+is owner-reported acceptance, separate from the earlier agent entry/photo smoke
+observations. The owner approved a stronger gallery-first browser concept.
+Classic is frozen as the presentation fallback; target Nov19 visual completion
+and reserve Nov20 for stabilization. Other destination stages remain gated on
+acceptance of the new native D01 version.
+
+Implemented D01 only: a prominent gallery entrance, three compact optional story
+stations, six symbolic ridge/ripple contours, and finite native entrance reveals.
+The entrance image fills its wide frame; the focused viewer aspect-fits complete
+originals. All seven Danao photos are directly browsable without story pages.
+Previous/Next changes photos; independent metadata controls retain complete
+localized captions/credits. No autoplay or wrap. The flat reader remains at 2.25
+units with its original footprint and parent-owned reading preference. The first
+native version omits the browser thumbnail strip for space/targets.
+
+The gallery is a separate geometric focus target and whitelisted session-only
+cursor, never a fake chapter or opening/Passport producer. All stage geometry
+retires during opening/focus/Close. Accepted Close synchronously records collapsed
+intent before background can retire React state; recovery restores the same photo
+only after this frame's pose. Shared service/transition code retains per-mount
+controllers, callbacks and animation state. Added controller-phase/token checks
+also prevent queued Classic page/size commands from mutating state after Close
+is accepted but before its React commit. Both reported race patterns were
+reproduced RED then passed GREEN. Help also retires ornaments during intro;
+reduced motion/effects retain content and controls.
+
+Verification on the completed offline source:
+
+- Final `npm run check`: strict TypeScript, zero-warning lint, **1,506 tests across
+  134 files passed**. This includes real-scene, installed-focus-hook screen and
+  session/image regressions, actual EN/JA/KO resources, all seven Danao gallery
+  photos/complete credits, independent photo/metadata paging, reading reflow,
+  chapter denominator/opening separation, Help/tracking completion, immediate
+  Close/background, new-pose restoration, capture-owner stability and retired
+  gallery completion versus a new Classic frame.
+- Independent review: no Critical/Important/Minor code findings. Its targeted
+  review run passed 182 tests; the subsequent entrance/full-viewer check passed 77.
+- Final `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android` passed: 111 assets,
+  8,762,943-byte Hermes bundle
+  `index-696e01cacc17345bfe5653877905d05b.hbc`. All 53 original bundled-photo SHA-256
+  values are unchanged and present in the final output. No dependency/native
+  configuration change is part of this AR patch. Existing unrelated SDK/auth
+  working-tree changes remain excluded from these commits.
+- Scoped and complete `git diff --check` passed. The approved browser illustration
+  is archived at `docs/design/presentation-exhibit/D01-STAGE-REVIEW.html`, explicitly
+  labelled as a design illustration rather than an Android screenshot.
+
+**Physical verification remains pending.** No ADB/phone connection was made: the
+owner is charging the A53 and will notify availability. No new native screenshots
+or recordings were created, and the existing minimal progress gallery remains
+unchanged. New-stage alpha/crop appearance, physical taps, CJK/large-text fit,
+tracking/background recovery, Capture/Discard and native performance require the
+D01 A53 acceptance pass before extending to D02–D09. Native FPS is not inferred
+from the scheduling policy or tests. No APK build/install, OTA publication,
+provider/GPS field test, Passport claim, Save or Share was performed.

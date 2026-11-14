@@ -1,5 +1,16 @@
 # ARgala design authority
 
+## Gallery-first destination stages — 2026-11-14
+
+The owner accepted Classic's complete device sweep, the corrected original
+Exhibit, and a stronger Danao browser concept: a prominent photo gallery leads
+into optional story stations within a destination-specific symbolic stage.
+Implement the [approved stage plan](docs/superpowers/plans/2026-11-14-destination-stages.md).
+Keep the gallery separate from chapter/Passport progress, retain the 2.25-unit
+reader and Classic fallback, and require native D01 review before extending to
+the other eight destinations. November 21 is the presentation deadline; reserve
+November 20 for stabilization. No phone connection while the owner charges it.
+
 ## Presentation Exhibit assignment — 2026-11-14
 
 The owner authorizes a reversible spatial redesign for the nine-destination presentation after content-complete Classic is retained. Earlier fixed AR layout restrictions yield to this assignment; lifecycle, capture, admission, Passport and the default 2.25-unit reader distance remain protected. D01 is the first review prototype. Do not extend its design to the other destinations before owner feedback and Galaxy A53 acceptance. Classic remains selectable; ACLC stays separate. See [approved implementation plan](docs/superpowers/plans/2026-11-14-presentation-spatial-exhibit.md).

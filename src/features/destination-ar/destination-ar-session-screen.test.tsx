@@ -35,7 +35,7 @@ vi.mock('expo-router', async () => {
 });
 vi.mock('@reactvision/react-viro', async () => {
   const R = await import('react');
-  return { ViroSound: 'viro-sound', ViroARScene: 'native-scene', ViroQuad: 'quad', ViroText: 'viro-text', ViroImage: 'viro-image',
+  return { ViroSound: 'viro-sound', ViroARScene: 'native-scene', ViroQuad: 'quad', ViroPolyline: 'polyline', ViroText: 'viro-text', ViroImage: 'viro-image',
     ViroNode: R.forwardRef((props: { children?: React.ReactNode }, ref) => { R.useImperativeHandle(ref, () => ({ setNativeProps: vi.fn() })); return R.createElement('node', props, props.children); }),
     ViroARSceneNavigator: R.forwardRef((props: { initialScene: { scene: () => React.JSX.Element } }, ref) => {
       R.useImperativeHandle(ref, () => ({ arSceneNavigator: { takeScreenshot: native.screenshot } }), []);
@@ -543,9 +543,10 @@ it('runs the actual D01 Exhibit host through the shared session and capture serv
   await mount(() => React.createElement(SessionRoute)); await press('presentation.exhibit'); await press('presentation.openDanao'); await settle();
   await layout(); await start(); await ready();
   expect(node('ring-tile-chapter-2').props.position[2]).toBeLessThan(-1.8);
-  expect(tree!.root.findAllByProps({ testID: 'exhibit-cover-photo' })).toHaveLength(2);
+  expect(node('exhibit-gallery-entry')).toBeDefined();
+  expect(tree!.root.findAllByProps({ testID: 'exhibit-gallery-cover' })).toHaveLength(1);
   await click('ring-tile-overview'); await finish();
-  expect(node('ring-focused-panel').props.animation.name).toBe('argalaExhibitRingFocus');
+  expect(node('ring-focused-panel').props.animation.name).toBe('argalaExhibitDanaoRingFocus');
   expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
   expect(tree!.root.findByType('photo-controls' as React.ElementType).props.capture).toBeTypeOf('function');
   await press('destinationAr.exit');
@@ -553,4 +554,39 @@ it('runs the actual D01 Exhibit host through the shared session and capture serv
   await press('presentation.classic');
   expect(copy()).toContain('Sabin Resort Hotel');
   expect(native.load).not.toHaveBeenCalled();
+});
+
+it('restores the native Exhibit gallery photo across background and commits Close before immediate retirement', async () => {
+  native.exhibit.mockImplementationOnce(async () => (await import('./exhibit-ring-scene')).ExhibitRingSceneHost);
+  await mount(() => React.createElement(SessionRoute)); await press('presentation.exhibit'); await press('presentation.openDanao'); await settle();
+  await layout(); await start(); await ready(); await click('exhibit-gallery-entry'); await finish();
+  await click('ring-action-gallery-photo-next');
+  expect(text('exhibit-photo-position')).toBe('Photo 2 / 7');
+  await active(false); expect(cameras()).toHaveLength(0);
+  await active(true); await settle(); await ready([3, 2, 1], [1, 0, 0]);
+  expect(text('exhibit-photo-position')).toBe('Photo 2 / 7');
+  expect(node('ring-focused-panel').props.position).toEqual([5.25, 2, 1]);
+  const retainedClose = node('ring-action-close').props.onClick;
+  await act(async () => { retainedClose(); native.active = false; tree!.update(wrapper()); });
+  await settle(); expect(cameras()).toHaveLength(0);
+  await active(true); await settle(); await ready();
+  expect(node('ring-focused-panel')).toBeUndefined(); expect(node('exhibit-gallery-entry')).toBeDefined();
+  await click('exhibit-gallery-entry'); await finish(); expect(text('exhibit-photo-position')).toBe('Photo 2 / 7');
+  expect(tree!.root.findByType('photo-controls' as React.ElementType).props.capture).toBeTypeOf('function');
+});
+
+it.each(['ja', 'ko'])('keeps the %s gallery, text preferences and capture owner stable through Help', async locale => {
+  await translations.changeLanguage(locale);
+  native.exhibit.mockImplementationOnce(async () => (await import('./exhibit-ring-scene')).ExhibitRingSceneHost);
+  await mount(() => React.createElement(SessionRoute)); await press('presentation.exhibit'); await press('presentation.openDanao'); await settle();
+  await layout(); await start(); await ready(); await click('exhibit-gallery-entry'); await finish();
+  const camera = cameras()[0]; const captureKey = tree!.root.findByType('photo-controls' as React.ElementType).props.sessionKey;
+  await press('destinationRing.increaseTextSize');
+  const image = tree!.root.findByProps({ testID: 'ring-gallery-image' }).props.source;
+  await press('destinationRing.help'); expect(cameras()[0]).toBe(camera);
+  expect(node('ring-action-gallery-photo-next').props.onClick).toBeUndefined();
+  await press('destinationStories.dismissHelp'); await ready();
+  expect(tree!.root.findByProps({ testID: 'ring-gallery-image' }).props.source).toBe(image);
+  expect(text('exhibit-gallery-heading')).toBe(translations.t('presentation.galleryTitle'));
+  expect(tree!.root.findByType('photo-controls' as React.ElementType).props.sessionKey).toBe(captureKey);
 });
