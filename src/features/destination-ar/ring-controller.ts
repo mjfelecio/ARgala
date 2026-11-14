@@ -55,7 +55,7 @@ export class RingController {
     // coordinates so movement (including recovery) cannot stale the endpoint.
     const origin: Vector3 = [...this.position];
     const from = { ...this.selection.to, position: this.selection.to.position.map((v, i) => v - origin[i]) as Vector3 };
-    const to = { position: slot.position, rotation: slot.rotation, scale: ringMetrics.tileScale };
+    const to = { position: slot.position, rotation: slot.rotation, scale: slot.scale ?? ringMetrics.tileScale };
     return this.selection = { id: slot.id, phase: 'closing', token: ++this.serial, origin, from, to };
   }
   complete(token: number) {

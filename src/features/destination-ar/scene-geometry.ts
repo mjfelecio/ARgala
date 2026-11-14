@@ -3,7 +3,7 @@ import type { PoseSample, Vector3 } from './types';
 export type RingEntry = { id: string; role?: 'overview' | 'history' };
 export type Basis = { forward: Vector3; right: Vector3; yaw: number };
 export type SpatialTransform = { position: Vector3; rotation: Vector3; scale: number };
-export type RingSlot = RingEntry & { angle: number; position: Vector3; rotation: Vector3 };
+export type RingSlot = RingEntry & { angle: number; position: Vector3; rotation: Vector3; scale?: number };
 // Engineering starting values in Viro world units; physical Gate B tunes fit/comfort.
 export const ringMetrics = { radius: 2, tileSize: 0.68, panelWidth: 1.25, panelHeight: 1.25, focusDistance: 2.25, tileScale: 0.56, transitionMs: 280 } as const;
 const degrees = (value: number) => ((value + 180) % 360 + 360) % 360 - 180;
@@ -38,5 +38,5 @@ export function focusTransform(pose: PoseSample): SpatialTransform | null {
   return { position: [pose.position[0] + basis.forward[0] * ringMetrics.focusDistance, pose.position[1], pose.position[2] + basis.forward[2] * ringMetrics.focusDistance], rotation: [0, basis.yaw, 0], scale: 1 };
 }
 export function slotTransform(slot: RingSlot, origin: Vector3): SpatialTransform {
-  return { position: slot.position.map((value, index) => value + origin[index]) as Vector3, rotation: slot.rotation, scale: ringMetrics.tileScale };
+  return { position: slot.position.map((value, index) => value + origin[index]) as Vector3, rotation: slot.rotation, scale: slot.scale ?? ringMetrics.tileScale };
 }

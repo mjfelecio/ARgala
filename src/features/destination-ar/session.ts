@@ -2,7 +2,8 @@ import type { ReadingCursor } from './content-layout';
 import type { TrackingState } from './types';
 export const suspensionGraceMs = 5 * 60 * 1000;
 export type SessionIdentity = { admissionId: string; destinationId: string; principalId: string; provenance: 'development' | 'verified' };
-export type LogicalArProgress = { selectedId: string | null; cursors: Record<string, ReadingCursor>; openedIds?: readonly string[] };
+export type ExhibitGalleryProgress = Readonly<{ focused: boolean; cursor: ReadingCursor }>;
+export type LogicalArProgress = { selectedId: string | null; cursors: Record<string, ReadingCursor>; openedIds?: readonly string[]; exhibitGallery?: ExhibitGalleryProgress };
 type Phase = 'idle' | 'preflight' | 'initializing' | 'reveal' | 'exploring' | 'limited' | 'suspended' | 'interrupted' | 'failed' | 'expired' | 'closed';
 export type SessionSnapshot = { phase: Phase; attempt: number; established: boolean; suspendedAt: number | null; progress: LogicalArProgress; revealedCount: number };
 const emptyProgress = (): LogicalArProgress => ({ selectedId: null, cursors: {}, openedIds: [] });
@@ -15,8 +16,11 @@ export class ArSession {
   private listeners = new Set<() => void>();
   private resumePhase: 'reveal' | 'exploring' = 'exploring';
   private ids: ReadonlySet<string>;
+  private galleryMediaIds: ReadonlySet<string>;
   private suspendedElapsedAt: number | null = null;
-  constructor(private readonly identity: SessionIdentity, ids: readonly string[], private readonly elapsedNow: () => number = () => performance.now()) { this.identity = { ...identity }; this.ids = new Set(ids); }
+  constructor(private readonly identity: SessionIdentity, ids: readonly string[], private readonly elapsedNow: () => number = () => performance.now(), galleryMediaIds: readonly string[] = []) {
+    this.identity = { ...identity }; this.ids = new Set(ids); this.galleryMediaIds = new Set(galleryMediaIds);
+  }
   getSnapshot = () => this.state;
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
   private write(patch: Partial<SessionSnapshot>) { this.state = Object.freeze({ ...this.state, ...patch }); this.listeners.forEach(listener => listener()); }
@@ -111,7 +115,16 @@ export class ArSession {
       cursors[id] = Object.freeze({ page: cursor.page, offset: cursor.offset, locale: cursor.locale, size: cursor.size, ...media });
     }
     const openedIds = Object.freeze([...new Set(progress.openedIds ?? this.state.progress.openedIds ?? [])].filter(id => this.ids.has(id)));
-    this.write({ progress: Object.freeze({ selectedId: progress.selectedId !== null && this.ids.has(progress.selectedId) ? progress.selectedId : null, cursors: Object.freeze(cursors), openedIds }) });
+    const selectedId = progress.selectedId !== null && this.ids.has(progress.selectedId) ? progress.selectedId : null;
+    const source = progress.exhibitGallery; const cursor = source?.cursor;
+    const validGallery = source && typeof source.focused === 'boolean' && cursor && this.galleryMediaIds.has(cursor.mediaId ?? '')
+      && Number.isSafeInteger(cursor.page) && cursor.page >= 0 && Number.isSafeInteger(cursor.offset) && cursor.offset >= 0
+      && Number.isSafeInteger(cursor.mediaPage) && cursor.mediaPage! >= 0 && typeof cursor.locale === 'string'
+      && ['small', 'standard', 'large'].includes(cursor.size);
+    const exhibitGallery = validGallery ? { exhibitGallery: Object.freeze({ focused: source.focused && selectedId === null,
+      cursor: Object.freeze({ page: cursor.page, offset: cursor.offset, locale: cursor.locale, size: cursor.size, mediaId: cursor.mediaId, mediaPage: cursor.mediaPage }),
+    }) } : {};
+    this.write({ progress: Object.freeze({ selectedId, cursors: Object.freeze(cursors), openedIds, ...exhibitGallery }) });
   }
   close() { this.suspendedElapsedAt = null; this.write({ phase: 'closed', established: false, suspendedAt: null, attempt: this.state.attempt + 1, progress: emptyProgress() }); }
 }
