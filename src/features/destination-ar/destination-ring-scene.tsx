@@ -31,6 +31,8 @@ export type RingScenePresentation = Readonly<{
   Tile: typeof InformationTile;
   Frame: typeof HolographicFrame;
   revealImages: boolean;
+  pageMotion?: boolean;
+  focusGlint?: boolean;
   isolateReader: boolean;
   stage?: Readonly<{ profile: ExhibitStageProfile; Entry: typeof ExhibitGalleryEntry; Panel: typeof ExhibitGalleryPanel; Scenery: typeof DanaoScenery; Arrival: typeof ExhibitArrival }>;
 }>;
@@ -215,7 +217,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
         return deployment && controller.basis ? <CinematicTile key={slot.id} slot={slot} basis={controller.basis} variant={deployment} ordinal={index} peers={frame.slots} animationPrefix={animationPrefix}>{tile({ ...slot, position: [0, 0, 0], rotation: [0, 0, 0] })}</CinematicTile> : <React.Fragment key={slot.id}>{tile(slot)}</React.Fragment>;
       })}
     </ViroNode>}
-    {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel animationPrefix={animationPrefix} Frame={presentation?.Frame} revealImages={presentation?.revealImages} selection={selection} ordinal={frame!.slots.filter(slot => slot.id !== stage?.profile.galleryId).findIndex(slot => slot.id === selection.id) + 1} chapterCount={snapshot.length} openedCount={openedIds.length} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style} decorations={quality === 'standard'}
+    {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel animationPrefix={animationPrefix} Frame={presentation?.Frame} revealImages={presentation?.revealImages} pageMotion={presentation?.pageMotion} focusGlint={presentation?.focusGlint} selection={selection} ordinal={frame!.slots.filter(slot => slot.id !== stage?.profile.galleryId).findIndex(slot => slot.id === selection.id) + 1} chapterCount={snapshot.length} openedCount={openedIds.length} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style} decorations={quality === 'standard'}
       onCursor={(id, cursor) => setCursors(previous => ({ ...previous, [id]: cursor }))} onClose={close} onComplete={complete} onPageChange={pageSound} externalReadingControls={externalReadingControls} onReadingControls={acceptReadingCommand} canInteract={canRead} /></ViroNode>}
     {selection && stage && GalleryPanel && selection.id === stage.profile.galleryId && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}>
       <GalleryPanel profile={stage.profile} selection={selection} previous={galleryCursor} reading={reading} enabled={interactive && tracking === 'normal'} style={style} animationPrefix={animationPrefix}

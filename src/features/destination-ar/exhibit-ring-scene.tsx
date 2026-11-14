@@ -15,7 +15,7 @@ export const exhibitPresentation: RingScenePresentation = Object.freeze({
 });
 export const danaoStagePresentation: RingScenePresentation = Object.freeze({
   animationPrefix: 'argalaExhibitDanao', buildSlots: buildStageSlots,
-  Tile: ExhibitStoryTile, Frame: ExhibitFrame, revealImages: true, isolateReader: true,
+  Tile: ExhibitStoryTile, Frame: ExhibitFrame, revealImages: false, pageMotion: false, focusGlint: false, isolateReader: true,
   stage: Object.freeze({ profile: danaoStageProfile, Entry: ExhibitGalleryEntry, Panel: ExhibitGalleryPanel, Scenery: DanaoScenery, Arrival: ExhibitArrival }),
 });
 export function ExhibitRingSceneHost(props: ComponentProps<typeof DestinationRingSceneHost>) {

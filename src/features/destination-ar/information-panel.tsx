@@ -24,8 +24,9 @@ const { height: bodyHeight, y: bodyY } = readerLayout.body;
 const legacySizeY = readerLayout.toolbar.y - nativePanelActionHeight - 0.04;
 export type ReadingCommand = (delta: -1 | 1) => void;
 
-export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, onPageChange, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0, externalReadingControls = false, onReadingControls, animationPrefix = 'argala', Frame = HolographicFrame, revealImages = false, canInteract }: {
+export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, onPageChange, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0, externalReadingControls = false, onReadingControls, animationPrefix = 'argala', Frame = HolographicFrame, revealImages = false, pageMotion = true, focusGlint = true, canInteract }: {
   animationPrefix?: string; Frame?: typeof HolographicFrame; revealImages?: boolean;
+  pageMotion?: boolean; focusGlint?: boolean;
   selection: FocusSelection; content: RingContent; previous?: ReadingCursor; reading: ReturnType<typeof useReadingSize>; enabled: boolean; style: ArNativeStyle; decorations?: boolean;
   onPageChange?(): void; onCursor(id: string, cursor: ReadingCursor): void; onClose(): void; onComplete(token: number): void;
   ordinal?: number; chapterCount?: number; openedCount?: number;
@@ -60,19 +61,20 @@ export function InformationPanel({ selection, content, previous, reading, enable
     onReadingControls?.(delta => { if (current) changeSize(delta); });
     return () => { current = false; onReadingControls?.(null); };
   }, [interactive, changeSize, onReadingControls]);
+  const pageContent = page.kind === 'image'
+    ? <BundledGalleryPage animateImages={decorations} revealImages={revealImages && pageMotion} animationPrefix={animationPrefix} key={`${page.media!.id}:${page.media!.source}`} page={page} size={reading.size} style={style} enabled={interactive} />
+    : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
+      textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />;
   return <ViroNode ref={ref} key={selection.token} testID="ring-focused-panel" position={transform.position} rotation={transform.rotation}
     scale={[transform.scale, transform.scale, transform.scale]} opacity={enabled ? 1 : 0.35}
     animation={animation}>
     <Frame variant="reader" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={Frame !== HolographicFrame && decorations} />
     <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.49 : 0.44, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.07 : 0.14} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 4 : 6, 'left', '600')} />
     {!closing && <>
-      {decorations && <HolographicGlint animationPrefix={animationPrefix} id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
+      {decorations && focusGlint && <HolographicGlint animationPrefix={animationPrefix} id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
       <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
       <ArText testID="ring-sample-label" position={[0.28, 0.555, 0.006]} width={0.56} height={0.06} text={content.approved ? t('destinationStories.openedCount', { count: openedCount, total: chapterCount }) : t('destinationRing.sampleLabel')} style={style.text(3)} />
-      <PageTransition animationPrefix={animationPrefix} identity={`${content.id}:${cursor.page}:${locale}:${reading.size}`} enabled={interactive} reduced={reduced}>
-      {page.kind === 'image' ? <BundledGalleryPage animateImages={decorations} revealImages={revealImages} animationPrefix={animationPrefix} key={`${page.media!.id}:${page.media!.source}`} page={page} size={reading.size} style={style} enabled={interactive} /> : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
-        textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />}
-      </PageTransition>
+      {pageMotion ? <PageTransition animationPrefix={animationPrefix} identity={`${content.id}:${cursor.page}:${locale}:${reading.size}`} enabled={interactive} reduced={reduced}>{pageContent}</PageTransition> : pageContent}
       {selection.phase === 'focused' && <ViroNode testID="ring-reader-toolbar" position={[0, readerLayout.toolbar.y, 0.012]}>
       <Frame variant="toolbar" width={readerLayout.toolbar.width} height={readerLayout.toolbar.height} decorations={false} />
       <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.555, 0, 0.004]} enabled={interactive && cursor.page > 0} style={style}

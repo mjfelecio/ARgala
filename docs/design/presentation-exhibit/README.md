@@ -159,3 +159,35 @@ first chapter photograph/caption in all nine destinations on this A53. Initial
 automation that ran ahead of the returning selector was repeated with screen
 verification. This covers each entry and first photo, not the full 20-chapter /
 53-photo native matrix. See the destination table in `docs/validation.md`.
+
+### Gallery-first Danao device continuation — 2026-11-14
+
+The owner subsequently reported the full Classic sweep passed. The new Danao
+stage is a separate review. On the same A53 and existing accepted APK, its wide
+Gallery entrance, symbolic scenery, seven-photo browser and optional stories
+rendered. Stage geometry stays hidden while a reader is open and returns after
+Close. The gallery toolbar now fits the reader width; all three controls were
+visible on the device. No APK build or dependency change was needed.
+
+The owner reported slide shaking in both viewers, followed by confirmation that
+the image movement was resolved. Danao now swaps pages without the late photo
+reveal or nested page movement. In the installed Viro renderer, bitmap completion
+is emitted after bitmap installation; starting a reveal then moved an already
+visible photograph. Classic keeps its existing presentation defaults. Unchanged
+frame-image props are also memoized across page commits.
+
+A remaining story-border flash was reproduced on chapter 3 pages 6↔7. Removing
+the extra focus-glint overlay from Danao eliminated the observed spike in a
+controlled 14-second repeat; entrance, focus and Close motion remain. A fixed
+top-border cyan mask ranged 1,738–1,836 pixels over 203 recorded frames, compared
+with a previous peak of 5,441. Gallery photo 7→6→5 also showed no comparable
+spike. These are recording comparisons, not native FPS or exhaustive acceptance.
+The native cause of overlay replay was not established; a memo-only experiment
+failed and was retired. Owner confirmation of the final fix is still pending.
+
+Final checks: strict TypeScript, zero-warning lint, 1,510 tests in 135 files,
+independent review and Android export passed. All 53 original photo hashes are
+unchanged and present in the export. The minimal local sample gallery contains
+an updated Danao gallery screenshot and one short story navigation clip.
+The complete new-stage photo/metadata, locale/size, recovery, Capture/Discard
+and performance sweep remains pending. D02–D09 are still gated on D01 acceptance.

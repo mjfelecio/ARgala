@@ -23,7 +23,7 @@ export const exhibitGalleryLayout = {
 
 /** A photo browser, never a synthetic chapter or an opening-progress producer. */
 export function ExhibitGalleryPanel({ profile, selection, previous, reading, enabled, style, animationPrefix,
-  onCursor, onClose, onComplete, onPageChange, onReadingControls, externalReadingControls = false, decorations = true, canInteract,
+  onCursor, onClose, onComplete, onPageChange, onReadingControls, externalReadingControls = false, canInteract,
 }: {
   profile: ExhibitStageProfile; selection: FocusSelection; previous?: ReadingCursor; reading: ReturnType<typeof useReadingSize>;
   enabled: boolean; style: ArNativeStyle; animationPrefix: string; decorations?: boolean; externalReadingControls?: boolean;
@@ -32,7 +32,7 @@ export function ExhibitGalleryPanel({ profile, selection, previous, reading, ena
   canInteract?(): boolean;
 }) {
   const { t, i18n } = useTranslation(); const locale = i18n.resolvedLanguage ?? i18n.language;
-  const { ref, reduced, moving, closing, animation, transform } = usePanelTransition(selection, enabled, onComplete, animationPrefix);
+  const { ref, moving, closing, animation, transform } = usePanelTransition(selection, enabled, onComplete, animationPrefix);
   const layout = useCallback((size: ReadingSize) => galleryPages([], profile.media, locale, size,
     credit => t('destinationRing.imageCredit', { credit }), t('destinations.englishFallback'), 'gallery', exhibitGalleryLayout.caption.height), [profile.media, locale, t]);
   const pages = useMemo(() => layout(reading.size), [layout, reading.size]);
@@ -67,8 +67,7 @@ export function ExhibitGalleryPanel({ profile, selection, previous, reading, ena
     <ArText testID="exhibit-gallery-heading" position={[-0.22, closing ? 0 : 0.55, 0.006]} width={0.65} height={0.08} text={t('presentation.galleryTitle')} style={style.text(4, 'left', '600')} />
     {!closing && <>
       <ArText testID="exhibit-photo-position" position={[0.35, 0.55, 0.006]} width={0.4} height={0.08} text={t('presentation.photoPosition', { current: photoIndex + 1, total: profile.media.length })} style={style.text(3)} />
-      <BundledGalleryPage key={page.media!.id} page={page} size={reading.size} style={style} enabled={interactive} layout={exhibitGalleryLayout}
-        revealImages animateImages={decorations && !reduced} animationPrefix={animationPrefix} />
+      <BundledGalleryPage key={page.media!.id} page={page} size={reading.size} style={style} enabled={interactive} layout={exhibitGalleryLayout} animationPrefix={animationPrefix} />
       {selection.phase === 'focused' && <>
         {metadataIndices.length > 1 && <ViroNode testID="exhibit-caption-toolbar" position={[0, exhibitGalleryLayout.metadataY, 0.012]}>
           <NativePanelAction id="gallery-caption-previous" label={t('presentation.captionBack')} width={0.32} position={[-0.38, 0, 0]} enabled={interactive && metadataIndex > 0} style={style} onPress={() => changePage(metadataIndices[metadataIndex - 1])} />
@@ -76,10 +75,10 @@ export function ExhibitGalleryPanel({ profile, selection, previous, reading, ena
           <NativePanelAction id="gallery-caption-next" label={t('presentation.captionMore')} width={0.32} position={[0.38, 0, 0]} enabled={interactive && metadataIndex < metadataIndices.length - 1} style={style} onPress={() => changePage(metadataIndices[metadataIndex + 1])} />
         </ViroNode>}
         <ViroNode testID="exhibit-gallery-toolbar" position={[0, readerLayout.toolbar.y, 0.012]}>
-          <ExhibitFrame variant="toolbar" width={readerLayout.toolbar.width} height={readerLayout.toolbar.height} decorations={false} />
-          <NativePanelAction id="gallery-photo-previous" label={t('destinationRing.previous')} width={0.44} position={[-0.49, 0, 0.004]} enabled={interactive && photoIndex > 0} style={style} onPress={() => changePhoto(-1)} />
-          <NativePanelAction id="gallery-photo-next" label={t('destinationRing.next')} width={0.44} position={[0, 0, 0.004]} enabled={interactive && photoIndex < profile.media.length - 1} style={style} onPress={() => changePhoto(1)} />
-          <NativePanelAction id="close" primary label={t('destinationRing.close')} width={0.44} position={[0.49, 0, 0.004]} enabled={interactive} style={style} onPress={onClose} />
+          <ExhibitFrame variant="toolbar" width={ringMetrics.panelWidth} height={readerLayout.toolbar.height} decorations={false} />
+          <NativePanelAction id="gallery-photo-previous" label={t('destinationRing.previous')} width={0.36} position={[-0.4, 0, 0.004]} enabled={interactive && photoIndex > 0} style={style} onPress={() => changePhoto(-1)} />
+          <NativePanelAction id="gallery-photo-next" label={t('destinationRing.next')} width={0.36} position={[0, 0, 0.004]} enabled={interactive && photoIndex < profile.media.length - 1} style={style} onPress={() => changePhoto(1)} />
+          <NativePanelAction id="close" primary label={t('destinationRing.close')} width={0.36} position={[0.4, 0, 0.004]} enabled={interactive} style={style} onPress={onClose} />
         </ViroNode>
         {!externalReadingControls && <ViroNode position={[0, readerLayout.toolbar.y - 0.22, 0.012]}>
           <NativePanelAction id="smaller" label={t('destinationRing.smaller')} width={0.2} position={[-0.15, 0, 0]} enabled={interactive && reading.size !== 'small'} style={style} onPress={() => changeSize(-1)} />

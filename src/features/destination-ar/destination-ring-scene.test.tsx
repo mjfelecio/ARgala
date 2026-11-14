@@ -732,3 +732,28 @@ it('does not let a retired Danao gallery completion affect a new Classic frame',
   expect(node('exhibit-gallery-entry')).toBeUndefined();
   await finish(); expect(node('ring-reader-toolbar')).toBeDefined();
 });
+
+it.each(['gallery', 'story'])('keeps Danao %s slides stationary after native bitmap installation and rapid paging', async kind => {
+  sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation };
+  await mount(); await track(); await pose();
+  await press(kind === 'gallery' ? 'exhibit-gallery-entry' : 'ring-tile-overview'); await finish();
+  expect(node('ring-focus-glint')).toBeUndefined();
+  const frame = node('ring-focused-panel'); const transform = frame.props.position;
+  const borders = tree.root.findAllByType('viro-image' as React.ElementType).filter(image => image.props.testID === 'holographic-surface');
+  const materialRegistrations = vi.mocked(ViroMaterials.createMaterials).mock.calls.length;
+  native.patches.length = 0;
+  for (let index = 0; index < 4; index++) {
+    const photo = tree.root.findAllByType('viro-image' as React.ElementType).find(image => image.props.testID === 'ring-gallery-image');
+    if (photo) await act(async () => photo.props.onLoadEnd({ nativeEvent: null }));
+    await press(kind === 'gallery' ? 'ring-action-gallery-photo-next' : 'ring-action-next');
+  }
+  const pageAnimations = native.patches.filter(item => {
+    const animation = item.patch.animation as { name?: string; run?: boolean } | undefined;
+    return animation?.run && animation.name?.includes('PageReveal');
+  });
+  expect(pageAnimations).toEqual([]);
+  expect(native.patches.some(item => (item.patch.position as number[] | undefined)?.[0] === 0.018)).toBe(false);
+  expect(node('ring-focused-panel')).toBe(frame); expect(frame.props.position).toEqual(transform);
+  expect(tree.root.findAllByType('viro-image' as React.ElementType).filter(image => image.props.testID === 'holographic-surface')).toEqual(borders);
+  expect(vi.mocked(ViroMaterials.createMaterials).mock.calls.length).toBe(materialRegistrations);
+});

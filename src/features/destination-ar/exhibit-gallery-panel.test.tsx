@@ -7,6 +7,7 @@ import { localizationOptions } from '@/i18n/options';
 import { ExhibitGalleryPanel, exhibitGalleryLayout } from './exhibit-gallery-panel';
 import { danaoStageProfile } from './exhibit-stage';
 import { readerLayout } from './reader-layout';
+import { ringMetrics } from './scene-geometry';
 import type { ReadingCursor } from './content-layout';
 import type { ReadingSize } from './reading-preference';
 import type { ArNativeStyle } from './native-styles';
@@ -102,4 +103,15 @@ it('retires retained photo and metadata commands when Help disables the gallery'
   enabled = false; await act(async () => tree.update(view()));
   await act(async () => { next(); captionNext(); }); expect(saved).toBeUndefined();
   for (const id of ['gallery-photo-next', 'gallery-caption-next', 'close']) expect(action(id).props.onClick).toBeUndefined();
+});
+
+it('keeps gallery navigation within the reader width so Close remains visible on the A53', async () => {
+  await mount();
+  const halfWidth = (ringMetrics.panelWidth + 0.025) / 2;
+  for (const id of ['gallery-photo-previous', 'gallery-photo-next', 'close']) {
+    const control = action(id); const quad = control.findAllByType('quad' as React.ElementType)[0];
+    expect(Math.abs(control.props.position[0]) + quad.props.width / 2).toBeLessThanOrEqual(halfWidth);
+    expect(quad.props.width).toBeGreaterThanOrEqual(0.18);
+    expect(quad.props.height).toBe(0.18);
+  }
 });

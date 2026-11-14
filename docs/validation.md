@@ -3218,3 +3218,44 @@ tracking/background recovery, Capture/Discard and native performance require the
 D01 A53 acceptance pass before extending to D02–D09. Native FPS is not inferred
 from the scheduling policy or tests. No APK build/install, OTA publication,
 provider/GPS field test, Passport claim, Save or Share was performed.
+
+## Danao gallery-first device stability follow-up — 2026-11-14
+
+Owner-reported full Classic device sweep passed; the gallery-first Danao stage
+remains a separate acceptance gate. Existing SM-A536E/Android16 development APK,
+1080×2400, density420, fontscale1.1, dark OS, USB Metro from worktree254a; no new
+APK build/install. Native stage, gallery/photos, independent caption controls,
+optional chapters and isolated readers rendered. The gallery-only toolbar was
+narrowed to its reader footprint after native Close edge cropping; all controls
+are now visible in the updated sample.
+
+Owner reported shake/flash on both gallery/story transitions. Danao disables
+late photo/page movement while preserving native entrance/focus/Close. Installed
+Viro bytecode installs the image before emitting its null completion event; the
+old reveal could reposition that already-visible bitmap. Owner subsequently
+confirmed the image seemed fixed. Frame-image memoization preserves unchanged
+border props without suppressing real size/texture/hit changes.
+
+The remaining story-border pulse was recorded on chapter3 page6↔7. A memo-only
+focus-glint experiment did not resolve it and was removed. Danao now omits that
+extra overlay; Classic and the archived Exhibit retain their defaults. The same
+controlled 14-second test completed6→7→6→7 with the fixed top-border cyan mask
+remaining1738–1836 pixels over203 frames (prior spike5441); gallery7→6→5 ranged
+1453–1594. Sampled original video frames confirm image/text changes. This supports
+the targeted fix, not a native FPS benchmark or complete acceptance. Owner's
+final physical confirmation is pending; automated taps are paused for review.
+
+Verification: watched toolbar-fit, stable-frame and Danao glint-absence tests fail
+before their fixes and pass after. Final `npm run check` passed strict TypeScript,
+zero-warning lint and **1510 tests across135 files**; independent review found no
+issues, with72 scene tests passing. Final Android export passed111 assets and
+8,763,493-byte Hermes `index-cdf707724188bfe25835e75c5f411beb.hbc`; all53 original
+photo SHA-256 values are unchanged and present. `git diff --check` passed.
+
+Minimal native samples are outside Git at
+`~/Pictures/ARgala-progress/2026-11-14/`: updated08 gallery screenshot and09 story
+navigation clip, with captions and hashes. Raw failures, account and precise-map
+screens stay private. New-stage full photo/metadata/locale/size, Help/recenter/
+background/capture recovery and performance coverage remain incomplete; existing
+mocked lifecycle coverage does not replace device acceptance. No Save, Share,
+on-site GPS/Passport claim, publication or D02–D09 rollout occurred.
