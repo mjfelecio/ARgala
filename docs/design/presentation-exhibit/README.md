@@ -46,6 +46,29 @@ The owner then accepted the refined Danao on the physical A53: “Looks good and
 taps are reliable,” answering the three-pair/picture/Next/Close review prompt.
 This clears the agreed checkpoint for the remaining eight destinations.
 
+### Nine destination Photo Islands rollout
+
+Allnine now use the accepted image-only direction. All53 photographs have unique
+entrances with no repeated padding; all20 chapter IDs/content remain unchanged.
+Five-photo destinations have two pairs after welcome; six-photo destinations have
+two pairs plus a single-photo bay; Danao retains its three accepted pairs. Extra
+photo-only bays create no chapter. Bay angles vary by destination; each preserves
+its existing welcome scenery and shares only the restrained static display bases.
+
+Tall originals keep their complete image: maximum cover height1.05, proportional
+width, and story controls lowered only as needed for0.16 clearance. Danao's
+accepted cover/story geometry is unchanged. Shared source sizing also sets focus/
+Close scale. The flat reader remains1.25 square at2.25. Classic remains selected
+by default; accepted front profiles and the Danao front presentation are retained.
+
+Offline gate: **1,586 tests/138files**, strict TypeScript, zero-warning lint and
+Android export111assets passed. Fresh independent review passed200 tests/4files
+with no confirmed material issue, including actual allnine gallery/chapter/
+background owners. New native sweep is pending: the connected phone entered its
+charging screensaver/keyguard while offline checks ran; the owner was asked to
+unlock it. This is distinct from the earlier accepted front-stage allnine sweep.
+See [rollout plan](../../superpowers/plans/2026-11-14-photo-islands-rollout.md).
+
 ### Initial native slice and preceding decisions
 
 After reviewing the all-nine stage rollout, the owner requested more reason to

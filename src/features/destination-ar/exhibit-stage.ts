@@ -14,7 +14,7 @@ export type ExhibitStageProfile = Readonly<{
   theme: 'shoreline' | 'fern' | 'basin' | 'roots' | 'fields' | 'fairway' | 'ridges' | 'garden' | 'coast';
   gallery: readonly [x: number, y: number, forward: number];
   stations: readonly (readonly [x: number, y: number, forward: number])[];
-  photoIslands?: readonly Readonly<{ angle: number; mediaIds: readonly [string, string] }>[];
+  photoIslands?: readonly Readonly<{ angle: number; mediaIds: readonly [string] | readonly [string, string] }>[];
 }>;
 
 function profile(destinationId: DestinationId, theme: ExhibitStageProfile['theme'], gallery: ExhibitStageProfile['gallery'], stations: ExhibitStageProfile['stations']): ExhibitStageProfile {

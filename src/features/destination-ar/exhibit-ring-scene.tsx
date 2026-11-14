@@ -29,11 +29,10 @@ function createStagePresentation(profile: ExhibitStageProfile): RingScenePresent
     }),
   });
 }
-// Retain the accepted composition for a one-line rollback. Native Danao review
-// gates extending the islands geometry to the other eight destinations.
+// Retain the accepted front composition for a one-line rollback. The owner
+// accepted refined Danao spacing and physical taps before this nine-stage rollout.
 export const danaoFrontStagePresentation = createStagePresentation(getExhibitStageProfile('D01')!);
-const danaoIslandsProfile = createPhotoIslandsProfile(getExhibitStageProfile('D01')!, [-95, 65, 165]);
-const presentations = Object.freeze(Object.fromEntries(destinationIds.map(id => [id, createStagePresentation(id === 'D01' ? danaoIslandsProfile : getExhibitStageProfile(id)!)])) as Record<DestinationId, RingScenePresentation>);
+const presentations = Object.freeze(Object.fromEntries(destinationIds.map(id => [id, createStagePresentation(createPhotoIslandsProfile(getExhibitStageProfile(id)!))])) as Record<DestinationId, RingScenePresentation>);
 export function getExhibitStagePresentation(id: string): RingScenePresentation | null {
   return getExhibitStageProfile(id) ? presentations[id as DestinationId] : null;
 }

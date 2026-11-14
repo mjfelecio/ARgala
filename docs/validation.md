@@ -3458,3 +3458,33 @@ accepts the refined Danao direction/spacing and physical taps for rollout. It is
 owner-reported device evidence; it is not an independent seven-entry sweep or
 every locale, size and lifecycle combination. Expansion to the other eight
 destinations is now authorized by the agreed Danao-first checkpoint.
+
+### Allnine Photo Islands rollout — offline gate
+
+Following the owner's Danao physical acceptance, allnine immutable Exhibit hosts
+now use Photo Islands. All53 original media IDs have distinct entrances, with
+ordered pairs and a final single when required. Exactly20 original chapters
+remain; extra photo-only bays do not synthesize content or openings. Portraits
+retain their full proportions within1.05 height; story controls clear the lowest
+photo by0.16. Each destination retains its previous symbolic welcome scenery.
+Danao's accepted dimensions/angles and the2.25-unit reader are unchanged.
+
+RED:20 failures in new rollout/scene tests against the Danao-only implementation,
+with88 existing cases still passing. GREEN:200 tests/4files, including all53
+sources individually selected through actual scenes,20 chapter behavior, portrait
+bounds, focus/Close scale, no cover labels and allnine session restoration.
+The first full check caught a new test's string-vs-DestinationId tuple typing;
+the parameter array was made literal, without changing runtime source.
+
+Final `npm run check`: **1,586 tests/138files**, strict TypeScript and zero-warning
+lint passed. Android export111assets passed, Hermes
+`index-a362fd5ccb88ecee062b4723a24d4fc9.hbc`. Fresh read-only review independently
+passed200 tests/4files with no confirmed material issue. No native/dependency
+change or APK build was made.
+
+The new allnine native sweep has not yet started. The charging A53 entered its
+Android DreamActivity/screensaver with keyguard showing; app launch waited behind
+it. ADB remained connected and the process existed. Wake did not dismiss the
+screensaver; the owner was asked to unlock. Do not diagnose an app crash or infer
+new physical results from this state. The earlier allnine front-stage sweep and
+owner's refined Danao acceptance remain separate evidence.

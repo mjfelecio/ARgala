@@ -883,10 +883,10 @@ it.each(['en', 'ja', 'ko'])('shows %s photo context only after opening and keeps
   expect(text('ring-gallery-caption').trim().length).toBeGreaterThan(0);
 });
 
-it('keeps the accepted Danao front stage available and other destinations outside the islands rollout', async () => {
+it('keeps the accepted Danao front stage available while every destination opts into islands', async () => {
   const { danaoFrontStagePresentation, getExhibitStagePresentation } = await import('./exhibit-ring-scene');
   expect(danaoFrontStagePresentation.stage!.profile.photoIslands).toBeUndefined();
-  for (const id of ['D02','D03','D04','D05','D06','D07','D08','D09']) expect(getExhibitStagePresentation(id)!.stage!.profile.photoIslands).toBeUndefined();
+  for (const id of ['D02','D03','D04','D05','D06','D07','D08','D09']) expect(getExhibitStagePresentation(id)!.stage!.profile.photoIslands).toBeDefined();
   sceneOptions = { content: previewStoryContent('D01'), presentation: danaoFrontStagePresentation };
   await mount(); await track(); await pose(); await press('exhibit-gallery-entry'); await finish();
   expect(text('exhibit-photo-position')).toBe('Photo 1 / 7');
@@ -894,4 +894,27 @@ it('keeps the accepted Danao front stage available and other destinations outsid
   await press('ring-action-gallery-photo-next'); await press('ring-action-close'); await finish();
   await press('exhibit-gallery-entry'); await finish();
   expect(text('exhibit-photo-position')).toBe('Photo 2 / 7');
+});
+
+it.each(['D01','D02','D03','D04','D05','D06','D07','D08','D09'] as const)('opens every %s standalone photograph at its own context without chapter progress', async id => {
+  const { getExhibitStagePresentation } = await import('./exhibit-ring-scene');
+  const presentation = getExhibitStagePresentation(id)!; const profile = presentation.stage!.profile;
+  expect(profile.photoIslands).toBeDefined();
+  const progress = vi.fn(); sceneOptions = { content: previewStoryContent(id), presentation, onProgress: progress };
+  await mount(); await track(); await pose();
+  const entrances = exhibitGalleryEntries(profile);
+  expect(entrances).toHaveLength(profile.media.length);
+  expect(node(id === 'D01' ? 'exhibit-danao-scenery' : `exhibit-${profile.theme}-scenery`)).toBeDefined();
+  for (const [index, entry] of entrances.entries()) {
+    const targetId = entry.id === profile.galleryId ? 'exhibit-gallery-entry' : `exhibit-island-entry-${entry.mediaId}`;
+    expect(node(targetId).findAllByType('viro-text' as React.ElementType)).toHaveLength(0);
+    const image = node(targetId).findAllByType('viro-image' as React.ElementType).find(item => item.props.testID !== 'holographic-surface')!;
+    expect(image.props.source).toBe(profile.media[index].source); expect(image.props.highAccuracyEvents).toBe(true);
+    await press(targetId); await finish();
+    expect(tree.root.findByProps({ testID: 'ring-gallery-image' }).props.source).toBe(profile.media[index].source);
+    expect(text('exhibit-photo-position')).toBe(`Photo ${index + 1} / ${profile.media.length}`);
+    expect(progress.mock.lastCall?.[0]).toMatchObject({ selectedId: null, openedIds: [], exhibitGallery: { focused: true, cursor: { mediaId: profile.media[index].id } } });
+    expect(node('exhibit-photo-island-scenery')).toBeUndefined(); expect(node('ring-focus-glint')).toBeUndefined();
+    await press('ring-action-close'); await finish();
+  }
 });

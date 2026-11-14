@@ -1,5 +1,15 @@
 # ARgala design authority
 
+## Nine-destination Photo Islands rollout — 2026-11-14
+
+The owner accepted the refined Danao on the physical A53, including spacing and
+reliable taps. Extend its photo-only museum direction to allnine destinations.
+Each of the53 photographs has a unique entrance; two-photo bays may end with a
+single image, and photo-only bays do not create chapters. Keep all20 chapters,
+destination scenery, original photo proportions and the2.25-unit reader. Bound
+portraits to1.05 height and clear their story controls. Classic remains default.
+See [rollout design](docs/superpowers/specs/2026-11-14-photo-islands-rollout-design.md).
+
 ## Photo Islands — owner-selected direction, 2026-11-14
 
 The owner selected Photo Islands from the interactive browser spatial comparison
