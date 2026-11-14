@@ -1,5 +1,9 @@
 # ARgala design authority
 
+## Presentation Exhibit assignment — 2026-11-14
+
+The owner authorizes a reversible spatial redesign for the nine-destination presentation after content-complete Classic is retained. Earlier fixed AR layout restrictions yield to this assignment; lifecycle, capture, admission, Passport and the default 2.25-unit reader distance remain protected. D01 is the first review prototype. Do not extend its design to the other destinations before owner feedback and Galaxy A53 acceptance. Classic remains selectable; ACLC stays separate. See [approved implementation plan](docs/superpowers/plans/2026-11-14-presentation-spatial-exhibit.md).
+
 ## Cinematic AR assignment — 2026-11-02
 
 The owner separately assigned the approved [cinematic AR design](docs/design/cinematic-ar/DESIGN-SPEC.md).

@@ -1,0 +1,1064 @@
+[
+  {
+    "id": "D01-preview",
+    "destinationId": "D01",
+    "file": "assets/presentation/featured/D01-preview.jpg",
+    "credit": "Hydrochic · CC BY-SA 4.0 · 2017",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Always_take_the_scenic_route.jpg",
+    "caption": {
+      "en": "A paddleboarder on Lake Danao beneath forested hills, photographed in 2017.",
+      "ja": "森に覆われた山並みの下、ダナオ湖でパドルボードに乗る人。2017年撮影。",
+      "ko": "숲이 우거진 산 아래 다나오 호수에서 패들보드를 타는 사람. 2017년 촬영."
+    },
+    "alt": {
+      "en": "A paddleboarder on Lake Danao beneath forested hills, photographed in 2017.",
+      "ja": "森に覆われた山並みの下、ダナオ湖でパドルボードに乗る人。2017年撮影。",
+      "ko": "숲이 우거진 산 아래 다나오 호수에서 패들보드를 타는 사람. 2017년 촬영."
+    },
+    "width": 1616,
+    "height": 1080,
+    "sha256": "fcbab8d70b3374cfd849d438e3faf7a45669311b8e2dce52531028446ed20af1",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+  },
+  {
+    "id": "D01-ext-11",
+    "destinationId": "D01",
+    "file": "assets/presentation/featured/D01-ext-11.jpg",
+    "credit": "Source: tacloban.bluelineph.com",
+    "sourceUrl": "https://tacloban.bluelineph.com/lake-danao-national-park/",
+    "caption": {
+      "en": "A floating cottage and red boat on blue Lake Danao.",
+      "ja": "青いダナオ湖に浮かぶ水上コテージと赤いボート。",
+      "ko": "푸른 다나오 호수에 떠 있는 수상 코티지와 빨간 배."
+    },
+    "alt": {
+      "en": "A floating cottage and red boat on blue Lake Danao.",
+      "ja": "青いダナオ湖に浮かぶ水上コテージと赤いボート。",
+      "ko": "푸른 다나오 호수에 떠 있는 수상 코티지와 빨간 배."
+    },
+    "width": 720,
+    "height": 401,
+    "sha256": "792ad61469275cdf42f4e9f4d602f4285d1348c44ff1c7d20ae4fcba3604ce94"
+  },
+  {
+    "id": "D01-ext-01",
+    "destinationId": "D01",
+    "file": "assets/presentation/featured/D01-ext-01.jpg",
+    "credit": "Source: ormoc.bluelineph.com",
+    "sourceUrl": "https://ormoc.bluelineph.com/lake-danao-national-park/",
+    "caption": {
+      "en": "Visitors aboard a floating cottage near Lake Danao's wooded shore.",
+      "ja": "森に縁取られたダナオ湖の岸近くで、水上コテージに乗る人々。",
+      "ko": "숲이 둘러싼 다나오 호숫가 근처 수상 코티지에 탄 사람들."
+    },
+    "alt": {
+      "en": "Visitors aboard a floating cottage near Lake Danao's wooded shore.",
+      "ja": "森に縁取られたダナオ湖の岸近くで、水上コテージに乗る人々。",
+      "ko": "숲이 둘러싼 다나오 호숫가 근처 수상 코티지에 탄 사람들."
+    },
+    "width": 720,
+    "height": 401,
+    "sha256": "7964e03957f88e48778299a00706b2ce719f0ff04fdc8b5a61494db633001c34"
+  },
+  {
+    "id": "D01-maps-01",
+    "destinationId": "D01",
+    "file": "assets/presentation/featured/D01-maps-01.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0652951%2C124.703809",
+    "caption": {
+      "en": "A floating cottage on rippled water beneath Lake Danao's forested hills.",
+      "ja": "ダナオ湖の森に覆われた山並みの下、波立つ水面に浮かぶコテージ。",
+      "ko": "다나오 호수의 숲이 우거진 산 아래 잔물결 위에 떠 있는 코티지."
+    },
+    "alt": {
+      "en": "A floating cottage on rippled water beneath Lake Danao's forested hills.",
+      "ja": "ダナオ湖の森に覆われた山並みの下、波立つ水面に浮かぶコテージ。",
+      "ko": "다나오 호수의 숲이 우거진 산 아래 잔물결 위에 떠 있는 코티지."
+    },
+    "width": 1200,
+    "height": 675,
+    "sha256": "88c56d0a132bc15efd9727dececcc319ded0d41f5e9a9f54dbde1cf56b04c585"
+  },
+  {
+    "id": "D01-ext-22",
+    "destinationId": "D01",
+    "file": "assets/presentation/featured/D01-ext-22.jpg",
+    "credit": "Source: jauntingandmusing.wordpress.com",
+    "sourceUrl": "https://jauntingandmusing.wordpress.com/2017/08/13/lake-danao-natural-park-ormoc-citys-natural-gem-that-provides-a-relaxing-view-to-behold/",
+    "caption": {
+      "en": "Two people paddle a narrow wooden boat across Lake Danao.",
+      "ja": "ダナオ湖で細長い木の舟をこぐ2人。",
+      "ko": "다나오 호수에서 길쭉한 나무배를 젓는 두 사람."
+    },
+    "alt": {
+      "en": "Two people paddle a narrow wooden boat across Lake Danao.",
+      "ja": "ダナオ湖で細長い木の舟をこぐ2人。",
+      "ko": "다나오 호수에서 길쭉한 나무배를 젓는 두 사람."
+    },
+    "width": 775,
+    "height": 516,
+    "sha256": "147d71a361f1882617ba65aecaab6340ca6d1bed6925657d00cc8842fb81a110"
+  },
+  {
+    "id": "D01-maps-04",
+    "destinationId": "D01",
+    "file": "assets/presentation/featured/D01-maps-04.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0652951%2C124.703809",
+    "caption": {
+      "en": "The Lake Danao Natural Park sign surrounded by green foliage.",
+      "ja": "緑の葉に囲まれたダナオ湖自然公園の看板。",
+      "ko": "푸른 잎에 둘러싸인 다나오 호수 자연공원 표지판."
+    },
+    "alt": {
+      "en": "The Lake Danao Natural Park sign surrounded by green foliage.",
+      "ja": "緑の葉に囲まれたダナオ湖自然公園の看板。",
+      "ko": "푸른 잎에 둘러싸인 다나오 호수 자연공원 표지판."
+    },
+    "width": 1200,
+    "height": 801,
+    "sha256": "b3eff6ce9e622b699af34c49b16a006257487ac98965d79c0ca9420fb9940e10"
+  },
+  {
+    "id": "D01-preview-extra",
+    "destinationId": "D01",
+    "file": "assets/presentation/featured/D01-preview-extra.jpg",
+    "credit": "Brenda Bonjoc · CC BY-SA 2.0 · 2008; source version modified",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_Danao.jpg",
+    "caption": {
+      "en": "A thatched lakeside shelter and wooded hills at Lake Danao, photographed in 2008.",
+      "ja": "ダナオ湖畔の草ぶき屋根の小屋と、森に覆われた山並み。2008年撮影。",
+      "ko": "다나오 호숫가의 초가지붕 쉼터와 숲이 우거진 산자락. 2008년 촬영."
+    },
+    "alt": {
+      "en": "A thatched lakeside shelter and wooded hills at Lake Danao, photographed in 2008.",
+      "ja": "ダナオ湖畔の草ぶき屋根の小屋と、森に覆われた山並み。2008年撮影。",
+      "ko": "다나오 호숫가의 초가지붕 쉼터와 숲이 우거진 산자락. 2008년 촬영."
+    },
+    "width": 960,
+    "height": 643,
+    "sha256": "e45f66a39ad5c92c87043e24b38719e2c7301be36946fda19d8744cf9ec2c7b0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/"
+  },
+  {
+    "id": "D02-maps-01",
+    "destinationId": "D02",
+    "file": "assets/presentation/featured/D02-maps-01.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.026388977432092%2C124.74888613655587",
+    "caption": {
+      "en": "An overhead view of Lake Kasudsuran enclosed by densely wooded hills.",
+      "ja": "木々が密に茂る山々に囲まれたカスドゥスラン湖を上空から望む。",
+      "ko": "나무가 빽빽한 산에 둘러싸인 카수드수란 호수를 위에서 본 풍경."
+    },
+    "alt": {
+      "en": "An overhead view of Lake Kasudsuran enclosed by densely wooded hills.",
+      "ja": "木々が密に茂る山々に囲まれたカスドゥスラン湖を上空から望む。",
+      "ko": "나무가 빽빽한 산에 둘러싸인 카수드수란 호수를 위에서 본 풍경."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "bdab4b31a4c9453ae63f487936f3c220fe4f18c8ac76530c116c2dd0a0b34bce"
+  },
+  {
+    "id": "D02-preview",
+    "destinationId": "D02",
+    "file": "assets/presentation/featured/D02-preview.jpg",
+    "credit": "Ephraim Arriesgado / Selfless Travels · via TripZilla and Shellwanders",
+    "sourceUrl": "https://www.tripzilla.ph/adventurers-guide-ormoc-city-leyte/11576",
+    "caption": {
+      "en": "A narrow boat among ferns and tall grasses beside Lake Kasudsuran.",
+      "ja": "カスドゥスラン湖畔のシダや背の高い草の間にある細長い舟。",
+      "ko": "카수드수란 호숫가의 고사리와 키 큰 풀 사이에 놓인 길쭉한 배."
+    },
+    "alt": {
+      "en": "A narrow boat among ferns and tall grasses beside Lake Kasudsuran.",
+      "ja": "カスドゥスラン湖畔のシダや背の高い草の間にある細長い舟。",
+      "ko": "카수드수란 호숫가의 고사리와 키 큰 풀 사이에 놓인 길쭉한 배."
+    },
+    "width": 640,
+    "height": 480,
+    "sha256": "0783dc946f4f3c1f294e95df88f497f914368aacecc22347068241052506649c"
+  },
+  {
+    "id": "D02-ext-06",
+    "destinationId": "D02",
+    "file": "assets/presentation/featured/D02-ext-06.jpg",
+    "credit": "Source: viajeintl.blogspot.com",
+    "sourceUrl": "https://viajeintl.blogspot.com/2014/07/lake-kasudsuran.html",
+    "caption": {
+      "en": "Trees and clouds reflected across the still surface of Lake Kasudsuran.",
+      "ja": "カスドゥスラン湖の静かな水面に映る木々と雲。",
+      "ko": "카수드수란 호수의 잔잔한 수면에 비친 나무와 구름."
+    },
+    "alt": {
+      "en": "Trees and clouds reflected across the still surface of Lake Kasudsuran.",
+      "ja": "カスドゥスラン湖の静かな水面に映る木々と雲。",
+      "ko": "카수드수란 호수의 잔잔한 수면에 비친 나무와 구름."
+    },
+    "width": 640,
+    "height": 480,
+    "sha256": "18be81cd8cb73c93c010b7df06676cbe44f308da457ea9e6f00fe3a572ab2261"
+  },
+  {
+    "id": "D02-maps-04",
+    "destinationId": "D02",
+    "file": "assets/presentation/featured/D02-maps-04.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.026388977432092%2C124.74888613655587",
+    "caption": {
+      "en": "A visitor beside the Lake Kasudsuran sign amid misty vegetation.",
+      "ja": "霧がかかる草木の中、カスドゥスラン湖の看板のそばに立つ訪問者。",
+      "ko": "안개가 낀 풀숲 속 카수드수란 호수 표지판 옆에 선 방문객."
+    },
+    "alt": {
+      "en": "A visitor beside the Lake Kasudsuran sign amid misty vegetation.",
+      "ja": "霧がかかる草木の中、カスドゥスラン湖の看板のそばに立つ訪問者。",
+      "ko": "안개가 낀 풀숲 속 카수드수란 호수 표지판 옆에 선 방문객."
+    },
+    "width": 1200,
+    "height": 1600,
+    "sha256": "e8df1c463e721ffa33d18b211fd7dafacd4e62c4a1815612b9d81d8b9fd12456"
+  },
+  {
+    "id": "D02-maps-05",
+    "destinationId": "D02",
+    "file": "assets/presentation/featured/D02-maps-05.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.026388977432092%2C124.74888613655587",
+    "caption": {
+      "en": "A backpacked hiker on Lake Kasudsuran's densely vegetated shoreline path.",
+      "ja": "草木の茂るカスドゥスラン湖岸の小道にいる、バックパックを背負った登山者。",
+      "ko": "풀이 우거진 카수드수란 호숫가 길에서 배낭을 멘 등산객."
+    },
+    "alt": {
+      "en": "A backpacked hiker on Lake Kasudsuran's densely vegetated shoreline path.",
+      "ja": "草木の茂るカスドゥスラン湖岸の小道にいる、バックパックを背負った登山者。",
+      "ko": "풀이 우거진 카수드수란 호숫가 길에서 배낭을 멘 등산객."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "8fad1112074632145849257383d2cfe37183b50d930dfcb383f61de1225ec96c"
+  },
+  {
+    "id": "D03-maps-03",
+    "destinationId": "D03",
+    "file": "assets/presentation/featured/D03-maps-03.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406",
+    "caption": {
+      "en": "Lake Janagdan's blue-green water enclosed by steep, densely vegetated slopes.",
+      "ja": "植物に覆われた急な斜面に囲まれた、ジャナグダン湖の青緑の水面。",
+      "ko": "식물이 빽빽한 가파른 비탈에 둘러싸인 자나그단 호수의 청록빛 수면."
+    },
+    "alt": {
+      "en": "Lake Janagdan's blue-green water enclosed by steep, densely vegetated slopes.",
+      "ja": "植物に覆われた急な斜面に囲まれた、ジャナグダン湖の青緑の水面。",
+      "ko": "식물이 빽빽한 가파른 비탈에 둘러싸인 자나그단 호수의 청록빛 수면."
+    },
+    "width": 720,
+    "height": 646,
+    "sha256": "57a9db22bea2993e7b3620607926a91962aff5b3469d6ddf3c078a98fe88e889"
+  },
+  {
+    "id": "D03-preview-extra",
+    "destinationId": "D03",
+    "file": "assets/presentation/featured/D03-preview-extra.jpg",
+    "credit": "Source: Shellwanders · photographer unconfirmed",
+    "sourceUrl": "https://shellwanders.com/how-to-get-to-lake-janagdan-budget-expenses/",
+    "caption": {
+      "en": "Bare foreground branches frame green slopes reflected in Lake Janagdan.",
+      "ja": "手前の葉のない枝の向こうに、緑の斜面を映すジャナグダン湖。",
+      "ko": "앞쪽의 잎 없는 가지 너머로 푸른 비탈이 비친 자나그단 호수."
+    },
+    "alt": {
+      "en": "Bare foreground branches frame green slopes reflected in Lake Janagdan.",
+      "ja": "手前の葉のない枝の向こうに、緑の斜面を映すジャナグダン湖。",
+      "ko": "앞쪽의 잎 없는 가지 너머로 푸른 비탈이 비친 자나그단 호수."
+    },
+    "width": 845,
+    "height": 462,
+    "sha256": "88d94129dbd066349a89114a24edb7f95b60e88f7caf407538dad78a3d9dca6c"
+  },
+  {
+    "id": "D03-preview",
+    "destinationId": "D03",
+    "file": "assets/presentation/featured/D03-preview.jpg",
+    "credit": "Source: Shellwanders · photographer unconfirmed",
+    "sourceUrl": "https://shellwanders.com/how-to-get-to-lake-janagdan-budget-expenses/",
+    "caption": {
+      "en": "Visitors at the rocky shore and in Lake Janagdan beneath low mist.",
+      "ja": "低く霧が漂うジャナグダン湖で、岩の多い岸辺や水中にいる人々。",
+      "ko": "낮은 안개 아래 자나그단 호수의 바위 물가와 물속에 있는 사람들."
+    },
+    "alt": {
+      "en": "Visitors at the rocky shore and in Lake Janagdan beneath low mist.",
+      "ja": "低く霧が漂うジャナグダン湖で、岩の多い岸辺や水中にいる人々。",
+      "ko": "낮은 안개 아래 자나그단 호수의 바위 물가와 물속에 있는 사람들."
+    },
+    "width": 845,
+    "height": 462,
+    "sha256": "b65b11f287aed248474824f641bbfe491dba445e78b86a7ecdbce34198705998"
+  },
+  {
+    "id": "D03-maps-02",
+    "destinationId": "D03",
+    "file": "assets/presentation/featured/D03-maps-02.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406",
+    "caption": {
+      "en": "Lake Janagdan seen through hillside grasses, with distant lowlands beyond.",
+      "ja": "斜面の草越しに見えるジャナグダン湖と、その先の遠い低地。",
+      "ko": "비탈의 풀 사이로 보이는 자나그단 호수와 그 너머 먼 저지대."
+    },
+    "alt": {
+      "en": "Lake Janagdan seen through hillside grasses, with distant lowlands beyond.",
+      "ja": "斜面の草越しに見えるジャナグダン湖と、その先の遠い低地。",
+      "ko": "비탈의 풀 사이로 보이는 자나그단 호수와 그 너머 먼 저지대."
+    },
+    "width": 1200,
+    "height": 675,
+    "sha256": "0243d6c2cfc78ae5d62176654fb2b99cf1f83d431d5a904871641e1b3b5b9bfc"
+  },
+  {
+    "id": "D03-maps-04",
+    "destinationId": "D03",
+    "file": "assets/presentation/featured/D03-maps-04.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406",
+    "caption": {
+      "en": "A hiker follows a narrow, overgrown trail toward misty mountain slopes.",
+      "ja": "草木の茂る細い道を、霧のかかる山の斜面へ進む登山者。",
+      "ko": "풀이 무성한 좁은 길을 따라 안개 낀 산비탈로 향하는 등산객."
+    },
+    "alt": {
+      "en": "A hiker follows a narrow, overgrown trail toward misty mountain slopes.",
+      "ja": "草木の茂る細い道を、霧のかかる山の斜面へ進む登山者。",
+      "ko": "풀이 무성한 좁은 길을 따라 안개 낀 산비탈로 향하는 등산객."
+    },
+    "width": 1200,
+    "height": 1500,
+    "sha256": "02cd16b440ba7cd9e909d570cefde3199bb8cadca94737b26051ad9decee36ed"
+  },
+  {
+    "id": "D03-maps-05",
+    "destinationId": "D03",
+    "file": "assets/presentation/featured/D03-maps-05.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406",
+    "caption": {
+      "en": "A Lake Janagdan staging-area sign beside a mountain road and trees.",
+      "ja": "山道と木々のそばに立つ、ジャナグダン湖ステージングエリアの案内看板。",
+      "ko": "산길과 나무 옆에 선 자나그단 호수 집결지 안내 표지판."
+    },
+    "alt": {
+      "en": "A Lake Janagdan staging-area sign beside a mountain road and trees.",
+      "ja": "山道と木々のそばに立つ、ジャナグダン湖ステージングエリアの案内看板。",
+      "ko": "산길과 나무 옆에 선 자나그단 호수 집결지 안내 표지판."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "58eeb6f42c9150a5907fefbc152f83d7179474355aa4a98f1ba3112cf978b468"
+  },
+  {
+    "id": "D04-ext-03",
+    "destinationId": "D04",
+    "file": "assets/presentation/featured/D04-ext-03.jpg",
+    "credit": "Source: delightful.ph",
+    "sourceUrl": "https://www.delightful.ph/blog/category/4/travel-news/post/648/mangrove-eco-park-in-ormoc-city-shows-how-nature-and-livelihood-can-thrive-together",
+    "caption": {
+      "en": "A blue walkway extends across calm water toward dense mangroves.",
+      "ja": "青い遊歩道が穏やかな水面を渡り、密生するマングローブへ延びる。",
+      "ko": "푸른 산책로가 잔잔한 수면을 가로질러 빽빽한 맹그로브로 이어진다."
+    },
+    "alt": {
+      "en": "A blue walkway extends across calm water toward dense mangroves.",
+      "ja": "青い遊歩道が穏やかな水面を渡り、密生するマングローブへ延びる。",
+      "ko": "푸른 산책로가 잔잔한 수면을 가로질러 빽빽한 맹그로브로 이어진다."
+    },
+    "width": 1280,
+    "height": 853,
+    "sha256": "1e8cb7ba542f8a1c407e45ba3816a81c129b406f6b7f36a56bcb3a526e6f4b12"
+  },
+  {
+    "id": "D04-ext-12",
+    "destinationId": "D04",
+    "file": "assets/presentation/featured/D04-ext-12.webp",
+    "credit": "Source: mindtrip.ai",
+    "sourceUrl": "https://mindtrip.ai/attraction/ormoc-visayas/ormoc-mangrove-ecopark/at-diXLPBie",
+    "caption": {
+      "en": "Blue railings frame a sunlit walkway beside palms and mangroves.",
+      "ja": "ヤシとマングローブのそばで、青い手すりが日差しを浴びる遊歩道を縁取る。",
+      "ko": "야자수와 맹그로브 옆에서 푸른 난간이 햇빛 드는 산책로를 둘러싼다."
+    },
+    "alt": {
+      "en": "Blue railings frame a sunlit walkway beside palms and mangroves.",
+      "ja": "ヤシとマングローブのそばで、青い手すりが日差しを浴びる遊歩道を縁取る。",
+      "ko": "야자수와 맹그로브 옆에서 푸른 난간이 햇빛 드는 산책로를 둘러싼다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "07d997c9220c56468618c837d24da2a0be0558f10bf0c15d4e9124b5dac02ea1"
+  },
+  {
+    "id": "D04-preview",
+    "destinationId": "D04",
+    "file": "assets/presentation/featured/D04-preview.jpg",
+    "credit": "Source: Shellwanders · 2023",
+    "sourceUrl": "https://shellwanders.com/ormoc-mangrove-eco-park-tourist-spot-in-ormoc/",
+    "caption": {
+      "en": "Lamps illuminate a raised walkway beside palms and muddy shoreline.",
+      "ja": "ヤシと泥の岸辺のそばに延びる高架の遊歩道を照明が照らす。",
+      "ko": "야자수와 진흙 해안 옆으로 이어진 높은 산책로에 조명이 켜져 있다."
+    },
+    "alt": {
+      "en": "Lamps illuminate a raised walkway beside palms and muddy shoreline.",
+      "ja": "ヤシと泥の岸辺のそばに延びる高架の遊歩道を照明が照らす。",
+      "ko": "야자수와 진흙 해안 옆으로 이어진 높은 산책로에 조명이 켜져 있다."
+    },
+    "width": 845,
+    "height": 527,
+    "sha256": "d78d6adb603fe0c5118c7c628c9825e5e1b1a796784a76d163da54ec2e59a672"
+  },
+  {
+    "id": "D04-preview-extra",
+    "destinationId": "D04",
+    "file": "assets/presentation/featured/D04-preview-extra.jpg",
+    "credit": "Source: Shellwanders · 2023",
+    "sourceUrl": "https://shellwanders.com/ormoc-mangrove-eco-park-tourist-spot-in-ormoc/",
+    "caption": {
+      "en": "Mangroves border a lamp-lit walkway above the exposed shore.",
+      "ja": "干出した岸辺の上で、照明のついた遊歩道にマングローブが寄り添う。",
+      "ko": "드러난 해안 위로 조명이 켜진 산책로 옆에 맹그로브가 자란다."
+    },
+    "alt": {
+      "en": "Mangroves border a lamp-lit walkway above the exposed shore.",
+      "ja": "干出した岸辺の上で、照明のついた遊歩道にマングローブが寄り添う。",
+      "ko": "드러난 해안 위로 조명이 켜진 산책로 옆에 맹그로브가 자란다."
+    },
+    "width": 845,
+    "height": 527,
+    "sha256": "3151550210836469ea40c67c33754e4221eac89eddfb3cd7edd9079dbc008bf3"
+  },
+  {
+    "id": "D04-maps-05",
+    "destinationId": "D04",
+    "file": "assets/presentation/featured/D04-maps-05.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0089889%2C124.5700552",
+    "caption": {
+      "en": "A wooden park sign stands before a pale-blue building.",
+      "ja": "淡い青色の建物の前に木製の公園案内看板が立つ。",
+      "ko": "연한 파란색 건물 앞에 나무로 된 공원 안내판이 서 있다."
+    },
+    "alt": {
+      "en": "A wooden park sign stands before a pale-blue building.",
+      "ja": "淡い青色の建物の前に木製の公園案内看板が立つ。",
+      "ko": "연한 파란색 건물 앞에 나무로 된 공원 안내판이 서 있다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "8bc199fa1aec6453c0c11a5f804098e243dee3f664fcd03277b56c5fb4b481e8"
+  },
+  {
+    "id": "D04-maps-03",
+    "destinationId": "D04",
+    "file": "assets/presentation/featured/D04-maps-03.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0089889%2C124.5700552",
+    "caption": {
+      "en": "Blue railings follow the waterside walkway beneath a dusky sky.",
+      "ja": "夕暮れの空の下、水辺の遊歩道に青い手すりが続く。",
+      "ko": "해 질 무렵 하늘 아래 물가 산책로를 따라 푸른 난간이 이어진다."
+    },
+    "alt": {
+      "en": "Blue railings follow the waterside walkway beneath a dusky sky.",
+      "ja": "夕暮れの空の下、水辺の遊歩道に青い手すりが続く。",
+      "ko": "해 질 무렵 하늘 아래 물가 산책로를 따라 푸른 난간이 이어진다."
+    },
+    "width": 1200,
+    "height": 675,
+    "sha256": "674bce235db22b4e2e301ffc0467b7bb0e3045fd9fb21a72b420c10084da7bdc"
+  },
+  {
+    "id": "D05-preview",
+    "destinationId": "D05",
+    "file": "assets/presentation/featured/D05-preview.jpg",
+    "credit": "Source: Shellwanders",
+    "sourceUrl": "https://shellwanders.com/a-locals-guide-to-things-to-do-in-ormoc-city/",
+    "caption": {
+      "en": "Two visitors stand beside a giant pineapple sculpture and fields.",
+      "ja": "大きなパイナップルの像と畑のそばに2人の訪問者が立つ。",
+      "ko": "거대한 파인애플 조형물과 들판 옆에 두 방문객이 서 있다."
+    },
+    "alt": {
+      "en": "Two visitors stand beside a giant pineapple sculpture and fields.",
+      "ja": "大きなパイナップルの像と畑のそばに2人の訪問者が立つ。",
+      "ko": "거대한 파인애플 조형물과 들판 옆에 두 방문객이 서 있다."
+    },
+    "width": 845,
+    "height": 634,
+    "sha256": "d0201c32690ddfd7a457dc94705fc6ad60ac9cb39a219814a915981109a25476"
+  },
+  {
+    "id": "D05-maps-03",
+    "destinationId": "D05",
+    "file": "assets/presentation/featured/D05-maps-03.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679",
+    "caption": {
+      "en": "Rows of pineapple plants stretch toward palms beneath blue sky.",
+      "ja": "青空の下、列をなすパイナップルの株がヤシの木々へと続く。",
+      "ko": "푸른 하늘 아래 줄지어 자라는 파인애플이 야자수 쪽으로 펼쳐진다."
+    },
+    "alt": {
+      "en": "Rows of pineapple plants stretch toward palms beneath blue sky.",
+      "ja": "青空の下、列をなすパイナップルの株がヤシの木々へと続く。",
+      "ko": "푸른 하늘 아래 줄지어 자라는 파인애플이 야자수 쪽으로 펼쳐진다."
+    },
+    "width": 720,
+    "height": 542,
+    "sha256": "2e8139aae102db3e3885e0d884ca929c50e28548afede4928c3f90eb34c94f29"
+  },
+  {
+    "id": "D05-maps-04",
+    "destinationId": "D05",
+    "file": "assets/presentation/featured/D05-maps-04.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679",
+    "caption": {
+      "en": "A tractor sits among pineapple rows beyond a strip of bare soil.",
+      "ja": "土の露出した帯の向こう、パイナップルの列の間にトラクターが見える。",
+      "ko": "맨땅이 드러난 구간 너머 파인애플 줄 사이로 트랙터가 보인다."
+    },
+    "alt": {
+      "en": "A tractor sits among pineapple rows beyond a strip of bare soil.",
+      "ja": "土の露出した帯の向こう、パイナップルの列の間にトラクターが見える。",
+      "ko": "맨땅이 드러난 구간 너머 파인애플 줄 사이로 트랙터가 보인다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "dc15a01eb004e6d6082fd2a42e2163e16d1910c9baebb58c24136f5d67d08b64"
+  },
+  {
+    "id": "D05-preview-extra",
+    "destinationId": "D05",
+    "file": "assets/presentation/featured/D05-preview-extra.jpg",
+    "credit": "Ormoc News and Updates · via Chill and Travel",
+    "sourceUrl": "https://chillandtravel.com/ormoc-tourist-spots/",
+    "caption": {
+      "en": "Pineapple sculptures stand beside a tall SAL Queen Pineapple sign.",
+      "ja": "背の高い「SAL Queen Pineapple」の看板のそばにパイナップルの像が立つ。",
+      "ko": "높은 SAL Queen Pineapple 표지판 옆에 파인애플 조형물들이 서 있다."
+    },
+    "alt": {
+      "en": "Pineapple sculptures stand beside a tall SAL Queen Pineapple sign.",
+      "ja": "背の高い「SAL Queen Pineapple」の看板のそばにパイナップルの像が立つ。",
+      "ko": "높은 SAL Queen Pineapple 표지판 옆에 파인애플 조형물들이 서 있다."
+    },
+    "width": 1200,
+    "height": 1600,
+    "sha256": "3f8f7d06f1910e52d1ee1712e3e07c4ce134fb65586d7a54554c25f76a8a415c"
+  },
+  {
+    "id": "D05-maps-01",
+    "destinationId": "D05",
+    "file": "assets/presentation/featured/D05-maps-01.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679",
+    "caption": {
+      "en": "Two pineapple sculptures rise above a paved path under blue sky.",
+      "ja": "青空の下、舗装された小道の上に2つのパイナップルの像がそびえる。",
+      "ko": "푸른 하늘 아래 포장된 길 위로 두 파인애플 조형물이 솟아 있다."
+    },
+    "alt": {
+      "en": "Two pineapple sculptures rise above a paved path under blue sky.",
+      "ja": "青空の下、舗装された小道の上に2つのパイナップルの像がそびえる。",
+      "ko": "푸른 하늘 아래 포장된 길 위로 두 파인애플 조형물이 솟아 있다."
+    },
+    "width": 1200,
+    "height": 2573,
+    "sha256": "a696048b2808edcc37d45a13b802ced4cc0f971be44b32ca9f7c6a825c8b156b"
+  },
+  {
+    "id": "D05-maps-05",
+    "destinationId": "D05",
+    "file": "assets/presentation/featured/D05-maps-05.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679",
+    "caption": {
+      "en": "Heavy clouds gather above pineapple fields and distant palms.",
+      "ja": "パイナップル畑と遠くのヤシの上に厚い雲が広がる。",
+      "ko": "파인애플밭과 멀리 있는 야자수 위로 짙은 구름이 드리운다."
+    },
+    "alt": {
+      "en": "Heavy clouds gather above pineapple fields and distant palms.",
+      "ja": "パイナップル畑と遠くのヤシの上に厚い雲が広がる。",
+      "ko": "파인애플밭과 멀리 있는 야자수 위로 짙은 구름이 드리운다."
+    },
+    "width": 1200,
+    "height": 1600,
+    "sha256": "43473c2f56ff4279085331848327cd32700d6844c5e8a1e43fb1b361a26b40e7"
+  },
+  {
+    "id": "D06-maps-01",
+    "destinationId": "D06",
+    "file": "assets/presentation/featured/D06-maps-01.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625",
+    "caption": {
+      "en": "Long tree shadows cross a golf green bordered by broad canopies.",
+      "ja": "大きな樹冠に囲まれたゴルフのグリーンを、長い木陰が横切る。",
+      "ko": "넓은 나뭇가지로 둘러싸인 골프 그린 위로 긴 나무 그림자가 드리운다."
+    },
+    "alt": {
+      "en": "Long tree shadows cross a golf green bordered by broad canopies.",
+      "ja": "大きな樹冠に囲まれたゴルフのグリーンを、長い木陰が横切る。",
+      "ko": "넓은 나뭇가지로 둘러싸인 골프 그린 위로 긴 나무 그림자가 드리운다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "2db7772c34f1cf741b1174bdab9c33266e71f71eac776bdff2d29fa1ee3afa3b"
+  },
+  {
+    "id": "D06-preview",
+    "destinationId": "D06",
+    "file": "assets/presentation/featured/D06-preview.jpg",
+    "credit": "Source: ORMOC CITY blog · 2014",
+    "sourceUrl": "https://mitch18malinao.blogspot.com/2014/03/tourist-spots.html",
+    "caption": {
+      "en": "A large spreading tree towers above an open lawn.",
+      "ja": "開けた芝生の上に、大きく枝を広げた木がそびえる。",
+      "ko": "탁 트인 잔디밭 위로 가지를 넓게 펼친 큰 나무가 솟아 있다."
+    },
+    "alt": {
+      "en": "A large spreading tree towers above an open lawn.",
+      "ja": "開けた芝生の上に、大きく枝を広げた木がそびえる。",
+      "ko": "탁 트인 잔디밭 위로 가지를 넓게 펼친 큰 나무가 솟아 있다."
+    },
+    "width": 550,
+    "height": 365,
+    "sha256": "e61d1212ba8974f7659284a05c13c1f181e41e21865e364b78b47c389f676c30"
+  },
+  {
+    "id": "D06-preview-extra",
+    "destinationId": "D06",
+    "file": "assets/presentation/featured/D06-preview-extra.jpg",
+    "credit": "Source: Nickileodion · 2011",
+    "sourceUrl": "https://nickileodion.blogspot.com/2011/06/ormoc-city.html",
+    "caption": {
+      "en": "A row of spreading trees borders a bright green lawn.",
+      "ja": "鮮やかな緑の芝生に沿って、枝を広げた木々が並ぶ。",
+      "ko": "선명한 초록 잔디밭 가장자리에 가지를 펼친 나무들이 줄지어 있다."
+    },
+    "alt": {
+      "en": "A row of spreading trees borders a bright green lawn.",
+      "ja": "鮮やかな緑の芝生に沿って、枝を広げた木々が並ぶ。",
+      "ko": "선명한 초록 잔디밭 가장자리에 가지를 펼친 나무들이 줄지어 있다."
+    },
+    "width": 497,
+    "height": 375,
+    "sha256": "b4b22769060729e67bf1c6701936084287def5f818e72ebefc05e4704dc30e8c"
+  },
+  {
+    "id": "D06-maps-03",
+    "destinationId": "D06",
+    "file": "assets/presentation/featured/D06-maps-03.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625",
+    "caption": {
+      "en": "Golfers stand on a green beneath clouds and distant mountain ridges.",
+      "ja": "雲と遠くの山並みを背景に、ゴルファーたちがグリーンに立つ。",
+      "ko": "구름과 멀리 있는 산줄기를 배경으로 골퍼들이 그린에 서 있다."
+    },
+    "alt": {
+      "en": "Golfers stand on a green beneath clouds and distant mountain ridges.",
+      "ja": "雲と遠くの山並みを背景に、ゴルファーたちがグリーンに立つ。",
+      "ko": "구름과 멀리 있는 산줄기를 배경으로 골퍼들이 그린에 서 있다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "b97fbc66c5b8d87614be55305afd2342e67cffeb1784e62d6d04e9185b35fa3f"
+  },
+  {
+    "id": "D06-maps-04",
+    "destinationId": "D06",
+    "file": "assets/presentation/featured/D06-maps-04.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625",
+    "caption": {
+      "en": "Red-roofed buildings flank a trimmed lawn under a bright sky.",
+      "ja": "明るい空の下、手入れされた芝生の両側に赤い屋根の建物が並ぶ。",
+      "ko": "밝은 하늘 아래 잘 다듬어진 잔디밭 양옆에 빨간 지붕 건물들이 있다."
+    },
+    "alt": {
+      "en": "Red-roofed buildings flank a trimmed lawn under a bright sky.",
+      "ja": "明るい空の下、手入れされた芝生の両側に赤い屋根の建物が並ぶ。",
+      "ko": "밝은 하늘 아래 잘 다듬어진 잔디밭 양옆에 빨간 지붕 건물들이 있다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "25b95e693cd918a410bc1dab4dc925078ccf5bff1b9d758e67bc02a6d91751a6"
+  },
+  {
+    "id": "D06-maps-05",
+    "destinationId": "D06",
+    "file": "assets/presentation/featured/D06-maps-05.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625",
+    "caption": {
+      "en": "White golf carts line up beneath a roof beside club buildings.",
+      "ja": "クラブの建物のそばで、白いゴルフカートが屋根の下に並ぶ。",
+      "ko": "클럽 건물 옆 지붕 아래에 흰 골프 카트들이 줄지어 있다."
+    },
+    "alt": {
+      "en": "White golf carts line up beneath a roof beside club buildings.",
+      "ja": "クラブの建物のそばで、白いゴルフカートが屋根の下に並ぶ。",
+      "ko": "클럽 건물 옆 지붕 아래에 흰 골프 카트들이 줄지어 있다."
+    },
+    "width": 1200,
+    "height": 677,
+    "sha256": "3b76f78e136fbb847eb4b9bc92011fd80d3a2272285b82ff39c686fd2530fc30"
+  },
+  {
+    "id": "D07-maps-01",
+    "destinationId": "D07",
+    "file": "assets/presentation/featured/D07-maps-01.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.103007%2C124.7424401",
+    "caption": {
+      "en": "Clouds drift above layered, forested ridges around Alto Peak.",
+      "ja": "アルト・ピーク周辺で、森に覆われた幾重もの尾根の上に雲が広がる。",
+      "ko": "알토 피크 주변의 숲이 우거진 겹겹의 능선 위로 구름이 펼쳐진다."
+    },
+    "alt": {
+      "en": "Clouds drift above layered, forested ridges around Alto Peak.",
+      "ja": "アルト・ピーク周辺で、森に覆われた幾重もの尾根の上に雲が広がる。",
+      "ko": "알토 피크 주변의 숲이 우거진 겹겹의 능선 위로 구름이 펼쳐진다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "9da5eaa468ec38ac66c62c47805e637dc3e532efb801d1b4b96783d79913df58"
+  },
+  {
+    "id": "D07-preview",
+    "destinationId": "D07",
+    "file": "assets/presentation/featured/D07-preview.jpg",
+    "credit": "Source: Shellwanders",
+    "sourceUrl": "https://shellwanders.com/a-locals-guide-to-things-to-do-in-ormoc-city/",
+    "caption": {
+      "en": "A wooden Alto Peak marker stands among trees and grass.",
+      "ja": "木々や草の間に立つ、アルト・ピークの木製標識。",
+      "ko": "나무와 풀 사이에 서 있는 알토 피크 나무 표지판."
+    },
+    "alt": {
+      "en": "A wooden Alto Peak marker stands among trees and grass.",
+      "ja": "木々や草の間に立つ、アルト・ピークの木製標識。",
+      "ko": "나무와 풀 사이에 서 있는 알토 피크 나무 표지판."
+    },
+    "width": 845,
+    "height": 581,
+    "sha256": "46612cd5a7a53c6bf2613bdd963a286940cb68f32cd7b3670be8a5e607d09fb0"
+  },
+  {
+    "id": "D07-preview-extra",
+    "destinationId": "D07",
+    "file": "assets/presentation/featured/D07-preview-extra.jpg",
+    "credit": "My Nature Trip · via Shellwanders",
+    "sourceUrl": "https://mynaturetrip.wordpress.com/2022/07/27/alto-peak-the-marvelous-summit-of-mt-aminduen/",
+    "caption": {
+      "en": "Green ridges recede beneath white and grey mountain clouds.",
+      "ja": "白や灰色の雲の下に、緑の尾根が幾重にも遠ざかる。",
+      "ko": "흰색과 회색 구름 아래로 푸른 능선이 겹겹이 이어진다."
+    },
+    "alt": {
+      "en": "Green ridges recede beneath white and grey mountain clouds.",
+      "ja": "白や灰色の雲の下に、緑の尾根が幾重にも遠ざかる。",
+      "ko": "흰색과 회색 구름 아래로 푸른 능선이 겹겹이 이어진다."
+    },
+    "width": 640,
+    "height": 426,
+    "sha256": "09080c937e780a24de71a573bea567e6478af6290c737a062832bccc47c0a650"
+  },
+  {
+    "id": "D07-maps-02",
+    "destinationId": "D07",
+    "file": "assets/presentation/featured/D07-maps-02.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.103007%2C124.7424401",
+    "caption": {
+      "en": "Dense greenery frames a steep ridge beneath scattered clouds.",
+      "ja": "生い茂る緑の向こうに、雲が浮かぶ空と急な尾根が見える。",
+      "ko": "무성한 초록 식물 너머로 구름이 떠 있는 하늘과 가파른 능선이 보인다."
+    },
+    "alt": {
+      "en": "Dense greenery frames a steep ridge beneath scattered clouds.",
+      "ja": "生い茂る緑の向こうに、雲が浮かぶ空と急な尾根が見える。",
+      "ko": "무성한 초록 식물 너머로 구름이 떠 있는 하늘과 가파른 능선이 보인다."
+    },
+    "width": 720,
+    "height": 1280,
+    "sha256": "df6e75198ffa8e7adea823efffd0aee8e0db75df2b4384911644cda9e8a31c9e"
+  },
+  {
+    "id": "D07-maps-05",
+    "destinationId": "D07",
+    "file": "assets/presentation/featured/D07-maps-05.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.103007%2C124.7424401",
+    "caption": {
+      "en": "A forest trail marker rests beside moss-covered rocks.",
+      "ja": "苔に覆われた岩のそばに置かれた、森の登山道の標識。",
+      "ko": "이끼 덮인 바위 옆에 놓인 숲속 등산로 표지판."
+    },
+    "alt": {
+      "en": "A forest trail marker rests beside moss-covered rocks.",
+      "ja": "苔に覆われた岩のそばに置かれた、森の登山道の標識。",
+      "ko": "이끼 덮인 바위 옆에 놓인 숲속 등산로 표지판."
+    },
+    "width": 1200,
+    "height": 1600,
+    "sha256": "14910c7ffbe019f62da26085d826637a8442a3400abb4121e6e75b899067f9c7"
+  },
+  {
+    "id": "D08-ext-08",
+    "destinationId": "D08",
+    "file": "assets/presentation/featured/D08-ext-08.jpg",
+    "credit": "Source: definitelypinoy.wordpress.com",
+    "sourceUrl": "https://definitelypinoy.wordpress.com/2021/10/24/heavens-peak-garden-of-the-gods/",
+    "caption": {
+      "en": "A decorative arch frames a flower-lined path toward green mountains.",
+      "ja": "花々に縁取られた小道と緑の山々を囲む、装飾的なアーチ。",
+      "ko": "꽃이 늘어선 길과 푸른 산을 감싸는 장식 아치."
+    },
+    "alt": {
+      "en": "A decorative arch frames a flower-lined path toward green mountains.",
+      "ja": "花々に縁取られた小道と緑の山々を囲む、装飾的なアーチ。",
+      "ko": "꽃이 늘어선 길과 푸른 산을 감싸는 장식 아치."
+    },
+    "width": 4000,
+    "height": 2252,
+    "sha256": "3610ef626692f7a96f8c7eec4fa8b05bbfed4c17c1482b62d6074b3d2a87936a"
+  },
+  {
+    "id": "D08-ext-02",
+    "destinationId": "D08",
+    "file": "assets/presentation/featured/D08-ext-02.jpg",
+    "credit": "Source: x.com",
+    "sourceUrl": "https://x.com/WPMedics/status/1175421856850968576",
+    "caption": {
+      "en": "A stone path runs between bright flowers toward forested mountains.",
+      "ja": "鮮やかな花々の間を、森に覆われた山々へと延びる石の小道。",
+      "ko": "선명한 꽃 사이로 숲이 우거진 산을 향해 이어지는 돌길."
+    },
+    "alt": {
+      "en": "A stone path runs between bright flowers toward forested mountains.",
+      "ja": "鮮やかな花々の間を、森に覆われた山々へと延びる石の小道。",
+      "ko": "선명한 꽃 사이로 숲이 우거진 산을 향해 이어지는 돌길."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "8f4325f5d160a013d6057009b994f6b25707ee70ee40aacf5dcc3d5b9150d05d"
+  },
+  {
+    "id": "D08-preview",
+    "destinationId": "D08",
+    "file": "assets/presentation/featured/D08-preview.jpg",
+    "credit": "Source: Shellwanders · published 2021",
+    "sourceUrl": "https://shellwanders.com/how-to-get-to-heavens-peak-ormoc/",
+    "caption": {
+      "en": "A visitor stands between flower borders beneath green mountain ridges.",
+      "ja": "緑の山並みを背景に、花壇の間に立つ来訪者。",
+      "ko": "푸른 산등성이를 배경으로 화단 사이에 서 있는 방문객."
+    },
+    "alt": {
+      "en": "A visitor stands between flower borders beneath green mountain ridges.",
+      "ja": "緑の山並みを背景に、花壇の間に立つ来訪者。",
+      "ko": "푸른 산등성이를 배경으로 화단 사이에 서 있는 방문객."
+    },
+    "width": 845,
+    "height": 475,
+    "sha256": "d77ba270f5fdffbd8524fe46f8b78c1377e7c882fdeef89db04a8af7b8486628"
+  },
+  {
+    "id": "D08-ext-21",
+    "destinationId": "D08",
+    "file": "assets/presentation/featured/D08-ext-21.jpg",
+    "credit": "Source: definitelypinoy.wordpress.com",
+    "sourceUrl": "https://definitelypinoy.wordpress.com/2021/10/24/heavens-peak-garden-of-the-gods/",
+    "caption": {
+      "en": "Pink flowers line a path toward an arch and garden building.",
+      "ja": "ピンクの花々が、アーチと庭園の建物へ向かう小道に並ぶ。",
+      "ko": "아치와 정원 건물로 향하는 길을 따라 분홍색 꽃이 피어 있다."
+    },
+    "alt": {
+      "en": "Pink flowers line a path toward an arch and garden building.",
+      "ja": "ピンクの花々が、アーチと庭園の建物へ向かう小道に並ぶ。",
+      "ko": "아치와 정원 건물로 향하는 길을 따라 분홍색 꽃이 피어 있다."
+    },
+    "width": 4000,
+    "height": 2252,
+    "sha256": "9d40bba319e9a6f21eaaf53da4f11f50071ca8fafd7916cbaf10a80795c89ba8"
+  },
+  {
+    "id": "D08-maps-04",
+    "destinationId": "D08",
+    "file": "assets/presentation/featured/D08-maps-04.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0837842%2C124.7215256",
+    "caption": {
+      "en": "Visitors follow a narrow path through colourful flower beds below mountains.",
+      "ja": "山々の下、色鮮やかな花壇の間の細い小道を歩く来訪者たち。",
+      "ko": "산 아래 알록달록한 화단 사이의 좁은 길을 걷는 방문객들."
+    },
+    "alt": {
+      "en": "Visitors follow a narrow path through colourful flower beds below mountains.",
+      "ja": "山々の下、色鮮やかな花壇の間の細い小道を歩く来訪者たち。",
+      "ko": "산 아래 알록달록한 화단 사이의 좁은 길을 걷는 방문객들."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "6faf97fe24685c3c20e268673de1a4c8736e47b8107fc1553d6ee60b8dfbfeef"
+  },
+  {
+    "id": "D08-maps-05",
+    "destinationId": "D08",
+    "file": "assets/presentation/featured/D08-maps-05.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0837842%2C124.7215256",
+    "caption": {
+      "en": "Interlaced branches form a leafy tunnel over a narrow garden path.",
+      "ja": "枝が重なり、細い庭園の小道の上に緑のトンネルをつくる。",
+      "ko": "서로 얽힌 가지가 좁은 정원 길 위로 초록 터널을 만든다."
+    },
+    "alt": {
+      "en": "Interlaced branches form a leafy tunnel over a narrow garden path.",
+      "ja": "枝が重なり、細い庭園の小道の上に緑のトンネルをつくる。",
+      "ko": "서로 얽힌 가지가 좁은 정원 길 위로 초록 터널을 만든다."
+    },
+    "width": 1200,
+    "height": 1599,
+    "sha256": "48de5dc7e3922a0f5ead4ba8ae4850f34d2567589dcc8b0855ae97fd620fdbc5"
+  },
+  {
+    "id": "D09-preview",
+    "destinationId": "D09",
+    "file": "assets/presentation/featured/D09-preview.jpg",
+    "credit": "Philippine Travel Notes (Pinoy Traveler) · 2016",
+    "sourceUrl": "https://philippinetravelnotes.blogspot.com/2016/04/sabin-resort-hotel-overnight.html",
+    "caption": {
+      "en": "An arched bridge crosses a curved pool beside palms and the bay.",
+      "ja": "ヤシの木と湾のそばで、曲線を描くプールにアーチ橋が架かる。",
+      "ko": "야자수와 만 곁의 곡선형 수영장에 아치 다리가 놓여 있다."
+    },
+    "alt": {
+      "en": "An arched bridge crosses a curved pool beside palms and the bay.",
+      "ja": "ヤシの木と湾のそばで、曲線を描くプールにアーチ橋が架かる。",
+      "ko": "야자수와 만 곁의 곡선형 수영장에 아치 다리가 놓여 있다."
+    },
+    "width": 1365,
+    "height": 768,
+    "sha256": "18cd994eef10805968a09efaa3c08d180ddc82e67aa7794c3794e06309e31275"
+  },
+  {
+    "id": "D09-preview-extra",
+    "destinationId": "D09",
+    "file": "assets/presentation/featured/D09-preview-extra.jpg",
+    "credit": "Dutchpickle · 2011",
+    "sourceUrl": "https://www.dutchpickle.com/philippines/leyte/sabin-resort-hotel.html",
+    "caption": {
+      "en": "White benches line a waterfront path beside a palm-covered lawn.",
+      "ja": "ヤシの木が立つ芝生のそばで、水辺の小道に白いベンチが並ぶ。",
+      "ko": "야자수가 있는 잔디밭 옆 물가 산책로에 흰 벤치가 늘어서 있다."
+    },
+    "alt": {
+      "en": "White benches line a waterfront path beside a palm-covered lawn.",
+      "ja": "ヤシの木が立つ芝生のそばで、水辺の小道に白いベンチが並ぶ。",
+      "ko": "야자수가 있는 잔디밭 옆 물가 산책로에 흰 벤치가 늘어서 있다."
+    },
+    "width": 500,
+    "height": 375,
+    "sha256": "59b169c4c7d5c669973579a4fc4a02ddc2891353ec39b31902f42cec21e31181"
+  },
+  {
+    "id": "D09-maps-01",
+    "destinationId": "D09",
+    "file": "assets/presentation/featured/D09-maps-01.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132",
+    "caption": {
+      "en": "A thatched pavilion stands within a turquoise pool beside hotel buildings.",
+      "ja": "ホテルの建物のそばで、青緑色のプールの中に茅葺きの東屋が立つ。",
+      "ko": "호텔 건물 옆 청록색 수영장 안에 초가지붕 정자가 서 있다."
+    },
+    "alt": {
+      "en": "A thatched pavilion stands within a turquoise pool beside hotel buildings.",
+      "ja": "ホテルの建物のそばで、青緑色のプールの中に茅葺きの東屋が立つ。",
+      "ko": "호텔 건물 옆 청록색 수영장 안에 초가지붕 정자가 서 있다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "aa2a69a21413458c29010af7dc9044d66d579a98385feff3acd2f556576ce240"
+  },
+  {
+    "id": "D09-maps-03",
+    "destinationId": "D09",
+    "file": "assets/presentation/featured/D09-maps-03.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132",
+    "caption": {
+      "en": "Two beds and wooden furniture fill a room with closed curtains.",
+      "ja": "カーテンを閉めた客室に、ベッド二台と木製家具が置かれている。",
+      "ko": "커튼이 닫힌 객실에 침대 두 개와 목재 가구가 놓여 있다."
+    },
+    "alt": {
+      "en": "Two beds and wooden furniture fill a room with closed curtains.",
+      "ja": "カーテンを閉めた客室に、ベッド二台と木製家具が置かれている。",
+      "ko": "커튼이 닫힌 객실에 침대 두 개와 목재 가구가 놓여 있다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "2a4bf2677556a2e13682281d56cef7aa6a4e2dd4d3c786fd4a378524f0013319"
+  },
+  {
+    "id": "D09-maps-04",
+    "destinationId": "D09",
+    "file": "assets/presentation/featured/D09-maps-04.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132",
+    "caption": {
+      "en": "Palm trees rise beside a curved pool beneath a golden sky.",
+      "ja": "黄金色の空の下、曲線を描くプールのそばにヤシの木がそびえる。",
+      "ko": "황금빛 하늘 아래 곡선형 수영장 곁으로 야자수가 솟아 있다."
+    },
+    "alt": {
+      "en": "Palm trees rise beside a curved pool beneath a golden sky.",
+      "ja": "黄金色の空の下、曲線を描くプールのそばにヤシの木がそびえる。",
+      "ko": "황금빛 하늘 아래 곡선형 수영장 곁으로 야자수가 솟아 있다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "962e085c73c78f7ac57ae0e6899be208963c98a7f474f7137bee5d914b1b7db3"
+  },
+  {
+    "id": "D09-maps-05",
+    "destinationId": "D09",
+    "file": "assets/presentation/featured/D09-maps-05.jpg",
+    "credit": "Source: google.com",
+    "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132",
+    "caption": {
+      "en": "An illuminated Sabin Resort sign stands between palms against the bay.",
+      "ja": "湾を背景に、ヤシの木の間でサビン・リゾートの看板が光る。",
+      "ko": "만을 배경으로 야자수 사이의 사빈 리조트 간판이 빛난다."
+    },
+    "alt": {
+      "en": "An illuminated Sabin Resort sign stands between palms against the bay.",
+      "ja": "湾を背景に、ヤシの木の間でサビン・リゾートの看板が光る。",
+      "ko": "만을 배경으로 야자수 사이의 사빈 리조트 간판이 빛난다."
+    },
+    "width": 1200,
+    "height": 900,
+    "sha256": "6114a4aace05fb3ee42019564f97227958644d8c9be97c50c6b28ddd3a5962bf"
+  }
+]

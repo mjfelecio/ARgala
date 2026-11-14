@@ -3035,3 +3035,14 @@ tracking, an ADB tap opened Lake Danao’s overview, and the photograph rendered
 at the 2.25-unit focus setting. The focused panel was still partly outside the
 left edge at the phone’s observed tilted orientation. This single observation
 does not establish comfort, stable framing or physical short-tap reliability.
+
+
+## 2026-11-14 — College presentation Classic content
+
+Work isolated on `feat/presentation-spatial-exhibit` in the managed `254a/ARgala` worktree. Source baseline `56e5717`; existing SDK/authentication changes were copied solely for workspace compatibility and remain separate from the content commit. No dependency/native configuration change, APK build, install or publication was performed for this task.
+
+Integrated the owner-supplied 2026-11-13 package: nine catalog entries, 20 stable chapters, 53 byte-verified bundled photographs, all EN/JA/KO stories, summaries, complete photo metadata and visitor guidance. Catalog/map/detail display names use supplied translations; captured route targets retain the selected language. Independently referenced landmark centers and practical entrances remain separate. Guide requirements are retained for D02/D03/D07; D02 retains approximately one hour. Catalog coordinates grant no AR activation, provider association or Passport authority. Source metadata does not claim redistribution clearance. ACLC is unchanged.
+
+Evidence: baseline `npm run check` passed TypeScript, zero-warning lint and 1,457 tests / 129 files. Final Classic `npm run check` passed TypeScript, zero-warning lint and **1,467 tests / 130 files**. New tests hash all 53 real assets, compare chapter/media/locale bindings, exercise actual visitor screens without provider work, and retain every paragraph/caption/full credit through all three locales and reading sizes. Reminder regressions verify missing canonical coordinates reject and forged caller coordinates never override bundled points. `npm run test:destination-content` passed the isolated PostgreSQL privilege/manifest checks. `npm run export:android` passed with 111 bundled assets; it is not an APK build. Independent scoped code review found no blocking issues; its localized Directions handoff observation was corrected with a failing-then-passing routing regression.
+
+No device is attached (`adb devices -l` empty). Existing development client identity, physical taps, CJK glyph appearance, offline device loading, tracking/recovery, capture and performance remain unverified. Classic is content-complete and automated checks pass; physical presentation acceptance is pending. Follow-ups remain in `docs/content/presentation-2026-11-13/FOLLOW-UP.md`. Presentation cutoff awaits the client's deadline.

@@ -262,20 +262,20 @@
   "destinations": {
     "title": "Featured Destinations",
     "shortTitle": "Featured",
-    "intro": "Browse nine study destinations. Official names and visitor content are awaiting verification.",
-    "provisional": "Provisional name",
+    "intro": "Explore nine destinations across Ormoc’s lakes, mountains, coast and countryside.",
+    "provisional": "Destination",
     "contentPending": "Verified visitor information is not yet available.",
     "centerMissing": "Nearby places will be available once the destination location is verified.",
     "entranceMissing": "Directions will be available once an accessible visitor entrance is verified.",
     "unavailable": "This destination is unavailable. Return to Featured Destinations.",
-    "daytime": "Daytime Preview",
-    "notLive": "Approved daytime photos — not live camera imagery.",
+    "daytime": "Photo gallery",
+    "notLive": "Destination photographs",
     "previewMissing": "Daytime preview not yet available.",
     "imageFailed": "This preview image could not be displayed.",
     "englishFallback": "Shown in English",
     "highlights": "Highlights",
-    "photoCount_one": "{{count}} approved photo",
-    "photoCount_other": "{{count}} approved photos",
+    "photoCount_one": "{{count}} photo",
+    "photoCount_other": "{{count}} photos",
     "exploreNearby": "Explore Nearby",
     "nearbyTitle": "Nearby Places",
     "nearbyRadius": "Search within 500 m of this destination. Distances are straight-line distances from the destination.",
@@ -289,7 +289,15 @@
     "storiesPending": "Approved stories are not yet available.",
     "storiesOnSite": "Approved stories open in AR after a verified arrival.",
     "visitForAr": "Visit to unlock camera AR",
-    "arrivalRequired": "Camera AR requires verified arrival and approved content."
+    "arrivalRequired": "Camera AR requires verified arrival and approved content.",
+    "guideRequired": "A local guide is required.",
+    "visitorGuide": {
+      "arrival": "Getting there",
+      "bestTime": "When to visit",
+      "activities": "What to experience",
+      "preparation": "Before you go",
+      "safety": "Care for yourself and the place"
+    }
   },
   "onboarding": {
     "tagline": "Discover places around you.",
@@ -589,105 +597,105 @@
     "readerTitle": "Destination stories"
   },
   "featuredResearch": {
-    "title": "Featured destination research previews",
-    "notice": "Development preview: researched draft, not verified arrival. Translations await review.",
+    "title": "Explore Ormoc in AR",
+    "notice": "Discover local stories, photographs and visitor tips.",
     "stories": {
       "D01": [
         {
           "title": "A living lake",
-          "body": "Lake Danao lies among the forested uplands of Ormoc. The freshwater lake and its surroundings are part of a protected natural park."
+          "body": "Forested slopes frame Lake Danao in the uplands of Ormoc, Leyte. Its long, curved outline is often compared with a guitar, while wooded headlands and ripples reward a closer look from shore. Arrive at the visitor entrance beside the viewing deck, rather than the broader park map pin. Enjoy sightseeing and picnics, or ask staff about kayaking, paddle boating, boat rides and floating-cottage rides. These activities share a landscape that also supports nearby fishing and farming communities. Check the day's activity arrangements before heading onto the water, and leave the shore as clean as you found it."
         },
         {
-          "title": "Life and livelihoods",
-          "body": "Researchers working with local fishers studied the lake from 2021 to 2022, recording eight fish species and examining their local use as food."
+          "title": "Fish and everyday life",
+          "body": "Lake Danao's fish connect the water to local kitchens and livelihoods. Work with fishers in 2021–2022 recorded eight species by combining sampled catches with community knowledge; five species were collected directly. Families kept fish for meals, sold valuable catches and sometimes exchanged fish for other food. Preparations included tinola, a fish soup, and ginataan, cooked with coconut milk. These everyday choices reveal more than a list of species: they show how knowledge, food and income link people to the lake. As you look across the water, remember that this view is also part of someone's working landscape."
         },
         {
-          "title": "A protected place",
-          "body": "Lake Danao and its surroundings were declared a protected natural park in 1998. The lake is part of a landscape connected to water, wildlife and nearby communities."
+          "title": "A protected landscape",
+          "body": "Lake Danao and its surroundings became a protected natural park on 3 February 1998 and were included in the expanded national protected-area system in 2018. The lake and its habitats belong together; protecting the water also means caring for the land around it. Keep waste out of the lake and leave wildlife undisturbed. Take water safety seriously: this is deep water with a serious drowning risk. Swimming is permitted only inside the designated rope-lined area, never beyond it; the ropes do not guarantee safety. Follow staff instructions and wear a properly fitted life jacket for boating and floating-cottage rides."
         }
       ],
       "D02": [
         {
-          "title": "A highland lake",
-          "body": "Lake Kasudsuran is a lake in the uplands of Ormoc. City planning material places it in Barangay Ga-as."
+          "title": "A lake framed by green",
+          "body": "Lake Kasudsuran is one of Ormoc's smaller upland lakes, in Barangay Ga-as. Ferns and tall shoreline grasses draw the eye toward open water, with wooded slopes rising beyond. Look from the plants along the bank to the reflections farther out: the close meeting of land and water gives the lake its character. Reaching this setting is a guided walk, not a drive to the lakeshore. Allow approximately one hour for the hike, agree the timing with your local guide, and leave enough daylight for the return. Take in the view from firm ground without trampling the shoreline vegetation."
         },
         {
-          "title": "Exploring the uplands",
-          "body": "The lake is one of Ormoc’s smaller lakes. Access and trail conditions can change; confirm arrangements locally before visiting."
+          "title": "A working upland landscape",
+          "body": "Ga-as is a place of work as well as scenery. Its farmers grow cabbage, cassava and sweet potato, linking these uplands to city markets. Arrange a local guide, then begin at the road-end beside the basketball court in Sitio Maglahug. A guide is required, and access to the lake is on foot only. The small unpaved fork beyond the road-end is not a vehicle route or a shortcut through private property. Wear grippy trail shoes, carry water and rain protection, and follow your guide if rain or slippery ground changes the plan. Respect fields, homes and residents' paths."
         }
       ],
       "D03": [
         {
-          "title": "Lake Janagdan",
-          "body": "Lake Janagdan is a small upland lake in Barangay Cabintan, Ormoc, according to the city’s ecological profile."
+          "title": "Within the green slopes",
+          "body": "Lake Janagdan rests among steep, green slopes in Barangay Cabintan, Ormoc, in the Mt. Aminduen area. A rocky waterline and reflections on a still surface bring the shape of the surrounding land into focus. Begin at Lake Janagdan Staging Area, not the lake's map pin, and hike with a required local guide. The uphill approach calls for care around roots, rocks and slippery ground, especially after rain. Wear grippy trail shoes, bring water and rain protection, and agree the day's route with your guide. At the lake, pause on firm ground and let the enclosed landscape reveal its details."
         },
         {
-          "title": "Among the mountains",
-          "body": "Local travel writing describes Lake Janagdan as part of the Mt. Aminduen area. Trail and access details require local confirmation."
+          "title": "A lake that matters to Cabintan",
+          "body": "Janagdan's story reaches beyond hiking. In 2018, a proposed access road faced opposition from mountaineers concerned about the mountain environment and the lake's role as a water source for Cabintan. The project was stopped, and reallocating remaining funds to other tourism roads was approved. This history helps explain why visiting also means caring for land and water shared with residents. Confirm local check-in arrangements before setting out, stay on the guide's route and allow enough daylight to return. Keep rubbish, soap and detergents out of the lake, leave plants undisturbed and ask your guide before considering any water activity."
         }
       ],
       "D04": [
         {
-          "title": "Where land meets sea",
-          "body": "The mangroves of Naungan lie along Ormoc Bay, near the mouth of the Pagsangaan River. Part of this coastal forest has been used as a public park."
+          "title": "Where river, forest and bay meet",
+          "body": "At Naungan, the Pagsangaan River reaches Ormoc Bay beside mangrove forest and fishponds. Part of this coastal forest serves as a public park, bringing recreation into a landscape that supports local livelihoods. Mangroves shelter fish, crustaceans and other wildlife while helping stabilize the shore. Begin at the Naungan park entrance and explore only the paths open to visitors. Daylight makes it easier to appreciate the water, roots and shoreline; wear shoes with grip and take extra care on wet surfaces beside the water."
         },
         {
-          "title": "People and mangroves",
-          "body": "The Naungan-San Juan Mangrove Planters Association and the local government have worked together on mangrove conservation and an ecotourism site."
+          "title": "A forest cared for by its community",
+          "body": "The Naungan–San Juan Mangrove Planters Association has worked with Ormoc’s local government and the Department of Environment and Natural Resources to conserve and restore mangroves in Naungan, Lao and San Juan. A community forestry agreement in 2000 and an ecotourism initiative in 2017 mark stages in this work. Rehabilitation continued after Typhoon Haiyan damaged planted areas and nurseries. These efforts connect coastal livelihoods with environmental care. Respect that work by leaving roots, plants and wildlife undisturbed, keeping to open paths and carrying your litter away."
         }
       ],
       "D05": [
         {
-          "title": "Sal’s Pineapple Plantation",
-          "body": "Sal’s Pineapple Plantation is a likely match for the fields beside Ormoc’s diversion road. Local guides identify it as a pineapple plantation in Ormoc."
+          "title": "Pineapple country",
+          "body": "Sal’s Pineapple Plantation sits beside Ormoc Diversion Road in Barangay Biliboy. The giant pineapple landmark marks the entrance and ride drop-off, making a memorable starting point for a visit. Visitors can walk inside the plantation while keeping clear of the crops. Beyond the view is a working agricultural landscape: pineapple growing supports livelihoods and helps shape Ormoc’s identity. The Queen variety is especially associated with the city, although it also grows elsewhere in Leyte and Eastern Visayas. See the fields as both a local landmark and a place of work."
         },
         {
-          "title": "Ormoc’s Queen pineapple",
-          "body": "Queen pineapple is grown in Ormoc and other parts of Leyte, according to Visayas State University. The fruit is celebrated in Ormoc’s Piña Festival."
+          "title": "A fruit at the heart of the fiesta",
+          "body": "Queen pineapple is known for its sweetness, aroma and crisp texture, with fruit smaller than some other pineapple varieties. In Ormoc, it also has a cultural role. The Piña Festival brings pineapple imagery into street dancing, costumes and community celebrations during the city’s June fiesta season. The celebration honors the patron saints, Saints Peter and Paul, while giving local agriculture a place in public life. That connection helps explain why pineapple is such a recognizable city symbol. Here, a familiar fruit tells a larger story about growers, community pride and celebration."
         },
         {
-          "title": "Visiting the fields",
-          "body": "Travel listings identify a location in Ormoc, but a public entrance and present access arrangements have not been confirmed. The fields are working farmland."
+          "title": "Walk gently through the growing fields",
+          "body": "The plantation route is popular locally for jogging and fun runs, but it remains a place where crops are growing. Walk on clear routes without stepping on plants or planted rows, and leave every pineapple intact. There is virtually no shade, so choose early morning or late afternoon; on a cooler evening, finish before dark. Bring drinking water, a hat and sun protection. Take photographs without entering the crops, keep access clear for workers and vehicles, and follow on-site instructions. Carry your litter away so the next visitor finds the fields just as inviting."
         }
       ],
       "D06": [
         {
-          "title": "Leyte Golf and Country Club",
-          "body": "Leyte Golf and Country Club is a golf course in Ormoc. Golf guides describe an 18-hole course."
+          "title": "Golf in Ormoc’s countryside",
+          "body": "Leyte Golf and Country Club is an 18-hole, par-72 course in Ormoc’s Mabini area. Its setting includes surrounding mountains and views toward Ormoc Bay, adding a sporting perspective to a city also known for lakes, farms and coastal scenery. For golfers, it offers a different way to experience the countryside. Arrange your visit with the club before travelling, including guest eligibility, booking and any playing requirements. The marked club location is also the registration area; check in there and follow staff directions before going farther onto the property."
         },
         {
-          "title": "A place to play",
-          "body": "Golf combines a course landscape with practice and play. Confirm the present visitor arrangements and actual entrance with the operator."
+          "title": "Trees, open ground and thoughtful play",
+          "body": "Spreading trees and open grass give the club’s landscape its character. The contrast between closely cut ground and branching canopies invites a slower look at the space around the game. Enjoy that setting from the areas staff authorize, without assuming the course is open for casual walks or sightseeing. Golf balls and moving carts make active playing areas unsuitable for unguided wandering. Wear suitable footwear, carry water and sun protection, and follow the club’s weather instructions. If thunder or lightning develops, stop outdoor activity and seek a substantial building as directed by staff."
         }
       ],
       "D07": [
         {
-          "title": "Alto Peak",
-          "body": "Alto Peak is a mountain associated with the uplands near Ormoc and the Mt. Aminduen area."
+          "title": "Above the folded ridges",
+          "body": "Alto Peak, also known as Mt. Aminduen, rises about 1,332 metres above sea level and is recognized as Eastern Visayas’ highest peak. Forested slopes and tightly folded ridges make the landscape feel larger than a single summit. The approach from Ormoc is associated with Cabintan, a community at the edge of this mountain country. Begin at the SULFATARA starting point rather than the summit map pin. Arrange a local guide before travelling; a guide is required. This is a strenuous mountain trek, not a beginner’s sightseeing stroll."
         },
         {
-          "title": "The mountain landscape",
-          "body": "Local hiking accounts connect the mountain area with Lake Janagdan. Trails, guides and access conditions should be confirmed locally before a visit."
+          "title": "Earn the view, respect the forest",
+          "body": "On Alto’s forest trails, the climb demands attention as well as stamina. Mud, slippery roots and steep ground can slow progress, and upper sections may involve scrambling and rope assistance. Wear grippy hiking footwear and bring rope-handling gloves, water, food, rain protection, a headlamp and first aid. Set the route, registration arrangements and turnaround time with your guide before setting out. Follow the guide’s instructions around ropes and steep sections; postpone or turn back when rain or conditions make the route unsafe. Stay on the agreed trail and carry out every piece of rubbish, leaving the forest intact."
         }
       ],
       "D08": [
         {
-          "title": "Heaven’s Peak",
-          "body": "Heaven’s Peak is described in local travel writing as a garden viewpoint in Barangay Cabintan, Ormoc."
+          "title": "A garden beneath the mountains",
+          "body": "At Heaven’s Peak in Barangay Cabintan, the garden brings Ormoc’s upland scenery close enough to explore at walking pace. Flower borders, lawns and a stone path draw the eye toward the forested mountains beyond. Notice the change in scale: carefully tended plants are close at hand, while ridges form the backdrop. This is a garden viewpoint, not a summit trek. Arrive at the garden entrance and check opening and admission arrangements before travelling. Walk on the paths and give the planted borders room to flourish."
         },
         {
-          "title": "The upland view",
-          "body": "Visitors come for the garden and its mountain outlook. Check current opening and access information locally before visiting."
+          "title": "Flowers in a working landscape",
+          "body": "Cabintan is more than a mountain backdrop: vegetable growing is part of the community’s livelihood. Seen in that setting, Heaven’s Peak offers another expression of people tending the uplands, this time through ornamental plants. Look from the flower beds toward the wider landscape and remember that homes and farms continue beyond the garden. Choose daylight and fair weather for enjoying the view; bring drinking water, sun or rain protection and shoes with a good grip. Paths can be slippery when wet. Keep children close, take your rubbish away and respect neighbouring homes and cultivated land."
         }
       ],
       "D09": [
         {
-          "title": "Sabin Resort Hotel",
-          "body": "Sabin Resort Hotel is listed by the Department of Tourism in Barangay Bantigue, Ormoc City."
+          "title": "Hospitality beside Ormoc Bay",
+          "body": "Sabin Resort Hotel stands beside Ormoc Bay in Barangay Bantigue, where the waterfront gives the property its distinctive setting. Its story is tied to people coming together by the sea, first for simple recreation and later for hotel stays and gatherings. The bay remains the thread linking those different chapters. Arrive at the hotel entrance and check in with staff before exploring. Confirm your room, dining or visitor arrangements directly with the hotel before travelling, including which outdoor areas and facilities your visit allows you to use."
         },
         {
-          "title": "By the bay",
-          "body": "The hotel describes beachfront and dining facilities. Availability and services may change; confirm directly before visiting."
+          "title": "From Sal’s Beach to a hotel",
+          "body": "Sabin’s story began with Sal’s Beach, a seaside recreation spot with simple bamboo-and-nipa huts. Visits from Ormoc and nearby towns encouraged Sabin A. Larrazabal to develop a larger property. In the hotel’s history, project planning began in 1990, followed by an expansion in 2006. From beach huts to accommodation and gathering spaces, the scale changed while the sea remained central. For a comfortable visit, bring sun or rain protection and suitable footwear. Follow staff instructions near water, supervise children closely and do not assume the bay is safe for swimming."
         }
       ]
     }

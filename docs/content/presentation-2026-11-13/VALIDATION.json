@@ -1,0 +1,48 @@
+{
+  "contentVersion": "2026-11-13-presentation-v1",
+  "checks": [
+    {
+      "name": "Nine destinations, 20 stable chapters, three complete languages",
+      "result": "passed"
+    },
+    {
+      "name": "User-confirmed entrances and guide flags",
+      "result": "passed"
+    },
+    {
+      "name": "53 bundled photos, matching hashes, distinct files and complete captions",
+      "result": "passed"
+    },
+    {
+      "name": "Visitor text excludes research-status wording and private follow-ups",
+      "result": "passed"
+    },
+    {
+      "name": "Locale story patches and runtime JSON match the final content",
+      "result": "passed"
+    },
+    {
+      "name": "TypeScript syntax and existing-export adapter smoke test (20 chapters / 53 bundled assets)",
+      "result": "passed"
+    }
+  ],
+  "browser": {
+    "result": "not_run",
+    "reason": "The execution environment blocked Chromium socket creation. No visual-layout or device-rendering pass is claimed."
+  },
+  "readerLogic": {
+    "relativeAssetReader": {
+      "result": "passed",
+      "languageDestinationCombinations": 27,
+      "photoOpenClose": "passed",
+      "imageReferences": "passed"
+    },
+    "standaloneEmbeddedReader": {
+      "result": "passed",
+      "languageDestinationCombinations": 27,
+      "photoOpenClose": "passed",
+      "imageReferences": "passed"
+    }
+  },
+  "boundary": "Package data, TypeScript adapter syntax/export behavior and offline reader render logic verified. No current app repository typecheck, browser visual-layout verification, APK build or physical AR test was performed here."
+}

@@ -1,5 +1,11 @@
 # ARgala agent operating manual
 
+## College presentation and spatial Exhibit — 2026-11-14
+
+The owner-approved presentation integration uses nine destinations, 20 stable chapters and 53 bundled photographs from the 2026-11-13 handoff. Supplied names, summaries, visitor guidance, landmark centers and independently confirmed entrances supersede the earlier placeholder catalog. This grants no activation radius, provider association, Passport entitlement, third-party redistribution rights or production AR approval.
+
+The later owner authorizes reversible AR visual and spatial improvements beyond the earlier fixed ring/reader specification. Complete and retain Classic first; prototype Exhibit on D01 and show the first working slice before further polish or rollout. Owner direction review and physical Galaxy A53 acceptance are required before extending Exhibit. Share camera/session services, content, preferences and capture, but keep each mode's scene animation/transition owners, tokens, refs and callbacks independent. Default reader distance remains 2.25 units. Keep pilot-aclc separate and unchanged. Once the presentation deadline is supplied, reserve testing/packaging/recovery time, freeze new visuals at the cutoff, and deliver Classic if Exhibit is not accepted. See docs/superpowers/plans/2026-11-14-presentation-spatial-exhibit.md.
+
 ## Approved Seafoam Forest screen refresh — 2026-11-02
 
 The later owner-approved eight-screen handoff supersedes earlier artwork-only

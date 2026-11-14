@@ -9,7 +9,7 @@ import { router } from 'expo-router';
 import { queryClient } from '@/lib/query';
 import { localizationOptions } from '@/i18n/options';
 import { placesService } from '@/features/places/service';
-import { listDestinations } from './catalog';
+import { destinationName, listDestinations } from './catalog';
 import DestinationsScreen from './destinations-screen';
 import DestinationScreen from './destination-screen';
 import { DestinationContentContext } from '@/features/destination-content/context';
@@ -31,6 +31,19 @@ function render(element: React.ReactElement = <DestinationScreen />) { return <I
 async function mount(element?: React.ReactElement) { await act(async () => { tree = create(render(element)); }); }
 function output() { return JSON.stringify(tree!.toJSON()); }
 function button(key: string) { return tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t(key)); }
+it.each(['en', 'ja', 'ko'] as const)('shows complete %s visitor guidance and the supplied cover without starting paid work', async language => {
+  controls.language = language; await translations.changeLanguage(language); await mount();
+  const destination = listDestinations()[0];
+  const guide = destination.visitorGuide![language].value;
+  expect(output()).toContain(destinationName(destination, language));
+  expect(output()).toContain(destination.copy![language]!.overview!.value);
+  expect(output()).toContain(guide.arrival);
+  expect(output()).toContain(guide.bestTime);
+  for (const item of [...guide.activities, ...guide.preparation, ...guide.safety]) expect(output()).toContain(item);
+  expect(output()).not.toContain(translations.t('destinations.contentPending'));
+  expect(tree!.root.findAllByType('img')[0].props.source).toBe(destination.media![0].source);
+  expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
+});
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   Object.assign(controls, { params: { destinationId: 'D01' }, language: 'en', focused: true, active: true, back: true });
@@ -40,21 +53,21 @@ beforeEach(async () => {
   const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; client.clear(); notifyManager.setScheduler(cb => setTimeout(cb, 0)); vi.restoreAllMocks(); });
-it('lists all nine provisional names with working stable-ID navigation and no sensors or provider work', async () => {
+it('lists all nine presentation destinations with working stable-ID map navigation and no sensors or provider work', async () => {
   await mount(<DestinationsScreen />);
   for (const destination of listDestinations()) {
     expect(output()).toContain(destination.provisionalName);
     const card = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === destination.provisionalName)!;
     await act(async () => card.props.onPress());
-    expect(router.navigate).toHaveBeenLastCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: destination.id } });
+    expect(router.navigate).toHaveBeenLastCalledWith({ pathname: '/', params: { featuredDestinationId: destination.id } });
   }
   expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
 });
-it.each(listDestinations())('opens $id directly, honestly representing incomplete content without paid requests', async destination => {
+it.each(listDestinations())('opens $id directly with complete visitor content without paid requests', async destination => {
   controls.params = { destinationId: destination.id }; await mount();
   expect(output()).toContain(destination.provisionalName);
-  for (const key of ['destinations.contentPending', 'destinations.centerMissing', 'destinations.entranceMissing']) expect(output()).toContain(translations.t(key));
-  expect(button('placeDetails.directions')?.props.disabled).toBe(true);
+  for (const key of ['destinations.contentPending', 'destinations.centerMissing', 'destinations.entranceMissing']) expect(output()).not.toContain(translations.t(key));
+  expect(button('placeDetails.directions')?.props.disabled).not.toBe(true);
   expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
 });
 it.each(listDestinations())('does not emit duplicate sibling keys for $id', async destination => {
@@ -68,25 +81,25 @@ it.each([undefined, 'D10', ['D01'], '../D01'])('handles an invalid deep link %j 
   expect(output()).toContain(translations.t('destinations.unavailable'));
   await act(async () => button('placeDetails.back')!.props.onPress()); expect(router.navigate).toHaveBeenCalledWith('/destinations');
 });
-it('uses history for Back and translates missing states with actual resources on locale changes', async () => {
+it('uses history for Back and translates visitor sections with actual resources on locale changes', async () => {
   await mount(); await act(async () => button('placeDetails.back')!.props.onPress()); expect(router.back).toHaveBeenCalledOnce();
   for (const language of ['en', 'ko', 'ja'] as const) {
     controls.language = language;
     await act(async () => { await translations.changeLanguage(language); tree!.update(render()); });
-    for (const key of ['destinations.title', 'destinations.contentPending', 'destinations.centerMissing', 'destinations.entranceMissing']) {
+    for (const key of ['destinations.title', 'destinations.visitorGuide.arrival', 'destinations.visitorGuide.safety']) {
       expect(translations.t(key)).not.toBe(key); expect(output()).toContain(translations.t(key));
     }
   }
   expect(placesService.nearby).not.toHaveBeenCalled();
 });
-it('shows only localized prearrival teaser instead of approved rich copy', async () => {
+it('shows a supplied summary without exposing AR chapter bodies', async () => {
  const catalog = await import('./catalog');
  const fixture = catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic fixture', copy: { en: { overview: { value: 'Approved test overview', approvalReference: 'Test' } } } });
  vi.spyOn(catalog, 'getDestination').mockReturnValue(fixture);
  await mount();
  for (const language of ['en', 'ja', 'ko'] as const) {
    controls.language = language; await act(async () => { await translations.changeLanguage(language); tree!.update(render()); });
-   expect(output()).not.toContain('Approved test overview'); expect(output()).toContain(translations.t('arrival.teaser'));
+   expect(output()).toContain('Approved test overview'); expect(output()).not.toContain('featuredResearch.stories');
  }
 });
 it('routes an approved visitor entrance exactly once without obtaining GPS on the catalog screen', async () => {
@@ -130,13 +143,12 @@ it.each(['en', 'ja', 'ko'])('puts %s destination choices before optional content
   expect(placesService.nearby).not.toHaveBeenCalled();
   expect(placesService.details).not.toHaveBeenCalled();
 });
-it('keeps approved featured overview and history out of prearrival 2D details', async () => {
+it('shows the supplied summary but keeps full AR chapters out of prearrival 2D details', async () => {
  const catalog = await import('./catalog');
  const fixture = catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic featured', copy: { en: { overview: { value: 'Private approved overview', approvalReference: 'test' }, highlights: { value: ['Private approved highlight'], approvalReference: 'test' } } } });
  vi.spyOn(catalog, 'getDestination').mockReturnValue(fixture);
  await mount();
- expect(output()).not.toContain('Private approved overview'); expect(output()).not.toContain('Private approved highlight');
- expect(output()).toContain(translations.t('arrival.teaser'));
+ expect(output()).toContain('Private approved overview'); expect(output()).not.toContain('Private approved highlight');
 });
 
 it.each(['en', 'ja', 'ko'])('renders the %s catalog count from the preserved nine-destination total', async language => {
@@ -148,19 +160,12 @@ it.each(['en', 'ja', 'ko'])('renders the %s catalog count from the preserved nin
   expect(placesService.nearby).not.toHaveBeenCalled();
 });
 
-it('groups truthful prearrival availability and verification with icons and decorative Journey artwork', async () => {
+it('keeps supplied content in the single page scroll owner and preserves directions', async () => {
  await mount();
- const info=tree!.root.findByProps({testID:'destination-information'});
- expect(info.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toContain('information-circle-outline');
- expect(tree!.root.findByProps({testID:'destination-media-fallback'}).findAllByType('svg' as React.ElementType)).toHaveLength(1);
- expect(button('placeDetails.directions')!.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toContain('navigate-outline');
- for (const locale of ['en','ja','ko']) {
-  await act(async()=>{await translations.changeLanguage(locale);});
-  for(const key of ['destinations.storiesPending','destinations.visitForAr']) {
-    expect(translations.t(key)).not.toBe(key);expect(output()).toContain(translations.t(key));
-  }
- }
- expect(placesService.nearby).not.toHaveBeenCalled();expect(placesService.details).not.toHaveBeenCalled();
+ const info = tree!.root.findByProps({ testID: 'destination-information' });
+ expect(info.findAllByType('text').map(node => node.props.children)).toContain(translations.t('destinations.visitorGuide.arrival'));
+ expect(button('placeDetails.directions')!.findAllByType('icon' as React.ElementType).map(node => node.props.name)).toContain('navigate-outline');
+ expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
 });
 
 it('reports installed approved story availability without granting prearrival story access or changing bundled navigation', async () => {
@@ -180,10 +185,10 @@ it('reports installed approved story availability without granting prearrival st
  expect(placesService.nearby).not.toHaveBeenCalled();expect(placesService.details).not.toHaveBeenCalled();
 });
 
-it('removes provisional-name presentation from the catalog and preview while retaining readiness guidance', async()=>{
+it('removes provisional and research-status presentation from completed catalog entries', async()=>{
  await mount(<DestinationsScreen/>);
- expect(output()).not.toContain(translations.t('destinations.provisional'));
+ expect(tree!.root.findAllByType('text').some(node => node.props.children === translations.t('destinations.provisional'))).toBe(false);
  await act(async()=>tree!.update(render(<DestinationScreen/>)));
- expect(output()).not.toContain(translations.t('destinations.provisional'));
- expect(output()).toContain(translations.t('destinations.contentPending'));
+ expect(tree!.root.findAllByType('text').some(node => node.props.children === translations.t('destinations.provisional'))).toBe(false);
+ expect(output()).not.toContain(translations.t('destinations.contentPending'));
 });

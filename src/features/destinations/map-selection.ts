@@ -1,4 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
+import type { Language } from '../../../supabase/functions/_shared/contracts';
 import { AR } from '@/config/limits';
 import type { Place } from '@/features/places/service';
 import { destinationName, getDestination, listFeaturedDestinations, type Destination, type FeaturedDestinationId } from './catalog';
@@ -13,10 +14,10 @@ export const featuredSelectionOptions = (destinationId: FeaturedDestinationId | 
   queryFn: async (): Promise<{ destinationId: FeaturedDestinationId } | null> => null,
 });
 /** Essential curated basics only: provider rich copy cannot leak through this sheet. */
-export function featuredMapPlace(destination: Destination): Place | null {
+export function featuredMapPlace(destination: Destination, language: Language = 'en'): Place | null {
   if (!destination.center || !destination.centerApprovalReference) return null;
   return { id: `destination:${destination.id}`, providerId: `curated_${destination.id}`, provider: 'curated', source: 'curated',
-    name: destinationName(destination), coordinates: destination.center, attributions: [] };
+    name: destinationName(destination, language), coordinates: destination.center, attributions: [] };
 }
 export function matchedFeaturedDestination(place: Pick<Place, 'provider' | 'providerId'>, destinations: readonly Destination[] = listFeaturedDestinations()) {
   if (place.provider !== 'google') return null;

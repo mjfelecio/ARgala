@@ -22,7 +22,7 @@ export function createRoutePreviewIntent(client: QueryClient, place: Place, exis
   travelModeSchema.parse(mode);
   if (existing && (existing.mode ?? 'walking') !== mode) existing = undefined;
   const featured = featuredDestinationId ? getDestination(featuredDestinationId) : null;
-  const entrance = featured ? destinationToRoutePlace(featured) : null;
+  const entrance = featured ? destinationToRoutePlace(featured, language) : null;
   const verifiedContext = entrance && place.provider === 'curated' && place.source === 'curated' &&
     place.id === entrance.id && place.providerId === entrance.providerId &&
     place.coordinates.latitude === entrance.coordinates.latitude && place.coordinates.longitude === entrance.coordinates.longitude;

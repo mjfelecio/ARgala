@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { coordinateSchema, detailsRequestSchema, type Language } from '../../../supabase/functions/_shared/contracts';
+import { presentationCatalog } from './presentation-catalog';
 
 export const destinationIds = ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09'] as const;
 export type DestinationId = typeof destinationIds[number];
@@ -10,6 +11,8 @@ const approvedText = z.object({ value: text, approvalReference: text }).strict()
 const approvedHighlights = z.object({ value: z.array(text).min(1).readonly(), approvalReference: text }).strict();
 const translatedText = z.object({ en: approvedText.optional(), ko: approvedText.optional(), ja: approvedText.optional() }).strict();
 const copy = z.object({ overview: approvedText.optional(), highlights: approvedHighlights.optional() }).strict();
+const guide = z.object({ arrival: text, bestTime: text, activities: z.array(text), preparation: z.array(text), safety: z.array(text) }).strict();
+const approvedGuide = z.object({ value: guide, approvalReference: text }).strict();
 const mediaSchema = z.object({
   offlineRightsReference: text.optional(),
   id: text, source: z.number().int().positive(), credit: text, rightsReference: text, approvalReference: text,
@@ -35,6 +38,9 @@ const arSchema = z.object({
 }).strict();
 export const destinationSchema = z.object({
   id: z.enum(featuredDestinationIds), provisionalName: text, verifiedName: approvedText.optional(),
+  localizedNames: translatedText.optional(),
+  visitorGuide: z.object({ en: approvedGuide, ja: approvedGuide, ko: approvedGuide }).strict().optional(),
+  requiresGuide: z.boolean().optional(), coverMediaId: text.optional(),
   ar: arSchema.optional(),
   center: coordinateSchema.optional(), centerApprovalReference: text.optional(),
   routeEntrance: coordinateSchema.optional(), routeEntranceApprovalReference: text.optional(),
@@ -46,12 +52,9 @@ export const destinationSchema = z.object({
 export type Destination = z.infer<typeof destinationSchema>;
 export type DestinationMedia = z.infer<typeof mediaSchema>;
 
-// Draft SRS §3 labels, deliberately without geographic or tourism assertions.
-const catalog: readonly Destination[] = Object.freeze([
-  ['D01', 'Lake Danao Natural Park'], ['D02', 'Lake Kasudsuran'], ['D03', 'Lake Janagdan'],
-  ['D04', 'Ormoc Mangrove Eco Park'], ['D05', 'Pineapple Farm'], ['D06', 'Leyte Golf and Country Club'],
-  ['D07', 'Alto Peak'], ['D08', 'Heaven’s Peak'], ['D09', 'Sabin Resort Hotel'],
-].map(([id, provisionalName]) => destinationSchema.parse({ id, provisionalName })));
+// Owner-supplied presentation content and independent local access confirmation.
+// None of these display/navigation fields establish native AR or Passport authority.
+const catalog: readonly Destination[] = Object.freeze(presentationCatalog.map(item => destinationSchema.parse(item)));
 export const listDestinations = (): readonly Destination[] => catalog;
 const pilotApproval = 'Owner supplied entrance and approved Maps place activation center, 2026-10-27; docs/aclc-pilot-inputs.md';
 const pilotPoint = { latitude: 11.022973, longitude: 124.6054992 };
@@ -69,7 +72,8 @@ export const listFeaturedDestinations = (): readonly Destination[] => [...catalo
 export function getDestination(id: unknown): Destination | null {
   return typeof id === 'string' ? listFeaturedDestinations().find(d => d.id === id) ?? null : null;
 }
-export const destinationName = (destination: Destination) => destination.verifiedName?.value ?? destination.provisionalName;
+export const destinationName = (destination: Destination, language: Language = 'en') =>
+  localizedContent(destination.localizedNames, language)?.value ?? destination.verifiedName?.value ?? destination.provisionalName;
 
 /** Content falls back independently; an untranslated highlight cannot hide an approved overview. */
 export function localizedContent<T>(values: Partial<Record<Language, { value: T; approvalReference: string }>> | undefined, language: Language): { value: T; englishFallback: boolean } | null {

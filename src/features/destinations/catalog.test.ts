@@ -1,14 +1,16 @@
 import { expect, it } from 'vitest';
 import { destinationSchema, getDestination, listDestinations, localizedContent } from './catalog';
 
-it('contains exactly the nine provisional SRS labels in stable order without unverified facts', () => {
+it('contains the nine owner-supplied presentation destinations in stable order without AR authority', () => {
   const all = listDestinations();
   expect(all.map(d => d.id)).toEqual(['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09']);
-  expect(all.map(d => d.provisionalName)).toEqual(['Lake Danao Natural Park', 'Lake Kasudsuran', 'Lake Janagdan', 'Ormoc Mangrove Eco Park', 'Pineapple Farm', 'Leyte Golf and Country Club', 'Alto Peak', 'Heaven’s Peak', 'Sabin Resort Hotel']);
-  for (const d of all) {
-    expect(destinationSchema.safeParse(d).success).toBe(true);
-    for (const field of ['center', 'routeEntrance', 'verifiedName', 'copy', 'media']) expect(d).not.toHaveProperty(field);
-    expect(getDestination(d.id)).toEqual(d);
+  expect(all[4].verifiedName?.value).toBe('Sal’s Pineapple Plantation');
+  for (const destination of all) {
+    expect(destinationSchema.safeParse(destination).success).toBe(true);
+    expect(destination.center).toBeDefined(); expect(destination.routeEntrance).toBeDefined();
+    expect(destination.media?.length).toBeGreaterThan(1);
+    expect(destination.ar).toBeUndefined();
+    expect(getDestination(destination.id)).toEqual(destination);
   }
 });
 it.each([null, undefined, '', 'D10', 'd01', ['D01'], '../D01'])('rejects unknown ID %j', id => expect(getDestination(id)).toBeNull());

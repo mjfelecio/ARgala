@@ -37,18 +37,18 @@ import type { NativeCapture } from '@/features/ar-photo/types';
  * loading this module; this entry is explicitly development provenance only.
  */
 export default function DevelopmentSessionRoute() {
-  const { session } = useAuth(); const { t } = useTranslation(); const principalId = session?.user.id;
+  const { session } = useAuth(); const { t } = useTranslation(); const { language } = useSettings(); const principalId = session?.user.id;
   const scopeId = useId(); // Development correlation only; never verified admission authority.
   const [selection, setSelection] = useState<DestinationId | 'gallery' | null>(null);
   const identity = useMemo<SessionIdentity>(() => ({ admissionId: `development-${scopeId}-${selection ?? 'none'}`, destinationId: `development-${selection ?? 'none'}`, principalId: principalId ?? '', provenance: 'development' }), [principalId, scopeId, selection]);
   if (!principalId || !isViroSpikeEnabled()) return <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
   if (selection === 'gallery') return <DevelopmentGallerySession key={`${principalId}:${identity.admissionId}`} identity={identity} />;
   if (selection) return <DestinationArSessionExperience key={`${principalId}:${identity.admissionId}`} identity={identity} freshEligible={isViroSpikeEnabled}
-    title={destinationName(listDestinations().find(item => item.id === selection)!)} content={previewStoryContent(selection)}
+    title={destinationName(listDestinations().find(item => item.id === selection)!, language)} content={previewStoryContent(selection)}
     preflightNoticeKey="featuredResearch.notice" onReturn={() => setSelection(null)} />;
   return <Screen><Notice>{t('featuredResearch.notice')}</Notice>
     <Text className="font-sans text-lg text-foreground">{t('featuredResearch.title')}</Text>
-    {destinationIds.map(id => <Action key={id} title={destinationName(listDestinations().find(item => item.id === id)!)} onPress={() => setSelection(id)} />)}
+    {destinationIds.map(id => <Action key={id} title={destinationName(listDestinations().find(item => item.id === id)!, language)} onPress={() => setSelection(id)} />)}
     <Action title={t('destinationRing.title')} onPress={() => setSelection('gallery')} />
     <Action title={t('common.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }} />
   </Screen>;

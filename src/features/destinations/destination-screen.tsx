@@ -14,6 +14,7 @@ import { useSettings } from '@/features/settings/provider';
 import { useAppActive } from '@/lib/use-app-active';
 import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
 import { destinationName, getDestination } from './catalog';
+import { VisitorGuide } from './visitor-guide';
 import { DaytimeGallery } from './daytime-gallery';
 import { NearbyEstablishments } from './nearby-establishments';
 import { destinationToRoutePlace } from './routing';
@@ -32,7 +33,8 @@ export default function DestinationScreen() {
   const lookupContent = useDestinationLookup();
   const storyDestination = lookupContent(destinationId);
   useEffect(() => { if (focused) navigating.current = false; }, [focused, destination?.id]);
-  const routePlace = destination ? destinationToRoutePlace(destination) : null;
+  const routePlace = destination ? destinationToRoutePlace(destination, language) : null;
+  const summary = destination?.copy?.[language]?.overview ?? destination?.copy?.en?.overview;
   function directions() {
     if (!routePlace || !active || !focused || navigating.current) return;
     navigating.current = true;
@@ -47,12 +49,12 @@ export default function DestinationScreen() {
     <ScrollView contentContainerClassName="gap-5 px-4 pb-8">
       {destination ? <>
         <View className="gap-3">
-          <Text selectable accessibilityRole="header" className="font-sans text-hero font-ui-bold text-brand-strong">{destinationName(destination)}</Text>
-          <Text className="font-sans text-base text-brand-strong">{t('arrival.teaser')}</Text>
+          <Text selectable accessibilityRole="header" className="font-sans text-hero font-ui-bold text-brand-strong">{destinationName(destination, language)}</Text>
+          <Text className="font-sans text-base text-brand-strong">{summary?.value ?? t('arrival.teaser')}</Text>
         </View>
         <DaytimeGallery key={`gallery:${destination.id}`} media={destination.media ?? []} />
         <View testID="destination-information" className="gap-4">
-          <View className="flex-row flex-wrap gap-3">
+          {destination.visitorGuide ? <VisitorGuide destination={destination} /> : <><View className="flex-row flex-wrap gap-3">
             <View className="min-w-40 flex-1 gap-2 rounded-card bg-surface p-4">
               <Ionicons name="book-outline" size={28} color={accent} accessible={false} />
               <Text accessibilityRole="header" className="font-sans text-card font-ui-bold text-brand-strong">{t('destinations.storiesHeading')}</Text>
@@ -66,7 +68,7 @@ export default function DestinationScreen() {
           </View>
           <View className="flex-row items-start gap-3 rounded-card bg-mint p-4">
             <Ionicons name="information-circle-outline" size={24} color={accent} accessible={false} /><Text className="min-w-0 flex-1 font-sans text-sm text-brand-strong">{t('destinations.contentPending')}</Text>
-          </View>
+          </View></>}
         </View>
         <DestinationReminderAction destination={destination} />
         <Button isDisabled={!routePlace || !active || !focused} accessibilityLabel={t('placeDetails.directions')} onPress={directions}><Ionicons name="navigate-outline" size={22} color={onAccent} accessible={false} /><Button.Label>{t('placeDetails.directions')}</Button.Label></Button>
