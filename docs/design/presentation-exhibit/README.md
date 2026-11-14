@@ -95,3 +95,9 @@ measurement, not a frame-pacing benchmark or a leak assessment.
 D08 overview was then traversed through all eight pages with 100 ms synthetic
 taps; all three photographs, captions and credits rendered. Close restored its
 cover. The second chapter and its other three photos remain outside this trial.
+
+The subsequent Classic entry smoke pass reached live native AR and rendered the
+first chapter photograph/caption in all nine destinations on this A53. Initial
+automation that ran ahead of the returning selector was repeated with screen
+verification. This covers each entry and first photo, not the full 20-chapter /
+53-photo native matrix. See the destination table in `docs/validation.md`.

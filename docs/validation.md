@@ -3126,3 +3126,34 @@ in AGENTS.md and copied to the owner's main checkout. Other preexisting SDK/auth
 changes remain separate. No push/merge or external publication occurred. Exhibit
 rollout remains limited to D01 pending the agreed review gate; the presentation
 cutoff still awaits Jelzon's deadline.
+
+### Classic destination-entry smoke completion — 2026-11-14
+
+With runtime corrections committed at `6ce3f25`, all nine Classic presentation
+entries reached live native AR. Each first chapter was opened using a 100 ms
+synthetic ADB tap, and its supplied first photograph/caption was inspected:
+
+| Destination | Observed first photograph |
+| --- | --- |
+| D01 Lake Danao | Paddleboarder beneath wooded hills |
+| D02 Lake Kasudsuran | Overhead view of the wooded lake |
+| D03 Lake Janagdan | Blue-green lake within steep green slopes |
+| D04 Mangrove Eco-Park | Blue walkway across water toward mangroves |
+| D05 Sal’s Pineapple Plantation | Visitors beside the pineapple sculpture |
+| D06 Leyte Golf | Golf green beneath broad trees and long shadows |
+| D07 Alto Peak | Clouds above layered forested ridges |
+| D08 Heaven’s Peak | Decorative arch and flower-lined garden path |
+| D09 Sabin Resort Hotel | Arched bridge across the curved pool |
+
+An initial fixed-delay automation pass sent the next selection before the
+returning selector settled; those captures are inconclusive. D03 and D05 were
+repeated with each screen verified before its next action. They passed. This
+is not evidence of an application admission or native tracking failure.
+
+This completes destination-entry/first-photo coverage only. It does not complete
+all 20 chapter openings, every page of all 53 photographs, every language/reading
+size or on-site admission. Existing full-check/export results above still apply:
+no product code changed during this additional pass. The camera was released on
+final Exit, and English, font scale 1.1 and original network settings were kept.
+The curated gallery remains six screenshots and one short clip; additional raw
+navigation evidence is separate. No further APK build, install or publication.
