@@ -1,5 +1,38 @@
 # D01 destination stage and gallery
 
+## Photo Islands — owner-selected direction, November 14
+
+After reviewing the all-nine stage rollout, the owner requested more reason to
+look around through AR. An interactive browser comparison explored the existing
+front stage, Open Circle, Panoramic Ribbon and Photo Islands. The owner explicitly
+selected Photo Islands and instructed implementation. See the
+[design](../../superpowers/specs/2026-11-14-photo-islands-design.md) and
+[plan](../../superpowers/plans/2026-11-14-photo-islands.md).
+
+The first native slice is Danao: a gallery welcome ahead, then three bays at
+−95°, +35° and +150° with two photographs each and an optional, larger story tile
+below. Bay radius is 2.6 units. Photos retain separate native focus/Close targets
+and open the shared gallery at the selected media ID; the welcome resumes it.
+All seven photographs and all three chapter IDs remain intact. Browsing a photo
+cannot create a selected/opened chapter or Passport progress. Static shoreline
+accents sit below the bays; all browsing geometry disappears during reading and
+Close. Reader, camera/session ownership, capture and 2.25-unit distance remain
+unchanged. No page glint/reveal effects return.
+
+Danao is enabled for the first physical review. The other eight destinations
+retain their accepted stages until that checkpoint. Classic remains selectable;
+`danaoFrontStagePresentation` retains the previous Danao composition for rollback.
+The November 21 deadline, November 19 visual cutoff and November 20 stabilization
+day still apply. No dependency, native change or APK build was made.
+
+Offline verification: TypeScript, zero-warning lint, **1,565 tests / 137 files**
+and Android export with **111 assets** passed. Fresh read-only review reported no
+confirmed material issues and passed 108 focused tests in five files. The native
+A53 first view rendered the welcome photograph, text, shoreline and look-around
+hint with tracking ready. Full bay reachability and owner physical tap/spacing
+review are in progress; browser simulation and mocked tests do not establish
+those results. Earlier sections below record the preceding iterations.
+
 ## Current owner decisions — 2026-11-14
 
 Jelzon confirmed **November 21**. The owner reports the complete Classic device

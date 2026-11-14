@@ -11,6 +11,7 @@ import { RingController } from './ring-controller';
 import { ViroMaterials } from '@reactvision/react-viro';
 import type { PoseSample } from './types';
 import { useReadingSize } from './use-reading-size';
+import { exhibitGalleryEntries } from './photo-islands';
 const native = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn(), patches: [] as { id: string; patch: Record<string, unknown> }[], reduced: false }));
 vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, toolbar: 110, actionMask: 111, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
@@ -792,4 +793,94 @@ it.each(['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09'] as const
   await press('exhibit-gallery-entry'); await finish();
   expect(text('exhibit-photo-position')).toBe(`Photo ${profile.media.length} / ${profile.media.length}`);
   expect(native.patches.some(item => (item.patch.animation as { run?: boolean; name?: string } | undefined)?.run && (item.patch.animation as { name: string }).name.includes('PageReveal'))).toBe(false);
+});
+
+it('opens each Danao photo island at its exact image while retaining only gallery progress', async () => {
+  const profile = danaoStagePresentation.stage!.profile;
+  const entrances = exhibitGalleryEntries(profile).slice(1);
+  expect(entrances).toHaveLength(6);
+  const progress = vi.fn(); sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, onProgress: progress };
+  await mount(); await track(); await pose();
+  expect(tree.root.findAllByType('viro-image' as React.ElementType).filter(image => String(image.props.testID).startsWith('exhibit-island-cover-'))).toHaveLength(6);
+  for (const entry of entrances) {
+    await press(`exhibit-island-entry-${entry.mediaId}`);
+    expect(node('exhibit-gallery-entry')).toBeUndefined();
+    expect(node('exhibit-photo-island-scenery')).toBeUndefined();
+    await finish();
+    expect(tree.root.findByProps({ testID: 'ring-gallery-image' }).props.source).toBe(profile.media.find(photo => photo.id === entry.mediaId)!.source);
+    expect(progress.mock.lastCall?.[0]).toMatchObject({ selectedId: null, openedIds: [], exhibitGallery: { focused: true, cursor: { mediaId: entry.mediaId } } });
+    expect(node('ring-focus-glint')).toBeUndefined();
+    await press('ring-action-close');
+    expect(progress.mock.lastCall?.[0]).toMatchObject({ selectedId: null, openedIds: [], exhibitGallery: { focused: false } });
+    expect(node(`exhibit-island-entry-${entry.mediaId}`)).toBeUndefined();
+    await finish(); expect(node(`exhibit-island-entry-${entry.mediaId}`)).toBeDefined();
+  }
+  await press('exhibit-gallery-entry'); await finish();
+  expect(progress.mock.lastCall?.[0].exhibitGallery.cursor.mediaId).toBe(entrances.at(-1)!.mediaId);
+});
+
+it('fences queued photo-island taps, retains cursor through Help, and restores a gallery after a new frame', async () => {
+  const profile = danaoStagePresentation.stage!.profile; const entry = exhibitGalleryEntries(profile)[3];
+  expect(entry.mediaId).toBeDefined();
+  const progress = vi.fn(); sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, onProgress: progress };
+  await mount(); await track(); await pose();
+  const tap = node(`exhibit-island-entry-${entry.mediaId}`).props.onClick;
+  sceneOptions = { ...sceneOptions, interactive: false }; await act(async () => tree.update(wrapper()));
+  await act(async () => tap()); expect(node('ring-focused-panel')).toBeUndefined();
+  sceneOptions = { ...sceneOptions, interactive: true }; await act(async () => tree.update(wrapper()));
+  const other = node(`exhibit-island-entry-${exhibitGalleryEntries(profile)[1].mediaId}`).props.onClick;
+  await press(`exhibit-island-entry-${entry.mediaId}`); const done = node('ring-focused-panel').props.animation.onFinish;
+  await act(async () => other()); expect(progress.mock.lastCall?.[0].exhibitGallery.cursor.mediaId).toBe(entry.mediaId);
+  sceneOptions = { ...sceneOptions, interactive: false }; await act(async () => tree.update(wrapper()));
+  await track(2); await act(async () => done()); await track();
+  sceneOptions = { ...sceneOptions, interactive: true }; await act(async () => tree.update(wrapper()));
+  expect(node('ring-action-gallery-photo-next')).toBeUndefined(); await pose(initial, 1100);
+  await press('ring-action-gallery-photo-next');
+  const saved = progress.mock.lastCall![0]; expect(saved.selectedId).toBeNull(); expect(saved.openedIds).toEqual([]);
+  await act(async () => tree.unmount()); await act(async () => { tap(); other(); done(); });
+  sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, onProgress: progress, initialProgress: saved };
+  await mount(); await track(); await pose(initial, 1200);
+  expect(tree.root.findByProps({ testID: 'ring-gallery-image' }).props.source).toBe(profile.media.find(photo => photo.id === saved.exhibitGallery.cursor.mediaId)!.source);
+  expect(node('exhibit-gallery-entry')).toBeUndefined();
+  await press('ring-action-close'); await finish();
+  expect(node('exhibit-photo-island-scenery')).toBeDefined();
+});
+
+it('recenters a photo-island focus without counting it as a story or replaying page motion', async () => {
+  const profile = danaoStagePresentation.stage!.profile; const entry = exhibitGalleryEntries(profile)[2];
+  expect(entry.mediaId).toBeDefined();
+  const progress = vi.fn(); sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation, onProgress: progress };
+  await mount(); await track(); await pose(); await press(`exhibit-island-entry-${entry.mediaId}`);
+  await pose({ ...initial, forward: [1, 0, 0] }); await act(async () => controls!.recenter());
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual([]);
+  expect(node('ring-focused-panel').props.position).toEqual([2.25, 2, 0]);
+  await press('ring-action-close'); await finish();
+  await press('ring-tile-chapter-3'); await finish();
+  expect(text('ring-chapter-position')).toBe('Chapter 3 / 3');
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual(['chapter-3']);
+});
+
+it.each(['en', 'ja', 'ko'])('keeps %s photo-island cover labels localized and native hit surfaces explicit', async locale => {
+  await translations.changeLanguage(locale);
+  sceneOptions = { content: previewStoryContent('D01'), presentation: danaoStagePresentation };
+  await mount(); await track(); await pose();
+  expect(translations.getResource(locale, 'translation', 'presentation.galleryOpen')).toBeTruthy();
+  expect(translations.getResource(locale, 'translation', 'presentation.islandsLookAround')).toBeTruthy();
+  expect(text('exhibit-islands-hint')).toBe(translations.t('presentation.islandsLookAround'));
+  const covers = tree.root.findAllByType('viro-image' as React.ElementType).filter(image => String(image.props.testID).startsWith('exhibit-island-cover-'));
+  expect(covers).toHaveLength(6);
+  for (const cover of covers) expect(cover.props).toMatchObject({ highAccuracyEvents: true, ignoreEventHandling: false, resizeMode: 'ScaleToFill' });
+  for (const line of tree.root.findAllByType('polyline' as React.ElementType)) expect(line.props.ignoreEventHandling).toBe(true);
+  sceneOptions = { ...sceneOptions, interactive: false }; await act(async () => tree.update(wrapper()));
+  for (const cover of covers) expect(cover.props.ignoreEventHandling).toBe(true);
+});
+
+it('keeps the accepted Danao front stage available and other destinations outside the islands rollout', async () => {
+  const { danaoFrontStagePresentation, getExhibitStagePresentation } = await import('./exhibit-ring-scene');
+  expect(danaoFrontStagePresentation.stage!.profile.photoIslands).toBeUndefined();
+  for (const id of ['D02','D03','D04','D05','D06','D07','D08','D09']) expect(getExhibitStagePresentation(id)!.stage!.profile.photoIslands).toBeUndefined();
+  sceneOptions = { content: previewStoryContent('D01'), presentation: danaoFrontStagePresentation };
+  await mount(); await track(); await pose(); await press('exhibit-gallery-entry'); await finish();
+  expect(text('exhibit-photo-position')).toBe('Photo 1 / 7');
+  expect(node('exhibit-photo-island-scenery')).toBeUndefined();
 });

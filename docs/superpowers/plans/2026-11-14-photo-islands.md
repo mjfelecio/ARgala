@@ -43,12 +43,12 @@ descriptors; `isExhibitGalleryEntry(profile, id)` classifies exact known IDs;
 `buildPhotoIslandSlots(profile, entries, basis)` returns `RingSlot[]`.
 Expose a frozen Danao islands profile separately from the old front-stage profile.
 
-- [ ] Add regressions for seven unique image entrances, 3 unchanged chapter IDs,
+- [x] Add regressions for seven unique image entrances, 3 unchanged chapter IDs,
   all photo identity/bounds, angular separation and cardinal/turned bases.
-- [ ] Watch targeted test fail before implementation.
-- [ ] Implement pure descriptors/geometry, validate entry ownership/order, and
+- [x] Watch targeted test fail before implementation.
+- [x] Implement pure descriptors/geometry, validate entry ownership/order, and
   retain the original front-stage builder for rollback/eight other destinations.
-- [ ] Verify select/Close from each entrance returns to that entrance, and fresh
+- [x] Verify select/Close from each entrance returns to that entrance, and fresh
   focus remains at 2.25 units. Run focused geometry/controller tests.
 
 ### Task 2: Photo bays through the existing scene and gallery owner
@@ -61,15 +61,15 @@ Expose a frozen Danao islands profile separately from the old front-stage profil
 Scene derives a cursor by media ID only after native selection is accepted;
 logical progress recognizes every entrance as the existing gallery.
 
-- [ ] Add failing real-scene tests: bay photo opens exact image, Next/Close,
+- [x] Add failing real-scene tests: bay photo opens exact image, Next/Close,
   resume through welcome, restoration, no chapter openings, stale callbacks,
   tracking/Help, Recenter and unmount isolation.
-- [ ] Render bounded photo covers and larger story tiles in the approved bays;
+- [x] Render bounded photo covers and larger story tiles in the approved bays;
   visible images own accurate hits and decoration ignores events.
-- [ ] Hide all neighboring geometry through opening/read/Close. Retain native
+- [x] Hide all neighboring geometry through opening/read/Close. Retain native
   stationary reader paging, shared preferences and previous chapter counts.
-- [ ] Enable Danao islands only. Export old Danao front presentation for rollback.
-- [ ] Run targeted scene/gallery/geometry tests, then `npm run check` and
+- [x] Enable Danao islands only. Export old Danao front presentation for rollback.
+- [x] Run targeted scene/gallery/geometry tests, then `npm run check` and
   `npm run export:android`. Review diff; fix confirmed findings and reverify.
 
 ### Task 3: Native Danao review checkpoint

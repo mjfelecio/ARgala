@@ -3350,3 +3350,36 @@ Minimal curated samples remain outside Git at
 Only two stage screenshots (fern/fields) and one 18-second coast gallery/capture
 navigation clip were added for this rollout. Raw photo-verification indexes,
 failed captures and private account/map screens are excluded from that gallery.
+
+## Photo Islands Danao first slice — 2026-11-14
+
+The owner selected Photo Islands from an interactive browser comparison and
+instructed implementation. Danao alone uses the new spatial layout pending its
+physical checkpoint; other eight accepted front stages and Classic remain.
+Geometry/spec/plan: `95bd8c5`; subsequent native implementation in the same
+isolated presentation worktree. No auth/SDK/dependency/native changes were made
+for this feature; the installed development APK remains the November 8 build.
+
+Offline verification: `npm run check` passed strict TypeScript, zero-warning lint
+and **1,565 tests in 137 files**. The new tests exercised exact-media selection
+from six bay entrances, a separate resumable welcome, 2.25-unit focus, individual
+Close transforms, turned bases, Help/tracking fences, stale callback retirement,
+new-frame gallery restoration, chapter denominator/openings, all three actual
+label resources, eight-stage isolation and the old Danao fallback. A fresh
+read-only review reported no confirmed material issue and passed 108 targeted
+tests in five files. Android export passed with 111 assets and Hermes bundle
+`index-a27f79bf02ad271df89f518949d9a80e.hbc`. No APK build was run.
+
+The Galaxy A53 (SM-A536E, Android16, 1080×2400, density420, font scale1.1,
+dark OS) was reconnected through USB/Metro8081. Explicitly opened the development
+presentation selector, chose Exhibit → Lake Danao → Start native AR test. The
+native session reached tracking-ready, completed its entrance and rendered the
+welcome photograph, label, static shoreline and new look-around hint. The photo
+loaded after the early introduction capture; the settled frame shows the actual
+bitmap. Full bay reachability, small-cover physical taps, alpha artifacts and
+owner spacing acceptance are still in review. These observations do not grant
+on-site GPS/Passport authority or establish all-locale/size/performance results.
+
+Minimal actual-navigation samples are stored outside Git at
+`~/Pictures/ARgala-progress/2026-11-14/`, separately from browser concepts and
+private diagnostics in `/tmp/argala-photo-islands-device-2026-11-14/`.

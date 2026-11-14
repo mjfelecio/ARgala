@@ -668,6 +668,8 @@
     "session": "プレゼンテーションセッション",
     "galleryTitle": "フォトギャラリー",
     "galleryExplore": "写真で楽しむ",
+    "galleryOpen": "ギャラリーを開く",
+    "islandsLookAround": "周りを見渡して、写真の島を見つけましょう",
     "galleryCount": "写真{{count}}枚 · ギャラリーを開く",
     "photoPosition": "写真 {{current}} / {{total}}",
     "captionBack": "戻る",

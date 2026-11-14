@@ -668,6 +668,8 @@
     "session": "프레젠테이션 세션",
     "galleryTitle": "사진 갤러리",
     "galleryExplore": "사진으로 둘러보기",
+    "galleryOpen": "갤러리 열기",
+    "islandsLookAround": "주위를 둘러보며 사진 섬을 찾아보세요",
     "galleryCount": "사진 {{count}}장 · 갤러리 열기",
     "photoPosition": "사진 {{current}} / {{total}}",
     "captionBack": "이전",

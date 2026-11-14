@@ -1,5 +1,16 @@
 # ARgala design authority
 
+## Photo Islands — owner-selected direction, 2026-11-14
+
+The owner selected Photo Islands from the interactive browser spatial comparison
+and instructed implementation. Restore looking around by distributing small photo
+bays around the visitor, with optional stories below. Keep the gallery welcome
+ahead, the flat 2.25-unit reader and the stable stationary page swaps. Start with
+Danao; native spacing/tap review gates extension to the other eight destinations.
+Classic and the preceding front-stage composition remain fallbacks. Photos are
+gallery entrances, never chapters or Passport events. See the
+[approved direction](docs/superpowers/specs/2026-11-14-photo-islands-design.md).
+
 ## Gallery-first destination stages — 2026-11-14
 
 The owner accepted Classic's complete device sweep, the corrected original

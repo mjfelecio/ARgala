@@ -710,6 +710,8 @@
     "session": "Presentation session",
     "galleryTitle": "Photo gallery",
     "galleryExplore": "Explore in pictures",
+    "galleryOpen": "Open gallery",
+    "islandsLookAround": "Look around to discover photo islands",
     "galleryCount": "{{count}} photographs · Open gallery",
     "photoPosition": "Photo {{current}} / {{total}}",
     "captionBack": "Back",
