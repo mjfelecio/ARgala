@@ -95,3 +95,12 @@ remain separate from the implemented presentation.
 Use [argala-ui](.agents/skills/argala-ui/SKILL.md) for Android insets, keyboard,
 large text, EN/JA/KO, AR and screenshot acceptance. General Impeccable/Expo defaults
 yield to these approved project decisions. No new art direction or questionnaire.
+
+## Destination-specific Exhibit stages — 2026-11-14
+
+The owner-approved [destination-stage design](docs/superpowers/specs/2026-11-14-destination-stages-design.md)
+extends the accepted Danao gallery-first direction to all nine destinations.
+Photos lead, stories are optional; each stage uses its own symbolic scenery and
+station composition. Share the stable gallery/flat 2.25-unit reader and services;
+keep camera, admission, Passport and per-mode state contracts intact. Classic is
+the default presentation fallback. See [implementation and native evidence](docs/design/presentation-exhibit/README.md).

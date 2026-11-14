@@ -5,7 +5,8 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { ExhibitGalleryPanel, exhibitGalleryLayout } from './exhibit-gallery-panel';
-import { danaoStageProfile } from './exhibit-stage';
+import { destinationIds } from '@/features/destinations/catalog';
+import { danaoStageProfile, getExhibitStageProfile } from './exhibit-stage';
 import { readerLayout } from './reader-layout';
 import { ringMetrics } from './scene-geometry';
 import type { ReadingCursor } from './content-layout';
@@ -18,10 +19,10 @@ vi.mock('@reactvision/react-viro', () => ({ ViroImage: 'image', ViroQuad: 'quad'
 const transform = { position: [0, 2, -2.25] as [number, number, number], rotation: [0, 0, 0] as [number, number, number], scale: 1 };
 const selection: FocusSelection = { id: danaoStageProfile.galleryId, phase: 'focused', token: 1, origin: [0, 0, 0], from: transform, to: transform };
 const style: ArNativeStyle = { text: (fontSize, textAlign = 'center', fontWeight = '400') => ({ fontSize, textAlign, fontWeight, color: '#fff', fontFamily: 'test', textAlignVertical: 'center' }) };
-let tree: ReactTestRenderer; let translations: i18n; let saved: ReadingCursor | undefined; let enabled = true;
+let tree: ReactTestRenderer; let translations: i18n; let saved: ReadingCursor | undefined; let enabled = true; let profile = danaoStageProfile;
 function Harness() {
   const [cursor, setCursor] = useState(saved); const [size, setSize] = useState<ReadingSize>('standard');
-  return <ExhibitGalleryPanel selection={selection} profile={danaoStageProfile} previous={cursor} reading={{ size, pending: false, error: null, retry: async () => {}, change: delta => setSize(delta > 0 ? 'large' : 'small') }} enabled={enabled} decorations={false} style={style} animationPrefix="testExhibit"
+  return <ExhibitGalleryPanel selection={{ ...selection, id: profile.galleryId }} profile={profile} previous={cursor} reading={{ size, pending: false, error: null, retry: async () => {}, change: delta => setSize(delta > 0 ? 'large' : 'small') }} enabled={enabled} decorations={false} style={style} animationPrefix="testExhibit"
     onCursor={value => { saved = value; setCursor(value); }} onClose={() => {}} onComplete={() => {}} />;
 }
 const view = () => <I18nextProvider i18n={translations}><Harness /></I18nextProvider>;
@@ -31,21 +32,21 @@ async function press(id: string) { await act(async () => action(id).props.onClic
 const image = () => tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'ring-gallery-image')!;
 const text = (id: string) => tree.root.findAllByType('text' as React.ElementType).find(node => node.props.testID === id)?.props.text as string | undefined;
 beforeEach(async () => {
-  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }); saved = undefined; enabled = true;
+  Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }); saved = undefined; enabled = true; profile = danaoStageProfile;
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, resources: structuredClone(localizationOptions.resources), lng: 'en', react: { useSuspense: false } });
   const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
 afterEach(async () => { await act(async () => tree?.unmount()); vi.restoreAllMocks(); });
 
-it.each(['en', 'ja', 'ko'] as const)('browses all seven supplied %s photos without prose, retaining every caption and credit', async locale => {
-  await translations.changeLanguage(locale); await mount();
+it.each(destinationIds.flatMap(id => (['en', 'ja', 'ko'] as const).map(locale => ({ id, locale }))))('browses every $id $locale photo without prose, retaining every caption and credit', async ({ id, locale }) => {
+  profile = getExhibitStageProfile(id)!; await translations.changeLanguage(locale); await mount();
   expect(translations.getResource(locale, 'translation', 'presentation.galleryTitle')).toBeTruthy();
   expect(text('exhibit-gallery-heading')).toBe(translations.t('presentation.galleryTitle'));
   const compact = (value: string) => value.replace(/\s/g, '');
-  for (let index = 0; index < danaoStageProfile.media.length; index++) {
-    const photo = danaoStageProfile.media[index];
+  for (let index = 0; index < profile.media.length; index++) {
+    const photo = profile.media[index];
     expect(image().props).toMatchObject({ source: photo.source, resizeMode: 'ScaleToFit', ignoreEventHandling: true });
-    expect(text('exhibit-photo-position')).toBe(translations.t('presentation.photoPosition', { current: index + 1, total: 7 }));
+    expect(text('exhibit-photo-position')).toBe(translations.t('presentation.photoPosition', { current: index + 1, total: profile.media.length }));
     expect(text('ring-body')).toBeUndefined();
     const retainedImage = image(); const caption = [text('ring-gallery-caption')!];
     let steps = 0;
@@ -56,7 +57,7 @@ it.each(['en', 'ja', 'ko'] as const)('browses all seven supplied %s photos witho
     expect(compact(caption.join(''))).toContain(compact(photo.caption![locale]!.value));
     expect(compact(caption.join(''))).toContain(compact(photo.credit));
     expect(action('gallery-photo-previous').props.onClick === undefined).toBe(index === 0);
-    if (index < 6) await press('gallery-photo-next');
+    if (index < profile.media.length - 1) await press('gallery-photo-next');
   }
   expect(action('gallery-photo-next').props.onClick).toBeUndefined();
   expect(tree.root.findAllByProps({ testID: 'ring-gallery-image' })).toHaveLength(1);

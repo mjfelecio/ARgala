@@ -29,7 +29,7 @@ import { loadDevelopmentSystemAudio } from './development-audio-loader';
 import { loadDevelopmentGalleryContent } from './development-gallery-loader';
 import { loadRingScene } from './ring-loader';
 import { loadExhibitScene, type PresentationMode } from './exhibit-loader';
-import { danaoStageProfile } from './exhibit-stage';
+import { getExhibitStageProfile } from './exhibit-stage';
 import type { RingControls, RingMetrics } from './destination-ring-scene';
 import type { SessionIdentity } from './session';
 import { ArPhotoControls } from '@/features/ar-photo/ar-photo-controls';
@@ -45,7 +45,7 @@ export default function DevelopmentSessionRoute() {
   const [mode, setMode] = useState<PresentationMode>('classic');
   const identity = useMemo<SessionIdentity>(() => ({ admissionId: `development-${scopeId}-${mode}-${selection ?? 'none'}`, destinationId: mode === 'exhibit' ? `development-exhibit-${selection ?? 'none'}` : `development-${selection ?? 'none'}`, principalId: principalId ?? '', provenance: 'development' }), [principalId, scopeId, selection, mode]);
   if (!principalId || !isViroSpikeEnabled()) return <Screen><Notice>{t('destinationAr.unavailable')}</Notice></Screen>;
-  if (selection === 'D01' && mode === 'exhibit') return <ExhibitSession key={`${principalId}:${identity.admissionId}`} identity={identity} onReturn={() => setSelection(null)} onClassic={() => setMode('classic')} />;
+  if (selection && selection !== 'gallery' && mode === 'exhibit') return <ExhibitSession destinationId={selection} key={`${principalId}:${identity.admissionId}`} identity={identity} onReturn={() => setSelection(null)} onClassic={() => setMode('classic')} />;
   if (selection === 'gallery') return <DevelopmentGallerySession key={`${principalId}:${identity.admissionId}`} identity={identity} />;
   if (selection) return <DestinationArSessionExperience key={`${principalId}:${identity.admissionId}`} identity={identity} freshEligible={isViroSpikeEnabled}
     title={destinationName(listDestinations().find(item => item.id === selection)!, language)} content={previewStoryContent(selection)}
@@ -53,16 +53,16 @@ export default function DevelopmentSessionRoute() {
   return <Screen><Notice>{t('featuredResearch.notice')}</Notice>
     <Text className="font-sans text-lg text-foreground">{t('featuredResearch.title')}</Text>
     <View className="flex-row gap-3">{(['classic', 'exhibit'] as const).map(value => <Button key={value} variant={mode === value ? 'primary' : 'outline'} className="min-h-12 flex-1" accessibilityLabel={t(`presentation.${value}`)} accessibilityState={{ selected: mode === value }} onPress={() => setMode(value)}><Button.Label>{t(`presentation.${value}`)}</Button.Label></Button>)}</View>
-    {mode === 'exhibit' && <Notice>{t('presentation.danaoOnly')}</Notice>}
-    {mode === 'exhibit' ? <Action title={t('presentation.openDanao')} onPress={() => setSelection('D01')} /> : <>{destinationIds.map(id => <Action key={id} title={destinationName(listDestinations().find(item => item.id === id)!, language)} onPress={() => setSelection(id)} />)}
-    <Action title={t('destinationRing.title')} onPress={() => setSelection('gallery')} /></>}
+    {mode === 'exhibit' && <Notice>{t('presentation.exhibitDestinations')}</Notice>}
+    {destinationIds.map(id => <Action key={id} title={destinationName(listDestinations().find(item => item.id === id)!, language)} onPress={() => setSelection(id)} />)}
+    {mode === 'classic' && <Action title={t('destinationRing.title')} onPress={() => setSelection('gallery')} />}
     <Action title={t('common.back')} onPress={() => { if (router.canGoBack()) router.back(); else router.navigate('/'); }} />
   </Screen>;
 }
 
 /** Optional native code is resolved before permission/startup work. Timeouts,
  * Retry, blur, principal replacement and unmount retire late import results. */
-function ExhibitSession({ identity, onReturn, onClassic }: { identity: SessionIdentity; onReturn(): void; onClassic(): void }) {
+function ExhibitSession({ destinationId, identity, onReturn, onClassic }: { destinationId: DestinationId; identity: SessionIdentity; onReturn(): void; onClassic(): void }) {
   const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
   const [Scene, setScene] = useState<Awaited<ReturnType<typeof loadExhibitScene>>>(null);
   const [attempt, setAttempt] = useState(0); const [failed, setFailed] = useState(false);
@@ -70,19 +70,19 @@ function ExhibitSession({ identity, onReturn, onClassic }: { identity: SessionId
     if (!focused || !active || failed || Scene) return;
     let current = true;
     const timer = setTimeout(() => { current = false; setFailed(true); }, 20000);
-    void loadExhibitScene('D01').then(component => {
+    void loadExhibitScene(destinationId).then(component => {
       if (!current) return;
       clearTimeout(timer);
       if (component) setScene(() => component); else setFailed(true);
     }).catch(() => { if (current) { clearTimeout(timer); setFailed(true); } });
     return () => { current = false; clearTimeout(timer); };
-  }, [attempt, focused, active, failed, Scene]);
+  }, [attempt, focused, active, failed, Scene, destinationId]);
   const sceneLoader = useCallback(async () => Scene!, [Scene]);
   const { language } = useSettings();
   if (Scene) return <DestinationArSessionExperience identity={identity} freshEligible={isViroSpikeEnabled}
-    sceneLoader={sceneLoader} content={previewStoryContent('D01')}
-    galleryMediaIds={danaoStageProfile.media.map(photo => photo.id)}
-    title={destinationName(listDestinations().find(item => item.id === 'D01')!, language)}
+    sceneLoader={sceneLoader} content={previewStoryContent(destinationId)}
+    galleryMediaIds={getExhibitStageProfile(destinationId)!.media.map(photo => photo.id)}
+    title={destinationName(listDestinations().find(item => item.id === destinationId)!, language)}
     developmentNoticeKey="presentation.session" preflightNoticeKey="featuredResearch.notice" onReturn={onReturn} />;
   return <Screen><Notice busy={!failed}>{t(failed ? 'presentation.loadFailed' : 'common.loading')}</Notice>
     {failed && <Action title={t('common.retry')} onPress={() => { setFailed(false); setAttempt(value => value + 1); }} />}

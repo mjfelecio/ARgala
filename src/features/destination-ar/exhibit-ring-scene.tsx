@@ -3,7 +3,9 @@ import { buildExhibitSlots } from './exhibit-layout';
 import { ExhibitTile } from './exhibit-tile';
 import { ExhibitFrame } from './exhibit-frame';
 import type { ComponentProps } from 'react';
-import { danaoStageProfile, buildStageSlots } from './exhibit-stage';
+import { getExhibitStageProfile, buildDestinationStageSlots, type ExhibitStageProfile } from './exhibit-stage';
+import { destinationIds, type DestinationId } from '@/features/destinations/catalog';
+import { DestinationStageScenery } from './destination-stage-scenery';
 import { DanaoScenery, ExhibitArrival, ExhibitGalleryEntry, ExhibitStoryTile } from './danao-stage';
 import { ExhibitGalleryPanel } from './exhibit-gallery-panel';
 
@@ -13,11 +15,28 @@ export const exhibitPresentation: RingScenePresentation = Object.freeze({
   animationPrefix: 'argalaExhibit', buildSlots: buildExhibitSlots,
   Tile: ExhibitTile, Frame: ExhibitFrame, revealImages: true, isolateReader: true,
 });
-export const danaoStagePresentation: RingScenePresentation = Object.freeze({
-  animationPrefix: 'argalaExhibitDanao', buildSlots: buildStageSlots,
-  Tile: ExhibitStoryTile, Frame: ExhibitFrame, revealImages: false, pageMotion: false, focusGlint: false, isolateReader: true,
-  stage: Object.freeze({ profile: danaoStageProfile, Entry: ExhibitGalleryEntry, Panel: ExhibitGalleryPanel, Scenery: DanaoScenery, Arrival: ExhibitArrival }),
-});
-export function ExhibitRingSceneHost(props: ComponentProps<typeof DestinationRingSceneHost>) {
-  return <DestinationRingSceneHost {...props} presentation={danaoStagePresentation} />;
+function createStagePresentation(profile: ExhibitStageProfile): RingScenePresentation {
+  const animationPrefix = profile.destinationId === 'D01' ? 'argalaExhibitDanao' : `argalaExhibit${profile.destinationId}`;
+  return Object.freeze({
+    animationPrefix, buildSlots: (entries, basis) => buildDestinationStageSlots(profile, entries, basis),
+    Tile: ExhibitStoryTile, Frame: ExhibitFrame, revealImages: false, pageMotion: false, focusGlint: false, isolateReader: true,
+    stage: Object.freeze({ profile, Entry: ExhibitGalleryEntry, Panel: ExhibitGalleryPanel,
+      Scenery: profile.destinationId === 'D01' ? DanaoScenery : function StageScenery({ basis }: ComponentProps<typeof DanaoScenery>) { return <DestinationStageScenery profile={profile} basis={basis} />; },
+      Arrival: function StageArrival(props: ComponentProps<typeof ExhibitArrival>) { return <ExhibitArrival {...props} animationPrefix={animationPrefix} />; },
+    }),
+  });
 }
+const presentations = Object.freeze(Object.fromEntries(destinationIds.map(id => [id, createStagePresentation(getExhibitStageProfile(id)!)])) as Record<DestinationId, RingScenePresentation>);
+export function getExhibitStagePresentation(id: string): RingScenePresentation | null {
+  return getExhibitStageProfile(id) ? presentations[id as DestinationId] : null;
+}
+export const danaoStagePresentation = presentations.D01;
+// Bind once at module load. Destination/principal changes mount a new session;
+// page commits never manufacture a replacement component or native navigator.
+const hosts = Object.freeze(Object.fromEntries(destinationIds.map(id => [id, function DestinationExhibitHost(props: ComponentProps<typeof DestinationRingSceneHost>) {
+  return <DestinationRingSceneHost {...props} presentation={presentations[id]} />;
+}])) as Record<DestinationId, typeof DestinationRingSceneHost>);
+export function getExhibitSceneHost(id: string): typeof DestinationRingSceneHost | null {
+  return getExhibitStageProfile(id) ? hosts[id as DestinationId] : null;
+}
+export const ExhibitRingSceneHost = hosts.D01;

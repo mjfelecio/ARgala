@@ -672,6 +672,7 @@
     "photoPosition": "写真 {{current}} / {{total}}",
     "captionBack": "戻る",
     "captionMore": "続き",
-    "readStory": "物語を読む"
+    "readStory": "物語を読む",
+    "exhibitDestinations": "写真で各スポットを巡り、気になる物語を読んでみましょう。"
   }
 }

@@ -43,3 +43,22 @@ Gallery must never become a fake chapter; late image/selection/Close callbacks
 cannot revive retired views; metadata size/locale changes preserve media identity;
 immediate background after accepted Close cannot reopen it; Classic does not
 inherit Exhibit focus/configuration. Pin these in actual service/scene tests.
+
+### Task 3 rollout continuation — owner authorized 2026-11-14
+
+The owner confirmed corrected Danao paging is stable, then explicitly requested
+continuing the other eight custom stages. This opens profile implementation;
+remaining native verification stays part of the rollout rather than a new
+permission gate. Keep Classic and the accepted Danao profile intact.
+
+1. Add immutable profiles for all nine using the approved destination treatments,
+   bounded distinct station positions and existing 53-photo/20-chapter content.
+2. Add static symbolic scenery through installed Viro polylines, below64 nodes,
+   ignored by hits, hidden during focus/Help and removed for reduced effects.
+3. Bind each guarded lazy scene to its explicitly selected profile. Show all nine
+   Exhibit choices; preserve timeout/Retry, principal, lifecycle and Classic paths.
+4. Exercise every real profile/gallery/story scene, independent progress,
+   captured-basis geometry and EN/JA/KO UI. Run full check/export/photo hashes.
+5. Review the complete rollout delta, fix material findings, then use the existing
+   A53 client for important navigation samples and a nine-destination device sweep.
+   Record exact limits; packaging/build still needs separate owner approval.

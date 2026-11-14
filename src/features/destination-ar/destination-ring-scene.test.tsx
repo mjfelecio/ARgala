@@ -757,3 +757,39 @@ it.each(['gallery', 'story'])('keeps Danao %s slides stationary after native bit
   expect(tree.root.findAllByType('viro-image' as React.ElementType).filter(image => image.props.testID === 'holographic-surface')).toEqual(borders);
   expect(vi.mocked(ViroMaterials.createMaterials).mock.calls.length).toBe(materialRegistrations);
 });
+
+it.each(['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09'] as const)('runs %s gallery and every chapter in its own stable native stage', async id => {
+  const { getExhibitStagePresentation } = await import('./exhibit-ring-scene');
+  const presentation = getExhibitStagePresentation(id)!; const profile = presentation.stage!.profile;
+  const progress = vi.fn(); const content = previewStoryContent(id);
+  sceneOptions = { content, presentation, onProgress: progress };
+  await mount(); await track(); await pose();
+  expect(node(id === 'D01' ? 'exhibit-danao-scenery' : `exhibit-${profile.theme}-scenery`)).toBeDefined();
+  await press('exhibit-gallery-entry'); await finish();
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual([]);
+  expect(node(id === 'D01' ? 'exhibit-danao-scenery' : `exhibit-${profile.theme}-scenery`)).toBeUndefined();
+  for (let index = 0; index < profile.media.length; index++) {
+    const image = tree.root.findByProps({ testID: 'ring-gallery-image' });
+    expect(image.props.source).toBe(profile.media[index].source);
+    await act(async () => image.props.onLoadEnd({ nativeEvent: null }));
+    expect(text('exhibit-photo-position')).toBe(`Photo ${index + 1} / ${profile.media.length}`);
+    if (index < profile.media.length - 1) await press('ring-action-gallery-photo-next');
+  }
+  const retiredNext = node('ring-action-gallery-photo-previous').props.onClick;
+  await press('ring-action-close'); await finish();
+  expect(progress.mock.lastCall?.[0].exhibitGallery.focused).toBe(false);
+  for (let index = 0; index < content.length; index++) {
+    await pose(); await press(`ring-tile-${content[index].id}`); await finish();
+    expect(node('ring-focus-glint')).toBeUndefined();
+    expect(node('exhibit-gallery-entry')).toBeUndefined();
+    expect(text('ring-chapter-position')).toBe(`Chapter ${index + 1} / ${content.length}`);
+    expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
+    await press('ring-action-next');
+    await press('ring-action-close'); await finish();
+  }
+  await act(async () => retiredNext?.());
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual(content.map(chapter => chapter.id));
+  await press('exhibit-gallery-entry'); await finish();
+  expect(text('exhibit-photo-position')).toBe(`Photo ${profile.media.length} / ${profile.media.length}`);
+  expect(native.patches.some(item => (item.patch.animation as { run?: boolean; name?: string } | undefined)?.run && (item.patch.animation as { name: string }).name.includes('PageReveal'))).toBe(false);
+});

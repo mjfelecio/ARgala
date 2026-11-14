@@ -193,3 +193,41 @@ unchanged and present in the export. The minimal local sample gallery contains
 an updated Danao gallery screenshot and one short story navigation clip.
 The complete new-stage photo/metadata, locale/size, recovery, Capture/Discard
 and performance sweep remains pending. D02–D09 are still gated on D01 acceptance.
+
+### Nine destination stages — rollout implementation, 2026-11-14
+
+The owner confirmed Danao paging is stable and explicitly authorized extending
+Exhibit to the other eight destinations. All nine now have immutable, selected-
+destination profiles and stable bound lazy hosts. Shared gallery/reader/capture
+services retain separate per-mount transition and session state. Classic remains
+the default and the accepted presentation fallback; ACLC remains separate.
+
+| Destination | Symbolic treatment | Stories / photos |
+| --- | --- | --- |
+| D01 Lake Danao | Accepted shoreline, layered ridges and ripples | 3 / 7 |
+| D02 Lake Kasudsuran | Paired fern fronds around the photo entrance | 2 / 5 |
+| D03 Lake Janagdan | Enclosed basin contours and water rings | 2 / 6 |
+| D04 Ormoc Mangrove Eco-Park | Branching roots and river banks | 2 / 6 |
+| D05 Sal’s Pineapple Plantation | Receding field rows and fiesta pennants | 3 / 6 |
+| D06 Leyte Golf and Country Club | Fairway sweeps and tree edges | 2 / 6 |
+| D07 Alto Peak | Rising layered ridges and staggered story stations | 2 / 5 |
+| D08 Heaven’s Peak | Garden terraces, flowers and mountain contours | 2 / 6 |
+| D09 Sabin Resort Hotel | Bay horizon, waves and coastal trees | 2 / 6 |
+
+Each has distinct station coordinates; all retain the same readable 2.25-unit
+focused reader, complete supplied content, separate photo/metadata controls and
+quiet page swaps. New scenery uses 6–15 static polyline meshes per destination,
+ignores touches and disappears for focus, Help/tracking fences and reduced effects.
+It is symbolic framing, not a terrain reconstruction or a route. The first A53
+view prompted narrowing the new scenery group to keep its framing visible;
+Danao's accepted composition is unchanged. No new assets, dependencies, lighting,
+particles or native changes were required.
+
+Offline rollout verification: `npm run check` passed TypeScript, zero-warning
+lint and **1,554 tests in 136 files**. Coverage includes all nine actual scenes,
+all 20 chapter openings, all 53 photo sources, 27 destination/language gallery
+runs retaining complete captions/credits, and actual session-screen background
+restoration for every destination. Profile/loader/selector failures were observed
+before implementation. Independent review passed 265 tests in nine files with no
+findings. New A53 sweep evidence is recorded separately in `docs/validation.md`;
+these automated checks alone are not full native or owner visual acceptance.

@@ -672,6 +672,7 @@
     "photoPosition": "사진 {{current}} / {{total}}",
     "captionBack": "이전",
     "captionMore": "설명 더 보기",
-    "readStory": "이야기 읽기"
+    "readStory": "이야기 읽기",
+    "exhibitDestinations": "사진으로 각 여행지를 둘러보고, 관심 있는 이야기도 읽어 보세요."
   }
 }

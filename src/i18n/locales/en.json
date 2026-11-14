@@ -714,6 +714,7 @@
     "photoPosition": "Photo {{current}} / {{total}}",
     "captionBack": "Back",
     "captionMore": "More text",
-    "readStory": "Read story"
+    "readStory": "Read story",
+    "exhibitDestinations": "Explore each destination in pictures, with optional local stories."
   }
 }

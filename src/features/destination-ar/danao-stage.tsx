@@ -12,18 +12,18 @@ import type { ArNativeStyle } from './native-styles';
 import type { IntroVariant } from './intro-policy';
 
 /** Finite native-only reveal, inside the route-owned introduction deadline. */
-export function ExhibitArrival({ children, deployment, order }: { children: ReactNode; deployment?: IntroVariant; order: number }) {
+export function ExhibitArrival({ children, deployment, order, animationPrefix = 'argalaExhibitDanao' }: { animationPrefix?: string; children: ReactNode; deployment?: IntroVariant; order: number }) {
   const ref = useRef<ViroNode>(null); const reduced = useReducedMotion();
   const animate = !!deployment && deployment !== 'none' && deployment !== 'reduced' && !reduced;
   useEffect(() => {
-    const name = `argalaExhibitDanaoArrival${order}`;
+    const name = `${animationPrefix}Arrival${order}`;
     const node = ref.current;
     if (!animate) { node?.setNativeProps({ opacity: 1, position: [0, 0, 0] }); return; }
     ViroAnimations.registerAnimations({ [name]: { duration: deployment === 'full' ? 650 : 250,
       delay: deployment === 'full' ? order * 130 : 0, easing: 'EaseOut', properties: { opacity: 1, positionY: 0 } } });
     node?.setNativeProps({ animation: { name, run: true, loop: false, interruptible: true } });
     return () => { node?.setNativeProps({ animation: { name, run: false, interruptible: true } }); };
-  }, [animate, deployment, order]);
+  }, [animate, deployment, order, animationPrefix]);
   return <ViroNode ref={ref} testID={`exhibit-arrival-${order}`} ignoreEventHandling={!!deployment} opacity={animate ? 0.4 : 1} position={[0, animate ? -0.04 : 0, 0]}>{children}</ViroNode>;
 }
 
