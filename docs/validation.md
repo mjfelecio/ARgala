@@ -3243,7 +3243,8 @@ controlled 14-second test completed6→7→6→7 with the fixed top-border cyan 
 remaining1738–1836 pixels over203 frames (prior spike5441); gallery7→6→5 ranged
 1453–1594. Sampled original video frames confirm image/text changes. This supports
 the targeted fix, not a native FPS benchmark or complete acceptance. Owner's
-final physical confirmation is pending; automated taps are paused for review.
+subsequent hands-on confirmation states the latest update is stable. This
+accepts the reported slide-stability fix; the remaining D01 sweep is pending.
 
 Verification: watched toolbar-fit, stable-frame and Danao glint-absence tests fail
 before their fixes and pass after. Final `npm run check` passed strict TypeScript,

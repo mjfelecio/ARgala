@@ -183,7 +183,9 @@ top-border cyan mask ranged 1,738–1,836 pixels over 203 recorded frames, compa
 with a previous peak of 5,441. Gallery photo 7→6→5 also showed no comparable
 spike. These are recording comparisons, not native FPS or exhaustive acceptance.
 The native cause of overlay replay was not established; a memo-only experiment
-failed and was retired. Owner confirmation of the final fix is still pending.
+failed and was retired. The owner subsequently confirmed the latest update is
+stable. This accepts the reported slide-stability fix; the remaining D01 sweep
+is still pending.
 
 Final checks: strict TypeScript, zero-warning lint, 1,510 tests in 135 files,
 independent review and Android export passed. All 53 original photo hashes are
