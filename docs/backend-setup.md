@@ -2,7 +2,11 @@
 
 For the complete setup sequence through Expo signing, an Android APK and phone installation, start with the [Android setup guide](android-setup.md). This document explains the backend contracts and deployment details behind that walkthrough.
 
-Create a Supabase project; use its public publishable key only in the mobile environment. Enable email/password authentication and configure email delivery/confirmation. The foundation uses Supabase PostgreSQL for Auth plus a private request counter, without profile, catalog, POI or travel-history tables.
+Create a Supabase project; use its public publishable key only in the mobile environment. ARgala signs in through Supabase's Google OAuth provider, not an app-owned password. Configure the Google consent screen and a Google **web** OAuth client with the Supabase provider's callback URL as its authorized redirect URI. Enable Google in Supabase Auth and enter the client ID and secret there; never put the secret in the app or repository. Add the exact `argala://auth-callback` URL to Supabase Auth's redirect allow list. For external Google consent screens in testing, authorize the intended Google test accounts; review Google's publishing requirements before public use. The Google OAuth credentials are distinct from the Maps SDK and server API keys.
+
+Verify the complete Google sign-in on the installed Android app before disabling the hosted email/password provider. The application no longer exposes password sign-in or registration, and no legacy-account migration is supplied. Disabling the provider and handling existing sessions or deleting old users are separate hosted operations requiring review. Supabase may automatically link a verified Google identity to an existing user with the same email; this is provider behavior, not an app migration. Guest access remains local, and its existing journal merge applies after account sign-in.
+
+The browser callback is accepted only by the current in-memory sign-in attempt. If Android terminates the app during the browser flow, start sign-in again; cold-start callback completion is not implemented. Configure and verify the native browser module in an approved Android build before relying on this flow. Hosted OAuth settings, email-provider cutover and physical sign-in have not been verified by the code changes alone.
 
 From the project root, install/use the Supabase CLI and link your project:
 

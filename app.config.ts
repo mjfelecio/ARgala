@@ -23,6 +23,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['expo-notifications', { defaultChannel: 'destination-nearby' }],
     ['expo-media-library', { granularPermissions: [], isAccessMediaLocationEnabled: false }],
     'expo-sharing',
+    'expo-web-browser',
     // SDK 57 manifest mods run in reverse registration order: normalize last.
     './plugins/with-optional-ar',
     ['@reactvision/react-viro', { android: { xRMode: ['AR'] }, provider: 'none' }],
