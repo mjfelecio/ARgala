@@ -63,6 +63,13 @@ supabase/.temp/
 
 # local UI kickoff and reference exports
 /ARgala_UI_Implementation_Kickoff/
+/ARgala-Brand-Kit-v1/
+/ARgala-Brand-Kit-v2/
+/ARgala_*_Kickoff.zip
+/ARgala_POI_Details_Implementation_Package.zip
+/ARgala_POI_Details_Implementation_Plan.md
+/argala-cinematic-ar-handoff-20261102/
+/argala-seafoam-forest-implementation-20261102/
 
 # Impeccable runtime output (shared configuration stays tracked)
 **/.impeccable/config.local.json

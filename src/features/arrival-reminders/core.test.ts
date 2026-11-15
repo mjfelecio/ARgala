@@ -16,7 +16,23 @@ function setup() {
 beforeEach(()=>vi.clearAllMocks());
 describe('durable per-destination nearby reminders',()=>{
  it('starts disabled and never prompts on owner restore or resume',async()=>{const x=setup();await x.controller.setPrincipal('guest');await x.controller.refresh();expect(x.native.request).not.toHaveBeenCalled();expect(x.native.register).not.toHaveBeenCalled();expect(x.controller.snapshot.selections).toEqual([]);});
- it('rejects missing bundled coordinates and ignores a caller supplied coordinate',async()=>{const x=setup();await x.controller.setPrincipal('guest');await x.controller.enable({...getDestination('D01')!,center:pilot.center,centerApprovalReference:'forged'},'en',async()=>true);expect(x.native.request).not.toHaveBeenCalled();expect(x.native.register).not.toHaveBeenCalled();expect(x.controller.snapshot.error).toBe('reminders.pointMissing');});
+ it('rejects a destination missing bundled coordinates before prompting',async()=>{
+  const x=setup();await x.controller.setPrincipal('guest');
+  const catalog=await import('@/features/destinations/catalog');
+  const supplied=getDestination('D01')!;
+  const lookup=vi.spyOn(catalog,'getDestination').mockReturnValueOnce({...supplied,center:undefined,centerApprovalReference:undefined});
+  try {
+   await x.controller.enable({...supplied,center:pilot.center,centerApprovalReference:'forged'},'en',async()=>true);
+   expect(x.native.request).not.toHaveBeenCalled();expect(x.native.register).not.toHaveBeenCalled();expect(x.controller.snapshot.error).toBe('reminders.pointMissing');
+  } finally {lookup.mockRestore();}
+ });
+ it('uses the newly confirmed bundled center rather than a caller supplied coordinate',async()=>{
+  const x=setup();await x.controller.setPrincipal('guest');
+  const destination=getDestination('D01')!;
+  await x.controller.enable({...destination,center:pilot.center,centerApprovalReference:'forged'},'en',async()=>true);
+  expect(x.native.register).toHaveBeenCalledOnce();
+  expect(vi.mocked(x.native.register).mock.calls[0][0][0]).toMatchObject(destination.center!);
+ });
  it('persists consent before registering and bounds regions with a distinct radius',async()=>{const x=setup();await x.controller.setPrincipal('guest');vi.mocked(x.native.register).mockImplementation(async regions=>{expect(JSON.parse(x.values.get(reminderOwnerKey('guest'))!).selections[0].consented).toBe(true);expect(regions).toHaveLength(1);expect(regions[0].radius).toBe(150);});await x.controller.enable(pilot,'en',async()=>true);expect(x.native.register).toHaveBeenCalledOnce();expect(x.controller.snapshot.status).toBe('requested');});
  it('claims once durably before scheduling despite initial Enter, jitter and re-registration',async()=>{const x=setup();await x.controller.setPrincipal('guest');await x.controller.enable(pilot,'ja',async()=>true);const region=vi.mocked(x.native.register).mock.calls.at(-1)![0][0];x.schedule.mockImplementation(async()=>{expect(JSON.parse(x.values.get(reminderOwnerKey('guest'))!).selections[0].claimed).toBe(true);});await Promise.all([1,1,2,1].map(eventType=>executeReminderTask({data:{eventType,region}},x.repo,{schedule:x.schedule,cancel:x.native.cancel,check:x.native.check})));expect(x.schedule).toHaveBeenCalledOnce();await x.controller.refresh();const latest=vi.mocked(x.native.register).mock.calls.at(-1)![0][0];await executeReminderTask({data:{eventType:1,region:latest}},x.repo,{schedule:x.schedule,cancel:x.native.cancel,check:x.native.check});expect(x.schedule).toHaveBeenCalledOnce();});
  it('keeps an ambiguous schedule consumed until a new explicit enable',async()=>{const x=setup();await x.controller.setPrincipal('guest');await x.controller.enable(pilot,'en',async()=>true);const region=vi.mocked(x.native.register).mock.calls.at(-1)![0][0];x.schedule.mockRejectedValueOnce(new Error('native private'));await executeReminderTask({data:{eventType:1,region}},x.repo,{schedule:x.schedule,cancel:x.native.cancel,check:x.native.check});await executeReminderTask({data:{eventType:1,region}},x.repo,{schedule:x.schedule,cancel:x.native.cancel,check:x.native.check});expect(x.schedule).toHaveBeenCalledOnce();});

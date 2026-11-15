@@ -117,3 +117,33 @@ it('requires a new logical owner after restoration grace expires', () => {
  session.fail(session.getSnapshot().attempt, 302002);
  expect(session.getSnapshot().phase).toBe('expired');
 });
+
+const gallery = { focused: true, cursor: { page: 0, offset: 12, locale: 'en', size: 'standard' as const, mediaId: 'D01-preview', mediaPage: 1 } };
+it('retains gallery focus separately from chapter IDs and retires it on close/expiry', () => {
+  const session = new ArSession(identity, ids, undefined, ['D01-preview']); const token = live(session);
+  session.saveProgress(token, { selectedId: null, cursors: {}, exhibitGallery: gallery });
+  expect(session.getSnapshot().progress).toEqual({ selectedId: null, cursors: {}, openedIds: [], exhibitGallery: gallery });
+  session.suspend(2000); const next = session.begin(identity, 3000)!;
+  session.authorizeMount(next, identity, 3001, () => false); session.ready(next, 3010, false);
+  expect(session.getSnapshot().progress.exhibitGallery).toEqual(gallery);
+  session.saveProgress(next, { selectedId: null, cursors: {}, exhibitGallery: { ...gallery, focused: false } });
+  expect(session.getSnapshot().progress.exhibitGallery?.focused).toBe(false);
+  session.suspend(4000); session.expire(304000);
+  expect(session.getSnapshot().progress.exhibitGallery).toBeUndefined();
+});
+it('rejects gallery state in Classic, foreign media, malformed cursors and simultaneous chapter focus', () => {
+  const classic = create(); const classicToken = live(classic);
+  classic.saveProgress(classicToken, { selectedId: null, cursors: {}, exhibitGallery: gallery });
+  expect(classic.getSnapshot().progress).not.toHaveProperty('exhibitGallery');
+  const session = new ArSession(identity, ids, undefined, ['D01-preview']); const token = live(session);
+  for (const cursor of [{ ...gallery.cursor, mediaId: 'D02-photo' }, { ...gallery.cursor, offset: -1 }, { ...gallery.cursor, mediaPage: NaN }, { ...gallery.cursor, size: 'foreign' }]) {
+    session.saveProgress(token, { selectedId: null, cursors: {}, exhibitGallery: { ...gallery, cursor } } as never);
+    expect(session.getSnapshot().progress).not.toHaveProperty('exhibitGallery');
+  }
+  session.saveProgress(token, { selectedId: 'history', cursors: {}, exhibitGallery: gallery });
+  expect(session.getSnapshot().progress.selectedId).toBe('history');
+  expect(session.getSnapshot().progress.exhibitGallery?.focused).toBe(false);
+  session.close();
+  session.saveProgress(token, { selectedId: null, cursors: {}, exhibitGallery: gallery });
+  expect(session.getSnapshot().progress.exhibitGallery).toBeUndefined();
+});

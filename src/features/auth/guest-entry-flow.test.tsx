@@ -11,6 +11,7 @@ const boundary=vi.hoisted(()=>({get:vi.fn(),set:vi.fn(),committed:false,navigate
 vi.mock('@react-native-async-storage/async-storage',()=>({default:{getItem:boundary.get,setItem:boundary.set}}));
 vi.mock('@/lib/query',()=>({queryClient:{clear:vi.fn()}}));
 vi.mock('@/lib/supabase',()=>({getSupabase:()=>{throw new Error('Guest entry must not call Auth');}}));
+vi.mock('./google-sign-in',()=>({signInWithGoogle:vi.fn(),GoogleBrowserUnavailable:class extends Error{}}));
 vi.mock('expo-router',()=>({router:{replace:()=>boundary.navigated.push(boundary.committed)}}));
 const translations=createInstance();await translations.use(initReactI18next).init({...localizationOptions,lng:'en',react:{useSuspense:false}});
 let tree:ReactTestRenderer;

@@ -14,6 +14,15 @@ import { EdgeRequestError } from '@/lib/edge-error';
 import { localizationOptions } from '@/i18n/options';
 import MapScreen from './map-screen';
 import { MapRecenter } from './map-recenter';
+import { getDestination } from '@/features/destinations/catalog';
+
+it('shows the supplied featured summary without initiating paid discovery', async () => {
+  controls.params = { featuredDestinationId: 'D01' };
+  await act(async () => { tree = create(renderMap()); });
+  expect(JSON.stringify(tree!.toJSON())).toContain(getDestination('D01')!.copy!.en!.overview!.value);
+  expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(placesService.details).not.toHaveBeenCalled();
+});
 
 const controls = vi.hoisted(() => ({
   fit: vi.fn(), animate: vi.fn(), active: true, focused: true,

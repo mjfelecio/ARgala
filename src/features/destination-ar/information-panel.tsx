@@ -3,8 +3,8 @@ import { PageTransition } from './page-transition';
 import { HolographicFrame } from './holographic-frame';
 import { chapterPresentation } from './chapter-presentation';
 import { ArText } from './ar-text';
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ViroAnimations, ViroImage, ViroNode, ViroQuad } from '@reactvision/react-viro';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState, type ComponentProps } from 'react';
+import { ViroImage, ViroNode, ViroQuad } from '@reactvision/react-viro';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { paginate, readingMetrics, type ReadingCursor } from './content-layout';
@@ -18,44 +18,23 @@ import { galleryPages, galleryCursor, cursorAtPage, type GalleryPage } from './i
 import { NativePanelAction, nativePanelActionHeight } from './information-tile';
 import { readingContentWidth } from './reading-widths';
 import { readerLayout } from './reader-layout';
+import { usePanelTransition } from './use-panel-transition';
 
 const { height: bodyHeight, y: bodyY } = readerLayout.body;
-const { height: imageHeight, y: imageY } = readerLayout.image;
-const { height: captionHeight, y: captionY } = readerLayout.caption;
 const legacySizeY = readerLayout.toolbar.y - nativePanelActionHeight - 0.04;
 export type ReadingCommand = (delta: -1 | 1) => void;
 
-export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, onPageChange, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0, externalReadingControls = false, onReadingControls }: {
+export function InformationPanel({ selection, content, previous, reading, enabled, style, onCursor, onClose, onComplete, onPageChange, decorations = true, ordinal = 1, chapterCount = 1, openedCount = 0, externalReadingControls = false, onReadingControls, animationPrefix = 'argala', Frame = HolographicFrame, revealImages = false, pageMotion = true, focusGlint = true, canInteract }: {
+  animationPrefix?: string; Frame?: typeof HolographicFrame; revealImages?: boolean;
+  pageMotion?: boolean; focusGlint?: boolean;
   selection: FocusSelection; content: RingContent; previous?: ReadingCursor; reading: ReturnType<typeof useReadingSize>; enabled: boolean; style: ArNativeStyle; decorations?: boolean;
   onPageChange?(): void; onCursor(id: string, cursor: ReadingCursor): void; onClose(): void; onComplete(token: number): void;
   ordinal?: number; chapterCount?: number; openedCount?: number;
   externalReadingControls?: boolean; onReadingControls?(command: ReadingCommand | null): void;
+  canInteract?(): boolean;
 }) {
-  const { t, i18n } = useTranslation(); const ref = useRef<ViroNode>(null); const reduced = useReducedMotion();
-  const moving = selection.phase !== 'focused'; const closing = selection.phase === 'closing';
-  const name = closing ? 'argalaRingClose' : 'argalaRingFocus';
-  const [registeredToken, setRegisteredToken] = useState<number | null>(null);
-  const completion = useRef(onComplete);
-  useLayoutEffect(() => { completion.current = onComplete; return () => { completion.current = () => {}; }; }, [onComplete]);
-  const finish = useCallback(() => completion.current(selection.token), [selection.token]);
-  useLayoutEffect(() => {
-    if (!moving) return;
-    const from = selection.from; const to = selection.to;
-    const rotationDelta = ((to.rotation[1] - from.rotation[1] + 180) % 360 + 360) % 360 - 180;
-    ViroAnimations.registerAnimations({ [name]: { duration: reduced ? 0 : ringMetrics.transitionMs, easing: 'EaseInEaseOut', properties: {
-      positionX: to.position[0], positionY: to.position[1], positionZ: to.position[2], rotateY: from.rotation[1] + rotationDelta,
-      scaleX: to.scale, scaleY: to.scale, scaleZ: to.scale,
-    } } });
-    let current = true;
-    void Promise.resolve().then(() => { if (current) setRegisteredToken(selection.token); });
-    return () => { current = false; };
-  }, [moving, name, reduced, selection.from, selection.to, selection.token]);
-  // One declarative owner: an unrelated React commit cannot pause an animation
-  // started imperatively. Registration completes before run becomes true.
-  const animation = useMemo(() => ({ name, run: moving && enabled && registeredToken === selection.token, onFinish: finish, interruptible: true }), [name, moving, enabled, registeredToken, selection.token, finish]);
-  useLayoutEffect(() => {
-    if (!moving) ref.current?.setNativeProps({ position: selection.to.position, rotation: selection.to.rotation, scale: [selection.to.scale, selection.to.scale, selection.to.scale] });
-  }, [moving, selection.to, selection.token]);
+  const { t, i18n } = useTranslation();
+  const { ref, reduced, moving, closing, animation, transform } = usePanelTransition(selection, enabled, onComplete, animationPrefix);
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const chapter = chapterPresentation(content, locale, key => t(key), key => i18n.exists(key));
   const layout = useCallback((size: ReadingSize) => {
@@ -67,35 +46,37 @@ export function InformationPanel({ selection, content, previous, reading, enable
   const pages = useMemo(() => layout(reading.size), [layout, reading.size]);
   const cursor = galleryCursor(pages, previous, locale, reading.size);
   const page = pages[cursor.page]; const interactive = enabled && !moving;
-  const transform = moving ? selection.from : selection.to;
   function changePage(page: number) {
+    if (!interactive || canInteract?.() === false) return;
     onCursor(content.id, cursorAtPage(pages, page, locale, reading.size)); onPageChange?.();
   }
   const changeSize = useCallback((delta: -1 | 1) => {
+    if (!interactive || canInteract?.() === false) return;
     const next = readingSizes[Math.min(2, Math.max(0, readingSizes.indexOf(reading.size) + delta))];
     onCursor(content.id, galleryCursor(layout(next), cursor, locale, next)); reading.change(delta);
-  }, [reading, onCursor, content.id, layout, cursor, locale]);
+  }, [reading, onCursor, content.id, layout, cursor, locale, interactive, canInteract]);
   useLayoutEffect(() => {
     if (!interactive) { onReadingControls?.(null); return; }
     let current = true;
     onReadingControls?.(delta => { if (current) changeSize(delta); });
     return () => { current = false; onReadingControls?.(null); };
   }, [interactive, changeSize, onReadingControls]);
+  const pageContent = page.kind === 'image'
+    ? <BundledGalleryPage animateImages={decorations} revealImages={revealImages && pageMotion} animationPrefix={animationPrefix} key={`${page.media!.id}:${page.media!.source}`} page={page} size={reading.size} style={style} enabled={interactive} />
+    : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
+      textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />;
   return <ViroNode ref={ref} key={selection.token} testID="ring-focused-panel" position={transform.position} rotation={transform.rotation}
     scale={[transform.scale, transform.scale, transform.scale]} opacity={enabled ? 1 : 0.35}
     animation={animation}>
-    <HolographicFrame variant="reader" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={false} />
+    <Frame variant="reader" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={Frame !== HolographicFrame && decorations} />
     <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.49 : 0.44, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.07 : 0.14} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 4 : 6, 'left', '600')} />
     {!closing && <>
-      {decorations && <HolographicGlint id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
+      {decorations && focusGlint && <HolographicGlint animationPrefix={animationPrefix} id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
       <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
       <ArText testID="ring-sample-label" position={[0.28, 0.555, 0.006]} width={0.56} height={0.06} text={content.approved ? t('destinationStories.openedCount', { count: openedCount, total: chapterCount }) : t('destinationRing.sampleLabel')} style={style.text(3)} />
-      <PageTransition identity={`${content.id}:${cursor.page}:${locale}:${reading.size}`} enabled={interactive} reduced={reduced}>
-      {page.kind === 'image' ? <BundledGalleryPage key={`${page.media!.id}:${page.media!.source}`} page={page} size={reading.size} style={style} enabled={interactive} /> : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
-        textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />}
-      </PageTransition>
+      {pageMotion ? <PageTransition animationPrefix={animationPrefix} identity={`${content.id}:${cursor.page}:${locale}:${reading.size}`} enabled={interactive} reduced={reduced}>{pageContent}</PageTransition> : pageContent}
       {selection.phase === 'focused' && <ViroNode testID="ring-reader-toolbar" position={[0, readerLayout.toolbar.y, 0.012]}>
-      <HolographicFrame variant="toolbar" width={readerLayout.toolbar.width} height={readerLayout.toolbar.height} decorations={false} />
+      <Frame variant="toolbar" width={readerLayout.toolbar.width} height={readerLayout.toolbar.height} decorations={false} />
       <NativePanelAction id="previous" label={t('destinationRing.previous')} width={0.34} position={[-0.555, 0, 0.004]} enabled={interactive && cursor.page > 0} style={style}
         onPress={() => changePage(cursor.page - 1)} />
       <ArText testID="ring-page-indicator" position={[-0.25, 0, 0.004]} width={0.2} height={0.1} text={t('destinationRing.page', { current: cursor.page + 1, total: pages.length })} style={style.text(3)} />
@@ -121,13 +102,17 @@ export function InformationPanel({ selection, content, previous, reading, enable
 /** Keep the native image mounted through caption pages, but replace an attempt
  * on explicit Retry. A bundled source replacement starts clean under its key.
  */
-function BundledGalleryPage(props: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean }) {
+export type GalleryPageLayout = { image: { y: number; height: number }; caption: { y: number; height: number } };
+export function BundledGalleryPage(props: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean; revealImages?: boolean; animateImages?: boolean; animationPrefix?: string; layout?: GalleryPageLayout }) {
   const [attempt, setAttempt] = useState(0);
   return <GalleryImageAttempt key={attempt} {...props} onRetry={() => setAttempt(previous => previous + 1)} />;
 }
-function GalleryImageAttempt({ page, size, style, enabled, onRetry }: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean; onRetry(): void }) {
+function GalleryImageAttempt({ page, size, style, enabled, onRetry, revealImages, animateImages, animationPrefix = 'argala', layout }: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean; onRetry(): void; revealImages?: boolean; animateImages?: boolean; animationPrefix?: string; layout?: GalleryPageLayout }) {
+  const imageY = layout?.image.y ?? readerLayout.image.y; const imageHeight = layout?.image.height ?? readerLayout.image.height;
+  const captionY = layout?.caption.y ?? readerLayout.caption.y; const captionHeight = layout?.caption.height ?? readerLayout.caption.height;
   const { t } = useTranslation(); const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>('loading');
   const alive = useRef(false); const settled = useRef(false);
+  const reduced = useReducedMotion();
   useLayoutEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
   function finish(success: boolean) {
     if (!alive.current || settled.current) return;
@@ -141,6 +126,7 @@ function GalleryImageAttempt({ page, size, style, enabled, onRetry }: { page: Ga
       <NativePanelAction id="image-retry" label={t('common.retry')} position={[0, imageY - 0.11, 0.012]} width={0.46}
         enabled={enabled} style={style} onPress={onRetry} />
     </> : <>
+      <PhotoReveal reveal={!!revealImages} animationPrefix={`${animationPrefix}Photo`} identity={status} enabled={!!animateImages && enabled && status === 'ready'} reduced={reduced}>
       <ViroImage testID="ring-gallery-image" source={page.media!.source} position={[0, imageY, 0.006]} width={readingContentWidth} height={imageHeight}
         renderingOrder={2} ignoreEventHandling resizeMode="ScaleToFit" imageClipMode="ClipToBounds"
         onError={fail} onLoadEnd={event => {
@@ -148,10 +134,14 @@ function GalleryImageAttempt({ page, size, style, enabled, onRetry }: { page: Ga
           // bitmap, with no success field. Explicit false and onError still fail.
           finish(event.nativeEvent?.success !== false);
         }} />
+      </PhotoReveal>
       {status === 'loading' && <ArText testID="ring-gallery-loading" position={[0, imageY, 0.008]} width={readingContentWidth} height={imageHeight}
         text={t('common.loading')} style={style.text(4)} />}
     </>}
     <ArText testID="ring-gallery-caption" position={[0, captionY, 0.006]} width={readingContentWidth} height={captionHeight} text={page.flowText ?? page.text}
       textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[size].fontSize, 'left')} />
   </>;
+}
+function PhotoReveal({ reveal, children, ...props }: ComponentProps<typeof PageTransition> & { reveal: boolean }) {
+  return reveal ? <PageTransition {...props}>{children}</PageTransition> : children;
 }

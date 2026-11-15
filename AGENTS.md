@@ -1,5 +1,11 @@
 # ARgala agent operating manual
 
+## College presentation and spatial Exhibit — 2026-11-14
+
+The owner-approved presentation integration uses nine destinations, 20 stable chapters and 53 bundled photographs from the 2026-11-13 handoff. Supplied names, summaries, visitor guidance, landmark centers and independently confirmed entrances supersede the earlier placeholder catalog. This grants no activation radius, provider association, Passport entitlement, third-party redistribution rights or production AR approval.
+
+The later owner authorizes reversible AR visual and spatial improvements beyond the earlier fixed ring/reader specification. Complete and retain Classic first; prototype Exhibit on D01 and show the first working slice before further polish or rollout. Owner direction review and physical Galaxy A53 acceptance are required before extending Exhibit. Share camera/session services, content, preferences and capture, but keep each mode's scene animation/transition owners, tokens, refs and callbacks independent. Default reader distance remains 2.25 units. Keep pilot-aclc separate and unchanged. Once the presentation deadline is supplied, reserve testing/packaging/recovery time, freeze new visuals at the cutoff, and deliver Classic if Exhibit is not accepted. See docs/superpowers/plans/2026-11-14-presentation-spatial-exhibit.md.
+
 ## Approved Seafoam Forest screen refresh — 2026-11-02
 
 The later owner-approved eight-screen handoff supersedes earlier artwork-only
@@ -215,3 +221,28 @@ Docs: https://docs.expo.dev/eas/index.md
   in the existing preferences record and honor explicit Save/Undo. Partial language/
   radius saves preserve audio opt-outs. Missing reviewed locale clips stay silent;
   never substitute unapproved English audio. Native video remains feasibility gated.
+
+## App navigation sample gallery — owner request 2026-11-14
+
+When testing by navigating through the app, capture only important milestones,
+meaningful before/after changes and representative successful states. Keep a
+minimal, curated gallery of screenshots and short screen recordings for progress
+updates and presentation content; do not record every tap or unrelated tooling.
+Use `~/Pictures/ARgala-progress/YYYY-MM-DD/` for durable samples outside Git.
+Include a small index with each sample's screen/flow, result, device, source
+revision and any development/simulation caveat. Prefer settled, readable states;
+exclude account details, credentials, precise location and unrelated personal
+content. Keep raw troubleshooting captures separate from the curated gallery.
+Mention the gallery path when new samples are added. This applies to app
+navigation testing, not ordinary code edits or command-line checks.
+
+## Exhibit gallery and focused commands — 2026-11-14
+
+- Destination galleries are photo-browsing affordances, separate from chapter
+  IDs, opening counts and Passport. Validate session-only gallery cursors against
+  explicit destination media IDs; mode/principal/admission replacement or terminal
+  expiry retires them. Classic has no gallery progress unless explicitly configured.
+- Focused page and reading-size callbacks must check the surviving controller's
+  focused phase and transition token as well as committed interactivity/tracking.
+  Enabled React props alone leave a window after Close is accepted but before its
+  render commits. Gallery and chapter commands share this ownership fence.

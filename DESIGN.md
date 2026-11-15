@@ -1,5 +1,44 @@
 # ARgala design authority
 
+## Nine-destination Photo Islands rollout — 2026-11-14
+
+The owner accepted the refined Danao on the physical A53, including spacing and
+reliable taps. Extend its photo-only museum direction to allnine destinations.
+Each of the53 photographs has a unique entrance; two-photo bays may end with a
+single image, and photo-only bays do not create chapters. Keep all20 chapters,
+destination scenery, original photo proportions and the2.25-unit reader. Bound
+portraits to1.05 height and clear their story controls. Classic remains default.
+See [rollout design](docs/superpowers/specs/2026-11-14-photo-islands-rollout-design.md).
+
+## Photo Islands — owner-selected direction, 2026-11-14
+
+The owner selected Photo Islands from the interactive browser spatial comparison
+and instructed implementation. Restore looking around by distributing small photo
+bays around the visitor, with optional stories below. Keep the gallery welcome
+ahead, the flat 2.25-unit reader and the stable stationary page swaps. Start with
+Danao; native spacing/tap review gates extension to the other eight destinations.
+The owner's first native refinement makes successful photo covers image-only,
+larger and closer, with original aspect ratios and a deliberate lead/companion
+composition. Context appears after opening; the reader remains at 2.25 units.
+Classic and the preceding front-stage composition remain fallbacks. Photos are
+gallery entrances, never chapters or Passport events. See the
+[approved direction](docs/superpowers/specs/2026-11-14-photo-islands-design.md).
+
+## Gallery-first destination stages — 2026-11-14
+
+The owner accepted Classic's complete device sweep, the corrected original
+Exhibit, and a stronger Danao browser concept: a prominent photo gallery leads
+into optional story stations within a destination-specific symbolic stage.
+Implement the [approved stage plan](docs/superpowers/plans/2026-11-14-destination-stages.md).
+Keep the gallery separate from chapter/Passport progress, retain the 2.25-unit
+reader and Classic fallback, and require native D01 review before extending to
+the other eight destinations. November 21 is the presentation deadline; reserve
+November 20 for stabilization. No phone connection while the owner charges it.
+
+## Presentation Exhibit assignment — 2026-11-14
+
+The owner authorizes a reversible spatial redesign for the nine-destination presentation after content-complete Classic is retained. Earlier fixed AR layout restrictions yield to this assignment; lifecycle, capture, admission, Passport and the default 2.25-unit reader distance remain protected. D01 is the first review prototype. Do not extend its design to the other destinations before owner feedback and Galaxy A53 acceptance. Classic remains selectable; ACLC stays separate. See [approved implementation plan](docs/superpowers/plans/2026-11-14-presentation-spatial-exhibit.md).
+
 ## Cinematic AR assignment — 2026-11-02
 
 The owner separately assigned the approved [cinematic AR design](docs/design/cinematic-ar/DESIGN-SPEC.md).
@@ -80,3 +119,12 @@ remain separate from the implemented presentation.
 Use [argala-ui](.agents/skills/argala-ui/SKILL.md) for Android insets, keyboard,
 large text, EN/JA/KO, AR and screenshot acceptance. General Impeccable/Expo defaults
 yield to these approved project decisions. No new art direction or questionnaire.
+
+## Destination-specific Exhibit stages — 2026-11-14
+
+The owner-approved [destination-stage design](docs/superpowers/specs/2026-11-14-destination-stages-design.md)
+extends the accepted Danao gallery-first direction to all nine destinations.
+Photos lead, stories are optional; each stage uses its own symbolic scenery and
+station composition. Share the stable gallery/flat 2.25-unit reader and services;
+keep camera, admission, Passport and per-mode state contracts intact. Classic is
+the default presentation fallback. See [implementation and native evidence](docs/design/presentation-exhibit/README.md).

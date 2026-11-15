@@ -15,7 +15,8 @@ let tree: ReactTestRenderer | undefined;
 let translations: i18n;
 let running: boolean; let sessionKey: string; let nativeCapture: NativeCapture | null;
 let resource: PhotoResource;
-const view = () => <I18nextProvider i18n={translations}>{withHeroUI(<ArPhotoControls running={running} sessionKey={sessionKey} capture={nativeCapture} />)}</I18nextProvider>;
+let leadingAction: React.ReactNode;
+const view = () => <I18nextProvider i18n={translations}>{withHeroUI(<ArPhotoControls running={running} sessionKey={sessionKey} capture={nativeCapture} leadingAction={leadingAction} />)}</I18nextProvider>;
 const output = () => JSON.stringify(tree?.toJSON());
 const button = (key: string) => tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === translations.t(key))!;
 async function mount() { await act(async () => { tree = create(view()); }); }
@@ -24,6 +25,7 @@ async function update() { await act(async () => tree!.update(view())); }
 async function press(key: string) { await act(async () => button(key).props.onPress()); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
+  leadingAction = undefined;
   running = true; sessionKey = 'principal/admission/destination/frame1'; nativeCapture = vi.fn();
   resource = { uri: 'file:///private/captured.jpg', save: vi.fn(async () => {}), share: vi.fn(async () => {}), dispose: vi.fn() };
   boundary.capture.mockReset().mockResolvedValue(resource);
@@ -171,4 +173,28 @@ it.each([{height:800, expected:436.16}, {height:360, expected:220}, {height:1600
   const modal = tree!.root.findByType('modal' as React.ElementType);
   expect(modal.findAllByType('scroll' as React.ElementType)).toHaveLength(1);
   expect(button('arPhoto.discard')).toBeDefined();
+});
+
+it.each(['en', 'ja', 'ko'] as const)('keeps %s capture feedback outside the shared action row', async locale => {
+  await translations.changeLanguage(locale);
+  leadingAction = <Native.Text testID="recenter-action">Recenter</Native.Text>;
+  boundary.capture.mockRejectedValueOnce(new PhotoFailure('capture-failed'));
+  await mount();
+  const actions = tree!.root.findByProps({ testID: 'ar-photo-actions' });
+  expect(actions.findAllByProps({ testID: 'recenter-action' }).length).toBeGreaterThan(0);
+  await press('arPhoto.capture');
+  const status = tree!.root.findByProps({ accessibilityRole: 'alert' });
+  expect(actions.findAllByProps({ accessibilityRole: 'alert' })).toHaveLength(0);
+  expect(status.parent).toBe(actions.parent);
+  expect(JSON.stringify(status.props.children)).toContain(translations.t('arPhoto.errors.capture-failed'));
+  boundary.capture.mockImplementationOnce(() => new Promise(() => {}));
+  await press('arPhoto.capture');
+  expect(actions.findAllByProps({ testID: 'ar-photo-processing' })).toHaveLength(0);
+  expect(tree!.root.findByProps({ testID: 'ar-photo-processing' }).parent).toBe(actions.parent);
+});
+it('keeps the leading action available when capture has no live owner', async () => {
+  leadingAction = <Native.Text testID="recenter-action">Recenter</Native.Text>;
+  running = false; await mount();
+  expect(tree!.root.findAllByProps({ testID: 'recenter-action' }).length).toBeGreaterThan(0);
+  expect(tree!.root.findAllByType('button')).toHaveLength(0);
 });
