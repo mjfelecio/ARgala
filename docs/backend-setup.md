@@ -8,6 +8,12 @@ Verify the complete Google sign-in on the installed Android app before disabling
 
 The browser callback is accepted only by the current in-memory sign-in attempt. If Android terminates the app during the browser flow, start sign-in again; cold-start callback completion is not implemented. Configure and verify the native browser module in an approved Android build before relying on this flow. Hosted OAuth settings, email-provider cutover and physical sign-in have not been verified by the code changes alone.
 
+Integration check on 2026-11-15: the hosted public Auth settings reported Google
+disabled and email enabled. The workspace contains no Google OAuth client
+credentials. Enable the provider and configure the exact callback above using
+credentials kept in Supabase; guest entry remains available meanwhile. Do not
+disable email or revoke existing sessions before successful Google acceptance.
+
 From the project root, install/use the Supabase CLI and link your project:
 
 ```sh
