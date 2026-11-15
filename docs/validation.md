@@ -3600,3 +3600,48 @@ off-axis camera framing is preserved; no Save/Share occurred. The gallery's SHA2
 index was verified for all18 samples. Portrait diagnostics include personal room background and remain
 private. This sweep does not establish on-site GPS/Passport behavior, all20 new
 native chapter entrances, JA/KO glyphs, all reading sizes or measured FPS/memory.
+
+## Assigned tester login — 2026-11-15
+
+Restored assigned email/password sign-in and retained Guest entry with the
+Seafoam Forest HeroUI form, keyboard-avoiding single scroll owner, password
+visibility/autofill and English/Japanese/Korean instructions. The notice beneath
+Sign in reads: “Registration is unavailable in this demo. Please contact the
+developers to gain tester access.” There are no signup, password-reset or Google
+actions. Email is trimmed; password contents are preserved. One synchronous
+pending-action owner fences login/Guest, with UI work retired after unmount.
+Unconfirmed accounts receive developer-activation guidance; SDK network/rate-limit
+and credential errors remain translated at render time without raw diagnostics.
+
+The new real-screen regressions failed against the Google-only screen before
+implementation. `npm test -- src/features/auth src/features/journal
+src/features/onboarding/navigation.test.tsx` passes **140 tests across 14 files**,
+covering login, invalid fields/credentials, unconfirmed accounts, rate limits,
+returned/rejected network/unknown failures, recovery, language changes, duplicate
+and competing actions, keyboard-submit props, unmount completion, Guest durable
+entry, session restoration after remount and existing journal merge/isolation.
+Signup/OAuth/reset SDK spies stay unused by the screen.
+
+`npm run export:android` passes with the existing dependencies and native config.
+Full `npm run check`, independent review and delivery evidence follow below.
+No dependency, Expo Updates/session config, AR, Passport or account-data changes
+are included in the patch.
+
+Hosted Supabase Auth configuration was inspected with the existing CLI login.
+Only public signup changed (`disable_signup: false → true`). Independent readback
+confirmed signup disabled, Email login enabled, general email confirmation enabled
+(`mailer_autoconfirm=false`) and Google disabled. No user accounts or passwords
+were created or changed. The owner must provision one auto-confirmed account per
+tester through the documented dashboard flow and share credentials privately.
+
+Elevated `adb devices` returned no attached device. A53 keyboard/large-text,
+EN/JA/KO rendered glyphs, assigned-account login/logout, reopening, Guest entry,
+and preview APK OTA cold launches remain unverified. No device recording was
+made, no credentials were captured and no APK build was started.
+
+Completed local verification: `npm run check` passes strict TypeScript,
+zero-warning ESLint and **1,604 tests**. A fresh independent reviewer found no
+Critical, Important or Minor findings and separately passed **28 auth tests across
+three files**, plus `git diff --check`. The review covered changed auth flows and
+integration boundaries; unchanged dormant Google helper, broader AR/Passport and
+unrelated provider/journal internals retain their existing verification limits.

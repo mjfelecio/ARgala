@@ -1,3 +1,29 @@
+# Assigned tester Sign In — 2026-11-15
+
+The approved presentation plan supersedes the historical registration and Google
+flows described below. `/sign-in` now uses the established Seafoam Forest hero,
+white form surface and primary HeroUI credential fields for assigned email/password
+accounts, with Guest as its secondary action. The form has one keyboard-avoiding
+scroll owner, handled keyboard taps, password autofill/visibility and translated
+EN/JA/KO tester instructions. The registration-unavailable notice sits beneath
+Sign in; there are no registration, reset-password or Google actions.
+
+Only email whitespace is trimmed; passwords retain their exact contents and any
+nonempty existing password may sign in. A synchronous ref owns both login and
+Guest entry while pending. Disabled fields/actions, error preservation, password
+clearing after success and retired UI callbacks after unmount are covered through
+the real screen with SDK boundaries mocked. Supabase codes map to translated
+messages at render time; unconfirmed accounts receive developer-activation guidance.
+Session restoration, logout, Guest persistence/merge and native dependencies/runtime
+configuration retain their existing owners. Hosted provisioning instructions live
+in [backend setup](../../backend-setup.md#assigned-tester-accounts-for-the-presentation).
+Android keyboard, large text, assigned-account login/logout/reopen and preview OTA
+cold launches require the physical A53; automated tests do not establish those.
+
+---
+
+Historical auth layout implementation (superseded where it conflicts above):
+
 # AU01/AU02 — Sign In and Create Account
 
 Implemented from the owner-supplied approved [design](auth-kickoff/ARgala_Auth_UI_Design_Spec.md), [plan](auth-kickoff/ARgala_Auth_UI_Implementation_Plan.md) and paired [Sign In](auth-kickoff/references/sign-in-screen.png) / [Create Account](auth-kickoff/references/create-account-screen.png) references. The supplied HTML is reference material only.

@@ -44,3 +44,16 @@ it.each(['returned', 'thrown'])('exposes a translation key for a %s session rest
   await render(React.createElement(AuthProvider, null, React.createElement(SessionProbe)));
   expect(tree.root.findByType('output').props.children).toBe('auth.restoreFailed');
 });
+function RestoredSessionProbe() {
+  const { session, loading } = useAuth();
+  return React.createElement('output', null, loading ? 'pending' : session?.user.id ?? 'signed-out');
+}
+it('restores the existing session through the real provider after reopening', async () => {
+  auth.getSession.mockResolvedValue({ data: { session: { user: { id: 'assigned-tester' } } }, error: null });
+  await render(React.createElement(AuthProvider, null, React.createElement(RestoredSessionProbe)));
+  expect(tree.root.findByType('output').props.children).toBe('assigned-tester');
+  await act(async () => tree.unmount());
+  await render(React.createElement(AuthProvider, null, React.createElement(RestoredSessionProbe)));
+  expect(tree.root.findByType('output').props.children).toBe('assigned-tester');
+  expect(auth.getSession).toHaveBeenCalledTimes(2);
+});

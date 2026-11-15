@@ -11,6 +11,9 @@
     "settingsError": "設定を開けません。Androidの設定から直接開いてください。"
   },
   "auth": {
+    "networkFailed": "接続できません。インターネット接続を確認して、もう一度お試しください。",
+    "registrationUnavailable": "このデモでは新規登録できません。テスターとしてのアクセスをご希望の場合は、開発者にお問い合わせください。",
+    "testerInstructions": "開発者から案内されたメールアドレスとパスワードでログインしてください。",
     "googleSignIn": "Google で続行",
     "googleUnavailable": "このバージョンでは Google ログインを利用できません。アプリを更新してください。",
     "signIn": "ログイン",
@@ -19,7 +22,7 @@
     "password": "パスワード",
     "failed": "認証に失敗しました。再試行してください。",
     "invalidCredentials": "メールアドレスまたはパスワードが正しくありません。",
-    "emailNotConfirmed": "ログインする前に、メールアドレスを確認してください。",
+    "emailNotConfirmed": "テスターアカウントの有効化について、開発者にお問い合わせください。",
     "weakPassword": "より安全なパスワードを選んでください。",
     "accountExists": "このメールアドレスのアカウントは既に存在します。ログインしてください。",
     "rateLimited": "試行回数が多すぎます。しばらく待ってから再試行してください。",

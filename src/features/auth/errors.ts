@@ -1,6 +1,7 @@
-import { isAuthError } from '@supabase/supabase-js';
+import { isAuthError, isAuthRetryableFetchError } from '@supabase/supabase-js';
 
 export function authErrorMessageKey(error: unknown, fallback: 'auth.failed' | 'auth.logoutFailed' = 'auth.failed') {
+  if (fallback === 'auth.failed' && isAuthRetryableFetchError(error)) return 'auth.networkFailed';
   if (!isAuthError(error)) return fallback;
   switch (error.code) {
     case 'invalid_credentials': return 'auth.invalidCredentials';
