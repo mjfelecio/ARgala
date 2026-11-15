@@ -1,5 +1,21 @@
 # Foundation validation
 
+## Expo SDK 57 patch alignment — 2026-11-13
+
+Updated the six Expo packages flagged by the dependency check to compatible
+SDK 57 patch releases. Expo Router 57.0.31 still contains the same three
+upstream initial-link patch points; the guarded 57.0.31 patch applies and the
+existing real-hook linking regressions pass. Other version-guarded patches remain
+in place.
+
+`npm run check` passed (1,485 tests / 130 files), as did `npm run
+check:native-patches`, `npm run test:viro-touch`, `npm run check:edge`, `npm run
+lint:edge`, `npx expo install --check`, `npx expo-doctor` (21/21), `npm run
+check:android`, `npm run export:android`, `npm run test:limiter`, `npm run
+test:journal-sync`, and `npm run test:destination-content`. `npm ci --dry-run
+--ignore-scripts` passed; the actual clean install remains for CI. The export is
+not an APK. No native build or device verification was performed.
+
 ## AR capture processing and review — 2026-11-12
 
 Source commit `7122e58` adds the owner-selected ivory/forest photo review,
@@ -3035,6 +3051,27 @@ tracking, an ADB tap opened Lake Danao’s overview, and the photograph rendered
 at the 2.25-unit focus setting. The focused panel was still partly outside the
 left edge at the phone’s observed tilted orientation. This single observation
 does not establish comfort, stable framing or physical short-tap reliability.
+## Google sign-in implementation — 2026-11-13
+
+The app now offers Google OAuth and local guest entry instead of email/password
+forms. Supabase uses PKCE; the active Android browser result is checked before
+exchanging its authorization code. Router strips callback parameters from its
+navigation path. Cancellation, malformed callbacks, duplicate submission,
+localized failures, guest entry and session restoration have mocked-boundary
+coverage. An older APK without ExpoWebBrowser shows localized update guidance.
+
+The Supabase provider, Google consent screen, redirect allow list and hosted
+email-provider cutover were not changed or verified. Existing restored sessions
+are not forcibly revoked. A cold-start callback after Android terminates the
+app is not completed: the user must explicitly retry. Browser routing, Google
+branding, Android interaction, account switching, guest merge with a real
+Google account and authenticated services remain device/hosted acceptance work.
+No APK build or installation was performed for this change.
+
+Checks: `npm run check` passed typecheck, zero-warning lint and 1,457 tests
+across 129 files; `npx expo install --check`, `npx expo-doctor` (21/21),
+`npm run check:android`, `npm run export:android -- --max-workers 2` and
+`git diff --check` passed. These checks do not establish a live OAuth flow.
 
 
 ## 2026-11-14 — College presentation Classic content

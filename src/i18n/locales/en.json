@@ -11,6 +11,8 @@
     "back": "Back"
   },
   "auth": {
+    "googleSignIn": "Continue with Google",
+    "googleUnavailable": "Google sign-in is unavailable in this app build. Please update the app.",
     "title": "Sign in to ARgala",
     "create": "Create account",
     "email": "Email",
