@@ -2,17 +2,39 @@
 
 For the complete setup sequence through Expo signing, an Android APK and phone installation, start with the [Android setup guide](android-setup.md). This document explains the backend contracts and deployment details behind that walkthrough.
 
-Create a Supabase project; use its public publishable key only in the mobile environment. ARgala signs in through Supabase's Google OAuth provider, not an app-owned password. Configure the Google consent screen and a Google **web** OAuth client with the Supabase provider's callback URL as its authorized redirect URI. Enable Google in Supabase Auth and enter the client ID and secret there; never put the secret in the app or repository. Add the exact `argala://auth-callback` URL to Supabase Auth's redirect allow list. For external Google consent screens in testing, authorize the intended Google test accounts; review Google's publishing requirements before public use. The Google OAuth credentials are distinct from the Maps SDK and server API keys.
+## Assigned tester accounts for the presentation
 
-Verify the complete Google sign-in on the installed Android app before disabling the hosted email/password provider. The application no longer exposes password sign-in or registration, and no legacy-account migration is supplied. Disabling the provider and handling existing sessions or deleting old users are separate hosted operations requiring review. Supabase may automatically link a verified Google identity to an existing user with the same email; this is provider behavior, not an app migration. Guest access remains local, and its existing journal merge applies after account sign-in.
+The presentation uses email/password sign-in for developer-provisioned accounts,
+plus local Guest access. Google OAuth, custom SMTP and a sending domain are not
+required. This supersedes the earlier Google-only setup instructions. Existing
+accounts, sessions, journal merges and Passport records remain intact.
 
-The browser callback is accepted only by the current in-memory sign-in attempt. If Android terminates the app during the browser flow, start sign-in again; cold-start callback completion is not implemented. Configure and verify the native browser module in an approved Android build before relying on this flow. Hosted OAuth settings, email-provider cutover and physical sign-in have not been verified by the code changes alone.
+In the hosted Supabase project:
 
-Integration check on 2026-11-15: the hosted public Auth settings reported Google
-disabled and email enabled. The workspace contains no Google OAuth client
-credentials. Enable the provider and configure the exact callback above using
-credentials kept in Supabase; guest entry remains available meanwhile. Do not
-disable email or revoke existing sessions before successful Google acceptance.
+1. Keep **Authentication → Sign In / Providers → Email** enabled.
+2. Disable **Allow new users to sign up** in the Auth signup settings. Hiding
+   registration in the app does not disable the public signup endpoint.
+3. Keep **Confirm email** enabled for general account confirmation.
+4. For each assigned tester, use **Authentication → Users → Add user → Create
+   new user**, enter their assigned email/password and select **Auto confirm user**.
+   Use Create new user, rather than an email invitation.
+5. Manage account activation and password changes through the developers. Share
+   assigned credentials privately; never add them to the app, Git or QA recordings.
+
+Auto-confirming an individual tester does not disable general email confirmation.
+The app directs unconfirmed testers to contact the developers for activation. It
+has no registration, password-reset or Google sign-in action. It displays:
+“Registration is unavailable in this demo. Please contact the developers to gain
+tester access.” No developer email address is implied.
+
+Hosted verification on 2026-11-15 found Email enabled, general confirmation
+enabled and Google disabled. Public signup was enabled; this implementation
+disabled it through the authenticated Management API and read back
+`disable_signup=true`, `external_email_enabled=true`, `mailer_autoconfirm=false`.
+No tester accounts were created or changed. Provision the assigned testers in
+the dashboard before presentation acceptance.
+Supabase's supported [admin account creation](https://supabase.com/docs/reference/javascript/auth-admin-createuser)
+is separate from public signup. Never ship an admin/service-role key in the app.
 
 From the project root, install/use the Supabase CLI and link your project:
 

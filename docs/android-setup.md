@@ -67,15 +67,15 @@ In Supabase:
 
 1. Open **Authentication → Sign In / Providers**.
 2. Ensure **Email** authentication is enabled.
-3. Keep email confirmation enabled.
+3. Disable public self-signup (**Allow new users to sign up**) and keep email confirmation enabled.
 4. Open **Authentication → Users → Add user → Create new user**.
-5. Enter a test email and password.
+5. Enter the email and password assigned to this tester.
 6. Select **Auto confirm user**.
 7. Create the user.
 
 Use this account for your first phone login. Auto-confirming this test account does not disable confirmation for everyone else.
 
-Before testing registration with other email addresses, configure **custom SMTP**. Supabase's default email service only sends to addresses belonging to your Supabase organization's team, which can otherwise make signup appear broken. See [Supabase email restrictions and SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp).
+Create one auto-confirmed account per tester. Registration and password changes are developer-managed for this demo; Google OAuth, SMTP and a sending domain are unnecessary. Share credentials privately and keep them outside the app, Git and navigation recordings. See [assigned tester setup](backend-setup.md#assigned-tester-accounts-for-the-presentation).
 
 ## 4. Apply the Supabase database migration
 
