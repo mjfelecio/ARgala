@@ -11,6 +11,8 @@
     "settingsError": "設定を開けません。Androidの設定から直接開いてください。"
   },
   "auth": {
+    "googleSignIn": "Google で続行",
+    "googleUnavailable": "このバージョンでは Google ログインを利用できません。アプリを更新してください。",
     "signIn": "ログイン",
     "signOut": "ログアウト",
     "email": "メールアドレス",

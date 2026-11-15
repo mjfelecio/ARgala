@@ -89,7 +89,7 @@ General location-based discovery and the curated tourist catalog must coexist. A
 - Bound Viro utility overlays to their visible controls/content and keep `pointerEvents="box-none"`; a transparent full-screen wrapper is not proof that native touches will pass through. Keep native scene bounds independent of chrome and repeat touch delivery on the physical device; mocked handlers do not establish native hit routing.
 - Keep the AR camera in the measured full-screen scene, outside the safe-area overlay layout. Native camera bounds must never depend on sheet occupation, header or attribution height; retain positive bounds across refocus and continue unmounting the camera on blur/background. When the parent native stack reveals AR, wait for its opening `transitionEnd` before restarting the preview; focus alone returns before the scene finishes appearing and can leave CameraX's inner crop transform unapplied.
 - Android camera preview uses CameraX's transform-compatible TextureView mode through a version-checked dependency patch. Build `expo-camera` from source; its precompiled artifact bypasses Kotlin changes. Full React bounds alone do not verify the native preview's aspect ratio after stack navigation.
-- Expo Router 57.0.30's initial-link notification is patched to run after commit with cleanup for pending URLs. Keep initial URL parsing synchronous where supported, preserve live links, and never notify React state from a startup render that may suspend or be abandoned. The dependency patch runner verifies this JavaScript patch alongside the native patches.
+- Expo Router 57.0.31's initial-link notification is patched to run after commit with cleanup for pending URLs. Keep initial URL parsing synchronous where supported, preserve live links, and never notify React state from a startup render that may suspend or be abandoned. The dependency patch runner verifies this JavaScript patch alongside the native patches.
 - For AR camera docks, carry requested expansion through the controlled native sheet index; an imperative snap may be discarded before native layout readiness. Preserve logical expansion separately from the index clamped to a one-detent viewport. Keep controlled index updates on a layout-aware native path; configurations that write shared values during React render are invalid (Gorhom 5.2.14 requires `animateOnMount` for this AR flow).
 - Keep the authenticated JavaScript tab bar in normal layout below the map scene; the navigator owns its bottom inset. Preserve the map instance, selection and route through focus-driven GPS restarts, but require current device location for device-centered searches, the native user marker, Recenter, route origins and arrival. A known viewport or selected destination remains browsable without GPS; explicit text/area search, Details recovery and external destination navigation do not grant physical location authority. Interactive maps extend behind the status bar; inset floating controls instead, use the shared CSS-derived light Google style, and release screen status-bar styling on blur. Explore owns a branded floating search bar, without a duplicate navigator header or top Settings action; Profile owns settings. The legacy generic AR route is dormant and starts no sensors; selected-destination native AR belongs on the parent stack and provides an explicit return to Explore. Settings stays on the parent stack so Back restores the originating tab. See [app shell navigation](docs/app-shell-navigation.md).
 
@@ -215,3 +215,17 @@ Docs: https://docs.expo.dev/eas/index.md
   in the existing preferences record and honor explicit Save/Undo. Partial language/
   radius saves preserve audio opt-outs. Missing reviewed locale clips stay silent;
   never substitute unapproved English audio. Native video remains feasibility gated.
+
+## App navigation sample gallery — owner request 2026-11-14
+
+When testing by navigating through the app, capture only important milestones,
+meaningful before/after changes and representative successful states. Keep a
+minimal, curated gallery of screenshots and short screen recordings for progress
+updates and presentation content; do not record every tap or unrelated tooling.
+Use `~/Pictures/ARgala-progress/YYYY-MM-DD/` for durable samples outside Git.
+Include a small index with each sample's screen/flow, result, device, source
+revision and any development/simulation caveat. Prefer settled, readable states;
+exclude account details, credentials, precise location and unrelated personal
+content. Keep raw troubleshooting captures separate from the curated gallery.
+Mention the gallery path when new samples are added. This applies to app
+navigation testing, not ordinary code edits or command-line checks.
