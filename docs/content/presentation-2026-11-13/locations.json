@@ -1,0 +1,182 @@
+[
+  {
+    "id": "D01",
+    "name": {
+      "en": "Lake Danao Natural Park",
+      "ja": "ダナオ湖自然公園",
+      "ko": "다나오 호수 자연공원"
+    },
+    "center": {
+      "latitude": 11.0652951,
+      "longitude": 124.703809
+    },
+    "routeEntrance": {
+      "latitude": 11.061682464216442,
+      "longitude": 124.70298467658193
+    },
+    "area": "Lake Danao, Ormoc City",
+    "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.061682464216442%2C124.70298467658193",
+    "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0652951%2C124.703809",
+    "requiresGuide": false
+  },
+  {
+    "id": "D02",
+    "name": {
+      "en": "Lake Kasudsuran",
+      "ja": "カスドゥスラン湖",
+      "ko": "카수드수란 호수"
+    },
+    "center": {
+      "latitude": 11.026388977432092,
+      "longitude": 124.74888613655587
+    },
+    "routeEntrance": {
+      "latitude": 11.01875571851537,
+      "longitude": 124.73015686478796
+    },
+    "area": "Sitio Maglahug, Barangay Ga-as, Ormoc City",
+    "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.01875571851537%2C124.73015686478796",
+    "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.026388977432092%2C124.74888613655587",
+    "requiresGuide": true
+  },
+  {
+    "id": "D03",
+    "name": {
+      "en": "Lake Janagdan",
+      "ja": "ジャナグダン湖",
+      "ko": "자나그단 호수"
+    },
+    "center": {
+      "latitude": 11.0990654,
+      "longitude": 124.7177406
+    },
+    "routeEntrance": {
+      "latitude": 11.0938179,
+      "longitude": 124.7130357
+    },
+    "area": "Barangay Cabintan, Ormoc City",
+    "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.0938179%2C124.7130357",
+    "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406",
+    "requiresGuide": true
+  },
+  {
+    "id": "D04",
+    "name": {
+      "en": "Ormoc Mangrove Eco-Park",
+      "ja": "オルモック・マングローブ・エコパーク",
+      "ko": "오르모크 맹그로브 생태공원"
+    },
+    "center": {
+      "latitude": 11.0089889,
+      "longitude": 124.5700552
+    },
+    "routeEntrance": {
+      "latitude": 11.009,
+      "longitude": 124.57005555555556
+    },
+    "area": "Barangay Naungan, Ormoc City",
+    "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.009%2C124.57005555555556",
+    "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0089889%2C124.5700552",
+    "requiresGuide": false
+  },
+  {
+    "id": "D05",
+    "name": {
+      "en": "Sal’s Pineapple Plantation",
+      "ja": "サルズ・パイナップル農園",
+      "ko": "살스 파인애플 농장"
+    },
+    "center": {
+      "latitude": 11.0390182,
+      "longitude": 124.6132679
+    },
+    "routeEntrance": {
+      "latitude": 11.0390182,
+      "longitude": 124.6132679
+    },
+    "area": "Barangay Biliboy, Ormoc City (Ormoc Diversion Road)",
+    "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.0390182%2C124.6132679",
+    "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679",
+    "requiresGuide": false
+  },
+  {
+    "id": "D06",
+    "name": {
+      "en": "Leyte Golf and Country Club",
+      "ja": "レイテ・ゴルフ・アンド・カントリークラブ",
+      "ko": "레이테 골프 앤드 컨트리클럽"
+    },
+    "center": {
+      "latitude": 10.9800643,
+      "longitude": 124.6611625
+    },
+    "routeEntrance": {
+      "latitude": 10.9800643,
+      "longitude": 124.6611625
+    },
+    "area": "Ormoc City, Leyte",
+    "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=10.9800643%2C124.6611625",
+    "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625",
+    "requiresGuide": false
+  },
+  {
+    "id": "D07",
+    "name": {
+      "en": "Alto Peak",
+      "ja": "アルト・ピーク",
+      "ko": "알토 피크"
+    },
+    "center": {
+      "latitude": 11.103007,
+      "longitude": 124.7424401
+    },
+    "routeEntrance": {
+      "latitude": 11.0981519,
+      "longitude": 124.7277058
+    },
+    "area": "Ormoc City, Leyte",
+    "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.0981519%2C124.7277058",
+    "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.103007%2C124.7424401",
+    "requiresGuide": true
+  },
+  {
+    "id": "D08",
+    "name": {
+      "en": "Heaven’s Peak",
+      "ja": "ヘブンズ・ピーク",
+      "ko": "헤븐스 피크"
+    },
+    "center": {
+      "latitude": 11.0837842,
+      "longitude": 124.7215256
+    },
+    "routeEntrance": {
+      "latitude": 11.0837842,
+      "longitude": 124.7215256
+    },
+    "area": "Barangay Cabintan, Ormoc City",
+    "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.0837842%2C124.7215256",
+    "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0837842%2C124.7215256",
+    "requiresGuide": false
+  },
+  {
+    "id": "D09",
+    "name": {
+      "en": "Sabin Resort Hotel",
+      "ja": "サビン・リゾート・ホテル",
+      "ko": "사빈 리조트 호텔"
+    },
+    "center": {
+      "latitude": 10.990489,
+      "longitude": 124.621132
+    },
+    "routeEntrance": {
+      "latitude": 10.990489,
+      "longitude": 124.621132
+    },
+    "area": "Barangay Bantigue, Ormoc City",
+    "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=10.990489%2C124.621132",
+    "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132",
+    "requiresGuide": false
+  }
+]

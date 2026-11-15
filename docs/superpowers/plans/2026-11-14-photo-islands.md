@@ -1,0 +1,122 @@
+# Photo Islands Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Restore spatial exploration with Danao photo bays around the visitor.
+
+**Architecture:** Extend Exhibit with explicit gallery-entrance descriptors and
+pure captured-basis geometry. Reuse its gallery, native transitions and chapter
+controller; map every photo entrance to the one existing logical gallery owner.
+
+**Tech Stack:** Existing Expo SDK 57, strict TypeScript, React Native, pinned
+Viro 3.0.3, Vitest/react-test-renderer. No dependencies or native changes.
+
+**Spec:** `docs/superpowers/specs/2026-11-14-photo-islands-design.md`
+
+## Global Constraints
+
+- Danao first; physical Galaxy A53 review before expanding to eight other stages.
+- Reader: flat 1.25-unit square, 2.25-unit distance; no page reveal/glint.
+- Refined bays at −95°, +65°, +165°. Dominant/secondary photos at 2.1/2.2 units,
+  widths1.18/1.02, yaw offsets−16°/+18° and y0.22/−0.10; welcome width1.20 at2.1.
+- Successful photo covers have no labels or text below; original aspect preserved.
+- Classic selectable; old front-stage profiles/presentation retained.
+- No changes to content, capture services, admission, camera lifecycle or Passport.
+- Scene state remains per mount. No per-pose React publications or JS frame loop.
+- English/Japanese/Korean labels come from locale resources; credits remain data.
+- November 19 visual cutoff; November 20 stabilization; November 21 presentation.
+
+## Review Focus
+
+- A retired photo click after focus, Close, Help or unmount cannot replace cursor.
+- Gallery restoration from any bay remains a gallery, never an opened chapter.
+- Turned basis, explicit Recenter and tracking recovery preserve geometry/2.25 focus.
+- Every photo remains reachable and small covers retain real native hit surfaces.
+- Classic and other eight destinations preserve accepted behavior while D01 changes.
+
+### Task 1: Gallery entrance identity and native focus geometry
+
+**Files:** Create `src/features/destination-ar/photo-islands.ts` and
+`photo-islands.test.ts`; modify `exhibit-stage.ts`.
+
+**Interfaces:** `exhibitGalleryEntries(profile)` returns stable `{id, mediaId?}`
+descriptors; `isExhibitGalleryEntry(profile, id)` classifies exact known IDs;
+`exhibitSceneEntries(profile, chapters)` builds controller entries;
+`buildPhotoIslandSlots(profile, entries, basis)` returns `RingSlot[]`.
+Expose a frozen Danao islands profile separately from the old front-stage profile.
+
+- [x] Add regressions for seven unique image entrances, 3 unchanged chapter IDs,
+  all photo identity/bounds, angular separation and cardinal/turned bases.
+- [x] Watch targeted test fail before implementation.
+- [x] Implement pure descriptors/geometry, validate entry ownership/order, and
+  retain the original front-stage builder for rollback/eight other destinations.
+- [x] Verify select/Close from each entrance returns to that entrance, and fresh
+  focus remains at 2.25 units. Run focused geometry/controller tests.
+
+### Task 2: Photo bays through the existing scene and gallery owner
+
+**Files:** Modify `destination-ring-scene.tsx`, `danao-stage.tsx`,
+`exhibit-ring-scene.tsx`; create `photo-island-scenery.tsx`; extend
+`destination-ring-scene.test.tsx` and locale resources only for new visible copy.
+
+**Interfaces:** Gallery entry accepts its descriptor and selects its unique ID.
+Scene derives a cursor by media ID only after native selection is accepted;
+logical progress recognizes every entrance as the existing gallery.
+
+- [x] Add failing real-scene tests: bay photo opens exact image, Next/Close,
+  resume through welcome, restoration, no chapter openings, stale callbacks,
+  tracking/Help, Recenter and unmount isolation.
+- [x] Render bounded photo covers and larger story tiles in the approved bays;
+  visible images own accurate hits and decoration ignores events.
+- [x] Hide all neighboring geometry through opening/read/Close. Retain native
+  stationary reader paging, shared preferences and previous chapter counts.
+- [x] Enable Danao islands only. Export old Danao front presentation for rollback.
+- [x] Run targeted scene/gallery/geometry tests, then `npm run check` and
+  `npm run export:android`. Review diff; fix confirmed findings and reverify.
+
+### Task 3: Native Danao review checkpoint
+
+**Files:** Update presentation Exhibit README and validation evidence, preserving
+unrelated pending auth/SDK edits. Minimal device gallery outside repository.
+
+- [x] Use the existing accepted development APK and Metro; no APK build.
+- [ ] Verify tracking-ready, turn to all 3 bays, all 7 image entrances, galleries,
+  each story, rapid paging, Close, Recenter and temporary tracking/Help recovery.
+- [ ] Capture only important actual-navigation screenshots/short clip, inspect
+  evidence, and release camera on Exit. Record exact native verification limits.
+- [x] Show Danao for owner review. Extend islands to other destinations only
+  after physical acceptance; do not infer approval from automated screenshots.
+
+### Task 4: Owner refinement — larger standalone photo collages
+
+**Files:** `photo-islands.ts/test`, `danao-stage.tsx`, `exhibit-ring-scene.tsx`,
+`photo-island-scenery.tsx`, `destination-ring-scene.test.tsx`, design/validation docs.
+
+- [x] Pin closer asymmetric pair geometry, image aspect/full coverage and absence
+  of photo labels through failing geometry/real-scene tests.
+- [x] Implement shared `photoIslandCoverSize(profile, entrance)` from the bundled
+  content dimensions, using it for both cover geometry and focus/Close scale.
+- [x] Keep one dominant and one supporting image per bay, move the forward bay
+  away from the wider welcome, and keep story surfaces vertically separate.
+- [x] Preserve exact-media opening, context/caption/credit access in the reader,
+  Classic, old Danao fallback and eight other destinations.
+- [x] Run focused tests, `npm run check`, Android export and review the diff.
+- [x] Revisit on A53 after the owner reconnects it; power-off interrupted review.
+  Do not connect while charging without the owner's notification.
+
+### Task 5: Match standalone welcome context to its displayed photograph
+
+Native retesting found the now-unlabeled welcome picture still resumed another
+gallery photo after Next/Close. Bind its descriptor to its displayed media ID,
+as with every other standalone photo. Keep the old labeled front-stage gallery
+resumable, logical cursor/background restoration intact, and stable main IDs.
+
+- [x] Reproduce on A53 and observe the real-scene regression fail before fixing.
+- [x] Bind explicit welcome media only for islands and classify its main surface
+  by gallery ID, retaining the existing accepted-selection/cursor fence.
+- [x] Cover intentional photo selection, background restoration, retired clicks,
+  chapter separation and old front-stage resume; independent180-test review clean.
+- [x] Run full check:1,566 tests/137files, TypeScript/zero-warninglint; Android
+  export111assets, Hermes index-d92db1b42eabc08c0729df7f67d3ea53.hbc.
+- [x] Repeat native photo1→Next→Close→welcome and confirm photo1 context, then
+  complete owner physical bay/spacing review before the eight-destination rollout.

@@ -3,7 +3,7 @@ import { ContentUpdates } from '@/features/destination-content/updates';
 import { useQueryClient } from '@tanstack/react-query';
 import { setFeaturedSelection } from './map-selection';
 import { router } from 'expo-router';
-import { ScrollView, Text, View } from 'react-native';
+import { Image, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { withUniwind } from 'uniwind';
 import { useTranslation } from 'react-i18next';
@@ -11,10 +11,13 @@ import { Button } from 'heroui-native/button';
 import { useThemeColor } from 'heroui-native/hooks';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { destinationIds, destinationName, listFeaturedDestinations } from './catalog';
+import { useSettings } from '@/features/settings/provider';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
+const StyledImage = withUniwind(Image);
 export default function DestinationsScreen() {
   const { t } = useTranslation();
+  const { language } = useSettings();
   const client = useQueryClient();
   const accent = useThemeColor('accent');
   return <StyledSafeAreaView className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
@@ -29,15 +32,16 @@ export default function DestinationsScreen() {
         <Text className="font-sans text-sm text-muted">{t('destinations.intro')}</Text>
       </View>
       {listFeaturedDestinations().map(destination => <Button key={destination.id} variant="ghost" className="h-auto min-h-16! justify-start gap-3 rounded-card! bg-surface! p-4"
-        accessibilityLabel={destinationName(destination)} onPress={() => {
+        accessibilityLabel={destinationName(destination, language)} onPress={() => {
           if (destination.center) { setFeaturedSelection(client, destination.id); router.navigate({ pathname: '/', params: { featuredDestinationId: destination.id } }); }
           else router.navigate({ pathname: '/destinations/[destinationId]', params: { destinationId: destination.id } });
         }}>
-        <View className="size-12 items-center justify-center rounded-pill bg-mint" accessible={false}>
+        {destination.media?.[0] ? <StyledImage source={destination.media[0].source} className="size-16 rounded-card" resizeMode="cover" accessible={false} /> : <View className="size-12 items-center justify-center rounded-pill bg-mint" accessible={false}>
           <Ionicons name="location-outline" size={24} color={accent} />
-        </View>
+        </View>}
         <View className="min-w-0 flex-1 gap-1">
-          <Text className="font-sans text-card font-ui-semibold text-brand-strong">{destinationName(destination)}</Text>
+          <Text className="font-sans text-card font-ui-semibold text-brand-strong">{destinationName(destination, language)}</Text>
+          {destination.copy?.[language]?.overview && <Text numberOfLines={3} className="font-sans text-sm text-muted">{destination.copy[language]!.overview!.value}</Text>}
           <View className="flex-row flex-wrap gap-x-2 gap-y-1">
             <Text className="font-sans text-xs text-muted">{destination.id}</Text>
           </View>

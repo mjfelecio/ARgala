@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 import { SavePlaceAction, JournalFeedback } from '@/features/journal/actions';
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { View, useWindowDimensions } from 'react-native';
+import { Image, View, useWindowDimensions } from 'react-native';
 import { useSharedValue } from 'react-native-reanimated';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
 import { homeSheetGeometry, MAP_SHEET_OVERLAP } from './sheet-geometry';
@@ -48,6 +48,7 @@ import { ProviderAttributions, useOpenProviderLink } from './attributions';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
 const StyledMapView = withUniwind(MapView);
+const StyledImage = withUniwind(Image);
 
 function LaunchControls() {
   const { t } = useTranslation();
@@ -159,7 +160,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
   const topPadding = Math.min(headerHeight, Math.max(0, frameHeight - gutter));
   const mapPadding = { top: topPadding, bottom: Math.max(0, Math.min(sheetHeight - sheetGeometry.peek + MAP_SHEET_OVERLAP, frameHeight - topPadding - gutter)), left: gutter, right: gutter };
   const complete = availablePlaceDetails(queryClient, selectedId, language);
-  const place = featured ? featuredMapPlace(featured) : complete ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
+  const place = featured ? featuredMapPlace(featured, language) : complete ?? handoff.data ?? nearby.data?.find((item) => item.providerId === selectedId);
   useEffect(() => {
     if (incomingId) pendingHandoffCenter.current = incomingId;
     if (!enabled || !place || pendingHandoffCenter.current !== place.providerId) return;
@@ -193,7 +194,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
   function searchArea() { if (viewport) submitSearch({ query: draftQuery.trim(), category, area: viewport }); }
   function directions() {
     if (!mapEnabled || !place || previewNavigation.current) return;
-    const target = featured ? destinationToRoutePlace(featured) : place;
+    const target = featured ? destinationToRoutePlace(featured, language) : place;
     if (!target) return;
     previewNavigation.current = true;
     const token = createRoutePreviewIntent(queryClient, target, undefined, 'map', language, featured?.id);
@@ -227,7 +228,8 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
       canRequest={featured ? mapEnabled && !!destinationToRoutePlace(featured) : mapEnabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!complete || !!featured} detailsLoading={details.isFetching} mapLoading={!mapReady}
       locationStatus={<>{locationStatus}{featured && <ArrivalInvitation state={arrival.state} destinationTitle={destinationName(featured)} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
-      selectionSummary={featured ? t('arrival.teaser') : place && locationReady ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : place ? t('map.proximityUnavailable') : undefined}
+      selectionMedia={featured?.media?.[0] ? <StyledImage source={featured.media[0].source} className="h-40 w-full rounded-card" resizeMode="cover" accessible={false} /> : undefined}
+      selectionSummary={featured ? featured.copy?.[language]?.overview?.value ?? t('arrival.teaser') : place && locationReady ? t('map.activation', { active: isWithinRadius(position, place.coordinates, activationRadiusMeters) ? t('map.active') : t('map.inactive'), distance: Math.round(distanceMeters(position, place.coordinates)), meters: activationRadiusMeters }) : place ? t('map.proximityUnavailable') : undefined}
       onViewDetails={place ? () => {
         if (!active || !focused) return;
         if (featured) {

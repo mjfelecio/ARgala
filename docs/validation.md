@@ -3072,3 +3072,507 @@ Checks: `npm run check` passed typecheck, zero-warning lint and 1,457 tests
 across 129 files; `npx expo install --check`, `npx expo-doctor` (21/21),
 `npm run check:android`, `npm run export:android -- --max-workers 2` and
 `git diff --check` passed. These checks do not establish a live OAuth flow.
+
+
+## 2026-11-14 — College presentation Classic content
+
+Work isolated on `feat/presentation-spatial-exhibit` in the managed `254a/ARgala` worktree. Source baseline `56e5717`; existing SDK/authentication changes were copied solely for workspace compatibility and remain separate from the content commit. No dependency/native configuration change, APK build, install or publication was performed for this task.
+
+Integrated the owner-supplied 2026-11-13 package: nine catalog entries, 20 stable chapters, 53 byte-verified bundled photographs, all EN/JA/KO stories, summaries, complete photo metadata and visitor guidance. Catalog/map/detail display names use supplied translations; captured route targets retain the selected language. Independently referenced landmark centers and practical entrances remain separate. Guide requirements are retained for D02/D03/D07; D02 retains approximately one hour. Catalog coordinates grant no AR activation, provider association or Passport authority. Source metadata does not claim redistribution clearance. ACLC is unchanged.
+
+Evidence: baseline `npm run check` passed TypeScript, zero-warning lint and 1,457 tests / 129 files. Final Classic `npm run check` passed TypeScript, zero-warning lint and **1,467 tests / 130 files**. New tests hash all 53 real assets, compare chapter/media/locale bindings, exercise actual visitor screens without provider work, and retain every paragraph/caption/full credit through all three locales and reading sizes. Reminder regressions verify missing canonical coordinates reject and forged caller coordinates never override bundled points. `npm run test:destination-content` passed the isolated PostgreSQL privilege/manifest checks. `npm run export:android` passed with 111 bundled assets; it is not an APK build. Independent scoped code review found no blocking issues; its localized Directions handoff observation was corrected with a failing-then-passing routing regression.
+
+No device is attached (`adb devices -l` empty). Existing development client identity, physical taps, CJK glyph appearance, offline device loading, tracking/recovery, capture and performance remain unverified. Classic is content-complete and automated checks pass; physical presentation acceptance is pending. Follow-ups remain in `docs/content/presentation-2026-11-13/FOLLOW-UP.md`. Presentation cutoff awaits the client's deadline.
+
+
+## 2026-11-14 — D01 Exhibit first review slice (offline)
+
+Classic remains the default, content-complete fallback at `9960138`. The guarded presentation selector now offers Classic or a D01-only Exhibit. Exhibit code loads with a bounded 20-second owner before permission/native startup. Timeout, Retry, focus/background loss, unmount and principal replacement retire late results; failure keeps explicit Classic recovery. No real geographic admission, release entry or Passport entitlement is added.
+
+D01 uses three faceted forward chapter panels (0°, +24°, -24°) at the existing two-unit radius, supplied chapter-specific photo covers, a text-led middle chapter, layered noninteractive frame decoration, native entrance/focus animation and short successfully-loaded image reveals. Focus remains at 2.25 units. Shared pure/controller/render services are instantiated per scene: controllers, transition tokens, refs, timers and callbacks are per mount, presentation is fixed at mount, and every native animation uses a separate Exhibit namespace. Classic retains its default geometry and names. Reduced motion settles directly; reduced effects preserve the mounted photo, controls and focused transform. Existing session, capture, Help, tracking and reading owners remain in use. ACLC is unchanged.
+
+Final `npm run check` passed strict TypeScript, zero-warning lint and **1,478 tests across 132 files**. Targeted RED→GREEN tests cover arc geometry, Classic isolation from retired Exhibit callbacks, native image completion and reduced motion/effects, guard-before-module-evaluation, bounded loader timeout/late results, explicit recovery, language changes, focus/principal retirement and the actual Exhibit host through shared session/capture services. Independent scoped review found no critical or important findings and confirmed mutable-state separation. `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android` passed (8.7MB Hermes, 111 assets); all 53 original photograph SHA-256 byte signatures were independently found in the exported assets. The earlier isolated content SQL check remains passed; no backend code changed afterward. `git diff --check` passed.
+
+The offline `docs/design/presentation-exhibit/D01-REVIEW.html` illustration uses the real D01 story/media bindings and is explicitly labeled **browser illustration, not Android/Viro evidence**. Headless Chrome UI smoke checked 9 locale/chapter combinations, 21 localized photo views, image resolution, photo navigation and Close. Wide English, Japanese reader and narrow Korean renders were inspected; the wide capture is committed beside the illustration. Browser flowing text does not emulate native pagination or CJK rendering.
+
+The owner explicitly chose to continue offline. No phone is connected; the installed compatible development client/APK identity, physical taps, native alpha/hit behavior, CJK glyph appearance, offline client delivery, tracking/recovery/capture and native frame pacing/memory remain unverified. No APK build/install, native/dependency upgrade, push or merge was performed. Atmospheric particles, deeper polish and rollout to the other eight destinations are intentionally pending owner feedback on this first slice and Galaxy A53 acceptance. Presentation cutoff awaits Jelzon's deadline; reserve final testing/packaging/recovery and deliver Classic if Exhibit is not accepted. See the prototype review README for the device matrix.
+
+## Presentation AR device corrections and sample gallery — 2026-11-14
+
+This connected-device pass supersedes the earlier offline-only status above.
+Galaxy A53 SM-A536E / Android 16, 1080×2400, override 420 dpi, system font scale
+1.1, dark OS. Existing development APK SHA-256
+`1a261cd4b63a2029d9f1b47eee9121ddd34d1f66fb82da82ca8e9b2ebe3bceac`
+matches the previously accepted native tap-patched client. Source `6983671` plus
+these JavaScript corrections ran over USB Metro. No APK build/install or native
+upgrade occurred. Battery began at 15%; the owner explicitly requested continued
+testing at low charge (3% at the end).
+
+The owner reported expanded Exhibit panels overlapping. Exhibit now removes all
+chapter-cover geometry through opening, focused reading and closing, restores
+the arc after Close completes, and rejects callbacks from retired covers. Classic
+keeps its existing visible-neighbor behavior. An inner decorative rule crossing
+Exhibit titles is suppressed. Focus stays at 2.25 units. Capture feedback now
+occupies a full-width sibling below the shared Recenter/Capture row, retaining
+announcements and bounded scrolling without squeezing one button's column.
+
+Observed on this phone:
+
+- Classic D01: tracking-ready, supplied photo/caption/creator/license/year, Next
+  1/13→2/13, Close to cover and Exit releasing CameraService.
+- Exhibit D01: supplied photo covers and arc, isolated expanded reader, Close
+  restoring the arc, and brief Home/app recovery restoring the focused photo at
+  1/13. Background released the camera. The owner separately reported reliable
+  physical quick taps on panels/Next/Close; visual direction is not accepted yet.
+- Capture: actual processing and failure layouts inspected. The initial failure
+  was before native dispatch: Metro could not resolve the lazy file-service
+  import through an external dependency symlink. Making the same dependencies
+  local to the worktree resolved it without changing application capture code.
+  Real preview then opened; Discard returned to the arc and emptied the cache.
+  Save/Share were not invoked in this pass.
+- Languages: actual Japanese D01 cover/body/caption/credit/control glyphs and
+  Korean cover/caption/control glyphs rendered. Japanese overview traversed
+  through 11/12 with all five photos visible in inspected samples. Korean
+  synthetic Next/Close taps during the short recording did not advance the
+  reader, so that clip documents opening only. English was explicitly saved
+  back; the existing 500 m activation preference and other settings were kept.
+- Classic D08: first entrance completed; all eight overview pages were traversed
+  using 100 ms synthetic taps, with all three photographs (including the 8 MB
+  first photo), captions and credit pages observed. Close restored its cover.
+  This is not the full two-chapter/six-photo D08 matrix.
+
+Exhibit covers also displayed with phone Wi-Fi/data off and USB Metro connected.
+This establishes WAN-offline development-client loading, not standalone APK
+operation. Original Wi-Fi on/data off was restored. Native frame pacing was not
+measured; isolated memory snapshots do not establish a performance or leak result.
+The full nine-destination/20-chapter/53-photo native matrix, all locale/reading-size
+combinations, TalkBack, short/large-text conditions, controlled tracking and
+transition interruptions, real GPS/routes and owner visual acceptance remain open.
+
+Final `npm run check` passed strict TypeScript, zero-warning lint and **1,484 tests
+across 132 files**. Focused regressions demonstrated the reported failures before
+fixes; independent reviews found no critical/important issues. Android export
+passed: 8.7 MB Hermes `index-03d2c413d259192f92db272c47f3a6e6.hbc`, 111 assets,
+and all 53 original photo SHA-256 signatures verified. `git diff --check` passed.
+
+Owner-requested navigation samples are retained outside Git at
+`~/Pictures/ARgala-progress/2026-11-14/`: six screenshots, one 12.5-second clip and
+a captioned index. Account/location screens and raw troubleshooting captures are
+excluded from that gallery. The navigation-only, minimal-capture rule is committed
+in AGENTS.md and copied to the owner's main checkout. Other preexisting SDK/auth
+changes remain separate. No push/merge or external publication occurred. Exhibit
+rollout remains limited to D01 pending the agreed review gate; the presentation
+cutoff still awaits Jelzon's deadline.
+
+### Classic destination-entry smoke completion — 2026-11-14
+
+With runtime corrections committed at `6ce3f25`, all nine Classic presentation
+entries reached live native AR. Each first chapter was opened using a 100 ms
+synthetic ADB tap, and its supplied first photograph/caption was inspected:
+
+| Destination | Observed first photograph |
+| --- | --- |
+| D01 Lake Danao | Paddleboarder beneath wooded hills |
+| D02 Lake Kasudsuran | Overhead view of the wooded lake |
+| D03 Lake Janagdan | Blue-green lake within steep green slopes |
+| D04 Mangrove Eco-Park | Blue walkway across water toward mangroves |
+| D05 Sal’s Pineapple Plantation | Visitors beside the pineapple sculpture |
+| D06 Leyte Golf | Golf green beneath broad trees and long shadows |
+| D07 Alto Peak | Clouds above layered forested ridges |
+| D08 Heaven’s Peak | Decorative arch and flower-lined garden path |
+| D09 Sabin Resort Hotel | Arched bridge across the curved pool |
+
+An initial fixed-delay automation pass sent the next selection before the
+returning selector settled; those captures are inconclusive. D03 and D05 were
+repeated with each screen verified before its next action. They passed. This
+is not evidence of an application admission or native tracking failure.
+
+This completes destination-entry/first-photo coverage only. It does not complete
+all 20 chapter openings, every page of all 53 photographs, every language/reading
+size or on-site admission. Existing full-check/export results above still apply:
+no product code changed during this additional pass. The camera was released on
+final Exit, and English, font scale 1.1 and original network settings were kept.
+The curated gallery remains six screenshots and one short clip; additional raw
+navigation evidence is separate. No further APK build, install or publication.
+
+
+### Danao destination stage and photo gallery — offline checkpoint, 2026-11-14
+
+The owner confirmed the November 21 presentation deadline, reported a successful
+complete Classic device sweep, and accepted the corrected original Exhibit. That
+is owner-reported acceptance, separate from the earlier agent entry/photo smoke
+observations. The owner approved a stronger gallery-first browser concept.
+Classic is frozen as the presentation fallback; target Nov19 visual completion
+and reserve Nov20 for stabilization. Other destination stages remain gated on
+acceptance of the new native D01 version.
+
+Implemented D01 only: a prominent gallery entrance, three compact optional story
+stations, six symbolic ridge/ripple contours, and finite native entrance reveals.
+The entrance image fills its wide frame; the focused viewer aspect-fits complete
+originals. All seven Danao photos are directly browsable without story pages.
+Previous/Next changes photos; independent metadata controls retain complete
+localized captions/credits. No autoplay or wrap. The flat reader remains at 2.25
+units with its original footprint and parent-owned reading preference. The first
+native version omits the browser thumbnail strip for space/targets.
+
+The gallery is a separate geometric focus target and whitelisted session-only
+cursor, never a fake chapter or opening/Passport producer. All stage geometry
+retires during opening/focus/Close. Accepted Close synchronously records collapsed
+intent before background can retire React state; recovery restores the same photo
+only after this frame's pose. Shared service/transition code retains per-mount
+controllers, callbacks and animation state. Added controller-phase/token checks
+also prevent queued Classic page/size commands from mutating state after Close
+is accepted but before its React commit. Both reported race patterns were
+reproduced RED then passed GREEN. Help also retires ornaments during intro;
+reduced motion/effects retain content and controls.
+
+Verification on the completed offline source:
+
+- Final `npm run check`: strict TypeScript, zero-warning lint, **1,506 tests across
+  134 files passed**. This includes real-scene, installed-focus-hook screen and
+  session/image regressions, actual EN/JA/KO resources, all seven Danao gallery
+  photos/complete credits, independent photo/metadata paging, reading reflow,
+  chapter denominator/opening separation, Help/tracking completion, immediate
+  Close/background, new-pose restoration, capture-owner stability and retired
+  gallery completion versus a new Classic frame.
+- Independent review: no Critical/Important/Minor code findings. Its targeted
+  review run passed 182 tests; the subsequent entrance/full-viewer check passed 77.
+- Final `EXPO_PUBLIC_VIRO_SPIKE=1 npm run export:android` passed: 111 assets,
+  8,762,943-byte Hermes bundle
+  `index-696e01cacc17345bfe5653877905d05b.hbc`. All 53 original bundled-photo SHA-256
+  values are unchanged and present in the final output. No dependency/native
+  configuration change is part of this AR patch. Existing unrelated SDK/auth
+  working-tree changes remain excluded from these commits.
+- Scoped and complete `git diff --check` passed. The approved browser illustration
+  is archived at `docs/design/presentation-exhibit/D01-STAGE-REVIEW.html`, explicitly
+  labelled as a design illustration rather than an Android screenshot.
+
+**Physical verification remains pending.** No ADB/phone connection was made: the
+owner is charging the A53 and will notify availability. No new native screenshots
+or recordings were created, and the existing minimal progress gallery remains
+unchanged. New-stage alpha/crop appearance, physical taps, CJK/large-text fit,
+tracking/background recovery, Capture/Discard and native performance require the
+D01 A53 acceptance pass before extending to D02–D09. Native FPS is not inferred
+from the scheduling policy or tests. No APK build/install, OTA publication,
+provider/GPS field test, Passport claim, Save or Share was performed.
+
+## Danao gallery-first device stability follow-up — 2026-11-14
+
+Owner-reported full Classic device sweep passed; the gallery-first Danao stage
+remains a separate acceptance gate. Existing SM-A536E/Android16 development APK,
+1080×2400, density420, fontscale1.1, dark OS, USB Metro from worktree254a; no new
+APK build/install. Native stage, gallery/photos, independent caption controls,
+optional chapters and isolated readers rendered. The gallery-only toolbar was
+narrowed to its reader footprint after native Close edge cropping; all controls
+are now visible in the updated sample.
+
+Owner reported shake/flash on both gallery/story transitions. Danao disables
+late photo/page movement while preserving native entrance/focus/Close. Installed
+Viro bytecode installs the image before emitting its null completion event; the
+old reveal could reposition that already-visible bitmap. Owner subsequently
+confirmed the image seemed fixed. Frame-image memoization preserves unchanged
+border props without suppressing real size/texture/hit changes.
+
+The remaining story-border pulse was recorded on chapter3 page6↔7. A memo-only
+focus-glint experiment did not resolve it and was removed. Danao now omits that
+extra overlay; Classic and the archived Exhibit retain their defaults. The same
+controlled 14-second test completed6→7→6→7 with the fixed top-border cyan mask
+remaining1738–1836 pixels over203 frames (prior spike5441); gallery7→6→5 ranged
+1453–1594. Sampled original video frames confirm image/text changes. This supports
+the targeted fix, not a native FPS benchmark or complete acceptance. Owner's
+subsequent hands-on confirmation states the latest update is stable. This
+accepts the reported slide-stability fix; the remaining D01 sweep is pending.
+
+Verification: watched toolbar-fit, stable-frame and Danao glint-absence tests fail
+before their fixes and pass after. Final `npm run check` passed strict TypeScript,
+zero-warning lint and **1510 tests across135 files**; independent review found no
+issues, with72 scene tests passing. Final Android export passed111 assets and
+8,763,493-byte Hermes `index-cdf707724188bfe25835e75c5f411beb.hbc`; all53 original
+photo SHA-256 values are unchanged and present. `git diff --check` passed.
+
+Minimal native samples are outside Git at
+`~/Pictures/ARgala-progress/2026-11-14/`: updated08 gallery screenshot and09 story
+navigation clip, with captions and hashes. Raw failures, account and precise-map
+screens stay private. New-stage full photo/metadata/locale/size, Help/recenter/
+background/capture recovery and performance coverage remain incomplete; existing
+mocked lifecycle coverage does not replace device acceptance. No Save, Share,
+on-site GPS/Passport claim, publication or D02–D09 rollout occurred.
+
+## Nine-destination gallery-first Exhibit rollout — 2026-11-14
+
+Implemented and committed as `3541b48` on `feat/presentation-spatial-exhibit`,
+worktree 254a. Owner confirmed Danao paging stable, approved the destination-specific
+approach, and explicitly requested the other eight. All nine development Exhibit
+choices now bind their own immutable profile, gallery media and stage scenery.
+Classic stays the default; geographic admission, camera/capture lifecycle,
+Passport, ACLC and existing native configuration are preserved.
+
+Final `npm run check` passed strict TypeScript, zero-warning lint and **1,554 tests
+in 136 files**. Tests exercise all nine actual scenes/all 20 chapter openings, all 53
+gallery photo sources, full captions/credits for 27 destination × language cases and
+per-destination session-screen background restoration. Profile/loader/selector
+cases failed before implementation and passed after. Independent fresh review:
+no actionable findings; 265 tests in nine files passed. Some adversarial loader races
+and arrival-name isolation remain covered by D01 cases plus inspection rather
+than an exhaustive destination-switch matrix.
+
+Final Android export passed 111 assets and an 8,780,168-byte Hermes
+`index-bc58c99a3011417a15ce6a56d65b83bf.hbc`. All 53 original photo SHA-256 values are
+unchanged and present. No dependency/native changes, new APK build/install, OTA,
+Places/Routes action, push/merge or external publication occurred. Original SDK/auth
+working-tree changes remain excluded from these commits.
+
+Physical continuation used the same SM-A536E / Android 16 accepted development APK,
+1080 × 2400, 420 dpi, font scale 1.1, dark OS and USB Metro from worktree 254a. All nine
+native stages reached tracking-ready and rendered distinct symbolic scenery.
+The first new fern view was too wide; its shared new-scenery group was narrowed
+and raised with a RED→GREEN framing check, then verified natively. Danao's
+accepted composition stays unchanged. New scenes use 6–15 static contour meshes,
+no particles, shaders, lighting or per-frame JavaScript updates.
+
+The completed English native sweep is recorded by destination below. Every photo
+has a settled real-device frame (with a longer repeat for D08 Photo 4), and every
+chapter target was opened across these passes. This checks reachability and
+sampled reader/caption rendering, not every story page or every metadata page.
+
+| Destination | Gallery photos | Chapter entries |
+| --- | --- | --- |
+| D01 Lake Danao | 7 rendered | 3 opened |
+| D02 Lake Kasudsuran | 5 rendered | 2 opened |
+| D03 Lake Janagdan | 6 rendered | 2 opened |
+| D04 Ormoc Mangrove Eco-Park | 6 rendered | 2 opened across passes |
+| D05 Sal’s Pineapple Plantation | 6 rendered after transport restore | 3 opened |
+| D06 Leyte Golf and Country Club | 6 rendered | 2 opened |
+| D07 Alto Peak | 5 rendered | 2 opened |
+| D08 Heaven’s Peak | 6 rendered, Photo 4 repeated after loading | 2 opened |
+| D09 Sabin Resort Hotel | 6 rendered | 2 opened |
+
+Synthetic selections sent while a transition or fresh-pose fence was still
+settling were repeated from the inspected settled screen. Missed automation taps
+and host-terminated shell sequences are not counted as completed native cases.
+
+A USB reconnection during the pause removed adb reverse. Cached covers worked,
+while uncached pineapple photos failed. Restoring TCP 8081 forwarding and
+repeating the affected images succeeded, including the tractor story photo and
+final cloud photograph.
+These are development-server asset checks, not standalone APK WAN-offline proof.
+A 3-second gallery sweep caught Heaven's Peak Photo 4 still loading; revisiting with
+more time rendered it correctly. Captions and metadata controls remained available during
+loading/failure, and captions/credits stay separate from photo navigation.
+
+Heaven's Peak retained Gallery Photo 5 through Help, A+ large/A- standard and a
+Home/MainActivity foreground return. Standard/large metadata counts changed 1/2 → 1/4
+without changing the photo. A subsequent capture showed Preparing, then Explore
+was visible at the next inspection; no process death or crash-buffer entry was
+found and PID 15201 survived. The owner confirmed leaving the phone alone and
+that the laptop had slept. This is consistent with the observed development
+connection interruption; the precise navigation-reset mechanism was not
+established. A fresh Sabin capture without that background step
+successfully opened the real upright AR photo preview. Discard returned to the
+same gallery, Previous 6 → 5 worked, and Close restored the coastal stage. Save and
+Share were not invoked. This passes the fresh capture path, not a diagnosis of
+the earlier interruption or exhaustive capture/recovery combinations.
+
+One late warm-run snapshot reported PSS 1,946,500 KB / RSS 1,600,789 KB / swap PSS 440,194 KB.
+It is a single observation, not an FPS benchmark or leak determination. Automated
+Viro handlers and synthetic ADB gestures do not replace fresh physical finger,
+TalkBack, all locale/size combinations, controlled tracking-loss or on-site GPS/
+Passport acceptance. Owner's earlier physical Danao quick-tap/stability acceptance
+and complete Classic sweep remain separate evidence. The final native camera-service snapshot showed no active camera clients after
+Exit returned to the Exhibit selector. Final all-nine visual acceptance and
+standalone packaging remain owner review/build gates.
+
+Minimal curated samples remain outside Git at
+`~/Pictures/ARgala-progress/2026-11-14/`, with source captions and SHA-256 index.
+Only two stage screenshots (fern/fields) and one 18-second coast gallery/capture
+navigation clip were added for this rollout. Raw photo-verification indexes,
+failed captures and private account/map screens are excluded from that gallery.
+
+## Photo Islands Danao first slice — 2026-11-14
+
+The owner selected Photo Islands from an interactive browser comparison and
+instructed implementation. Danao alone uses the new spatial layout pending its
+physical checkpoint; other eight accepted front stages and Classic remain.
+Geometry/spec/plan: `95bd8c5`; subsequent native implementation in the same
+isolated presentation worktree. No auth/SDK/dependency/native changes were made
+for this feature; the installed development APK remains the November 8 build.
+
+Offline verification: `npm run check` passed strict TypeScript, zero-warning lint
+and **1,565 tests in 137 files**. The new tests exercised exact-media selection
+from six bay entrances, a separate resumable welcome, 2.25-unit focus, individual
+Close transforms, turned bases, Help/tracking fences, stale callback retirement,
+new-frame gallery restoration, chapter denominator/openings, all three actual
+label resources, eight-stage isolation and the old Danao fallback. A fresh
+read-only review reported no confirmed material issue and passed 108 targeted
+tests in five files. Android export passed with 111 assets and Hermes bundle
+`index-a27f79bf02ad271df89f518949d9a80e.hbc`. No APK build was run.
+
+The Galaxy A53 (SM-A536E, Android16, 1080×2400, density420, font scale1.1,
+dark OS) was reconnected through USB/Metro8081. Explicitly opened the development
+presentation selector, chose Exhibit → Lake Danao → Start native AR test. The
+native session reached tracking-ready, completed its entrance and rendered the
+welcome photograph, label, static shoreline and new look-around hint. The photo
+loaded after the early introduction capture; the settled frame shows the actual
+bitmap. Full bay reachability, small-cover physical taps, alpha artifacts and
+owner spacing acceptance are still in review. These observations do not grant
+on-site GPS/Passport authority or establish all-locale/size/performance results.
+
+Minimal actual-navigation samples are stored outside Git at
+`~/Pictures/ARgala-progress/2026-11-14/`, separately from browser concepts and
+private diagnostics in `/tmp/argala-photo-islands-device-2026-11-14/`.
+
+### Owner refinement: larger standalone photographs — offline
+
+The owner found the initial bays too small and loosely placed, requesting larger
+standalone images with context only after opening and possibly nearer covers.
+The phone powered off during review, so no further ADB interaction occurred for
+this refinement. The first native render above concerns the earlier geometry.
+
+The revised Danao welcome is width1.20 at2.1 units. Bay images alternate a
+width1.18/radius2.1 raised lead and width1.02/radius2.2 lower companion, keeping
+original bundled aspect ratios and complete images. Successful photo covers
+have no text below; gallery captions/credits remain available after opening.
+Bay centers−95/+65/+165 avoid the larger welcome; stories have vertical clearance.
+Reader distance remains2.25. All other stages and Classic retain their behavior.
+
+Targeted geometry/scene/gallery regressions passed128 tests/4 files. Full checking
+initially found a session-screen assertion that assumed the old35° forward bay;
+it now verifies the intended65°/2.45-unit story position in the actual host.
+That session suite passed87 tests. Independent read-only review passed93 tests
+in2 files and found no confirmed material issue. Native fit, physical quick taps,
+alpha/depth and visual acceptance remain pending after the owner reconnects.
+No APK or native build was performed; browser illustrations are kept separate
+from the real-app sample gallery.
+
+Final offline gate: `npm run check` passed strict TypeScript, zero-warning lint
+and **1,566 tests / 137 files**. Android export passed with111 assets and Hermes
+`index-81362df873b6d18d2bb8c778190b3a9a.hbc`. The updated illustrative browser
+preview passed seven source-image decodes/opens, three story opens, context
+reveal, Close, straight-on image fit in its simulated view, no browser/HTTP
+errors and no overflow at390px; desktop/mobile renders were visually inspected.
+These browser checks do not establish native fit or physical-device acceptance.
+
+### Refined Photo Islands native return and pictured context — 2026-11-14
+
+After the owner reopened the A53, USB/Metro8081 was restored and the same
+November8 development APK used (SM-A536E/Android16,1080×2400,density420,font1.1).
+The owner had accepted the refined browser's museum direction; native bay/touch
+acceptance remains separate. Explicit Exhibit→Danao→Start reached tracking-ready.
+The larger welcome photo rendered without labels. An early tilted view clipped
+its left edge slightly; the subsequent settled first view showed the complete
+image within the screen width. Photo1 context, Next→Photo2 and Close were observed.
+
+This exposed a semantic mismatch after removing the gallery label: the static
+welcome picture could open a different, previously viewed image. The standalone
+welcome now binds its own media ID, while old labeled galleries still resume.
+Gallery progress remains retained through Close and background restoration;
+only a new accepted image tap chooses that picture. Main native IDs, camera,
+2.25-unit reader, capture service and chapter/Passport boundaries are unchanged.
+
+The real-scene regression failed before correction. Final `npm run check` passed
+TypeScript, zero-warning lint and **1,566 tests/137files**. Android export passed
+111assets, Hermes `index-d92db1b42eabc08c0729df7f67d3ea53.hbc`. Independent read-only
+follow-up passed180 tests/3files with no confirmed issue. No APK was built.
+
+Native repeat paged to Photo2, closed and then opened the welcome picture at its
+correct Photo1 context. Several short synthetic taps during the return did not
+select; an180ms stationary ADB gesture on the settled image did. The short video
+shows a gap while browse geometry/images return after Close. This is not proof
+of physical quick-tap reliability or a diagnosed input failure. The owner is
+reviewing actual turns, three-bay reachability, size and finger taps before the
+other eight destinations receive this layout. All-locale/size and controlled
+tracking/background/capture combinations for the refinement remain unverified.
+
+Private navigation diagnostics: `/tmp/argala-photo-islands-refined-device-2026-11-14/`.
+Only useful, inspected samples will join the existing local curated gallery;
+raw Maps/account views and browser concepts stay separate. The camera was
+confirmed released at the temporary Exit for the correction, then explicitly
+reopened for owner review. No on-site GPS/Passport authority follows from it.
+
+The owner subsequently reported **“Looks good and taps are reliable”** after the
+prompt to turn to the three photo pairs and try a picture, Next and Close. This
+accepts the refined Danao direction/spacing and physical taps for rollout. It is
+owner-reported device evidence; it is not an independent seven-entry sweep or
+every locale, size and lifecycle combination. Expansion to the other eight
+destinations is now authorized by the agreed Danao-first checkpoint.
+
+### Allnine Photo Islands rollout — offline gate
+
+Following the owner's Danao physical acceptance, allnine immutable Exhibit hosts
+now use Photo Islands. All53 original media IDs have distinct entrances, with
+ordered pairs and a final single when required. Exactly20 original chapters
+remain; extra photo-only bays do not synthesize content or openings. Portraits
+retain their full proportions within1.05 height; story controls clear the lowest
+photo by0.16. Each destination retains its previous symbolic welcome scenery.
+Danao's accepted dimensions/angles and the2.25-unit reader are unchanged.
+
+RED:20 failures in new rollout/scene tests against the Danao-only implementation,
+with88 existing cases still passing. GREEN:200 tests/4files, including all53
+sources individually selected through actual scenes,20 chapter behavior, portrait
+bounds, focus/Close scale, no cover labels and allnine session restoration.
+The first full check caught a new test's string-vs-DestinationId tuple typing;
+the parameter array was made literal, without changing runtime source.
+
+Final `npm run check`: **1,586 tests/138files**, strict TypeScript and zero-warning
+lint passed. Android export111assets passed, Hermes
+`index-a362fd5ccb88ecee062b4723a24d4fc9.hbc`. Fresh read-only review independently
+passed200 tests/4files with no confirmed material issue. No native/dependency
+change or APK build was made.
+
+The new allnine native sweep has not yet started. The charging A53 entered its
+Android DreamActivity/screensaver with keyguard showing; app launch waited behind
+it. ADB remained connected and the process existed. Wake did not dismiss the
+screensaver; the owner was asked to unlock. Do not diagnose an app crash or infer
+new physical results from this state. The earlier allnine front-stage sweep and
+owner's refined Danao acceptance remain separate evidence.
+
+### Allnine Photo Islands — A53 entry/gallery sweep
+
+After the owner unlocked the phone, the retained old front-stage scene was exited
+and the Expo development client explicitly reloaded. The following observations
+use source `3b824ae`, the existing November8 APK, Galaxy A53 SM-A536E/Android16,
+1080×2400, density420, font scale1.1, English and dark OS. No APK was rebuilt,
+installed or upgraded. Actual ARCore tracking and app controls were used; no
+synthetic poses, GPS samples or admission were injected.
+
+Allnine destinations reached tracking-ready and showed their image-only welcome.
+For each, opening the welcome, advancing from Photo1 to2 and Close restored the
+complete welcome and its destination scenery. Photo denominators remained D01=7,
+D02/D07=5 and allothers=6. Full near-square Janagdan, long Mangrove/Golf headers
+and the high-resolution Heaven's Peak entrance rendered correctly. Native photo
+captions and Previous/Next/Close controls were visible. These are two-photo entry
+checks per destination, not a fresh native sweep of all53 individual entrances.
+
+The owner physically turned to Pineapple Plantation's portrait bay. Its full
+SAL Queen sign photograph fit without cropping, with a visible gap before the
+chapter2 control below. An actual native image hit opened the matching Photo4/6
+and its caption; Close returned to that same bay. The taller companion's complete
+standalone fit and Alto Peak's portrait bay were not independently inspected.
+One synthetic Next attempt missed as the physical phone view moved; the captured
+state remained Photo4, so it is not recorded as successful Photo5 coverage.
+
+The same bay's chapter2 opened with1/3 session-only chapter progress, independently
+of gallery activity. After the phone settled, Next reached page2/3 and Previous
+returned to1/3. Close eventually restored the photo-only browse scene; an earlier
+post-Close frame still showed its cover texture at reader size before settling.
+The frame remained anchored as the owner turned; off-axis reader edges moved
+outside the camera view. Automated taps taken at stale projected positions missed
+and were retried against the visible controls. No coordinate/pose override or
+implicit recenter was used.
+
+Capture reached preview twice. The first preview followed a physical turn toward
+an empty wall; after owner Discard, the same focused chapter/page returned. A
+second capture visibly included the standalone welcome photograph and field lines
+in the native camera composite. Save/Share were not invoked.
+The second Discard restored that same browse photograph and field scenery.
+Final Exit returned to the Exhibit selector; Android camera diagnostics reported
+`Active Camera Clients: []`.
+
+Two inspected original screenshots were added to the external progress gallery:
+`16-heavens-peak-standalone-islands.png` and
+`17-sabin-islands-photo-context.png`. One eight-second navigation clip,
+`18-pineapple-islands-capture-discard.mp4`, shows preview→Discard→browse. Its
+off-axis camera framing is preserved; no Save/Share occurred. The gallery's SHA256
+index was verified for all18 samples. Portrait diagnostics include personal room background and remain
+private. This sweep does not establish on-site GPS/Passport behavior, all20 new
+native chapter entrances, JA/KO glyphs, all reading sizes or measured FPS/memory.

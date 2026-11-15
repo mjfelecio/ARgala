@@ -25,13 +25,13 @@ export type HomePlaceSheetProps = {
   geometry?: ReturnType<typeof homeSheetGeometry>;
   state: HomePlaceSheetState; selectedPlace: Place | null; hasSelection: boolean;
   canRequest: boolean; resultCount: number; errorKey?: string; detailsLoading?: boolean; detailsLoaded?: boolean;
-  saveAction?: ReactNode; selectionSummary?: string; locationStatus?: ReactNode; mapLoading?: boolean;
+  saveAction?: ReactNode; selectionSummary?: string; selectionMedia?: ReactNode; locationStatus?: ReactNode; mapLoading?: boolean;
   attributions: ReactNode; onRetrySearch(): void; onClosePlace(): void; onDetails(): void;
   onViewDetails?(): void; onDirections(): void; onOpenGoogle?(): void; onMeasuredHeight(height: number): void;
   animatedPosition?: SharedValue<number>;
   onSettledHeight?(height: number): void; maxHeight?: number; containerHeight?: number;
 };
-export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, saveAction, selectionSummary, locationStatus, mapLoading, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onDirections, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight, animatedPosition }: HomePlaceSheetProps) {
+export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, saveAction, selectionSummary, selectionMedia, locationStatus, mapLoading, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onDirections, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight, animatedPosition }: HomePlaceSheetProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [settledIndex, setSettledIndex] = useState(0);
@@ -103,6 +103,7 @@ export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelec
           <Card.Body className="gap-3">
             {selectionSummary && <Text className="font-sans text-sm text-muted">{selectionSummary}</Text>}
             {expanded && <>
+              {selectionMedia}
               {place.address && <Text className="font-sans text-sm text-muted">{place.address}</Text>}
               {place.description && <Text className="font-sans text-sm text-muted">{place.description}</Text>}
               {place.mapsUri && onOpenGoogle && <Button variant="outline" accessibilityLabel={t('map.openGoogle')} onPress={onOpenGoogle}><Button.Label>{t('map.openGoogle')}</Button.Label></Button>}

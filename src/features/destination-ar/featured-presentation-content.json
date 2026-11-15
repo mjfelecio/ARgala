@@ -1,0 +1,2369 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "2026-11-13-presentation-v1",
+  "locales": [
+    "en",
+    "ja",
+    "ko"
+  ],
+  "destinations": [
+    {
+      "id": "D01",
+      "name": {
+        "en": "Lake Danao Natural Park",
+        "ja": "ダナオ湖自然公園",
+        "ko": "다나오 호수 자연공원"
+      },
+      "tagline": {
+        "en": "Water, forest and lakeside life",
+        "ja": "水と森、湖畔の暮らし",
+        "ko": "물과 숲, 호숫가의 삶"
+      },
+      "summary": {
+        "en": "Explore Ormoc's forest-framed freshwater lake, where lakeside recreation meets a protected landscape and a living fishing tradition.",
+        "ja": "森に囲まれたオルモックの淡水湖へ。湖畔の楽しみと、守られた自然、今に続く漁の暮らしが出会う場所です。",
+        "ko": "숲이 감싼 오르모크의 담수호를 만나 보세요. 호숫가의 여가와 보호받는 자연, 이어져 온 어업의 삶이 함께하는 곳입니다."
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "A living lake",
+            "ja": "いのちを育む湖",
+            "ko": "살아 있는 호수"
+          },
+          "body": {
+            "en": "Forested slopes frame Lake Danao in the uplands of Ormoc, Leyte. Its long, curved outline is often compared with a guitar, while wooded headlands and ripples reward a closer look from shore. Arrive at the visitor entrance beside the viewing deck, rather than the broader park map pin. Enjoy sightseeing and picnics, or ask staff about kayaking, paddle boating, boat rides and floating-cottage rides. These activities share a landscape that also supports nearby fishing and farming communities. Check the day's activity arrangements before heading onto the water, and leave the shore as clean as you found it.",
+            "ja": "レイテ島オルモックの高地で、ダナオ湖は森に覆われた斜面に囲まれています。細長く湾曲した輪郭はギターにたとえられ、湖畔では木々の茂る岬や水面の波紋にも目を引かれます。到着先は公園全体を示す地図のピンではなく、展望デッキのそばにある来園者入口です。眺めやピクニックを楽しむほか、カヤック、ペダルボート、遊覧ボート、水上コテージに乗るサービスについて係員に尋ねてみましょう。この風景は、近隣の漁業や農業の暮らしも支えています。水上へ出る前に当日の利用方法を確認し、湖畔にごみを残さないようにしてください。",
+            "ko": "레이테 오르모크의 고지대에서 다나오 호수는 숲이 우거진 비탈에 둘러싸여 있습니다. 길고 굽은 윤곽은 흔히 기타 모양에 비유되며, 호숫가에서는 나무가 우거진 곶과 잔물결도 눈길을 끕니다. 넓은 공원 구역을 가리키는 지도 핀이 아니라 전망 데크 옆 방문객 입구로 도착하세요. 경치 감상과 피크닉을 즐기거나 직원에게 카약, 페달 보트, 보트 탑승, 수상 코티지 탑승 서비스를 문의해 보세요. 이 풍경은 인근의 어업과 농업 공동체도 뒷받침합니다. 물 위로 나가기 전에 당일 이용 절차를 확인하고 호숫가에 쓰레기를 남기지 마세요."
+          },
+          "mediaIds": [
+            "D01-preview",
+            "D01-ext-11",
+            "D01-ext-01",
+            "D01-maps-01",
+            "D01-ext-22"
+          ],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "Fish and everyday life",
+            "ja": "魚と日々の暮らし",
+            "ko": "물고기와 일상"
+          },
+          "body": {
+            "en": "Lake Danao's fish connect the water to local kitchens and livelihoods. Work with fishers in 2021–2022 recorded eight species by combining sampled catches with community knowledge; five species were collected directly. Families kept fish for meals, sold valuable catches and sometimes exchanged fish for other food. Preparations included tinola, a fish soup, and ginataan, cooked with coconut milk. These everyday choices reveal more than a list of species: they show how knowledge, food and income link people to the lake. As you look across the water, remember that this view is also part of someone's working landscape.",
+            "ja": "ダナオ湖の魚は、地元の食卓や生計と結びついています。2021〜2022年に漁師とともに行われた調査では、採集した漁獲物と地域の知識を合わせて8種が記録され、そのうち5種が直接採集されました。人々は魚を家庭の食事に使い、価値の高い漁獲物を売り、ときにはほかの食べ物と交換していました。調理法には魚のスープのティノラや、ココナッツミルクで煮るギナタアンがあります。こうした日常の営みは、魚の種類だけでなく、知識、食、収入を通じた人と湖のつながりを伝えます。水面を眺めるとき、この風景が誰かの仕事の場でもあることを思い出してみてください。",
+            "ko": "다나오 호수의 물고기는 지역의 식탁과 생계를 물에 연결합니다. 2021~2022년 어민들과 함께한 조사에서는 채집한 어획물과 공동체의 지식을 종합해 여덟 종을 기록했으며, 그중 다섯 종을 직접 채집했습니다. 주민들은 물고기를 가족의 식사에 쓰고, 값이 나가는 어획물을 팔거나 때로 다른 먹거리와 교환했습니다. 조리법에는 생선국인 티놀라와 코코넛 밀크로 조리하는 기나타안이 있었습니다. 이런 일상은 단순한 어종 목록을 넘어 지식과 음식, 소득이 사람들을 호수와 어떻게 이어 주는지 보여 줍니다. 물을 바라보며 이 경치가 누군가의 일터이기도 하다는 점을 떠올려 보세요."
+          },
+          "mediaIds": [],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-3",
+          "title": {
+            "en": "A protected landscape",
+            "ja": "守られる湖と周辺の土地",
+            "ko": "호수와 주변을 함께 지키는 곳"
+          },
+          "body": {
+            "en": "Lake Danao and its surroundings became a protected natural park on 3 February 1998 and were included in the expanded national protected-area system in 2018. The lake and its habitats belong together; protecting the water also means caring for the land around it. Keep waste out of the lake and leave wildlife undisturbed. Take water safety seriously: this is deep water with a serious drowning risk. Swimming is permitted only inside the designated rope-lined area, never beyond it; the ropes do not guarantee safety. Follow staff instructions and wear a properly fitted life jacket for boating and floating-cottage rides.",
+            "ja": "ダナオ湖とその周辺は1998年2月3日に保護自然公園に指定され、2018年には拡大された国家保護区制度にも含まれました。湖と周囲の生息環境は一つにつながっています。水を守るには、周りの土地にも配慮が必要です。ごみを湖に入れず、野生生物をそっと見守ってください。水の安全には十分な注意が必要です。湖は深く、重大な溺水の危険があります。泳げるのは指定されたロープ内の遊泳区域だけで、その外では絶対に泳がないでください。ロープ内でも安全が保証されるわけではありません。係員の指示に従い、ボートや水上コテージに乗る際は体に合った救命胴衣を着用してください。",
+            "ko": "다나오 호수와 주변은 1998년 2월 3일 보호 자연공원으로 지정되었고, 2018년 확대된 국가 보호지역 체계에도 포함되었습니다. 호수와 주변 서식지는 하나로 이어져 있습니다. 물을 지키려면 주변 땅도 돌봐야 합니다. 쓰레기가 호수에 들어가지 않게 하고 야생생물을 방해하지 마세요. 물놀이 안전을 매우 중요하게 생각해야 합니다. 수심이 깊고 심각한 익사 위험이 있습니다. 수영은 지정된 로프 안쪽 수영 구역에서만 허용되며, 로프 밖에서는 절대 수영하지 마세요. 로프 안이라고 안전이 보장되지는 않습니다. 직원의 지시를 따르고 보트나 수상 코티지에 탈 때는 몸에 맞는 구명조끼를 착용하세요."
+          },
+          "mediaIds": [
+            "D01-maps-04",
+            "D01-preview-extra"
+          ],
+          "presentation": "story"
+        }
+      ],
+      "visitorGuide": {
+        "en": {
+          "arrival": "Use the visitor entrance beside the Lake Danao viewing deck in Barangay Danao, Ormoc. Do not use the broader park listing as the arrival point.",
+          "bestTime": "Choose daylight and suitable weather. Ask staff about the day's conditions before any water activity.",
+          "activities": [
+            "Viewing-deck sightseeing",
+            "Picnics",
+            "Kayaking or paddle boating",
+            "Boat rides",
+            "Floating-cottage rides",
+            "Swimming only inside the designated rope-lined area"
+          ],
+          "preparation": [
+            "Bring drinking water, sun and rain protection, and a bag for your rubbish.",
+            "Check activity availability and the safety briefing with staff before participating.",
+            "Have a properly fitted life jacket for boating and floating-cottage rides."
+          ],
+          "safety": [
+            "Deep water presents a serious drowning risk. Never swim outside the designated rope-lined area; being inside it does not guarantee safety.",
+            "Follow staff instructions and do not enter the water or board a service when conditions are unsafe.",
+            "Keep children closely supervised near the water.",
+            "Do not disturb wildlife or leave waste in the lake."
+          ]
+        },
+        "ja": {
+          "arrival": "オルモックのダナオ地区にある、ダナオ湖展望デッキのそばの来園者入口を目指してください。公園全体を示す地図のピンを到着先にしないでください。",
+          "bestTime": "明るい時間帯と天候のよい日を選び、水上の活動前に当日の状況を係員に確認してください。",
+          "activities": [
+            "展望デッキからの景色",
+            "ピクニック",
+            "カヤックやペダルボート",
+            "遊覧ボート",
+            "水上コテージへの乗船",
+            "指定されたロープ内の遊泳区域だけでの水泳"
+          ],
+          "preparation": [
+            "飲料水、日よけと雨具、ごみを持ち帰る袋を用意してください。",
+            "参加前に利用できる活動と安全説明を係員に確認してください。",
+            "ボートや水上コテージでは体に合った救命胴衣を着用してください。"
+          ],
+          "safety": [
+            "深い水には重大な溺水の危険があります。指定されたロープ内の遊泳区域の外では絶対に泳がないでください。区域内でも安全は保証されません。",
+            "係員の指示に従い、危険な状況では入水や乗船をしないでください。",
+            "水辺では子どもから目を離さないでください。",
+            "野生生物を妨げず、湖にごみを残さないでください。"
+          ]
+        },
+        "ko": {
+          "arrival": "오르모크 다나오 바랑가이의 다나오 호수 전망 데크 옆 방문객 입구를 이용하세요. 넓은 공원 구역을 가리키는 지도 핀을 도착 지점으로 삼지 마세요.",
+          "bestTime": "날이 밝고 날씨가 적절할 때 방문하세요. 수상 활동 전에는 당일 상황을 직원에게 확인하세요.",
+          "activities": [
+            "전망 데크에서 경치 감상",
+            "피크닉",
+            "카약 또는 페달 보트",
+            "보트 탑승",
+            "수상 코티지 탑승",
+            "지정된 로프 안쪽 수영 구역에서만 수영"
+          ],
+          "preparation": [
+            "마실 물, 햇빛과 비를 막을 용품, 쓰레기를 담아 갈 봉투를 준비하세요.",
+            "참여하기 전에 이용 가능한 활동과 안전 안내를 직원에게 확인하세요.",
+            "보트나 수상 코티지에서는 몸에 맞는 구명조끼를 착용하세요."
+          ],
+          "safety": [
+            "깊은 수심으로 심각한 익사 위험이 있습니다. 지정된 로프 안쪽 수영 구역 밖에서는 절대 수영하지 마세요. 구역 안이라고 안전이 보장되지는 않습니다.",
+            "직원의 지시를 따르고 위험한 상황에서는 물에 들어가거나 탑승하지 마세요.",
+            "물가에서는 어린이를 가까이서 지켜보세요.",
+            "야생생물을 방해하거나 호수에 쓰레기를 남기지 마세요."
+          ]
+        }
+      },
+      "location": {
+        "center": {
+          "latitude": 11.0652951,
+          "longitude": 124.703809
+        },
+        "routeEntrance": {
+          "latitude": 11.061682464216442,
+          "longitude": 124.70298467658193
+        },
+        "area": "Lake Danao, Ormoc City",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.061682464216442%2C124.70298467658193",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0652951%2C124.703809"
+      },
+      "requiresGuide": false,
+      "gallery": [
+        "D01-preview",
+        "D01-ext-11",
+        "D01-ext-01",
+        "D01-maps-01",
+        "D01-ext-22",
+        "D01-maps-04",
+        "D01-preview-extra"
+      ],
+      "coverMediaId": "D01-preview"
+    },
+    {
+      "id": "D02",
+      "name": {
+        "en": "Lake Kasudsuran",
+        "ja": "カスドゥスラン湖",
+        "ko": "카수드수란 호수"
+      },
+      "tagline": {
+        "en": "A green-framed lake beyond the road",
+        "ja": "道の先に待つ、緑に囲まれた湖",
+        "ko": "도로 너머에서 만나는 초록빛 호수"
+      },
+      "summary": {
+        "en": "Follow a local guide on foot from Sitio Maglahug to a small upland lake shaped by water, vegetation and the working landscape of Ga-as.",
+        "ja": "シティオ・マグラフグから地元ガイドと歩き、ガアスの暮らしの風景の中にある、水と緑に囲まれた小さな高地の湖へ。",
+        "ko": "시티오 마글라후그에서 현지 가이드와 걸어가 보세요. 가아스의 일하는 풍경 속에 물과 식물이 어우러진 작은 고지대 호수가 기다립니다."
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "A lake framed by green",
+            "ja": "緑に縁取られた湖",
+            "ko": "초록으로 둘러싸인 호수"
+          },
+          "body": {
+            "en": "Lake Kasudsuran is one of Ormoc's smaller upland lakes, in Barangay Ga-as. Ferns and tall shoreline grasses draw the eye toward open water, with wooded slopes rising beyond. Look from the plants along the bank to the reflections farther out: the close meeting of land and water gives the lake its character. Reaching this setting is a guided walk, not a drive to the lakeshore. Allow approximately one hour for the hike, agree the timing with your local guide, and leave enough daylight for the return. Take in the view from firm ground without trampling the shoreline vegetation.",
+            "ja": "カスドゥスラン湖は、オルモックのガアス地区にある小さな高地の湖の一つです。シダや背の高い湖岸の草の先に水面が広がり、その向こうには木々の茂る斜面が続きます。岸辺の植物から遠くの水面に映る景色へ目を移すと、陸と水が近く寄り添う、この湖らしさが見えてきます。ここへは湖畔まで車で行くのではなく、ガイドと歩いて向かいます。徒歩の目安は約1時間ですが、地元ガイドと所要時間を相談し、明るいうちに戻れる余裕を確保してください。足元の安定した場所から眺めを楽しみ、湖岸の植物を踏まないようにしましょう。",
+            "ko": "카수드수란 호수는 오르모크 가아스 바랑가이에 있는 작은 고지대 호수 가운데 하나입니다. 고사리와 키 큰 물가의 풀 너머로 수면이 펼쳐지고, 그 뒤에는 나무가 우거진 비탈이 솟아 있습니다. 물가의 식물에서 멀리 수면에 비친 풍경으로 시선을 옮겨 보세요. 땅과 물이 가깝게 맞닿는 모습이 이 호수의 특징입니다. 호숫가까지 차로 가는 곳이 아니라 가이드와 함께 걸어서 도착하는 곳입니다. 하이킹은 약 한 시간을 예상하되 현지 가이드와 소요 시간을 상의하고, 밝을 때 돌아올 수 있도록 여유를 두세요. 단단한 지면에서 경치를 즐기며 물가의 식물을 밟지 마세요."
+          },
+          "mediaIds": [
+            "D02-maps-01",
+            "D02-preview",
+            "D02-ext-06"
+          ],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "A working upland landscape",
+            "ja": "暮らしを支える高地",
+            "ko": "삶과 일이 이어지는 고지대"
+          },
+          "body": {
+            "en": "Ga-as is a place of work as well as scenery. Its farmers grow cabbage, cassava and sweet potato, linking these uplands to city markets. Arrange a local guide, then begin at the road-end beside the basketball court in Sitio Maglahug. A guide is required, and access to the lake is on foot only. The small unpaved fork beyond the road-end is not a vehicle route or a shortcut through private property. Wear grippy trail shoes, carry water and rain protection, and follow your guide if rain or slippery ground changes the plan. Respect fields, homes and residents' paths.",
+            "ja": "ガアスは、美しい風景の地であると同時に人々の仕事の場です。農家が育てるキャベツ、キャッサバ、サツマイモは、この高地と市街地の市場をつないでいます。地元ガイドを手配し、シティオ・マグラフグのバスケットボールコート脇の道路終点から出発してください。ガイドの同行は必須で、湖へは徒歩だけでアクセスします。道路終点の先にある未舗装の小さな分岐は、車両用ルートでも私有地を通る近道でもありません。滑りにくい登山靴を履き、水と雨具を携帯し、雨や滑りやすい地面で計画を変える際はガイドに従ってください。畑や家、住民の通り道を大切にしましょう。",
+            "ko": "가아스는 경치를 즐기는 곳이면서 주민들의 일터이기도 합니다. 농민들이 기르는 양배추, 카사바, 고구마는 이 고지대를 도시의 시장과 연결합니다. 현지 가이드를 예약하고 시티오 마글라후그의 농구장 옆 도로 끝에서 출발하세요. 가이드 동행은 필수이며 호수까지는 도보로만 이동합니다. 도로 끝 너머의 작은 비포장 갈림길은 차량 통행로나 사유지를 가로지르는 지름길이 아닙니다. 접지력이 좋은 등산화를 신고 물과 우비를 챙기세요. 비나 미끄러운 지면 때문에 계획을 바꿔야 할 때는 가이드의 안내를 따르세요. 밭과 집, 주민들이 다니는 길을 존중해 주세요."
+          },
+          "mediaIds": [
+            "D02-maps-04",
+            "D02-maps-05"
+          ],
+          "presentation": "story"
+        }
+      ],
+      "visitorGuide": {
+        "en": {
+          "arrival": "Arrange a local guide, then start at the road-end beside the basketball court in Sitio Maglahug, Barangay Ga-as. Leave the vehicle approach there and continue on foot with your required guide; do not navigate a vehicle to the lake pin.",
+          "bestTime": "Start early in daylight, check the weather with your guide and keep a daylight margin for the return. Allow approximately one hour for the hike and agree route timing with the guide.",
+          "activities": [
+            "Guided hiking",
+            "Lakeside sightseeing",
+            "Landscape and shoreline photography from firm ground"
+          ],
+          "preparation": [
+            "Arrange a local guide before travelling and confirm check-in arrangements.",
+            "Bring drinking water, snacks, rain protection and a basic first-aid kit.",
+            "Wear trail footwear with grip and carry out all rubbish."
+          ],
+          "safety": [
+            "A local guide is required. Lake access beyond the road-end is on foot only.",
+            "Do not drive along the small unpaved fork or cross private property as a shortcut.",
+            "Follow the guide's advice on rain, slippery footing and whether to turn back.",
+            "Keep clear of unstable lake edges and do not assume swimming is permitted.",
+            "Respect crops, homes, vegetation and residents' paths."
+          ]
+        },
+        "ja": {
+          "arrival": "地元ガイドを手配し、ガアス地区のシティオ・マグラフグにあるバスケットボールコート脇の道路終点から出発してください。車での移動はそこで終え、必須のガイドと徒歩で進みます。湖のピンを車の目的地にしないでください。",
+          "bestTime": "明るい時間に早めに出発し、天候をガイドと確認して、明るいうちに戻れる余裕を確保してください。徒歩の目安は約1時間ですが、ルートの所要時間はガイドと相談してください。",
+          "activities": [
+            "ガイド付きハイキング",
+            "湖畔の景色",
+            "足元の安定した場所からの風景や湖岸の撮影"
+          ],
+          "preparation": [
+            "出発前に地元ガイドを手配し、訪問受付の方法を確認してください。",
+            "飲料水、軽食、雨具、基本的な救急用品を携帯してください。",
+            "滑りにくい登山靴を履き、ごみはすべて持ち帰ってください。"
+          ],
+          "safety": [
+            "地元ガイドが必須です。道路終点から湖までは徒歩だけでアクセスします。",
+            "小さな未舗装の分岐を車で進んだり、私有地を近道にしたりしないでください。",
+            "雨、滑りやすい足元、引き返す判断についてガイドの助言に従ってください。",
+            "不安定な水際を避け、水泳が許可されていると思い込まないでください。",
+            "農作物、家、植物、住民の通り道を大切にしてください。"
+          ]
+        },
+        "ko": {
+          "arrival": "현지 가이드를 예약하고 가아스 바랑가이 시티오 마글라후그의 농구장 옆 도로 끝에서 출발하세요. 차량 이동은 그곳에서 마치고 필수 가이드와 걸어서 이동하세요. 호수 핀을 차량 목적지로 삼지 마세요.",
+          "bestTime": "날이 밝을 때 일찍 출발하고 가이드와 날씨를 확인하며 밝을 때 돌아올 여유를 두세요. 하이킹은 약 한 시간을 예상하되 경로의 소요 시간은 가이드와 상의하세요.",
+          "activities": [
+            "가이드 동반 하이킹",
+            "호숫가 경치 감상",
+            "단단한 지면에서 풍경과 물가 사진 촬영"
+          ],
+          "preparation": [
+            "여행 전에 현지 가이드를 예약하고 방문 접수 절차를 확인하세요.",
+            "마실 물, 간식, 우비와 기본 구급용품을 챙기세요.",
+            "접지력이 좋은 등산화를 신고 쓰레기는 모두 가져오세요."
+          ],
+          "safety": [
+            "현지 가이드가 필수입니다. 도로 끝부터 호수까지는 도보로만 이동하세요.",
+            "작은 비포장 갈림길로 차를 몰거나 사유지를 지름길로 가로지르지 마세요.",
+            "비와 미끄러운 지면, 돌아설 시점에 관한 가이드의 조언을 따르세요.",
+            "불안정한 물가에서 떨어져 있고 수영이 허용된다고 생각하지 마세요.",
+            "농작물과 집, 식물, 주민들의 통행로를 존중하세요."
+          ]
+        }
+      },
+      "location": {
+        "center": {
+          "latitude": 11.026388977432092,
+          "longitude": 124.74888613655587
+        },
+        "routeEntrance": {
+          "latitude": 11.01875571851537,
+          "longitude": 124.73015686478796
+        },
+        "area": "Sitio Maglahug, Barangay Ga-as, Ormoc City",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.01875571851537%2C124.73015686478796",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.026388977432092%2C124.74888613655587"
+      },
+      "requiresGuide": true,
+      "gallery": [
+        "D02-maps-01",
+        "D02-preview",
+        "D02-ext-06",
+        "D02-maps-04",
+        "D02-maps-05"
+      ],
+      "coverMediaId": "D02-maps-01"
+    },
+    {
+      "id": "D03",
+      "name": {
+        "en": "Lake Janagdan",
+        "ja": "ジャナグダン湖",
+        "ko": "자나그단 호수"
+      },
+      "tagline": {
+        "en": "A mountain lake with a community story",
+        "ja": "地域の物語を伝える山あいの湖",
+        "ko": "공동체의 이야기를 품은 산속 호수"
+      },
+      "summary": {
+        "en": "Walk with a local guide into Cabintan's green uplands to discover a small lake whose landscape and water have mattered well beyond the hiking trail.",
+        "ja": "地元ガイドとカビンタンの緑の高地へ。小さな湖には、ハイキングの景色だけにとどまらない、土地と水をめぐる物語があります。",
+        "ko": "현지 가이드와 카빈탄의 푸른 고지대로 걸어가 보세요. 이 작은 호수의 풍경과 물은 하이킹 코스를 넘어 중요한 의미를 지녀 왔습니다."
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "Within the green slopes",
+            "ja": "緑の斜面に抱かれて",
+            "ko": "푸른 비탈에 둘러싸여"
+          },
+          "body": {
+            "en": "Lake Janagdan rests among steep, green slopes in Barangay Cabintan, Ormoc, in the Mt. Aminduen area. A rocky waterline and reflections on a still surface bring the shape of the surrounding land into focus. Begin at Lake Janagdan Staging Area, not the lake's map pin, and hike with a required local guide. The uphill approach calls for care around roots, rocks and slippery ground, especially after rain. Wear grippy trail shoes, bring water and rain protection, and agree the day's route with your guide. At the lake, pause on firm ground and let the enclosed landscape reveal its details.",
+            "ja": "ジャナグダン湖は、オルモックのカビンタン地区、アミンドゥエン山周辺の急な緑の斜面に囲まれています。岩の多い水際と、静かな水面に映る景色が、周囲の地形を際立たせます。出発点は湖の地図ピンではなく、ジャナグダン湖ステージングエリアです。必須の地元ガイドと歩いてください。登り道では木の根、岩、滑りやすい地面に注意が必要で、雨の後は特に気をつけましょう。滑りにくい登山靴を履き、水と雨具を携帯し、当日のルートをガイドと相談してください。湖に着いたら足元の安定した場所で立ち止まり、周囲に包まれた景観の細部を眺めてみましょう。",
+            "ko": "자나그단 호수는 오르모크 카빈탄 바랑가이의 아민두엔산 주변에서 가파르고 푸른 비탈에 둘러싸여 있습니다. 바위가 많은 물가와 잔잔한 수면에 비친 풍경은 주변 땅의 형태를 또렷하게 보여 줍니다. 출발점은 호수의 지도 핀이 아니라 자나그단 호수 집결지입니다. 필수 현지 가이드와 함께 하이킹하세요. 오르막에서는 뿌리와 바위, 미끄러운 지면에 주의해야 하며 비가 온 뒤에는 특히 조심하세요. 접지력이 좋은 등산화를 신고 물과 우비를 챙긴 뒤 당일 경로를 가이드와 상의하세요. 호수에 도착하면 단단한 지면에서 잠시 멈춰 주변 땅에 둘러싸인 풍경의 세부를 살펴보세요."
+          },
+          "mediaIds": [
+            "D03-maps-03",
+            "D03-preview-extra",
+            "D03-preview",
+            "D03-maps-02"
+          ],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "A lake that matters to Cabintan",
+            "ja": "カビンタンにとって大切な湖",
+            "ko": "카빈탄에 소중한 호수"
+          },
+          "body": {
+            "en": "Janagdan's story reaches beyond hiking. In 2018, a proposed access road faced opposition from mountaineers concerned about the mountain environment and the lake's role as a water source for Cabintan. The project was stopped, and reallocating remaining funds to other tourism roads was approved. This history helps explain why visiting also means caring for land and water shared with residents. Confirm local check-in arrangements before setting out, stay on the guide's route and allow enough daylight to return. Keep rubbish, soap and detergents out of the lake, leave plants undisturbed and ask your guide before considering any water activity.",
+            "ja": "ジャナグダン湖の物語は、ハイキングだけにとどまりません。2018年、山の環境とカビンタンの水源としての湖の役割を懸念した登山者たちが、計画されたアクセス道路に反対しました。事業は中止され、残りの予算をほかの観光道路へ振り向けることが承認されました。この歴史は、訪れることが住民と共有する土地や水を大切にすることでもあると教えてくれます。出発前に現地の受付方法を確認し、ガイドのルートを守り、明るいうちに戻れる時間を確保してください。ごみ、せっけん、洗剤を湖に入れず、植物を傷つけないでください。水に入る活動を考える前に、ガイドに確認しましょう。",
+            "ko": "자나그단의 이야기는 하이킹을 넘어섭니다. 2018년 산악 환경과 카빈탄의 수원으로서 호수의 역할을 우려한 산악인들이 계획된 진입도로에 반대했습니다. 사업은 중단되었고 남은 예산을 다른 관광도로로 돌리는 방안이 승인되었습니다. 이 역사는 방문이 주민들과 공유하는 땅과 물을 돌보는 일이기도 한 이유를 보여 줍니다. 출발 전에 현지 접수 절차를 확인하고 가이드가 안내하는 길을 지키며 밝을 때 돌아올 시간을 확보하세요. 쓰레기와 비누, 세제가 호수에 들어가지 않게 하고 식물을 훼손하지 마세요. 물에서 하는 활동을 고려하기 전에는 가이드에게 먼저 확인하세요."
+          },
+          "mediaIds": [
+            "D03-maps-04",
+            "D03-maps-05"
+          ],
+          "presentation": "story"
+        }
+      ],
+      "visitorGuide": {
+        "en": {
+          "arrival": "Travel to Lake Janagdan Staging Area in Cabintan, not the lake pin. Arrange a required local guide and confirm barangay check-in arrangements before starting the hike.",
+          "bestTime": "Start early in daylight, check weather and trail conditions with your guide, and allow generous time for the return. Agree timing for your group's route and pace.",
+          "activities": [
+            "Guided hiking",
+            "Lakeside sightseeing",
+            "Landscape photography from firm ground"
+          ],
+          "preparation": [
+            "Arrange a local guide and confirm any registration and briefing before arrival.",
+            "Wear grippy trail shoes, long trousers and sleeves for the forest approach.",
+            "Carry drinking water, snacks, rain protection and basic first aid.",
+            "Allow extra time for mud, rest stops and slower walkers."
+          ],
+          "safety": [
+            "A local guide is required. Follow the agreed route and do not substitute a longer mountain circuit without planning it with the guide.",
+            "Take care around roots, rocks, thorny vegetation and loose or slippery ground, particularly after rain.",
+            "Follow the guide's decision to change plans or turn back.",
+            "Stay on firm ground near the water and ask your guide before considering any water activity.",
+            "Keep rubbish, soap and detergents out of the lake; leave plants and wildlife undisturbed."
+          ]
+        },
+        "ja": {
+          "arrival": "湖のピンではなく、カビンタンのジャナグダン湖ステージングエリアへ向かってください。必須の地元ガイドを手配し、歩き始める前にバランガイでの受付方法を確認してください。",
+          "bestTime": "明るい時間に早めに出発し、天候と道の状態をガイドに確認して、帰路に十分な余裕を持たせてください。グループのルートと歩く速さに合わせて所要時間を相談しましょう。",
+          "activities": [
+            "ガイド付きハイキング",
+            "湖畔の景色",
+            "足元の安定した場所からの風景撮影"
+          ],
+          "preparation": [
+            "地元ガイドを手配し、到着前に受付や安全説明の手順を確認してください。",
+            "森の道では滑りにくい登山靴、長ズボン、長袖を着用してください。",
+            "飲料水、軽食、雨具、基本的な救急用品を携帯してください。",
+            "ぬかるみ、休憩、ゆっくり歩く人に合わせた時間の余裕を確保してください。"
+          ],
+          "safety": [
+            "地元ガイドが必須です。相談したルートを守り、ガイドと計画せずに長い山岳周回コースへ変更しないでください。",
+            "木の根、岩、とげのある植物、崩れやすい地面や滑りやすい場所に注意し、雨の後は特に気をつけてください。",
+            "計画変更や引き返しについてはガイドの判断に従ってください。",
+            "水辺では足元の安定した場所にとどまり、水に入る活動を考える前にガイドに確認してください。",
+            "ごみ、せっけん、洗剤を湖に入れず、植物や野生生物を傷つけないでください。"
+          ]
+        },
+        "ko": {
+          "arrival": "호수 핀이 아니라 카빈탄의 자나그단 호수 집결지로 가세요. 필수 현지 가이드를 예약하고 하이킹 전에 바랑가이의 방문 접수 절차를 확인하세요.",
+          "bestTime": "날이 밝을 때 일찍 출발하고 가이드에게 날씨와 길 상태를 확인하며 귀환 시간을 넉넉히 잡으세요. 일행의 경로와 걷는 속도에 맞춰 소요 시간을 상의하세요.",
+          "activities": [
+            "가이드 동반 하이킹",
+            "호숫가 경치 감상",
+            "단단한 지면에서 풍경 사진 촬영"
+          ],
+          "preparation": [
+            "현지 가이드를 예약하고 도착 전에 접수와 안전 안내 절차를 확인하세요.",
+            "숲길에서는 접지력이 좋은 등산화와 긴 바지, 긴소매 옷을 착용하세요.",
+            "마실 물, 간식, 우비와 기본 구급용품을 챙기세요.",
+            "진흙길과 휴식, 천천히 걷는 일행을 위해 여유 시간을 두세요."
+          ],
+          "safety": [
+            "현지 가이드가 필수입니다. 합의한 경로를 따르고 가이드와 계획하지 않은 긴 산악 순환 코스로 바꾸지 마세요.",
+            "뿌리와 바위, 가시가 있는 식물, 무르거나 미끄러운 지면에 주의하며 특히 비가 온 뒤에 조심하세요.",
+            "계획 변경이나 되돌아갈 시점에 관한 가이드의 판단을 따르세요.",
+            "물가에서는 단단한 지면에 머물고 수상 활동을 고려하기 전에 가이드에게 확인하세요.",
+            "쓰레기와 비누, 세제가 호수에 들어가지 않게 하고 식물과 야생생물을 방해하지 마세요."
+          ]
+        }
+      },
+      "location": {
+        "center": {
+          "latitude": 11.0990654,
+          "longitude": 124.7177406
+        },
+        "routeEntrance": {
+          "latitude": 11.0938179,
+          "longitude": 124.7130357
+        },
+        "area": "Barangay Cabintan, Ormoc City",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.0938179%2C124.7130357",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406"
+      },
+      "requiresGuide": true,
+      "gallery": [
+        "D03-maps-03",
+        "D03-preview-extra",
+        "D03-preview",
+        "D03-maps-02",
+        "D03-maps-04",
+        "D03-maps-05"
+      ],
+      "coverMediaId": "D03-maps-03"
+    },
+    {
+      "id": "D04",
+      "name": {
+        "en": "Ormoc Mangrove Eco-Park",
+        "ja": "オルモック・マングローブ・エコパーク",
+        "ko": "오르모크 맹그로브 생태공원"
+      },
+      "tagline": {
+        "en": "Where river, forest and bay meet",
+        "ja": "川と森と湾が出会う場所",
+        "ko": "강과 숲, 만이 만나는 곳"
+      },
+      "summary": {
+        "en": "Discover Ormoc’s coastal landscape at Naungan, where mangroves shelter wildlife and connect the river, bay and local livelihoods. A gentle visit is also a chance to appreciate the community’s work to care for this living shoreline.",
+        "ja": "ナウンガンでは、マングローブが生き物を育み、川と湾、地域の暮らしを結ぶオルモックの海辺の風景に出会えます。ゆっくり訪ねながら、この生きた海岸を守る地域の取り組みにも目を向けてみましょう。",
+        "ko": "나웅안에서는 맹그로브가 생물의 보금자리가 되고 강과 만, 주민들의 생계를 이어 주는 오르모크의 해안 풍경을 만납니다. 여유롭게 둘러보며 살아 있는 해안을 지켜 온 지역사회의 노력도 느껴 보세요."
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "Where river, forest and bay meet",
+            "ja": "川と森と湾が出会う場所",
+            "ko": "강과 숲, 만이 만나는 곳"
+          },
+          "body": {
+            "en": "At Naungan, the Pagsangaan River reaches Ormoc Bay beside mangrove forest and fishponds. Part of this coastal forest serves as a public park, bringing recreation into a landscape that supports local livelihoods. Mangroves shelter fish, crustaceans and other wildlife while helping stabilize the shore. Begin at the Naungan park entrance and explore only the paths open to visitors. Daylight makes it easier to appreciate the water, roots and shoreline; wear shoes with grip and take extra care on wet surfaces beside the water.",
+            "ja": "ナウンガンでは、パグサンガアン川がマングローブ林や養魚池のそばからオルモック湾へ注いでいます。この海岸林の一部は公園として利用され、地域の暮らしを支える風景の中に憩いの場が広がっています。マングローブは魚や甲殻類などの生き物にすみかを提供し、海岸を安定させる役割も果たします。ナウンガンの公園入口から入り、公開されている道だけを歩きましょう。明るい時間なら、水辺や根、海岸の様子もよく見えます。滑りにくい靴を履き、水辺の濡れた路面では特に足元に注意してください。",
+            "ko": "나웅안에서는 팍상아안강이 맹그로브 숲과 양식장 곁에서 오르모크만으로 흘러듭니다. 이 해안 숲의 일부는 공원으로 이용되어, 지역 주민들의 생계를 지탱하는 풍경 속에 휴식 공간을 더합니다. 맹그로브는 물고기와 갑각류 등 여러 생물에게 서식처를 제공하고 해안을 안정시키는 데도 도움을 줍니다. 나웅안 공원 입구에서 출발해 방문객에게 개방된 길로만 이동하세요. 밝은 시간에는 물과 뿌리, 해안의 모습을 더 잘 살펴볼 수 있습니다. 접지력이 좋은 신발을 신고, 물가의 젖은 바닥에서는 특히 조심하세요."
+          },
+          "mediaIds": [
+            "D04-ext-03",
+            "D04-ext-12",
+            "D04-preview"
+          ],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "A forest cared for by its community",
+            "ja": "地域で守り育てる森",
+            "ko": "지역사회가 지켜 온 숲"
+          },
+          "body": {
+            "en": "The Naungan–San Juan Mangrove Planters Association has worked with Ormoc’s local government and the Department of Environment and Natural Resources to conserve and restore mangroves in Naungan, Lao and San Juan. A community forestry agreement in 2000 and an ecotourism initiative in 2017 mark stages in this work. Rehabilitation continued after Typhoon Haiyan damaged planted areas and nurseries. These efforts connect coastal livelihoods with environmental care. Respect that work by leaving roots, plants and wildlife undisturbed, keeping to open paths and carrying your litter away.",
+            "ja": "ナウンガン・サンフアン・マングローブ植林者協会は、オルモック市とフィリピン環境天然資源省と協力し、ナウンガン、ラオ、サンフアンのマングローブの保全と再生に取り組んできました。2000年の地域住民による森林管理協定と、2017年のエコツーリズム事業は、その歩みの節目です。台風ハイヤンで植林地や苗床が被害を受けた後も、再生への取り組みは続きました。こうした活動は、沿岸の暮らしと環境を守ることを結びつけています。根や植物、野生生物を傷つけず、公開されている道を歩き、ごみを持ち帰って、地域の努力を尊重しましょう。",
+            "ko": "나웅안·산후안 맹그로브 식재자 협회는 오르모크시와 필리핀 환경천연자원부와 함께 나웅안, 라오, 산후안의 맹그로브를 보전하고 복원해 왔습니다. 2000년의 지역사회 산림 관리 협약과 2017년의 생태관광 사업은 그 과정의 이정표입니다. 태풍 하이옌으로 조림지와 묘목장이 피해를 입은 뒤에도 복원 활동은 이어졌습니다. 이러한 노력은 해안 주민의 생계와 환경 보호를 연결합니다. 뿌리와 식물, 야생동물을 건드리지 않고 개방된 길로만 이동하며 쓰레기를 되가져가는 것으로 지역사회의 노력을 존중해 주세요."
+          },
+          "mediaIds": [
+            "D04-preview-extra",
+            "D04-maps-05",
+            "D04-maps-03"
+          ],
+          "presentation": "story"
+        }
+      ],
+      "visitorGuide": {
+        "en": {
+          "arrival": "Use the park entrance in Barangay Naungan, Ormoc City.",
+          "bestTime": "Visit in daylight, with cooler morning or late-afternoon conditions preferable for a comfortable walk. Check weather and on-site access before setting out.",
+          "activities": [
+            "Walk along paths open to visitors and observe the mangrove landscape.",
+            "Take shoreline photographs without disturbing plants or wildlife."
+          ],
+          "preparation": [
+            "Bring drinking water, sun protection and insect repellent.",
+            "Wear shoes with grip and carry a bag for your litter."
+          ],
+          "safety": [
+            "Stay on open paths and respect closures and on-site instructions.",
+            "Watch your footing on wet surfaces and keep clear of unprotected water edges.",
+            "Do not climb on railings, step onto mangrove roots or disturb wildlife."
+          ]
+        },
+        "ja": {
+          "arrival": "オルモック市バランガイ・ナウンガンにある公園入口へ向かってください。",
+          "bestTime": "明るい時間に訪ねましょう。比較的涼しい朝や夕方なら歩きやすくなります。出発前に天候と現地の入場状況を確認してください。",
+          "activities": [
+            "公開されている道を歩き、マングローブの風景を観察する。",
+            "植物や野生生物を邪魔せず、水辺の写真を撮る。"
+          ],
+          "preparation": [
+            "飲料水、日よけ用品、虫よけを持参する。",
+            "滑りにくい靴を履き、ごみを持ち帰る袋を用意する。"
+          ],
+          "safety": [
+            "公開されている道を通り、立入禁止表示や現地の指示に従う。",
+            "濡れた路面では足元に注意し、柵などのない水際には近づかない。",
+            "手すりに登らず、マングローブの根を踏まず、野生生物を邪魔しない。"
+          ]
+        },
+        "ko": {
+          "arrival": "오르모크시 바랑가이 나웅안에 있는 공원 입구로 이동하세요.",
+          "bestTime": "밝은 시간에 방문하세요. 비교적 서늘한 아침이나 늦은 오후가 걷기에 편합니다. 출발 전에 날씨와 현장 출입 상황을 확인하세요.",
+          "activities": [
+            "방문객에게 개방된 길을 걸으며 맹그로브 풍경 관찰하기.",
+            "식물과 야생동물을 방해하지 않고 해안 사진 찍기."
+          ],
+          "preparation": [
+            "마실 물, 자외선 차단 용품과 벌레 퇴치제를 준비하세요.",
+            "접지력이 좋은 신발을 신고 쓰레기를 담아 갈 봉투를 챙기세요."
+          ],
+          "safety": [
+            "개방된 길로만 이동하고 통제 구역 표시와 현장 안내를 따르세요.",
+            "젖은 바닥에서는 발밑을 살피고 안전시설이 없는 물가에는 가까이 가지 마세요.",
+            "난간에 오르거나 맹그로브 뿌리를 밟거나 야생동물을 방해하지 마세요."
+          ]
+        }
+      },
+      "location": {
+        "center": {
+          "latitude": 11.0089889,
+          "longitude": 124.5700552
+        },
+        "routeEntrance": {
+          "latitude": 11.009,
+          "longitude": 124.57005555555556
+        },
+        "area": "Barangay Naungan, Ormoc City",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.009%2C124.57005555555556",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0089889%2C124.5700552"
+      },
+      "requiresGuide": false,
+      "gallery": [
+        "D04-ext-03",
+        "D04-ext-12",
+        "D04-preview",
+        "D04-preview-extra",
+        "D04-maps-05",
+        "D04-maps-03"
+      ],
+      "coverMediaId": "D04-ext-03"
+    },
+    {
+      "id": "D05",
+      "name": {
+        "en": "Sal’s Pineapple Plantation",
+        "ja": "サルズ・パイナップル農園",
+        "ko": "살스 파인애플 농장"
+      },
+      "tagline": {
+        "en": "Fields that reflect Ormoc’s local identity",
+        "ja": "オルモックらしさを映す畑",
+        "ko": "오르모크의 정체성이 담긴 들판"
+      },
+      "summary": {
+        "en": "Explore Sal’s Pineapple Plantation in Barangay Biliboy, where the giant pineapple landmark welcomes you to a working agricultural landscape. Enjoy a cooler-hour walk and discover how pineapple farming connects with Ormoc’s livelihoods, celebrations and everyday recreation.",
+        "ja": "バランガイ・ビリボイのサルズ・パイナップル農園では、大きなパイナップルの目印が農業の営まれる風景へと迎えてくれます。涼しい時間に歩きながら、栽培がオルモックの暮らしや祭り、日々の運動とどう結びついているかを感じてみましょう。",
+        "ko": "바랑가이 빌리보이의 살스 파인애플 농장에서는 거대한 파인애플 조형물이 농사가 이어지는 풍경으로 안내합니다. 서늘한 시간에 걸으며 파인애플 재배가 오르모크의 생계와 축제, 일상의 운동에 어떻게 연결되는지 느껴 보세요."
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "Pineapple country",
+            "ja": "パイナップルが育む風景",
+            "ko": "파인애플이 자라는 고장"
+          },
+          "body": {
+            "en": "Sal’s Pineapple Plantation sits beside Ormoc Diversion Road in Barangay Biliboy. The giant pineapple landmark marks the entrance and ride drop-off, making a memorable starting point for a visit. Visitors can walk inside the plantation while keeping clear of the crops. Beyond the view is a working agricultural landscape: pineapple growing supports livelihoods and helps shape Ormoc’s identity. The Queen variety is especially associated with the city, although it also grows elsewhere in Leyte and Eastern Visayas. See the fields as both a local landmark and a place of work.",
+            "ja": "サルズ・パイナップル農園は、バランガイ・ビリボイのオルモック・ディバージョン・ロード沿いにあります。大きなパイナップルの目印が入口と車の降車地点を示し、印象的な訪問の出発点になります。作物を避けて歩けば、訪問者も農園内に入れます。この眺めの向こうには農業の営みがあり、パイナップル栽培が人々の暮らしとオルモックらしさを支えています。特にクイーン種はこの街と深く結びついていますが、レイテ島のほかの地域や東ビサヤ地方でも育てられています。畑を地域の名所として、そして仕事の場として眺めてみましょう。",
+            "ko": "살스 파인애플 농장은 바랑가이 빌리보이의 오르모크 디버전 로드 옆에 있습니다. 거대한 파인애플 조형물이 입구이자 차량 하차 지점을 알려 주며 인상적인 방문의 출발점이 됩니다. 작물을 피해서 걸으면 방문객도 농장 안에 들어갈 수 있습니다. 눈앞의 풍경은 농사가 이어지는 일터로, 파인애플 재배가 주민들의 생계와 오르모크의 정체성을 뒷받침합니다. 특히 퀸 품종은 이 도시와 깊이 연결되어 있지만 레이테의 다른 지역과 동부 비사야에서도 재배됩니다. 들판을 지역의 명소이자 일터로 바라보세요."
+          },
+          "mediaIds": [
+            "D05-preview",
+            "D05-maps-03",
+            "D05-preview-extra"
+          ],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "A fruit at the heart of the fiesta",
+            "ja": "祭りの主役になる果実",
+            "ko": "축제의 중심에 선 과일"
+          },
+          "body": {
+            "en": "Queen pineapple is known for its sweetness, aroma and crisp texture, with fruit smaller than some other pineapple varieties. In Ormoc, it also has a cultural role. The Piña Festival brings pineapple imagery into street dancing, costumes and community celebrations during the city’s June fiesta season. The celebration honors the patron saints, Saints Peter and Paul, while giving local agriculture a place in public life. That connection helps explain why pineapple is such a recognizable city symbol. Here, a familiar fruit tells a larger story about growers, community pride and celebration.",
+            "ja": "クイーンパイナップルは、甘さ、香り、歯切れのよい食感で知られ、ほかの一部の品種より小ぶりな果実が特徴です。オルモックでは、文化の中でも大切な役割を担っています。6月のフィエスタの時期に開かれるピニャ祭りでは、パイナップルのモチーフが街頭の踊りや衣装、地域の祝祭を彩ります。街の守護聖人である聖ペトロと聖パウロをたたえながら、地域の農業にも光を当てる行事です。このつながりを知ると、パイナップルが街の象徴となった理由も見えてきます。身近な果物が、生産者や地域の誇り、祝祭の物語を伝えているのです。",
+            "ko": "퀸 파인애플은 단맛과 향, 아삭한 식감으로 알려져 있으며 다른 일부 품종보다 열매가 작습니다. 오르모크에서는 문화적으로도 중요한 역할을 합니다. 6월의 도시 축제 기간에 열리는 피냐 축제에서는 파인애플 모티프가 거리 춤과 의상, 지역사회 행사를 장식합니다. 도시의 수호성인인 성 베드로와 성 바오로를 기리면서 지역 농업에도 주목하는 행사입니다. 이러한 연결을 알면 파인애플이 도시를 대표하는 상징이 된 이유를 이해할 수 있습니다. 이곳에서 익숙한 과일은 재배 농가와 지역의 자부심, 축제에 관한 더 큰 이야기를 전합니다."
+          },
+          "mediaIds": [],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-3",
+          "title": {
+            "en": "Walk gently through the growing fields",
+            "ja": "作物を大切に、畑を歩く",
+            "ko": "작물을 배려하며 걷는 길"
+          },
+          "body": {
+            "en": "The plantation route is popular locally for jogging and fun runs, but it remains a place where crops are growing. Walk on clear routes without stepping on plants or planted rows, and leave every pineapple intact. There is virtually no shade, so choose early morning or late afternoon; on a cooler evening, finish before dark. Bring drinking water, a hat and sun protection. Take photographs without entering the crops, keep access clear for workers and vehicles, and follow on-site instructions. Carry your litter away so the next visitor finds the fields just as inviting.",
+            "ja": "農園の道は地元でジョギングやファンランのコースとして親しまれていますが、作物が育つ仕事の場でもあります。植物や植え付けられた列を踏まず、空いている通路を歩き、パイナップルは一つも傷つけずに残しましょう。日陰はほとんどないため、早朝か夕方がおすすめです。涼しい夕方に訪れる場合も、暗くなる前に見学を終えてください。飲料水、帽子、日よけ用品を持参しましょう。写真は作物の中に入らずに撮り、作業する人や車両の通行を妨げず、現地の指示に従ってください。次に訪れる人も気持ちよく過ごせるよう、ごみは持ち帰りましょう。",
+            "ko": "농장 길은 지역 주민들에게 조깅과 펀런 코스로 인기가 있지만, 작물이 자라는 일터이기도 합니다. 식물이나 재배 줄을 밟지 말고 비어 있는 통로로 걸으며 파인애플은 하나도 손상시키지 말고 그대로 두세요. 그늘이 거의 없으므로 이른 아침이나 늦은 오후를 선택하세요. 선선한 저녁에 방문하더라도 어두워지기 전에 마치세요. 마실 물과 모자, 자외선 차단 용품을 챙기세요. 작물 사이에 들어가지 않고 사진을 찍고, 작업자와 차량의 통행을 막지 않으며 현장 안내를 따르세요. 다음 방문객도 쾌적한 풍경을 만날 수 있도록 쓰레기는 되가져가세요."
+          },
+          "mediaIds": [
+            "D05-maps-04",
+            "D05-maps-01",
+            "D05-maps-05"
+          ],
+          "presentation": "story"
+        }
+      ],
+      "visitorGuide": {
+        "en": {
+          "arrival": "Head to the giant pineapple landmark at the plantation entrance and ride drop-off on Ormoc Diversion Road, Barangay Biliboy.",
+          "bestTime": "Early morning or late afternoon is best for avoiding intense sun. If visiting on a cooler evening, finish before dark; the route has virtually no shade.",
+          "activities": [
+            "Walk inside the plantation on clear routes without stepping on crops.",
+            "Photograph the giant pineapple landmark and the fields from crop-free positions.",
+            "Enjoy the route’s local jogging and fun-run setting while respecting farm work."
+          ],
+          "preparation": [
+            "Bring drinking water, a hat and sun protection.",
+            "Wear comfortable walking shoes and plan to finish before dark."
+          ],
+          "safety": [
+            "Do not step on plants or planted rows, pick fruit or damage pineapples; leave them intact.",
+            "Keep clear of passing vehicles and leave farm access open for workers.",
+            "Follow on-site instructions, take breaks from heat as needed and carry your litter away."
+          ]
+        },
+        "ja": {
+          "arrival": "バランガイ・ビリボイのオルモック・ディバージョン・ロード沿いにある、大きなパイナップルの目印へ向かってください。ここが農園入口と車の降車地点です。",
+          "bestTime": "強い日差しを避けるには早朝か夕方がおすすめです。涼しい夕方でも、暗くなる前に見学を終えてください。道沿いに日陰はほとんどありません。",
+          "activities": [
+            "作物を踏まず、空いている通路を使って農園内を歩く。",
+            "作物のない場所から大きなパイナップルの目印や畑を撮影する。",
+            "農作業に配慮しながら、地元でジョギングやファンランに親しまれる道の雰囲気を楽しむ。"
+          ],
+          "preparation": [
+            "飲料水、帽子、日よけ用品を持参する。",
+            "歩きやすい靴を履き、暗くなる前に終える計画を立てる。"
+          ],
+          "safety": [
+            "植物や植え付けられた列を踏まず、果実を採ったり傷つけたりせず、そのまま残す。",
+            "通行車両に注意し、作業者の農園への出入りを妨げない。",
+            "現地の指示に従い、暑いときは適宜休憩し、ごみを持ち帰る。"
+          ]
+        },
+        "ko": {
+          "arrival": "바랑가이 빌리보이의 오르모크 디버전 로드에 있는 거대한 파인애플 조형물로 이동하세요. 이곳이 농장 입구이자 차량 하차 지점입니다.",
+          "bestTime": "강한 햇볕을 피하려면 이른 아침이나 늦은 오후가 좋습니다. 선선한 저녁에 방문하더라도 어두워지기 전에 마치세요. 길에는 그늘이 거의 없습니다.",
+          "activities": [
+            "작물을 밟지 않고 비어 있는 통로로 농장 안 걷기.",
+            "작물이 없는 위치에서 거대한 파인애플 조형물과 들판 사진 찍기.",
+            "농사일을 배려하며 지역의 조깅·펀런 코스로 사랑받는 길의 분위기 즐기기."
+          ],
+          "preparation": [
+            "마실 물과 모자, 자외선 차단 용품을 챙기세요.",
+            "편한 운동화를 신고 어두워지기 전에 마칠 계획을 세우세요."
+          ],
+          "safety": [
+            "식물이나 재배 줄을 밟거나 열매를 따거나 파인애플을 손상시키지 말고 그대로 두세요.",
+            "지나가는 차량을 주의하고 작업자의 농장 출입을 막지 마세요.",
+            "현장 안내를 따르고 더울 때는 필요에 따라 쉬며 쓰레기는 되가져가세요."
+          ]
+        }
+      },
+      "location": {
+        "center": {
+          "latitude": 11.0390182,
+          "longitude": 124.6132679
+        },
+        "routeEntrance": {
+          "latitude": 11.0390182,
+          "longitude": 124.6132679
+        },
+        "area": "Barangay Biliboy, Ormoc City (Ormoc Diversion Road)",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.0390182%2C124.6132679",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679"
+      },
+      "requiresGuide": false,
+      "gallery": [
+        "D05-preview",
+        "D05-maps-03",
+        "D05-maps-04",
+        "D05-preview-extra",
+        "D05-maps-01",
+        "D05-maps-05"
+      ],
+      "coverMediaId": "D05-preview"
+    },
+    {
+      "id": "D06",
+      "name": {
+        "en": "Leyte Golf and Country Club",
+        "ja": "レイテ・ゴルフ・アンド・カントリークラブ",
+        "ko": "레이테 골프 앤드 컨트리클럽"
+      },
+      "tagline": {
+        "en": "Golf amid Ormoc’s countryside scenery",
+        "ja": "オルモックの郊外の風景とゴルフ",
+        "ko": "오르모크 전원 풍경 속 골프"
+      },
+      "summary": {
+        "en": "An 18-hole, par-72 course brings a sporting perspective to Ormoc’s countryside. Plan your visit with the club, arrive at the registration area and enjoy the landscape only within the access arranged for you.",
+        "ja": "18ホール、パー72のコースが、オルモックの郊外にスポーツという楽しみを添えます。事前にクラブと訪問を相談し、受付に到着したら、認められた範囲で風景を楽しみましょう。",
+        "ko": "18홀, 파 72 코스가 오르모크의 전원에 스포츠의 즐거움을 더합니다. 클럽과 방문을 미리 상의하고 등록 구역에 도착한 뒤, 허용된 범위 안에서 풍경을 즐기세요."
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "Golf in Ormoc’s countryside",
+            "ja": "オルモックの郊外で楽しむゴルフ",
+            "ko": "오르모크의 전원에서 즐기는 골프"
+          },
+          "body": {
+            "en": "Leyte Golf and Country Club is an 18-hole, par-72 course in Ormoc’s Mabini area. Its setting includes surrounding mountains and views toward Ormoc Bay, adding a sporting perspective to a city also known for lakes, farms and coastal scenery. For golfers, it offers a different way to experience the countryside. Arrange your visit with the club before travelling, including guest eligibility, booking and any playing requirements. The marked club location is also the registration area; check in there and follow staff directions before going farther onto the property.",
+            "ja": "レイテ・ゴルフ・アンド・カントリークラブは、オルモックのマビニ地区にある18ホール、パー72のコースです。周囲の山々やオルモック湾を望む環境が、湖や農園、海辺の風景で知られる街にスポーツという一面を添えています。ゴルファーにとっては、郊外を体験するもう一つの方法になるでしょう。出発前にクラブと相談し、ゲストの利用資格、予約、プレーに必要な条件を確認してください。地図のクラブ位置は受付の場所でもあります。到着したらそこで手続きを行い、敷地内を先へ進む前にスタッフの案内に従いましょう。",
+            "ko": "레이테 골프 앤드 컨트리클럽은 오르모크 마비니 지역에 있는 18홀, 파 72 코스입니다. 주변 산들과 오르모크만을 향한 전망이 호수와 농장, 해안 풍경으로 알려진 도시에 스포츠라는 또 다른 면을 더합니다. 골퍼에게는 전원을 경험하는 색다른 방법이 됩니다. 출발 전에 클럽과 방문을 상의하고 게스트 이용 자격, 예약과 플레이 조건을 확인하세요. 지도에 표시된 클럽 위치는 등록 구역이기도 합니다. 도착하면 그곳에서 체크인하고, 부지 안으로 더 들어가기 전에 직원 안내를 따르세요."
+          },
+          "mediaIds": [
+            "D06-maps-01",
+            "D06-maps-03",
+            "D06-maps-04"
+          ],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "Trees, open ground and thoughtful play",
+            "ja": "木々と芝生、配慮あるプレー",
+            "ko": "나무와 잔디, 배려하는 플레이"
+          },
+          "body": {
+            "en": "Spreading trees and open grass give the club’s landscape its character. The contrast between closely cut ground and branching canopies invites a slower look at the space around the game. Enjoy that setting from the areas staff authorize, without assuming the course is open for casual walks or sightseeing. Golf balls and moving carts make active playing areas unsuitable for unguided wandering. Wear suitable footwear, carry water and sun protection, and follow the club’s weather instructions. If thunder or lightning develops, stop outdoor activity and seek a substantial building as directed by staff.",
+            "ja": "枝を広げる木々と開けた芝生が、クラブの景観を形づくっています。短く刈り込まれた地面と頭上に広がる樹冠との対比に、プレーを囲む空間の魅力が見えてきます。散歩や観光のために自由にコースへ入れるとは考えず、スタッフが認めた場所から風景を楽しみましょう。プレー中の場所では、飛んでくるボールや走行するカートが危険なため、案内なく歩き回らないでください。適切な靴を履き、水と日よけ用品を持参し、天候に関するクラブの指示に従いましょう。雷鳴や稲妻があれば屋外活動をやめ、スタッフの指示に従って頑丈な建物へ避難してください。",
+            "ko": "넓게 가지를 펼친 나무와 탁 트인 잔디밭이 클럽 풍경의 특징을 이룹니다. 짧게 깎인 잔디와 머리 위로 퍼진 나뭇가지의 대비에서 경기 주변 공간의 매력을 천천히 살펴볼 수 있습니다. 코스가 일반 산책이나 관광을 위해 자유롭게 개방되어 있다고 생각하지 말고, 직원이 허용한 구역에서 풍경을 즐기세요. 플레이 구역에는 날아오는 골프공과 이동하는 카트가 있어 안내 없이 돌아다니면 위험합니다. 알맞은 신발을 신고 물과 자외선 차단 용품을 챙기며 기상 관련 클럽 안내를 따르세요. 천둥이나 번개가 발생하면 야외 활동을 멈추고 직원 안내에 따라 튼튼한 건물로 대피하세요."
+          },
+          "mediaIds": [
+            "D06-preview",
+            "D06-preview-extra",
+            "D06-maps-05"
+          ],
+          "presentation": "story"
+        }
+      ],
+      "visitorGuide": {
+        "en": {
+          "arrival": "Use the club’s marked registration area in Ormoc’s San Antonio / Mabini area. Check in with staff before proceeding.",
+          "bestTime": "Choose a time agreed with the club. Check weather before travelling and follow staff instructions if conditions change.",
+          "activities": [
+            "Play golf only with the club’s permission and required arrangements.",
+            "Appreciate the trees and countryside views from areas staff authorize."
+          ],
+          "preparation": [
+            "Confirm guest eligibility, booking, playing requirements and charges directly with the club before travel.",
+            "Bring drinking water and sun protection, and wear suitable footwear and clothing that meet the club’s requirements."
+          ],
+          "safety": [
+            "Registration does not by itself grant access to the course; follow staff directions and stay out of restricted areas.",
+            "Watch for golf balls and moving carts; do not wander across active playing areas.",
+            "If thunder or lightning develops, stop outdoor activity and seek a substantial building as directed by staff."
+          ]
+        },
+        "ja": {
+          "arrival": "オルモックのサンアントニオ／マビニ地区にある、地図で示されたクラブの受付へ向かってください。先へ進む前にスタッフに申し出てください。",
+          "bestTime": "クラブと相談した時間に訪問しましょう。出発前に天候を確認し、状況が変わったらスタッフの指示に従ってください。",
+          "activities": [
+            "クラブの許可を得て、必要な手配を済ませたうえでゴルフをする。",
+            "スタッフが認めた場所から木々や郊外の眺めを楽しむ。"
+          ],
+          "preparation": [
+            "出発前に、ゲストの利用資格、予約、プレー条件、料金をクラブへ直接確認する。",
+            "飲料水と日よけ用品を持参し、クラブの規定に合った服装と適切な靴を用意する。"
+          ],
+          "safety": [
+            "受付を済ませただけでコースへ入れるわけではありません。スタッフの指示に従い、立入禁止区域には入らないでください。",
+            "飛んでくるボールや走行するカートに注意し、プレー中の場所を歩き回らないでください。",
+            "雷鳴や稲妻があれば屋外活動をやめ、スタッフの指示に従って頑丈な建物へ避難してください。"
+          ]
+        },
+        "ko": {
+          "arrival": "오르모크 산안토니오/마비니 지역의 지도에 표시된 클럽 등록 구역으로 이동하세요. 더 들어가기 전에 직원에게 체크인하세요.",
+          "bestTime": "클럽과 협의한 시간에 방문하세요. 출발 전에 날씨를 확인하고 상황이 바뀌면 직원 안내를 따르세요.",
+          "activities": [
+            "클럽의 허가를 받고 필요한 절차를 마친 뒤 골프 즐기기.",
+            "직원이 허용한 구역에서 나무와 전원 풍경 감상하기."
+          ],
+          "preparation": [
+            "출발 전에 게스트 이용 자격, 예약, 플레이 조건과 요금을 클럽에 직접 확인하세요.",
+            "마실 물과 자외선 차단 용품을 챙기고 클럽 규정에 맞는 복장과 알맞은 신발을 준비하세요."
+          ],
+          "safety": [
+            "등록만으로 코스 출입이 허용되는 것은 아닙니다. 직원 안내를 따르고 제한 구역에 들어가지 마세요.",
+            "날아오는 골프공과 이동하는 카트를 주의하고 플레이 중인 구역을 돌아다니지 마세요.",
+            "천둥이나 번개가 발생하면 야외 활동을 멈추고 직원 안내에 따라 튼튼한 건물로 대피하세요."
+          ]
+        }
+      },
+      "location": {
+        "center": {
+          "latitude": 10.9800643,
+          "longitude": 124.6611625
+        },
+        "routeEntrance": {
+          "latitude": 10.9800643,
+          "longitude": 124.6611625
+        },
+        "area": "Ormoc City, Leyte",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=10.9800643%2C124.6611625",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625"
+      },
+      "requiresGuide": false,
+      "gallery": [
+        "D06-maps-01",
+        "D06-preview",
+        "D06-preview-extra",
+        "D06-maps-03",
+        "D06-maps-04",
+        "D06-maps-05"
+      ],
+      "coverMediaId": "D06-maps-01"
+    },
+    {
+      "id": "D07",
+      "name": {
+        "en": "Alto Peak",
+        "ja": "アルト・ピーク",
+        "ko": "알토 피크"
+      },
+      "tagline": {
+        "en": "A demanding climb into Leyte’s mountain landscape",
+        "ja": "レイテの山岳風景へ挑む本格登山",
+        "ko": "레이테의 산악 풍경으로 향하는 도전적인 등반"
+      },
+      "summary": {
+        "en": "Forested ridges and a demanding climb define Alto Peak, also known as Mt. Aminduen. Rising about 1,332 metres above sea level, it offers a strenuous mountain experience requiring a local guide and careful preparation.",
+        "ja": "アミンドゥエン山とも呼ばれるアルト・ピークでは、森に覆われた尾根と本格的な登りが待っています。標高約1,332メートルの山で、現地ガイドの同行と十分な準備が必要な、体力を要する登山を体験できます。",
+        "ko": "아민두엔산이라고도 불리는 알토 피크에서는 숲이 우거진 능선과 도전적인 등반이 기다립니다. 해발 약 1,332미터의 산으로, 현지 가이드 동행과 철저한 준비가 필요한 체력 소모가 큰 산행을 경험할 수 있습니다."
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "Above the folded ridges",
+            "ja": "幾重もの尾根の先へ",
+            "ko": "겹겹이 이어진 능선 위로"
+          },
+          "body": {
+            "en": "Alto Peak, also known as Mt. Aminduen, rises about 1,332 metres above sea level and is recognized as Eastern Visayas’ highest peak. Forested slopes and tightly folded ridges make the landscape feel larger than a single summit. The approach from Ormoc is associated with Cabintan, a community at the edge of this mountain country. Begin at the SULFATARA starting point rather than the summit map pin. Arrange a local guide before travelling; a guide is required. This is a strenuous mountain trek, not a beginner’s sightseeing stroll.",
+            "ja": "アミンドゥエン山とも呼ばれるアルト・ピークは、標高約1,332メートルで、東ビサヤ地方の最高峰として知られています。森に覆われた斜面と幾重にも折り重なる尾根が、一つの山頂にとどまらない雄大な風景をつくっています。オルモック側からのアプローチは、この山岳地帯に接するカビンタンの集落と結びついています。山頂の地図ピンではなく、SULFATARA登山出発地点へ向かってください。出発前に現地ガイドを手配しましょう。ガイドの同行は必須です。これは体力を要する本格的な山歩きで、初心者向けの観光散歩ではありません。",
+            "ko": "아민두엔산이라고도 불리는 알토 피크는 해발 약 1,332미터로, 동부 비사야스의 최고봉으로 알려져 있습니다. 숲으로 덮인 비탈과 촘촘하게 겹친 능선은 하나의 정상보다 훨씬 넓은 산악 풍경을 만들어 냅니다. 오르모크 쪽에서의 접근은 이 산악 지대 가장자리에 있는 카빈탄 마을과 연결됩니다. 정상 지도 핀이 아니라 SULFATARA 출발 지점으로 향하세요. 여행 전에 현지 가이드를 예약해야 하며, 가이드 동행은 필수입니다. 체력 소모가 큰 본격적인 산행이므로 초보자를 위한 가벼운 관광 산책으로 생각해서는 안 됩니다."
+          },
+          "mediaIds": [
+            "D07-maps-01",
+            "D07-preview",
+            "D07-preview-extra"
+          ],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "Earn the view, respect the forest",
+            "ja": "眺めを目指し、森を大切に",
+            "ko": "전망을 향해 오르고, 숲을 존중하기"
+          },
+          "body": {
+            "en": "On Alto’s forest trails, the climb demands attention as well as stamina. Mud, slippery roots and steep ground can slow progress, and upper sections may involve scrambling and rope assistance. Wear grippy hiking footwear and bring rope-handling gloves, water, food, rain protection, a headlamp and first aid. Set the route, registration arrangements and turnaround time with your guide before setting out. Follow the guide’s instructions around ropes and steep sections; postpone or turn back when rain or conditions make the route unsafe. Stay on the agreed trail and carry out every piece of rubbish, leaving the forest intact.",
+            "ja": "アルトの森の登山道では、体力だけでなく足元への注意も欠かせません。ぬかるみ、滑りやすい木の根、急斜面では進む速度が落ち、上部では手を使って登ったり、ロープの補助を受けたりすることがあります。滑りにくい登山靴を履き、ロープ用の手袋、水、食料、雨具、ヘッドランプ、救急用品を持参してください。出発前に、ルート、登山登録の手続き、引き返す時刻をガイドと決めましょう。ロープや急斜面ではガイドの指示に従い、雨や路面状況で危険な場合は延期または引き返してください。決めた登山道を外れず、ごみはすべて持ち帰り、森をそのまま守りましょう。",
+            "ko": "알토의 숲길에서는 체력뿐 아니라 발밑에 대한 주의도 필요합니다. 진흙, 미끄러운 나무뿌리와 급경사 때문에 속도가 느려질 수 있으며, 상부에서는 손을 짚어 오르거나 로프의 도움을 받아야 할 수 있습니다. 접지력이 좋은 등산화를 신고 로프용 장갑, 물, 음식, 우비, 헤드램프와 구급용품을 준비하세요. 출발 전에 가이드와 경로, 입산 등록 절차, 되돌아갈 시각을 정하세요. 로프 구간과 급경사에서는 가이드의 지시를 따르고, 비나 길 상태로 위험해지면 산행을 미루거나 돌아서세요. 정해진 길을 벗어나지 말고 모든 쓰레기를 되가져와 숲을 온전히 지켜 주세요."
+          },
+          "mediaIds": [
+            "D07-maps-02",
+            "D07-maps-05"
+          ],
+          "presentation": "story"
+        }
+      ],
+      "visitorGuide": {
+        "en": {
+          "arrival": "Navigate to the SULFATARA starting point, not the summit pin. The summit is a separate landmark, not a driving destination. Arrange the meeting point and registration with your required local guide before travel.",
+          "bestTime": "Choose a guide-approved weather window and departure time that allow a safe return. Postpone in heavy rain or when the guide considers trail conditions unsafe.",
+          "activities": [
+            "A strenuous guided mountain trek",
+            "Appreciating forested ridges and mountain scenery from safe stopping places"
+          ],
+          "preparation": [
+            "Arrange a local guide; confirm the route, trail status, registration or permits, expected duration and turnaround time.",
+            "Prepare physically and wear grippy hiking shoes or boots, long sleeves and trousers; bring gloves suitable for rope handling.",
+            "Carry sufficient water and food, rain protection, a headlamp, first aid and emergency supplies. Agree any overnight equipment with the guide."
+          ],
+          "safety": [
+            "A local guide is required; this is not a beginner stroll.",
+            "Expect steep, muddy ground and slippery roots; upper sections may require scrambling and rope assistance. Follow your guide’s instructions.",
+            "Turn back or postpone if rain or trail conditions are unsafe. Stay together, keep to the agreed trail and carry out all rubbish."
+          ]
+        },
+        "ja": {
+          "arrival": "山頂のピンではなく、SULFATARA登山出発地点へ向かってください。山頂は別の目印で、車で向かう目的地ではありません。必須の現地ガイドと、集合場所や登山登録を事前に確認しましょう。",
+          "bestTime": "ガイドが安全と判断する天候と、無理なく戻れる出発時刻を選んでください。大雨や、ガイドが危険と判断する登山道の状態では延期しましょう。",
+          "activities": [
+            "ガイドと歩く、体力を要する本格登山",
+            "安全に立ち止まれる場所から森に覆われた尾根や山の景色を楽しむ"
+          ],
+          "preparation": [
+            "現地ガイドを手配し、ルート、登山道の状態、登録や許可、所要時間、引き返す時刻を確認してください。",
+            "事前に体力を整え、滑りにくい登山靴、長袖、長ズボンを着用し、ロープの扱いに適した手袋を持参してください。",
+            "十分な水と食料、雨具、ヘッドランプ、救急用品、緊急時の装備を携行し、泊まりの場合は必要な装備をガイドと相談してください。"
+          ],
+          "safety": [
+            "現地ガイドの同行は必須です。初心者向けの散歩ではありません。",
+            "急なぬかるみや滑りやすい木の根があり、上部では手を使う登りやロープの補助が必要な場合があります。ガイドの指示に従ってください。",
+            "雨や登山道の状態が危険な場合は引き返すか延期してください。仲間と離れず、決めた登山道を守り、ごみはすべて持ち帰りましょう。"
+          ]
+        },
+        "ko": {
+          "arrival": "정상 핀이 아니라 SULFATARA 출발 지점으로 향하세요. 정상은 별도의 지형 표식이며 차량 도착지가 아닙니다. 반드시 동행해야 하는 현지 가이드와 출발 전에 만날 장소와 입산 등록을 확인하세요.",
+          "bestTime": "가이드가 승인한 날씨와 안전하게 돌아올 수 있는 출발 시각을 선택하세요. 폭우가 내리거나 가이드가 길 상태를 위험하다고 판단하면 미루세요.",
+          "activities": [
+            "현지 가이드와 함께하는 체력 소모가 큰 산행",
+            "안전하게 멈출 수 있는 지점에서 숲이 우거진 능선과 산악 경관 감상"
+          ],
+          "preparation": [
+            "현지 가이드를 예약하고 경로, 길 상태, 등록이나 허가, 예상 소요 시간과 되돌아갈 시각을 확인하세요.",
+            "미리 체력을 준비하고 접지력이 좋은 등산화, 긴소매와 긴바지를 착용하며 로프를 다룰 때 적합한 장갑을 챙기세요.",
+            "충분한 물과 음식, 우비, 헤드램프, 구급용품과 비상용품을 휴대하세요. 숙박 산행 장비는 가이드와 상의하세요."
+          ],
+          "safety": [
+            "현지 가이드 동행이 필수이며, 초보자를 위한 산책이 아닙니다.",
+            "가파른 진흙길과 미끄러운 나무뿌리가 있으며, 상부에서는 손을 짚어 오르거나 로프의 도움이 필요할 수 있습니다. 가이드의 지시를 따르세요.",
+            "비나 길 상태로 위험해지면 돌아서거나 미루세요. 일행과 함께 정해진 길을 지키고 모든 쓰레기를 되가져오세요."
+          ]
+        }
+      },
+      "location": {
+        "center": {
+          "latitude": 11.103007,
+          "longitude": 124.7424401
+        },
+        "routeEntrance": {
+          "latitude": 11.0981519,
+          "longitude": 124.7277058
+        },
+        "area": "Ormoc City, Leyte",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.0981519%2C124.7277058",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.103007%2C124.7424401"
+      },
+      "requiresGuide": true,
+      "gallery": [
+        "D07-maps-01",
+        "D07-preview",
+        "D07-preview-extra",
+        "D07-maps-02",
+        "D07-maps-05"
+      ],
+      "coverMediaId": "D07-maps-01"
+    },
+    {
+      "id": "D08",
+      "name": {
+        "en": "Heaven’s Peak",
+        "ja": "ヘブンズ・ピーク",
+        "ko": "헤븐스 피크"
+      },
+      "tagline": {
+        "en": "A garden framed by Cabintan’s mountain landscape",
+        "ja": "カビンタンの山々に抱かれた庭園",
+        "ko": "카빈탄의 산악 풍경이 감싸는 정원"
+      },
+      "summary": {
+        "en": "Heaven’s Peak pairs a planted garden with views of Cabintan’s forested mountains. Follow the garden paths, enjoy the contrast of flowers and ridges, and discover a quieter side of Ormoc’s working uplands.",
+        "ja": "ヘブンズ・ピークでは、手入れされた庭園の向こうにカビンタンの森に覆われた山々を望めます。庭の小道を歩き、花々と尾根の対比を楽しみながら、人々が暮らし働くオルモック高地の穏やかな一面に触れてみてください。",
+        "ko": "헤븐스 피크에서는 가꾼 정원 너머로 카빈탄의 숲이 우거진 산을 바라볼 수 있습니다. 정원 길을 따라 꽃과 능선의 대비를 즐기며 사람들이 살아가고 일하는 오르모크 고지대의 한적한 모습을 만나 보세요."
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "A garden beneath the mountains",
+            "ja": "山々を望む庭園",
+            "ko": "산을 바라보는 정원"
+          },
+          "body": {
+            "en": "At Heaven’s Peak in Barangay Cabintan, the garden brings Ormoc’s upland scenery close enough to explore at walking pace. Flower borders, lawns and a stone path draw the eye toward the forested mountains beyond. Notice the change in scale: carefully tended plants are close at hand, while ridges form the backdrop. This is a garden viewpoint, not a summit trek. Arrive at the garden entrance and check opening and admission arrangements before travelling. Walk on the paths and give the planted borders room to flourish.",
+            "ja": "カビンタン地区のヘブンズ・ピークでは、庭園を歩く速さでオルモック高地の風景を味わえます。花壇、芝生、石の小道が、その向こうの森に覆われた山々へと視線を導きます。すぐそばには丹念に育てられた植物、その背後には連なる尾根があり、近景と遠景の大きさの違いが魅力です。ここは庭園の展望スポットで、山頂を目指す登山ではありません。庭園入口へ向かい、出発前に営業と入園の条件を確認してください。園路を歩き、花壇に踏み込まず植物を大切にしましょう。",
+            "ko": "카빈탄 바랑가이의 헤븐스 피크에서는 정원을 걷는 속도로 오르모크 고지대의 풍경을 감상할 수 있습니다. 꽃이 둘러선 화단, 잔디와 돌길은 그 너머 숲이 우거진 산으로 시선을 이끕니다. 가까이에는 정성껏 가꾼 식물이 있고, 뒤로는 능선이 펼쳐져 가까운 정원과 먼 산의 크기 차이가 돋보입니다. 이곳은 정상 등반지가 아니라 정원 전망 명소입니다. 정원 입구로 향하고, 출발 전에 운영 여부와 입장 조건을 확인하세요. 정해진 길로 걸으며 화단을 밟지 말고 식물이 자랄 공간을 지켜 주세요."
+          },
+          "mediaIds": [
+            "D08-ext-08",
+            "D08-ext-02",
+            "D08-preview"
+          ],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "Flowers in a working landscape",
+            "ja": "暮らしのある高地に咲く花",
+            "ko": "삶이 이어지는 고지대의 꽃"
+          },
+          "body": {
+            "en": "Cabintan is more than a mountain backdrop: vegetable growing is part of the community’s livelihood. Seen in that setting, Heaven’s Peak offers another expression of people tending the uplands, this time through ornamental plants. Look from the flower beds toward the wider landscape and remember that homes and farms continue beyond the garden. Choose daylight and fair weather for enjoying the view; bring drinking water, sun or rain protection and shoes with a good grip. Paths can be slippery when wet. Keep children close, take your rubbish away and respect neighbouring homes and cultivated land.",
+            "ja": "カビンタンは、山の景色の背景というだけの場所ではありません。野菜づくりが地域の生業の一部となっています。そうした土地にあるヘブンズ・ピークの観賞植物は、人々が高地を手入れしながら暮らす、もう一つの姿を見せてくれます。花壇から遠くへ目を向けるとき、庭園の外には家々や畑での暮らしが続いていることも思い出してください。眺めを楽しむなら、日中の穏やかな天候を選びましょう。飲み水、日差しや雨への備え、滑りにくい靴を用意してください。園路は濡れると滑ることがあります。子どもから目を離さず、ごみを持ち帰り、近隣の住まいや農地を尊重しましょう。",
+            "ko": "카빈탄은 단순히 산이 보이는 배경이 아니라 채소 재배로 생계를 이어가는 마을이기도 합니다. 이런 환경에서 헤븐스 피크의 관상용 식물은 사람들이 고지대를 가꾸며 살아가는 또 다른 모습을 보여 줍니다. 화단에서 더 넓은 풍경으로 눈을 돌리며 정원 밖에도 집과 농장의 일상이 이어진다는 점을 떠올려 보세요. 전망을 즐기려면 날씨가 좋은 낮 시간을 선택하고, 마실 물과 햇빛이나 비를 막을 용품, 접지력이 좋은 신발을 준비하세요. 길은 젖으면 미끄러울 수 있습니다. 아이들을 가까이에서 살피고 쓰레기는 되가져가며 이웃의 집과 농경지를 존중해 주세요."
+          },
+          "mediaIds": [
+            "D08-ext-21",
+            "D08-maps-04",
+            "D08-maps-05"
+          ],
+          "presentation": "story"
+        }
+      ],
+      "visitorGuide": {
+        "en": {
+          "arrival": "Use the Heaven’s Peak garden entrance in Barangay Cabintan, Ormoc City. Confirm opening and admission arrangements before travelling.",
+          "bestTime": "Choose daylight and fair weather to enjoy the garden and mountain outlook; check the operator’s opening arrangements first.",
+          "activities": [
+            "Walking along the garden paths",
+            "Viewing the flowers and mountain landscape",
+            "Taking photographs without entering planted borders"
+          ],
+          "preparation": [
+            "Bring drinking water and sun or rain protection.",
+            "Wear shoes with a good grip for garden paths.",
+            "Confirm current admission arrangements and plan your return transport before setting out."
+          ],
+          "safety": [
+            "Walk carefully on wet paths, which can be slippery.",
+            "Keep children close and follow on-site instructions.",
+            "Stay on paths, protect the plants, respect nearby homes and farms, and take rubbish away."
+          ]
+        },
+        "ja": {
+          "arrival": "オルモック市カビンタン地区のヘブンズ・ピーク庭園入口へ向かってください。出発前に営業と入園の条件を確認しましょう。",
+          "bestTime": "庭園と山の眺めを楽しむには、日中の穏やかな天候を選び、先に施設の営業状況を確認してください。",
+          "activities": [
+            "庭園の小道を散策する",
+            "花々や山の風景を眺める",
+            "花壇に入らずに写真を撮る"
+          ],
+          "preparation": [
+            "飲み水と、日差しや雨への備えを持参してください。",
+            "園路を歩くため、滑りにくい靴を履いてください。",
+            "現在の入園条件を確認し、出発前に帰りの交通手段を考えておきましょう。"
+          ],
+          "safety": [
+            "濡れた園路は滑ることがあるため、足元に注意してください。",
+            "子どもから目を離さず、現地の指示に従ってください。",
+            "園路を守り、植物を傷つけず、近隣の家や農地を尊重し、ごみを持ち帰ってください。"
+          ]
+        },
+        "ko": {
+          "arrival": "오르모크시 카빈탄 바랑가이의 헤븐스 피크 정원 입구로 향하세요. 출발 전에 운영 여부와 입장 조건을 확인하세요.",
+          "bestTime": "정원과 산 전망을 즐기려면 날씨가 좋은 낮 시간을 선택하고, 운영 일정을 먼저 확인하세요.",
+          "activities": [
+            "정원 길 산책",
+            "꽃과 산악 풍경 감상",
+            "화단에 들어가지 않고 사진 촬영"
+          ],
+          "preparation": [
+            "마실 물과 햇빛이나 비를 막을 용품을 준비하세요.",
+            "정원 길을 걸을 때는 접지력이 좋은 신발을 신으세요.",
+            "현재 입장 조건을 확인하고 출발 전에 돌아올 교통편을 계획하세요."
+          ],
+          "safety": [
+            "젖은 길은 미끄러울 수 있으므로 주의해서 걸으세요.",
+            "아이들을 가까이에서 살피고 현장 안내를 따르세요.",
+            "정해진 길로 다니고 식물을 보호하며, 인근 집과 농장을 존중하고 쓰레기는 되가져오세요."
+          ]
+        }
+      },
+      "location": {
+        "center": {
+          "latitude": 11.0837842,
+          "longitude": 124.7215256
+        },
+        "routeEntrance": {
+          "latitude": 11.0837842,
+          "longitude": 124.7215256
+        },
+        "area": "Barangay Cabintan, Ormoc City",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=11.0837842%2C124.7215256",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=11.0837842%2C124.7215256"
+      },
+      "requiresGuide": false,
+      "gallery": [
+        "D08-ext-08",
+        "D08-ext-02",
+        "D08-preview",
+        "D08-ext-21",
+        "D08-maps-04",
+        "D08-maps-05"
+      ],
+      "coverMediaId": "D08-ext-08"
+    },
+    {
+      "id": "D09",
+      "name": {
+        "en": "Sabin Resort Hotel",
+        "ja": "サビン・リゾート・ホテル",
+        "ko": "사빈 리조트 호텔"
+      },
+      "tagline": {
+        "en": "A bayfront retreat with roots in Sal’s Beach",
+        "ja": "サルズ・ビーチの面影を受け継ぐ湾岸の宿",
+        "ko": "살스 비치의 역사를 이어가는 만 연안의 휴식처"
+      },
+      "summary": {
+        "en": "In Barangay Bantigue beside Ormoc Bay, Sabin Resort Hotel connects a hotel setting with the story of Sal’s Beach, its simpler seaside predecessor. Arrange your visit with the hotel and arrive through its visitor entrance.",
+        "ja": "オルモック湾に面したバンティゲ地区のサビン・リゾート・ホテルには、前身となった素朴な海辺の行楽地サルズ・ビーチの物語が息づいています。ホテルに来訪の手配を確認し、来訪者用の入口からお入りください。",
+        "ko": "오르모크만에 접한 반티게 바랑가이의 사빈 리조트 호텔에는 전신인 소박한 해안 휴양지 살스 비치의 이야기가 이어집니다. 호텔과 방문 일정을 확인하고 방문객 입구를 통해 들어가세요."
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "Hospitality beside Ormoc Bay",
+            "ja": "オルモック湾のほとりで過ごす",
+            "ko": "오르모크만 곁의 휴식"
+          },
+          "body": {
+            "en": "Sabin Resort Hotel stands beside Ormoc Bay in Barangay Bantigue, where the waterfront gives the property its distinctive setting. Its story is tied to people coming together by the sea, first for simple recreation and later for hotel stays and gatherings. The bay remains the thread linking those different chapters. Arrive at the hotel entrance and check in with staff before exploring. Confirm your room, dining or visitor arrangements directly with the hotel before travelling, including which outdoor areas and facilities your visit allows you to use.",
+            "ja": "サビン・リゾート・ホテルは、オルモック湾に面したバンティゲ地区にあり、水辺の立地がこの場所ならではの雰囲気をつくっています。その歩みには、海辺で集う人々の姿があります。素朴な行楽から、ホテルでの滞在や集まりへと形を変えながら、湾はその物語をつなぎ続けてきました。ホテル入口に到着したら、敷地を見て回る前にスタッフに声をかけてください。出発前に、宿泊、食事、来訪の手配をホテルへ直接確認し、今回利用できる屋外エリアや施設も確かめておきましょう。",
+            "ko": "사빈 리조트 호텔은 오르모크만에 접한 반티게 바랑가이에 자리하며, 물가의 입지가 이곳만의 분위기를 만듭니다. 이곳의 역사는 바닷가에 모이는 사람들과 이어집니다. 소박한 나들이에서 호텔 숙박과 모임으로 모습이 달라지는 동안에도 만은 그 이야기를 연결해 왔습니다. 호텔 입구에 도착하면 둘러보기 전에 직원에게 먼저 문의하세요. 출발 전에 객실, 식사 또는 방문 일정을 호텔에 직접 확인하고, 이번 방문에 이용할 수 있는 야외 구역과 시설도 알아보세요."
+          },
+          "mediaIds": [
+            "D09-preview",
+            "D09-maps-01",
+            "D09-maps-04"
+          ],
+          "presentation": "story"
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "From Sal’s Beach to a hotel",
+            "ja": "サルズ・ビーチからホテルへ",
+            "ko": "살스 비치에서 호텔로"
+          },
+          "body": {
+            "en": "Sabin’s story began with Sal’s Beach, a seaside recreation spot with simple bamboo-and-nipa huts. Visits from Ormoc and nearby towns encouraged Sabin A. Larrazabal to develop a larger property. In the hotel’s history, project planning began in 1990, followed by an expansion in 2006. From beach huts to accommodation and gathering spaces, the scale changed while the sea remained central. For a comfortable visit, bring sun or rain protection and suitable footwear. Follow staff instructions near water, supervise children closely and do not assume the bay is safe for swimming.",
+            "ja": "サビンの物語は、竹とニッパヤシの素朴な小屋が並ぶ海辺の行楽地、サルズ・ビーチから始まりました。オルモックや近隣の町から訪れる人々の需要を受け、サビン・A・ララサバルがより大きな施設の開発を進めました。ホテルの沿革では1990年に計画が始まり、2006年には拡張が行われました。海辺の小屋から宿泊や集まりの空間へと規模が変わっても、海は物語の中心にありました。訪問時は日差しや雨への備えと歩きやすい靴を用意してください。水辺ではスタッフの指示に従い、子どもから目を離さず、湾で安全に泳げるとは考えないでください。",
+            "ko": "사빈의 이야기는 대나무와 니파야자로 만든 소박한 오두막이 있던 해안 휴양지 살스 비치에서 시작되었습니다. 오르모크와 인근 마을에서 사람들이 찾아오자 사빈 A. 라라사발은 더 큰 시설 개발을 추진했습니다. 호텔 연혁에 따르면 사업 계획은 1990년에 시작되었고, 2006년에는 확장이 이루어졌습니다. 해변의 오두막에서 숙박과 모임 공간으로 규모가 바뀌어도 바다는 이야기의 중심에 남았습니다. 편안한 방문을 위해 햇빛이나 비를 막을 용품과 적절한 신발을 준비하세요. 물가에서는 직원의 안내를 따르고 아이들을 가까이에서 살피며, 만에서 수영해도 안전하다고 생각해서는 안 됩니다."
+          },
+          "mediaIds": [
+            "D09-preview-extra",
+            "D09-maps-03",
+            "D09-maps-05"
+          ],
+          "presentation": "story"
+        }
+      ],
+      "visitorGuide": {
+        "en": {
+          "arrival": "Use the Sabin Resort Hotel entrance in Barangay Bantigue, Ormoc City, and report to staff on arrival.",
+          "bestTime": "Plan around the time agreed with the hotel for your booking or visit. Choose daylight for enjoying the bay setting, subject to weather and permitted access.",
+          "activities": [
+            "Enjoying the bayfront setting in areas staff permit visitors to use",
+            "A hotel stay, meal or gathering when arranged and confirmed with the hotel"
+          ],
+          "preparation": [
+            "Confirm booking, visitor access, dining arrangements and any facility use directly with the hotel before travel.",
+            "Bring sun or rain protection and suitable footwear for permitted outdoor areas.",
+            "Ask staff which areas and facilities are open to your visit and whether reservations are needed."
+          ],
+          "safety": [
+            "Follow staff instructions and use only areas open to your booking or visit.",
+            "Take care near water and on wet surfaces, and supervise children closely.",
+            "Do not assume the bay is safe for swimming or that a pool is available for your visit; ask staff about permitted use and safety rules."
+          ]
+        },
+        "ja": {
+          "arrival": "オルモック市バンティゲ地区のサビン・リゾート・ホテル入口へ向かい、到着したらスタッフに声をかけてください。",
+          "bestTime": "予約や来訪についてホテルと合意した時刻に合わせてください。湾の風景を楽しむなら日中を選び、天候や立入可能な範囲に従いましょう。",
+          "activities": [
+            "スタッフが来訪者の利用を認める場所で湾岸の雰囲気を楽しむ",
+            "ホテルと手配・確認したうえでの宿泊、食事、集まり"
+          ],
+          "preparation": [
+            "出発前に予約、来訪者の入場、食事、施設利用をホテルへ直接確認してください。",
+            "利用可能な屋外エリアに適した靴と、日差しや雨への備えを持参してください。",
+            "今回利用できる場所や施設、予約の必要性をスタッフに確認してください。"
+          ],
+          "safety": [
+            "スタッフの指示に従い、予約や来訪で利用を認められた場所だけを使用してください。",
+            "水辺や濡れた場所では足元に注意し、子どもから目を離さないでください。",
+            "湾で安全に泳げる、または今回プールを利用できるとは限りません。利用の可否と安全規則をスタッフに確認してください。"
+          ]
+        },
+        "ko": {
+          "arrival": "오르모크시 반티게 바랑가이의 사빈 리조트 호텔 입구로 향하고, 도착하면 직원에게 먼저 문의하세요.",
+          "bestTime": "예약이나 방문에 대해 호텔과 합의한 시간에 맞추세요. 만의 풍경을 즐기려면 낮을 선택하되 날씨와 허용된 출입 범위를 따르세요.",
+          "activities": [
+            "직원이 방문객에게 허용한 구역에서 만 연안의 분위기 즐기기",
+            "호텔과 사전에 협의하고 확인한 숙박, 식사 또는 모임"
+          ],
+          "preparation": [
+            "출발 전에 예약, 방문객 출입, 식사와 시설 이용을 호텔에 직접 확인하세요.",
+            "허용된 야외 구역에 적합한 신발과 햇빛이나 비를 막을 용품을 준비하세요.",
+            "이번 방문에 이용할 수 있는 구역과 시설, 예약 필요 여부를 직원에게 확인하세요."
+          ],
+          "safety": [
+            "직원의 지시를 따르고 예약이나 방문에 허용된 구역만 이용하세요.",
+            "물가와 젖은 바닥에서 주의하고 아이들을 가까이에서 살피세요.",
+            "만에서 수영해도 안전하거나 이번 방문에 수영장을 이용할 수 있다고 가정하지 마세요. 허용된 이용과 안전 규칙을 직원에게 확인하세요."
+          ]
+        }
+      },
+      "location": {
+        "center": {
+          "latitude": 10.990489,
+          "longitude": 124.621132
+        },
+        "routeEntrance": {
+          "latitude": 10.990489,
+          "longitude": 124.621132
+        },
+        "area": "Barangay Bantigue, Ormoc City",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=10.990489%2C124.621132",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132"
+      },
+      "requiresGuide": false,
+      "gallery": [
+        "D09-preview",
+        "D09-preview-extra",
+        "D09-maps-01",
+        "D09-maps-03",
+        "D09-maps-04",
+        "D09-maps-05"
+      ],
+      "coverMediaId": "D09-preview"
+    }
+  ],
+  "media": [
+    {
+      "id": "D01-preview",
+      "destinationId": "D01",
+      "file": "assets/presentation/featured/D01-preview.jpg",
+      "credit": "Hydrochic · CC BY-SA 4.0 · 2017",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Always_take_the_scenic_route.jpg",
+      "caption": {
+        "en": "A paddleboarder on Lake Danao beneath forested hills, photographed in 2017.",
+        "ja": "森に覆われた山並みの下、ダナオ湖でパドルボードに乗る人。2017年撮影。",
+        "ko": "숲이 우거진 산 아래 다나오 호수에서 패들보드를 타는 사람. 2017년 촬영."
+      },
+      "alt": {
+        "en": "A paddleboarder on Lake Danao beneath forested hills, photographed in 2017.",
+        "ja": "森に覆われた山並みの下、ダナオ湖でパドルボードに乗る人。2017年撮影。",
+        "ko": "숲이 우거진 산 아래 다나오 호수에서 패들보드를 타는 사람. 2017년 촬영."
+      },
+      "width": 1616,
+      "height": 1080,
+      "sha256": "fcbab8d70b3374cfd849d438e3faf7a45669311b8e2dce52531028446ed20af1",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/"
+    },
+    {
+      "id": "D01-ext-11",
+      "destinationId": "D01",
+      "file": "assets/presentation/featured/D01-ext-11.jpg",
+      "credit": "Source: tacloban.bluelineph.com",
+      "sourceUrl": "https://tacloban.bluelineph.com/lake-danao-national-park/",
+      "caption": {
+        "en": "A floating cottage and red boat on blue Lake Danao.",
+        "ja": "青いダナオ湖に浮かぶ水上コテージと赤いボート。",
+        "ko": "푸른 다나오 호수에 떠 있는 수상 코티지와 빨간 배."
+      },
+      "alt": {
+        "en": "A floating cottage and red boat on blue Lake Danao.",
+        "ja": "青いダナオ湖に浮かぶ水上コテージと赤いボート。",
+        "ko": "푸른 다나오 호수에 떠 있는 수상 코티지와 빨간 배."
+      },
+      "width": 720,
+      "height": 401,
+      "sha256": "792ad61469275cdf42f4e9f4d602f4285d1348c44ff1c7d20ae4fcba3604ce94"
+    },
+    {
+      "id": "D01-ext-01",
+      "destinationId": "D01",
+      "file": "assets/presentation/featured/D01-ext-01.jpg",
+      "credit": "Source: ormoc.bluelineph.com",
+      "sourceUrl": "https://ormoc.bluelineph.com/lake-danao-national-park/",
+      "caption": {
+        "en": "Visitors aboard a floating cottage near Lake Danao's wooded shore.",
+        "ja": "森に縁取られたダナオ湖の岸近くで、水上コテージに乗る人々。",
+        "ko": "숲이 둘러싼 다나오 호숫가 근처 수상 코티지에 탄 사람들."
+      },
+      "alt": {
+        "en": "Visitors aboard a floating cottage near Lake Danao's wooded shore.",
+        "ja": "森に縁取られたダナオ湖の岸近くで、水上コテージに乗る人々。",
+        "ko": "숲이 둘러싼 다나오 호숫가 근처 수상 코티지에 탄 사람들."
+      },
+      "width": 720,
+      "height": 401,
+      "sha256": "7964e03957f88e48778299a00706b2ce719f0ff04fdc8b5a61494db633001c34"
+    },
+    {
+      "id": "D01-maps-01",
+      "destinationId": "D01",
+      "file": "assets/presentation/featured/D01-maps-01.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0652951%2C124.703809",
+      "caption": {
+        "en": "A floating cottage on rippled water beneath Lake Danao's forested hills.",
+        "ja": "ダナオ湖の森に覆われた山並みの下、波立つ水面に浮かぶコテージ。",
+        "ko": "다나오 호수의 숲이 우거진 산 아래 잔물결 위에 떠 있는 코티지."
+      },
+      "alt": {
+        "en": "A floating cottage on rippled water beneath Lake Danao's forested hills.",
+        "ja": "ダナオ湖の森に覆われた山並みの下、波立つ水面に浮かぶコテージ。",
+        "ko": "다나오 호수의 숲이 우거진 산 아래 잔물결 위에 떠 있는 코티지."
+      },
+      "width": 1200,
+      "height": 675,
+      "sha256": "88c56d0a132bc15efd9727dececcc319ded0d41f5e9a9f54dbde1cf56b04c585"
+    },
+    {
+      "id": "D01-ext-22",
+      "destinationId": "D01",
+      "file": "assets/presentation/featured/D01-ext-22.jpg",
+      "credit": "Source: jauntingandmusing.wordpress.com",
+      "sourceUrl": "https://jauntingandmusing.wordpress.com/2017/08/13/lake-danao-natural-park-ormoc-citys-natural-gem-that-provides-a-relaxing-view-to-behold/",
+      "caption": {
+        "en": "Two people paddle a narrow wooden boat across Lake Danao.",
+        "ja": "ダナオ湖で細長い木の舟をこぐ2人。",
+        "ko": "다나오 호수에서 길쭉한 나무배를 젓는 두 사람."
+      },
+      "alt": {
+        "en": "Two people paddle a narrow wooden boat across Lake Danao.",
+        "ja": "ダナオ湖で細長い木の舟をこぐ2人。",
+        "ko": "다나오 호수에서 길쭉한 나무배를 젓는 두 사람."
+      },
+      "width": 775,
+      "height": 516,
+      "sha256": "147d71a361f1882617ba65aecaab6340ca6d1bed6925657d00cc8842fb81a110"
+    },
+    {
+      "id": "D01-maps-04",
+      "destinationId": "D01",
+      "file": "assets/presentation/featured/D01-maps-04.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0652951%2C124.703809",
+      "caption": {
+        "en": "The Lake Danao Natural Park sign surrounded by green foliage.",
+        "ja": "緑の葉に囲まれたダナオ湖自然公園の看板。",
+        "ko": "푸른 잎에 둘러싸인 다나오 호수 자연공원 표지판."
+      },
+      "alt": {
+        "en": "The Lake Danao Natural Park sign surrounded by green foliage.",
+        "ja": "緑の葉に囲まれたダナオ湖自然公園の看板。",
+        "ko": "푸른 잎에 둘러싸인 다나오 호수 자연공원 표지판."
+      },
+      "width": 1200,
+      "height": 801,
+      "sha256": "b3eff6ce9e622b699af34c49b16a006257487ac98965d79c0ca9420fb9940e10"
+    },
+    {
+      "id": "D01-preview-extra",
+      "destinationId": "D01",
+      "file": "assets/presentation/featured/D01-preview-extra.jpg",
+      "credit": "Brenda Bonjoc · CC BY-SA 2.0 · 2008; source version modified",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lake_Danao.jpg",
+      "caption": {
+        "en": "A thatched lakeside shelter and wooded hills at Lake Danao, photographed in 2008.",
+        "ja": "ダナオ湖畔の草ぶき屋根の小屋と、森に覆われた山並み。2008年撮影。",
+        "ko": "다나오 호숫가의 초가지붕 쉼터와 숲이 우거진 산자락. 2008년 촬영."
+      },
+      "alt": {
+        "en": "A thatched lakeside shelter and wooded hills at Lake Danao, photographed in 2008.",
+        "ja": "ダナオ湖畔の草ぶき屋根の小屋と、森に覆われた山並み。2008年撮影。",
+        "ko": "다나오 호숫가의 초가지붕 쉼터와 숲이 우거진 산자락. 2008년 촬영."
+      },
+      "width": 960,
+      "height": 643,
+      "sha256": "e45f66a39ad5c92c87043e24b38719e2c7301be36946fda19d8744cf9ec2c7b0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/"
+    },
+    {
+      "id": "D02-maps-01",
+      "destinationId": "D02",
+      "file": "assets/presentation/featured/D02-maps-01.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.026388977432092%2C124.74888613655587",
+      "caption": {
+        "en": "An overhead view of Lake Kasudsuran enclosed by densely wooded hills.",
+        "ja": "木々が密に茂る山々に囲まれたカスドゥスラン湖を上空から望む。",
+        "ko": "나무가 빽빽한 산에 둘러싸인 카수드수란 호수를 위에서 본 풍경."
+      },
+      "alt": {
+        "en": "An overhead view of Lake Kasudsuran enclosed by densely wooded hills.",
+        "ja": "木々が密に茂る山々に囲まれたカスドゥスラン湖を上空から望む。",
+        "ko": "나무가 빽빽한 산에 둘러싸인 카수드수란 호수를 위에서 본 풍경."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "bdab4b31a4c9453ae63f487936f3c220fe4f18c8ac76530c116c2dd0a0b34bce"
+    },
+    {
+      "id": "D02-preview",
+      "destinationId": "D02",
+      "file": "assets/presentation/featured/D02-preview.jpg",
+      "credit": "Ephraim Arriesgado / Selfless Travels · via TripZilla and Shellwanders",
+      "sourceUrl": "https://www.tripzilla.ph/adventurers-guide-ormoc-city-leyte/11576",
+      "caption": {
+        "en": "A narrow boat among ferns and tall grasses beside Lake Kasudsuran.",
+        "ja": "カスドゥスラン湖畔のシダや背の高い草の間にある細長い舟。",
+        "ko": "카수드수란 호숫가의 고사리와 키 큰 풀 사이에 놓인 길쭉한 배."
+      },
+      "alt": {
+        "en": "A narrow boat among ferns and tall grasses beside Lake Kasudsuran.",
+        "ja": "カスドゥスラン湖畔のシダや背の高い草の間にある細長い舟。",
+        "ko": "카수드수란 호숫가의 고사리와 키 큰 풀 사이에 놓인 길쭉한 배."
+      },
+      "width": 640,
+      "height": 480,
+      "sha256": "0783dc946f4f3c1f294e95df88f497f914368aacecc22347068241052506649c"
+    },
+    {
+      "id": "D02-ext-06",
+      "destinationId": "D02",
+      "file": "assets/presentation/featured/D02-ext-06.jpg",
+      "credit": "Source: viajeintl.blogspot.com",
+      "sourceUrl": "https://viajeintl.blogspot.com/2014/07/lake-kasudsuran.html",
+      "caption": {
+        "en": "Trees and clouds reflected across the still surface of Lake Kasudsuran.",
+        "ja": "カスドゥスラン湖の静かな水面に映る木々と雲。",
+        "ko": "카수드수란 호수의 잔잔한 수면에 비친 나무와 구름."
+      },
+      "alt": {
+        "en": "Trees and clouds reflected across the still surface of Lake Kasudsuran.",
+        "ja": "カスドゥスラン湖の静かな水面に映る木々と雲。",
+        "ko": "카수드수란 호수의 잔잔한 수면에 비친 나무와 구름."
+      },
+      "width": 640,
+      "height": 480,
+      "sha256": "18be81cd8cb73c93c010b7df06676cbe44f308da457ea9e6f00fe3a572ab2261"
+    },
+    {
+      "id": "D02-maps-04",
+      "destinationId": "D02",
+      "file": "assets/presentation/featured/D02-maps-04.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.026388977432092%2C124.74888613655587",
+      "caption": {
+        "en": "A visitor beside the Lake Kasudsuran sign amid misty vegetation.",
+        "ja": "霧がかかる草木の中、カスドゥスラン湖の看板のそばに立つ訪問者。",
+        "ko": "안개가 낀 풀숲 속 카수드수란 호수 표지판 옆에 선 방문객."
+      },
+      "alt": {
+        "en": "A visitor beside the Lake Kasudsuran sign amid misty vegetation.",
+        "ja": "霧がかかる草木の中、カスドゥスラン湖の看板のそばに立つ訪問者。",
+        "ko": "안개가 낀 풀숲 속 카수드수란 호수 표지판 옆에 선 방문객."
+      },
+      "width": 1200,
+      "height": 1600,
+      "sha256": "e8df1c463e721ffa33d18b211fd7dafacd4e62c4a1815612b9d81d8b9fd12456"
+    },
+    {
+      "id": "D02-maps-05",
+      "destinationId": "D02",
+      "file": "assets/presentation/featured/D02-maps-05.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.026388977432092%2C124.74888613655587",
+      "caption": {
+        "en": "A backpacked hiker on Lake Kasudsuran's densely vegetated shoreline path.",
+        "ja": "草木の茂るカスドゥスラン湖岸の小道にいる、バックパックを背負った登山者。",
+        "ko": "풀이 우거진 카수드수란 호숫가 길에서 배낭을 멘 등산객."
+      },
+      "alt": {
+        "en": "A backpacked hiker on Lake Kasudsuran's densely vegetated shoreline path.",
+        "ja": "草木の茂るカスドゥスラン湖岸の小道にいる、バックパックを背負った登山者。",
+        "ko": "풀이 우거진 카수드수란 호숫가 길에서 배낭을 멘 등산객."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "8fad1112074632145849257383d2cfe37183b50d930dfcb383f61de1225ec96c"
+    },
+    {
+      "id": "D03-maps-03",
+      "destinationId": "D03",
+      "file": "assets/presentation/featured/D03-maps-03.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406",
+      "caption": {
+        "en": "Lake Janagdan's blue-green water enclosed by steep, densely vegetated slopes.",
+        "ja": "植物に覆われた急な斜面に囲まれた、ジャナグダン湖の青緑の水面。",
+        "ko": "식물이 빽빽한 가파른 비탈에 둘러싸인 자나그단 호수의 청록빛 수면."
+      },
+      "alt": {
+        "en": "Lake Janagdan's blue-green water enclosed by steep, densely vegetated slopes.",
+        "ja": "植物に覆われた急な斜面に囲まれた、ジャナグダン湖の青緑の水面。",
+        "ko": "식물이 빽빽한 가파른 비탈에 둘러싸인 자나그단 호수의 청록빛 수면."
+      },
+      "width": 720,
+      "height": 646,
+      "sha256": "57a9db22bea2993e7b3620607926a91962aff5b3469d6ddf3c078a98fe88e889"
+    },
+    {
+      "id": "D03-preview-extra",
+      "destinationId": "D03",
+      "file": "assets/presentation/featured/D03-preview-extra.jpg",
+      "credit": "Source: Shellwanders · photographer unconfirmed",
+      "sourceUrl": "https://shellwanders.com/how-to-get-to-lake-janagdan-budget-expenses/",
+      "caption": {
+        "en": "Bare foreground branches frame green slopes reflected in Lake Janagdan.",
+        "ja": "手前の葉のない枝の向こうに、緑の斜面を映すジャナグダン湖。",
+        "ko": "앞쪽의 잎 없는 가지 너머로 푸른 비탈이 비친 자나그단 호수."
+      },
+      "alt": {
+        "en": "Bare foreground branches frame green slopes reflected in Lake Janagdan.",
+        "ja": "手前の葉のない枝の向こうに、緑の斜面を映すジャナグダン湖。",
+        "ko": "앞쪽의 잎 없는 가지 너머로 푸른 비탈이 비친 자나그단 호수."
+      },
+      "width": 845,
+      "height": 462,
+      "sha256": "88d94129dbd066349a89114a24edb7f95b60e88f7caf407538dad78a3d9dca6c"
+    },
+    {
+      "id": "D03-preview",
+      "destinationId": "D03",
+      "file": "assets/presentation/featured/D03-preview.jpg",
+      "credit": "Source: Shellwanders · photographer unconfirmed",
+      "sourceUrl": "https://shellwanders.com/how-to-get-to-lake-janagdan-budget-expenses/",
+      "caption": {
+        "en": "Visitors at the rocky shore and in Lake Janagdan beneath low mist.",
+        "ja": "低く霧が漂うジャナグダン湖で、岩の多い岸辺や水中にいる人々。",
+        "ko": "낮은 안개 아래 자나그단 호수의 바위 물가와 물속에 있는 사람들."
+      },
+      "alt": {
+        "en": "Visitors at the rocky shore and in Lake Janagdan beneath low mist.",
+        "ja": "低く霧が漂うジャナグダン湖で、岩の多い岸辺や水中にいる人々。",
+        "ko": "낮은 안개 아래 자나그단 호수의 바위 물가와 물속에 있는 사람들."
+      },
+      "width": 845,
+      "height": 462,
+      "sha256": "b65b11f287aed248474824f641bbfe491dba445e78b86a7ecdbce34198705998"
+    },
+    {
+      "id": "D03-maps-02",
+      "destinationId": "D03",
+      "file": "assets/presentation/featured/D03-maps-02.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406",
+      "caption": {
+        "en": "Lake Janagdan seen through hillside grasses, with distant lowlands beyond.",
+        "ja": "斜面の草越しに見えるジャナグダン湖と、その先の遠い低地。",
+        "ko": "비탈의 풀 사이로 보이는 자나그단 호수와 그 너머 먼 저지대."
+      },
+      "alt": {
+        "en": "Lake Janagdan seen through hillside grasses, with distant lowlands beyond.",
+        "ja": "斜面の草越しに見えるジャナグダン湖と、その先の遠い低地。",
+        "ko": "비탈의 풀 사이로 보이는 자나그단 호수와 그 너머 먼 저지대."
+      },
+      "width": 1200,
+      "height": 675,
+      "sha256": "0243d6c2cfc78ae5d62176654fb2b99cf1f83d431d5a904871641e1b3b5b9bfc"
+    },
+    {
+      "id": "D03-maps-04",
+      "destinationId": "D03",
+      "file": "assets/presentation/featured/D03-maps-04.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406",
+      "caption": {
+        "en": "A hiker follows a narrow, overgrown trail toward misty mountain slopes.",
+        "ja": "草木の茂る細い道を、霧のかかる山の斜面へ進む登山者。",
+        "ko": "풀이 무성한 좁은 길을 따라 안개 낀 산비탈로 향하는 등산객."
+      },
+      "alt": {
+        "en": "A hiker follows a narrow, overgrown trail toward misty mountain slopes.",
+        "ja": "草木の茂る細い道を、霧のかかる山の斜面へ進む登山者。",
+        "ko": "풀이 무성한 좁은 길을 따라 안개 낀 산비탈로 향하는 등산객."
+      },
+      "width": 1200,
+      "height": 1500,
+      "sha256": "02cd16b440ba7cd9e909d570cefde3199bb8cadca94737b26051ad9decee36ed"
+    },
+    {
+      "id": "D03-maps-05",
+      "destinationId": "D03",
+      "file": "assets/presentation/featured/D03-maps-05.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0990654%2C124.7177406",
+      "caption": {
+        "en": "A Lake Janagdan staging-area sign beside a mountain road and trees.",
+        "ja": "山道と木々のそばに立つ、ジャナグダン湖ステージングエリアの案内看板。",
+        "ko": "산길과 나무 옆에 선 자나그단 호수 집결지 안내 표지판."
+      },
+      "alt": {
+        "en": "A Lake Janagdan staging-area sign beside a mountain road and trees.",
+        "ja": "山道と木々のそばに立つ、ジャナグダン湖ステージングエリアの案内看板。",
+        "ko": "산길과 나무 옆에 선 자나그단 호수 집결지 안내 표지판."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "58eeb6f42c9150a5907fefbc152f83d7179474355aa4a98f1ba3112cf978b468"
+    },
+    {
+      "id": "D04-ext-03",
+      "destinationId": "D04",
+      "file": "assets/presentation/featured/D04-ext-03.jpg",
+      "credit": "Source: delightful.ph",
+      "sourceUrl": "https://www.delightful.ph/blog/category/4/travel-news/post/648/mangrove-eco-park-in-ormoc-city-shows-how-nature-and-livelihood-can-thrive-together",
+      "caption": {
+        "en": "A blue walkway extends across calm water toward dense mangroves.",
+        "ja": "青い遊歩道が穏やかな水面を渡り、密生するマングローブへ延びる。",
+        "ko": "푸른 산책로가 잔잔한 수면을 가로질러 빽빽한 맹그로브로 이어진다."
+      },
+      "alt": {
+        "en": "A blue walkway extends across calm water toward dense mangroves.",
+        "ja": "青い遊歩道が穏やかな水面を渡り、密生するマングローブへ延びる。",
+        "ko": "푸른 산책로가 잔잔한 수면을 가로질러 빽빽한 맹그로브로 이어진다."
+      },
+      "width": 1280,
+      "height": 853,
+      "sha256": "1e8cb7ba542f8a1c407e45ba3816a81c129b406f6b7f36a56bcb3a526e6f4b12"
+    },
+    {
+      "id": "D04-ext-12",
+      "destinationId": "D04",
+      "file": "assets/presentation/featured/D04-ext-12.webp",
+      "credit": "Source: mindtrip.ai",
+      "sourceUrl": "https://mindtrip.ai/attraction/ormoc-visayas/ormoc-mangrove-ecopark/at-diXLPBie",
+      "caption": {
+        "en": "Blue railings frame a sunlit walkway beside palms and mangroves.",
+        "ja": "ヤシとマングローブのそばで、青い手すりが日差しを浴びる遊歩道を縁取る。",
+        "ko": "야자수와 맹그로브 옆에서 푸른 난간이 햇빛 드는 산책로를 둘러싼다."
+      },
+      "alt": {
+        "en": "Blue railings frame a sunlit walkway beside palms and mangroves.",
+        "ja": "ヤシとマングローブのそばで、青い手すりが日差しを浴びる遊歩道を縁取る。",
+        "ko": "야자수와 맹그로브 옆에서 푸른 난간이 햇빛 드는 산책로를 둘러싼다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "07d997c9220c56468618c837d24da2a0be0558f10bf0c15d4e9124b5dac02ea1"
+    },
+    {
+      "id": "D04-preview",
+      "destinationId": "D04",
+      "file": "assets/presentation/featured/D04-preview.jpg",
+      "credit": "Source: Shellwanders · 2023",
+      "sourceUrl": "https://shellwanders.com/ormoc-mangrove-eco-park-tourist-spot-in-ormoc/",
+      "caption": {
+        "en": "Lamps illuminate a raised walkway beside palms and muddy shoreline.",
+        "ja": "ヤシと泥の岸辺のそばに延びる高架の遊歩道を照明が照らす。",
+        "ko": "야자수와 진흙 해안 옆으로 이어진 높은 산책로에 조명이 켜져 있다."
+      },
+      "alt": {
+        "en": "Lamps illuminate a raised walkway beside palms and muddy shoreline.",
+        "ja": "ヤシと泥の岸辺のそばに延びる高架の遊歩道を照明が照らす。",
+        "ko": "야자수와 진흙 해안 옆으로 이어진 높은 산책로에 조명이 켜져 있다."
+      },
+      "width": 845,
+      "height": 527,
+      "sha256": "d78d6adb603fe0c5118c7c628c9825e5e1b1a796784a76d163da54ec2e59a672"
+    },
+    {
+      "id": "D04-preview-extra",
+      "destinationId": "D04",
+      "file": "assets/presentation/featured/D04-preview-extra.jpg",
+      "credit": "Source: Shellwanders · 2023",
+      "sourceUrl": "https://shellwanders.com/ormoc-mangrove-eco-park-tourist-spot-in-ormoc/",
+      "caption": {
+        "en": "Mangroves border a lamp-lit walkway above the exposed shore.",
+        "ja": "干出した岸辺の上で、照明のついた遊歩道にマングローブが寄り添う。",
+        "ko": "드러난 해안 위로 조명이 켜진 산책로 옆에 맹그로브가 자란다."
+      },
+      "alt": {
+        "en": "Mangroves border a lamp-lit walkway above the exposed shore.",
+        "ja": "干出した岸辺の上で、照明のついた遊歩道にマングローブが寄り添う。",
+        "ko": "드러난 해안 위로 조명이 켜진 산책로 옆에 맹그로브가 자란다."
+      },
+      "width": 845,
+      "height": 527,
+      "sha256": "3151550210836469ea40c67c33754e4221eac89eddfb3cd7edd9079dbc008bf3"
+    },
+    {
+      "id": "D04-maps-05",
+      "destinationId": "D04",
+      "file": "assets/presentation/featured/D04-maps-05.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0089889%2C124.5700552",
+      "caption": {
+        "en": "A wooden park sign stands before a pale-blue building.",
+        "ja": "淡い青色の建物の前に木製の公園案内看板が立つ。",
+        "ko": "연한 파란색 건물 앞에 나무로 된 공원 안내판이 서 있다."
+      },
+      "alt": {
+        "en": "A wooden park sign stands before a pale-blue building.",
+        "ja": "淡い青色の建物の前に木製の公園案内看板が立つ。",
+        "ko": "연한 파란색 건물 앞에 나무로 된 공원 안내판이 서 있다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "8bc199fa1aec6453c0c11a5f804098e243dee3f664fcd03277b56c5fb4b481e8"
+    },
+    {
+      "id": "D04-maps-03",
+      "destinationId": "D04",
+      "file": "assets/presentation/featured/D04-maps-03.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0089889%2C124.5700552",
+      "caption": {
+        "en": "Blue railings follow the waterside walkway beneath a dusky sky.",
+        "ja": "夕暮れの空の下、水辺の遊歩道に青い手すりが続く。",
+        "ko": "해 질 무렵 하늘 아래 물가 산책로를 따라 푸른 난간이 이어진다."
+      },
+      "alt": {
+        "en": "Blue railings follow the waterside walkway beneath a dusky sky.",
+        "ja": "夕暮れの空の下、水辺の遊歩道に青い手すりが続く。",
+        "ko": "해 질 무렵 하늘 아래 물가 산책로를 따라 푸른 난간이 이어진다."
+      },
+      "width": 1200,
+      "height": 675,
+      "sha256": "674bce235db22b4e2e301ffc0467b7bb0e3045fd9fb21a72b420c10084da7bdc"
+    },
+    {
+      "id": "D05-preview",
+      "destinationId": "D05",
+      "file": "assets/presentation/featured/D05-preview.jpg",
+      "credit": "Source: Shellwanders",
+      "sourceUrl": "https://shellwanders.com/a-locals-guide-to-things-to-do-in-ormoc-city/",
+      "caption": {
+        "en": "Two visitors stand beside a giant pineapple sculpture and fields.",
+        "ja": "大きなパイナップルの像と畑のそばに2人の訪問者が立つ。",
+        "ko": "거대한 파인애플 조형물과 들판 옆에 두 방문객이 서 있다."
+      },
+      "alt": {
+        "en": "Two visitors stand beside a giant pineapple sculpture and fields.",
+        "ja": "大きなパイナップルの像と畑のそばに2人の訪問者が立つ。",
+        "ko": "거대한 파인애플 조형물과 들판 옆에 두 방문객이 서 있다."
+      },
+      "width": 845,
+      "height": 634,
+      "sha256": "d0201c32690ddfd7a457dc94705fc6ad60ac9cb39a219814a915981109a25476"
+    },
+    {
+      "id": "D05-maps-03",
+      "destinationId": "D05",
+      "file": "assets/presentation/featured/D05-maps-03.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679",
+      "caption": {
+        "en": "Rows of pineapple plants stretch toward palms beneath blue sky.",
+        "ja": "青空の下、列をなすパイナップルの株がヤシの木々へと続く。",
+        "ko": "푸른 하늘 아래 줄지어 자라는 파인애플이 야자수 쪽으로 펼쳐진다."
+      },
+      "alt": {
+        "en": "Rows of pineapple plants stretch toward palms beneath blue sky.",
+        "ja": "青空の下、列をなすパイナップルの株がヤシの木々へと続く。",
+        "ko": "푸른 하늘 아래 줄지어 자라는 파인애플이 야자수 쪽으로 펼쳐진다."
+      },
+      "width": 720,
+      "height": 542,
+      "sha256": "2e8139aae102db3e3885e0d884ca929c50e28548afede4928c3f90eb34c94f29"
+    },
+    {
+      "id": "D05-maps-04",
+      "destinationId": "D05",
+      "file": "assets/presentation/featured/D05-maps-04.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679",
+      "caption": {
+        "en": "A tractor sits among pineapple rows beyond a strip of bare soil.",
+        "ja": "土の露出した帯の向こう、パイナップルの列の間にトラクターが見える。",
+        "ko": "맨땅이 드러난 구간 너머 파인애플 줄 사이로 트랙터가 보인다."
+      },
+      "alt": {
+        "en": "A tractor sits among pineapple rows beyond a strip of bare soil.",
+        "ja": "土の露出した帯の向こう、パイナップルの列の間にトラクターが見える。",
+        "ko": "맨땅이 드러난 구간 너머 파인애플 줄 사이로 트랙터가 보인다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "dc15a01eb004e6d6082fd2a42e2163e16d1910c9baebb58c24136f5d67d08b64"
+    },
+    {
+      "id": "D05-preview-extra",
+      "destinationId": "D05",
+      "file": "assets/presentation/featured/D05-preview-extra.jpg",
+      "credit": "Ormoc News and Updates · via Chill and Travel",
+      "sourceUrl": "https://chillandtravel.com/ormoc-tourist-spots/",
+      "caption": {
+        "en": "Pineapple sculptures stand beside a tall SAL Queen Pineapple sign.",
+        "ja": "背の高い「SAL Queen Pineapple」の看板のそばにパイナップルの像が立つ。",
+        "ko": "높은 SAL Queen Pineapple 표지판 옆에 파인애플 조형물들이 서 있다."
+      },
+      "alt": {
+        "en": "Pineapple sculptures stand beside a tall SAL Queen Pineapple sign.",
+        "ja": "背の高い「SAL Queen Pineapple」の看板のそばにパイナップルの像が立つ。",
+        "ko": "높은 SAL Queen Pineapple 표지판 옆에 파인애플 조형물들이 서 있다."
+      },
+      "width": 1200,
+      "height": 1600,
+      "sha256": "3f8f7d06f1910e52d1ee1712e3e07c4ce134fb65586d7a54554c25f76a8a415c"
+    },
+    {
+      "id": "D05-maps-01",
+      "destinationId": "D05",
+      "file": "assets/presentation/featured/D05-maps-01.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679",
+      "caption": {
+        "en": "Two pineapple sculptures rise above a paved path under blue sky.",
+        "ja": "青空の下、舗装された小道の上に2つのパイナップルの像がそびえる。",
+        "ko": "푸른 하늘 아래 포장된 길 위로 두 파인애플 조형물이 솟아 있다."
+      },
+      "alt": {
+        "en": "Two pineapple sculptures rise above a paved path under blue sky.",
+        "ja": "青空の下、舗装された小道の上に2つのパイナップルの像がそびえる。",
+        "ko": "푸른 하늘 아래 포장된 길 위로 두 파인애플 조형물이 솟아 있다."
+      },
+      "width": 1200,
+      "height": 2573,
+      "sha256": "a696048b2808edcc37d45a13b802ced4cc0f971be44b32ca9f7c6a825c8b156b"
+    },
+    {
+      "id": "D05-maps-05",
+      "destinationId": "D05",
+      "file": "assets/presentation/featured/D05-maps-05.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0390182%2C124.6132679",
+      "caption": {
+        "en": "Heavy clouds gather above pineapple fields and distant palms.",
+        "ja": "パイナップル畑と遠くのヤシの上に厚い雲が広がる。",
+        "ko": "파인애플밭과 멀리 있는 야자수 위로 짙은 구름이 드리운다."
+      },
+      "alt": {
+        "en": "Heavy clouds gather above pineapple fields and distant palms.",
+        "ja": "パイナップル畑と遠くのヤシの上に厚い雲が広がる。",
+        "ko": "파인애플밭과 멀리 있는 야자수 위로 짙은 구름이 드리운다."
+      },
+      "width": 1200,
+      "height": 1600,
+      "sha256": "43473c2f56ff4279085331848327cd32700d6844c5e8a1e43fb1b361a26b40e7"
+    },
+    {
+      "id": "D06-maps-01",
+      "destinationId": "D06",
+      "file": "assets/presentation/featured/D06-maps-01.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625",
+      "caption": {
+        "en": "Long tree shadows cross a golf green bordered by broad canopies.",
+        "ja": "大きな樹冠に囲まれたゴルフのグリーンを、長い木陰が横切る。",
+        "ko": "넓은 나뭇가지로 둘러싸인 골프 그린 위로 긴 나무 그림자가 드리운다."
+      },
+      "alt": {
+        "en": "Long tree shadows cross a golf green bordered by broad canopies.",
+        "ja": "大きな樹冠に囲まれたゴルフのグリーンを、長い木陰が横切る。",
+        "ko": "넓은 나뭇가지로 둘러싸인 골프 그린 위로 긴 나무 그림자가 드리운다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "2db7772c34f1cf741b1174bdab9c33266e71f71eac776bdff2d29fa1ee3afa3b"
+    },
+    {
+      "id": "D06-preview",
+      "destinationId": "D06",
+      "file": "assets/presentation/featured/D06-preview.jpg",
+      "credit": "Source: ORMOC CITY blog · 2014",
+      "sourceUrl": "https://mitch18malinao.blogspot.com/2014/03/tourist-spots.html",
+      "caption": {
+        "en": "A large spreading tree towers above an open lawn.",
+        "ja": "開けた芝生の上に、大きく枝を広げた木がそびえる。",
+        "ko": "탁 트인 잔디밭 위로 가지를 넓게 펼친 큰 나무가 솟아 있다."
+      },
+      "alt": {
+        "en": "A large spreading tree towers above an open lawn.",
+        "ja": "開けた芝生の上に、大きく枝を広げた木がそびえる。",
+        "ko": "탁 트인 잔디밭 위로 가지를 넓게 펼친 큰 나무가 솟아 있다."
+      },
+      "width": 550,
+      "height": 365,
+      "sha256": "e61d1212ba8974f7659284a05c13c1f181e41e21865e364b78b47c389f676c30"
+    },
+    {
+      "id": "D06-preview-extra",
+      "destinationId": "D06",
+      "file": "assets/presentation/featured/D06-preview-extra.jpg",
+      "credit": "Source: Nickileodion · 2011",
+      "sourceUrl": "https://nickileodion.blogspot.com/2011/06/ormoc-city.html",
+      "caption": {
+        "en": "A row of spreading trees borders a bright green lawn.",
+        "ja": "鮮やかな緑の芝生に沿って、枝を広げた木々が並ぶ。",
+        "ko": "선명한 초록 잔디밭 가장자리에 가지를 펼친 나무들이 줄지어 있다."
+      },
+      "alt": {
+        "en": "A row of spreading trees borders a bright green lawn.",
+        "ja": "鮮やかな緑の芝生に沿って、枝を広げた木々が並ぶ。",
+        "ko": "선명한 초록 잔디밭 가장자리에 가지를 펼친 나무들이 줄지어 있다."
+      },
+      "width": 497,
+      "height": 375,
+      "sha256": "b4b22769060729e67bf1c6701936084287def5f818e72ebefc05e4704dc30e8c"
+    },
+    {
+      "id": "D06-maps-03",
+      "destinationId": "D06",
+      "file": "assets/presentation/featured/D06-maps-03.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625",
+      "caption": {
+        "en": "Golfers stand on a green beneath clouds and distant mountain ridges.",
+        "ja": "雲と遠くの山並みを背景に、ゴルファーたちがグリーンに立つ。",
+        "ko": "구름과 멀리 있는 산줄기를 배경으로 골퍼들이 그린에 서 있다."
+      },
+      "alt": {
+        "en": "Golfers stand on a green beneath clouds and distant mountain ridges.",
+        "ja": "雲と遠くの山並みを背景に、ゴルファーたちがグリーンに立つ。",
+        "ko": "구름과 멀리 있는 산줄기를 배경으로 골퍼들이 그린에 서 있다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "b97fbc66c5b8d87614be55305afd2342e67cffeb1784e62d6d04e9185b35fa3f"
+    },
+    {
+      "id": "D06-maps-04",
+      "destinationId": "D06",
+      "file": "assets/presentation/featured/D06-maps-04.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625",
+      "caption": {
+        "en": "Red-roofed buildings flank a trimmed lawn under a bright sky.",
+        "ja": "明るい空の下、手入れされた芝生の両側に赤い屋根の建物が並ぶ。",
+        "ko": "밝은 하늘 아래 잘 다듬어진 잔디밭 양옆에 빨간 지붕 건물들이 있다."
+      },
+      "alt": {
+        "en": "Red-roofed buildings flank a trimmed lawn under a bright sky.",
+        "ja": "明るい空の下、手入れされた芝生の両側に赤い屋根の建物が並ぶ。",
+        "ko": "밝은 하늘 아래 잘 다듬어진 잔디밭 양옆에 빨간 지붕 건물들이 있다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "25b95e693cd918a410bc1dab4dc925078ccf5bff1b9d758e67bc02a6d91751a6"
+    },
+    {
+      "id": "D06-maps-05",
+      "destinationId": "D06",
+      "file": "assets/presentation/featured/D06-maps-05.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.9800643%2C124.6611625",
+      "caption": {
+        "en": "White golf carts line up beneath a roof beside club buildings.",
+        "ja": "クラブの建物のそばで、白いゴルフカートが屋根の下に並ぶ。",
+        "ko": "클럽 건물 옆 지붕 아래에 흰 골프 카트들이 줄지어 있다."
+      },
+      "alt": {
+        "en": "White golf carts line up beneath a roof beside club buildings.",
+        "ja": "クラブの建物のそばで、白いゴルフカートが屋根の下に並ぶ。",
+        "ko": "클럽 건물 옆 지붕 아래에 흰 골프 카트들이 줄지어 있다."
+      },
+      "width": 1200,
+      "height": 677,
+      "sha256": "3b76f78e136fbb847eb4b9bc92011fd80d3a2272285b82ff39c686fd2530fc30"
+    },
+    {
+      "id": "D07-maps-01",
+      "destinationId": "D07",
+      "file": "assets/presentation/featured/D07-maps-01.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.103007%2C124.7424401",
+      "caption": {
+        "en": "Clouds drift above layered, forested ridges around Alto Peak.",
+        "ja": "アルト・ピーク周辺で、森に覆われた幾重もの尾根の上に雲が広がる。",
+        "ko": "알토 피크 주변의 숲이 우거진 겹겹의 능선 위로 구름이 펼쳐진다."
+      },
+      "alt": {
+        "en": "Clouds drift above layered, forested ridges around Alto Peak.",
+        "ja": "アルト・ピーク周辺で、森に覆われた幾重もの尾根の上に雲が広がる。",
+        "ko": "알토 피크 주변의 숲이 우거진 겹겹의 능선 위로 구름이 펼쳐진다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "9da5eaa468ec38ac66c62c47805e637dc3e532efb801d1b4b96783d79913df58"
+    },
+    {
+      "id": "D07-preview",
+      "destinationId": "D07",
+      "file": "assets/presentation/featured/D07-preview.jpg",
+      "credit": "Source: Shellwanders",
+      "sourceUrl": "https://shellwanders.com/a-locals-guide-to-things-to-do-in-ormoc-city/",
+      "caption": {
+        "en": "A wooden Alto Peak marker stands among trees and grass.",
+        "ja": "木々や草の間に立つ、アルト・ピークの木製標識。",
+        "ko": "나무와 풀 사이에 서 있는 알토 피크 나무 표지판."
+      },
+      "alt": {
+        "en": "A wooden Alto Peak marker stands among trees and grass.",
+        "ja": "木々や草の間に立つ、アルト・ピークの木製標識。",
+        "ko": "나무와 풀 사이에 서 있는 알토 피크 나무 표지판."
+      },
+      "width": 845,
+      "height": 581,
+      "sha256": "46612cd5a7a53c6bf2613bdd963a286940cb68f32cd7b3670be8a5e607d09fb0"
+    },
+    {
+      "id": "D07-preview-extra",
+      "destinationId": "D07",
+      "file": "assets/presentation/featured/D07-preview-extra.jpg",
+      "credit": "My Nature Trip · via Shellwanders",
+      "sourceUrl": "https://mynaturetrip.wordpress.com/2022/07/27/alto-peak-the-marvelous-summit-of-mt-aminduen/",
+      "caption": {
+        "en": "Green ridges recede beneath white and grey mountain clouds.",
+        "ja": "白や灰色の雲の下に、緑の尾根が幾重にも遠ざかる。",
+        "ko": "흰색과 회색 구름 아래로 푸른 능선이 겹겹이 이어진다."
+      },
+      "alt": {
+        "en": "Green ridges recede beneath white and grey mountain clouds.",
+        "ja": "白や灰色の雲の下に、緑の尾根が幾重にも遠ざかる。",
+        "ko": "흰색과 회색 구름 아래로 푸른 능선이 겹겹이 이어진다."
+      },
+      "width": 640,
+      "height": 426,
+      "sha256": "09080c937e780a24de71a573bea567e6478af6290c737a062832bccc47c0a650"
+    },
+    {
+      "id": "D07-maps-02",
+      "destinationId": "D07",
+      "file": "assets/presentation/featured/D07-maps-02.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.103007%2C124.7424401",
+      "caption": {
+        "en": "Dense greenery frames a steep ridge beneath scattered clouds.",
+        "ja": "生い茂る緑の向こうに、雲が浮かぶ空と急な尾根が見える。",
+        "ko": "무성한 초록 식물 너머로 구름이 떠 있는 하늘과 가파른 능선이 보인다."
+      },
+      "alt": {
+        "en": "Dense greenery frames a steep ridge beneath scattered clouds.",
+        "ja": "生い茂る緑の向こうに、雲が浮かぶ空と急な尾根が見える。",
+        "ko": "무성한 초록 식물 너머로 구름이 떠 있는 하늘과 가파른 능선이 보인다."
+      },
+      "width": 720,
+      "height": 1280,
+      "sha256": "df6e75198ffa8e7adea823efffd0aee8e0db75df2b4384911644cda9e8a31c9e"
+    },
+    {
+      "id": "D07-maps-05",
+      "destinationId": "D07",
+      "file": "assets/presentation/featured/D07-maps-05.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.103007%2C124.7424401",
+      "caption": {
+        "en": "A forest trail marker rests beside moss-covered rocks.",
+        "ja": "苔に覆われた岩のそばに置かれた、森の登山道の標識。",
+        "ko": "이끼 덮인 바위 옆에 놓인 숲속 등산로 표지판."
+      },
+      "alt": {
+        "en": "A forest trail marker rests beside moss-covered rocks.",
+        "ja": "苔に覆われた岩のそばに置かれた、森の登山道の標識。",
+        "ko": "이끼 덮인 바위 옆에 놓인 숲속 등산로 표지판."
+      },
+      "width": 1200,
+      "height": 1600,
+      "sha256": "14910c7ffbe019f62da26085d826637a8442a3400abb4121e6e75b899067f9c7"
+    },
+    {
+      "id": "D08-ext-08",
+      "destinationId": "D08",
+      "file": "assets/presentation/featured/D08-ext-08.jpg",
+      "credit": "Source: definitelypinoy.wordpress.com",
+      "sourceUrl": "https://definitelypinoy.wordpress.com/2021/10/24/heavens-peak-garden-of-the-gods/",
+      "caption": {
+        "en": "A decorative arch frames a flower-lined path toward green mountains.",
+        "ja": "花々に縁取られた小道と緑の山々を囲む、装飾的なアーチ。",
+        "ko": "꽃이 늘어선 길과 푸른 산을 감싸는 장식 아치."
+      },
+      "alt": {
+        "en": "A decorative arch frames a flower-lined path toward green mountains.",
+        "ja": "花々に縁取られた小道と緑の山々を囲む、装飾的なアーチ。",
+        "ko": "꽃이 늘어선 길과 푸른 산을 감싸는 장식 아치."
+      },
+      "width": 4000,
+      "height": 2252,
+      "sha256": "3610ef626692f7a96f8c7eec4fa8b05bbfed4c17c1482b62d6074b3d2a87936a"
+    },
+    {
+      "id": "D08-ext-02",
+      "destinationId": "D08",
+      "file": "assets/presentation/featured/D08-ext-02.jpg",
+      "credit": "Source: x.com",
+      "sourceUrl": "https://x.com/WPMedics/status/1175421856850968576",
+      "caption": {
+        "en": "A stone path runs between bright flowers toward forested mountains.",
+        "ja": "鮮やかな花々の間を、森に覆われた山々へと延びる石の小道。",
+        "ko": "선명한 꽃 사이로 숲이 우거진 산을 향해 이어지는 돌길."
+      },
+      "alt": {
+        "en": "A stone path runs between bright flowers toward forested mountains.",
+        "ja": "鮮やかな花々の間を、森に覆われた山々へと延びる石の小道。",
+        "ko": "선명한 꽃 사이로 숲이 우거진 산을 향해 이어지는 돌길."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "8f4325f5d160a013d6057009b994f6b25707ee70ee40aacf5dcc3d5b9150d05d"
+    },
+    {
+      "id": "D08-preview",
+      "destinationId": "D08",
+      "file": "assets/presentation/featured/D08-preview.jpg",
+      "credit": "Source: Shellwanders · published 2021",
+      "sourceUrl": "https://shellwanders.com/how-to-get-to-heavens-peak-ormoc/",
+      "caption": {
+        "en": "A visitor stands between flower borders beneath green mountain ridges.",
+        "ja": "緑の山並みを背景に、花壇の間に立つ来訪者。",
+        "ko": "푸른 산등성이를 배경으로 화단 사이에 서 있는 방문객."
+      },
+      "alt": {
+        "en": "A visitor stands between flower borders beneath green mountain ridges.",
+        "ja": "緑の山並みを背景に、花壇の間に立つ来訪者。",
+        "ko": "푸른 산등성이를 배경으로 화단 사이에 서 있는 방문객."
+      },
+      "width": 845,
+      "height": 475,
+      "sha256": "d77ba270f5fdffbd8524fe46f8b78c1377e7c882fdeef89db04a8af7b8486628"
+    },
+    {
+      "id": "D08-ext-21",
+      "destinationId": "D08",
+      "file": "assets/presentation/featured/D08-ext-21.jpg",
+      "credit": "Source: definitelypinoy.wordpress.com",
+      "sourceUrl": "https://definitelypinoy.wordpress.com/2021/10/24/heavens-peak-garden-of-the-gods/",
+      "caption": {
+        "en": "Pink flowers line a path toward an arch and garden building.",
+        "ja": "ピンクの花々が、アーチと庭園の建物へ向かう小道に並ぶ。",
+        "ko": "아치와 정원 건물로 향하는 길을 따라 분홍색 꽃이 피어 있다."
+      },
+      "alt": {
+        "en": "Pink flowers line a path toward an arch and garden building.",
+        "ja": "ピンクの花々が、アーチと庭園の建物へ向かう小道に並ぶ。",
+        "ko": "아치와 정원 건물로 향하는 길을 따라 분홍색 꽃이 피어 있다."
+      },
+      "width": 4000,
+      "height": 2252,
+      "sha256": "9d40bba319e9a6f21eaaf53da4f11f50071ca8fafd7916cbaf10a80795c89ba8"
+    },
+    {
+      "id": "D08-maps-04",
+      "destinationId": "D08",
+      "file": "assets/presentation/featured/D08-maps-04.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0837842%2C124.7215256",
+      "caption": {
+        "en": "Visitors follow a narrow path through colourful flower beds below mountains.",
+        "ja": "山々の下、色鮮やかな花壇の間の細い小道を歩く来訪者たち。",
+        "ko": "산 아래 알록달록한 화단 사이의 좁은 길을 걷는 방문객들."
+      },
+      "alt": {
+        "en": "Visitors follow a narrow path through colourful flower beds below mountains.",
+        "ja": "山々の下、色鮮やかな花壇の間の細い小道を歩く来訪者たち。",
+        "ko": "산 아래 알록달록한 화단 사이의 좁은 길을 걷는 방문객들."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "6faf97fe24685c3c20e268673de1a4c8736e47b8107fc1553d6ee60b8dfbfeef"
+    },
+    {
+      "id": "D08-maps-05",
+      "destinationId": "D08",
+      "file": "assets/presentation/featured/D08-maps-05.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=11.0837842%2C124.7215256",
+      "caption": {
+        "en": "Interlaced branches form a leafy tunnel over a narrow garden path.",
+        "ja": "枝が重なり、細い庭園の小道の上に緑のトンネルをつくる。",
+        "ko": "서로 얽힌 가지가 좁은 정원 길 위로 초록 터널을 만든다."
+      },
+      "alt": {
+        "en": "Interlaced branches form a leafy tunnel over a narrow garden path.",
+        "ja": "枝が重なり、細い庭園の小道の上に緑のトンネルをつくる。",
+        "ko": "서로 얽힌 가지가 좁은 정원 길 위로 초록 터널을 만든다."
+      },
+      "width": 1200,
+      "height": 1599,
+      "sha256": "48de5dc7e3922a0f5ead4ba8ae4850f34d2567589dcc8b0855ae97fd620fdbc5"
+    },
+    {
+      "id": "D09-preview",
+      "destinationId": "D09",
+      "file": "assets/presentation/featured/D09-preview.jpg",
+      "credit": "Philippine Travel Notes (Pinoy Traveler) · 2016",
+      "sourceUrl": "https://philippinetravelnotes.blogspot.com/2016/04/sabin-resort-hotel-overnight.html",
+      "caption": {
+        "en": "An arched bridge crosses a curved pool beside palms and the bay.",
+        "ja": "ヤシの木と湾のそばで、曲線を描くプールにアーチ橋が架かる。",
+        "ko": "야자수와 만 곁의 곡선형 수영장에 아치 다리가 놓여 있다."
+      },
+      "alt": {
+        "en": "An arched bridge crosses a curved pool beside palms and the bay.",
+        "ja": "ヤシの木と湾のそばで、曲線を描くプールにアーチ橋が架かる。",
+        "ko": "야자수와 만 곁의 곡선형 수영장에 아치 다리가 놓여 있다."
+      },
+      "width": 1365,
+      "height": 768,
+      "sha256": "18cd994eef10805968a09efaa3c08d180ddc82e67aa7794c3794e06309e31275"
+    },
+    {
+      "id": "D09-preview-extra",
+      "destinationId": "D09",
+      "file": "assets/presentation/featured/D09-preview-extra.jpg",
+      "credit": "Dutchpickle · 2011",
+      "sourceUrl": "https://www.dutchpickle.com/philippines/leyte/sabin-resort-hotel.html",
+      "caption": {
+        "en": "White benches line a waterfront path beside a palm-covered lawn.",
+        "ja": "ヤシの木が立つ芝生のそばで、水辺の小道に白いベンチが並ぶ。",
+        "ko": "야자수가 있는 잔디밭 옆 물가 산책로에 흰 벤치가 늘어서 있다."
+      },
+      "alt": {
+        "en": "White benches line a waterfront path beside a palm-covered lawn.",
+        "ja": "ヤシの木が立つ芝生のそばで、水辺の小道に白いベンチが並ぶ。",
+        "ko": "야자수가 있는 잔디밭 옆 물가 산책로에 흰 벤치가 늘어서 있다."
+      },
+      "width": 500,
+      "height": 375,
+      "sha256": "59b169c4c7d5c669973579a4fc4a02ddc2891353ec39b31902f42cec21e31181"
+    },
+    {
+      "id": "D09-maps-01",
+      "destinationId": "D09",
+      "file": "assets/presentation/featured/D09-maps-01.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132",
+      "caption": {
+        "en": "A thatched pavilion stands within a turquoise pool beside hotel buildings.",
+        "ja": "ホテルの建物のそばで、青緑色のプールの中に茅葺きの東屋が立つ。",
+        "ko": "호텔 건물 옆 청록색 수영장 안에 초가지붕 정자가 서 있다."
+      },
+      "alt": {
+        "en": "A thatched pavilion stands within a turquoise pool beside hotel buildings.",
+        "ja": "ホテルの建物のそばで、青緑色のプールの中に茅葺きの東屋が立つ。",
+        "ko": "호텔 건물 옆 청록색 수영장 안에 초가지붕 정자가 서 있다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "aa2a69a21413458c29010af7dc9044d66d579a98385feff3acd2f556576ce240"
+    },
+    {
+      "id": "D09-maps-03",
+      "destinationId": "D09",
+      "file": "assets/presentation/featured/D09-maps-03.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132",
+      "caption": {
+        "en": "Two beds and wooden furniture fill a room with closed curtains.",
+        "ja": "カーテンを閉めた客室に、ベッド二台と木製家具が置かれている。",
+        "ko": "커튼이 닫힌 객실에 침대 두 개와 목재 가구가 놓여 있다."
+      },
+      "alt": {
+        "en": "Two beds and wooden furniture fill a room with closed curtains.",
+        "ja": "カーテンを閉めた客室に、ベッド二台と木製家具が置かれている。",
+        "ko": "커튼이 닫힌 객실에 침대 두 개와 목재 가구가 놓여 있다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "2a4bf2677556a2e13682281d56cef7aa6a4e2dd4d3c786fd4a378524f0013319"
+    },
+    {
+      "id": "D09-maps-04",
+      "destinationId": "D09",
+      "file": "assets/presentation/featured/D09-maps-04.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132",
+      "caption": {
+        "en": "Palm trees rise beside a curved pool beneath a golden sky.",
+        "ja": "黄金色の空の下、曲線を描くプールのそばにヤシの木がそびえる。",
+        "ko": "황금빛 하늘 아래 곡선형 수영장 곁으로 야자수가 솟아 있다."
+      },
+      "alt": {
+        "en": "Palm trees rise beside a curved pool beneath a golden sky.",
+        "ja": "黄金色の空の下、曲線を描くプールのそばにヤシの木がそびえる。",
+        "ko": "황금빛 하늘 아래 곡선형 수영장 곁으로 야자수가 솟아 있다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "962e085c73c78f7ac57ae0e6899be208963c98a7f474f7137bee5d914b1b7db3"
+    },
+    {
+      "id": "D09-maps-05",
+      "destinationId": "D09",
+      "file": "assets/presentation/featured/D09-maps-05.jpg",
+      "credit": "Source: google.com",
+      "sourceUrl": "https://www.google.com/maps/search/?api=1&query=10.990489%2C124.621132",
+      "caption": {
+        "en": "An illuminated Sabin Resort sign stands between palms against the bay.",
+        "ja": "湾を背景に、ヤシの木の間でサビン・リゾートの看板が光る。",
+        "ko": "만을 배경으로 야자수 사이의 사빈 리조트 간판이 빛난다."
+      },
+      "alt": {
+        "en": "An illuminated Sabin Resort sign stands between palms against the bay.",
+        "ja": "湾を背景に、ヤシの木の間でサビン・リゾートの看板が光る。",
+        "ko": "만을 배경으로 야자수 사이의 사빈 리조트 간판이 빛난다."
+      },
+      "width": 1200,
+      "height": 900,
+      "sha256": "6114a4aace05fb3ee42019564f97227958644d8c9be97c50c6b28ddd3a5962bf"
+    }
+  ]
+}
