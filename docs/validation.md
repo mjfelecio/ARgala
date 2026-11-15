@@ -1,5 +1,21 @@
 # Foundation validation
 
+## Expo SDK 57 patch alignment — 2026-11-13
+
+Updated the six Expo packages flagged by the dependency check to compatible
+SDK 57 patch releases. Expo Router 57.0.31 still contains the same three
+upstream initial-link patch points; the guarded 57.0.31 patch applies and the
+existing real-hook linking regressions pass. Other version-guarded patches remain
+in place.
+
+`npm run check` passed (1,485 tests / 130 files), as did `npm run
+check:native-patches`, `npm run test:viro-touch`, `npm run check:edge`, `npm run
+lint:edge`, `npx expo install --check`, `npx expo-doctor` (21/21), `npm run
+check:android`, `npm run export:android`, `npm run test:limiter`, `npm run
+test:journal-sync`, and `npm run test:destination-content`. `npm ci --dry-run
+--ignore-scripts` passed; the actual clean install remains for CI. The export is
+not an APK. No native build or device verification was performed.
+
 ## AR capture processing and review — 2026-11-12
 
 Source commit `7122e58` adds the owner-selected ivory/forest photo review,
