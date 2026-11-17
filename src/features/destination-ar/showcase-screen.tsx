@@ -73,10 +73,10 @@ function ShowcaseOwner({ principalId }: { principalId: string }) {
 function ShowcaseDestinationCard({ destinationId, name, stamped, onPress }: { destinationId: DestinationId; name: string; stamped: boolean; onPress(): void }) {
   const { t } = useTranslation(); const accent = useThemeColor('accent'); const [failed, setFailed] = useState(false);
   const destination = getDestination(destinationId)!; const cover = destination.media?.find(photo => photo.id === destination.coverMediaId) ?? destination.media?.[0];
-  return <View className="overflow-hidden rounded-card bg-surface">
+  return <View className="overflow-hidden rounded-card border border-brand-strong/25 bg-surface">
     <Button variant="ghost" className="h-auto min-h-24! flex-col items-stretch gap-0 rounded-none! p-0" accessibilityLabel={name} accessibilityHint={t('arShowcase.openHint')} onPress={onPress}>
       {cover && !failed && <Photo source={cover.source} className="h-44 w-full" resizeMode="cover" accessible={false} onError={() => setFailed(true)} />}
-      <View className="flex-row items-center gap-3 p-4">
+      <View className="flex-row items-center gap-3 bg-mint p-4">
         <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-section font-ui-semibold text-brand-strong">{name}</Text><Text className="font-sans text-sm text-muted">{t(stamped ? 'arShowcase.visited' : 'arShowcase.cardHint')}</Text></View>
         <Ionicons name={stamped ? 'checkmark-circle' : 'chevron-forward'} size={24} color={accent} accessible={false} />
       </View>
@@ -119,6 +119,6 @@ function ShowcaseDestination({ destinationId, principalId, scopeId, memory, gene
   </ShowcasePage>;
   return <DestinationArSessionExperience identity={identity} freshEligible={freshEligible} sceneLoader={sceneLoader} content={content}
     galleryMediaIds={getDestination(destinationId)!.media?.map(photo => photo.id)} title={destinationName(getDestination(destinationId)!, language)}
-    onEstablished={onEstablished} onReturn={onReturn} introductionMemory={introductionMemory} preflightNoticeKey="arShowcase.preflight" developmentNoticeKey="arShowcase.liveHint"
+    onEstablished={onEstablished} onReturn={onReturn} introductionMemory={introductionMemory} preflightNoticeKey="arShowcase.preflight"
     preparation={<ShowcasePreparation destinationId={destinationId} stamped={stamped} />} />;
 }

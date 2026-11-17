@@ -43,7 +43,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
   const variant = introVariant({ ready: true, established: false, seen: introduction.seen && !previewEntrance, reduced });
   const lifecycle = useArSession({ identity, tileIds: content.map(item => item.id), galleryMediaIds, running: focused && active, transitionReady,
     entryReady, measured: scene.width > 0 && scene.height > 0 && NativeRing !== null && introduction.loaded, freshEligible, onEstablished, reveal: true, revealDurationMs: introDuration(variant) });
-  const { startup, session, finishReveal, close } = lifecycle;
+  const { startup, session, close } = lifecycle;
   const completeIntroduction = introduction.complete;
   const reportFailure = startup.onFailure;
   useEffect(() => {
@@ -112,9 +112,8 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
       {startup.phase === 'live' && showLiveGuidance && <View className="gap-2 p-4">
         {(session.phase === 'limited' || revealing) && <Notice>{t(session.phase === 'limited' ? 'destinationAr.trackingLost' : 'destinationSession.reveal')}</Notice>}
         {!session.established || revealing ? <Text className="rounded-card bg-ar-panel p-3 font-sans text-sm text-white">{t('destinationStories.exploreHint')}</Text> : null}
-        {identity.provenance !== 'verified' && (identity.provenance === 'development' || help) && <Text className="rounded-card bg-ar-panel p-2 font-sans text-xs text-white">{t(developmentNoticeKey ?? (identity.provenance === 'showcase' ? 'arShowcase.liveHint' : 'destinationRing.prototype'))}</Text>}
+        {identity.provenance === 'development' && <Text className="rounded-card bg-ar-panel p-2 font-sans text-xs text-white">{t(developmentNoticeKey ?? 'destinationRing.prototype')}</Text>}
         {session.phase === 'limited' && <Action title={t('destinationSession.retryTracking')} onPress={lifecycle.retryTracking} disabled={startup.pending} />}
-        {revealing && <Action title={t('destinationSession.skip')} onPress={() => { finishReveal(); void completeIntroduction(); }} />}
         {poseRequired && <Notice>{t('destinationRing.poseRequired')}</Notice>}
         {help && <View testID="ar-help" className="gap-3 rounded-card bg-ar-panel p-4">
           <Text accessibilityRole="header" className="font-sans text-card font-ui-semibold text-white">{t('destinationStories.helpTitle')}</Text>

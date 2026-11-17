@@ -177,14 +177,14 @@ it('restores the same approved image and caption page through the real screen se
   expect(tree!.root.findByProps({ testID: 'ring-gallery-image' }).props.source).toBe(1);
   expect(text('ring-gallery-caption')).toBe(caption); expect(text('ring-page-indicator')).toBe(page);
 });
-it('starts full native deployment only after ready and makes Skip settle to interactive canonical slots', async () => {
+it('starts deployment only after tracking is ready and automatically enables interaction without a skip button', async () => {
   native.getItem.mockResolvedValue(null); await mount(); await layout(); await start(); expect(node('ring-tile-overview')).toBeUndefined();
   expect(native.setItem).not.toHaveBeenCalled();
   await ready([0, 2, 0], [0, 0, -1], false);
   expect(node('cinematic-emblem')).toBeDefined(); expect(node('cinematic-history')).toBeDefined();
   await click('ring-tile-history'); expect(node('ring-focused-panel')).toBeUndefined();
-  await press('destinationSession.skip'); expect(node('cinematic-history')).toBeUndefined();
-  await ready(); await click('ring-tile-history'); expect(node('ring-focused-panel')).toBeDefined();
+  expect(copy()).not.toContain('Skip introduction');
+  await ready(); expect(node('cinematic-history')).toBeUndefined(); await click('ring-tile-history'); expect(node('ring-focused-panel')).toBeDefined();
   expect(native.setItem).toHaveBeenCalledWith('argala.ar-cinematic.v1:development:development-aclc', 'complete');
 });
 it('skips staged reveal for reduced motion while retaining the native content boundary', async () => {

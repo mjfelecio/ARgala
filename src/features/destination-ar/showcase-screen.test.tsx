@@ -64,7 +64,7 @@ it('retires blur and timed-out imports until explicit recovery, and never render
 it.each(['en', 'ja', 'ko'])('has finished %s copy and keeps showcase entry available without a flag', async language => {
   await translations.changeLanguage(language); await act(async () => { tree = create(<I18nextProvider i18n={translations}>{withHeroUI(<ShowcaseEntry />)}</I18nextProvider>); });
   await press(translations.t('arShowcase.title')); expect(runtime.push).toHaveBeenCalledWith('/ar-showcase');
-  for (const key of ['title', 'intro', 'ready', 'liveHint', 'reset', 'passportTitle', 'loadFailed']) expect(translations.getResource(language, 'translation', `arShowcase.${key}`)).toBeTruthy();
+  for (const key of ['title', 'intro', 'ready', 'readyHint', 'reset', 'passportTitle', 'loadFailed']) expect(translations.getResource(language, 'translation', `arShowcase.${key}`)).toBeTruthy();
 });
 
 it('returns from a selected destination to the picker on Android Back', async () => {

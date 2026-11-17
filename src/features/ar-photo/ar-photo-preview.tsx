@@ -45,14 +45,9 @@ export function ArPhotoPreview({ state, onSave, onShare, onDiscard, onPreviewFai
     <SafePreview className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
       <StatusBar style="dark" />
       <ScrollView testID="ar-photo-preview-scroll" className="flex-1" contentContainerClassName="grow gap-5 p-4" keyboardShouldPersistTaps="handled">
-        <View className="flex-row items-center gap-3">
-          <View className="size-12 items-center justify-center rounded-pill bg-mint" accessible={false}>
-            <Ionicons name="image-outline" size={24} color={ink} />
-          </View>
-          <View className="grow shrink gap-1">
-            <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-brand-strong">{t('arPhoto.preview')}</Text>
-            <Text className="font-sans text-sm text-muted">{t('arPhoto.review')}</Text>
-          </View>
+        <View className="gap-1">
+          <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-brand-strong">{t('arPhoto.preview')}</Text>
+          <Text className="font-sans text-sm text-muted">{t('arPhoto.review')}</Text>
         </View>
         <View testID="ar-photo-canvas" style={{ height: canvasHeight }} className="w-full overflow-hidden rounded-card bg-mint">
           {imageState !== 'failed' && <StyledImage source={{ uri: state.photoUri }} resizeMode="contain" className="size-full" accessibilityLabel={t('arPhoto.image')} onLoad={() => finish(true)} onError={() => finish(false)} />}
