@@ -55,14 +55,12 @@ export default function DestinationsScreen() {
         return <View key={destination.id} testID={`featured-photo-card:${destination.id}`} className="relative overflow-hidden rounded-card bg-brand-strong">
           {!failed.has(cover.id) && <StyledImage source={cover.source} accessible={false} className="absolute inset-0 h-full w-full" resizeMode="cover"
             onError={() => setFailed(previous => new Set([...previous, cover.id]))} />}
-          <View pointerEvents="none" accessible={false} importantForAccessibility="no-hide-descendants" className="absolute inset-x-0 bottom-0 h-32 overflow-hidden">
-            {!failed.has(cover.id) && <StyledImage source={cover.source} blurRadius={12} className="h-full w-full" resizeMode="cover" accessible={false} />}
-          </View>
           <Svg pointerEvents="none" accessible={false} width="100%" height="100%" style={{ position: 'absolute' }}>
             <Defs><LinearGradient id={`featured-fade-${destination.id}`} x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0" stopColor={forest} stopOpacity="0" />
-              <Stop offset="0.5" stopColor={forest} stopOpacity="0.05" />
-              <Stop offset="0.72" stopColor={forest} stopOpacity="0.8" />
+              <Stop offset="0.35" stopColor={forest} stopOpacity="0" />
+              <Stop offset="0.6" stopColor={forest} stopOpacity="0.3" />
+              <Stop offset="0.8" stopColor={forest} stopOpacity="0.85" />
               <Stop offset="1" stopColor={forest} stopOpacity="1" />
             </LinearGradient></Defs>
             <Rect width="100%" height="100%" fill={`url(#featured-fade-${destination.id})`} />
@@ -75,7 +73,7 @@ export default function DestinationsScreen() {
             </View>}
           </Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel={name} onPress={() => choose(destination)}
-            className="min-h-24 flex-row items-center gap-4 bg-brand-strong/50 p-5 active:bg-brand-strong/80">
+            className="min-h-24 flex-row items-center gap-4 p-5 active:bg-brand-strong/80">
             <Text className="min-w-0 flex-1 font-sans text-section font-ui-semibold text-white">{name}</Text>
             <Ionicons name="chevron-forward" size={24} color="white" accessible={false} />
           </Pressable>

@@ -68,12 +68,14 @@ export function ArPhotoPreview({ state, onSave, onShare, onDiscard, onPreviewFai
           <Button className="min-h-12 w-full" accessibilityLabel={t('arPhoto.save')} accessibilityState={{ busy: state.busy === 'save', disabled: busy || state.saved || unavailable }} isDisabled={busy || state.saved || unavailable} onPress={onSave}>
             <Ionicons name="download-outline" size={20} color={onAccent} accessible={false} /><Button.Label>{t('arPhoto.save')}</Button.Label>
           </Button>
-          <Button variant="secondary" className="min-h-12 w-full" accessibilityLabel={t('arPhoto.share')} accessibilityState={{ busy: state.busy === 'share', disabled: busy || unavailable }} isDisabled={busy || unavailable} onPress={onShare}>
-            <Ionicons name="share-outline" size={20} color={ink} accessible={false} /><Button.Label>{t('arPhoto.share')}</Button.Label>
-          </Button>
-          <Button variant="tertiary" className="min-h-12 w-full" accessibilityLabel={t('arPhoto.discard')} isDisabled={busy} onPress={onDiscard}>
-            <Button.Label>{t('arPhoto.discard')}</Button.Label>
-          </Button>
+          <View className="flex-row items-stretch gap-3">
+            <Button variant="secondary" className="min-h-12 min-w-0 flex-1 px-3" accessibilityLabel={t('arPhoto.share')} accessibilityState={{ busy: state.busy === 'share', disabled: busy || unavailable }} isDisabled={busy || unavailable} onPress={onShare}>
+              <Button.Label className="shrink text-center">{t('arPhoto.share')}</Button.Label>
+            </Button>
+            <Button variant="tertiary" className="min-h-12 min-w-0 flex-1 px-3" accessibilityLabel={t('arPhoto.discard')} isDisabled={busy} onPress={onDiscard}>
+              <Button.Label className="shrink text-center">{t('arPhoto.discard')}</Button.Label>
+            </Button>
+          </View>
         </View>
         <View className="gap-2 pb-2">
           <Text className="font-sans text-xs text-muted">{t('arPhoto.about')}</Text>

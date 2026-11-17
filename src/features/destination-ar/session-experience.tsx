@@ -117,8 +117,18 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
         {poseRequired && <Notice>{t('destinationRing.poseRequired')}</Notice>}
         {help && <View testID="ar-help" className="gap-3 rounded-card bg-ar-panel p-4">
           <Text accessibilityRole="header" className="font-sans text-card font-ui-semibold text-white">{t('destinationStories.helpTitle')}</Text>
-          <Text className="font-sans text-sm text-white">{t('destinationStories.exploreHint')}{'\n\n'}{t('destinationRing.helpText')}</Text>
-          <Text className="font-sans text-sm text-white">{t('destinationRing.recenterRecovery')}</Text>
+          <View className="gap-1">
+            <Text className="font-sans text-base font-ui-semibold text-white">{t('destinationStories.helpLookTitle')}</Text>
+            <Text className="font-sans text-sm text-white">{t('destinationStories.helpLook')}</Text>
+          </View>
+          <View className="gap-1 border-t border-white/15 pt-3">
+            <Text className="font-sans text-base font-ui-semibold text-white">{t('destinationStories.helpReadTitle')}</Text>
+            <Text className="font-sans text-sm text-white">{t('destinationStories.helpRead')}</Text>
+          </View>
+          <View className="gap-1 border-t border-white/15 pt-3">
+            <Text className="font-sans text-base font-ui-semibold text-white">{t('destinationStories.helpPositionTitle')}</Text>
+            <Text className="font-sans text-sm text-white">{t('destinationRing.recenterRecovery')}</Text>
+          </View>
           {identity.provenance === 'development' && <Text className="font-sans text-xs text-white">{t('destinationRing.poseRate', metrics)}</Text>}
           <Button variant="secondary" accessibilityLabel={t('destinationStories.dismissHelp')} onPress={() => setHelp(false)}><Button.Label>{t('destinationStories.dismissHelp')}</Button.Label></Button>
         </View>}
