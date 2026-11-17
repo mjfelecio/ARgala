@@ -6,8 +6,8 @@
   "openHint": "Open this destination in the AR Showcase",
   "cardHint": "Photographs and local stories",
   "ready": "Demo experience",
-  "readyHint": "This demo skips location checks. Outside the showcase, you must visit the destination to open AR. After starting, move your phone slowly to place the experience around you.",
-  "preflight": "Use a well-lit space with room to turn. Camera access is needed to show the experience around you.",
+  "readyHint": "You can try this demo wherever you are. In the app, AR opens when you visit the destination.",
+  "preflight": "Find a bright spot with room to turn. Hold your phone upright and move it slowly to explore with your camera.",
   "loading": "Preparing your destination…",
   "loadFailed": "This destination could not be loaded. Try again, or choose another destination.",
   "unavailable": "Open the showcase from Profile or Settings after signing in or continuing as a guest.",
@@ -18,6 +18,6 @@
   "reset": "Reset showcase",
   "expired": "This AR session has ended. Choose the destination again to start a new experience.",
   "return": "Choose a destination",
-  "preflightTitle": "Your AR experience",
+  "preflightTitle": "Before you begin",
   "start": "Start AR"
 }
