@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { BackHandler, Image, ScrollView, Text, View } from 'react-native';
+import { BackHandler, Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useIsFocused } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCSSVariable, withUniwind } from 'uniwind';
@@ -12,6 +12,7 @@ import { useGuestAccess } from '@/features/auth/guest-context';
 import { useSettings } from '@/features/settings/provider';
 import { useAppActive } from '@/lib/use-app-active';
 import { destinationIds, destinationName, getDestination, localizedContent, type DestinationId } from '@/features/destinations/catalog';
+import { DestinationPhotoCard } from '@/features/destinations/destination-photo-card';
 import { PassportIcon } from '@/features/journal/passport-icon';
 import { StatusRow } from '@/ui/status-row';
 import { loadExhibitScene } from './exhibit-loader';
@@ -71,17 +72,20 @@ function ShowcaseOwner({ principalId }: { principalId: string }) {
   </ShowcasePage>;
 }
 function ShowcaseDestinationCard({ destinationId, name, stamped, onPress }: { destinationId: DestinationId; name: string; stamped: boolean; onPress(): void }) {
-  const { t } = useTranslation(); const accent = useThemeColor('accent'); const [failed, setFailed] = useState(false);
+  const { t } = useTranslation(); const [failed, setFailed] = useState(false);
   const destination = getDestination(destinationId)!; const cover = destination.media?.find(photo => photo.id === destination.coverMediaId) ?? destination.media?.[0];
-  return <View className="overflow-hidden rounded-card border border-brand-strong/25 bg-surface">
-    <Button variant="ghost" className="h-auto min-h-24! flex-col items-stretch gap-0 rounded-none! p-0" accessibilityLabel={name} accessibilityHint={t('arShowcase.openHint')} onPress={onPress}>
-      {cover && !failed && <Photo source={cover.source} className="h-44 w-full" resizeMode="cover" accessible={false} onError={() => setFailed(true)} />}
-      <View className="flex-row items-center gap-3 bg-mint p-4">
-        <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-section font-ui-semibold text-brand-strong">{name}</Text><Text className="font-sans text-sm text-muted">{t(stamped ? 'arShowcase.visited' : 'arShowcase.cardHint')}</Text></View>
-        <Ionicons name={stamped ? 'checkmark-circle' : 'chevron-forward'} size={24} color={accent} accessible={false} />
+  return <DestinationPhotoCard id={`showcase-${destinationId}`} source={cover?.source} failed={failed} onImageError={() => setFailed(true)}>
+    <Pressable className="active:opacity-80" accessibilityRole="button" accessibilityLabel={name} accessibilityHint={t('arShowcase.openHint')} onPress={onPress}>
+      <View className="min-h-56" />
+      <View className="min-h-24 flex-row items-center gap-4 p-5">
+        <View className="min-w-0 flex-1 gap-1">
+          <Text className="font-sans text-section font-ui-semibold text-white">{name}</Text>
+          {stamped && <Text className="font-sans text-sm text-white">{t('arShowcase.visited')}</Text>}
+        </View>
+        <Ionicons name={stamped ? 'checkmark-circle' : 'chevron-forward'} size={24} color="white" accessible={false} />
       </View>
-    </Button>
-  </View>;
+    </Pressable>
+  </DestinationPhotoCard>;
 }
 function ShowcasePreparation({ destinationId, stamped }: { destinationId: DestinationId; stamped: boolean }) {
   const { t } = useTranslation(); const { language } = useSettings(); const [failed, setFailed] = useState(false);
