@@ -3645,3 +3645,111 @@ Critical, Important or Minor findings and separately passed **28 auth tests acro
 three files**, plus `git diff --check`. The review covered changed auth flows and
 integration boundaries; unchanged dormant Google helper, broader AR/Passport and
 unrelated provider/journal internals retain their existing verification limits.
+
+## Explore, saved-place and featured media cleanup — 2026-11-17
+
+Implemented the owner-approved conversation plan and image concepts in
+`docs/superpowers/plans/2026-11-17-explore-cleanup.md`, retaining Seafoam Forest,
+the existing native runtime and the separate ACLC pilot.
+
+Startup now uses a shared branded JS bootstrap and mounts the ordinary Explore
+shell while GPS is pending. The temporary standalone search form is removed from
+the startup flow. Unselected category chips have white surfaces, forest-tinted
+borders, category icons and restrained shadows. Shared loading rows keep the
+spinner beside wrapping localized text. Ordinary selections show distance without
+AR activation wording; Google Maps is the compact/expanded primary action, with
+Directions/Save secondary. The old ordinary details route redirects without
+lookup authority; its redundant content is removed and all navigation producers
+now return to Explore. Featured pages remain.
+
+Native POI names/coordinates become typed partial seeds immediately; they never
+become complete discovery responses. Explicit selections and single-use,
+principal-scoped 30-second map handoffs may fetch missing details once, after
+native readiness. Pending commands retire on focus/foreground loss, replacement,
+Close or expiration; unknown URLs remain display/recovery-only. General Search
+also fails an offline action immediately instead of queuing it for reconnect.
+Complete same-language cache responses retain their original response age.
+
+Saved Google places now require a user-written label and optionally a user-written
+note/address. The local version-3 envelope holds the existing ID journal/sync
+state plus device-local metadata in one durable write. Google names, addresses,
+provider responses, photos and location history are not written there. The cloud
+wire format remains ID/stamp-only. Guest/account transfer, failed saves,
+in-flight sync acknowledgement and principal replacement preserve isolation.
+Saved pin coordinates are removed 30 days after their original capture; labels
+remain, and merge/re-save cannot extend capture age. Old/other-device ID-only
+bookmarks retain explicit Open/Edit label recovery without a background lookup.
+The Save form uses a full-width HeroUI Dialog portal with one keyboard-aware
+scroll owner; it no longer grows the compact button column. Busy Back/backdrop/
+Cancel and duplicate submission are synchronously fenced; late callbacks cannot
+close a replacement form.
+
+All nine main destinations have persistent static bitmap markers, derived from
+editable SVG using the existing logo geometry. Saved bookmark markers are
+viewport-bounded to 100 with an overflow hint; matching result/saved/featured
+identities deduplicate. Seven exact Google display associations are backed by
+public listing evidence in `docs/design/explore-cleanup/google-place-associations.md`.
+D02 Lake Kasudsuran remains unresolved; the discovered D07 Alto Peak candidate
+pointed elsewhere and was rejected. They retain their curated pins/sheets, but
+unverified Google results remain ordinary. Display associations grant no AR
+activation policy, Passport entitlement or replacement route entrance.
+
+Featured sheets/pages share image-only carousels containing all 53 bundled photos.
+Any photo opens a paging contain-mode viewer with original proportions, bottom
+caption/credit and safe-area Close/Previous/Next. The viewer decodes the selected
+and adjacent photos. Visitor lists retain every supplied item with activity,
+preparation and safety prefixes. Listing cards use a photo-led forest fade with
+separate photo/title hit areas, and Passport uses a single closed-book/globe icon.
+The shared arrival presentation no longer repeats destination names or uses the
+large generic mint box. Availability and development provenance remain truthful;
+public UI no longer describes internal content-approval workflow.
+
+Regression evidence includes the original real-map failures (GPS-gated fallback,
+missing native-POI identity during loading and hidden compact Maps action), atomic
+journal/expiry failures, all-photo viewer failures, and actual Dialog placement/
+busy/ownership failures before their fixes. An independent read-only review found
+two confirmed integration defects: featured-page legacy bookmark aliases, and
+GPS-dependent/duplicate handoff camera movement. Both received failing real-screen
+regressions and fixes. Additional regressions cover late URL clearing, a handoff
+first observed in the background, offline Search and installed SDK focus context.
+The post-review targeted map/featured batch passes 134 tests; the Dialog/journal
+batch passes 125 tests, and the offline selection-flow batch passes 12 tests.
+
+The reconnected Galaxy A53 received the worktree JavaScript through the existing
+development client on localhost:8081 (Android 16, dark system theme, English,
+font scale 1.1, density 420). Physical checks covered the branded bootstrap,
+map-first location loading, outlined/icon category pills, normal compact actions,
+full-width Save form/input/Cancel, Passport/listing, featured pin/sheet and gallery,
+and full-screen photo browsing. Temporary draft text was cancelled without saving;
+account preferences, bookmarks and Passport were preserved. On-site AR, all nine
+pin hit targets, a full large-font/JA/KO device matrix, and offline saved-pin expiry
+remain unverified physically; regression tests cover their relevant logic.
+
+The A53 exposed an additional real details failure: the paid response succeeded,
+but React Compiler retained a render-time imperative missing-cache snapshot. Map
+and the sibling AR discovery consumer now use a stable subscribed snapshot with
+independent expiry and the original response timestamp. Five installed-compiler
+regressions transform the real hook and consumer, reproduce the old failure, and
+cover Details arrival, fresh Nearby over stale Details, cache reset/clear,
+language changes and timer-only expiry without new requests. A focused independent
+review found no further defect. After reloading the phone, an explicit Robinsons
+native-POI tap showed the title immediately and the fetched street address in the
+expanded sheet, with no stale recovery action. Normal collapse retained Maps,
+Directions and Save. Device review also found the missing Cancel resource; all
+three actual locale resources now have a regression and the English button was
+verified on the phone. The photo viewer owns a light status bar on its dark canvas.
+
+No APK was built, installed or upgraded for this change; no OTA/backend deployment
+or provider verification batch was performed. Only deliberate native POI selections
+requested live details. The design concepts remain distinct from the implemented
+A53 screenshots captured locally during these checks. Final automated results follow.
+
+Final verification on the completed implementation:
+
+- `npm run check`: strict typecheck, zero-warning ESLint, **1,640 tests in 145 files passed**.
+- `npm run export:android -- --output-dir /tmp/argala-cleanup-final-export`: passed with **117 assets**, Hermes bundle `index-7c008e3287ed6c6fcb78eb48e4473b11.hbc` (8.9 MB).
+- `npm run check:native-patches`: passed, **0 files updated**.
+- `git diff --check`: passed.
+
+No dependency, app/native configuration, provider field mask, Edge Function or
+native patch changed. Changes remain on `feat/explore-ui-cleanup`; no merge or push.
