@@ -37,7 +37,7 @@ vi.mock('react-native-gesture-handler', () => {
       onFinalize(callback: (...args: unknown[]) => void) { handlers.finalize = callback; return this; },
     };
   }
-  return { GestureDetector: 'gesture', GestureHandlerRootView:'gesture-root', Gesture: { Tap: () => gesture('tap'), Pan: () => gesture('pan') } };
+  return { ScrollView: 'gesture-scroll', GestureDetector: 'gesture', GestureHandlerRootView:'gesture-root', Gesture: { Tap: () => gesture('tap'), Pan: () => gesture('pan') } };
 });
 vi.mock('react-native-worklets', () => ({ scheduleOnRN: (callback: (...args: unknown[]) => unknown, ...args: unknown[]) => callback(...args) }));
 vi.mock('react-native-reanimated', async () => {

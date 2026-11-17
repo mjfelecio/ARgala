@@ -3753,3 +3753,28 @@ Final verification on the completed implementation:
 
 No dependency, app/native configuration, provider field mask, Edge Function or
 native patch changed. Changes remain on `feat/explore-ui-cleanup`; no merge or push.
+
+### Follow-up: Android sheet carousel and bootstrap alignment — 2026-11-17
+
+The reconnected A53 reproduced a horizontal strip that could not scroll inside
+Explore's Gorhom sheet. The same photos scrolled normally on the standalone page;
+image loading was unaffected (the owner confirmed the apparent loading failure
+came from disconnecting Metro). The sheet variant now uses Gesture Handler's
+ScrollView through UniWind, as recommended by upstream Android troubleshooting:
+https://gorhom.dev/react-native-bottom-sheet/troubleshooting. The page strip and
+full-screen viewer retain their existing scroll owners. A focused regression
+failed on the original RN scroll owner and passed after the change; it retains
+all image sources and the later-photo viewer entrance.
+
+On the A53, the sheet strip advanced beyond the first image, vertical content
+scrolling still worked, and tapping the third photo opened “Photo 3 of 7” with
+its matching image/caption. No paid provider requests or stored user data changes
+were needed. Device checks were brief at 4% battery while USB charging. The shared
+status row also gained an opt-in centered layout for Bootstrap's spinner and
+“Getting things ready…” copy; regular status rows retain their wrapping layout.
+The brief startup frame capture missed the JavaScript bootstrap, so the centering
+change has code/CSS verification rather than a new captured native frame.
+
+Checks: targeted gallery/page/map/shared UI **135 tests passed**; `npm run check`
+passed strict TypeScript, zero-warning lint and **1,641 tests in 145 files**;
+`git diff --check` passed. No dependency/native/configuration changes or APK build.

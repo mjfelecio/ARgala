@@ -7,6 +7,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { destinationSchema, listDestinations, localizedContent, type DestinationMedia } from './catalog';
 import { DaytimeGallery } from './daytime-gallery';
+import { ScrollView as GestureScrollView } from 'react-native-gesture-handler';
 const controls = vi.hoisted(() => ({ language: 'en' as 'en' | 'ko' | 'ja' }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language }) }));
 const photo = destinationSchema.parse({ id: 'D01', provisionalName: 'Synthetic fixture', media: [{ id: 'synthetic', source: 1, credit: 'Synthetic fixture credit', rightsReference: 'Test rights', approvalReference: 'Test approval', alt: { en: { value: 'Synthetic daytime test image', approvalReference: 'Test' } }, caption: { en: { value: 'Synthetic caption', approvalReference: 'Test' } } }] }).media![0];
@@ -24,6 +25,15 @@ beforeEach(async () => {
  const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.restoreAllMocks(); });
+it('uses the gesture-handler scroll owner inside a sheet so Android horizontal drags are not captured by the sheet', async () => {
+ await act(async () => { tree = create(<I18nextProvider i18n={translations}>{withHeroUI(<DaytimeGallery media={[photo, second]} variant="sheet" />)}</I18nextProvider>); });
+ const strip = tree!.root.findByProps({ testID: 'destination-photo-strip' });
+ expect(strip.type).toBe(GestureScrollView);
+ expect(strip.props.horizontal).toBe(true);
+ expect(strip.findAllByType('img').map(node => node.props.source)).toEqual([photo.source, second.source]);
+ await act(async () => photoButton(second.alt.en.value).props.onPress());
+ expect(modal().findByProps({testID: `viewer-photo:${second.id}`}).props.source).toBe(second.source);
+});
 it('shows only photographs in the horizontal strip, with captions and required credits accessible from each photo', async () => {
  await act(async () => { tree = create(render([photo, second])); });
  expect(visibleText()).not.toContain('Synthetic caption');

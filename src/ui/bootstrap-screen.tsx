@@ -11,6 +11,6 @@ export function BootstrapScreen() {
   const { t } = useTranslation();
   return <SafeArea className="flex-1 items-center justify-center gap-12 bg-page px-8">
     <BrandLogo variant="primary" width={184} />
-    <View className="w-full max-w-72"><StatusRow busy>{t('exploreCleanup.preparing')}</StatusRow></View>
+    <View className="w-full max-w-72"><StatusRow busy centered>{t('exploreCleanup.preparing')}</StatusRow></View>
   </SafeArea>;
 }

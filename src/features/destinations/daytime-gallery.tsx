@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColor } from 'heroui-native/hooks';
 import { useState, type ReactNode } from 'react';
 import { Image, Pressable, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { ScrollView as GestureScrollView } from 'react-native-gesture-handler';
 import { withUniwind } from 'uniwind';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '@/features/settings/provider';
@@ -9,6 +10,7 @@ import { localizedContent, type DestinationMedia } from './catalog';
 import { DestinationPhotoViewer } from './destination-photo-viewer';
 
 const StyledImage = withUniwind(Image);
+const SheetPhotoStrip = withUniwind(GestureScrollView);
 export { DestinationPhotoViewer } from './destination-photo-viewer';
 /** Bundled photography only. Keeping the strip mounted preserves its native scroll position. */
 export function DaytimeGallery({ media, variant = 'page', children }: {
@@ -23,6 +25,8 @@ export function DaytimeGallery({ media, variant = 'page', children }: {
   const cardWidth = Math.max(160, Math.min(width - (variant === 'sheet' ? 64 : 48), 440));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
+  // The sheet's Android pan handler captures plain RN horizontal scroll gestures.
+  const PhotoStrip = variant === 'sheet' ? SheetPhotoStrip : ScrollView;
   return <View className="gap-3">
     <View className="gap-1">
       <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-brand-strong">{t('destinations.daytime')}</Text>
@@ -30,7 +34,7 @@ export function DaytimeGallery({ media, variant = 'page', children }: {
       <Text className="font-sans text-xs text-muted">{t('destinations.notLive')}</Text>
     </View>
     {children}
-    {media.length ? <ScrollView testID="destination-photo-strip" horizontal contentContainerClassName="gap-3" showsHorizontalScrollIndicator={false}>
+    {media.length ? <PhotoStrip testID="destination-photo-strip" horizontal contentContainerClassName="gap-3" showsHorizontalScrollIndicator={false}>
       {media.map(item => {
         const alt = localizedContent(item.alt, language)!;
         const caption = localizedContent(item.caption, language);
@@ -45,7 +49,7 @@ export function DaytimeGallery({ media, variant = 'page', children }: {
             onError={() => setFailed(previous => new Set([...previous, item.id]))} />}
         </Pressable>;
       })}
-    </ScrollView> : <View testID="destination-media-fallback" className="min-h-48 items-center justify-center gap-3 rounded-xl bg-mint p-6">
+    </PhotoStrip> : <View testID="destination-media-fallback" className="min-h-48 items-center justify-center gap-3 rounded-xl bg-mint p-6">
       <Ionicons name="images-outline" size={28} color={accent} accessible={false} />
       <Text className="text-center font-sans text-base text-muted">{t('destinations.previewMissing')}</Text>
     </View>}

@@ -12,7 +12,7 @@ The local journal may use a version-3 envelope around the unchanged ID-only jour
 
 Verified Google IDs in `src/features/destinations/google-place-associations.ts` support display convergence only, independently of AR/provider admission metadata. D02/D07 remain unmatched until verified; never substitute a fuzzy name/location match. Featured, saved and result pins deduplicate; saved rendering is viewport bounded with an explicit overflow hint.
 
-Shared photo carousels expose every bundled photo; any photo opens the contain-mode viewer with bottom safe-area controls, caption and credit. Keep photos separate from chapters/Passport. Public UI describes availability without editorial approval jargon, while development provenance and actual AR eligibility remain truthful. See `docs/superpowers/plans/2026-11-17-explore-cleanup.md` and validation evidence.
+Shared photo carousels expose every bundled photo; any photo opens the contain-mode viewer with bottom safe-area controls, caption and credit. Inside the Android Gorhom sheet, horizontal photo strips use Gesture Handler’s ScrollView through UniWind so the sheet pan handler cannot capture their drags. Keep the standalone page and full-screen viewer scroll owners separate. Keep photos separate from chapters/Passport. Public UI describes availability without editorial approval jargon, while development provenance and actual AR eligibility remain truthful. See `docs/superpowers/plans/2026-11-17-explore-cleanup.md` and validation evidence.
 
 ## College presentation and spatial Exhibit — 2026-11-14
 
