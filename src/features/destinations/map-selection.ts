@@ -1,3 +1,4 @@
+import { displayGooglePlaceId } from './google-place-associations';
 import type { QueryClient } from '@tanstack/react-query';
 import type { Language } from '../../../supabase/functions/_shared/contracts';
 import { AR } from '@/config/limits';
@@ -21,6 +22,6 @@ export function featuredMapPlace(destination: Destination, language: Language = 
 }
 export function matchedFeaturedDestination(place: Pick<Place, 'provider' | 'providerId'>, destinations: readonly Destination[] = listFeaturedDestinations()) {
   if (place.provider !== 'google') return null;
-  const matches = destinations.filter(destination => destination.ar?.providerAssociation?.providerId === place.providerId);
+  const matches = destinations.filter(destination => destination.ar?.providerAssociation?.providerId === place.providerId || displayGooglePlaceId(destination.id) === place.providerId);
   return matches.length === 1 ? matches[0] : null;
 }

@@ -1,13 +1,11 @@
+import { BootstrapScreen } from '@/ui/bootstrap-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react';
-import { useTranslation } from 'react-i18next';
 import i18n, { deviceLanguage } from '@/i18n';
-import { Notice, Screen } from '@/ui/shared';
 import { preferencesSchema, readPreferences, type Preferences, type PreferencesInput } from './preferences';
 const storageKey = 'argala.preferences.v1';
 const SettingsContext = createContext<(Preferences & { storageError: string | null; save: (value: PreferencesInput) => Promise<void> }) | null>(null);
 export function SettingsProvider({ children }: PropsWithChildren) {
-  const { t } = useTranslation();
   const [preferences, setPreferences] = useState(() => readPreferences(null, deviceLanguage));
   const [ready, setReady] = useState(false); const [storageError, setStorageError] = useState<string | null>(null);
   const saving = useRef(false);
@@ -26,7 +24,7 @@ export function SettingsProvider({ children }: PropsWithChildren) {
     try { await AsyncStorage.setItem(storageKey, JSON.stringify(next)); await i18n.changeLanguage(next.language); setPreferences(next); setStorageError(null); }
     finally { saving.current = false; }
   }
-  if (!ready) return <Screen><Notice busy>{t('common.loading')}</Notice></Screen>;
+  if (!ready) return <BootstrapScreen />;
   return <SettingsContext.Provider value={{ ...preferences, storageError, save }}>{children}</SettingsContext.Provider>;
 }
 export function useSettings() {

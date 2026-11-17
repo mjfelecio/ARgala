@@ -1,3 +1,4 @@
+import { useCallback,useRef,useSyncExternalStore } from 'react';
 import type { QueryClient } from '@tanstack/react-query';
 import { AR } from '@/config/limits';
 import type { Language } from '../../../supabase/functions/_shared/contracts';
@@ -38,4 +39,31 @@ export function placeDetailsOptions(client: QueryClient, providerId: string | nu
     initialDataUpdatedAt: cached?.updatedAt,
     gcTime: AR.nearbyReuseMs,
   };
+}
+
+/** Reactive display snapshot. Cache observation never grants request authority or renews its age. */
+export function useAvailablePlaceDetailsSnapshot(client: QueryClient, providerId: string | null, language: Language) {
+  const previous=useRef<ReturnType<typeof availablePlaceDetailsSnapshot>>(undefined);
+  const getSnapshot=useCallback(()=>{
+    const next=availablePlaceDetailsSnapshot(client,providerId,language);
+    if(previous.current?.place===next?.place&&previous.current?.updatedAt===next?.updatedAt)return previous.current;
+    previous.current=next;return next;
+  },[client,providerId,language]);
+  const subscribe=useCallback((onChange:()=>void)=>{
+    let current=true;let timer:ReturnType<typeof setTimeout>|undefined;
+    function scheduleExpiry(){
+      clearTimeout(timer);const value=getSnapshot();if(!value)return;
+      // Expiry must publish without another query/sensor event. Keep the source receipt time.
+      timer=setTimeout(()=>{if(current){onChange();scheduleExpiry();}},Math.max(1,value.updatedAt+AR.nearbyReuseMs-Date.now()+1));
+    }
+    const unsubscribe=client.getQueryCache().subscribe(event=>{
+      if(event.type!=='updated'&&event.type!=='added'&&event.type!=='removed')return;
+      const key=event.query.queryKey;
+      if((key[0]==='places'&&key[2]===language)||(key[0]==='place-details'&&key[1]===providerId&&key[2]===language)){
+        onChange();scheduleExpiry();
+      }
+    });
+    scheduleExpiry();return()=>{current=false;clearTimeout(timer);unsubscribe();};
+  },[client,providerId,language,getSnapshot]);
+  return useSyncExternalStore(subscribe,getSnapshot,getSnapshot);
 }

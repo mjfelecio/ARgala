@@ -1,0 +1,13 @@
+{
+  "photoCount": "写真{{count}}枚",
+  "photoPosition": "写真{{current}} / {{total}}",
+  "previousPhoto": "前の写真",
+  "nextPhoto": "次の写真",
+  "openMaps": "Google マップで開く",
+  "viewPhoto": "{{name}}の写真を見る",
+  "arTitle": "AR体験",
+  "arReady": "ARで探索できます",
+  "arPreview": "開発用ARプレビュー",
+  "arPreviewHint": "開発用のプレビューです。実際の到着確認も必要です。",
+  "launchPreview": "開発用プレビューを開始"
+}

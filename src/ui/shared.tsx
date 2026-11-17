@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from 'react';
 import { Button } from 'heroui-native/button';
-import { Spinner } from 'heroui-native/spinner';
+import { StatusRow } from './status-row';
 import { Surface } from 'heroui-native/surface';
 import { ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,10 +14,7 @@ export function Screen({ children }: PropsWithChildren) {
 }
 export function Notice({ children, busy = false }: PropsWithChildren<{ busy?: boolean }>) {
   return <Surface variant="secondary" className="rounded-card p-4">
-    <View className="flex-row items-start gap-3">
-      {busy && <Spinner size="sm" />}
-      <Text accessibilityLiveRegion="polite" className="shrink grow font-sans text-sm text-foreground">{children}</Text>
-    </View>
+    <StatusRow busy={busy}>{children}</StatusRow>
   </Surface>;
 }
 export function Action({ title, onPress, disabled = false }: { title: string; onPress: () => void; disabled?: boolean }) {

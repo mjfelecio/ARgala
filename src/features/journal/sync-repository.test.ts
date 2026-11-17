@@ -5,7 +5,7 @@ const ref={kind:'google' as const,id:'ChIJ_alpha'};
 function setup(){const disk=new Map<string,string>();const storage={getItem:vi.fn(async(k:string)=>disk.get(k)??null),setItem:vi.fn(async(k:string,v:string)=>{disk.set(k,v);})};return {disk,storage,repo:new JournalRepository(storage)};}
 it('upgrades existing v1 data and reuses a durable in-flight snapshot across retries and restarts',async()=>{
  const {repo,disk,storage}=setup();await repo.change('account',s=>saveBookmark(s,ref,true));const first=await repo.prepareSync('account');expect(first.flight.journal.bookmarks).toEqual([ref]);
- const restarted=new JournalRepository(storage);expect(await restarted.prepareSync('account')).toEqual(first);expect(JSON.parse(disk.get(repo.key('account'))!).version).toBe(2);
+ const restarted=new JournalRepository(storage);expect(await restarted.prepareSync('account')).toEqual(first);expect(JSON.parse(disk.get(repo.key('account'))!).document.version).toBe(2);
 });
 it('preserves offline deletion and other-device additions through a conflict',async()=>{
  const {repo}=setup();await repo.change('account',s=>saveBookmark(s,ref,true));let request=await repo.prepareSync('account');await repo.acceptSync('account',request,{status:'applied',sequence:request.flight.sequence,requestId:request.flight.requestId,revision:1,journal:request.flight.journal});

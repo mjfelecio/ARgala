@@ -23,3 +23,9 @@ it('uses exact approved provider identity only and rejects names, close coordina
  const ambiguous = destinationSchema.parse({ ...approved, id: 'D01' });
  expect(matchedFeaturedDestination(place, [approved, ambiguous])).toBeNull();
 });
+it('converges verified Lake Danao Google identity without granting geographic AR authority', () => {
+ const destination=matchedFeaturedDestination({provider:'google',providerId:'ChIJVREKfDnlBzMRfl4RQPJlsoU'});
+ expect(destination?.id).toBe('D01');
+ expect(destination?.ar?.activation).toBeUndefined();
+ expect(matchedFeaturedDestination({provider:'google',providerId:'ChIJNQczD5XkBzMRa_IcNPC-orI'})).toBeNull();
+});

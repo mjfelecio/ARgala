@@ -109,3 +109,19 @@ it.each([
   expect(visibleText()).toContain(area);
   expect(callbacks.onSearchNearby).not.toHaveBeenCalled();
 });
+
+it('distinguishes white unselected categories with borders and icons while retaining the selected primary action', async () => {
+  const { callbacks, render } = await setup('en', { category: 'restaurants' });
+  for (const [label, name] of [['All', 'apps-outline'], ['Attractions', 'camera-outline'], ['Hotels', 'bed-outline'], ['Shopping', 'bag-handle-outline']] as const) {
+    const chip = button(label);
+    expect(chip.props.className).toContain('bg-surface');
+    expect(chip.props.className).toContain('border-brand-strong/25');
+    expect(chip.findAllByType('icon' as React.ElementType).map(node => node.props.name)).toContain(name);
+  }
+  expect(button('Restaurants').props.className).toContain('button__root--variant-primary');
+  expect(button('Restaurants').findAllByType('icon' as React.ElementType).map(node => node.props.name)).toContain('restaurant-outline');
+  await act(async () => button('Hotels').props.onPress());
+  await act(async () => tree.update(render({ category: 'hotels' })));
+  expect(button('Hotels').props.accessibilityState.selected).toBe(true);
+  expect(callbacks.onSearchNearby).not.toHaveBeenCalled();
+});

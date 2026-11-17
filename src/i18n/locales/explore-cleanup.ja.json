@@ -1,0 +1,20 @@
+{
+  "preparing": "準備しています…",
+  "selectedPlace": "選択した場所",
+  "distance": "{{meters}} m先",
+  "browseWithoutLocation": "場所の検索や地図の閲覧は引き続き利用できます。",
+  "featuredBadge": "おすすめの目的地",
+  "viewDestination": "目的地を見る",
+  "zoomSaved": "保存した場所をさらに表示するには拡大してください。",
+  "arTitle": "AR体験",
+  "arUnavailable": "この場所ではARを利用できません。",
+  "arReady": "AR体験の準備ができました",
+  "arPreviewReady": "ARプレビューの準備ができました",
+  "arHint": "周囲の物語を探索しましょう。",
+  "preview": "開発プレビュー · 位置情報の確認が必要です",
+  "launchPreview": "ARプレビューを開始",
+  "arrivalVerified": "到着を確認しました",
+  "photos": "写真",
+  "loadDetails": "最新の詳細を読み込む",
+  "unnamed": "選択した場所"
+}

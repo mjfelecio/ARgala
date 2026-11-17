@@ -101,15 +101,17 @@ it('scans at current GPS only on action, preserves sheet selection, and requests
   await press('placeDetails.map'); expect(controls.navigate).toHaveBeenCalledWith({ pathname: '/', params: { placeId: 'north' } });
   expect(output()).toContain('Google Maps'); expect(output()).toContain('Local Provider');
 });
-it('opens the selected floating card through the existing Details handoff without a new request', async () => {
+it('opens the selected floating card on Explore without a new request or renewing its response timestamp', async () => {
   const complete = { ...north, source: 'discovery' as const };
   vi.mocked(placesService.nearby).mockResolvedValue([complete]);
   await mount(); await scan();
   const label = tree!.root.findAllByType(Pressable).find(node => node.props.testID === 'ar-label-north')!;
   expect(label).toBeDefined();
+  const responseUpdatedAt = client.getQueryState(['places', { latitude: 0, longitude: 0 }, 'en'])!.dataUpdatedAt;
   await act(async () => label.props.onPress());
-  expect(controls.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/place/[providerId]', params: { providerId: north.providerId } });
+  expect(controls.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/', params: { placeId: north.providerId } });
   expect(client.getQueryData(['place-selection', north.providerId])).toEqual(complete);
+  expect(client.getQueryState(['place-details', north.providerId, 'en'])!.dataUpdatedAt).toBe(responseUpdatedAt);
   expect(placesService.nearby).toHaveBeenCalledTimes(1);
   expect(placesService.details).not.toHaveBeenCalled();
 });
@@ -320,9 +322,9 @@ it('allows an explicit details request in a new language after hiding the loaded
  expect(placesService.details).toHaveBeenCalledTimes(2);
  expect(tree!.root.findAllByType('button').some(b=>b.props.title===translations.t('ar.more'))).toBe(false);
 });
-it('opens the same protected Details page from AR without a paid request and keeps the selected POI on return', async () => {
+it('opens the selected POI on Explore without a paid request and keeps AR selection on return', async () => {
   await mount(); await scan(); await press('ar.expand'); await press('placeDetails.view');
-  expect(controls.navigate).toHaveBeenLastCalledWith({ pathname: '/place/[providerId]', params: { providerId: north.providerId } });
+  expect(controls.navigate).toHaveBeenLastCalledWith({ pathname: '/', params: { placeId: north.providerId } });
   expect(client.getQueryData(['place-selection', north.providerId])).toEqual(north);
   expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).toHaveBeenCalledTimes(1);
   controls.focused = false; await update(); expect(tree!.root.findAllByType('video')).toHaveLength(0);

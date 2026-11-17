@@ -10,34 +10,34 @@ import { EdgeRequestError } from '@/lib/edge-error';
 import { queryClient } from '@/lib/query';
 import { localizationOptions } from '@/i18n/options';
 import type { Place } from '@/features/places/service';
-import { createRoutePreviewIntent } from './route-preview-intent';
+import { createRoutePreviewIntent, claimRoutePreviewIntent } from './route-preview-intent';
 import { routeService, type WalkingRoute } from './service';
 import RoutePreviewScreen from './route-preview-screen';
-import PlaceDetailsScreen from '@/features/places/place-details-screen';
-import { placeSelectionOptions } from '@/features/places/selection';
+import MapScreen from '@/features/map/map-screen';
+import { placeSelectionOptions, setPlaceSelection } from '@/features/places/selection';
 import { routeSheetGeometry } from '@/features/map/sheet-geometry';
 
-const controls = vi.hoisted(() => ({ token: undefined as unknown, details: false, providerId: 'north', active: true, focused: true, mapsConfigured: true, language: 'en' as 'en' | 'ko' | 'ja', fit: vi.fn(), animate: vi.fn(), retry: vi.fn(), canBack: true,
+const controls = vi.hoisted(() => ({ token: undefined as unknown, home: false, mapParams: {} as { placeId?: string }, active: true, focused: true, mapsConfigured: true, language: 'en' as 'en' | 'ko' | 'ja', fit: vi.fn(), animate: vi.fn(), retry: vi.fn(), canBack: true,
   location: { watcherSample: null as { position: { latitude: number; longitude: number }; accuracy: number; timestamp: number } | null, status: 'ready', watcherStatus: 'ready', errorCode: null as string | null, position: { latitude: 38.5, longitude: -120.2 } as { latitude: number; longitude: number } | null, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8, canAskAgain: true } }));
-vi.mock('expo-router', () => ({ useLocalSearchParams: () => ({ token: controls.token, providerId: controls.providerId }), useIsFocused: () => controls.focused,
+vi.mock('expo-router', () => ({ useLocalSearchParams: () => controls.home ? controls.mapParams : { token: controls.token }, useIsFocused: () => controls.focused,
   router: { back: vi.fn(), canGoBack: () => controls.canBack, push: vi.fn(), navigate: vi.fn(), dismissTo: vi.fn(), setParams: vi.fn() } }));
 vi.mock('expo-constants', () => ({ default: { get expoConfig() { return { extra: { mapsConfigured: controls.mapsConfigured } }; } } }));
-vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language }) }));
+vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: controls.language, activationRadiusMeters: 100 }) }));
 vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: vi.fn(() => ({ ...controls.location, sampleReceivedAt: Date.now(), retry: controls.retry })) }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => controls.active }));
-vi.mock('@/features/places/service', () => ({ placesService: { details: vi.fn(), nearby: vi.fn() } }));
+vi.mock('@/features/places/service', () => ({ placesService: { details: vi.fn(), nearby: vi.fn(), search: vi.fn() } }));
 vi.mock('./service', () => ({ routeService: { walking: vi.fn(), preview: vi.fn() } }));
 vi.mock('react-native-maps', async () => {
   const { createElement, forwardRef, useImperativeHandle } = await import('react');
   return { default: forwardRef((props: Record<string, unknown>, ref) => { useImperativeHandle(ref, () => ({ fitToCoordinates: controls.fit, animateToRegion: controls.animate })); return createElement('map', props); }),
-    Marker: 'marker', Polyline: 'polyline', PROVIDER_GOOGLE: 'google' };
+    Marker: 'marker', Polyline: 'polyline', Circle: 'circle', Callout: 'callout', PROVIDER_GOOGLE: 'google' };
 });
 const place: Place = { id: 'google:north', providerId: 'north', provider: 'google', name: 'Real destination', address: 'Returned address', coordinates: { latitude: 43.252, longitude: -126.453 }, attributions: [{ name: 'Returned credit', uri: 'https://example.com/credit' }] };
 const origin = { latitude: 38.5, longitude: -120.2 };
 const route: WalkingRoute = { distanceMeters: 867, durationSeconds: 301, encodedPolyline: '_p~iF~ps|U_ulLnnqC_mqNvxq`@', warnings: ['Actual provider warning'] };
 const coordinates = [origin, { latitude: 40.7, longitude: -120.95 }, place.coordinates];
 let tree: ReactTestRenderer | undefined; let client: QueryClient; let translations: i18n;
-function render() { return <I18nextProvider i18n={translations}><QueryClientProvider client={client}>{withHeroUI(controls.details ? <PlaceDetailsScreen /> : <RoutePreviewScreen />)}</QueryClientProvider></I18nextProvider>; }
+function render() { return <I18nextProvider i18n={translations}><QueryClientProvider client={client}>{withHeroUI(controls.home ? <MapScreen /> : <RoutePreviewScreen />)}</QueryClientProvider></I18nextProvider>; }
 async function mount() { await act(async () => { tree = create(render()); }); }
 async function update() { await act(async () => { tree!.update(render()); }); }
 function output() { return JSON.stringify(tree!.toJSON()); }
@@ -58,7 +58,7 @@ async function layout() { await act(async () => {
 async function expand() { if (button('map.expand')) await press('map.expand'); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false }); vi.clearAllMocks(); vi.spyOn(Date, 'now').mockReturnValue(1800000000000);
-  Object.assign(controls, { token: undefined, details: false, active: true, focused: true, mapsConfigured: true, language: 'en', canBack: true });
+  Object.assign(controls, { token: undefined, home: false, mapParams: {}, active: true, focused: true, mapsConfigured: true, language: 'en', canBack: true });
   Object.assign(controls.location, { watcherSample: null, status: 'ready', watcherStatus: 'ready', errorCode: null, position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8 });
   vi.mocked(routeService.walking).mockReset().mockResolvedValue(route); nativeUi.openURL.mockReset().mockResolvedValue(undefined);
   client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() }); notifyManager.setScheduler(cb => cb());
@@ -166,20 +166,29 @@ it.each(['en','ko','ja'] as const)('renders real %s navigation quality, expiry, 
   expect(tree!.root.findAllByType('polyline')).toHaveLength(0);await press('directions.returnToPreview');expect(tree!.root.findAllByType('polyline')).toHaveLength(1);
   expect(routeService.walking).not.toHaveBeenCalled();
 });
-it('returns to Map with selection or to the selected Place Details without provider work', async () => {
-  handoff(); await mount(); await press('directions.map'); expect(router.dismissTo).toHaveBeenCalledWith({ pathname: '/', params: { placeId: place.providerId } });
-  await press('directions.details'); expect(router.dismissTo).toHaveBeenCalledWith({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
+it('returns ordinary places to Explore with their selection without a second Details action or provider work', async () => {
+  handoff(); await mount(); await expand();
+  expect(button('directions.details')).toBeUndefined();
+  await press('directions.map'); expect(router.dismissTo).toHaveBeenCalledWith({ pathname: '/', params: { placeId: place.providerId } });
+  expect(client.getQueryData(placeSelectionOptions(place.providerId).queryKey)).toEqual(place);
   await press('directions.back'); expect(router.back).toHaveBeenCalledOnce(); expect(routeService.walking).not.toHaveBeenCalled();
 });
 it('shows honest Maps configuration guidance without spending quota', async () => {
   controls.mapsConfigured = false; handoff(false); await mount(); expect(output()).toContain(translations.t('map.missingKey')); expect(routeService.walking).not.toHaveBeenCalled();
 });
-it('retains its Google selection until details mounts after a navigation delay', async () => {
-  handoff(); await mount(); await press('directions.details');
+it('retains its Google selection until Explore mounts after a navigation delay without renewing the handoff', async () => {
+  const { placesService } = await import('@/features/places/service');
+  handoff(); await mount(); await press('directions.map');
+  const updatedAt = client.getQueryState(placeSelectionOptions(place.providerId).queryKey)!.dataUpdatedAt;
   await act(async () => { tree!.unmount(); }); tree = undefined;
   await new Promise(resolve => setTimeout(resolve, 10));
-  controls.details = true; await mount();
+  vi.mocked(Date.now).mockReturnValue(Date.now() + 10);
+  controls.home = true; controls.mapParams = { placeId: place.providerId }; await mount();
   expect(output()).toContain(place.name);
+  expect(client.getQueryData(placeSelectionOptions(place.providerId).queryKey)).toEqual(place);
+  expect(client.getQueryState(placeSelectionOptions(place.providerId).queryKey)!.dataUpdatedAt).toBe(updatedAt);
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(routeService.walking).not.toHaveBeenCalled();
 });
 it('spends one intent only when delayed foreground GPS becomes fresh, with no repeat on lifecycle or locale changes', async () => {
   const { focusManager, onlineManager } = await import('@tanstack/react-query');
@@ -239,13 +248,38 @@ it.each(['?', '??', 'malformed'])('rejects invalid/degenerate returned polyline 
   vi.mocked(routeService.walking).mockResolvedValue({ ...route, encodedPolyline }); handoff(false); await mount(); expect(routeService.walking).toHaveBeenCalledOnce(); expect(tree!.root.findAllByType('polyline')).toHaveLength(0); expect(output()).toContain(translations.t('service.unavailable')); expect(button('directions.retry')).toBeDefined();
 });
 
-it('connects one Details tap through the actual intent handoff to a single delayed-GPS preview request', async () => {
-  controls.details = true; controls.location.status = 'loading'; client.setQueryData(placeSelectionOptions(place.providerId).queryKey, place);
+it('connects the real Explore sheet Directions action through one intent to a single delayed-GPS preview request', async () => {
+  const { placesService } = await import('@/features/places/service');
+  const { focusManager, onlineManager } = await import('@tanstack/react-query');
+  controls.home = true; controls.mapParams = { placeId: place.providerId };
+  Object.assign(controls.location, { status: 'loading', position: null });
+  setPlaceSelection(client, place);
+  const selectedAt = client.getQueryState(placeSelectionOptions(place.providerId).queryKey)!.dataUpdatedAt;
   vi.mocked(router.push).mockImplementationOnce(href => { if (typeof href !== 'string' && href.params && 'token' in href.params) controls.token = href.params.token; });
-  await mount(); await act(async () => { const action = button('placeDetails.directions')!; action.props.onPress(); action.props.onPress(); });
-  expect(router.push).toHaveBeenCalledOnce(); controls.details = false; await update(); expect(routeService.walking).not.toHaveBeenCalled();
-  controls.location.status = 'ready'; await update(); expect(routeService.walking).toHaveBeenCalledExactlyOnceWith({ origin, destination: place.coordinates, language: 'en' });
+  await mount();
+  await act(async () => tree!.root.findByProps({ testID: 'home-map-scene' }).props.onLayout({ nativeEvent: { layout: { width: 360, height: 720 } } }));
+  await act(async () => tree!.root.findByType('map').props.onMapReady());
+  expect(output()).toContain(place.name);
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+  expect(routeService.walking).not.toHaveBeenCalled();
+  await act(async () => { const action = button('placeDetails.directions')!; action.props.onPress(); action.props.onPress(); });
+  expect(router.push).toHaveBeenCalledExactlyOnceWith({ pathname: '/directions', params: { token: expect.any(String) } });
+  expect(client.getQueryData(['route-preview-intent', controls.token])).toMatchObject({ place, source: 'map', language: 'en' });
+  controls.home = false; await update();
+  expect(claimRoutePreviewIntent(client, controls.token)).toBeNull();
+  expect(routeService.walking).not.toHaveBeenCalled();
+  Object.assign(controls.location, { status: 'ready', position: origin, positionTimestamp: Date.now(), watcherTimestamp: Date.now() });
+  await update();
+  expect(routeService.walking).toHaveBeenCalledExactlyOnceWith({ origin, destination: place.coordinates, language: 'en' });
   expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
+  controls.active = false; controls.focused = false; await update();
+  controls.active = true; controls.focused = true; await update();
+  await act(async () => { await translations.changeLanguage('ja'); controls.language = 'ja'; await client.invalidateQueries(); focusManager.setFocused(false); focusManager.setFocused(true); onlineManager.setOnline(false); onlineManager.setOnline(true); });
+  await update(); await act(async () => { tree!.unmount(); }); tree = undefined; await mount();
+  expect(routeService.walking).toHaveBeenCalledTimes(1);
+  expect(tree!.root.findByType('polyline').props.coordinates).toEqual(coordinates);
+  expect(client.getQueryState(placeSelectionOptions(place.providerId).queryKey)!.dataUpdatedAt).toBe(selectedAt);
+  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
 it('shows map loading until native readiness and resets readiness for a new intent/map instance', async () => {
   handoff(); await mount(); expect(output()).toContain(translations.t('map.loading')); await layout();

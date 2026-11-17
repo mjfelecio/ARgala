@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type ComponentProps } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type ComponentProps } from 'react';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -7,10 +7,9 @@ import { useAnimatedReaction, useSharedValue, type SharedValue } from 'react-nat
 import { scheduleOnRN } from 'react-native-worklets';
 import { useResolveClassNames, withUniwind } from 'uniwind';
 import { Button } from 'heroui-native/button';
-import { Card } from 'heroui-native/card';
 import { Chip } from 'heroui-native/chip';
 import { useThemeColor } from 'heroui-native/hooks';
-import { Spinner } from 'heroui-native/spinner';
+import { StatusRow } from '@/ui/status-row';
 import { homeSheetGeometry } from './sheet-geometry';
 import { DISCOVERY } from '@/config/limits';
 import type { Place } from '@/features/places/service';
@@ -25,13 +24,14 @@ export type HomePlaceSheetProps = {
   geometry?: ReturnType<typeof homeSheetGeometry>;
   state: HomePlaceSheetState; selectedPlace: Place | null; hasSelection: boolean;
   canRequest: boolean; resultCount: number; errorKey?: string; detailsLoading?: boolean; detailsLoaded?: boolean;
+  featured?: boolean; selectionName?: string; canLoadDetails?: boolean; extraStatus?: ReactNode; onCompactHeight?(height: number): void;
   saveAction?: ReactNode; selectionSummary?: string; selectionMedia?: ReactNode; locationStatus?: ReactNode; mapLoading?: boolean;
   attributions: ReactNode; onRetrySearch(): void; onClosePlace(): void; onDetails(): void;
   onViewDetails?(): void; onDirections(): void; onOpenGoogle?(): void; onMeasuredHeight(height: number): void;
   animatedPosition?: SharedValue<number>;
   onSettledHeight?(height: number): void; maxHeight?: number; containerHeight?: number;
 };
-export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelection, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, saveAction, selectionSummary, selectionMedia, locationStatus, mapLoading, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onDirections, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight, animatedPosition }: HomePlaceSheetProps) {
+export function HomePlaceSheet({ geometry, state, selectedPlace: place, selectionName, hasSelection, featured, canLoadDetails, extraStatus, onCompactHeight, canRequest, resultCount, errorKey, detailsLoading, detailsLoaded, saveAction, selectionSummary, selectionMedia, locationStatus, mapLoading, attributions, onRetrySearch, onClosePlace, onDetails, onViewDetails, onDirections, onOpenGoogle, onMeasuredHeight, onSettledHeight, maxHeight, containerHeight, animatedPosition }: HomePlaceSheetProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [settledIndex, setSettledIndex] = useState(0);
@@ -71,7 +71,17 @@ export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelec
     onMeasuredHeight(settledHeight);
     onSettledHeight?.(settledHeight);
   }, [height, position, settledHeight, onMeasuredHeight, onSettledHeight]);
+  const compactParts = useRef({ header: 0, actions: 0 });
+  const alive = useRef(true);
+  useLayoutEffect(() => { alive.current = true; return () => { alive.current = false; }; }, []);
+  function measureCompact(part: 'header' | 'actions', value: number) {
+    if (!alive.current || !Number.isFinite(value) || value <= 0) return;
+    compactParts.current[part] = value;
+    const { header, actions } = compactParts.current;
+    if (header && (!hasSelection || actions)) onCompactHeight?.(header + (hasSelection ? actions + 12 : 0) + 24 + 24);
+  }
   const busy = state === 'loading';
+  const canLoad = canLoadDetails ?? canRequest;
   // Keep native opening pending until the handle is measured. In 5.2.14,
   // disabling mount animation can discard opening before layout is ready.
   return <BottomSheet ref={sheet} containerLayoutState={containerLayoutState} snapPoints={snapPoints}
@@ -80,48 +90,46 @@ export function HomePlaceSheet({ geometry, state, selectedPlace: place, hasSelec
     accessible={false} accessibilityLabel={t('map.title')}
     onChange={(index, top) => { setSettledIndex(index); if (snapPoints.length > 1) setExpanded(index > 0); reportPosition(top); onSettledHeight?.(Math.max(0, height - top)); }}>
     <SheetScrollView className="flex-1" contentContainerClassName="gap-3 px-5 pb-6">
-      <View className="flex-row flex-wrap items-center justify-between gap-2">
-        <Text accessibilityRole="header" className="shrink font-sans text-section font-ui-bold text-brand-strong">{t('map.title')}</Text>
-        <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t(expanded ? 'map.collapse' : 'map.expand')} accessibilityState={{ expanded }}
-          onPress={() => { const next = !expanded; setExpanded(next); sheet.current?.snapToIndex(next ? snapPoints.length - 1 : 0); }}>
-          <Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={ink} />
-        </Button>
+      <View testID="home-place-header" className="gap-3" onLayout={event => measureCompact('header', event.nativeEvent.layout.height)}>
+        {featured && <View className="self-start rounded-pill bg-mint px-3 py-1"><Text className="font-sans text-xs font-ui-semibold text-brand-strong">{t('exploreCleanup.featuredBadge')}</Text></View>}
+        <View className="flex-row items-start gap-1">
+          <Text accessibilityRole="header" className="min-w-0 flex-1 font-sans text-section font-ui-bold text-brand-strong">{hasSelection ? place?.name ?? selectionName ?? t('exploreCleanup.selectedPlace') : t('map.title')}</Text>
+          {hasSelection && <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t('map.closePlace')} onPress={onClosePlace}><Ionicons name="close-outline" size={22} color={ink} accessible={false} /></Button>}
+          <Button isIconOnly variant="ghost" className="size-12" accessibilityLabel={t(expanded ? 'map.collapse' : 'map.expand')} accessibilityState={{ expanded }}
+            onPress={() => { const next = !expanded; setExpanded(next); sheet.current?.snapToIndex(next ? snapPoints.length - 1 : 0); }}>
+            <Ionicons name={expanded ? 'chevron-down-outline' : 'chevron-up-outline'} size={22} color={ink} accessible={false} />
+          </Button>
+        </View>
+        {locationStatus}
+        {mapLoading && <Message busy>{t('map.loading')}</Message>}
+        {state === 'unsearched' && <Message>{t('map.start')}</Message>}
+        {state === 'loading' && <Message busy>{t('map.searching')}</Message>}
+        {state === 'empty' && <Message>{t('map.empty')}</Message>}
+        {state === 'results' && <Chip variant="secondary"><Chip.Label>{t('map.results', { count: resultCount })}</Chip.Label></Chip>}
+        {selectionSummary && <Text className="font-sans text-sm text-muted">{selectionSummary}</Text>}
+        {hasSelection && detailsLoading && <Message busy>{t('map.details')}</Message>}
+        {errorKey && <Message error>{t(errorKey)}</Message>}
       </View>
-      {locationStatus}
-      {mapLoading && <Message busy>{t('map.loading')}</Message>}
-      {state === 'unsearched' && <Message>{t('map.start')}</Message>}
-      {state === 'loading' && <Message busy>{t('map.searching')}</Message>}
-      {state === 'empty' && <Message>{t('map.empty')}</Message>}
-      {state === 'results' && <Chip variant="secondary"><Chip.Label>{t('map.results', { count: resultCount })}</Chip.Label></Chip>}
-      {errorKey && <Message error>{t(errorKey)}</Message>}
-      {state === 'failed' && <Button variant="outline" accessibilityLabel={t('common.retry')} isDisabled={!canRequest || busy} onPress={onRetrySearch}><Button.Label>{t('common.retry')}</Button.Label></Button>}
+      {state === 'failed' && <Button variant="outline" accessibilityLabel={t('common.retry')} isDisabled={!canLoad || busy} onPress={onRetrySearch}><Button.Label>{t('common.retry')}</Button.Label></Button>}
       {hasSelection && <>
-        {detailsLoading && <Message busy>{t('map.details')}</Message>}
-        {!place && <><Message>{t('map.selectionUnavailable')}</Message></>}
-        {place && <Card variant="transparent" className="gap-3 p-0 shadow-none">
-          <Card.Header><Text accessibilityRole="header" className="font-sans text-title font-ui-bold text-foreground">{place.name}</Text></Card.Header>
-          <Card.Body className="gap-3">
-            {selectionSummary && <Text className="font-sans text-sm text-muted">{selectionSummary}</Text>}
-            {expanded && <>
-              {selectionMedia}
-              {place.address && <Text className="font-sans text-sm text-muted">{place.address}</Text>}
-              {place.description && <Text className="font-sans text-sm text-muted">{place.description}</Text>}
-              {place.mapsUri && onOpenGoogle && <Button variant="outline" accessibilityLabel={t('map.openGoogle')} onPress={onOpenGoogle}><Button.Label>{t('map.openGoogle')}</Button.Label></Button>}
-            </>}
-          </Card.Body>
-          {saveAction}
-          <Card.Footer className="flex-row flex-wrap gap-2">{onViewDetails && <Button variant="secondary" className="h-auto min-h-12 min-w-28 flex-1 py-3" accessibilityLabel={t('placeDetails.view')} onPress={onViewDetails}><Button.Label className="shrink text-center">{t('placeDetails.view')}</Button.Label></Button>}<Button className="h-auto min-h-12 min-w-28 flex-1 py-3" accessibilityLabel={t('placeDetails.directions')} onPress={onDirections} isDisabled={!canRequest} accessibilityState={{ disabled: !canRequest }}>
-            <Button.Label className="shrink text-center">{t('placeDetails.directions')}</Button.Label>
-          </Button></Card.Footer>
-        </Card>}
-        {!detailsLoaded && <Button variant="outline" accessibilityLabel={t('ar.more')} onPress={onDetails} isDisabled={!canRequest || detailsLoading} accessibilityState={{ busy: !!detailsLoading, disabled: !canRequest || !!detailsLoading }}><Button.Label>{t('ar.more')}</Button.Label></Button>}
-        <Button variant="ghost" accessibilityLabel={t('map.closePlace')} onPress={onClosePlace}><Button.Label>{t('map.closePlace')}</Button.Label></Button>
+        {expanded && selectionMedia}
+        <View testID="home-place-actions" className="gap-3" onLayout={event => measureCompact('actions', event.nativeEvent.layout.height)}>
+          {onOpenGoogle && <Button variant="primary" className="h-auto min-h-12 w-full py-3" accessibilityLabel={t('map.openGoogle')} onPress={onOpenGoogle}><Button.Label className="shrink text-center">{t('map.openGoogle')}</Button.Label></Button>}
+          <View className="flex-row flex-wrap items-start gap-2">
+            <Button variant="outline" className="h-auto min-h-12 min-w-28 flex-1 py-3" accessibilityLabel={t('placeDetails.directions')} onPress={onDirections} isDisabled={!canRequest} accessibilityState={{ disabled: !canRequest }}><Ionicons name="navigate-outline" size={20} color={ink} accessible={false} /><Button.Label className="shrink text-center">{t('placeDetails.directions')}</Button.Label></Button>
+            {saveAction && <View className="min-w-28 flex-1">{saveAction}</View>}
+          </View>
+        </View>
+        {featured && onViewDetails && <Button variant="ghost" accessibilityLabel={t('placeDetails.view')} onPress={onViewDetails}><Button.Label className="shrink text-center">{t('exploreCleanup.viewDestination')}</Button.Label><Ionicons name="chevron-forward" size={18} color={ink} accessible={false} /></Button>}
+        {expanded && <>{place?.address && <Text className="font-sans text-sm text-muted">{place.address}</Text>}{place?.description && <Text className="font-sans text-sm text-muted">{place.description}</Text>}</>}
+        {!detailsLoaded && <Button variant="outline" accessibilityLabel={t('exploreCleanup.loadDetails')} onPress={onDetails} isDisabled={!canLoad || detailsLoading} accessibilityState={{ busy: !!detailsLoading, disabled: !canLoad || !!detailsLoading }}><Button.Label>{t('exploreCleanup.loadDetails')}</Button.Label></Button>}
       </>}
+      {extraStatus}
       {expanded && <Text className="font-sans text-xs font-ui-medium text-muted">{t('map.limit', { count: DISCOVERY.maxResults, meters: DISCOVERY.radiusMeters })}</Text>}
       {attributions}
     </SheetScrollView>
   </BottomSheet>;
 }
 function Message({ children, busy, error }: { children: ReactNode; busy?: boolean; error?: boolean }) {
-  return <View className="gap-2">{busy && <Spinner size="sm" />}<Text accessibilityLiveRegion="polite" className={error ? 'font-sans text-sm text-danger' : 'font-sans text-sm text-muted'}>{children}</Text></View>;
+  return <StatusRow busy={busy} error={error}>{children}</StatusRow>;
 }
