@@ -412,12 +412,12 @@
     "expired": "This AR session has expired. Return to Explore to verify arrival and start a new session."
   },
   "arrival": {
-    "unavailable": "AR arrival is not available for this destination yet.",
-    "uncertain": "Waiting for fresh, accurate location updates.",
-    "distant": "Select this destination and approach it to unlock AR.",
-    "approaching": "You are approaching the selected destination.",
-    "near": "You are near the selected destination. Keep location enabled.",
-    "checking": "Checking stable arrival…",
+    "unavailable": "AR isn't available here yet. When available, it unlocks after you arrive and your location is confirmed.",
+    "uncertain": "Visit this destination with location turned on. AR unlocks once we confirm you're there.",
+    "distant": "AR unlocks when you're at this destination and we can confirm your location.",
+    "approaching": "You're getting close. AR unlocks when you reach this destination and your location is confirmed.",
+    "near": "You're nearby. Reach the destination and keep location on to unlock AR.",
+    "checking": "Confirming you're at the destination before unlocking AR…",
     "eligible": "Arrival confirmed.",
     "invitation": "Explore this place through its AR information ring.",
     "contentPending": "Arrival confirmed. AR is not available for this destination yet.",
