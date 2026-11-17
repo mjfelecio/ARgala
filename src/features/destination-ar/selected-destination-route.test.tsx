@@ -12,12 +12,16 @@ import { AdmissionContext } from './admission-context';
 import { ArAdmissionStore } from './admission-store';
 import SelectedDestinationArRoute from './selected-destination-route';
 import { loadDraftRingContent } from './draft-content-loader';
+import { loadExhibitScene } from './exhibit-loader';
+import { loadRingScene } from './ring-loader';
 const control = vi.hoisted(() => ({ params: {} as Record<string, unknown>, active: true, sample: null as { position: { latitude: number; longitude: number }; timestamp: number; accuracy: number } | null }));
 vi.mock('expo-router', () => ({ useLocalSearchParams: () => control.params, useIsFocused: () => true, router: { dismissTo: vi.fn(), navigate: vi.fn() } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => control.active }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ language: 'en' }) }));
 vi.mock('@/features/location/use-device-location', () => ({ useDeviceLocation: vi.fn(() => ({ phase: 'position', status: 'ready', watcherStatus: 'ready', watcherSample: control.sample, position: control.sample?.position ?? null, accuracy: 5, retry: vi.fn() })) }));
-vi.mock('./destination-ar-session-screen', async () => { const R = await import('react'); return { DestinationArSessionExperience: (props: Record<string, unknown>) => R.createElement('ar-experience', props) }; });
+vi.mock('./session-experience', async () => { const R = await import('react'); return { DestinationArSessionExperience: (props: Record<string, unknown>) => R.createElement('ar-experience', props) }; });
+vi.mock('./exhibit-loader', () => ({ loadExhibitScene: vi.fn(async () => () => null) }));
+vi.mock('./ring-loader', () => ({ loadRingScene: vi.fn(async () => () => null) }));
 vi.mock('./draft-content-loader', () => ({ loadDraftRingContent: vi.fn(async () => [{ id: 'overview', role: 'overview', titleKey: 'destinationRing.mock.overview.title', bodyKey: 'destinationRing.mock.overview.body' }]) }));
 let store: ArAdmissionStore; let tree: ReactTestRenderer | undefined; let render: () => React.ReactElement;
 beforeEach(async () => {
@@ -80,4 +84,42 @@ it('uses approved content with verified pending provenance in release without lo
  expect(scene.props.identity.provenance).toBe('verified'); expect(scene.props.content[0].approved.body.en.value).toBe('Approved body');
  expect(scene.props.content[0].approved.media).toEqual([media]);
  expect(scene.props.entryReady).toBe(false); expect(loadDraftRingContent).not.toHaveBeenCalled();
+});
+
+function featuredFixture() {
+ const pilot = getDestination('pilot-aclc')!;
+ const translated = { en: { value: 'Synthetic approved', approvalReference: 'Test' }, ja: { value: 'Synthetic approved', approvalReference: 'Test' }, ko: { value: 'Synthetic approved', approvalReference: 'Test' } };
+ const originals = getDestination('D01')!.media!;
+ const media = originals.slice(0, 3).map(photo => ({ ...photo, alt: translated, caption: translated, offlineRightsReference: 'Synthetic offline permission' }));
+ return { ...pilot, id: 'D01' as const, media, ar: { ...pilot.ar!, storyApproval: { contentVersion: pilot.ar!.contentVersion, approvalReference: 'Synthetic editorial approval', reviewer: 'Test', reviewedAt: '2026-11-18', primaryChapterIds: ['overview'] }, tiles: [{ id: 'overview', role: 'overview' as const, title: translated, body: translated, mediaIds: media.slice(0, 2).map(photo => photo.id) }] } };
+}
+it('keeps the nine-destination exhibit path behind real content and geographic authorization in release', async () => {
+ Object.assign(globalThis, { __DEV__: false }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '');
+ const fixture = featuredFixture(); store.setContentResolver(id => id === 'D01' ? fixture : null);
+ store.select('D01'); const lease = store.acquire('D01')!;
+ expect(store.begin(lease, 'D01', 'approved', 'en')).toBeNull();
+ for (const time of [10000, 13000, 16000]) { vi.mocked(Date.now).mockReturnValue(time); store.publish(lease, { running: true, watcherStatus: 'ready', sample: { timestamp: time, accuracy: 5, position: fixture.center! } }); }
+ const entryToken = store.begin(lease, 'D01', 'approved', 'en'); expect(entryToken).toBeTypeOf('string'); store.release(lease);
+ control.params = { destinationId: 'D01', entryToken };
+ await act(async () => { tree = create(render()); });
+ let scene = tree!.root.findByType('ar-experience' as React.ElementType);
+ expect(scene.props.entryReady).toBe(false); expect(scene.props.freshEligible()).toBe(false);
+ const authorized = fixture.media.slice(0, 2).map(photo => photo.id);
+ expect(scene.props.galleryMediaIds).toEqual(authorized);
+ expect(scene.props.content[0].approved.media.map((photo: { id: string }) => photo.id)).toEqual(authorized);
+ const loader = scene.props.sceneLoader;
+ await loader(); expect(loadExhibitScene).toHaveBeenLastCalledWith('D01', authorized); expect(loadRingScene).not.toHaveBeenCalled();
+ for (const time of [19000, 22000, 25000]) {
+  vi.mocked(Date.now).mockReturnValue(time); control.sample = { timestamp: time, accuracy: 5, position: fixture.center! };
+  await act(async () => tree!.update(render()));
+ }
+ scene = tree!.root.findByType('ar-experience' as React.ElementType);
+ expect(scene.props.entryReady).toBe(true); expect(scene.props.freshEligible()).toBe(true); expect(scene.props.sceneLoader).toBe(loader);
+ expect(scene.props.galleryMediaIds).toEqual(authorized);
+});
+it('does not promote the supplied featured catalog to approved on-site content', () => {
+ store.select('D01'); const lease = store.acquire('D01')!;
+ for (const time of [10000, 13000, 16000]) { vi.mocked(Date.now).mockReturnValue(time); store.publish(lease, { running: true, watcherStatus: 'ready', sample: { timestamp: time, accuracy: 5, position: getDestination('D01')!.center! } }); }
+ expect(store.begin(lease, 'D01', 'approved', 'en')).toBeNull();
+ expect(loadExhibitScene).not.toHaveBeenCalled();
 });

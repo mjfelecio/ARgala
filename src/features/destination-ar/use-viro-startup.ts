@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { cameraPermission, readViroSupport } from './viro-runtime';
 import type { StartupError, StartupPhase } from './types';
 
@@ -8,11 +8,19 @@ type State = { phase: StartupPhase; errorCode: StartupError | null; canAskAgain:
 const initial: State = { phase: 'idle', errorCode: null, canAskAgain: true, attempt: 0 };
 const startupTimeoutMs = 20000;
 
-/** M1 is an explicit development probe, with no geographic admission or resume grant.
+/** Explicit native startup; the caller retains geographic/showcase authority.
  * Attempt ownership lives above the disposable navigator. Resume never mounts a
  * replacement view (and hence never recreates an ARCore install prompt) by itself.
  */
 export function useViroStartup({ running, transitionReady, measured, admissionReady = true, policy }: Options) {
+  // A callback belongs to the committed foreground interval that created it.
+  // A later resume creates a new lease; retained Start/Allow cannot borrow it.
+  const foregroundToken = useMemo(() => Symbol(running ? 'foreground' : 'background'), [running]);
+  const foregroundLease = useRef<symbol | null>(null);
+  useLayoutEffect(() => {
+    foregroundLease.current = running ? foregroundToken : null;
+    return () => { if (foregroundLease.current === foregroundToken) foregroundLease.current = null; };
+  }, [foregroundToken, running]);
   const latestPolicy = useRef(policy);
   const latestAdmission = useRef(admissionReady);
   useLayoutEffect(() => { latestAdmission.current = admissionReady; }, [admissionReady]);
@@ -47,9 +55,9 @@ export function useViroStartup({ running, transitionReady, measured, admissionRe
   }, [admissionReady, retire, write]);
 
   const start = useCallback(async (prompt = false) => {
-    if (!running || operation.current || latestPolicy.current?.begin() === false) return;
+    if (foregroundLease.current !== foregroundToken || !running || operation.current || latestPolicy.current?.begin() === false) return;
     retire(); const attempt = sequence.current;
-    const valid = () => alive.current && sequence.current === attempt;
+    const valid = () => foregroundLease.current === foregroundToken && alive.current && sequence.current === attempt;
     const fail = (errorCode: StartupError) => {
       if (!valid()) return;
       // A hung support callback is safe to abandon. An outstanding permission
@@ -81,7 +89,7 @@ export function useViroStartup({ running, transitionReady, measured, admissionRe
         operation.current = null; if (alive.current) setPending(false);
       }
     }
-  }, [running, retire, write]);
+  }, [foregroundToken, running, retire, write]);
 
   useEffect(() => {
     if (!running || !transitionReady || !measured || !admissionReady || current.current.phase !== 'prepared') return;
@@ -90,17 +98,18 @@ export function useViroStartup({ running, transitionReady, measured, admissionRe
     } else write({ ...current.current, phase: 'initializing' });
   }, [running, transitionReady, measured, admissionReady, state.phase, write, retire]);
   const onReady = useCallback(() => {
-    if (!running || !latestAdmission.current || sequence.current !== state.attempt || current.current.phase !== 'initializing') return;
+    if (foregroundLease.current !== foregroundToken || !running || !latestAdmission.current || sequence.current !== state.attempt || current.current.phase !== 'initializing') return;
     if (Date.now() >= deadline.current) {
       latestPolicy.current?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'startup-timeout' }); return;
     }
     if (latestPolicy.current?.ready() === false) { latestPolicy.current?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'entry-ineligible' }); return; }
     clearTimeout(timer.current); write({ ...current.current, phase: 'live' });
-  }, [running, state.attempt, retire, write]);
+  }, [foregroundToken, running, state.attempt, retire, write]);
   const onFailure = useCallback(() => {
+    if (foregroundLease.current !== foregroundToken) return;
     if (sequence.current !== state.attempt || !alive.current) return;
     latestPolicy.current?.fail(); retire(); write({ ...current.current, phase: 'failed', errorCode: 'failed' });
-  }, [state.attempt, retire, write]);
+  }, [foregroundToken, state.attempt, retire, write]);
   return { ...state, pending, start, onReady, onFailure,
     mountScene: running && transitionReady && measured && admissionReady && (state.phase === 'initializing' || state.phase === 'live'),
   };

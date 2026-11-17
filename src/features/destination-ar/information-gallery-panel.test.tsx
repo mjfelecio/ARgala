@@ -258,4 +258,15 @@ it('uses a rounded authored toolbar surface without changing control hit sizes',
  const row=tree.root.findAllByType('node' as React.ElementType).find(node=>node.props.testID==='ring-reader-toolbar')!;
  expect(row.findAllByType('image' as React.ElementType).some(node=>node.props.source===110 && node.props.ignoreEventHandling===true)).toBe(true);
  expect(action('close').findAllByType('quad' as React.ElementType)[0].props.width).toBe(0.46);
+ const surface = row.findAllByType('image' as React.ElementType).find(node => node.props.source === 110)!;
+ for (const id of ['previous', 'next', 'close']) {
+   const control = action(id); const paint = control.findByType('quad' as React.ElementType);
+   for (const signX of [-1, 1]) for (const signY of [-1, 1]) {
+     const x = Math.abs(control.props.position[0] + signX * paint.props.width / 2) / surface.props.width * 832;
+     const y = Math.abs(control.props.position[1] + signY * paint.props.height / 2) / surface.props.height * 128;
+     // Toolbar artwork: 832x128, rect inset2, rx20, stroke2.
+     expect(x).toBeLessThanOrEqual(413); expect(y).toBeLessThanOrEqual(61);
+     expect(Math.max(0, x - 394) ** 2 + Math.max(0, y - 42) ** 2).toBeLessThanOrEqual(19 ** 2);
+   }
+ }
 });

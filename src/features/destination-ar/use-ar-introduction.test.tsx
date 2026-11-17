@@ -64,3 +64,18 @@ it('isolates destination cinematic completion from the legacy global hint and de
   await act(async () => tree!.update(React.createElement(Scoped, { destination: 'D02' }))); expect(current.seen).toBe(false);
   await act(async () => tree!.update(React.createElement(Scoped, { destination: 'D01', provenance: 'development' }))); expect(current.seen).toBe(false);
 });
+
+it('uses showcase memory without reading or writing the install history', async () => {
+  let seen = false;
+  function Showcase() {
+    const [revision, update] = React.useState(0);
+    const intro = useArIntroduction({ destinationId: 'D01', provenance: 'showcase' }, {
+      seen, complete: () => { seen = true; update(revision + 1); },
+    });
+    React.useEffect(() => { current = intro; }); return null;
+  }
+  await act(async () => { tree = create(React.createElement(Showcase)); });
+  expect(current.loaded).toBe(true); expect(current.seen).toBe(false);
+  await act(async () => current.complete()); expect(current.seen).toBe(true);
+  expect(storage.getItem).not.toHaveBeenCalled(); expect(storage.setItem).not.toHaveBeenCalled();
+});

@@ -18,7 +18,7 @@ import type { useReadingSize } from './use-reading-size';
 
 // Metadata gets its own full-height native actions, inside the original canvas.
 export const exhibitGalleryLayout = {
-  image: { y: 0.14, height: 0.64 }, caption: { y: -0.32, height: 0.22 }, metadataY: -0.535,
+  image: { y: 0.14, height: 0.64 }, caption: { y: -0.32, height: 0.22 }, metadataY: -0.525,
 } as const;
 
 /** A photo browser, never a synthetic chapter or an opening-progress producer. */

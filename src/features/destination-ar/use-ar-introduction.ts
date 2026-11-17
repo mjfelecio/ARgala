@@ -4,12 +4,13 @@ let writes: Promise<unknown> = Promise.resolve();
 async function read(key: string) { await writes; return await AsyncStorage.getItem(key) === 'complete'; }
 function write(key: string) { const result = writes.then(() => AsyncStorage.setItem(key, 'complete')); writes = result.catch(() => undefined); return result; }
 type IntroError = 'load-failed' | 'save-failed';
-type Scope = { destinationId: string; provenance: 'verified' | 'development' };
+export type IntroductionMemory = { seen: boolean; complete(): void };
+type Scope = { destinationId: string; provenance: 'verified' | 'development' | 'showcase' };
 /** Per-install presentation flags only. Cinematic history is destination and
  * provenance scoped; the legacy global help hint is intentionally independent.
  * Call complete after tracking-ready/settlement; it never grants admission.
  */
-export function useArIntroduction(scope?: Scope) {
+export function useArIntroduction(scope?: Scope, memory?: IntroductionMemory) {
   const key = scope ? `argala.ar-cinematic.v1:${scope.provenance}:${encodeURIComponent(scope.destinationId)}` : 'argala.ar-introduction.v1';
   const [state, setState] = useState({ key, seen: false, error: null as IntroError | null, pending: true });
   const [loadedKey, setLoadedKey] = useState<string | null>(null);
@@ -25,9 +26,10 @@ export function useArIntroduction(scope?: Scope) {
     });
   }, [key]);
   useEffect(() => {
+    if (scope?.provenance === 'showcase') return;
     owner.current = { key, alive: true, revision: owner.current.revision + 1, seen: false };
     void load(); return () => { owner.current.alive = false; owner.current.revision++; };
-  }, [key, load]);
+  }, [key, load, scope?.provenance]);
   const save = useCallback(async () => {
     if (!owner.current.alive || owner.current.key !== key) return;
     const version = ++owner.current.revision; owner.current.seen = true;
@@ -42,5 +44,6 @@ export function useArIntroduction(scope?: Scope) {
     if (current.error === 'save-failed') await save();
     else { setState({ key, seen: owner.current.seen, error: null, pending: true }); await load(); }
   }, [current.pending, current.error, key, save, load]);
+  if (scope?.provenance === 'showcase') return { loaded: true, seen: memory?.seen ?? false, error: null, pending: false, complete: async () => { memory?.complete(); }, retry: async () => {} };
   return { loaded: loadedKey === key, seen: current.seen, error: current.error, pending: current.pending, complete, retry };
 }

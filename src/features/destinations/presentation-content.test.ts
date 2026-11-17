@@ -6,7 +6,7 @@ import { destinationName, getDestination, listDestinations } from './catalog';
 import { destinationToRoutePlace } from './routing';
 import { arStoryReadiness } from './ar-content-readiness';
 import content from '../destination-ar/featured-presentation-content.json';
-import { previewStoryContent } from '../destination-ar/development-featured-media';
+import { featuredStoryContent } from '../destination-ar/featured-story-content';
 
 it('bundles all 53 source photographs with their supplied hashes and chapter bindings', () => {
   expect(content.media).toHaveLength(53);
@@ -17,7 +17,7 @@ it('bundles all 53 source photographs with their supplied hashes and chapter bin
   }
   for (const destination of listDestinations()) {
     const supplied = content.destinations.find(item => item.id === destination.id)!;
-    const chapters = previewStoryContent(destination.id as 'D01');
+    const chapters = featuredStoryContent(destination.id as 'D01');
     expect(chapters.map(chapter => chapter.id)).toEqual(supplied.chapters.map(chapter => chapter.id));
     expect(chapters.map(chapter => chapter.approved?.media?.map(photo => photo.id))).toEqual(supplied.chapters.map(chapter => chapter.mediaIds));
     expect(destination.media?.[0].id).toBe(supplied.coverMediaId);

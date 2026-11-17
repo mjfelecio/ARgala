@@ -1,4 +1,4 @@
-import { createElement, useEffect } from 'react';
+import { createElement, useEffect, useLayoutEffect } from 'react';
 import type { PermissionResponse } from 'expo';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
@@ -10,17 +10,21 @@ let tree: ReactTestRenderer;
 let current: ReturnType<typeof useViroStartup>;
 let running: boolean; let transitionReady: boolean; let measured: boolean;
 let clonePolicy = false;
+let duringLayout: (() => void) | undefined;
+let duringUnmount: (() => void) | undefined;
 let policy: { begin(): boolean; authorizeMount(): boolean; ready(): boolean; interrupt(): void; fail(): void } | undefined;
 const granted = { granted: true, canAskAgain: true, status: 'granted' as PermissionResponse['status'], expires: 'never' as const };
 function Probe() {
   const startup = useViroStartup({ running, transitionReady, measured, policy: clonePolicy && policy ? { ...policy } : policy });
+  useLayoutEffect(() => { duringLayout?.(); });
+  useLayoutEffect(() => () => { duringUnmount?.(); }, []);
   useEffect(() => { current = startup; });
   return null;
 }
 async function update() { await act(async () => tree.update(createElement(Probe))); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-  vi.useFakeTimers(); clonePolicy = false; policy = undefined; running = true; transitionReady = true; measured = true;
+  vi.useFakeTimers(); duringLayout = duringUnmount = undefined; clonePolicy = false; policy = undefined; running = true; transitionReady = true; measured = true;
   vi.mocked(cameraPermission).mockReset().mockResolvedValue(granted);
   vi.mocked(readViroSupport).mockReset().mockResolvedValue('supported');
   const original = console.error;
@@ -140,4 +144,27 @@ it('does not retire foreground ownership again merely because equivalent policy 
   policy = { begin: () => true, authorizeMount: () => true, ready: () => true, interrupt, fail: vi.fn() };
   clonePolicy = true; await update(); await act(async () => current.start()); await act(async () => current.onReady());
   running = false; await update(); expect(interrupt).toHaveBeenCalledOnce();
+});
+
+it.each([false, true])('rejects a retained Start/Allow action after blur, reacquisition and unmount (prompt=%s)', async prompt => {
+  policy = { begin: vi.fn(() => true), authorizeMount: () => true, ready: () => true, interrupt: vi.fn(), fail: vi.fn() };
+  await update(); const retiredStart = current.start;
+  running = false; await update();
+  await act(async () => retiredStart(prompt));
+  expect(policy.begin).not.toHaveBeenCalled(); expect(readViroSupport).not.toHaveBeenCalled(); expect(cameraPermission).not.toHaveBeenCalled();
+  running = true; await update();
+  await act(async () => retiredStart(prompt));
+  expect(policy.begin).not.toHaveBeenCalled(); expect(readViroSupport).not.toHaveBeenCalled();
+  const retiredUnmount = current.start; await act(async () => tree.unmount());
+  await act(async () => retiredUnmount(prompt));
+  expect(policy.begin).not.toHaveBeenCalled(); expect(readViroSupport).not.toHaveBeenCalled();
+});
+
+it.each(['blur', 'unmount'])('rejects native readiness after %s layout cleanup before passive retirement', async kind => {
+  policy = { begin: () => true, authorizeMount: () => true, ready: vi.fn(() => true), interrupt: vi.fn(), fail: vi.fn() };
+  await update(); await act(async () => current.start());
+  const ready = current.onReady;
+  if (kind === 'blur') { duringLayout = ready; running = false; await update(); }
+  else { duringUnmount = ready; await act(async () => tree.unmount()); }
+  expect(policy.ready).not.toHaveBeenCalled();
 });

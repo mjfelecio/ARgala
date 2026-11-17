@@ -1,1 +1,2 @@
-export { ViroRingRoute as default } from '@/features/destination-ar/dev-entry';
+import { Redirect } from 'expo-router';
+export default function LegacyShowcaseRoute() { return <Redirect href="/ar-showcase" />; }

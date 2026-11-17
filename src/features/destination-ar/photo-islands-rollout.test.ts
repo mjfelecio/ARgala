@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { destinationIds } from '@/features/destinations/catalog';
 import { getExhibitStageProfile, buildDestinationStageSlots } from './exhibit-stage';
 import { createPhotoIslandsProfile, exhibitGalleryEntries, exhibitSceneEntries, photoIslandCoverSize, photoIslandStoryY } from './photo-islands';
-import { previewStoryContent } from './development-featured-media';
+import { featuredStoryContent } from './featured-story-content';
 import { captureBasis } from './scene-geometry';
 import { RingController } from './ring-controller';
 import content from './featured-presentation-content.json';
@@ -14,7 +14,7 @@ it('gives all53 photographs unique entrances and retains exactly20 chapters with
   const allMedia: string[] = []; let chapterCount = 0; const layouts = new Set<string>();
   destinationIds.forEach((id, index) => {
     const front = getExhibitStageProfile(id)!; const profile = createPhotoIslandsProfile(front);
-    const chapters = previewStoryContent(id); const entrances = exhibitGalleryEntries(profile);
+    const chapters = featuredStoryContent(id); const entrances = exhibitGalleryEntries(profile);
     expect(profile.photoIslands).toHaveLength(bayCounts[index]);
     expect(profile.photoIslands!.every(bay => bay.mediaIds.length === 1 || bay.mediaIds.length === 2)).toBe(true);
     expect(profile.photoIslands!.at(-1)!.mediaIds.length).toBe(profile.media.length === 6 ? 1 : 2);
@@ -30,7 +30,7 @@ it('gives all53 photographs unique entrances and retains exactly20 chapters with
 
 it.each(destinationIds)('bounds every %s original photo, clears its stories and retains exact focus/Close scales', id => {
   const profile = createPhotoIslandsProfile(getExhibitStageProfile(id)!);
-  const chapters = previewStoryContent(id); const entries = exhibitSceneEntries(profile, chapters);
+  const chapters = featuredStoryContent(id); const entries = exhibitSceneEntries(profile, chapters);
   const entrances = exhibitGalleryEntries(profile); const basis = captureBasis(pose)!;
   const slots = buildDestinationStageSlots(profile, entries, basis);
   const controller = new RingController(entries, (items, localBasis) => buildDestinationStageSlots(profile, items, localBasis));

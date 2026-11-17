@@ -1,5 +1,13 @@
 # ARgala agent operating manual
 
+## Permanent AR Showcase — 2026-11-18
+
+The owner-approved AR Showcase is available to guests and accounts in every build, from Profile and Settings, without a development flag. `/ar-showcase` is canonical; `/viro-ring` redirects. The nine featured destinations use the accepted Photo Islands exhibits as their single presentation. Earlier instructions to retain alternative presentation choices are superseded. The ACLC sample remains a separate, hidden diagnostic under both development guards.
+
+Showcase provenance is explicit and separate from verified on-site admission. Only a current explicit Start AR action begins support/permission/native startup. Showcase bypasses geographic checks, never injects synthetic GPS or starts paid provider work. Its resettable Demo Passport and introduction history live only in the current showcase root/principal; stamp once after accepted native tracking-ready, never in the journal or cloud. Reset, exit/unmount and principal replacement clear demo progress; capture/background recovery retain the surviving flow. Real on-site geographic/content/media authorization remains unchanged.
+
+The reusable session experience requires explicit content and scene loader; sample defaults and synthetic audio belong only to diagnostics. Verified featured stages receive only media already authorized by their captured content. Rounded photo frames do not clip ViroImage children: keep full-aspect photos inside the painted rounded boundary. Native actions retain supported painted ViroQuad surfaces with rounded alpha textures, accurate quad hits and one completed-click owner; decorative/disabled geometry passes hits through. In the pinned Android renderer, ViroGeometry caches empty bounds when first attached and does not invalidate them after vertex updates; it must not replace interactive control surfaces without an actual native hit fix. Retain the 2.25-unit reader and native lifecycle guards. Device rendering/touch acceptance is separate from geometry/component tests.
+
 ## Explore and destination cleanup — 2026-11-17
 
 The owner-approved cleanup keeps Seafoam Forest and uses a branded JS bootstrap followed by the regular Explore map while GPS loads. Browse centers grant no device-location authority. Ordinary places use the map sheet, distance-only context, an always-visible primary Google Maps handoff and secondary Directions/Save. The old ordinary details route is a compatibility redirect only; URLs grant no paid request authority. Featured pages remain.
@@ -18,7 +26,7 @@ Shared photo carousels expose every bundled photo; any photo opens the contain-m
 
 The owner-approved presentation integration uses nine destinations, 20 stable chapters and 53 bundled photographs from the 2026-11-13 handoff. Supplied names, summaries, visitor guidance, landmark centers and independently confirmed entrances supersede the earlier placeholder catalog. This grants no activation radius, provider association, Passport entitlement, third-party redistribution rights or production AR approval.
 
-The later owner authorizes reversible AR visual and spatial improvements beyond the earlier fixed ring/reader specification. Complete and retain Classic first; prototype Exhibit on D01 and show the first working slice before further polish or rollout. Owner direction review and physical Galaxy A53 acceptance are required before extending Exhibit. Share camera/session services, content, preferences and capture, but keep each mode's scene animation/transition owners, tokens, refs and callbacks independent. Default reader distance remains 2.25 units. Keep pilot-aclc separate and unchanged. Once the presentation deadline is supplied, reserve testing/packaging/recovery time, freeze new visuals at the cutoff, and deliver Classic if Exhibit is not accepted. See docs/superpowers/plans/2026-11-14-presentation-spatial-exhibit.md.
+The later owner authorizes reversible AR visual and spatial improvements beyond the earlier fixed ring/reader specification. The nine Photo Islands exhibits are now the accepted shared presentation. Share camera/session services, content, preferences and capture while keeping native frame owners, transition tokens, refs and callbacks scoped to their mounted session. Default reader distance remains 2.25 units. Keep pilot-aclc separate and unchanged. Reserve November 20 for stabilization, packaging and recovery before the November 21 presentation. See docs/superpowers/plans/2026-11-14-presentation-spatial-exhibit.md.
 
 ## Approved Seafoam Forest screen refresh — 2026-11-02
 
@@ -254,7 +262,7 @@ navigation testing, not ordinary code edits or command-line checks.
 
 - Destination galleries are photo-browsing affordances, separate from chapter
   IDs, opening counts and Passport. Validate session-only gallery cursors against
-  explicit destination media IDs; mode/principal/admission replacement or terminal
+  explicit destination media IDs; provenance/principal/admission replacement or terminal
   expiry retires them. Classic has no gallery progress unless explicitly configured.
 - Focused page and reading-size callbacks must check the surviving controller's
   focused phase and transition token as well as committed interactivity/tracking.

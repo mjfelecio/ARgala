@@ -116,3 +116,20 @@ it('keeps gallery navigation within the reader width so Close remains visible on
     expect(quad.props.height).toBe(0.18);
   }
 });
+
+it('contains metadata action corners inside the painted reader and retains caption clearance', async () => {
+  await mount();
+  const frame = tree.root.findAllByType('image' as React.ElementType).find(node => node.props.testID === 'holographic-surface')!;
+  const row = tree.root.findAllByType('node' as React.ElementType).find(node => node.props.testID === 'exhibit-caption-toolbar')!;
+  for (const id of ['gallery-caption-previous', 'gallery-caption-next']) {
+    const control = action(id); const paint = control.findByType('quad' as React.ElementType);
+    for (const signX of [-1, 1]) for (const signY of [-1, 1]) {
+      const x = Math.abs(control.props.position[0] + signX * paint.props.width / 2) / frame.props.width * 512;
+      const y = Math.abs(row.props.position[1] + control.props.position[1] + signY * paint.props.height / 2) / frame.props.height * 512;
+      // Authored reader: x/y=5, rx=30, stroke=3 on a 512px square.
+      expect(x).toBeLessThanOrEqual(249.5); expect(y).toBeLessThanOrEqual(249.5);
+      expect(Math.max(0, x - 221) ** 2 + Math.max(0, y - 221) ** 2).toBeLessThanOrEqual(28.5 ** 2);
+    }
+    expect(row.props.position[1] + paint.props.height / 2).toBeLessThan(exhibitGalleryLayout.caption.y - exhibitGalleryLayout.caption.height / 2);
+  }
+});

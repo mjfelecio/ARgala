@@ -1,21 +1,29 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { ArSession, type LogicalArProgress, type SessionIdentity } from './session';
 import { useViroStartup, type StartupPolicy } from './use-viro-startup';
 import type { TrackingState } from './types';
-type Options = { identity: SessionIdentity; tileIds: readonly string[]; galleryMediaIds?: readonly string[]; running: boolean; transitionReady: boolean; measured: boolean; entryReady?: boolean; freshEligible(): boolean; reveal: boolean; revealDurationMs?: number };
+type Options = { identity: SessionIdentity; tileIds: readonly string[]; galleryMediaIds?: readonly string[]; running: boolean; transitionReady: boolean; measured: boolean; entryReady?: boolean; freshEligible(): boolean; reveal: boolean; revealDurationMs?: number; onEstablished?(): void };
 
 /** Owns logical progress and attempts above the disposable native navigator.
  * The route keys this owner by principal/destination; mismatches also fail closed.
  */
-export function useArSession({ identity, tileIds, galleryMediaIds, running, transitionReady, measured, entryReady = true, freshEligible, reveal, revealDurationMs }: Options) {
+export function useArSession({ identity, tileIds, galleryMediaIds, running, transitionReady, measured, entryReady = true, freshEligible, reveal, revealDurationMs, onEstablished }: Options) {
   const [owner] = useState(() => ({ identity: { ...identity }, session: new ArSession(identity, tileIds, undefined, galleryMediaIds) }));
   const model = owner.session; const session = useSyncExternalStore(model.subscribe, model.getSnapshot, model.getSnapshot);
   const token = useRef(0);
+  const established = useRef(onEstablished);
+  useLayoutEffect(() => { established.current = onEstablished; }, [onEstablished]);
   const matches = owner.identity.admissionId === identity.admissionId && owner.identity.destinationId === identity.destinationId && owner.identity.principalId === identity.principalId && owner.identity.provenance === identity.provenance;
   const policy = useMemo<StartupPolicy>(() => ({
     begin() { const next = model.begin(identity, Date.now()); if (next === null) return false; token.current = next; return true; },
     authorizeMount: () => model.authorizeMount(token.current, identity, Date.now(), freshEligible),
-    ready: () => (model.getSnapshot().established || freshEligible()) && model.ready(token.current, Date.now(), reveal),
+    ready: () => {
+      const alreadyEstablished = model.getSnapshot().established;
+      const accepted = (alreadyEstablished || freshEligible()) && model.ready(token.current, Date.now(), reveal);
+      // Commit the accepted event before Background/Back can retire this frame.
+      if (accepted && !alreadyEstablished) established.current?.();
+      return accepted;
+    },
     interrupt: () => model.suspend(Date.now()),
     fail: () => model.fail(token.current, Date.now()),
   }), [model, identity, freshEligible, reveal]);

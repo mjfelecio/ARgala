@@ -30,18 +30,18 @@ beforeEach(async () => {
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; nativeUi.fontScale = 1; vi.unstubAllEnvs(); });
 
-it('offers only the retained ring prototype in the development Profile', async () => {
-  Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
+it.each(['tab', 'stack'] as const)('offers the permanent showcase in release %s', async entry => {
+  Object.assign(globalThis, { __DEV__: false }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '');
   vi.mocked(router.push).mockClear();
-  await act(async () => { tree = create(withHeroUI(<I18nextProvider i18n={translations}><JournalContext.Provider value={journal}><ProfileSettingsContent entry="tab" /></JournalContext.Provider></I18nextProvider>)); });
+  await act(async () => { tree = create(withHeroUI(<I18nextProvider i18n={translations}><JournalContext.Provider value={journal}><ProfileSettingsContent entry={entry} /></JournalContext.Provider></I18nextProvider>)); });
   for (const locale of ['en', 'ja', 'ko']) {
     await act(async () => { await translations.changeLanguage(locale); });
     const labels = tree!.root.findAllByType('button').map(node => node.props.accessibilityLabel);
     expect(labels).not.toContain(translations.t('destinationAr.title'));
-    expect(labels).toContain(translations.t('destinationRing.title'));
+    expect(labels).toContain(translations.t('arShowcase.title'));
   }
-  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('destinationRing.title'))!.props.onPress());
-  expect(router.push).toHaveBeenCalledExactlyOnceWith('/viro-ring');
+  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('arShowcase.title'))!.props.onPress());
+  expect(router.push).toHaveBeenCalledExactlyOnceWith('/ar-showcase');
 });
 
 it.each(['tab', 'stack'] as const)('keeps growing guest content and settings in one scroll owner on %s', async entry => {

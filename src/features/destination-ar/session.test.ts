@@ -131,10 +131,10 @@ it('retains gallery focus separately from chapter IDs and retires it on close/ex
   session.suspend(4000); session.expire(304000);
   expect(session.getSnapshot().progress.exhibitGallery).toBeUndefined();
 });
-it('rejects gallery state in Classic, foreign media, malformed cursors and simultaneous chapter focus', () => {
-  const classic = create(); const classicToken = live(classic);
-  classic.saveProgress(classicToken, { selectedId: null, cursors: {}, exhibitGallery: gallery });
-  expect(classic.getSnapshot().progress).not.toHaveProperty('exhibitGallery');
+it('rejects gallery state without authorized gallery media, foreign media, malformed cursors and simultaneous chapter focus', () => {
+  const diagnostic = create(); const diagnosticToken = live(diagnostic);
+  diagnostic.saveProgress(diagnosticToken, { selectedId: null, cursors: {}, exhibitGallery: gallery });
+  expect(diagnostic.getSnapshot().progress).not.toHaveProperty('exhibitGallery');
   const session = new ArSession(identity, ids, undefined, ['D01-preview']); const token = live(session);
   for (const cursor of [{ ...gallery.cursor, mediaId: 'D02-photo' }, { ...gallery.cursor, offset: -1 }, { ...gallery.cursor, mediaPage: NaN }, { ...gallery.cursor, size: 'foreign' }]) {
     session.saveProgress(token, { selectedId: null, cursors: {}, exhibitGallery: { ...gallery, cursor } } as never);
