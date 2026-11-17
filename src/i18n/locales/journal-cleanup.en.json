@@ -1,0 +1,12 @@
+{
+  "label": "Your place label",
+  "note": "Your note or address (optional)",
+  "labelGuidance": "Write a label to recognize this place. Your label and note stay on this device.",
+  "labelRequired": "Enter your own label to save this place.",
+  "confirm": "Save label",
+  "rename": "Edit label",
+  "unnamed": "Saved place",
+  "idOnly": "Add a label, or open this place on the map.",
+  "pinExpired": "Open on the map to view this place. Saved pins expire after 30 days.",
+  "cancel": "Cancel"
+}

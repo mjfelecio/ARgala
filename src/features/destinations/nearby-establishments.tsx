@@ -3,15 +3,16 @@ import { Image, Text, View } from 'react-native';
 import { withUniwind } from 'uniwind';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { router, useIsFocused } from 'expo-router';
+import { useIsFocused } from 'expo-router';
 import { Button } from 'heroui-native/button';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColor } from 'heroui-native/hooks';
-import { Spinner } from 'heroui-native/spinner';
+import { StatusRow } from '@/ui/status-row';
 import { AR, DISCOVERY } from '@/config/limits';
 import { distanceMeters, isCoordinate } from '@/features/location/geo';
 import { ProviderAttributions } from '@/features/map/attributions';
-import { setPlaceSelection } from '@/features/places/selection';
+import { openGooglePlaceOnMap } from '@/features/places/map-navigation';
+import { useJournal } from '@/features/journal/context';
 import type { Place } from '@/features/places/service';
 import { useSettings } from '@/features/settings/provider';
 import { edgeErrorMessageKey } from '@/lib/edge-error';
@@ -26,6 +27,7 @@ export function NearbyEstablishments({ destination }: { destination: Destination
   const { language } = useSettings();
   const accent = useThemeColor('accent');
   const client = useQueryClient();
+  const journal = useJournal();
   const active = useAppActive(); const focused = useIsFocused();
   const navigating = useRef(false);
   useEffect(() => { if (focused) navigating.current = false; }, [focused]);
@@ -43,8 +45,7 @@ export function NearbyEstablishments({ destination }: { destination: Destination
   function select(place: Place) {
     if (!active || !focused || navigating.current) return;
     navigating.current = true;
-    setPlaceSelection(client, place, language, nearby.dataUpdatedAt);
-    router.navigate({ pathname: '/place/[providerId]', params: { providerId: place.providerId } });
+    openGooglePlaceOnMap(client, { providerId: place.providerId, name: place.name, coordinates: place.coordinates, place, language, updatedAt: nearby.dataUpdatedAt, principalId: journal?.principalId ?? 'guest' });
   }
   return <View className="gap-4 rounded-card bg-surface p-5">
     <View className="flex-row items-center gap-3">
@@ -55,7 +56,7 @@ export function NearbyEstablishments({ destination }: { destination: Destination
     {!center && <Text className="font-sans text-sm text-muted">{t(destination.center ? 'destinations.centerInvalid' : 'destinations.centerMissing')}</Text>}
     <Button variant="outline" accessibilityLabel={t('destinations.exploreNearby')} isDisabled={!center || !active || !focused || nearby.isFetching}
       accessibilityState={{ busy: nearby.isFetching }} onPress={search}><Ionicons name="search-outline" size={20} color={accent} accessible={false}/><Button.Label>{t('destinations.exploreNearby')}</Button.Label></Button>
-    {nearby.isFetching && <View accessibilityLiveRegion="polite" className="gap-2"><Spinner /><Text className="font-sans text-sm text-muted">{t('common.loading')}</Text></View>}
+    {nearby.isFetching && <StatusRow busy>{t('common.loading')}</StatusRow>}
     {nearby.error && <Text selectable accessibilityLiveRegion="polite" className="font-sans text-sm text-danger">{t(edgeErrorMessageKey(nearby.error))}</Text>}
     {center && !nearby.data && !nearby.error && !nearby.isFetching && <Text className="font-sans text-sm text-muted">{t('destinations.nearbyUnsearched')}</Text>}
     {nearby.data && <>

@@ -1,3 +1,4 @@
+import { StatusRow } from '@/ui/status-row';
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { Image, Modal, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -56,7 +57,7 @@ export function ArPhotoPreview({ state, onSave, onShare, onDiscard, onPreviewFai
         <View testID="ar-photo-canvas" style={{ height: canvasHeight }} className="w-full overflow-hidden rounded-card bg-mint">
           {imageState !== 'failed' && <StyledImage source={{ uri: state.photoUri }} resizeMode="contain" className="size-full" accessibilityLabel={t('arPhoto.image')} onLoad={() => finish(true)} onError={() => finish(false)} />}
           {imageState === 'loading' && <View className="absolute inset-0 items-center justify-center gap-3 bg-mint p-5" accessibilityLiveRegion="polite" accessibilityState={{ busy: true }}>
-            <Spinner size="md" /><Text className="text-center font-sans text-sm text-brand-strong">{t('arPhoto.loadingPreview')}</Text>
+            <StatusRow busy>{t('arPhoto.loadingPreview')}</StatusRow>
           </View>}
           {imageState === 'failed' && <View className="flex-1 items-center justify-center gap-3 p-5">
             <Ionicons name="image-outline" size={32} color={ink} accessible={false} />

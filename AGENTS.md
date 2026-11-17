@@ -1,5 +1,19 @@
 # ARgala agent operating manual
 
+## Explore and destination cleanup — 2026-11-17
+
+The owner-approved cleanup keeps Seafoam Forest and uses a branded JS bootstrap followed by the regular Explore map while GPS loads. Browse centers grant no device-location authority. Ordinary places use the map sheet, distance-only context, an always-visible primary Google Maps handoff and secondary Directions/Save. The old ordinary details route is a compatibility redirect only; URLs grant no paid request authority. Featured pages remain.
+
+Explicit cross-screen Google selections use a principal-scoped, single-use 30-second map intent. Partial native/saved seeds must never acquire `source: discovery` completeness or renew response timestamps. Claim while focused/foregrounded, wait for native map readiness, and retire pending commands on blur/background, replacement or Close. Only explicit current user actions initiate paid lookups; complete same-language transient data remains reusable under its original deadline.
+
+Render-time transient cache reads must use a subscribed snapshot with stable identity and independent expiry. React Compiler can memoize an imperative cache helper by client/ID/language and retain a missing result after Details succeeds; observer rerenders alone do not invalidate that expression. Keep imperative reads for explicit action checks. Compiler regressions must transform both the hook and consumer with the installed compiler.
+
+The local journal may use a version-3 envelope around the unchanged ID-only journal/sync document. User-authored labels/notes and saved pin coordinates stay principal-scoped on this device; no Google business names/addresses or provider responses are persisted. Coordinates expire 30 days after original capture and are durably removed, retaining labels. Save is one durable write; guest transfer commits the account before clearing the source. Merge/re-save cannot renew pin capture times. Cloud sync never carries local metadata; metadata-less old/other-device bookmarks need explicit Open/Rename.
+
+Verified Google IDs in `src/features/destinations/google-place-associations.ts` support display convergence only, independently of AR/provider admission metadata. D02/D07 remain unmatched until verified; never substitute a fuzzy name/location match. Featured, saved and result pins deduplicate; saved rendering is viewport bounded with an explicit overflow hint.
+
+Shared photo carousels expose every bundled photo; any photo opens the contain-mode viewer with bottom safe-area controls, caption and credit. Inside the Android Gorhom sheet, horizontal photo strips use Gesture Handler’s ScrollView through UniWind so the sheet pan handler cannot capture their drags. Keep the standalone page and full-screen viewer scroll owners separate. Keep photos separate from chapters/Passport. Public UI describes availability without editorial approval jargon, while development provenance and actual AR eligibility remain truthful. See `docs/superpowers/plans/2026-11-17-explore-cleanup.md` and validation evidence.
+
 ## College presentation and spatial Exhibit — 2026-11-14
 
 The owner-approved presentation integration uses nine destinations, 20 stable chapters and 53 bundled photographs from the 2026-11-13 handoff. Supplied names, summaries, visitor guidance, landmark centers and independently confirmed entrances supersede the earlier placeholder catalog. This grants no activation radius, provider association, Passport entitlement, third-party redistribution rights or production AR approval.

@@ -1,0 +1,13 @@
+{
+  "photoCount": "사진 {{count}}장",
+  "photoPosition": "사진 {{current}} / {{total}}",
+  "previousPhoto": "이전 사진",
+  "nextPhoto": "다음 사진",
+  "openMaps": "Google 지도에서 열기",
+  "viewPhoto": "{{name}} 사진 보기",
+  "arTitle": "AR 체험",
+  "arReady": "AR로 둘러볼 수 있어요",
+  "arPreview": "개발용 AR 미리보기",
+  "arPreviewHint": "개발용 미리보기입니다. 실제 도착 확인이 필요합니다.",
+  "launchPreview": "개발용 미리보기 시작"
+}

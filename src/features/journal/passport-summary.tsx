@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { PassportIcon } from './passport-icon';
 import { useCSSVariable } from 'uniwind';
 import { JournalSyncStatusView } from './sync-status';
 import { Text, View } from 'react-native';
@@ -18,8 +18,7 @@ export function PassportSummary() {
       <View className="flex-row items-center gap-3">
         <Text accessibilityRole="header" className="min-w-0 flex-1 font-sans text-section font-ui-semibold text-white">{t('journal.passportTitle')}</Text>
         <View className="flex-row items-center" accessible={false} importantForAccessibility="no-hide-descendants">
-          <Ionicons name="book-outline" size={36} color={seafoam} accessible={false} />
-          <Ionicons name="checkmark-circle-outline" size={24} color={seafoam} accessible={false} />
+          <PassportIcon color={seafoam} />
         </View>
       </View>
       {journal.ready && <>

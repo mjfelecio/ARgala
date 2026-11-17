@@ -1,0 +1,21 @@
+{
+  "preparing": "Getting things ready…",
+  "selectedPlace": "Selected place",
+  "distance": "{{meters}} m away",
+  "browseWithoutLocation": "You can still search or browse the map.",
+  "featuredBadge": "Featured destination",
+  "viewDestination": "View destination",
+  "zoomSaved": "Zoom in to see more saved places.",
+  "arTitle": "AR experience",
+  "arUnavailable": "AR is not available at this location.",
+  "arReady": "Your AR experience is ready",
+  "arPreviewReady": "Your AR preview is ready",
+  "arHint": "Explore stories around you.",
+  "preview": "Development preview · location checks still apply",
+  "launchPreview": "Launch AR preview",
+  "arrivalVerified": "Arrival verified",
+  "photos": "Photos",
+  "loadDetails": "Load current details",
+  "unnamed": "Selected location",
+  "savedShort": "Saved"
+}

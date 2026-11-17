@@ -1,4 +1,6 @@
-import { withHeroUI } from '@/test/native-ui';
+import { JournalContext, type JournalContextValue } from '@/features/journal/context';
+import { emptyJournal } from '@/features/journal/model';
+import { withHeroUI, nativeUi } from '@/test/native-ui';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { QueryClient, QueryClientProvider, notifyManager } from '@tanstack/react-query';
@@ -47,7 +49,7 @@ it.each(['en', 'ja', 'ko'] as const)('shows complete %s visitor guidance and the
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
   Object.assign(controls, { params: { destinationId: 'D01' }, language: 'en', focused: true, active: true, back: true });
-  vi.clearAllMocks(); notifyManager.setScheduler(cb => cb());
+  vi.clearAllMocks(); nativeUi.openURL.mockResolvedValue(undefined); notifyManager.setScheduler(cb => cb());
   client = new QueryClient({ defaultOptions: queryClient.getDefaultOptions() });
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
   const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
@@ -191,4 +193,55 @@ it('removes provisional and research-status presentation from completed catalog 
  await act(async()=>tree!.update(render(<DestinationScreen/>)));
  expect(tree!.root.findAllByType('text').some(node => node.props.children === translations.t('destinations.provisional'))).toBe(false);
  expect(output()).not.toContain(translations.t('destinations.contentPending'));
+});
+
+it('makes Maps the full-width primary action while preserving secondary Directions and all visitor guidance', async () => {
+ await mount();
+ const maps = button('destinationCleanup.openMaps');
+ expect(maps).toBeDefined();
+ expect(maps!.props.className).toContain('w-full');
+ expect(button('placeDetails.directions')!.props.className).toContain('button__root--variant-secondary');
+ await act(async () => maps!.props.onPress());
+ expect(nativeUi.openURL).toHaveBeenCalledWith(expect.stringContaining('https://www.google.com/maps/'));
+ expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('opens listing photography separately from the sibling title map action, with no nested buttons', async () => {
+ await mount(<DestinationsScreen />);
+ const destination = listDestinations()[0];
+ const name = destinationName(destination, 'en');
+ const photo = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('destinationCleanup.viewPhoto', { name }));
+ expect(photo).toBeDefined();
+ expect(photo!.findAllByType('button')).toHaveLength(1);
+ await act(async () => photo!.props.onPress());
+ expect(router.navigate).not.toHaveBeenCalled();
+ const modal = tree!.root.findByType('modal' as React.ElementType);
+ expect(modal.findByProps({ testID: `viewer-photo:${destination.media![0].id}` }).props.resizeMode).toBe('contain');
+ await act(async () => modal.props.onRequestClose());
+ const title = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === name)!;
+ expect(title.findAllByType('button')).toHaveLength(1);
+ await act(async () => title.props.onPress());
+ expect(router.navigate).toHaveBeenCalledWith({ pathname: '/', params: { featuredDestinationId: 'D01' } });
+ expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('gives every guide activity, preparation and safety item a noninteractive prefix while retaining paragraphs', async () => {
+ await mount();
+ const guide = listDestinations()[0].visitorGuide!.en.value;
+ for (const [section, icon] of [['activities', 'ellipse'], ['preparation', 'square-outline'], ['safety', 'warning-outline']] as const) {
+  for (const item of guide[section]) {
+   const text = tree!.root.findAllByType('text').find(node => node.props.children === item)!;
+   expect(text.parent!.findAllByType('icon' as React.ElementType).map(node => node.props.name)).toContain(icon);
+   expect(text.parent!.props.accessibilityRole).not.toBe('checkbox');
+  }
+ }
+ const arrival = tree!.root.findAllByType('text').find(node => node.props.children === guide.arrival)!;
+ expect(arrival.parent!.findAllByType('icon' as React.ElementType)).toHaveLength(0);
+});
+
+it('recognizes and removes a legacy Google alias on the featured destination page',async()=>{
+ const alias={kind:'google' as const,id:'ChIJVREKfDnlBzMRfl4RQPJlsoU'};
+ const save=vi.fn(async()=>true);
+ const journal:JournalContextValue={state:{...emptyJournal(),bookmarks:[alias]},metadata:{},ready:true,error:null,principalId:'guest',sync:{phase:'local'},save,award:async()=>false,syncNow:()=>{},retry:()=>{}};
+ await mount(<JournalContext.Provider value={journal}><DestinationScreen/></JournalContext.Provider>);
+ const remove=button('journal.remove');expect(remove).toBeDefined();await act(async()=>remove!.props.onPress());
+ expect(save).toHaveBeenCalledExactlyOnceWith({kind:'featured',id:'D01'},false,undefined,[alias]);
 });

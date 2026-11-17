@@ -1,3 +1,6 @@
+import { useJournal } from '@/features/journal/context';
+import { featuredBookmarkAliases } from '@/features/journal/bookmark-aliases';
+import { displayGooglePlaceId } from './google-place-associations';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColor } from 'heroui-native/hooks';
 import { useDestinationLookup } from '@/features/destination-content/context';
@@ -19,6 +22,9 @@ import { DaytimeGallery } from './daytime-gallery';
 import { NearbyEstablishments } from './nearby-establishments';
 import { destinationToRoutePlace } from './routing';
 import { DestinationReminderAction } from '@/features/arrival-reminders/components';
+import { SavePlaceAction, JournalFeedback } from '@/features/journal/actions';
+import { useOpenProviderLink } from '@/features/map/attributions';
+import { googleMapsPlaceUrl } from '@/features/places/maps-url';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
 export default function DestinationScreen() {
@@ -27,6 +33,8 @@ export default function DestinationScreen() {
   const { language } = useSettings();
   const [accent, onAccent] = useThemeColor(['accent', 'accent-foreground']);
   const client = useQueryClient();
+  const journal = useJournal();
+  const openProviderLink = useOpenProviderLink();
   const active = useAppActive(); const focused = useIsFocused();
   const navigating = useRef(false);
   const destination = getDestination(destinationId);
@@ -53,6 +61,17 @@ export default function DestinationScreen() {
           <Text className="font-sans text-base text-brand-strong">{summary?.value ?? t('arrival.teaser')}</Text>
         </View>
         <DaytimeGallery key={`gallery:${destination.id}`} media={destination.media ?? []} />
+        <View className="gap-3">
+          <Button className="w-full" accessibilityLabel={t('destinationCleanup.openMaps')} onPress={() => openProviderLink(googleMapsPlaceUrl({ providerId: displayGooglePlaceId(destination.id), name: destinationName(destination, language), coordinates: destination.center }))}>
+            <Ionicons name="open-outline" size={22} color={onAccent} accessible={false} /><Button.Label>{t('destinationCleanup.openMaps')}</Button.Label>
+          </Button>
+          <View className="flex-row flex-wrap gap-3">
+            <Button variant="secondary" className="min-w-40 flex-1" isDisabled={!routePlace || !active || !focused} accessibilityLabel={t('placeDetails.directions')} onPress={directions}><Ionicons name="navigate-outline" size={22} color={accent} accessible={false} /><Button.Label>{t('placeDetails.directions')}</Button.Label></Button>
+            <SavePlaceAction reference={{ kind: 'featured', id: destination.id }} aliases={featuredBookmarkAliases(destination.id, journal?.state.bookmarks ?? [])} className="min-w-32 flex-1" />
+          </View>
+          {!routePlace && <Text className="font-sans text-sm text-muted">{t('destinations.entranceMissing')}</Text>}
+          <JournalFeedback />
+        </View>
         <View testID="destination-information" className="gap-4">
           {destination.visitorGuide ? <VisitorGuide destination={destination} /> : <><View className="flex-row flex-wrap gap-3">
             <View className="min-w-40 flex-1 gap-2 rounded-card bg-surface p-4">
@@ -71,8 +90,6 @@ export default function DestinationScreen() {
           </View></>}
         </View>
         <DestinationReminderAction destination={destination} />
-        <Button isDisabled={!routePlace || !active || !focused} accessibilityLabel={t('placeDetails.directions')} onPress={directions}><Ionicons name="navigate-outline" size={22} color={onAccent} accessible={false} /><Button.Label>{t('placeDetails.directions')}</Button.Label></Button>
-        {!routePlace && <Text className="font-sans text-sm text-muted">{t('destinations.entranceMissing')}</Text>}
         <NearbyEstablishments key={`nearby:${destination.id}`} destination={destination} />
       </> : <Text className="font-sans text-base text-muted">{t('destinations.unavailable')}</Text>}
     </ScrollView>

@@ -20,12 +20,19 @@ export function SystemSettingsAction({ renderAction }: { renderAction?: (onPress
   </>;
   return <Action title={t('common.openSettings')} onPress={openSettings} />;
 }
-export function LocationStatus({ location }: { location: Pick<ReturnType<typeof useDeviceLocation>, 'status' | 'errorCode' | 'retry'> }) {
+export function LocationStatus({ location, renderMessage, renderRetry, renderSettingsAction }: {
+  location: Pick<ReturnType<typeof useDeviceLocation>, 'status' | 'errorCode' | 'retry'>;
+  renderMessage?(message: string, busy: boolean): ReactNode;
+  renderRetry?(onPress: () => void): ReactNode;
+  renderSettingsAction?(onPress: () => void): ReactNode;
+}) {
   const { t } = useTranslation();
   if (location.status === 'ready') return null;
+  const busy = location.status === 'loading';
+  const message = t(busy ? 'location.loading' : location.status === 'denied' ? 'location.denied' : location.status === 'disabled' ? 'location.disabled' : locationErrorMessageKey(location.errorCode));
   return <>
-    <Notice busy={location.status === 'loading'}>{location.status === 'loading' ? t('location.loading') : location.status === 'denied' ? t('location.denied') : location.status === 'disabled' ? t('location.disabled') : t(locationErrorMessageKey(location.errorCode))}</Notice>
-    {location.status !== 'loading' && <Action title={t('location.retry')} onPress={location.retry} />}
-    {(location.status === 'denied' || location.status === 'disabled') && <SystemSettingsAction />}
+    {renderMessage ? renderMessage(message, busy) : <Notice busy={busy}>{message}</Notice>}
+    {!busy && (renderRetry ? renderRetry(location.retry) : <Action title={t('location.retry')} onPress={location.retry} />)}
+    {(location.status === 'denied' || location.status === 'disabled') && <SystemSettingsAction renderAction={renderSettingsAction} />}
   </>;
 }

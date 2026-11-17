@@ -1,3 +1,4 @@
+import { BootstrapScreen } from '@/ui/bootstrap-screen';
 import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useGuestAccess } from '@/features/auth/guest-context';
@@ -10,9 +11,9 @@ export default function RootNavigation() {
   const { session, loading, error, retry } = useAuth();
   const onboarding = useOnboarding();
   const guest = useGuestAccess();
-  if (loading && !guest.enabled) return <Screen><Notice busy>{t('auth.restoring')}</Notice></Screen>;
+  if (loading && !guest.enabled) return <BootstrapScreen />;
   if (error && !guest.enabled) return <Screen><Notice>{t(error)}</Notice><Action title={t('common.retry')} onPress={retry} /></Screen>;
-  if (!session && (guest.loading || onboarding.status === 'loading')) return <Screen><Notice busy>{t('common.loading')}</Notice></Screen>;
+  if (!session && (guest.loading || onboarding.status === 'loading')) return <BootstrapScreen />;
   if (!session && onboarding.status === 'error') return <Screen><Notice>{t('onboarding.loadFailed')}</Notice><Action title={t('common.retry')} onPress={onboarding.retry} /></Screen>;
   return <Stack screenOptions={{ headerTitle: 'ARgala' }}>
     <Stack.Protected guard={!session && onboarding.status === 'required'}><Stack.Screen name="welcome" options={{ headerShown: false }} /></Stack.Protected>

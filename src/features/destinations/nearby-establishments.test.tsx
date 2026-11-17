@@ -11,6 +11,7 @@ import { AR } from '@/config/limits';
 import { localizationOptions } from '@/i18n/options';
 import { EdgeRequestError } from '@/lib/edge-error';
 import { placesService, type Place } from '@/features/places/service';
+import { claimMapSelectionIntent } from '@/features/places/map-selection-intent';
 import { placeSelectionOptions } from '@/features/places/selection';
 import { destinationSchema, type Destination } from './catalog';
 import { NearbyEstablishments } from './nearby-establishments';
@@ -50,22 +51,29 @@ it.each([undefined, { latitude: NaN, longitude: 0 }])('blocks missing/invalid ce
 it('does not accept a center without its independent approval', async () => {
  await mount({ ...destination, centerApprovalReference: undefined }); await search(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
-it('retains provider ID, selection and real credit on opening the existing details flow', async () => {
+it('retains provider ID, response age and real credit in a single-use Explore handoff', async () => {
  await mount(); await search();
  const row = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === place(499).name)!;
+ const updatedAt=client.getQueryCache().findAll({queryKey:['destination-nearby']})[0].state.dataUpdatedAt;
  await act(async () => { row.props.onPress(); row.props.onPress(); });
- expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/place/[providerId]', params: { providerId: place(499).providerId } });
+ expect(router.navigate).toHaveBeenCalledExactlyOnceWith({pathname:'/',params:{placeId:place(499).providerId,selectionToken:expect.any(String)}});
+ const target=vi.mocked(router.navigate).mock.calls[0][0] as unknown as {params:{selectionToken:string}};
+ expect(claimMapSelectionIntent(client,target.params.selectionToken,'guest')).toMatchObject({principalId:'guest',providerId:place(499).providerId,language:'en',updatedAt,place:place(499)});
+ expect(claimMapSelectionIntent(client,target.params.selectionToken,'guest')).toBeNull();
  expect(client.getQueryData(placeSelectionOptions(place(499).providerId).queryKey)).toEqual(place(499)); expect(placesService.details).not.toHaveBeenCalled();
 });
-it('hands complete Google establishment fields to Details with their known language', async () => {
+it('hands complete Google establishment fields to Explore with their known language and original age', async () => {
  const complete = { ...place(499), source: 'discovery' as const };
  vi.mocked(placesService.nearby).mockResolvedValue([complete]);
  await mount(); await search();
  const row = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === complete.name)!;
+ const updatedAt=client.getQueryCache().findAll({queryKey:['destination-nearby']})[0].state.dataUpdatedAt;
  await act(async () => row.props.onPress());
+ const target=vi.mocked(router.navigate).mock.calls[0][0] as unknown as {params:{selectionToken:string}};
+ expect(claimMapSelectionIntent(client,target.params.selectionToken,'guest')).toMatchObject({providerId:complete.providerId,language:'en',updatedAt,place:complete});
  await act(async () => tree!.unmount());
  await new Promise(resolve => setTimeout(resolve, 10));
- expect(client.getQueryData(['place-details', complete.providerId, 'en'])).toEqual(complete);
+ expect(client.getQueryState(['place-details',complete.providerId,'en'])).toMatchObject({data:complete,dataUpdatedAt:updatedAt});
  expect(client.getQueryData(['place-details', complete.providerId, 'ja'])).toBeUndefined();
  expect(placesService.details).not.toHaveBeenCalled();
 });

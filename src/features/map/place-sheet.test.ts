@@ -82,8 +82,10 @@ it('translates an error key at render time, supports retry and reports measured 
 it('shows expired selection without inventing data', async () => {
  props.state='selected'; props.hasSelection=true; props.errorKey='service.routeUnavailable'; await render();
  expect(content()).toContain(translations.t('service.routeUnavailable'));
- expect(content()).toContain(translations.t('map.selectionUnavailable'));
- await press('ar.more'); expect(props.onDetails).toHaveBeenCalledOnce();
+ expect(content()).toContain(translations.t('exploreCleanup.selectedPlace'));
+ expect(content()).not.toContain(translations.t('map.selectionUnavailable'));
+ expect(tree.root.findAllByType('button').some(button=>button.props.accessibilityLabel===translations.t('exploreCleanup.loadDetails'))).toBe(true);
+ await press('exploreCleanup.loadDetails'); expect(props.onDetails).toHaveBeenCalledOnce();
  expect(content()).not.toContain(translations.t('map.routeSummary',{meters:250,minutes:3}));
 });
 it('keeps the heading and expansion action scrollable when a short viewport caps the panel at 104 units', async () => {

@@ -19,7 +19,7 @@ vi.mock('expo-constants', () => ({ default: { expoConfig: { version: '1.0.0' } }
 let tree: ReactTestRenderer | undefined;
 let translations: i18n;
 const journal: JournalContextValue = {
-  principalId: 'guest', ready: true, error: null, state: { version: 1, bookmarks: [], stamps: [] },
+  metadata: {}, principalId: 'guest', ready: true, error: null, state: { version: 1, bookmarks: [], stamps: [] },
   sync: { phase: 'local' }, syncNow() {}, retry() {}, save: async () => true, award: async () => true,
 };
 beforeEach(async () => {

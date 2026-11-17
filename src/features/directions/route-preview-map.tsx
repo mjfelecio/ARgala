@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Spinner } from 'heroui-native/spinner';
+import { StatusRow } from '@/ui/status-row';
 import { Button } from 'heroui-native/button';
 import { useTranslation } from 'react-i18next';
 import { useCSSVariable, useResolveClassNames, withUniwind } from 'uniwind';
@@ -59,7 +59,7 @@ export function RoutePreviewMap({ place, origin, destination, coordinates, displ
       <Marker coordinate={destination} title={place.name} pinColor={destinationColor} />
       {displayCoordinates.length > 1 && <Polyline coordinates={displayCoordinates} strokeColor={routeColor} strokeWidth={5} />}
     </StyledMapView>
-    {!ready && <View pointerEvents="none" className="absolute left-4 gap-2 rounded-card bg-surface p-3" style={{ top: headerHeight + 8 }}><Spinner size="sm" /><Text accessibilityLiveRegion="polite" className="font-sans text-sm text-muted">{t('map.loading')}</Text></View>}
+    {!ready && <View pointerEvents="none" className="absolute left-4 gap-2 rounded-card bg-surface p-3" style={{ top: headerHeight + 8 }}><StatusRow busy>{t('map.loading')}</StatusRow></View>}
     <Animated.View testID="route-map-controls" className="absolute right-4 top-0 flex-row gap-2" style={controlsStyle}>
       <Button variant="secondary" isIconOnly className="size-12 rounded-card bg-surface shadow-sm" accessibilityLabel={t('directions.fit')} isDisabled={!canFit} onPress={fit}>
         <Ionicons name="scan-outline" size={24} color={destinationColor} />

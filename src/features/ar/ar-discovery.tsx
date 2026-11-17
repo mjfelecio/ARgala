@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { placeSelectionOptions, setPlaceSelection } from '@/features/places/selection';
 import { router, useLocalSearchParams } from 'expo-router';
 import { detailsRequestSchema } from '../../../supabase/functions/_shared/contracts';
-import { availablePlaceDetails, placeDetailsOptions } from '@/features/places/details-cache';
+import { useAvailablePlaceDetailsSnapshot, placeDetailsOptions } from '@/features/places/details-cache';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Image, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -90,7 +90,8 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
   const summary = places.find((p) => p.providerId === selectedId);
   const detailsOptions = placeDetailsOptions(client, selectedId, language);
   useQuery({ ...detailsOptions, enabled: false });
-  const detail = availablePlaceDetails(client, selectedId, language);
+  const detailSnapshot = useAvailablePlaceDetailsSnapshot(client, selectedId, language);
+  const detail = detailSnapshot?.place;
   const selected = detail ?? summary ?? (handoff.data?.providerId === selectedId ? handoff.data : null);
   const distance = ranked.find((p) => p.place.providerId === selectedId)?.distance;
   const labels = cameraReady && running ? layoutLabels(ranked.map(p => ({ ...p, x: projectBearing(p.bearing, heading) })), viewport.width, selectedId) : [];
@@ -99,21 +100,19 @@ export function ArDiscovery({ location, running, cameraReady, cameraStatus }: Pr
     if (!running || !selected || navigating.current) return;
     navigating.current = true;
     // Carry the selected summary without a provider request on map entry.
-    setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
+    setPlaceSelection(client, selected, detail ? language : undefined, detailSnapshot?.updatedAt);
     router.navigate({ pathname: '/', params: { placeId: selected.providerId } });
   }
   function directions() {
     if (!running || !selected || navigating.current) return;
     navigating.current = true;
-    setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
+    setPlaceSelection(client, selected, detail ? language : undefined, detailSnapshot?.updatedAt);
     const token = createRoutePreviewIntent(client, selected, undefined, 'ar', language);
     router.push({ pathname: '/directions', params: { token } });
   }
   function inspect(providerId: string) {
     if (!running || !selected || selected.providerId !== providerId || navigating.current) return;
-    navigating.current = true;
-    setPlaceSelection(client, selected, detail ? language : undefined, detailsOptions.initialDataUpdatedAt);
-    router.navigate({ pathname: '/place/[providerId]', params: { providerId: selected.providerId } });
+    toMap();
   }
   const state = data.nearby.isFetching ? 'scanning' : data.nearby.error ? 'failed' : !data.request ? 'unscanned' : places.length === 0 ? 'empty' : 'results';
   const status = <>

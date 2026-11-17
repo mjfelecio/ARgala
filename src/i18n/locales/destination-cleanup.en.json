@@ -1,0 +1,14 @@
+{
+  "photoCount_one": "{{count}} photo",
+  "photoCount_other": "{{count}} photos",
+  "photoPosition": "Photo {{current}} of {{total}}",
+  "previousPhoto": "Previous photo",
+  "nextPhoto": "Next photo",
+  "openMaps": "Open in Google Maps",
+  "viewPhoto": "View photo of {{name}}",
+  "arTitle": "AR experience",
+  "arReady": "Ready to explore in AR",
+  "arPreview": "Development AR preview",
+  "arPreviewHint": "Development preview. Real arrival checks still apply.",
+  "launchPreview": "Launch development preview"
+}

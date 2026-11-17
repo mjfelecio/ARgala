@@ -5,17 +5,18 @@ import { createInstance, type i18n } from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { router } from 'expo-router';
-import { QueryClient, QueryClientProvider, QueryObserver, notifyManager, focusManager, onlineManager } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, QueryObserver, notifyManager } from '@tanstack/react-query';
 import { queryClient } from '@/lib/query';
 import { placesService, type Place } from '@/features/places/service';
 import { AR } from '@/config/limits';
-import { EdgeRequestError } from '@/lib/edge-error';
-import PlaceDetailsScreen from '@/features/places/place-details-screen';
 import { localizationOptions } from '@/i18n/options';
 import { JournalContext, type JournalContextValue } from './context';
 import SavedPlacesScreen from './saved-screen';
+import { destinationName,getDestination } from '@/features/destinations/catalog';
 import { SavePlaceAction } from './actions';
-const controls=vi.hoisted(()=>({focused:true,active:true,language:'en' as 'en'|'ja'|'ko',id:''}));
+import { claimMapSelectionIntent } from '@/features/places/map-selection-intent';
+const controls=vi.hoisted(()=>({focused:true,active:true,language:'en' as 'en'|'ja'|'ko',id:'',matchedId:''}));
+vi.mock('@/features/destinations/map-selection',async()=>{const actual=await vi.importActual<typeof import('@/features/destinations/map-selection')>('@/features/destinations/map-selection');const {getDestination}=await import('@/features/destinations/catalog');return {...actual,matchedFeaturedDestination:(place:{provider:string;providerId:string})=>place.providerId===controls.matchedId?getDestination('D01'):actual.matchedFeaturedDestination(place)};});
 vi.mock('@/features/settings/provider',()=>({useSettings:()=>({language:controls.language})}));
 vi.mock('@/lib/use-app-active',()=>({useAppActive:()=>controls.active}));
 vi.mock('@/features/places/service',()=>({placesService:{details:vi.fn(),nearby:vi.fn()}}));
@@ -30,11 +31,11 @@ async function mount() { await act(async () => { tree = create(render()); }); }
 const output = () => JSON.stringify(tree!.toJSON());
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: false });
-  vi.clearAllMocks();Object.assign(controls,{focused:true,active:true,language:'en',id});
+  vi.clearAllMocks();Object.assign(controls,{focused:true,active:true,language:'en',id,matchedId:''});
   client=new QueryClient({defaultOptions:queryClient.getDefaultOptions()});notifyManager.setScheduler(cb=>cb());
   vi.mocked(placesService.details).mockReset().mockResolvedValue(knownPlace);
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
-  journal = { principalId: 'guest', ready: true, error: null, state: { version: 1, bookmarks: [{ kind: 'google', id }], stamps: [] }, sync: { phase: 'local' }, syncNow: vi.fn(), retry: vi.fn(), save: vi.fn(async () => true), award: vi.fn(async () => true) };
+  journal = { metadata:{}, principalId: 'guest', ready: true, error: null, state: { version: 1, bookmarks: [{ kind: 'google', id }], stamps: [] }, sync: { phase: 'local' }, syncNow: vi.fn(), retry: vi.fn(), save: vi.fn(async () => true), award: vi.fn(async () => true) };
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined;client.clear();notifyManager.setScheduler(cb=>setTimeout(cb,0));vi.useRealTimers();vi.restoreAllMocks(); });
 it('passes the complete 1,000-bookmark collection to a bounded virtualized list', async () => {
@@ -55,7 +56,8 @@ it.each(['en', 'ja', 'ko'])('keeps %s identifiers private and Open explicit with
   const remove = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('journal.remove'))!;
   expect(remove.props.className).toContain('ghost');
   await act(async () => open.props.onPress());
-  expect(router.push).toHaveBeenCalledWith({ pathname: '/place/[providerId]', params: { providerId: id } });
+  expect(router.navigate).toHaveBeenCalledWith({pathname:'/',params:{placeId:id,selectionToken:expect.any(String)}});
+  const target=vi.mocked(router.navigate).mock.calls.at(-1)![0] as unknown as {params:{selectionToken:string}};expect(claimMapSelectionIntent(client,target.params.selectionToken,'guest')?.providerId).toBe(id);
   await act(async () => { await remove.props.onPress(); });
   expect(journal.save).toHaveBeenCalledExactlyOnceWith({ kind: 'google', id }, false);
   await act(async () => { await translations.changeLanguage(locale === 'en' ? 'ja' : 'en'); });
@@ -114,13 +116,13 @@ it('keeps a guest quiet even with a retired account failure', async () => {
 it('shows bookmark toggle state, a visible saved check and busy coalescing without confusing row removal', async () => {
   journal.state.bookmarks=[];
   const gate=Promise.withResolvers<boolean>(); vi.mocked(journal.save).mockReturnValueOnce(gate.promise);
-  const action=()=>withHeroUI(<I18nextProvider i18n={translations}><JournalContext.Provider value={journal}><SavePlaceAction reference={{kind:'google',id}} /></JournalContext.Provider></I18nextProvider>);
+  const action=()=>withHeroUI(<I18nextProvider i18n={translations}><JournalContext.Provider value={journal}><SavePlaceAction reference={{kind:'featured',id:'D01'}} /></JournalContext.Provider></I18nextProvider>);
   await act(async()=>{tree=create(action());});
   const save=tree!.root.findAllByType('button').find(node=>node.props.accessibilityLabel===translations.t('journal.save'))!;
   expect(save.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toContain('bookmark-outline');
   await act(async()=>{void save.props.onPress();void save.props.onPress();});
   expect(save.props.accessibilityState.busy).toBe(true);expect(journal.save).toHaveBeenCalledOnce();
-  journal={...journal,state:{...journal.state,bookmarks:[{kind:'google',id}]}};
+  journal={...journal,state:{...journal.state,bookmarks:[{kind:'featured',id:'D01'}]}};
   await act(async()=>{gate.resolve(true);tree!.update(action());});
   const saved=tree!.root.findAllByType('button').find(node=>node.props.accessibilityLabel===translations.t('journal.remove'))!;
   expect(saved.findAllByType('icon' as React.ElementType).map(node=>node.props.name)).toEqual(['bookmark','checkmark']);
@@ -131,18 +133,16 @@ it('shows bookmark toggle state, a visible saved check and busy coalescing witho
 
 const knownPlace:Place={id:'google:cached',provider:'google',providerId:id,name:'Actual saved place name',address:'Actual provider address',coordinates:{latitude:10,longitude:124},attributions:[]};
 function openButton(){return tree!.root.findAllByType('button').find(n=>n.props.accessibilityLabel===translations.t('journal.open'))!;}
-it('loads directly from one View tap and reuses the result on Details without another lookup',async()=>{
- const pending=Promise.withResolvers<Place>();vi.mocked(placesService.details).mockReturnValueOnce(pending.promise);
+it('opens through a one-use map intent without starting a provider lookup from Saved Places',async()=>{
+ journal.metadata[`google:${id}`]={label:'My lakeside stop',note:'Meet near the gate',pin:{coordinates:{latitude:10,longitude:124},capturedAt:Date.now()-1000}};
  await mount();expect(placesService.details).not.toHaveBeenCalled();
+ expect(output()).toContain('My lakeside stop');expect(output()).toContain('Meet near the gate');
  await act(async()=>{openButton().props.onPress();openButton().props.onPress();});
- expect(placesService.details).toHaveBeenCalledExactlyOnceWith(id,'en');expect(router.push).toHaveBeenCalledOnce();
- await act(async()=>tree!.update(render(<PlaceDetailsScreen/>)));
- expect(output()).toContain(translations.t('placeDetails.loading'));
- expect(output()).not.toContain(translations.t('placeDetails.unavailable'));
- await act(async()=>pending.resolve(knownPlace));
- expect(output()).toContain(knownPlace.name);expect(output()).toContain(knownPlace.address);
- expect(tree!.root.findAllByType('button').some(n=>n.props.accessibilityLabel===translations.t('placeDetails.load'))).toBe(false);
- expect(placesService.details).toHaveBeenCalledOnce();
+ expect(placesService.details).not.toHaveBeenCalled();expect(router.navigate).toHaveBeenCalledOnce();
+ const target=vi.mocked(router.navigate).mock.calls[0][0] as unknown as {params:{selectionToken:string}};
+ const claimed=claimMapSelectionIntent(client,target.params.selectionToken,'guest');
+ expect(claimed).toMatchObject({providerId:id,principalId:'guest',name:'My lakeside stop',coordinates:{latitude:10,longitude:124},capturedAt:journal.metadata[`google:${id}`].pin!.capturedAt});
+ expect(claimMapSelectionIntent(client,target.params.selectionToken,'guest')).toBeNull();
 });
 it('shows known fresh names and addresses without loading the list and consumes View from the existing response',async()=>{
  client.setQueryData(['place-details',id,'en'],knownPlace);await mount();
@@ -158,21 +158,10 @@ it('expires cached display names without renewing their source window or request
  expect(client.getQueryState(['place-details',id,'en'])?.dataUpdatedAt).toBe(timestamp);
  expect(placesService.details).not.toHaveBeenCalled();
 });
-it('never repeats a failed View lookup on Details mount/refocus/foreground/remount and allows explicit recovery',async()=>{
- vi.mocked(placesService.details).mockRejectedValueOnce(new EdgeRequestError('UPSTREAM_ERROR'));await mount();
- await act(async()=>openButton().props.onPress());await act(async()=>tree!.update(render(<PlaceDetailsScreen/>)));
- for(const locale of ['en','ja','ko']){await act(async()=>{await translations.changeLanguage(locale);});expect(output()).toContain(translations.t('service.unavailable'));}
- controls.focused=false;controls.active=false;await act(async()=>tree!.update(render(<PlaceDetailsScreen/>)));
- controls.focused=true;controls.active=true;await act(async()=>{tree!.update(render(<PlaceDetailsScreen/>));await client.invalidateQueries();focusManager.setFocused(false);focusManager.setFocused(true);onlineManager.setOnline(false);onlineManager.setOnline(true);});
- await act(async()=>tree!.unmount());await act(async()=>{tree=create(render(<PlaceDetailsScreen/>));});
- expect(placesService.details).toHaveBeenCalledOnce();
- await act(async()=>tree!.root.findAllByType('button').find(n=>n.props.accessibilityLabel===translations.t('placeDetails.load'))!.props.onPress());
- expect(placesService.details).toHaveBeenCalledTimes(2);expect(output()).toContain(knownPlace.name);
-});
 it('keeps bare links and expired/wrong-language display data free of inherited lookup authority',async()=>{
  client.setQueryData(['place-details',id,'ja'],knownPlace);await mount();
  expect(tree!.root.findAllByType('text').some(n=>n.props.children===knownPlace.name)).toBe(false);
- await act(async()=>tree!.update(render(<PlaceDetailsScreen/>)));expect(placesService.details).not.toHaveBeenCalled();
+ expect(placesService.details).not.toHaveBeenCalled();
 });
 
 it('clears cached row identity with the principal cache and does not turn fresh observation into a lookup',async()=>{
@@ -198,4 +187,33 @@ it('prefers a fresh Nearby response over an existing expired Details entry witho
  expect(client.getQueryState(['place-details',id,'en'])?.dataUpdatedAt).toBe(old);
  expect(client.getQueryState(['places',{latitude:10,longitude:124},'en'])?.dataUpdatedAt).toBe(fresh);
  await act(async()=>openButton().props.onPress());expect(placesService.details).not.toHaveBeenCalled();stop();
+});
+
+it('offers explicit rename for old ID-only entries and never fills the field from transient provider copy',async()=>{
+ client.setQueryData(['place-details',id,'en'],knownPlace);await mount();
+ const rename=tree!.root.findAllByType('button').find(n=>n.props.accessibilityLabel===translations.t('journalCleanup.rename'))!;expect(rename).toBeDefined();
+ await act(async()=>rename.props.onPress());const field=tree!.root.findAllByType('input').find(n=>n.props.accessibilityLabel===translations.t('journalCleanup.label'))!;
+ expect(field.props.value).toBe('');await act(async()=>field.props.onChangeText('My own name'));
+ await act(async()=>tree!.root.findAllByType('button').find(n=>n.props.accessibilityLabel===translations.t('journalCleanup.confirm'))!.props.onPress());
+ expect(journal.save).toHaveBeenCalledWith({kind:'google',id},true,{label:'My own name'});expect(placesService.details).not.toHaveBeenCalled();
+});
+it('keeps labels after pin expiry and opens an expired bookmark without coordinates',async()=>{
+ journal.metadata[`google:${id}`]={label:'Permanent user label',pin:{coordinates:{latitude:10,longitude:124},capturedAt:Date.now()-30*86400000}};await mount();
+ expect(output()).toContain('Permanent user label');await act(async()=>openButton().props.onPress());
+ const target=vi.mocked(router.navigate).mock.calls[0][0] as unknown as {params:{selectionToken:string}};expect(claimMapSelectionIntent(client,target.params.selectionToken,'guest')?.coordinates).toBeUndefined();
+});
+
+it.each([true,false])('renders matched Google aliases once with curated identity (featured stored: %s), without rewriting IDs',async featured=>{
+ controls.matchedId=id;if(featured)journal.state.bookmarks.push({kind:'featured',id:'D01'});const before=JSON.stringify(journal.state);
+ await mount();expect(tree!.root.findByType('virtualized-list' as React.ElementType).props.data).toHaveLength(1);expect(output()).toContain(destinationName(getDestination('D01')!));expect(JSON.stringify(journal.state)).toBe(before);
+ await act(async()=>openButton().props.onPress());expect(router.push).toHaveBeenCalledWith({pathname:'/destinations/[destinationId]',params:{destinationId:'D01'}});expect(placesService.details).not.toHaveBeenCalled();
+ const remove=tree!.root.findAllByType('button').find(n=>n.props.accessibilityLabel===translations.t('journal.remove'))!;await act(async()=>remove.props.onPress());
+ if(featured)expect(journal.save).toHaveBeenCalledWith({kind:'featured',id:'D01'},false,undefined,[{kind:'google',id}]);else expect(journal.save).toHaveBeenCalledWith({kind:'google',id},false);
+});
+it.each(['principal','blur','unmount'])('retires a retained saved-open callback after %s replacement',async reason=>{
+ await mount();const oldOpen=openButton().props.onPress;
+ if(reason==='principal'){journal={...journal,principalId:'next-account'};await act(async()=>tree!.update(render()));}
+ else if(reason==='blur'){controls.focused=false;await act(async()=>tree!.update(render()));}
+ else await act(async()=>{tree!.unmount();tree=undefined;});
+ await act(async()=>oldOpen());expect(router.navigate).not.toHaveBeenCalled();expect(placesService.details).not.toHaveBeenCalled();
 });

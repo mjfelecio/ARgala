@@ -1,4 +1,13 @@
+import exploreCleanupKo from './locales/explore-cleanup.ko.json';
+import exploreCleanupJa from './locales/explore-cleanup.ja.json';
+import exploreCleanupEn from './locales/explore-cleanup.en.json';
+import destinationCleanupKo from './locales/destination-cleanup.ko.json';
+import destinationCleanupJa from './locales/destination-cleanup.ja.json';
+import destinationCleanupEn from './locales/destination-cleanup.en.json';
+import journalCleanupKo from './locales/journal-cleanup.ko.json';
+import journalCleanupJa from './locales/journal-cleanup.ja.json';
+import journalCleanupEn from './locales/journal-cleanup.en.json';
 import en from './locales/en.json';
 import ko from './locales/ko.json';
 import ja from './locales/ja.json';
-export const localizationOptions = { resources: { en: { translation: en }, ko: { translation: ko }, ja: { translation: ja } }, supportedLngs: ['en', 'ko', 'ja'], fallbackLng: 'en', interpolation: { escapeValue: false }, initAsync: false };
+export const localizationOptions = { resources: { en: { translation: { ...en, journalCleanup: journalCleanupEn, destinationCleanup: destinationCleanupEn, exploreCleanup: exploreCleanupEn } }, ko: { translation: { ...ko, journalCleanup: journalCleanupKo, destinationCleanup: destinationCleanupKo, exploreCleanup: exploreCleanupKo } }, ja: { translation: { ...ja, journalCleanup: journalCleanupJa, destinationCleanup: destinationCleanupJa, exploreCleanup: exploreCleanupJa } } }, supportedLngs: ['en', 'ko', 'ja'], fallbackLng: 'en', interpolation: { escapeValue: false }, initAsync: false };
