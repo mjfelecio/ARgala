@@ -538,7 +538,6 @@
     "backgroundExplanation": "To get reminders while you're using other apps, choose “Allow all the time” for location in Android Settings. ARgala doesn't save your route or location history. You can turn reminders off here anytime.",
     "continueSettings": "Continue to Settings",
     "cancel": "Cancel",
-    "requested": "We've asked your phone to remind you nearby. The reminder may be delayed or missed.",
     "used": "This one-time reminder has been used. Turn it off and on again to request another.",
     "off": "Reminders are off by default. Choose a destination to enable one.",
     "permissions": "In Android Settings, allow precise location and notifications, and set location access to “Allow all the time.” Then try again.",
