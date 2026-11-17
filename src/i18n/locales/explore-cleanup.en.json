@@ -16,5 +16,6 @@
   "arrivalVerified": "Arrival verified",
   "photos": "Photos",
   "loadDetails": "Load current details",
-  "unnamed": "Selected location"
+  "unnamed": "Selected location",
+  "savedShort": "Saved"
 }

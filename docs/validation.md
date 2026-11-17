@@ -3778,3 +3778,29 @@ change has code/CSS verification rather than a new captured native frame.
 Checks: targeted gallery/page/map/shared UI **135 tests passed**; `npm run check`
 passed strict TypeScript, zero-warning lint and **1,641 tests in 145 files**;
 `git diff --check` passed. No dependency/native/configuration changes or APK build.
+
+### Follow-up: featured star pins and Saved shortcut — 2026-11-17
+
+Replaced the dense logo-in-pin artwork with a simple ivory star on forest, keeping
+the existing pin outline/footprint and static-marker behavior. The SVG is rasterized
+directly at 40×48, 80×96 and 120×144; larger outputs are not enlarged base bitmaps.
+App logos, launcher artwork, map/selection semantics and AR admission are unchanged.
+A short English A53 check verified the star rendering on D01 after Metro refreshed.
+
+The last item in the scrolling category rail is now a bookmark-icon “Saved” action.
+Its accessible label uses the existing Saved Places translation; short EN/JA/KO
+copy is localized. It opens `/saved-places` independently of GPS, category choice
+and search availability, without paid provider work. Featured remains pinned.
+The A53 rail scrolled to Saved after Shopping; tapping it displayed Saved Places
+and Your saved places. Back restored Explore and its selection. No bookmarks,
+preferences or Passport state were changed; testing stayed brief at 3% battery.
+
+The regression batch first failed for the absent rail action, missing localized
+short labels and real-map navigation, then passed **92 tests**. Full verification
+and final diff review are recorded below.
+
+`npm run check` completed with exit 0: strict TypeScript, zero-warning ESLint and
+**1,645 tests in 145 files passed**. `git diff --check` passed. Asset dimensions
+were verified and the native rendered marker inspected; no APK build, dependency,
+configuration, backend or native-patch change was needed. Japanese/Korean device
+rendering and the full large-font matrix were not repeated for this small change.

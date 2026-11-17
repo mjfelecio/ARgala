@@ -25,6 +25,16 @@ it('shows the supplied featured summary without initiating paid discovery', asyn
   expect(placesService.details).not.toHaveBeenCalled();
 });
 
+it('opens Saved Places from the map pill without location or provider work', async () => {
+ controls.hasLocation = false;
+ await act(async () => { tree = create(renderMap()); });
+ await press('journal.savedTitle');
+ expect(router.navigate).toHaveBeenCalledExactlyOnceWith('/saved-places');
+ expect(placesService.nearby).not.toHaveBeenCalled();
+ expect(placesService.details).not.toHaveBeenCalled();
+ expect(placesService.search).not.toHaveBeenCalled();
+});
+
 const controls = vi.hoisted(() => ({
   fit: vi.fn(), animate: vi.fn(), active: true, focused: true,
   language: 'en' as 'en' | 'ko' | 'ja',

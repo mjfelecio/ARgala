@@ -10,12 +10,12 @@ import { Spinner } from 'heroui-native/spinner';
 import { useThemeColor } from 'heroui-native/hooks';
 
 export type HomeMapControlsProps = {
-  onSearchNearby(): void; onOpenAr?(): void; onOpenDestinations(): void;
+  onSearchNearby(): void; onOpenAr?(): void; onOpenDestinations(): void; onOpenSavedPlaces?(): void;
   query?: string; onQueryChange?(query: string): void; category?: SearchCategory; onCategoryChange?(category: SearchCategory): void;
   onSearchArea?(): void; canSearchArea?: boolean; areaRadiusMeters?: number;
   canSearch: boolean; searching: boolean; onLayout?(event: LayoutChangeEvent): void;
 };
-export function HomeMapControls({ onSearchNearby, onOpenDestinations, canSearch, searching, onLayout, query, onQueryChange, category = 'all', onCategoryChange, onSearchArea, canSearchArea, areaRadiusMeters }: HomeMapControlsProps) {
+export function HomeMapControls({ onSearchNearby, onOpenDestinations, onOpenSavedPlaces, canSearch, searching, onLayout, query, onQueryChange, category = 'all', onCategoryChange, onSearchArea, canSearchArea, areaRadiusMeters }: HomeMapControlsProps) {
   const { t } = useTranslation();
   const [ink, accent, onAccent] = useThemeColor(['default-foreground', 'accent', 'accent-foreground']);
   const searchDisabled = !canSearch || searching;
@@ -49,6 +49,10 @@ export function HomeMapControls({ onSearchNearby, onOpenDestinations, canSearch,
           <Ionicons name={({ all: 'apps-outline', attractions: 'camera-outline', restaurants: 'restaurant-outline', hotels: 'bed-outline', shopping: 'bag-handle-outline' } as const)[value]} size={17} color={category === value ? onAccent : ink} accessible={false} />
           <Button.Label>{t(`search.categories.${value}`)}</Button.Label>
         </Button>)}
+        {onOpenSavedPlaces && <Button size="sm" variant="secondary" hitSlop={{top:6,bottom:6}} className="h-auto min-h-9! rounded-pill border border-brand-strong/25 bg-surface! px-3 py-1! shadow-sm" accessibilityLabel={t('journal.savedTitle')} onPress={onOpenSavedPlaces}>
+          <Ionicons name="bookmark-outline" size={17} color={ink} accessible={false} />
+          <Button.Label>{t('exploreCleanup.savedShort')}</Button.Label>
+        </Button>}
       </ScrollView>}
     </View>
     {onSearchArea && <View className="-mt-2 min-h-12 items-center justify-center self-center" pointerEvents="box-none"><Button size="sm" variant="primary" hitSlop={{top:6,bottom:6}} className="h-auto min-h-9! rounded-pill px-4 py-1!"

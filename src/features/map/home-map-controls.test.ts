@@ -15,7 +15,7 @@ afterEach(async () => { await act(async () => tree?.unmount()); });
 async function setup(language = 'en', overrides: Partial<HomeMapControlsProps> = {}) {
   const translations = createInstance();
   await translations.use(initReactI18next).init({ ...localizationOptions, lng: language, react: { useSuspense: false } });
-  const callbacks = { onSearchNearby: vi.fn(), onOpenDestinations: vi.fn(), onQueryChange: vi.fn(), onCategoryChange: vi.fn(), onSearchArea: vi.fn() };
+  const callbacks = { onSearchNearby: vi.fn(), onOpenDestinations: vi.fn(), onOpenSavedPlaces: vi.fn(), onQueryChange: vi.fn(), onCategoryChange: vi.fn(), onSearchArea: vi.fn() };
   const props = { ...callbacks, canSearch: true, searching: false, canSearchArea: true, areaRadiusMeters: 1000, query: '', ...overrides };
   const render = (changes: Partial<HomeMapControlsProps> = {}) => React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(HomeMapControls, { ...props, ...changes })));
   await act(async () => { tree = create(render()); });
@@ -60,7 +60,7 @@ it('keeps Featured pinned before every scrolling category, with independent acti
   const { callbacks, render } = await setup('en', { category: 'restaurants' });
   const rail = tree.root.findByType('scroll' as React.ElementType);
   expect(rail.props.horizontal).toBe(true);
-  expect(rail.findAllByType('button').map(node => node.props.accessibilityLabel)).toEqual(['All', 'Attractions', 'Restaurants', 'Hotels', 'Shopping']);
+  expect(rail.findAllByType('button').map(node => node.props.accessibilityLabel)).toEqual(['All', 'Attractions', 'Restaurants', 'Hotels', 'Shopping', 'Saved Places']);
   expect(rail.findAllByType('button')).not.toContain(button('Featured Destinations'));
   expect(visibleText()).toContain('Featured');
   expect(button('Featured Destinations').props.accessibilityState?.selected).toBeUndefined();
@@ -75,6 +75,20 @@ it('keeps Featured pinned before every scrolling category, with independent acti
   expect(button('Hotels').props.accessibilityState.selected).toBe(true);
   expect(callbacks.onSearchNearby).not.toHaveBeenCalled();
   expect(buttons().some(node => ['Recenter', 'Settings'].includes(node.props.accessibilityLabel))).toBe(false);
+});
+
+it.each(['en', 'ja', 'ko'])('ends the %s category rail with an independent localized Saved Places action', async language => {
+ const { callbacks, translations } = await setup(language, { canSearch: false, searching: true });
+ const rail = tree.root.findByType('scroll' as React.ElementType);
+ const saved = rail.findAllByType('button').at(-1)!;
+ expect(saved.props.accessibilityLabel).toBe(translations.t('journal.savedTitle'));
+ expect(translations.exists('exploreCleanup.savedShort', { lng: language, fallbackLng: false })).toBe(true);
+ expect(visibleText()).toContain(translations.t('exploreCleanup.savedShort'));
+ expect(saved.findAllByType('icon' as React.ElementType).map(node => node.props.name)).toContain('bookmark-outline');
+ await act(async () => saved.props.onPress());
+ expect(callbacks.onOpenSavedPlaces).toHaveBeenCalledOnce();
+ expect(callbacks.onCategoryChange).not.toHaveBeenCalled();
+ expect(callbacks.onSearchNearby).not.toHaveBeenCalled();
 });
 
 it('keeps area search visible with a localized radius hint and preserves availability', async () => {

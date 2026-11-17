@@ -302,7 +302,8 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
       query={draftQuery} onQueryChange={setDraftQuery} category={category} onCategoryChange={setCategory}
       onSearchArea={searchArea} canSearchArea={mapEnabled && !!viewport} areaRadiusMeters={viewport?.radiusMeters}
       onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height + insets.top)}
-      onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')} />
+      onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')}
+      onOpenSavedPlaces={() => { if (canInteract()) router.navigate('/saved-places'); }} />
     </View>
     <MapRecenter disabled={!enabled} position={sheetPosition} onPress={() => enabled && map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
     <HomePlaceSheet saveAction={<>{featured ? <SavePlaceAction variant="outline" className="h-auto min-h-12 w-full py-3" reference={{kind:'featured',id:featured.id}} aliases={featuredBookmarkAliases(featured.id, journal?.state.bookmarks ?? [])} /> : selectedId ? <SavePlaceAction variant="outline" className="h-auto min-h-12 w-full py-3" reference={{kind:'google',id:selectedId}} placeName={place?.name ?? seed?.name} pin={place && (completeSnapshot?.updatedAt ?? seed?.capturedAt) ? { coordinates: place.coordinates, capturedAt: completeSnapshot?.updatedAt ?? seed!.capturedAt! } : undefined} /> : null}<JournalFeedback/></>} geometry={sheetGeometry} animatedPosition={sheetPosition} key={selectionKey} state={state} selectedPlace={place ?? null} selectionName={seed?.name} hasSelection={!!selectedId || !!featured}

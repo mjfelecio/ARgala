@@ -16,5 +16,6 @@
   "arrivalVerified": "到着を確認しました",
   "photos": "写真",
   "loadDetails": "最新の詳細を読み込む",
-  "unnamed": "選択した場所"
+  "unnamed": "選択した場所",
+  "savedShort": "保存済み"
 }
