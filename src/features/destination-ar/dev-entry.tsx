@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Button } from 'heroui-native/button';
 import { useAuth } from '@/features/auth/provider';
 import { Action, Notice, Screen } from '@/ui/shared';
 import { isViroSpikeEnabled } from './dev-guard';
@@ -9,12 +8,6 @@ import { loadDevelopmentSession } from './development-session-loader';
 export { isViroSpikeEnabled } from './dev-guard';
 
 function back() { if (router.canGoBack()) router.back(); else router.navigate('/'); }
-export function ViroRingLaunch() {
-  const { t } = useTranslation();
-  return isViroSpikeEnabled() ? <Button variant="secondary" className="mx-4 mb-2" accessibilityLabel={t('destinationRing.title')} onPress={() => router.push('/viro-ring')}>
-    <Button.Label>{t('destinationRing.title')}</Button.Label>
-  </Button> : null;
-}
 export function ViroRingRoute() {
   const { t } = useTranslation(); const { session } = useAuth();
   // Neither a URL nor an environment flag can enable this in a release build.

@@ -7,7 +7,7 @@ import * as React from 'react';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ViroARScene, ViroARSceneNavigator, ViroSound, ViroNode, ViroTrackingStateConstants } from '@reactvision/react-viro';
 import { useTranslation } from 'react-i18next';
-import { developmentRingContent, type RingContent } from './development-ring-content';
+import type { RingContent } from './ring-content';
 import { RingController, type FocusSelection } from './ring-controller';
 import { useArNativeStyle } from './native-styles';
 import { InformationTile } from './information-tile';
@@ -37,14 +37,14 @@ export type RingScenePresentation = Readonly<{
   isolateReader: boolean;
   stage?: Readonly<{ profile: ExhibitStageProfile; Entry: typeof ExhibitGalleryEntry; Panel: typeof ExhibitGalleryPanel; Scenery: typeof DanaoScenery; Arrival: typeof ExhibitArrival }>;
 }>;
-type Props = { presentation?: RingScenePresentation; onReady(): void; onTracking(state: TrackingState): void; onControls?(controls: RingControls | null): void; onRecenterResult?(success: boolean): void; onMetrics?(metrics: RingMetrics): void; content?: readonly RingContent[]; reading?: ReturnType<typeof useReadingSize>; initialProgress?: LogicalArProgress; onProgress?(progress: LogicalArProgress): void; visibleTileCount?: number; interactive?: boolean; effectsEnabled?: boolean; deployment?: IntroVariant; firstVisit?: boolean; audioPreferences?: AudioPreferences; audioManifest?: AudioManifest };
+type Props = { presentation?: RingScenePresentation; onReady(): void; onTracking(state: TrackingState): void; onControls?(controls: RingControls | null): void; onRecenterResult?(success: boolean): void; onMetrics?(metrics: RingMetrics): void; content: readonly RingContent[]; reading?: ReturnType<typeof useReadingSize>; initialProgress?: LogicalArProgress; onProgress?(progress: LogicalArProgress): void; visibleTileCount?: number; interactive?: boolean; effectsEnabled?: boolean; deployment?: IntroVariant; firstVisit?: boolean; audioPreferences?: AudioPreferences; audioManifest?: AudioManifest };
 
 /** A single native coordinate frame. No destination/GPS admission is granted. */
 export function DestinationRingScene(props: Props) {
   return props.reading ? <RingScene {...props} reading={props.reading} externalReadingControls /> : <OwnedReadingRingScene {...props} />;
 }
 function OwnedReadingRingScene(props: Props) { const reading = useReadingSize(); return <RingScene {...props} reading={reading} />; }
-function RingScene({ presentation: requestedPresentation, onReady, onTracking, onControls, onRecenterResult, onMetrics, content = developmentRingContent, reading, initialProgress, onProgress, visibleTileCount = Infinity, interactive = true, effectsEnabled = true, deployment, firstVisit = false, audioPreferences, audioManifest, externalReadingControls = false }: Props & { reading: ReturnType<typeof useReadingSize>; externalReadingControls?: boolean }) {
+function RingScene({ presentation: requestedPresentation, onReady, onTracking, onControls, onRecenterResult, onMetrics, content, reading, initialProgress, onProgress, visibleTileCount = Infinity, interactive = true, effectsEnabled = true, deployment, firstVisit = false, audioPreferences, audioManifest, externalReadingControls = false }: Props & { reading: ReturnType<typeof useReadingSize>; externalReadingControls?: boolean }) {
   const { t, i18n } = useTranslation(); const style = useArNativeStyle();
   // Each mount owns its controller/tokens/timers. A live frame never switches
   // presentation or shares mutable transition state with another mode.

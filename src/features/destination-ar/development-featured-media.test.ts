@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { destinationIds } from '@/features/destinations/catalog';
-import { previewStoryContent } from './development-featured-media';
+import { featuredStoryContent } from './featured-story-content';
 import { ringCopy } from './ring-copy';
 import { galleryPages } from './information-gallery';
 import { paginate } from './content-layout';
@@ -9,7 +9,7 @@ import { readingSizes } from './reading-preference';
 it.each(['en', 'ja', 'ko'] as const)('retains every supplied %s paragraph, photo, caption and complete credit at every reading size', language => {
   const compact = (value: string) => value.replace(/\s/g, '');
   for (const id of destinationIds) {
-    for (const chapter of previewStoryContent(id)) {
+    for (const chapter of featuredStoryContent(id)) {
       const body = ringCopy(chapter, 'body', language);
       const title = ringCopy(chapter, 'title', language);
       const media = chapter.approved!.media!;

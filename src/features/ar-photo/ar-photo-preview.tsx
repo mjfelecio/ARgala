@@ -45,19 +45,14 @@ export function ArPhotoPreview({ state, onSave, onShare, onDiscard, onPreviewFai
     <SafePreview className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
       <StatusBar style="dark" />
       <ScrollView testID="ar-photo-preview-scroll" className="flex-1" contentContainerClassName="grow gap-5 p-4" keyboardShouldPersistTaps="handled">
-        <View className="flex-row items-center gap-3">
-          <View className="size-12 items-center justify-center rounded-pill bg-mint" accessible={false}>
-            <Ionicons name="image-outline" size={24} color={ink} />
-          </View>
-          <View className="grow shrink gap-1">
-            <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-brand-strong">{t('arPhoto.preview')}</Text>
-            <Text className="font-sans text-sm text-muted">{t('arPhoto.review')}</Text>
-          </View>
+        <View className="gap-1">
+          <Text accessibilityRole="header" className="font-sans text-section font-ui-semibold text-brand-strong">{t('arPhoto.preview')}</Text>
+          <Text className="font-sans text-sm text-muted">{t('arPhoto.review')}</Text>
         </View>
         <View testID="ar-photo-canvas" style={{ height: canvasHeight }} className="w-full overflow-hidden rounded-card bg-mint">
           {imageState !== 'failed' && <StyledImage source={{ uri: state.photoUri }} resizeMode="contain" className="size-full" accessibilityLabel={t('arPhoto.image')} onLoad={() => finish(true)} onError={() => finish(false)} />}
           {imageState === 'loading' && <View className="absolute inset-0 items-center justify-center gap-3 bg-mint p-5" accessibilityLiveRegion="polite" accessibilityState={{ busy: true }}>
-            <StatusRow busy>{t('arPhoto.loadingPreview')}</StatusRow>
+            <StatusRow busy centered>{t('arPhoto.loadingPreview')}</StatusRow>
           </View>}
           {imageState === 'failed' && <View className="flex-1 items-center justify-center gap-3 p-5">
             <Ionicons name="image-outline" size={32} color={ink} accessible={false} />
@@ -73,12 +68,14 @@ export function ArPhotoPreview({ state, onSave, onShare, onDiscard, onPreviewFai
           <Button className="min-h-12 w-full" accessibilityLabel={t('arPhoto.save')} accessibilityState={{ busy: state.busy === 'save', disabled: busy || state.saved || unavailable }} isDisabled={busy || state.saved || unavailable} onPress={onSave}>
             <Ionicons name="download-outline" size={20} color={onAccent} accessible={false} /><Button.Label>{t('arPhoto.save')}</Button.Label>
           </Button>
-          <Button variant="secondary" className="min-h-12 w-full" accessibilityLabel={t('arPhoto.share')} accessibilityState={{ busy: state.busy === 'share', disabled: busy || unavailable }} isDisabled={busy || unavailable} onPress={onShare}>
-            <Ionicons name="share-outline" size={20} color={ink} accessible={false} /><Button.Label>{t('arPhoto.share')}</Button.Label>
-          </Button>
-          <Button variant="tertiary" className="min-h-12 w-full" accessibilityLabel={t('arPhoto.discard')} isDisabled={busy} onPress={onDiscard}>
-            <Button.Label>{t('arPhoto.discard')}</Button.Label>
-          </Button>
+          <View className="flex-row items-stretch gap-3">
+            <Button variant="secondary" className="min-h-12 min-w-0 flex-1 px-3" accessibilityLabel={t('arPhoto.share')} accessibilityState={{ busy: state.busy === 'share', disabled: busy || unavailable }} isDisabled={busy || unavailable} onPress={onShare}>
+              <Button.Label className="shrink text-center">{t('arPhoto.share')}</Button.Label>
+            </Button>
+            <Button variant="tertiary" className="min-h-12 min-w-0 flex-1 px-3" accessibilityLabel={t('arPhoto.discard')} isDisabled={busy} onPress={onDiscard}>
+              <Button.Label className="shrink text-center">{t('arPhoto.discard')}</Button.Label>
+            </Button>
+          </View>
         </View>
         <View className="gap-2 pb-2">
           <Text className="font-sans text-xs text-muted">{t('arPhoto.about')}</Text>

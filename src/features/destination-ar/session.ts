@@ -1,7 +1,7 @@
 import type { ReadingCursor } from './content-layout';
 import type { TrackingState } from './types';
 export const suspensionGraceMs = 5 * 60 * 1000;
-export type SessionIdentity = { admissionId: string; destinationId: string; principalId: string; provenance: 'development' | 'verified' };
+export type SessionIdentity = { admissionId: string; destinationId: string; principalId: string; provenance: 'development' | 'verified' | 'showcase' };
 export type ExhibitGalleryProgress = Readonly<{ focused: boolean; cursor: ReadingCursor }>;
 export type LogicalArProgress = { selectedId: string | null; cursors: Record<string, ReadingCursor>; openedIds?: readonly string[]; exhibitGallery?: ExhibitGalleryProgress };
 type Phase = 'idle' | 'preflight' | 'initializing' | 'reveal' | 'exploring' | 'limited' | 'suspended' | 'interrupted' | 'failed' | 'expired' | 'closed';

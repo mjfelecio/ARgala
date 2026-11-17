@@ -7,7 +7,8 @@ import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import DestinationArScreen from './destination-ar-screen';
-import { ViroRingRoute, ViroRingLaunch } from './dev-entry';
+import { ViroRingRoute } from './dev-entry';
+import { ShowcaseEntry } from './showcase-entry';
 import { router } from 'expo-router';
 
 const native = vi.hoisted(() => ({
@@ -35,7 +36,7 @@ vi.mock('expo-router', async () => {
 // Only the native renderer is replaced. The screen, controller, permission/support
 // adapter, installed SDK hooks, shared controls and actual locale resources run.
 vi.mock('@reactvision/react-viro', () => ({
-  ViroARScene: 'native-scene', ViroImage: 'viro-image', ViroNode: 'node', ViroQuad: 'quad', ViroText: 'viro-text',
+  ViroARScene: 'native-scene', ViroImage: 'viro-image', ViroNode: 'node', ViroQuad: 'quad', ViroGeometry: 'geometry', ViroText: 'viro-text',
   ViroARSceneNavigator: (props: { initialScene: { scene: () => React.JSX.Element } }) => React.createElement('native-navigator', props, React.createElement(props.initialScene.scene)),
   ViroMaterials: { createMaterials: vi.fn() }, ViroAnimations: { registerAnimations: vi.fn() },
   ViroTrackingStateConstants: { TRACKING_UNAVAILABLE: 1, TRACKING_LIMITED: 2, TRACKING_NORMAL: 3 },
@@ -164,9 +165,9 @@ it.each([false, true])('protects the M2 route before native work when dev=%s and
   expect(copy()).toContain(translations.t('destinationAr.unavailable'));
   expect(native.get).not.toHaveBeenCalled(); expect(native.support).not.toHaveBeenCalled(); expect(native.getSize).not.toHaveBeenCalled();
 });
-it('launches the retained ring route explicitly', async () => {
-  await mount(React.createElement(ViroRingLaunch)); await press('destinationRing.title');
-  expect(router.push).toHaveBeenCalledWith('/viro-ring'); expect(native.support).not.toHaveBeenCalled();
+it('launches the permanent showcase explicitly', async () => {
+  await mount(React.createElement(ShowcaseEntry)); await press('arShowcase.title');
+  expect(router.push).toHaveBeenCalledWith('/ar-showcase'); expect(native.support).not.toHaveBeenCalled();
 });
 it('keeps ring startup behind real focus/transition gates and exposes only utility controls outside Viro', async () => {
   const child = () => React.createElement(DestinationArScreen, { variant: 'ring' });

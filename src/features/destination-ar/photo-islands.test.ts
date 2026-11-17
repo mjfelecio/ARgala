@@ -1,8 +1,9 @@
 import { expect, it } from 'vitest';
-import { danaoStageProfile, buildDestinationStageSlots } from './exhibit-stage';
-import { createPhotoIslandsProfile, exhibitGalleryEntries, exhibitSceneEntries, isExhibitGalleryEntry, photoIslandCoverSize } from './photo-islands';
+import { destinationIds } from '@/features/destinations/catalog';
+import { danaoStageProfile, buildDestinationStageSlots, getExhibitStageProfile } from './exhibit-stage';
+import { createPhotoIslandsProfile, exhibitGalleryEntries, exhibitSceneEntries, isExhibitGalleryEntry, photoIslandCoverSize, restrictPhotoIslandsProfile } from './photo-islands';
 import presentationContent from './featured-presentation-content.json';
-import { previewStoryContent } from './development-featured-media';
+import { featuredStoryContent } from './featured-story-content';
 import { captureBasis } from './scene-geometry';
 import { RingController } from './ring-controller';
 
@@ -17,7 +18,7 @@ it('gives every Danao photograph a distinct entrance without creating chapters',
   expect(new Set(entries.map(entry => entry.id)).size).toBe(7);
   for (const entry of entries) expect(isExhibitGalleryEntry(profile, entry.id)).toBe(true);
   for (const id of ['overview', 'exhibit-gallery-D02', `${profile.galleryId}-unknown`, 'pilot-aclc']) expect(isExhibitGalleryEntry(profile, id)).toBe(false);
-  const chapters = previewStoryContent('D01'); const all = exhibitSceneEntries(profile, chapters);
+  const chapters = featuredStoryContent('D01'); const all = exhibitSceneEntries(profile, chapters);
   expect(all).toHaveLength(10);
   expect(all.filter(entry => !isExhibitGalleryEntry(profile, entry.id)).map(entry => entry.id)).toEqual(chapters.map(chapter => chapter.id));
   expect(Object.isFrozen(profile)).toBe(true); expect(Object.isFrozen(profile.photoIslands)).toBe(true);
@@ -27,7 +28,7 @@ it('gives every Danao photograph a distinct entrance without creating chapters',
 });
 
 it('places separate photo bays around the captured basis with vertical story clearance', () => {
-  const profile = makeProfile(); const entries = exhibitSceneEntries(profile, previewStoryContent('D01'));
+  const profile = makeProfile(); const entries = exhibitSceneEntries(profile, featuredStoryContent('D01'));
   const slots = buildDestinationStageSlots(profile, entries, captureBasis(initial)!);
   expect(slots.map(slot => slot.id)).toEqual(entries.map(entry => entry.id));
   expect(slots[0].position).toEqual([0, 0.18, -2.1]);
@@ -54,7 +55,7 @@ it('places separate photo bays around the captured basis with vertical story cle
 
 it('uses original photo proportions and larger image-only covers that fit a portrait view', () => {
   const profile = makeProfile(); const entrances = exhibitGalleryEntries(profile);
-  const slots = buildDestinationStageSlots(profile, exhibitSceneEntries(profile, previewStoryContent('D01')), captureBasis(initial)!);
+  const slots = buildDestinationStageSlots(profile, exhibitSceneEntries(profile, featuredStoryContent('D01')), captureBasis(initial)!);
   entrances.forEach((entry, index) => {
     const size = photoIslandCoverSize(profile, entry);
     const media = presentationContent.media.find(photo => photo.id === (entry.mediaId ?? profile.media[0].id))!;
@@ -70,7 +71,7 @@ it('uses original photo proportions and larger image-only covers that fit a port
 });
 
 it('focuses each photo from its own transform and closes back without rotating the captured basis', () => {
-  const profile = makeProfile(); const entries = exhibitSceneEntries(profile, previewStoryContent('D01'));
+  const profile = makeProfile(); const entries = exhibitSceneEntries(profile, featuredStoryContent('D01'));
   const controller = new RingController(entries, (items, basis) => buildDestinationStageSlots(profile, items, basis));
   controller.track('normal'); controller.pose(initial, 1000);
   const slots = controller.slots;
@@ -92,4 +93,44 @@ it('rejects bay configurations that cannot map to the approved photographs and c
   expect(() => createPhotoIslandsProfile(danaoStageProfile, [-95, 35])).toThrow();
   expect(() => createPhotoIslandsProfile(danaoStageProfile, [-95, NaN, 150])).toThrow();
   expect(() => createPhotoIslandsProfile(danaoStageProfile, [-95, -95, 150])).toThrow();
+});
+
+
+it.each([[], ['unknown'], [danaoStageProfile.media[1].id], [danaoStageProfile.media[1].id, danaoStageProfile.media[2].id]].map(allowed => ({ allowed })))('restricts gallery entrances to the explicitly authorized media $allowed', ({ allowed }) => {
+  const profile = restrictPhotoIslandsProfile(makeProfile(), allowed);
+  const expected = danaoStageProfile.media.filter(photo => allowed.includes(photo.id));
+  expect(profile.media).toEqual(expected);
+  expect(exhibitGalleryEntries(profile).map(entry => entry.mediaId)).toEqual(expected.map(photo => photo.id));
+  const chapters = featuredStoryContent('D01').slice(0, 1);
+  const entries = exhibitSceneEntries(profile, chapters);
+  const slots = buildDestinationStageSlots(profile, entries, captureBasis(initial)!);
+  expect(slots.map(slot => slot.id)).toEqual(entries.map(entry => entry.id));
+  expect(slots.every(slot => slot.position.every(Number.isFinite))).toBe(true);
+  expect(entries.filter(entry => !isExhibitGalleryEntry(profile, entry.id))).toEqual(chapters);
+  expect(makeProfile().media).toHaveLength(7);
+});
+
+
+it.each([4, 12])('places %s authorized chapters at distinct finite slots while retaining every accepted showcase transform', count => {
+ const basis = captureBasis(initial)!;
+ for (const id of destinationIds) {
+  const complete = createPhotoIslandsProfile(getExhibitStageProfile(id)!);
+  for (const profile of [complete, restrictPhotoIslandsProfile(complete, []), restrictPhotoIslandsProfile(complete, complete.media.slice(0, 2).map(photo => photo.id))]) {
+   const chapters = Array.from({ length: count }, (_, index) => ({ id: `approved-${index}` }));
+   const entries = exhibitSceneEntries(profile, chapters);
+   const slots = buildDestinationStageSlots(profile, entries, basis);
+   expect(slots.every(slot => [...slot.position, ...slot.rotation, slot.scale!, slot.angle].every(Number.isFinite))).toBe(true);
+   expect(new Set(slots.map(slot => JSON.stringify(slot.position))).size).toBe(slots.length);
+   const accepted = buildDestinationStageSlots(profile, exhibitSceneEntries(profile, chapters.slice(0, profile.stations.length)), basis);
+   expect(slots.slice(0, accepted.length)).toEqual(accepted);
+   const turned = buildDestinationStageSlots(profile, entries, captureBasis({ ...initial, forward: [1, 0, 0] })!);
+   slots.forEach((slot, index) => {
+    expect(turned[index].position[0]).toBeCloseTo(-slot.position[2]); expect(turned[index].position[2]).toBeCloseTo(slot.position[0]);
+   });
+  }
+ }
+});
+it('rejects chapter counts outside the approved twelve-chapter contract', () => {
+ const profile = makeProfile();
+ expect(() => buildDestinationStageSlots(profile, exhibitSceneEntries(profile, Array.from({ length: 13 }, (_, index) => ({ id: `overflow-${index}` }))), captureBasis(initial)!)).toThrow();
 });

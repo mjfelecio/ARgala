@@ -1,3 +1,13 @@
+# AR Showcase and destination exhibits
+
+## Current owner decision — 2026-11-18
+
+The permanent AR Showcase uses all nine accepted Photo Islands exhibits in every build, accessible from Profile and Settings. A photo-led picker leads to guided preparation and explicit Start AR. Its Demo Passport and entrance history are resettable in-memory state, isolated from real visits. Geography is bypassed only in the showcase; actual camera/support/tracking checks remain.
+
+The destination exhibits are the single current presentation. Obsolete alternative selectors, original front-stage exports and fallback compositions have been removed. Native photo containment now respects the rounded frame's painted boundary; painted rounded button quads preserve the native tap contract and stay within their frame. The reader remains at 2.25 units, with original assets, captions and credits. See the [current plan](../../superpowers/plans/2026-11-18-ar-showcase.md) and [validation record](../../validation.md).
+
+The dated evidence below records the earlier design process and is historical where superseded by this decision.
+
 # D01 destination stage and gallery
 
 ## Photo Islands — owner-selected direction, November 14

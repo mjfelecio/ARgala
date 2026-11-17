@@ -1,4 +1,6 @@
-import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { developmentRingContent } from './development-ring-content';
+import { SceneBoundary } from './scene-boundary';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { useIsFocused, useNavigation } from 'expo-router';
 import type { NativeStackNavigationProp } from 'expo-router/native-stack';
 import { Text, View } from 'react-native';
@@ -16,12 +18,7 @@ import type { TrackingState } from './types';
 // Do not evaluate Viro's native components in old APKs or before capability checks.
 const NativeScene = lazy(() => import('./destination-scene').then(module => ({ default: module.DestinationSceneHost })));
 const NativeRing = lazy(() => import('./destination-ring-scene').then(module => ({ default: module.DestinationRingSceneHost })));
-export class SceneBoundary extends Component<{ onFailure(): void; children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
-  static getDerivedStateFromError() { return { failed: true }; }
-  componentDidCatch() { this.props.onFailure(); }
-  render() { return this.state.failed ? null : this.props.children; }
-}
+export { SceneBoundary } from './scene-boundary';
 
 export default function DestinationArScreen({ variant = 'square' }: { variant?: 'square' | 'ring' }) {
   const { t } = useTranslation();
@@ -49,7 +46,7 @@ export default function DestinationArScreen({ variant = 'square' }: { variant?: 
     {startup.mountScene && <View style={{ position: 'absolute', top: 0, left: 0, width: scene.width, height: scene.height }}>
       <SceneBoundary key={startup.attempt} onFailure={startup.onFailure}>
         <Suspense fallback={null}>{variant === 'ring'
-          ? <NativeRing onReady={startup.onReady} onTracking={setTracking} onControls={acceptControls} onRecenterResult={recenterResult} onMetrics={help ? setMetrics : undefined} />
+          ? <NativeRing content={developmentRingContent} onReady={startup.onReady} onTracking={setTracking} onControls={acceptControls} onRecenterResult={recenterResult} onMetrics={help ? setMetrics : undefined} />
           : <NativeScene onReady={startup.onReady} onTracking={setTracking} />}</Suspense>
       </SceneBoundary>
     </View>}

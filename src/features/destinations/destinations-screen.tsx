@@ -4,26 +4,24 @@ import { useQueryClient } from '@tanstack/react-query';
 import { setFeaturedSelection } from './map-selection';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useCSSVariable, withUniwind } from 'uniwind';
+import { withUniwind } from 'uniwind';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
 import { useThemeColor } from 'heroui-native/hooks';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import { DestinationPhotoCard } from './destination-photo-card';
 import { destinationIds, destinationName, listFeaturedDestinations, localizedContent, type Destination } from './catalog';
 import { DestinationPhotoViewer } from './destination-photo-viewer';
 import { useSettings } from '@/features/settings/provider';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
-const StyledImage = withUniwind(Image);
 export default function DestinationsScreen() {
   const { t } = useTranslation();
   const { language } = useSettings();
   const client = useQueryClient();
   const accent = useThemeColor('accent');
-  const forest = useCSSVariable('--color-brand-strong') as string;
   const [viewing, setViewing] = useState<{ destination: Destination; initialId: string } | null>(null);
   const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
   function choose(destination: Destination) {
@@ -52,21 +50,8 @@ export default function DestinationsScreen() {
           <Ionicons name="chevron-forward" size={20} color={accent} accessible={false} />
         </Button>;
         const caption = localizedContent(cover.caption, language);
-        return <View key={destination.id} testID={`featured-photo-card:${destination.id}`} className="relative overflow-hidden rounded-card bg-brand-strong">
-          {!failed.has(cover.id) && <StyledImage source={cover.source} accessible={false} className="absolute inset-0 h-full w-full" resizeMode="cover"
-            onError={() => setFailed(previous => new Set([...previous, cover.id]))} />}
-          <View pointerEvents="none" accessible={false} importantForAccessibility="no-hide-descendants" className="absolute inset-x-0 bottom-0 h-32 overflow-hidden">
-            {!failed.has(cover.id) && <StyledImage source={cover.source} blurRadius={12} className="h-full w-full" resizeMode="cover" accessible={false} />}
-          </View>
-          <Svg pointerEvents="none" accessible={false} width="100%" height="100%" style={{ position: 'absolute' }}>
-            <Defs><LinearGradient id={`featured-fade-${destination.id}`} x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={forest} stopOpacity="0" />
-              <Stop offset="0.5" stopColor={forest} stopOpacity="0.05" />
-              <Stop offset="0.72" stopColor={forest} stopOpacity="0.8" />
-              <Stop offset="1" stopColor={forest} stopOpacity="1" />
-            </LinearGradient></Defs>
-            <Rect width="100%" height="100%" fill={`url(#featured-fade-${destination.id})`} />
-          </Svg>
+        return <DestinationPhotoCard key={destination.id} id={`featured-${destination.id}`} testID={`featured-photo-card:${destination.id}`} source={cover.source}
+          failed={failed.has(cover.id)} onImageError={() => setFailed(previous => new Set([...previous, cover.id]))}>
           <Pressable className="min-h-56 active:opacity-80" accessibilityRole="button" accessibilityLabel={t('destinationCleanup.viewPhoto', { name })}
             accessibilityHint={[localizedContent(cover.alt, language)!.value, caption?.value, cover.credit].filter(Boolean).join('. ')}
             onPress={() => setViewing({ destination, initialId: cover.id })}>
@@ -75,11 +60,11 @@ export default function DestinationsScreen() {
             </View>}
           </Pressable>
           <Pressable accessibilityRole="button" accessibilityLabel={name} onPress={() => choose(destination)}
-            className="min-h-24 flex-row items-center gap-4 bg-brand-strong/50 p-5 active:bg-brand-strong/80">
+            className="min-h-24 flex-row items-center gap-4 p-5 active:bg-brand-strong/80">
             <Text className="min-w-0 flex-1 font-sans text-section font-ui-semibold text-white">{name}</Text>
             <Ionicons name="chevron-forward" size={24} color="white" accessible={false} />
           </Pressable>
-        </View>;
+        </DestinationPhotoCard>;
       })}
       <ContentUpdates />
     </ScrollView>

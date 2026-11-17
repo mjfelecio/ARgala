@@ -41,19 +41,7 @@ export function getExhibitStageProfile(destinationId: string): ExhibitStageProfi
   return destinationIds.some(id => id === destinationId) ? stages[destinationId as DestinationId] : null;
 }
 
-/** A suspended composition in the captured basis, never an earth/floor anchor. */
-export function buildStageSlots(entries: readonly RingEntry[], basis: Basis): RingSlot[] {
-  return buildDestinationStageSlots(danaoStageProfile, entries, basis);
-}
+/** Photo Islands in the captured basis, never an earth/floor anchor. */
 export function buildDestinationStageSlots(stage: ExhibitStageProfile, entries: readonly RingEntry[], basis: Basis): RingSlot[] {
-  if (stage.photoIslands) return buildPhotoIslandSlots(stage, entries, basis);
-  if (entries.length !== stage.stations.length + 1 || entries[0]?.id !== stage.galleryId || new Set(entries.map(item => item.id)).size !== entries.length) throw new Error('Invalid exhibit stage');
-  return entries.map((entry, index) => {
-    const [x, y, z] = index === 0 ? stage.gallery : stage.stations[index - 1];
-    const angle = Math.atan2(x, z) * 180 / Math.PI;
-    return { ...entry, angle: (angle + 360) % 360, scale: index === 0 ? 1 : 0.46,
-      position: [basis.right[0] * x + basis.forward[0] * z, y, basis.right[2] * x + basis.forward[2] * z],
-      rotation: [0, ((basis.yaw - angle + 540) % 360) - 180, 0],
-    };
-  });
+  return buildPhotoIslandSlots(stage, entries, basis);
 }

@@ -31,7 +31,21 @@ export function createPhotoIslandsProfile(front: ExhibitStageProfile, angles: re
   })) });
 }
 
+/** A real entry exposes only media bound to its already authorized chapters.
+ * Empty authorization stays story-only; it never falls back to the showcase. */
+export function restrictPhotoIslandsProfile(profile: ExhibitStageProfile, allowedMediaIds: readonly string[]): ExhibitStageProfile {
+  const allowed = new Set(allowedMediaIds);
+  const media = Object.freeze(profile.media.filter(photo => allowed.has(photo.id)));
+  const count = Math.max(0, Math.ceil((media.length - 1) / 2));
+  const photoIslands = Object.freeze(destinationAngles[profile.destinationId].slice(0, count).map((angle, index) => {
+    const first = media[1 + index * 2].id; const second = media[2 + index * 2]?.id;
+    return Object.freeze({ angle, mediaIds: second ? Object.freeze([first, second] as const) : Object.freeze([first] as const) });
+  }));
+  return Object.freeze({ ...profile, media, photoIslands });
+}
+
 export function exhibitGalleryEntries(profile: ExhibitStageProfile): readonly ExhibitGalleryEntrance[] {
+  if (!profile.media.length) return [];
   return [{ id: profile.galleryId, ...(profile.photoIslands ? { mediaId: profile.media[0].id } : {}) }, ...(profile.photoIslands ?? []).flatMap(bay => bay.mediaIds.map(mediaId => ({ id: `${profile.galleryId}-photo-${mediaId}`, mediaId })))];
 }
 export function isExhibitGalleryEntry(profile: ExhibitStageProfile, id: string): boolean {
@@ -70,11 +84,16 @@ export function photoIslandStoryY(profile: ExhibitStageProfile, bayIndex: number
 /** Each entrance is a real native focus/Close target in the captured frame. */
 export function buildPhotoIslandSlots(profile: ExhibitStageProfile, entries: readonly RingEntry[], basis: Basis): RingSlot[] {
   const bays = profile.photoIslands; const gallery = exhibitGalleryEntries(profile);
-  if (!bays || entries.length !== gallery.length + profile.stations.length || new Set(entries.map(entry => entry.id)).size !== entries.length
+  if (!bays || entries.length < gallery.length || entries.length > gallery.length + 12 || new Set(entries.map(entry => entry.id)).size !== entries.length
     || gallery.some((entry, index) => entries[index]?.id !== entry.id)) throw new Error('Invalid photo island entries');
+  const storyAngles = destinationAngles[profile.destinationId];
+  // Preserve the accepted gallery and first story bays exactly. Additional
+  // authorized chapters use a separate lower ring, clear of those controls.
+  const overflowY = Math.min(photoIslandMetrics.storyY, ...bays.map((_, index) => photoIslandStoryY(profile, index)))
+    - photoIslandMetrics.storyHeight - photoIslandMetrics.storyClearance;
   return entries.map((entry, index) => {
     let x: number, y: number, z: number, angle: number, scale: number;
-    if (index === 0) {
+    if (index === 0 && gallery.length) {
       x = 0; y = photoIslandMetrics.welcomeY; z = photoIslandMetrics.welcomeRadius; angle = 0;
       scale = photoIslandCoverSize(profile, gallery[0]).width / 1.25;
     } else {
@@ -85,12 +104,14 @@ export function buildPhotoIslandSlots(profile: ExhibitStageProfile, entries: rea
       const bay = bays[bayIndex];
       const secondary = photo && bay.mediaIds[1] === mediaId;
       const composition = secondary ? photoIslandMetrics.secondary : photoIslandMetrics.primary;
-      angle = bay.angle + (photo ? composition.angle : 0);
+      const overflow = !photo && localIndex >= storyAngles.length;
+      angle = overflow ? (localIndex - storyAngles.length) * 360 / (12 - storyAngles.length)
+        : (bay?.angle ?? storyAngles[localIndex]) + (photo ? composition.angle : 0);
       const radians = angle * Math.PI / 180;
       const radius = photo ? composition.radius : photoIslandMetrics.storyRadius;
       x = Math.sin(radians) * radius;
       z = Math.cos(radians) * radius;
-      y = photo ? composition.y : photoIslandStoryY(profile, bayIndex);
+      y = photo ? composition.y : overflow ? overflowY : bay ? photoIslandStoryY(profile, bayIndex) : photoIslandMetrics.storyY;
       scale = (photo ? photoIslandCoverSize(profile, gallery[index]).width : photoIslandMetrics.storyWidth) / 1.25;
     }
     return { ...entry, angle: normalized(angle), scale,

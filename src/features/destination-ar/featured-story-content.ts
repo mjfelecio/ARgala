@@ -3,14 +3,14 @@ import type { RingContent } from './ring-content';
 import content from './featured-presentation-content.json';
 import { presentationPhotoAssets } from './featured-presentation-media-assets';
 
-// Presentation content uses the existing scene and gallery model. This adapter
-// does not change arrival, Passport, native configuration, or production gates.
+// Supplied destination stories shared by the showcase and its content tests.
+// Reading this display content grants no location or Passport authority.
 const reference = 'ARgala college presentation content, 2026-11-13';
 const value = (text: string) => ({ value: text, approvalReference: reference });
 const translated = (text: { en: string; ja: string; ko: string }) => ({
   en: value(text.en), ja: value(text.ja), ko: value(text.ko),
 });
-export function previewStoryContent(id: DestinationId): readonly RingContent[] {
+export function featuredStoryContent(id: DestinationId): readonly RingContent[] {
   const destination = content.destinations.find(item => item.id === id);
   if (!destination) return [];
   return destination.chapters.map((chapter, index): RingContent => ({

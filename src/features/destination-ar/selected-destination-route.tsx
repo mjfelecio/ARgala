@@ -15,8 +15,10 @@ import type { ArAdmissionStore, PreparedArEntry } from './admission-store';
 import type { RingContent } from './ring-content';
 import { isViroSpikeEnabled } from './dev-guard';
 import { loadDraftRingContent } from './draft-content-loader';
-import { DestinationArSessionExperience } from './destination-ar-session-screen';
+import { DestinationArSessionExperience } from './session-experience';
 import { ReadOnlyFallback } from './read-only-fallback';
+import { loadExhibitScene } from './exhibit-loader';
+import { loadRingScene } from './ring-loader';
 
 export default function SelectedDestinationArRoute() {
   const store = useArAdmission(); const params = useLocalSearchParams();
@@ -59,13 +61,27 @@ function ClaimedEntry({ store, id, token }: { store: ArAdmissionStore | null; id
 }
 function PreparedScene({ entry, store, content }: { entry: PreparedArEntry; store: ArAdmissionStore; content: readonly RingContent[] }) {
   const { t } = useTranslation(); const active = useAppActive(); const focused = useIsFocused();
+  // Admission captures this content version. Later observer renders cannot widen
+  // its gallery or replace the surviving native host with a showcase profile.
+  const [authorizedContent] = useState(content);
+  const [galleryMediaIds] = useState(() => {
+    const bound = new Set(authorizedContent.flatMap(tile => tile.approved?.media?.map(photo => photo.id) ?? []));
+    return Object.freeze((getDestination(entry.destination.id)?.media ?? []).filter(photo => bound.has(photo.id)).map(photo => photo.id));
+  });
+  const destinationId = entry.destination.id;
+  const sceneLoader = useCallback(async () => {
+    if (destinationId === 'pilot-aclc') return loadRingScene();
+    const scene = await loadExhibitScene(destinationId, galleryMediaIds);
+    if (!scene) throw new Error('Destination exhibit unavailable');
+    return scene;
+  }, [destinationId, galleryMediaIds]);
   const [established, setEstablished] = useState(false);
   const {onEstablished:earnStamp,retry:retryStamp}=useEarnedStamp(entry);
   const onEstablished = useCallback(() => { setEstablished(true); earnStamp(); }, [earnStamp]);
   const location = useDeviceLocation({ enabled: !established && !entry.simulated, heading: false, distanceIntervalMeters: 0 });
   useAdmissionSource(store, entry.destination.id, { running: active && focused && !established && !entry.simulated, watcherStatus: location.watcherStatus, sample: location.watcherSample }, false);
   const arrival = useAdmissionSnapshot(store);
-  return <DestinationArSessionExperience identity={entry.identity} content={content} title={destinationName(entry.destination)}
+  return <DestinationArSessionExperience identity={entry.identity} content={authorizedContent} sceneLoader={sceneLoader} galleryMediaIds={galleryMediaIds} title={destinationName(entry.destination)}
     unsupportedFallback={entry.kind === 'approved' && !entry.simulated && !established && entry.identity.provenance === 'verified' ? <ReadOnlyFallback entry={entry}
       eligible={arrival?.destinationId === entry.destination.id && arrival.eligible} running={active && focused}
       onEstablished={earnStamp} feedback={<JournalFeedback onRetrySave={retryStamp} />}
@@ -74,6 +90,6 @@ function PreparedScene({ entry, store, content }: { entry: PreparedArEntry; stor
     freshEligible={entry.authorizeMount} entryReady={entry.simulated || arrival?.destinationId === entry.destination.id && arrival.eligible}
     onEstablished={onEstablished} onExit={() => store.endEntry(entry.identity.admissionId)}
     onReturn={() => router.dismissTo({ pathname: '/', params: { featuredDestinationId: entry.destination.id } })}
-    preflightNoticeKey="arrival.preflight" developmentNoticeKey={entry.simulated ? "arrival.simulatedLive" : "arrival.draftLive"} progressFeedback={established && entry.kind === 'approved' && !entry.simulated && entry.identity.provenance === 'verified' ? <JournalFeedback onRetrySave={retryStamp}/> : null} guidance={entry.simulated ? <Notice>{t("arrival.simulatedLive")}</Notice> : <View className="gap-2 px-4"><LocationStatus location={location} />
-      <Text className="font-sans text-sm text-white">{t(`arrival.${arrival?.status ?? 'uncertain'}`)}</Text></View>} />;
+    preflightNoticeKey="arrival.preflight" developmentNoticeKey={entry.simulated ? "arrival.simulatedLive" : "arrival.draftLive"} progressFeedback={established && entry.kind === 'approved' && !entry.simulated && entry.identity.provenance === 'verified' ? <JournalFeedback onRetrySave={retryStamp}/> : null} guidance={entry.simulated ? <Notice>{t("arrival.simulatedLive")}</Notice> : <View testID="arrival-guidance" className="gap-2 rounded-card bg-page p-4"><LocationStatus location={location} />
+      <Text className="font-sans text-sm text-foreground">{t(`arrival.${arrival?.status ?? 'uncertain'}`)}</Text></View>} />;
 }

@@ -1,9 +1,7 @@
 import { destinationIds } from '@/features/destinations/catalog';
-import { isViroSpikeEnabled } from './dev-guard';
-
-export type PresentationMode = 'classic' | 'exhibit';
-/** No production/native/geographic admission. Only the explicitly selected featured stage is available. */
-export async function loadExhibitScene(destinationId: string) {
-  if (!isViroSpikeEnabled() || !destinationIds.some(id => id === destinationId)) return null;
-  return (await import('./exhibit-ring-scene')).getExhibitSceneHost(destinationId);
+/** Render configuration only; geographic and content admission belong to the caller.
+ * An omitted media list is the supplied showcase; an explicit list is a strict fence. */
+export async function loadExhibitScene(destinationId: string, allowedMediaIds?: readonly string[]) {
+  if (!destinationIds.some(id => id === destinationId)) return null;
+  return (await import('./exhibit-ring-scene')).getExhibitSceneHost(destinationId, allowedMediaIds);
 }

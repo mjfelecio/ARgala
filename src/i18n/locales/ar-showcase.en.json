@@ -1,0 +1,23 @@
+{
+  "title": "AR Showcase",
+  "entryHint": "Demo destination AR from anywhere",
+  "intro": "Try nine destinations in this AR demo, wherever you are. In the app, destination AR is only available when you visit the actual location.",
+  "choose": "Choose a destination",
+  "openHint": "Open this destination in the AR Showcase",
+  "cardHint": "Photographs and local stories",
+  "ready": "Demo experience",
+  "readyHint": "You can try this demo wherever you are. In the app, AR opens when you visit the destination.",
+  "preflight": "Find a bright spot with room to turn. Hold your phone upright and move it slowly to explore with your camera.",
+  "loading": "Preparing your destination…",
+  "loadFailed": "This destination could not be loaded. Try again, or choose another destination.",
+  "unavailable": "Open the showcase from Profile or Settings after signing in or continuing as a guest.",
+  "passportTitle": "Demo Passport",
+  "passportCount": "{{count}} of {{total}} destinations explored",
+  "passportHint": "Start AR to collect a demo stamp. These stamps stay in this showcase and reset when you leave.",
+  "visited": "Demo stamp collected",
+  "reset": "Reset showcase",
+  "expired": "This AR session has ended. Choose the destination again to start a new experience.",
+  "return": "Choose a destination",
+  "preflightTitle": "Before you begin",
+  "start": "Start AR"
+}
