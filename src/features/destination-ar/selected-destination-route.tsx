@@ -18,6 +18,7 @@ import { loadDraftRingContent } from './draft-content-loader';
 import { DestinationArSessionExperience } from './session-experience';
 import { ReadOnlyFallback } from './read-only-fallback';
 import { loadExhibitScene } from './exhibit-loader';
+import { withExhibitVisitorContent } from './exhibit-visitor-content';
 import { loadRingScene } from './ring-loader';
 
 export default function SelectedDestinationArRoute() {
@@ -63,7 +64,7 @@ function PreparedScene({ entry, store, content }: { entry: PreparedArEntry; stor
   const { t } = useTranslation(); const active = useAppActive(); const focused = useIsFocused();
   // Admission captures this content version. Later observer renders cannot widen
   // its gallery or replace the surviving native host with a showcase profile.
-  const [authorizedContent] = useState(content);
+  const [authorizedContent] = useState(() => entry.kind === 'approved' ? withExhibitVisitorContent(entry.destination, content) : content);
   const [galleryMediaIds] = useState(() => {
     const bound = new Set(authorizedContent.flatMap(tile => tile.approved?.media?.map(photo => photo.id) ?? []));
     return Object.freeze((getDestination(entry.destination.id)?.media ?? []).filter(photo => bound.has(photo.id)).map(photo => photo.id));

@@ -1,0 +1,19 @@
+{
+  "details": "Destination details",
+  "nearby": "Nearby places",
+  "mode": "AR view",
+  "scan": "Scan nearby",
+  "rescan": "Scan again",
+  "enableLocation": "Enable location",
+  "waitingLocation": "Waiting for an accurate location…",
+  "signInHint": "Sign in to search around your current location.",
+  "firstScan": "Scan for places within 1 km, then turn to see what’s around you.",
+  "scanning": "Searching nearby…",
+  "expired": "Scan again for current results.",
+  "empty": "No places turned up nearby.",
+  "results": "View results ({{count}})",
+  "resultsTitle": "Nearby places",
+  "headingUnavailable": "Direction is unavailable. You can still view the results.",
+  "showInCamera": "Show card in AR",
+  "distance": "{{meters}} m away"
+}

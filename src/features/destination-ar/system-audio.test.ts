@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest';
-import { ArSystemAudio, type AudioManifest } from './system-audio';
+import { ArSystemAudio, approvedSystemAudio, type AudioManifest } from './system-audio';
 const clip = (source: number) => ({ source, rightsReference: 'Synthetic test rights', approvalReference: 'Synthetic test review' });
-const manifest: AudioManifest = { voices: { en: clip(1), ja: clip(2), ko: clip(3) }, effects: { deployed: clip(4), focused: clip(5), trackingLost: clip(6), pageChanged: clip(7), closed: clip(8) } };
+const manifest: AudioManifest = { voices: { en: clip(1), ja: clip(2), ko: clip(3) }, effects: { deployed: clip(4), focused: clip(5), trackingLost: clip(6), pageChanged: clip(7), closed: clip(8), modeSwitched: clip(9) } };
 it.each([true, false].flatMap(systemVoice => [true, false].map(soundEffects => ({ systemVoice, soundEffects }))))('independently gates $systemVoice voice and $soundEffects effects with no overlapping playback', preferences => {
   const play = vi.fn(); const audio = new ArSystemAudio(manifest, play);
   audio.event('initialized', 'first', 'ja', preferences, true);
@@ -51,4 +51,29 @@ it('accepts late optional assets for future events without replaying a consumed 
   expect(audio.getSnapshot()).toBeNull();
   audio.event('focused', 'later', 'en', { systemVoice: true, soundEffects: true }, true);
   expect(audio.getSnapshot()?.source).toBe(5);
+});
+
+it('lets first-visit speech replace an effect and drops effects issued during speech', () => {
+  const audio = new ArSystemAudio(manifest);
+  const preferences = { systemVoice: true, soundEffects: true };
+
+  audio.event('deployed', 'deployment', 'en', preferences, true);
+  const retired = audio.getSnapshot()!;
+  audio.event('initialized', 'entry', 'en', preferences, true);
+  const voice = audio.getSnapshot()!;
+  expect(voice).toMatchObject({ channel: 'voice', source: 1 });
+  audio.finish(retired.playbackId);
+  expect(audio.getSnapshot()).toBe(voice);
+
+  audio.event('modeSwitched', 'mode-1', 'en', preferences, false);
+  expect(audio.getSnapshot()).toBe(voice);
+  audio.finish(voice.playbackId);
+  audio.event('modeSwitched', 'mode-1', 'en', preferences, false);
+  expect(audio.getSnapshot()).toBeNull();
+  audio.event('modeSwitched', 'mode-2', 'en', preferences, false);
+  expect(audio.getSnapshot()).toMatchObject({ channel: 'effect', source: 9 });
+});
+
+it('has an empty production slot for the mode-switch effect', () => {
+  expect(approvedSystemAudio.effects.modeSwitched).toBeNull();
 });

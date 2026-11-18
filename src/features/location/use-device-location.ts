@@ -22,7 +22,7 @@ type DeviceState = {
 };
 const initial: DeviceState = { watcherSample: null, phase: 'waiting', status: 'loading', watcherStatus: 'pending', errorCode: null, position: null, accuracy: null, heading: null, positionTimestamp: null, watcherTimestamp: null, headingTimestamp: null, sampleReceivedAt: null, headingStatus: 'pending', canAskAgain: true, error: null };
 
-export function useDeviceLocation({ enabled = true, heading: needsHeading = false, distanceIntervalMeters = LOCATION.distanceIntervalMeters }: { enabled?: boolean; heading?: boolean; distanceIntervalMeters?: number } = {}) {
+export function useDeviceLocation({ enabled = true, requestOnStart = true, heading: needsHeading = false, distanceIntervalMeters = LOCATION.distanceIntervalMeters }: { enabled?: boolean; requestOnStart?: boolean; heading?: boolean; distanceIntervalMeters?: number } = {}) {
   const [state, setState] = useState<DeviceState>(initial);
   const [attempt, setAttempt] = useState(0);
   const promptedAttempt = useRef<number | null>(null);
@@ -49,7 +49,7 @@ export function useDeviceLocation({ enabled = true, heading: needsHeading = fals
       }, LOCATION.timeoutMs);
       // A permission activity can replace this foreground owner before it resolves.
       // Only the initial attempt or an explicit Retry may prompt; resume just checks.
-      const prompt = promptedAttempt.current === attempt ? 'never' : attempt === 0 ? 'initial' : 'retry';
+      const prompt = promptedAttempt.current === attempt ? 'never' : attempt === 0 ? requestOnStart ? 'initial' : 'never' : 'retry';
       promptedAttempt.current = attempt;
       const permission = await requestLocationPermission({ prompt });
       if (disposed) return;
@@ -91,7 +91,7 @@ export function useDeviceLocation({ enabled = true, heading: needsHeading = fals
     }
     void start().catch((error: unknown) => { clearTimeout(startupTimer); patch({ status: 'error', ...locationFailure(error) }); });
     return stop;
-  }, [enabled, active, focused, attempt, needsHeading, distanceIntervalMeters]);
+  }, [enabled, active, focused, attempt, needsHeading, distanceIntervalMeters, requestOnStart]);
   const retry = useCallback(() => setAttempt((value) => value + 1), []);
   return { ...state, retry };
 }

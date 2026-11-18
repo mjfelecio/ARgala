@@ -17,7 +17,7 @@ import MapScreen from '@/features/map/map-screen';
 import { placeSelectionOptions, setPlaceSelection } from '@/features/places/selection';
 import { routeSheetGeometry } from '@/features/map/sheet-geometry';
 
-const controls = vi.hoisted(() => ({ token: undefined as unknown, home: false, mapParams: {} as { placeId?: string }, active: true, focused: true, mapsConfigured: true, language: 'en' as 'en' | 'ko' | 'ja', fit: vi.fn(), animate: vi.fn(), retry: vi.fn(), canBack: true,
+const controls = vi.hoisted(() => ({ token: undefined as unknown, home: false, mapParams: {} as { placeId?: string; featuredDestinationId?: string }, active: true, focused: true, mapsConfigured: true, language: 'en' as 'en' | 'ko' | 'ja', fit: vi.fn(), animate: vi.fn(), retry: vi.fn(), canBack: true,
   location: { watcherSample: null as { position: { latitude: number; longitude: number }; accuracy: number; timestamp: number } | null, status: 'ready', watcherStatus: 'ready', errorCode: null as string | null, position: { latitude: 38.5, longitude: -120.2 } as { latitude: number; longitude: number } | null, positionTimestamp: Date.now(), watcherTimestamp: Date.now(), accuracy: 8, canAskAgain: true } }));
 vi.mock('expo-router', () => ({ useLocalSearchParams: () => controls.home ? controls.mapParams : { token: controls.token }, useIsFocused: () => controls.focused,
   router: { back: vi.fn(), canGoBack: () => controls.canBack, push: vi.fn(), navigate: vi.fn(), dismissTo: vi.fn(), setParams: vi.fn() } }));
@@ -481,6 +481,61 @@ it('uses route-owned continuous samples for featured arrival without another rou
  controls.focused = false; await update();
  expect(output()).not.toContain(translations.t('arrival.eligible'));
  expect(routeService.walking).not.toHaveBeenCalled();
+});
+
+it.each(['Explore', 'Directions'] as const)('shows one approved unlock starting in %s and retains explicit inline entry in both screens', async firstScreen => {
+  const { PortalHost } = await import('heroui-native/portal');
+  const { Dialog } = await import('heroui-native/dialog');
+  const { AdmissionContext } = await import('@/features/destination-ar/admission-context');
+  const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+  const content = await import('@/features/destination-content/context');
+  const { getDestination } = await import('@/features/destinations/catalog');
+  const { destinationToRoutePlace } = await import('@/features/destinations/routing');
+  const { syntheticApprovedDestination, syntheticArrivalPoint, syntheticFeaturedGeofence } = await import('@/features/destinations/ar-geofence-fixtures');
+  const featured = syntheticApprovedDestination();
+  const lookup = (id: unknown) => id === featured.id ? featured : getDestination(id);
+  const store = new ArAdmissionStore('owner', lookup, syntheticFeaturedGeofence);
+  vi.spyOn(content, 'useDestinationLookup').mockReturnValue(lookup);
+  controls.home = firstScreen === 'Explore';
+  controls.mapParams = { featuredDestinationId: 'D01' };
+  const target = destinationToRoutePlace(featured)!;
+  controls.token = createRoutePreviewIntent(client, target, { origin, destination: target.coordinates, route }, 'map', 'en', 'D01');
+  const view = () => <AdmissionContext.Provider value={store}><I18nextProvider i18n={translations}>
+    <QueryClientProvider client={client}>{withHeroUI(<>{controls.home ? <MapScreen /> : <RoutePreviewScreen />}<PortalHost /></>)}</QueryClientProvider>
+  </I18nextProvider></AdmissionContext.Provider>;
+  const sample = async () => {
+    const timestamp = Date.now() + 3000;
+    vi.mocked(Date.now).mockReturnValue(timestamp);
+    controls.location.watcherSample = { position: syntheticArrivalPoint, accuracy: 5, timestamp };
+    await act(async () => tree!.update(view()));
+  };
+  await act(async () => { tree = create(view()); });
+  await sample();
+  expect(tree!.root.findAllByType(Dialog.Content)).toHaveLength(0);
+  await sample();
+  expect(tree!.root.findAllByType(Dialog.Content)).toHaveLength(1);
+  expect(router.push).not.toHaveBeenCalled();
+  await press('arrival.dismiss');
+  expect(tree!.root.findAllByType(Dialog.Content)).toHaveLength(0);
+  expect(button('arrival.unlockStart')).toBeDefined();
+
+  controls.home = !controls.home;
+  await act(async () => tree!.update(view()));
+  await sample();
+  await sample();
+  expect(tree!.root.findAllByType(Dialog.Content)).toHaveLength(0);
+  expect(button('arrival.unlockStart')).toBeDefined();
+  const staleStart = button('arrival.unlockStart')!.props.onPress;
+  vi.mocked(Date.now).mockReturnValue(Date.now() + 11000);
+  await act(async () => staleStart());
+  expect(router.push).not.toHaveBeenCalled();
+  await sample();
+  await sample();
+  await press('arrival.unlockStart');
+  const navigation = vi.mocked(router.push).mock.calls.at(-1)![0] as { pathname: string; params: { destinationId: 'D01'; entryToken: string } };
+  expect(navigation.pathname).toBe('/destination-ar/[destinationId]');
+  expect(store.take(navigation.params.entryToken, navigation.params.destinationId)?.identity.provenance).toBe('verified');
+  expect(routeService.walking).not.toHaveBeenCalled();
 });
 
 it('opens Google Maps with the displayed mode and captured destination without a new provider request', async () => {

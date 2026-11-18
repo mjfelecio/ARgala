@@ -29,6 +29,11 @@ it('requires independent activation and radius approvals and never substitutes a
   }
   expect(destinationSchema.safeParse({ ...base, ar: { ...ar, providerAssociation: { providerId: 'test-id' } } }).success).toBe(false);
 });
+it('does not authorize a featured destination through legacy circle metadata', () => {
+  const activation = { point: { latitude: 0, longitude: 0 }, pointApprovalReference: 'test', radiusMeters: 50, radiusApprovalReference: 'test' };
+  const featured = destinationSchema.parse({ ...base, id: 'D01', ar: { ...ar, activation } });
+  expect(activationPolicy(featured)).toBeNull();
+});
 it('validates versions, stable tile identity, unique roles and every translated field approval', () => {
   expect(destinationSchema.safeParse({ ...base, ar }).success).toBe(true);
   for (const invalid of [

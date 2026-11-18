@@ -373,6 +373,8 @@
     "expired": "이 AR 세션이 만료되었습니다. 탐색으로 돌아가 도착을 확인한 후 새 세션을 시작하세요."
   },
   "arrival": {
+    "unlockTitle": "AR이 열렸어요",
+    "unlockStart": "AR 시작",
     "unavailable": "이 장소의 AR은 아직 이용할 수 없어요. 이용 가능해지면 실제로 도착하고 현재 위치가 확인된 후 AR이 열려요.",
     "uncertain": "위치를 켜고 이 여행지를 방문하세요. 실제로 도착한 것이 확인되면 AR이 열려요.",
     "distant": "실제로 이 여행지에 도착하고 현재 위치가 확인되면 AR이 열려요.",
@@ -491,6 +493,14 @@
   },
   "reminders": {
     "title": "가까운 목적지 알림",
+    "sectionExplanation": "선택한 목적지에 가까워지면 알림을 한 번 받을 수 있어요.",
+    "browse": "추천 목적지 둘러보기",
+    "disableFor": "{{destination}} 알림 끄기",
+    "statusActive": "알림 켜짐",
+    "statusUsed": "일회성 알림 사용 완료",
+    "statusNeedsPermission": "권한 허용 필요",
+    "statusUnavailable": "알림을 사용할 수 없음",
+    "statusIncomplete": "설정 미완료",
     "enable": "가까워지면 알려 주세요",
     "disable": "알림 끄기",
     "explanation": "목적지에서 약 150m 이내로 가까워지면 한 번 알려 드려요. 휴대폰에 따라 알림이 늦거나 오지 않을 수 있어요. 이 알림만으로 방문이 확인되거나 여권 도장이 추가되지는 않아요.",

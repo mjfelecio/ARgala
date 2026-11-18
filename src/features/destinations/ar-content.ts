@@ -1,9 +1,13 @@
+import { getBundledArGeofence, type ArGeofence } from './ar-geofences';
 import { arStoryReadiness } from './ar-content-readiness';
 import type { Language } from '../../../supabase/functions/_shared/contracts';
 import { destinationSchema, localizedContent, type Destination } from './catalog';
 
 /** Approval-aware metadata only. Never substitute a display center or route entrance. */
-export function activationPolicy(destination: Destination | null) {
+export type ActivationPolicy = NonNullable<NonNullable<Destination['ar']>['activation']> | ArGeofence;
+export function activationPolicy(destination: Destination | null, resolveGeofence = getBundledArGeofence): ActivationPolicy | null {
+  if (!destination) return null;
+  if (destination.id !== 'pilot-aclc') return resolveGeofence(destination.id);
   const parsed = destinationSchema.safeParse(destination);
   return parsed.success ? parsed.data.ar?.activation ?? null : null;
 }

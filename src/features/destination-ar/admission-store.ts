@@ -1,7 +1,8 @@
 import { ARRIVAL } from '@/config/limits';
 import { activationPolicy, approvedArContent } from '@/features/destinations/ar-content';
+import { getBundledArGeofence } from '@/features/destinations/ar-geofences';
 import { destinationSchema, getDestination, type Destination, type FeaturedDestinationId } from '@/features/destinations/catalog';
-import { DestinationProximity, type ArrivalInput, type ArrivalSnapshot } from '@/features/destinations/proximity';
+import { DestinationProximity, type ArrivalEpisode, type ArrivalInput, type ArrivalSnapshot } from '@/features/destinations/proximity';
 import type { Language } from '../../../supabase/functions/_shared/contracts';
 import { ArEntryIntents } from './entry-intent';
 import { isViroSpikeEnabled } from './dev-guard';
@@ -15,6 +16,7 @@ export class ArAdmissionStore {
   private selected: FeaturedDestinationId | null = null;
   private model: DestinationProximity | null = null;
   private input: ArrivalInput = inactive;
+  private episodes = new Map<FeaturedDestinationId, ArrivalEpisode>();
   private lease = 0;
   private retainEpoch = 0;
   private closed = false;
@@ -25,7 +27,8 @@ export class ArAdmissionStore {
   private intents: ArEntryIntents;
   private simulatedIntents: ArEntryIntents;
   private simulationActive = false;
-  constructor(readonly principalId: string, private resolveDestination: (id: FeaturedDestinationId) => Destination | null = getDestination) {
+  constructor(readonly principalId: string, private resolveDestination: (id: FeaturedDestinationId) => Destination | null = getDestination,
+    private readonly resolveGeofence = getBundledArGeofence) {
     this.intents = new ArEntryIntents((id, principal) => !this.closed && principal === this.principalId && id === this.selected && this.tick()?.eligible === true);
     this.simulatedIntents = new ArEntryIntents((id, principal) => !this.closed && this.simulationActive && isViroSpikeEnabled() && principal === this.principalId && id === this.selected);
   }
@@ -48,7 +51,12 @@ export class ArAdmissionStore {
   select(id: FeaturedDestinationId | null) {
     if (this.closed || this.selected === id) return;
     this.endEntry(); this.lease++; this.input = inactive; this.selected = id;
-    this.model = id ? new DestinationProximity(id, activationPolicy(this.resolveDestination(id))) : null;
+    this.model = null;
+    if (id) {
+      const episode = this.episodes.get(id) ?? { active: false, unlockShown: false };
+      this.episodes.set(id, episode);
+      this.model = new DestinationProximity(id, activationPolicy(this.resolveDestination(id), this.resolveGeofence), episode);
+    }
     this.emit();
   }
   acquire(id: FeaturedDestinationId): number | null {
@@ -66,6 +74,11 @@ export class ArAdmissionStore {
   tick() {
     if (this.closed) return null;
     this.model?.update(this.input, Date.now()); this.emit(); return this.arrival;
+  }
+  claimUnlock(lease: number, id: FeaturedDestinationId, language: Language): boolean {
+    if (this.closed || lease !== this.lease || id !== this.selected || id === 'pilot-aclc' || this.tick()?.eligible !== true ||
+      !approvedArContent(this.resolveDestination(id), language).length) return false;
+    return this.model?.claimUnlock() ?? false;
   }
   begin(lease: number, id: FeaturedDestinationId, kind: 'approved' | 'draft', language: Language): string | null {
     return this.issue(lease, id, kind, language, false);
@@ -107,6 +120,7 @@ export class ArAdmissionStore {
     this.intents.clear(); this.simulatedIntents.clear(); this.simulationActive = false; this.transfers.clear(); this.issued = null;
   }
   close() {
-    this.endEntry(); this.closed = true; this.lease++; this.input = inactive; this.selected = null; this.model = null; this.emit();
+    this.endEntry(); this.closed = true; this.lease++; this.input = inactive; this.selected = null; this.model = null;
+    this.episodes.clear(); this.emit();
   }
 }

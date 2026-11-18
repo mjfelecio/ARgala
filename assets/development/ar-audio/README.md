@@ -56,3 +56,18 @@ recovery. Existing independent System Voice/Sound Effects preferences apply.
 
 Audible cues use device media volume. The application does not change system
 volume, DND, audio permissions or install another native player.
+
+## Release asset handoff
+
+The release inventory lives in
+[`approvedSystemAudio`](../../../src/features/destination-ar/system-audio.ts).
+Supply the exact reviewed EN, JA, and KO startup recordings and each approved
+effect as bundled assets, with a rights reference and release approval attached
+to each clip. The mode-switch effect has its own `modeSwitched` slot. Leave a
+slot empty until its recording and references are ready.
+
+Review the startup wording, pronunciation, and recording for each language.
+During device acceptance, check that speech starts once for an eligible first
+entry, takes priority while playing, and stops on interruption. Check the
+independent System Voice and Sound Effects settings, a mode switch, and a
+missing locale with device media volume enabled.

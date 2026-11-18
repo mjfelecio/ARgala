@@ -14,6 +14,7 @@ import { placesService } from '@/features/places/service';
 import { destinationName, listDestinations } from './catalog';
 import DestinationsScreen from './destinations-screen';
 import DestinationScreen from './destination-screen';
+import { featuredSelectionOptions } from './map-selection';
 import { DestinationContentContext } from '@/features/destination-content/context';
 
 const controls = vi.hoisted(() => ({ params: { destinationId: 'D01' } as Record<string, unknown>, language: 'en' as 'en' | 'ko' | 'ja', focused: true, active: true, back: true }));
@@ -55,13 +56,14 @@ beforeEach(async () => {
   const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; client.clear(); notifyManager.setScheduler(cb => setTimeout(cb, 0)); vi.restoreAllMocks(); });
-it('lists all nine presentation destinations with working stable-ID map navigation and no sensors or provider work', async () => {
+it('lists all nine presentation destinations with working stable-ID details navigation and no sensors or provider work', async () => {
   await mount(<DestinationsScreen />);
   for (const destination of listDestinations()) {
     expect(output()).toContain(destination.provisionalName);
     const card = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === destination.provisionalName)!;
     await act(async () => card.props.onPress());
-    expect(router.navigate).toHaveBeenLastCalledWith({ pathname: '/', params: { featuredDestinationId: destination.id } });
+    expect(router.navigate).toHaveBeenLastCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: destination.id } });
+    expect(client.getQueryData(featuredSelectionOptions(destination.id).queryKey)).toBeUndefined();
   }
   expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
 });
@@ -120,12 +122,12 @@ it('does not create directions intent from an inactive catalog owner', async () 
  controls.active = false; await mount(); await act(async () => button('placeDetails.directions')!.props.onPress()); expect(router.push).not.toHaveBeenCalled();
 });
 
-it('opens the ACLC pilot card on the existing map without acquiring catalog GPS', async () => {
+it('opens the ACLC pilot fallback card in details without acquiring catalog GPS', async () => {
   await mount(<DestinationsScreen />);
   const card = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === 'ACLC College of Ormoc');
   expect(card).toBeDefined();
   await act(async () => card!.props.onPress());
-  expect(router.navigate).toHaveBeenCalledWith({ pathname: '/', params: { featuredDestinationId: 'pilot-aclc' } });
+  expect(router.navigate).toHaveBeenCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'pilot-aclc' } });
   expect(placesService.details).not.toHaveBeenCalled();
 });
 it.each(['en', 'ja', 'ko'])('puts %s destination choices before optional content maintenance', async locale => {
@@ -205,23 +207,50 @@ it('makes Maps the full-width primary action while preserving secondary Directio
  expect(nativeUi.openURL).toHaveBeenCalledWith(expect.stringContaining('https://www.google.com/maps/'));
  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
-it('opens listing photography separately from the sibling title map action, with no nested buttons', async () => {
+it('makes the featured cover and title one details action and leaves photo viewing on the details page', async () => {
  await mount(<DestinationsScreen />);
  const destination = listDestinations()[0];
- const name = destinationName(destination, 'en');
- const photo = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('destinationCleanup.viewPhoto', { name }));
- expect(photo).toBeDefined();
- expect(photo!.findAllByType('button')).toHaveLength(1);
- await act(async () => photo!.props.onPress());
- expect(router.navigate).not.toHaveBeenCalled();
+ const card = tree!.root.findByProps({ testID: `featured-photo-card:${destination.id}` });
+ const controls = card.findAllByType('button');
+ expect(controls).toHaveLength(1);
+ expect(controls[0].props.accessibilityLabel).toBe(destinationName(destination, 'en'));
+ await act(async () => controls[0].props.onPress());
+ expect(router.navigate).toHaveBeenCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D01' } });
+ expect(tree!.root.findAllByType('modal' as React.ElementType)).toHaveLength(0);
+
+ await act(async () => tree!.update(render()));
+ const firstPhoto = destination.media![0];
+ const photo = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === firstPhoto.alt.en.value)!;
+ await act(async () => photo.props.onPress());
  const modal = tree!.root.findByType('modal' as React.ElementType);
- expect(modal.findByProps({ testID: `viewer-photo:${destination.media![0].id}` }).props.resizeMode).toBe('contain');
- await act(async () => modal.props.onRequestClose());
- const title = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === name)!;
- expect(title.findAllByType('button')).toHaveLength(1);
- await act(async () => title.props.onPress());
- expect(router.navigate).toHaveBeenCalledWith({ pathname: '/', params: { featuredDestinationId: 'D01' } });
+ expect(modal.findByProps({ testID: `viewer-photo:${firstPhoto.id}` }).props.resizeMode).toBe('contain');
  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it.each(['en', 'ja', 'ko'] as const)('hands the selected destination to Explore through a localized %s action', async language => {
+ controls.language = language;
+ await translations.changeLanguage(language);
+ await mount();
+ const key = 'destinationCleanup.viewOnExplore';
+ expect(translations.t(key)).not.toBe(key);
+ expect(router.dismissTo).not.toHaveBeenCalled();
+ const map = button(key)!;
+ await act(async () => {
+   map.props.onPress();
+   map.props.onPress();
+ });
+ expect(client.getQueryData(featuredSelectionOptions('D01').queryKey)).toEqual({ destinationId: 'D01' });
+ expect(router.dismissTo).toHaveBeenCalledExactlyOnceWith({ pathname: '/', params: { featuredDestinationId: 'D01' } });
+ expect(router.navigate).not.toHaveBeenCalled();
+ expect(router.push).not.toHaveBeenCalled();
+ expect(nativeUi.openURL).not.toHaveBeenCalled();
+ expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('does not offer a map handoff for a destination without a curated center', async () => {
+ const catalog = await import('./catalog');
+ vi.spyOn(catalog, 'getDestination').mockReturnValue(catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Unmapped fixture' }));
+ await mount();
+ expect(button('destinationCleanup.viewOnExplore')).toBeUndefined();
+ expect(router.dismissTo).not.toHaveBeenCalled();
 });
 it('gives every guide activity, preparation and safety item a noninteractive prefix while retaining paragraphs', async () => {
  await mount();

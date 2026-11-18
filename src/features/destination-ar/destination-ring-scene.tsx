@@ -24,6 +24,9 @@ import type { ExhibitStageProfile } from './exhibit-stage';
 import type { ExhibitArrival, ExhibitGalleryEntry, DanaoScenery } from './danao-stage';
 import type { ExhibitGalleryPanel } from './exhibit-gallery-panel';
 import { exhibitGalleryEntries, exhibitSceneEntries, isExhibitGalleryEntry } from './photo-islands';
+import { ArViewLayer } from './ar-view-layer';
+import { NearbyViroLayer, type NearbySceneContent } from './nearby-viro-layer';
+import type { ArViewPhase, ArViewState } from './ar-view-mode';
 export type RingControls = { recenter(): void; capture?: NativeCapture; readerAvailable?: boolean; changeReadingSize?: ReadingCommand };
 export type RingMetrics = { received: number; applied: number };
 export type RingScenePresentation = Readonly<{
@@ -37,14 +40,21 @@ export type RingScenePresentation = Readonly<{
   isolateReader: boolean;
   stage?: Readonly<{ profile: ExhibitStageProfile; Entry: typeof ExhibitGalleryEntry; Panel: typeof ExhibitGalleryPanel; Scenery: typeof DanaoScenery; Arrival: typeof ExhibitArrival }>;
 }>;
-type Props = { presentation?: RingScenePresentation; onReady(): void; onTracking(state: TrackingState): void; onControls?(controls: RingControls | null): void; onRecenterResult?(success: boolean): void; onMetrics?(metrics: RingMetrics): void; content: readonly RingContent[]; reading?: ReturnType<typeof useReadingSize>; initialProgress?: LogicalArProgress; onProgress?(progress: LogicalArProgress): void; visibleTileCount?: number; interactive?: boolean; effectsEnabled?: boolean; deployment?: IntroVariant; firstVisit?: boolean; audioPreferences?: AudioPreferences; audioManifest?: AudioManifest };
+type Props = { presentation?: RingScenePresentation; onReady(): void; onTracking(state: TrackingState): void; onControls?(controls: RingControls | null): void; onRecenterResult?(success: boolean): void; onMetrics?(metrics: RingMetrics): void; content: readonly RingContent[]; reading?: ReturnType<typeof useReadingSize>; initialProgress?: LogicalArProgress; onProgress?(progress: LogicalArProgress): void; visibleTileCount?: number; interactive?: boolean; effectsEnabled?: boolean; deployment?: IntroVariant; firstVisit?: boolean; audioPreferences?: AudioPreferences; audioManifest?: AudioManifest; claimStartupVoice?: () => boolean; viewMode?: ArViewState; nearbyContent?: NearbySceneContent; onViewComplete?(id: number, phase: ArViewPhase): void };
 
 /** A single native coordinate frame. No destination/GPS admission is granted. */
 export function DestinationRingScene(props: Props) {
   return props.reading ? <RingScene {...props} reading={props.reading} externalReadingControls /> : <OwnedReadingRingScene {...props} />;
 }
 function OwnedReadingRingScene(props: Props) { const reading = useReadingSize(); return <RingScene {...props} reading={reading} />; }
-function RingScene({ presentation: requestedPresentation, onReady, onTracking, onControls, onRecenterResult, onMetrics, content, reading, initialProgress, onProgress, visibleTileCount = Infinity, interactive = true, effectsEnabled = true, deployment, firstVisit = false, audioPreferences, audioManifest, externalReadingControls = false }: Props & { reading: ReturnType<typeof useReadingSize>; externalReadingControls?: boolean }) {
+function RingScene({ presentation: requestedPresentation, onReady, onTracking, onControls, onRecenterResult, onMetrics, content, reading, viewMode, nearbyContent, onViewComplete, claimStartupVoice, initialProgress, onProgress, visibleTileCount = Infinity, interactive: sceneInteractive = true, effectsEnabled = true, deployment, firstVisit = false, audioPreferences, audioManifest, externalReadingControls = false }: Props & { reading: ReturnType<typeof useReadingSize>; externalReadingControls?: boolean }) {
+  const interactive = sceneInteractive && (!viewMode || viewMode.view === 'details' && viewMode.phase === 'ready');
+  const canUseNearby = sceneInteractive && viewMode?.view === 'nearby' && viewMode.phase === 'ready';
+  const nearbyPose = useRef<((pose: PoseSample) => void) | null>(null);
+  const registerNearbyPose = useCallback((listener: (pose: PoseSample) => void) => {
+    nearbyPose.current = listener;
+    return () => { if (nearbyPose.current === listener) nearbyPose.current = null; };
+  }, []);
   const { t, i18n } = useTranslation(); const style = useArNativeStyle();
   // Each mount owns its controller/tokens/timers. A live frame never switches
   // presentation or shares mutable transition state with another mode.
@@ -59,9 +69,15 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
   const [frame, setFrame] = useState<{ slots: RingSlot[]; position: Vector3 } | null>(null);
   const [tracking, setTracking] = useState<TrackingState>('unavailable');
   const language = i18n.resolvedLanguage?.startsWith('ja') ? 'ja' : i18n.resolvedLanguage?.startsWith('ko') ? 'ko' : 'en';
-  const audio = useArSystemAudio(language, audioPreferences, tracking === 'normal' && (interactive || !!deployment), audioManifest);
+  const audio = useArSystemAudio(language, audioPreferences, tracking === 'normal' && (sceneInteractive || !!deployment), audioManifest, claimStartupVoice);
   const audioEvent = audio.event;
   const audioInteractions = useRef(0);
+  const previousModeCue = useRef(viewMode?.cue ?? null);
+  useEffect(() => {
+    const cue = viewMode?.cue ?? null;
+    if (cue !== null && cue !== previousModeCue.current) audioEvent('modeSwitched', String(cue));
+    previousModeCue.current = cue;
+  }, [viewMode?.cue, audioEvent]);
   const pageSound = useCallback(() => audioEvent('pageChanged', String(++audioInteractions.current)), [audioEvent]);
   const previousDeployment = useRef(false);
   useEffect(() => {
@@ -76,7 +92,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
   const [cursors, setCursors] = useState<Record<string, ReadingCursor>>(() => initialProgress?.cursors ?? {});
   const [openedIds, setOpenedIds] = useState<readonly string[]>(() => (initialProgress?.openedIds ?? []).filter(id => snapshot.some(item => item.id === id)));
   const [galleryCursor, setGalleryCursor] = useState<ReadingCursor | undefined>(() => stage ? restored?.exhibitGallery?.cursor ?? {
-    page: 0, offset: 0, locale: i18n.resolvedLanguage ?? i18n.language, size: reading.size, mediaId: stage.profile.media[0].id, mediaPage: 0,
+    page: 0, offset: 0, locale: i18n.resolvedLanguage ?? i18n.language, size: reading.size, mediaId: stage.profile.media[0]?.id, mediaPage: 0,
   } : undefined);
   const logicalProgress = useCallback((focus: FocusSelection | null, cursors: Record<string, ReadingCursor>, openedIds: readonly string[], cursor?: ReadingCursor): LogicalArProgress => ({
     selectedId: focus && focus.phase !== 'closing' && (!stage || !isExhibitGalleryEntry(stage.profile, focus.id)) ? focus.id : null, cursors, openedIds,
@@ -151,6 +167,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
     trackingRef.current = next; controller.track(next); setTracking(next); onTracking(next);
   }
   function pose(sample: PoseSample) {
+    nearbyPose.current?.(sample);
     counts.current.received++;
     const update = controller.pose(sample, performance.now());
     if (update.position) {
@@ -209,11 +226,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
     flushCompletion();
   }, [controller, flushCompletion]);
   const selectedContent = snapshot.find(item => item.id === selection?.id);
-  return <ViroARScene anchorDetectionTypes="None" onTrackingUpdated={track} onCameraTransformUpdate={pose}>
-    {/* The pinned bridge anchors direct AR-scene children. Keep moving/animated
-        nodes beneath a zero-origin frame so their transforms share camera space. */}
-    {audio.cue && <ViroSound key={audio.cue.playbackId} source={audio.cue.source} volume={audio.cue.channel === 'voice' ? 0.45 : 0.35} loop={false} paused={false} onFinish={audio.finish} onError={audio.finish} />}
-    <ViroNode testID="ring-native-frame" position={[0, 0, 0]}>
+  const detailsContent = <>
     {frame && <ViroNode ref={ring} testID="ring-root" position={frame.position} opacity={(selection ? 0.4 : 1) * (tracking === 'normal' ? 1 : 0.35)}>
       {!stage && deployment === 'full' && controller.basis && <CinematicEmblem basis={controller.basis} animationPrefix={animationPrefix} />}
       {stage && Scenery && Arrival && !selection && controller.basis && quality === 'standard' && effectsEnabled && tracking === 'normal' && (interactive || !!deployment) && <Arrival deployment={deployment} order={0}><Scenery basis={controller.basis} /></Arrival>}
@@ -231,6 +244,17 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
       <GalleryPanel profile={stage.profile} selection={selection} previous={galleryCursor} reading={reading} enabled={interactive && tracking === 'normal'} style={style} animationPrefix={animationPrefix}
         onCursor={setGalleryCursor} onClose={close} onComplete={complete} onPageChange={pageSound} externalReadingControls={externalReadingControls} onReadingControls={acceptReadingCommand} decorations={quality === 'standard'} canInteract={canRead} />
     </ViroNode>}
+  </>;
+  return <ViroARScene anchorDetectionTypes="None" onTrackingUpdated={track} onCameraTransformUpdate={pose}>
+    {/* Moving or animated nodes share a zero-origin native frame. */}
+    {audio.cue && <ViroSound key={audio.cue.playbackId} source={audio.cue.source} volume={audio.cue.channel === 'voice' ? 0.45 : 0.35} loop={false} paused={false} onFinish={audio.finish} onError={audio.finish} />}
+    <ViroNode testID="ring-native-frame" position={[0, 0, 0]}>
+      {viewMode && onViewComplete ? <>
+        <ArViewLayer view="details" state={viewMode} interactive={interactive} onComplete={onViewComplete}>{detailsContent}</ArViewLayer>
+        {viewMode.view === 'nearby' && <ArViewLayer view="nearby" state={viewMode} interactive={canUseNearby} onComplete={onViewComplete}>
+          {nearbyContent && <NearbyViroLayer content={nearbyContent} tracking={tracking === 'normal'} interactive={canUseNearby} animateArrival={viewMode.phase === 'ready'} registerPose={registerNearbyPose} style={style} />}
+        </ArViewLayer>}
+      </> : detailsContent}
     </ViroNode>
   </ViroARScene>;
 }
@@ -242,7 +266,13 @@ function RingEntry() {
 const initialScene = { scene: RingEntry };
 export function DestinationRingSceneHost(props: Props) {
   const navigator = useRef<ViroARSceneNavigator | null>(null);
-  const capture = useCallback<NativeCapture>(fileName => navigator.current
+  const canCapture = !props.viewMode || props.viewMode.view === 'details' && props.viewMode.phase === 'ready' && props.interactive !== false;
+  const captureAllowed = useRef(false);
+  useLayoutEffect(() => {
+    captureAllowed.current = canCapture;
+    return () => { captureAllowed.current = false; };
+  }, [canCapture]);
+  const capture = useCallback<NativeCapture>(fileName => captureAllowed.current && navigator.current
     ? navigator.current.arSceneNavigator.takeScreenshot(fileName, false)
     : Promise.resolve({ success: false, url: null, errorCode: 6 }), []);
   const onControls = props.onControls;

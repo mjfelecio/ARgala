@@ -7,10 +7,12 @@ import type { Destination } from './catalog';
 export function useDestinationProximity(destination: Destination | null, input: ArrivalInput) {
   const policy = activationPolicy(destination);
   const id = destination?.id;
+  const geofence = policy && 'geometry' in policy ? policy : null;
+  const circle = policy && 'point' in policy ? policy : null;
   const model = useMemo(() => id ? new DestinationProximity(id, policy) : null,
     // Catalog policy scalars define ownership; equivalent parsed objects are not a new selection.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [id, policy?.point.latitude, policy?.point.longitude, policy?.radiusMeters]);
+    [id, geofence, circle?.point.latitude, circle?.point.longitude, circle?.radiusMeters]);
   const latest = useRef(input);
   const alive = useRef(false);
   const currentModel = useRef(model);

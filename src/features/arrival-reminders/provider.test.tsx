@@ -5,26 +5,27 @@ import { beforeEach,afterEach,expect,it,vi } from 'vitest';
 import { I18nextProvider,initReactI18next } from 'react-i18next';
 import { createInstance } from 'i18next';
 import { localizationOptions } from '@/i18n/options';
-import { getDestination,type FeaturedDestinationId } from '@/features/destinations/catalog';
+import { destinationName,getDestination,type FeaturedDestinationId } from '@/features/destinations/catalog';
 import { ArrivalReminderProvider,useArrivalReminders } from './provider';
 import { DestinationReminderAction,ReminderSettings } from './components';
-const state=vi.hoisted(()=>({values:new Map<string,string>(),session:null as {user:{id:string}}|null,guest:true,loading:false,active:true,focused:true,navigationKey:undefined as string|undefined,guardReady:false,request:vi.fn(async()=>true),register:vi.fn(async()=>{}),check:vi.fn(async()=>true),listener:null as null|((r:unknown)=>void),last:null as unknown,push:vi.fn(),set:vi.fn(),get:vi.fn()}));
+const state=vi.hoisted(()=>({values:new Map<string,string>(),session:null as {user:{id:string}}|null,guest:true,loading:false,active:true,focused:true,navigationKey:undefined as string|undefined,guardReady:false,request:vi.fn(async()=>true),register:vi.fn(async()=>{}),check:vi.fn(async()=>true),listener:null as null|((r:unknown)=>void),last:null as unknown,push:vi.fn(),navigate:vi.fn(),set:vi.fn(),get:vi.fn()}));
 vi.mock('@react-native-async-storage/async-storage',()=>({default:{getItem:state.get,setItem:state.set}}));
 vi.mock('@/features/auth/provider',()=>({useAuth:()=>({session:state.session,loading:state.loading})}));
 vi.mock('@/features/auth/guest-context',()=>({useGuestAccess:()=>({enabled:state.guest,loading:false})}));
 vi.mock('@/lib/use-app-active',()=>({useAppActive:()=>state.active}));
-vi.mock('expo-router',()=>({useIsFocused:()=>state.focused,useRootNavigationState:()=>({key:state.navigationKey}),router:{push:state.push}}));
+vi.mock('expo-router',()=>({useIsFocused:()=>state.focused,useRootNavigationState:()=>({key:state.navigationKey}),router:{push:state.push,navigate:state.navigate}}));
 vi.mock('./native',()=>({reminderNative:{available:()=>true,check:state.check,request:state.request,register:state.register,unregister:vi.fn(async()=>{}),cancel:vi.fn(async()=>{})},optionalNotifications:()=>({addNotificationResponseReceivedListener:(listener:(r:unknown)=>void)=>{state.listener=listener;return {remove:()=>{}};},getLastNotificationResponse:()=>state.last})}));
 const i18n=createInstance();await i18n.use(initReactI18next).init({...localizationOptions,lng:'en',react:{useSuspense:false}});
 let onOpenDestination:((id:FeaturedDestinationId)=>void)|undefined;
+let includeDestinationAction=true;
 let committedRenders=0;let afterCommit:(()=>void)|undefined;
 let tree:ReactTestRenderer;let api:NonNullable<ReturnType<typeof useArrivalReminders>>;let mounts=0;
-function Probe(){const value=useArrivalReminders()!;React.useEffect(()=>{api=value;});React.useEffect(()=>{mounts++;},[]);return <><DestinationReminderAction destination={getDestination('pilot-aclc')!}/><ReminderSettings/></>;}
+function Probe(){const value=useArrivalReminders()!;React.useEffect(()=>{api=value;});React.useEffect(()=>{mounts++;},[]);return <>{includeDestinationAction&&<DestinationReminderAction destination={getDestination('pilot-aclc')!}/>}<ReminderSettings/></>;}
 const view=()=>withHeroUI(<React.Profiler id="reminder-provider" onRender={()=>{committedRenders++;afterCommit?.();}}><I18nextProvider i18n={i18n}><ArrivalReminderProvider navigationReady={state.guardReady} onOpenDestination={onOpenDestination}><Probe/></ArrivalReminderProvider></I18nextProvider></React.Profiler>);
 async function mount(){await act(async()=>{tree=create(view());});}
 async function update(){await act(async()=>tree.update(view()));}
 async function press(key:string){const button=tree.root.findAll(x=>x.type==='button'&&x.props.accessibilityLabel===i18n.t(key))[0];expect(button).toBeDefined();await act(async()=>{await button.props.onPress();});}
-beforeEach(async()=>{Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true,__DEV__:false});state.values.clear();committedRenders=0;afterCommit=undefined;onOpenDestination=undefined;state.session=null;state.guest=true;state.loading=false;state.active=true;state.focused=true;state.navigationKey='root';state.guardReady=true;state.last=null;state.listener=null;state.set.mockReset().mockImplementation(async(key:string,value:string)=>{state.values.set(key,value);});state.get.mockReset().mockImplementation(async(key:string)=>state.values.get(key)??null);state.check.mockReset().mockResolvedValue(true);state.request.mockReset().mockResolvedValue(true);state.register.mockReset().mockResolvedValue(undefined);state.push.mockReset();mounts=0;await i18n.changeLanguage('en');});
+beforeEach(async()=>{Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true,__DEV__:false});state.values.clear();committedRenders=0;afterCommit=undefined;onOpenDestination=undefined;state.session=null;state.guest=true;state.loading=false;state.active=true;state.focused=true;state.navigationKey='root';state.guardReady=true;state.last=null;state.listener=null;state.set.mockReset().mockImplementation(async(key:string,value:string)=>{state.values.set(key,value);});state.get.mockReset().mockImplementation(async(key:string)=>state.values.get(key)??null);state.check.mockReset().mockResolvedValue(true);state.request.mockReset().mockResolvedValue(true);state.register.mockReset().mockResolvedValue(undefined);state.push.mockReset();state.navigate.mockReset();includeDestinationAction=true;mounts=0;await i18n.changeLanguage('en');});
 afterEach(async()=>{await act(async()=>tree?.unmount());});
 it.each(['en','ja','ko'])('uses real %s copy for one-shot opt-in, errors, recovery and live language changes',async locale=>{await i18n.changeLanguage(locale);await mount();expect(JSON.stringify(tree.toJSON())).toContain(i18n.t('reminders.enable'));expect(state.request).not.toHaveBeenCalled();state.request.mockResolvedValueOnce(false);await press('reminders.enable');expect(JSON.stringify(tree.toJSON())).toContain(i18n.t('reminders.permissions'));state.request.mockResolvedValue(true);await press('reminders.enable');expect(api.snapshot.selections).toHaveLength(1);expect(state.register).toHaveBeenCalledOnce();await act(async()=>{await i18n.changeLanguage(locale==='en'?'ja':'en');});expect(JSON.stringify(tree.toJSON())).toContain(i18n.t('reminders.disable'));expect(JSON.stringify(tree.toJSON())).not.toContain('private raw');await press('reminders.disable');expect(api.snapshot.selections).toHaveLength(0);});
 it('changes reminder principal without remounting the app subtree or merging guest opt-ins',async()=>{await mount();await press('reminders.enable');state.session={user:{id:'account-a'}};await update();expect(api.snapshot.principalId).toBe('account-a');expect(api.snapshot.selections).toHaveLength(0);expect(mounts).toBe(1);});
@@ -53,4 +54,56 @@ it('bounds renders while tap validation storage is deferred across navigation re
   expect(open).toHaveBeenCalledExactlyOnceWith('pilot-aclc');
   await act(async()=>state.listener?.(response));expect(open).toHaveBeenCalledOnce();
  }finally{afterCommit=undefined;await act(async()=>{gate.resolve();await gate.promise;});}
+});
+
+function seedReminders(claimed: boolean) {
+ state.values.set('argala.reminders.v1:guest', JSON.stringify({ version: 1, selections: [
+  { destinationId: 'D01', generation: 'active-generation', locale: 'en', consented: true, claimed: false },
+  { destinationId: 'pilot-aclc', generation: 'pilot-generation', locale: 'en', consented: true, claimed },
+ ] }));
+}
+function reminderText() {
+ return tree.root.findAllByType('text').flatMap(node => node.props.children);
+}
+it.each(['en', 'ja', 'ko'])('offers a localized %s browse action in the empty reminder section', async locale => {
+ includeDestinationAction = false;
+ await i18n.changeLanguage(locale);
+ await mount();
+ expect(reminderText()).toContain(i18n.t('reminders.sectionExplanation'));
+ expect(i18n.exists('reminders.browse')).toBe(true);
+ await press('reminders.browse');
+ expect(state.navigate).toHaveBeenCalledExactlyOnceWith('/destinations');
+ expect(state.request).not.toHaveBeenCalled();
+ expect(state.register).not.toHaveBeenCalled();
+});
+it('localizes one-shot statuses and turns off only the selected destination immediately', async () => {
+ includeDestinationAction = false;
+ seedReminders(true);
+ await mount();
+ expect(reminderText()).toContain(i18n.t('reminders.statusActive'));
+ expect(reminderText()).toContain(i18n.t('reminders.statusUsed'));
+ await act(async () => { await i18n.changeLanguage('ja'); });
+ const name = destinationName(getDestination('D01')!, 'ja');
+ expect(reminderText()).toContain(name);
+ expect(reminderText()).toContain(i18n.t('reminders.statusActive'));
+ expect(reminderText()).toContain(i18n.t('reminders.statusUsed'));
+ expect(reminderText()).not.toContain(i18n.t('reminders.off'));
+ const disable = tree.root.findAllByType('button').find(node => node.props.accessibilityLabel === i18n.t('reminders.disableFor', { destination: name }))!;
+ expect(disable).toBeDefined();
+ await act(async () => { await disable.props.onPress(); });
+ expect(api.snapshot.selections.map(selection => selection.destinationId)).toEqual(['pilot-aclc']);
+ expect(state.request).not.toHaveBeenCalled();
+});
+it('shows one setup failure and recovery action below multiple selected destinations', async () => {
+ includeDestinationAction = false;
+ seedReminders(false);
+ state.register.mockRejectedValueOnce(new Error('private raw'));
+ await mount();
+ expect(reminderText().filter(copy => copy === i18n.t('reminders.failed'))).toHaveLength(1);
+ expect(reminderText().slice(-2)).toEqual([i18n.t('reminders.failed'), i18n.t('reminders.retry')]);
+ expect(tree.root.findAllByType('button').filter(node => node.props.accessibilityLabel === i18n.t('reminders.retry'))).toHaveLength(1);
+ await press('reminders.retry');
+ expect(api.snapshot.status).toBe('requested');
+ expect(reminderText()).not.toContain(i18n.t('reminders.failed'));
+ expect(state.request).not.toHaveBeenCalled();
 });

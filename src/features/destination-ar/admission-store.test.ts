@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { ArAdmissionStore } from './admission-store';
+import { syntheticApprovedDestination, syntheticArrivalPoint, syntheticFeaturedGeofence } from '@/features/destinations/ar-geofence-fixtures';
 import { getDestination } from '@/features/destinations/catalog';
 import type { ArrivalInput } from '@/features/destinations/proximity';
 import { contentManifestSchema, resolveContent } from '@/features/destination-content/model';
@@ -97,4 +98,44 @@ it('rechecks the latest raw approved-radius reading at pending mount and trackin
  vi.mocked(Date.now).mockReturnValue(16000); store.publish(lease, reading(16000, 51));
  // The same callback is used immediately before native mount and first tracking-ready.
  expect(entry.authorizeMount()).toBe(false); expect(store.getSnapshot()?.eligible).toBe(false);
+});
+
+it('claims the unlock once per principal, destination and corroborated visit', () => {
+ const featured = syntheticApprovedDestination();
+ let available = false;
+ const store = new ArAdmissionStore('owner', id => id === 'D01' && available ? featured : getDestination(id), syntheticFeaturedGeofence);
+ const report = (lease: number, timestamp: number, longitude = 0) => {
+  vi.mocked(Date.now).mockReturnValue(timestamp);
+  store.publish(lease, { running: true, watcherStatus: 'ready', sample: { position: { ...syntheticArrivalPoint, longitude }, accuracy: 5, timestamp } });
+ };
+ store.select('D01');
+ const explore = store.acquire('D01')!;
+ report(explore, 10000);
+ expect(store.claimUnlock(explore, 'D01', 'en')).toBe(false);
+ report(explore, 13000);
+ expect(store.claimUnlock(explore, 'D01', 'en')).toBe(false);
+ available = true;
+ expect(store.claimUnlock(explore, 'D01', 'en')).toBe(true);
+ store.release(explore);
+ store.select('D02');
+ store.select('D01');
+ const directions = store.acquire('D01')!;
+ report(directions, 16000);
+ report(directions, 19000);
+ expect(store.getSnapshot()?.eligible).toBe(true);
+ expect(store.claimUnlock(explore, 'D01', 'en')).toBe(false);
+ expect(store.claimUnlock(directions, 'D01', 'en')).toBe(false);
+ report(directions, 22000, 0.00025);
+ expect(store.begin(directions, 'D01', 'approved', 'en')).toBeNull();
+ report(directions, 25000);
+ report(directions, 28000);
+ expect(store.claimUnlock(directions, 'D01', 'en')).toBe(false);
+ report(directions, 31000, 0.0004);
+ report(directions, 34000, 0.0004);
+ report(directions, 37000);
+ report(directions, 40000);
+ expect(store.claimUnlock(directions, 'D01', 'en')).toBe(true);
+ expect(store.begin(directions, 'D01', 'approved', 'en')).toBeTypeOf('string');
+ store.close();
+ expect(store.claimUnlock(directions, 'D01', 'en')).toBe(false);
 });

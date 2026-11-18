@@ -11,5 +11,6 @@ export const developmentSystemAudio: AudioManifest = {
     pageChanged: sample(require('../../../assets/development/ar-audio/pageChanged.wav')),
     closed: sample(require('../../../assets/development/ar-audio/closed.wav')),
     trackingLost: sample(require('../../../assets/development/ar-audio/trackingLost.wav')),
+    modeSwitched: null,
   },
 };

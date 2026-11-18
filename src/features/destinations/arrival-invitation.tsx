@@ -7,14 +7,15 @@ import { StatusRow } from '@/ui/status-row';
 import type { ArrivalSnapshot } from './proximity';
 
 /** Foreground utility guidance only; camera entry always requires an explicit action. */
-export function ArrivalInvitation({ state, contentReady, draft = false, chapterCount = 0, onLaunch, onDismiss }: {
-  state: ArrivalSnapshot | null; contentReady: boolean; draft?: boolean; destinationTitle?: string; chapterCount?: number; onLaunch?(): void; onDismiss(): void;
+export function ArrivalInvitation({ state, contentReady, draft = false, keepInline = false, chapterCount = 0, onLaunch, onDismiss }: {
+  state: ArrivalSnapshot | null; contentReady: boolean; draft?: boolean; keepInline?: boolean; destinationTitle?: string; chapterCount?: number; onLaunch?(): void; onDismiss(): void;
 }) {
   const { t } = useTranslation();
   const accent = useThemeColor('accent');
   if (!state) return null;
   const hasLaunch = !!((contentReady || draft) && onLaunch);
   const ready = state.showInvitation && state.eligible && hasLaunch;
+  const actionKey = keepInline ? 'arrival.unlockStart' : draft ? 'destinationCleanup.launchPreview' : 'arrival.launch';
   return <View testID="arrival-invitation" className="gap-3 py-3">
     <View className="flex-row items-start gap-3">
       <View testID="arrival-status-medallion" className="size-10 shrink-0 items-center justify-center rounded-pill bg-mint" accessible={false} importantForAccessibility="no-hide-descendants">
@@ -31,10 +32,10 @@ export function ArrivalInvitation({ state, contentReady, draft = false, chapterC
       </View>
     </View>
     {state.showInvitation && <>
-      {hasLaunch && <Button className="w-full" accessibilityLabel={t(draft ? 'destinationCleanup.launchPreview' : 'arrival.launch')} onPress={onLaunch} isDisabled={!state.eligible}>
-        <Button.Label>{t(draft ? 'destinationCleanup.launchPreview' : 'arrival.launch')}</Button.Label>
+      {hasLaunch && <Button className="w-full" accessibilityLabel={t(actionKey)} onPress={onLaunch} isDisabled={!state.eligible}>
+        <Button.Label>{t(actionKey)}</Button.Label>
       </Button>}
-      <Button variant="ghost" className="self-start" accessibilityLabel={t('arrival.dismiss')} onPress={onDismiss}><Button.Label>{t('arrival.dismiss')}</Button.Label></Button>
+      {!keepInline && <Button variant="ghost" className="self-start" accessibilityLabel={t('arrival.dismiss')} onPress={onDismiss}><Button.Label>{t('arrival.dismiss')}</Button.Label></Button>}
     </>}
   </View>;
 }

@@ -17,6 +17,7 @@ import { PassportIcon } from '@/features/journal/passport-icon';
 import { StatusRow } from '@/ui/status-row';
 import { loadExhibitScene } from './exhibit-loader';
 import { featuredStoryContent } from './featured-story-content';
+import { withExhibitVisitorContent } from './exhibit-visitor-content';
 import { DestinationArSessionExperience } from './session-experience';
 import { ShowcaseMemory } from './showcase-memory';
 import type { SessionIdentity } from './session';
@@ -115,7 +116,7 @@ function ShowcaseDestination({ destinationId, principalId, scopeId, memory, gene
   const sceneLoader = useCallback(async () => Scene!, [Scene]);
   const onEstablished = useCallback(() => { if (freshEligible()) memory.recordEstablished(destinationId, generation); }, [freshEligible, memory, destinationId, generation]);
   const introductionMemory = useMemo(() => ({ seen, complete: () => { if (freshEligible()) memory.completeIntroduction(destinationId, generation); } }), [seen, freshEligible, memory, destinationId, generation]);
-  const content = useMemo(() => featuredStoryContent(destinationId), [destinationId]);
+  const content = useMemo(() => withExhibitVisitorContent(getDestination(destinationId)!, featuredStoryContent(destinationId)), [destinationId]);
   if (!Scene) return <ShowcasePage title={destinationName(getDestination(destinationId)!, language)} onBack={onReturn}>
     <ShowcasePreparation destinationId={destinationId} stamped={stamped} />
     <StatusRow busy={!failed}>{t(failed ? 'arShowcase.loadFailed' : 'arShowcase.loading')}</StatusRow>

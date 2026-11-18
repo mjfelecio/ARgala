@@ -17,10 +17,11 @@ import { useSettings } from '@/features/settings/provider';
 import { approvedArContent } from '@/features/destinations/ar-content';
 import { destinationName } from '@/features/destinations/catalog';
 import { useDestinationLookup } from '@/features/destination-content/context';
-import { useArAdmission, useAdmissionSource } from '@/features/destination-ar/admission-context';
+import { useArAdmission, useAdmissionSnapshot, useAdmissionSource } from '@/features/destination-ar/admission-context';
 import { simulateArEntry } from '@/features/destination-ar/simulation-loader';
 import { isViroSpikeEnabled } from '@/features/destination-ar/dev-guard';
 import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
+import { ArrivalUnlock } from '@/features/destinations/arrival-unlock';
 import { createRoutePreviewIntent } from './route-preview-intent';
 import { googleMapsNavigationUrl } from './google-maps-navigation';
 import type { TravelMode } from '../../../supabase/functions/_shared/contracts';
@@ -69,6 +70,11 @@ function Preview({ token }: { token: unknown }) {
   const arSource = useAdmissionSource(admission, featured?.id ?? null, { running,
     watcherStatus: preview.locationEnabled ? location.watcherStatus : 'pending',
     sample: preview.locationEnabled ? location.watcherSample ?? null : null }, true);
+  const onsite = !!(featured && featured.id !== 'pilot-aclc');
+  const snapshot = useAdmissionSnapshot(admission);
+  const arrivalState = admission && onsite
+    ? running && snapshot?.destinationId === featured?.id ? snapshot : null
+    : preview.arrival.state;
   const chapterCount = approvedArContent(featured, language).length;
   const contentReady = chapterCount > 0; const draftAr = !contentReady && featured?.id === 'pilot-aclc' && isViroSpikeEnabled();
   function launchAr() {
@@ -197,7 +203,7 @@ function Preview({ token }: { token: unknown }) {
               : <Button variant="outline" accessibilityLabel={t('directions.stopNavigation')} onPress={navigation.stop}><Button.Label>{t('directions.stopNavigation')}</Button.Label></Button>}
           </View>}
           </RoutePreviewPrimary>
-          {data?.intent.featuredDestinationId && <ArrivalInvitation state={preview.arrival.state} destinationTitle={featured ? destinationName(featured) : undefined} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
+          {data?.intent.featuredDestinationId && <ArrivalInvitation state={arrivalState} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} keepInline={onsite} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
           {featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {expanded && place && <View className="gap-4 border-t border-outline pt-4">
@@ -242,6 +248,8 @@ function Preview({ token }: { token: unknown }) {
         </>}
       </RoutePreviewSheet>
       </View>
+      {featured && onsite && <ArrivalUnlock eligible={running && contentReady && arrivalState?.eligible === true}
+        destinationTitle={destinationName(featured, language)} language={language} claimUnlock={arSource.claimUnlock} onLaunch={launchAr} />}
     </View>
   </StyledSafeAreaView>;
 }

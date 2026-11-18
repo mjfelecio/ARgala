@@ -1,0 +1,19 @@
+{
+  "details": "観光地の詳細",
+  "nearby": "周辺スポット",
+  "mode": "AR表示",
+  "scan": "周辺を検索",
+  "rescan": "再検索",
+  "enableLocation": "位置情報を有効にする",
+  "waitingLocation": "正確な位置情報を取得中…",
+  "signInHint": "現在地の周辺を検索するにはログインしてください。",
+  "firstScan": "1 km以内を検索し、カメラを向けて周辺のスポットを確認できます。",
+  "scanning": "周辺を検索中…",
+  "expired": "最新の結果を表示するには再検索してください。",
+  "empty": "周辺にスポットは見つかりませんでした。",
+  "results": "検索結果を見る（{{count}}件）",
+  "resultsTitle": "周辺スポット",
+  "headingUnavailable": "方角を取得できません。検索結果は一覧で確認できます。",
+  "showInCamera": "ARでカードを表示",
+  "distance": "約{{meters}} m先"
+}

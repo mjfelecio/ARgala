@@ -15,7 +15,9 @@ export function featuredStoryContent(id: DestinationId): readonly RingContent[] 
   if (!destination) return [];
   return destination.chapters.map((chapter, index): RingContent => ({
     id: chapter.id,
-    ...(index === 0 ? { role: 'overview' as const } : {}),
+    // The Sabin chapter records the supplied history of Sal’s Beach and the hotel.
+    ...(index === 0 ? { role: 'overview' as const }
+      : id === 'D09' && chapter.id === 'chapter-2' ? { role: 'history' as const } : {}),
     approved: {
       title: translated(chapter.title), body: translated(chapter.body),
       presentation: 'story',

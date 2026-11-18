@@ -412,6 +412,8 @@
     "expired": "This AR session has expired. Return to Explore to verify arrival and start a new session."
   },
   "arrival": {
+    "unlockTitle": "AR unlocked",
+    "unlockStart": "Start AR",
     "unavailable": "AR isn't available here yet. When available, it unlocks after you arrive and your location is confirmed.",
     "uncertain": "Visit this destination with location turned on. AR unlocks once we confirm you're there.",
     "distant": "AR unlocks when you're at this destination and we can confirm your location.",
@@ -531,6 +533,14 @@
   },
   "reminders": {
     "title": "Nearby reminders",
+    "sectionExplanation": "Get a one-time notification when you’re near a destination you choose.",
+    "browse": "Browse featured destinations",
+    "disableFor": "Turn off reminder for {{destination}}",
+    "statusActive": "Reminder on",
+    "statusUsed": "One-time reminder used",
+    "statusNeedsPermission": "Needs permissions",
+    "statusUnavailable": "Reminder unavailable",
+    "statusIncomplete": "Setup incomplete",
     "enable": "Remind me when I'm nearby",
     "disable": "Turn off reminder",
     "explanation": "Get a one-time reminder when you're about 150 m away. Your phone may delay or miss it. This reminder won't confirm your visit or add a Passport stamp.",

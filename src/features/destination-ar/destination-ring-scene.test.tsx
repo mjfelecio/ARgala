@@ -14,6 +14,7 @@ import { useReadingSize } from './use-reading-size';
 import { exhibitGalleryEntries } from './photo-islands';
 import { destinationSchema, getDestination } from '@/features/destinations/catalog';
 import { approvedArContent } from '@/features/destinations/ar-content';
+vi.mock('./camera-heading', () => ({ cameraHeadingModule: () => null, updateHeadingLocation: vi.fn() }));
 vi.mock('./development-ring-content', () => { throw new Error('Public scene engines must not evaluate diagnostic samples'); });
 const native = vi.hoisted(() => ({ getItem: vi.fn(), setItem: vi.fn(), patches: [] as { id: string; patch: Record<string, unknown> }[], reduced: false }));
 vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, toolbar: 110, actionMask: 111, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));

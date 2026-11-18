@@ -1,5 +1,34 @@
 # Foundation validation
 
+## Featured AR, arrival and visitor flows — 2026-11-18
+
+Feature regressions exercise the catalog-to-details navigation and both map
+actions, reminder management, approved synthetic polygon and multipolygon
+fixtures, the cross-screen arrival unlock, and localized Photo Islands reading.
+The real Showcase session tests preserve a focused reader and camera host
+through both view transitions, fence retired scan and photo callbacks, keep the
+results list available during limited tracking, and exercise the guest path
+without starting GPS or Places. Timestamp and alignment tests cover expiry,
+overlapping bearings, and unstable camera heading.
+
+`npm run check` passed TypeScript, zero-warning ESLint and **1,742 tests across
+153 files**. Android bundle export, Expo dependency validation, Expo Doctor
+(21/21), Android configuration, Android module autolinking, native patch
+verification, and the Viro touch/renderer guard suite passed.
+
+The nine-site on-site registry awaits approved boundaries and release content
+references. History uses localized placeholders where supplied content has no
+history chapter. Public audio stays silent pending approved EN/JA/KO voice and
+effect files. The Android heading module is autolinked. Older compatible builds
+without that module can present Nearby results as a list.
+
+Physical acceptance requires an approved Android APK and an ARCore device.
+Verify rear-camera directions outdoors at known bearings, stationary fixes,
+native taps and animation timing, EN/JA/KO at larger text sizes, reduced motion,
+and each audio preference combination after recordings are integrated. Verify
+each site's admission with real inside, outside, excluded-area and re-entry
+samples once its approved data is available.
+
 ## Expo Update configuration — 2026-11-13
 
 Installed SDK 57 `expo-updates` and ran `eas update:configure` for the existing

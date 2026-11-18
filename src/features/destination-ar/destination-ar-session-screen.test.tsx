@@ -1,6 +1,7 @@
 import { nativeUi, withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import * as Reanimated from 'react-native-reanimated';
+import { PortalHost } from 'heroui-native/portal';
 import { createRequire } from 'node:module';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createInstance, type i18n } from 'i18next';
@@ -12,15 +13,24 @@ import ShowcaseScreen from './showcase-screen';
 import { ViroRingRoute } from './dev-entry';
 import { router } from 'expo-router';
 import { destinationIds, getDestination, destinationName } from '@/features/destinations/catalog';
-const native = vi.hoisted(() => ({ exhibit: vi.fn(), active: true, focused: true, reduced: false, eligible: true,
+const native = vi.hoisted(() => ({ exhibit: vi.fn(), active: true, focused: true, reduced: false, eligible: true, guest: false,
   principal: 'owner' as string | null, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
-  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), gallery: vi.fn(), audio: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(),
+  transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), gallery: vi.fn(), audio: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(), positionWatch: vi.fn(), scanNearby: vi.fn(),
 }));
 vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, toolbar: 110, actionMask: 111, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => native.active }));
-vi.mock('@/features/auth/guest-context', () => ({ useGuestAccess: () => ({ enabled: false }) }));
+vi.mock('@/features/auth/guest-context', () => ({ useGuestAccess: () => ({ enabled: native.guest }) }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: native.principal ? { user: { id: native.principal } } : null }) }));
 vi.mock('@react-native-async-storage/async-storage', () => ({ default: { getItem: native.getItem, setItem: native.setItem } }));
+vi.mock('expo-location', () => ({
+  Accuracy: { High: 4 },
+  getForegroundPermissionsAsync: async () => granted,
+  hasServicesEnabledAsync: async () => true,
+  getCurrentPositionAsync: () => new Promise(() => {}),
+  watchPositionAsync: native.positionWatch,
+}));
+vi.mock('@/features/places/service', () => ({ placesService: { nearby: native.scanNearby } }));
+vi.mock('./camera-heading', () => ({ cameraHeadingModule: () => null, updateHeadingLocation: vi.fn() }));
 vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get, requestCameraPermissionsAsync: native.request } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true, language: translations?.resolvedLanguage ?? 'en' }) }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
@@ -52,7 +62,7 @@ const navigation = { isFocused: () => native.focused, addListener: (name: string
   const set = native.transitions.get(name) ?? new Set(); native.transitions.set(name, set); set.add(callback); return () => set.delete(callback);
 } };
 let tree: ReactTestRenderer | undefined; let translations: i18n; let child: () => React.ReactElement;
-function wrapper() { return React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(native.context!.Provider, { value: navigation }, React.createElement(native.focusContext!.Provider, { value: native.focused }, child())))); }
+function wrapper() { return React.createElement(I18nextProvider, { i18n: translations }, withHeroUI(React.createElement(native.context!.Provider, { value: navigation }, React.createElement(native.focusContext!.Provider, { value: native.focused }, child(), React.createElement(PortalHost))))); }
 async function mount(element?: () => React.ReactElement) { if (element) child = element; await act(async () => { tree = create(wrapper()); }); }
 async function update() { await act(async () => tree!.update(wrapper())); }
 async function layout() { await act(async () => tree!.root.findByProps({ testID: 'destination-ar-scene' }).props.onLayout({ nativeEvent: { layout: { width: 360, height: 800 } } })); }
@@ -81,6 +91,82 @@ it.each(['en', 'ja', 'ko'])('opens bounded %s help without remounting the camera
   await ready(); await click('ring-tile-history'); await finish();
   expect(node('ring-focused-panel')).toBeDefined();
   expect(native.support).toHaveBeenCalledOnce();
+});
+it('switches the actual Showcase camera layers in sequence and scans only on explicit action', async () => {
+  const { getExhibitSceneHost } = await import('./exhibit-ring-scene');
+  const Scene = getExhibitSceneHost('D01')!;
+  native.exhibit.mockResolvedValue(Scene);
+  const stop = vi.fn();
+  native.positionWatch.mockReset().mockImplementation(async (_options, receive) => {
+    receive({ coords: { latitude: 11, longitude: 124, accuracy: 5 }, timestamp: Date.now() });
+    return { remove: stop };
+  });
+  native.scanNearby.mockReset().mockResolvedValue([]);
+  await mount(() => <ShowcaseScreen />);
+  await selectDestination('D01'); await layout(); await start(); await ready();
+  const camera = cameras()[0];
+  expect(native.positionWatch).not.toHaveBeenCalled();
+  expect(native.scanNearby).not.toHaveBeenCalled();
+  await click('ring-tile-overview'); await finish();
+  expect(node('ring-focused-panel')).toBeDefined();
+  const capture = tree!.root.findByType('photo-controls' as React.ElementType).props.capture;
+  const pressMode = async (view: string) => {
+    await act(async () => tree!.root.findAllByType('button').find(button => button.props.testID === `ar-select-${view}`)!.props.onPress());
+  };
+  await pressMode('nearby');
+  expect(node('ar-view-details').props.animation.run).toBe(true);
+  expect(node('ar-view-nearby')).toBeUndefined();
+  const retired = node('ar-view-details').props.animation.onFinish;
+  await act(async () => retired());
+  expect(node('ar-view-details').props.visible).toBe(false);
+  expect(node('ar-view-nearby').props.animation.run).toBe(true);
+  expect((await capture('retired-capture')).errorCode).toBe(6);
+  await act(async () => retired());
+  expect(node('ar-view-nearby').props.animation.run).toBe(true);
+  await act(async () => node('ar-view-nearby').props.animation.onFinish());
+  await act(async () => { await vi.advanceTimersByTimeAsync(1000); });
+  expect(cameras()[0]).toBe(camera);
+  expect(native.scanNearby).not.toHaveBeenCalled();
+  const retiredScan = tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('arNearby.scan'))!.props.onPress;
+  expect(native.positionWatch).toHaveBeenCalledWith(expect.objectContaining({ distanceInterval: 0 }), expect.any(Function), expect.any(Function));
+  await press('arNearby.scan');
+  expect(native.scanNearby).toHaveBeenCalledExactlyOnceWith({ center: { latitude: 11, longitude: 124 }, language: 'en', radiusMeters: 1000 });
+  expect(copy()).toContain(translations.t('arNearby.empty'));
+  native.scanNearby.mockResolvedValueOnce([{ id: 'synthetic-place', providerId: 'synthetic-place', name: 'Test nearby place',
+    provider: 'google', coordinates: { latitude: 11.001, longitude: 124 }, attributions: [] }]);
+  await press('arNearby.rescan');
+  await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
+  const list = tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('arNearby.results', { count: 1 }))!;
+  expect(list.props.disabled).toBeFalsy();
+  await act(async () => list.props.onPress());
+  expect(copy()).toContain('Test nearby place');
+  await press('common.close');
+  await ready([0, 2, 0], [0, 0, -1], false);
+  await pressMode('details');
+  await act(async () => node('ar-view-nearby').props.animation.onFinish());
+  expect(node('ar-view-nearby')).toBeUndefined();
+  await act(async () => node('ar-view-details').props.animation.onFinish());
+  expect(cameras()[0]).toBe(camera);
+  expect(node('ring-focused-panel')).toBeDefined();
+  expect(stop).toHaveBeenCalledOnce();
+  await pressMode('nearby');
+  await act(async () => node('ar-view-details').props.animation.onFinish());
+  await act(async () => node('ar-view-nearby').props.animation.onFinish());
+  await act(async () => { await vi.advanceTimersByTimeAsync(1000); retiredScan(); });
+  expect(native.scanNearby).toHaveBeenCalledTimes(2);
+});
+it('keeps guest Showcase in Nearby view without accessing location or Places', async () => {
+  native.principal = null;
+  native.guest = true;
+  native.reduced = true;
+  native.exhibit.mockImplementationOnce(async () => (await import('./exhibit-ring-scene')).getExhibitSceneHost('D01')!);
+  await mount(() => <ShowcaseScreen />);
+  await selectDestination('D01'); await layout(); await start(); await ready();
+  await act(async () => tree!.root.findAllByType('button').find(button => button.props.testID === 'ar-select-nearby')!.props.onPress());
+  expect(copy()).toContain(translations.t('arNearby.signInHint'));
+  expect(cameras()).toHaveLength(1);
+  expect(native.positionWatch).not.toHaveBeenCalled();
+  expect(native.scanNearby).not.toHaveBeenCalled();
 });
 it('bounds the complete top utility stack to the measured short scene and keeps one scroll owner', async () => {
   await mount(); await layout(); await start(); await ready();
@@ -130,9 +216,10 @@ async function finish() { await act(async () => node('ring-focused-panel').props
 async function active(value: boolean) { native.active = value; await update(); await settle(); }
 beforeEach(async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true, __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); vi.useFakeTimers(); vi.setSystemTime(1000);
-  native.active = native.focused = native.eligible = true; native.reduced = false; native.principal = 'owner'; native.transitions.clear();
+  native.active = native.focused = native.eligible = true; native.reduced = false; native.guest = false; native.principal = 'owner'; native.transitions.clear();
   vi.spyOn(Reanimated, 'useReducedMotion').mockImplementation(() => native.reduced);
   native.get.mockReset().mockResolvedValue(granted); native.request.mockReset().mockResolvedValue({ ...granted, granted: false, status: 'denied' });
+  native.positionWatch.mockReset(); native.scanNearby.mockReset();
   native.screenshot.mockReset(); native.audio.mockReset().mockResolvedValue(null); native.gallery.mockReset().mockImplementation(async () => (await import('./development-ring-content')).developmentRingContent);
   native.support.mockReset().mockImplementation(callback => callback('SUPPORTED')); nativeUi.modules.VRTARSceneNavigatorModule = { isARSupportedOnDevice: native.support };
   native.getItem.mockReset().mockImplementation(async key => key.startsWith('argala.ar-') ? 'complete' : null); native.setItem.mockReset().mockResolvedValue(undefined);

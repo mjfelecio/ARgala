@@ -21,6 +21,7 @@ import { VisitorGuide } from './visitor-guide';
 import { DaytimeGallery } from './daytime-gallery';
 import { NearbyEstablishments } from './nearby-establishments';
 import { destinationToRoutePlace } from './routing';
+import { setFeaturedSelection } from './map-selection';
 import { DestinationReminderAction } from '@/features/arrival-reminders/components';
 import { SavePlaceAction, JournalFeedback } from '@/features/journal/actions';
 import { useOpenProviderLink } from '@/features/map/attributions';
@@ -42,12 +43,19 @@ export default function DestinationScreen() {
   const storyDestination = lookupContent(destinationId);
   useEffect(() => { if (focused) navigating.current = false; }, [focused, destination?.id]);
   const routePlace = destination ? destinationToRoutePlace(destination, language) : null;
+  const mappedDestination = destination?.center && destination.centerApprovalReference ? destination : null;
   const summary = destination?.copy?.[language]?.overview ?? destination?.copy?.en?.overview;
   function directions() {
     if (!routePlace || !active || !focused || navigating.current) return;
     navigating.current = true;
     const token = createRoutePreviewIntent(client, routePlace, undefined, 'details', language, destination?.id);
     router.push({ pathname: '/directions', params: { token } });
+  }
+  function viewOnExplore() {
+    if (!mappedDestination || !active || !focused || navigating.current) return;
+    navigating.current = true;
+    setFeaturedSelection(client, mappedDestination.id);
+    router.dismissTo({ pathname: '/', params: { featuredDestinationId: mappedDestination.id } });
   }
   return <StyledSafeAreaView className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
     <View className="flex-row items-center gap-3 px-4 py-3">
@@ -65,6 +73,11 @@ export default function DestinationScreen() {
           <Button className="w-full" accessibilityLabel={t('destinationCleanup.openMaps')} onPress={() => openProviderLink(googleMapsPlaceUrl({ providerId: displayGooglePlaceId(destination.id), name: destinationName(destination, language), coordinates: destination.center }))}>
             <Ionicons name="open-outline" size={22} color={onAccent} accessible={false} /><Button.Label>{t('destinationCleanup.openMaps')}</Button.Label>
           </Button>
+          {mappedDestination && <Button variant="secondary" className="h-auto min-h-12 py-3" isDisabled={!active || !focused}
+            accessibilityLabel={t('destinationCleanup.viewOnExplore')} onPress={viewOnExplore}>
+            <Ionicons name="map-outline" size={22} color={accent} accessible={false} />
+            <Button.Label className="shrink">{t('destinationCleanup.viewOnExplore')}</Button.Label>
+          </Button>}
           <View className="flex-row flex-wrap gap-3">
             <Button variant="secondary" className="min-w-40 flex-1" isDisabled={!routePlace || !active || !focused} accessibilityLabel={t('placeDetails.directions')} onPress={directions}><Ionicons name="navigate-outline" size={22} color={accent} accessible={false} /><Button.Label>{t('placeDetails.directions')}</Button.Label></Button>
             <SavePlaceAction reference={{ kind: 'featured', id: destination.id }} aliases={featuredBookmarkAliases(destination.id, journal?.state.bookmarks ?? [])} className="min-w-32 flex-1" />

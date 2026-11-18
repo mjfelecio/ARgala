@@ -9,6 +9,9 @@ import { localizationOptions } from '@/i18n/options';
 import { destinationIds, destinationName, getDestination } from '@/features/destinations/catalog';
 import ShowcaseScreen from './showcase-screen';
 import { ShowcaseEntry } from './showcase-entry';
+import { EXHIBIT_HISTORY_ID, EXHIBIT_VISIT_PLAN_ID } from './exhibit-visitor-content';
+import { featuredStoryContent } from './featured-story-content';
+import type { RingContent } from './ring-content';
 const runtime = vi.hoisted(() => ({ principal: 'a' as string | null, guest: false, focused: true, active: true, load: vi.fn(), push: vi.fn() }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: runtime.principal ? { user: { id: runtime.principal } } : null }) }));
 vi.mock('@/features/auth/guest-context', () => ({ useGuestAccess: () => ({ enabled: runtime.guest }) }));
@@ -39,7 +42,11 @@ it.each([false, true])('opens all nine release exhibits for guest=%s without nat
     expect(runtime.load).toHaveBeenLastCalledWith(id);
     expect(experience().props.identity).toMatchObject({ destinationId: id, principalId: guest ? 'guest' : 'a', provenance: 'showcase' });
     expect(experience().props.galleryMediaIds).toHaveLength(getDestination(id)!.media!.length);
-    expect(experience().props.content).toHaveLength(id === 'D01' || id === 'D05' ? 3 : 2);
+    const content: readonly RingContent[] = experience().props.content;
+    const stories = featuredStoryContent(id);
+    expect(content.slice(0, stories.length)).toEqual(stories);
+    expect(content.find(panel => panel.id === EXHIBIT_VISIT_PLAN_ID)).toBeDefined();
+    expect(content.filter(panel => panel.role === 'history').map(panel => panel.id)).toEqual([id === 'D09' ? 'chapter-2' : EXHIBIT_HISTORY_ID]);
     await act(async () => experience().props.onReturn());
   }
 });
