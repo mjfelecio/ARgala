@@ -24,9 +24,8 @@ UP. The next gesture starts with fresh listener ownership.
 AAR checksum. During the native build, `renderer.gradle` checks the version,
 archive and original listener hash, compiles the replacement as Java 17, and
 publishes a generated AAR through Viro's existing `default` artifact with task
-dependencies. Outputs stay under the dependency's Gradle build directory. All
-other archive entries, including native libraries and other classes, are
-preserved. No C++ fork, runtime dependency or generated Android edit is needed.
+dependencies. Outputs stay under the dependency's Gradle build directory. The later AR window correction below also appends one method to the ARCore
+view. All other archive entries, including native libraries, are preserved. No C++ fork, runtime dependency or generated Android edit is needed.
 
 JavaScript still uses the existing completed `onClick` callback. Visible control
 geometry, one event owner per control, and current tracking/Help/lifecycle guards
@@ -45,7 +44,7 @@ The production replacement remains Java 17 bytecode.
   Stationary timing boundaries, jitter, existing MOVE dispatch, repeated taps,
   cancellation, multitouch, interception and destruction are covered.
 - An archive test compares every resource, native library and class entry,
-  allowing only the listener to differ, and checks Java 17 bytecode.
+  allowing only the listener and ARCore view to differ, and checks Java 17 listener bytecode.
 - Temporary Gradle fixtures reject changed package/AAR/class identities,
   including reused configuration-cache entries and changed class-check metadata
   after extraction is already up to date.
@@ -68,3 +67,48 @@ Help/resume and sampled JA/KO glyph checks passed; English was restored. The
 owner reported no misses/doubles for the20-cycle check, with pre-response lag.
 Synthetic cancellation/swipe recovery passed; physical multitouch and forced
 tracking loss remain unverified. Input-latency attribution is still open.
+
+## AR window transparency correction — 2026-11-18
+
+The standalone A53 preview exposed a stale Android compositor transparency hint:
+its app window and Viro surface were both1080×2400, but the app window advertised
+`[0,900][1080,2400]` as transparent. Recenter/Capture had valid native bounds and
+were enabled, while the compositor discarded their pixels; Help cut off at900px.
+Changing ScrollView clipping did not change that boundary and was reverted.
+
+Android gathers this optimization during root layout. Fabric can update child
+layouts afterward without gathering it again. The guarded renderer build appends
+this override to the original `ViroViewARCore` class:
+
+```java
+public boolean gatherTransparentRegion(Region region) {
+    super.gatherTransparentRegion(region);
+    if (region != null) region.setEmpty();
+    return false;
+}
+```
+
+Superclass traversal and SurfaceView's actual camera alpha hole remain intact.
+Clearing the hint makes the window compositor consider all overlay pixels rather
+than trusting an obsolete hole. This costs full-window composition while AR is
+present; it adds no tint, geometry, touch surface or per-frame callback. The app
+continues to use one native camera surface at a time.
+
+The build uses pinned ASM9.9 to append only that method, preserving the original
+class's existing methods and JNI linkage. Package/AAR and original class hashes
+are checked before patching, and an existing override is rejected. The default
+AAR archive test permits only the listener and ARCore class to differ; the
+listener remains byte-for-byte identical to the prior compiled replacement.
+Robolectric exercises the actual packaged AR view, real ViewGroup traversal and
+Region operations with only camera/JNI startup substituted. It covers a child
+surface advertising a full-window hole and Android's nullable region contract.
+Guard fixtures also reject a changed original ARCore class hash.
+
+This is native code and requires a rebuilt preview. App version1.0.1 creates a
+new runtime under the existing appVersion policy;1.0.0 installations cannot gain
+this correction through EAS Update. Physical acceptance must check the root
+transparency hint, camera rendering, the complete Help card, footer taps and
+native scene touches outside the utility bounds.
+
+Sources: [ViewRootImpl transparency gathering](https://android.googlesource.com/platform/frameworks/base/+/refs/heads/android15-release/core/java/android/view/ViewRootImpl.java),
+[SurfaceView transparency and drawing](https://android.googlesource.com/platform/frameworks/base/+/refs/heads/android16-release/core/java/android/view/SurfaceView.java).
