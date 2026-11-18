@@ -3,7 +3,7 @@ import { Button } from 'heroui-native/button';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useThemeColor } from 'heroui-native/hooks';
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { withUniwind } from 'uniwind';
@@ -34,12 +34,23 @@ export function ArUtilityChrome({ children, actions, bottom, viewportHeight, tit
       <Text accessibilityRole="header" accessibilityLabel={title ?? t(titleKey)} numberOfLines={2} className="grow shrink font-sans text-card font-ui-semibold text-white">{title ?? t(titleKey)}</Text>
       {actions}
     </View>
-    <ScrollView testID="ar-utility-body" className="grow-0 shrink">{children}</ScrollView>
+    <View collapsable={false} pointerEvents="box-none" className="grow-0 shrink" style={nativeStyles.viewport}>
+      <ScrollView testID="ar-utility-body" className="grow-0 shrink" style={nativeStyles.scroll}>{children}</ScrollView>
+    </View>
   </SafeOverlay>
     {bottom && <SafeOverlay testID="ar-bottom-utilities" style={{ maxHeight: bottomMaxHeight }} onLayout={event => setBottomHeight(event.nativeEvent.layout.height)} className="absolute bottom-0 left-0 right-0" edges={['bottom', 'left', 'right']} pointerEvents="box-none">
-      <ScrollView testID="ar-bottom-utility-body" className="grow-0 shrink" contentContainerClassName="items-center px-4 pb-3" pointerEvents="box-none">
-        <View className="flex-row flex-wrap items-center justify-center gap-3 rounded-card bg-ar-panel p-2">{bottom}</View>
-      </ScrollView>
+      <View collapsable={false} pointerEvents="box-none" className="grow-0 shrink" style={nativeStyles.viewport}>
+        <ScrollView testID="ar-bottom-utility-body" className="grow-0 shrink" style={nativeStyles.scroll} contentContainerClassName="items-center px-4 pb-3" pointerEvents="box-none">
+          <View className="flex-row flex-wrap items-center justify-center gap-3 rounded-card bg-ar-panel p-2">{bottom}</View>
+        </ScrollView>
+      </View>
     </SafeOverlay>}
   </>;
 }
+
+// Android release ScrollView canvas clipping can retain a stale offset over the
+// AR surface. Keep scrolling, but let an unflattened parent clip its viewport.
+const nativeStyles = StyleSheet.create({
+  viewport: { overflow: 'hidden' },
+  scroll: { overflow: 'visible' },
+});
