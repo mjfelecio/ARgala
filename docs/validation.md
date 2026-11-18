@@ -3870,3 +3870,35 @@ Removed the normal bottom requested-status message and its EN/JA/KO resources at
 Changed the featured map-sheet AR heading to “Unlock AR at this destination.” EN/JA/KO guidance now explains that visitors need to reach the actual destination and have their current location confirmed before AR unlocks. Updated pending, distant, approaching, nearby and checking copy consistently. The unavailable state still explicitly says AR is not available yet, describing the arrival requirement conditionally rather than implying new availability. No admission, activation radius, native scene or geographic authority changed.
 
 **Verification:** arrival-invitation, map and proximity suites passed **152 tests in 9 files**; `npm run check` passed TypeScript, zero-warning lint and **1,681 tests in 148 files**. `git diff --check` passed. On the same A53/APK/density/font configuration with refreshed minified USB Metro, selected D01 through the actual featured-list title action, expanded/scrolled the Explore sheet and inspected the full heading and unavailable/arrival explanation. Left the sheet there for owner review. The map capture is private at `/tmp/argala-ar-unlock-copy-visible.png`. No explicit paid Places/Routes request, reminder preference action, APK, OTA or publication. CJK/large-text device rendering and real on-site unlock remain outside this copy-only check.
+
+## Standalone AR overlay compositor correction — 2026-11-18
+
+PR54 merged as e3a50d7 and the compatible preview OTA was installed on the A53's
+non-debuggable internal preview APK, preserving the existing account and data.
+Standalone AR then exposed a release blocker: Recenter/Capture were enabled at
+valid native bounds but invisible, and Help painting stopped at physical y900.
+The owner confirmed the missing controls. Standard/experimental export comparison
+and a ScrollView overflow candidate did not fix it; the overflow candidate was
+reverted in the follow-up.
+
+SurfaceFlinger showed full1080×2400 app/Viro buffers, but the app's transparency
+hint incorrectly covered `[0,900][1080,2400]`; HWC cropped the app layer to900px.
+The native correction conservatively clears that optimization after the ARCore
+view's normal transparency traversal. It preserves SurfaceView's actual alpha
+hole, all existing renderer methods, JNI, camera bounds and touch geometry. See
+`patches/viro-touch/README.md` for mechanism and Android source references.
+
+The original packaged ARCore view failed the two new Robolectric checks. With
+the appended override, all15 native tests pass, including the existing tap and
+archive checks; cached Gradle guard fixtures reject altered package/AAR/listener/
+ARCore identities. The previously compiled tap listener and the new artifact's
+listener are byte-for-byte identical. Every other archive resource, native
+library and class is preserved except the ARCore class receiving this method.
+`npm run check` passes TypeScript, zero-warning lint and1,681 tests in148 files;
+native patch verification, Android config and `git diff --check` pass.
+
+App version1.0.1 retains the existing appVersion runtime policy and requires a
+rebuilt preview; it cannot repair a1.0.0 installation by OTA alone. Preview builds
+now increment the Android build number. Native preview installation and physical
+compositor/footer/Help/capture acceptance are pending at this record's creation.
+No production update, store submission, provider request or reminder change.

@@ -47,13 +47,17 @@ try {
   gradle(fixture, extraction, 'listener class mismatch');
   writeFileSync(metadataPath, metadata);
   gradle(fixture, extraction);
+  writeFileSync(metadataPath, JSON.stringify({ ...JSON.parse(metadata), surfaceClassSha256: '0'.repeat(64) }));
+  gradle(fixture, extraction, 'surface class mismatch');
+  writeFileSync(metadataPath, metadata);
+  gradle(fixture, extraction);
   writeFileSync(join(packageDirectory, 'package.json'), '{"version":"3.0.4"}');
   gradle(fixture, extraction, 'requires 3.0.3');
   writeFileSync(join(packageDirectory, 'package.json'), '{"version":"3.0.3"}');
   gradle(fixture, extraction);
   appendFileSync(join(renderer, 'viro_renderer-release.aar'), 'unreviewed');
   gradle(fixture, extraction, 'renderer archive mismatch');
-  console.log('Viro guards passed: version, AAR checksum and original listener checksum.');
+  console.log('Viro guards passed: version, AAR checksum and original listener/surface checksums.');
 } finally {
   rmSync(fixture, { recursive: true, force: true });
 }

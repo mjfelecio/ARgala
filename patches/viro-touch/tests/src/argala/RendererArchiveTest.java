@@ -26,7 +26,7 @@ public class RendererArchiveTest {
         return result;
     }
 
-    @Test public void replacesOnlyListenerAndPreservesNativeLibrariesResourcesAndOtherClasses() throws Exception {
+    @Test public void replacesOnlyListenerAndSurfacePreservingNativeLibrariesResourcesAndOtherClasses() throws Exception {
         Map<String, byte[]> original = entries(Files.readAllBytes(Path.of(System.getProperty("argala.originalRenderer"))));
         Map<String, byte[]> patched = entries(Files.readAllBytes(Path.of(System.getProperty("argala.patchedRenderer"))));
         assertEquals(original.keySet(), patched.keySet());
@@ -38,6 +38,8 @@ public class RendererArchiveTest {
         byte[] replacement = patchedClasses.remove(listener);
         assertFalse("listener must actually change", Arrays.equals(originalClasses.remove(listener), replacement));
         assertEquals("Java 17 bytecode", 61, ((replacement[6] & 255) << 8) | (replacement[7] & 255));
+        String surface = "com/viro/core/ViroViewARCore.class";
+        assertFalse("surface must actually change", Arrays.equals(originalClasses.remove(surface), patchedClasses.remove(surface)));
         for (String name : originalClasses.keySet()) assertArrayEquals(name, originalClasses.get(name), patchedClasses.get(name));
     }
 }

@@ -1,6 +1,17 @@
 import groovy.json.JsonSlurper
 import java.security.MessageDigest
 import java.util.zip.ZipFile
+import org.objectweb.asm.ClassVisitor
+import org.objectweb.asm.MethodVisitor
+import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Label
+import org.objectweb.asm.Opcodes
+
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath 'org.ow2.asm:asm:9.9' }
+}
 
 // This is applied by Viro's existing AAR wrapper, outside generated android/.
 // Package installs only apply the text hook; compilation happens in Gradle.
@@ -33,8 +44,10 @@ if (archiveHash != patch.binaryChecksums[0].sha256) {
 def originalDirectory = layout.buildDirectory.dir('argala-viro/original')
 def originalJar = originalDirectory.map { it.file('classes.jar') }
 def listenerPath = 'com/viro/core/internal/ViroTouchGestureListener.class'
+def surfacePath = 'com/viro/core/ViroViewARCore.class'
 def extract = tasks.register('extractArgalaViroRenderer', Sync) {
     inputs.property 'listenerClassSha256', patch.listenerClassSha256
+    inputs.property 'surfaceClassSha256', patch.surfaceClassSha256
     from zipTree(originalAar)
     include 'classes.jar'
     into originalDirectory
@@ -43,6 +56,10 @@ def extract = tasks.register('extractArgalaViroRenderer', Sync) {
             def entry = jar.getEntry(listenerPath)
             if (entry == null || jar.getInputStream(entry).withCloseable(sha256) != patch.listenerClassSha256) {
                 throw new GradleException('ARgala Viro listener class mismatch; review before compiling.')
+            }
+            def surface = jar.getEntry(surfacePath)
+            if (surface == null || jar.getInputStream(surface).withCloseable(sha256) != patch.surfaceClassSha256) {
+                throw new GradleException('ARgala Viro surface class mismatch; review before patching.')
             }
         }
     }
@@ -61,10 +78,59 @@ def compile = tasks.register('compileArgalaViroTouch', JavaCompile) {
     options.release = 17
     options.encoding = 'UTF-8'
 }
+// SurfaceView's window transparency hint can outlive Fabric child-layout changes.
+// Keep its real alpha hole and traversal, but conservatively composite the whole
+// AR window so later Help/footer pixels are never discarded. Append just this
+// override to the pinned class; preserve its constructors, JNI and other methods.
+def surfaceDirectory = layout.buildDirectory.dir('argala-viro/surface')
+def surfacePatch = tasks.register('patchArgalaViroSurface') {
+    dependsOn extract
+    inputs.file originalJar
+    outputs.file surfaceDirectory.map { it.file(surfacePath) }
+    doLast {
+        byte[] source
+        new ZipFile(originalJar.get().asFile).withCloseable { jar ->
+            source = jar.getInputStream(jar.getEntry(surfacePath)).withCloseable { it.readAllBytes() }
+        }
+        def reader = new ClassReader(source)
+        def writer = new ClassWriter(reader, 0)
+        // Copy existing methods directly; no renderer method is rewritten.
+        reader.accept(new ClassVisitor(Opcodes.ASM9, writer) {
+            @Override MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                if (name == 'gatherTransparentRegion' && descriptor == '(Landroid/graphics/Region;)Z') {
+                    throw new GradleException('ARgala Viro surface override already exists; review the class.')
+                }
+                return super.visitMethod(access, name, descriptor, signature, exceptions)
+            }
+        }, 0)
+        def descriptor = '(Landroid/graphics/Region;)Z'
+        def method = writer.visitMethod(Opcodes.ACC_PUBLIC, 'gatherTransparentRegion', descriptor, null, null)
+        method.visitCode()
+        method.visitVarInsn(Opcodes.ALOAD, 0)
+        method.visitVarInsn(Opcodes.ALOAD, 1)
+        method.visitMethodInsn(Opcodes.INVOKESPECIAL, reader.superName, 'gatherTransparentRegion', descriptor, false)
+        method.visitInsn(Opcodes.POP)
+        method.visitVarInsn(Opcodes.ALOAD, 1)
+        def done = new Label()
+        method.visitJumpInsn(Opcodes.IFNULL, done)
+        method.visitVarInsn(Opcodes.ALOAD, 1)
+        method.visitMethodInsn(Opcodes.INVOKEVIRTUAL, 'android/graphics/Region', 'setEmpty', '()V', false)
+        method.visitLabel(done)
+        method.visitFrame(Opcodes.F_SAME, 0, null, 0, null)
+        method.visitInsn(Opcodes.ICONST_0)
+        method.visitInsn(Opcodes.IRETURN)
+        method.visitMaxs(2, 2)
+        method.visitEnd()
+        def output = surfaceDirectory.get().file(surfacePath).asFile
+        output.parentFile.mkdirs()
+        output.bytes = writer.toByteArray()
+    }
+}
 // Zip rather than Jar preserves the original manifest and every other entry.
 def patchedClasses = tasks.register('packageArgalaViroClasses', Zip) {
-    dependsOn compile
-    from({ zipTree(originalJar.get().asFile) }) { exclude listenerPath }
+    dependsOn compile, surfacePatch
+    from({ zipTree(originalJar.get().asFile) }) { exclude listenerPath, surfacePath }
+    from surfaceDirectory
     from compile.flatMap { it.destinationDirectory }
     archiveFileName = 'classes.jar'
     destinationDirectory = layout.buildDirectory.dir('argala-viro/patched')

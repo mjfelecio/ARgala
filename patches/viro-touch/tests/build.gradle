@@ -15,6 +15,7 @@ dependencies {
         exclude group: 'androidx.test', module: 'monitor'
         exclude group: 'androidx.test.espresso', module: 'espresso-idling-resource'
     }
+    testAars files(new File(project(':viro_renderer').projectDir, '../arcore_client/core-1.43.0.aar'))
     testAars 'androidx.test:monitor:1.8.0@aar'
     testAars 'androidx.test.espresso:espresso-idling-resource:3.7.0@aar'
 }
@@ -31,6 +32,7 @@ dependencies {
     testImplementation files(extractRenderer.map { new File(it.destinationDir, 'classes.jar') })
 }
 def extractTestAars = tasks.register('extractTestAars', Sync) {
+    filePermissions { unix '0644' }
     inputs.files configurations.testAars
     configurations.testAars.each { archive ->
         from(zipTree(archive)) {
