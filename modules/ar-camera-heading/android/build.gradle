@@ -6,6 +6,10 @@ plugins {
 group = 'com.argala.arheading'
 version = '1.0.0'
 
+expoModule {
+  canBePublished false
+}
+
 android {
   namespace 'com.argala.arheading'
 }
