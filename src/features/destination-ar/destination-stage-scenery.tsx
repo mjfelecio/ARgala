@@ -82,7 +82,7 @@ function coast(): Contour[] {
   ]);
 }
 // Computed once. No frame callbacks, external assets, anchors or running effects.
-const contours = { shoreline: [], fern: fern(), basin: basin(), roots: roots(), fields: fields(), fairway: fairway(), ridges: ridges(), garden: garden(), coast: coast() } satisfies Record<ExhibitStageProfile['theme'], Contour[]>;
+const contours = { shoreline: [], fern: fern(), basin: basin(), roots: roots(), fields: fields(), fairway: fairway(), ridges: ridges(), garden: garden(), coast: coast(), campus: [] } satisfies Record<ExhibitStageProfile['theme'], Contour[]>;
 export const stageContours = (theme: ExhibitStageProfile['theme']): readonly Contour[] => contours[theme];
 
 export function DestinationStageScenery({ basis, profile }: { basis: Basis; profile: ExhibitStageProfile }) {

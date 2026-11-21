@@ -10,7 +10,7 @@ import { Button } from 'heroui-native/button';
 import { useThemeColor } from 'heroui-native/hooks';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { DestinationPhotoCard } from './destination-photo-card';
-import { destinationIds, destinationName, listFeaturedDestinations, type FeaturedDestinationId } from './catalog';
+import { destinationIds, destinationName, localizedContent, listFeaturedDestinations, type FeaturedDestinationId } from './catalog';
 import { useSettings } from '@/features/settings/provider';
 
 const StyledSafeAreaView = withUniwind(SafeAreaView);
@@ -36,16 +36,17 @@ export default function DestinationsScreen() {
       {listFeaturedDestinations().map(destination => {
         const name = destinationName(destination, language);
         const cover = destination.media?.find(item => item.id === destination.coverMediaId) ?? destination.media?.[0];
-        // The separate development pilot has no supplied photography.
         if (!cover) return <Button key={destination.id} variant="ghost" className="h-auto min-h-16! justify-start gap-3 rounded-card! bg-surface! p-4"
           accessibilityLabel={name} onPress={() => openDestination(destination.id)}>
           <View className="size-12 items-center justify-center rounded-pill bg-mint" accessible={false}><Ionicons name="location-outline" size={24} color={accent} /></View>
           <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-card font-ui-semibold text-brand-strong">{name}</Text></View>
           <Ionicons name="chevron-forward" size={20} color={accent} accessible={false} />
         </Button>;
-        return <DestinationPhotoCard key={destination.id} id={`featured-${destination.id}`} testID={`featured-photo-card:${destination.id}`} source={cover.source}
+        const archival = cover.id === 'D10-archive-2014';
+        return <DestinationPhotoCard archival={archival} key={destination.id} id={`featured-${destination.id}`} testID={`featured-photo-card:${destination.id}`} source={cover.source}
           failed={failed.has(cover.id)} onImageError={() => setFailed(previous => new Set([...previous, cover.id]))}>
-          <Pressable accessibilityRole="button" accessibilityLabel={name} onPress={() => openDestination(destination.id)}
+          <Pressable accessibilityRole="button" accessibilityLabel={name}
+            accessibilityHint={archival ? localizedContent(cover.caption, language)?.value : undefined} onPress={() => openDestination(destination.id)}
             className="justify-end active:opacity-80">
             <View className="min-h-56 items-center justify-center gap-2 p-4">
               {failed.has(cover.id) && <>
@@ -54,7 +55,10 @@ export default function DestinationsScreen() {
               </>}
             </View>
             <View className="min-h-24 flex-row items-center gap-4 p-5">
-              <Text className="min-w-0 flex-1 font-sans text-section font-ui-semibold text-white">{name}</Text>
+              <View className="min-w-0 flex-1 gap-1">
+                <Text className="font-sans text-section font-ui-semibold text-white">{name}</Text>
+                {archival && <Text className="font-sans text-xs text-white">{t('destinations.aclcArchiveLabel')}</Text>}
+              </View>
               <Ionicons name="chevron-forward" size={24} color="white" accessible={false} />
             </View>
           </Pressable>

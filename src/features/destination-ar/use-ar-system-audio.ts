@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { ArSystemAudio, approvedSystemAudio, type AudioCue, type AudioEvent, type AudioPreferences, type AudioManifest } from './system-audio';
 import { isViroSpikeEnabled } from './dev-guard';
+import { playApprovedArEffect } from './native-ar-audio';
 import type { Language } from '../../../supabase/functions/_shared/contracts';
 
 function channelEnabled(cue: AudioCue, preferences: AudioPreferences | undefined) {
@@ -35,6 +36,12 @@ export function useArSystemAudio(
     const playing = audio.getSnapshot();
     if (playing && !channelEnabled(playing, preferences)) audio.finish(playing.playbackId);
   }, [audio, manifest, audition, preferences, claimStartupVoice]);
+
+  const effectsEnabled = preferences?.soundEffects === true;
+  useLayoutEffect(() => {
+    if (!scope.running || !effectsEnabled || !cue || typeof cue.source === 'number' || cue !== audio.getSnapshot()) return;
+    return playApprovedArEffect(cue.source, () => audio.finish(cue.playbackId));
+  }, [audio, cue, scope, effectsEnabled]);
 
   const event = useCallback((kind: AudioEvent, id: string, firstVisit = false) => {
     if (!scope.running || liveScope.current !== scope) return;

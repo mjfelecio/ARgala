@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "2026-11-13-presentation-v1",
+  "contentVersion": "2026-11-19-10-destinations-handoff-v1",
   "locales": [
     "en",
     "ja",
@@ -1300,6 +1300,148 @@
         "D09-maps-05"
       ],
       "coverMediaId": "D09-preview"
+    },
+    {
+      "id": "D10",
+      "name": {
+        "en": "ACLC College of Ormoc",
+        "ja": "オルモックACLCカレッジ",
+        "ko": "오르모크 ACLC 칼리지"
+      },
+      "tagline": {
+        "en": "A campus of learning, skills and ambition",
+        "ja": "学びと技能、挑戦が育つキャンパス",
+        "ko": "배움과 기술, 도전이 자라는 캠퍼스"
+      },
+      "summary": {
+        "en": "Discover a living educational landmark on Lilia Avenue, where Ormoc students develop academic, technical and professional skills. This is an active private campus: visits beyond public areas require school permission.",
+        "ja": "リリア通りにある、学びが今も続く教育のランドマーク。オルモックの学生たちが学問、技術、職業に関わる力を育んでいます。私立学校として運営中のため、一般に開放されていない場所への訪問には学校の許可が必要です。",
+        "ko": "릴리아 애비뉴에서 오르모크 학생들이 학업과 기술, 직업 역량을 키우는 교육 현장을 만나 보세요. 현재 운영 중인 사립 캠퍼스이므로 공개 구역 밖을 방문하려면 학교의 허가가 필요합니다."
+      },
+      "location": {
+        "center": null,
+        "routeEntrance": null,
+        "area": "Lilia Avenue, Barangay Cogon, Ormoc City, Leyte, Philippines",
+        "directionsUrl": "https://www.google.com/maps/dir/?api=1&destination=ACLC%20College%20of%20Ormoc%2C%20Lilia%20Avenue%2C%20Ormoc%20City%2C%20Leyte%2C%20Philippines",
+        "landmarkMapUrl": "https://www.google.com/maps/search/?api=1&query=ACLC%20College%20of%20Ormoc%2C%20Lilia%20Avenue%2C%20Ormoc%20City%2C%20Leyte%2C%20Philippines",
+        "locationHandoff": "Preserve the ACLC trial/diagnostic display coordinate and entrance point already configured in the application. This content package cannot independently confirm those numerical coordinates. Do not use geofence centroid as the entrance; preserve the raw approved D10 geometry separately."
+      },
+      "requiresGuide": false,
+      "visitorGuide": {
+        "en": {
+          "arrival": "Navigate to ACLC College of Ormoc on Lilia Avenue in Barangay Cogon. Use the school's designated visitor entrance and ask the guard or reception before proceeding. The entrance-arrival reminder is separate from the nearby approved AR polygon.",
+          "bestTime": "Come during a school-approved visiting period, preferably in daylight. Contact the school before traveling: academic calendars, examinations, holidays and campus access may change. Do not assume public-tour hours.",
+          "activities": [
+            "Observe the campus exterior respectfully from an authorized public area.",
+            "Ask the admissions office about programs and school life if staff are available and approve the visit.",
+            "Attend a campus event or guided visit only when formally open to visitors.",
+            "Explore the ARgala history exhibit from its independently approved AR activation area, without entering restricted school spaces."
+          ],
+          "preparation": [
+            "Confirm the reason for your visit and any appointment or visitor-registration requirement with the school.",
+            "Bring identification if the school requests it, and follow dress and conduct requirements.",
+            "Keep your phone charged, respect lessons and privacy, and allow time for traffic around Lilia Avenue."
+          ],
+          "safety": [
+            "This is an operating school, not an unrestricted tourist attraction. Do not cross a gate, enter classrooms or access staff areas without authorization.",
+            "Never photograph or record students, children, staff or school documents without appropriate consent and permission.",
+            "Stop walking before using AR. Stay out of vehicle lanes, driveways and emergency routes; obey guards, signs and staff instructions.",
+            "A geofence AR unlock is not permission to enter school property."
+          ]
+        },
+        "ja": {
+          "arrival": "オルモック市コゴン地区のリリア通りにあるACLCカレッジを目指してください。学校が指定する来訪者入口を使い、先へ進む前に警備員または受付に確認してください。入口到着の通知と、別に承認されたAR起動区域は異なります。",
+          "bestTime": "学校が訪問を許可している時間帯、できれば明るい時間に訪れてください。授業日程、試験、休校日、立ち入り条件は変わるため、出発前に学校へ確認してください。一般向け見学時間があるとは限りません。",
+          "activities": [
+            "許可された公共の場所からキャンパスの外観を静かに見学する。",
+            "担当者が対応でき、訪問が許可された場合に限り、入学担当窓口で学科や学校生活について尋ねる。",
+            "一般来訪者向けに正式に公開された行事や案内付き見学に参加する。",
+            "立ち入り禁止区域へ入らず、独立して承認されたAR起動区域からARgalaの歴史展示を見る。"
+          ],
+          "preparation": [
+            "訪問目的と、予約や来訪者登録が必要かどうかを学校に確認してください。",
+            "求められる場合は身分証を用意し、服装や行動の規則に従ってください。",
+            "携帯電話を充電し、授業とプライバシーを尊重し、リリア通りの交通状況にも余裕を持ってください。"
+          ],
+          "safety": [
+            "ここは運営中の学校であり、自由に入れる観光施設ではありません。許可なく門を越えたり、教室や職員用区域へ入ったりしないでください。",
+            "適切な同意と許可なく、学生、子ども、職員、学校の書類を撮影・録音しないでください。",
+            "ARを使う前に立ち止まってください。車道、出入口、緊急車両の通路をふさがず、警備員、標識、職員の指示に従ってください。",
+            "AR起動区域に入っても、学校敷地への立ち入り許可にはなりません。"
+          ]
+        },
+        "ko": {
+          "arrival": "오르모크시 코곤 바랑가이의 릴리아 애비뉴에 있는 ACLC 칼리지로 이동하세요. 학교에서 지정한 방문객 출입구를 이용하고 더 들어가기 전에 경비원이나 안내 데스크에 확인하세요. 입구 도착 알림과 별도로 승인된 AR 활성화 구역은 서로 다릅니다.",
+          "bestTime": "학교가 방문을 허용한 시간, 가능하면 낮에 방문하세요. 학사 일정과 시험, 휴교일, 출입 규정은 바뀔 수 있으므로 출발 전에 학교에 문의하세요. 일반인 대상 캠퍼스 투어 시간이 있다고 가정하지 마세요.",
+          "activities": [
+            "허용된 공공장소에서 캠퍼스 외관을 조용히 살펴보세요.",
+            "담당자가 응대할 수 있고 방문이 승인된 경우 입학처에 학과와 학교생활을 문의하세요.",
+            "방문객에게 공식적으로 개방된 행사나 안내 방문에만 참여하세요.",
+            "학교 제한 구역에 들어가지 않고 별도로 승인된 AR 활성화 구역에서 ARgala 역사 전시를 감상하세요."
+          ],
+          "preparation": [
+            "방문 목적과 예약 또는 방문객 등록이 필요한지 학교에 확인하세요.",
+            "학교에서 요청하면 신분증을 준비하고 복장과 행동 수칙을 따르세요.",
+            "휴대전화를 충전하고 수업과 사생활을 존중하며 릴리아 애비뉴 주변 교통 상황을 고려하세요."
+          ],
+          "safety": [
+            "현재 운영 중인 학교이며 누구나 출입할 수 있는 관광지는 아닙니다. 허가 없이 교문을 지나거나 교실, 교직원 구역에 들어가지 마세요.",
+            "적절한 동의와 허가 없이 학생, 미성년자, 직원 또는 학교 문서를 촬영하거나 녹음하지 마세요.",
+            "AR을 사용하기 전 걸음을 멈추세요. 차도, 차량 출입구, 비상 통로를 피하고 경비원과 표지판, 교직원의 안내를 따르세요.",
+            "AR 활성화 구역에 들어갔다고 해서 교내 출입이 허가되는 것은 아닙니다."
+          ]
+        }
+      },
+      "chapters": [
+        {
+          "id": "overview",
+          "title": {
+            "en": "A working campus in Cogon",
+            "ja": "コゴン地区の学びの現場",
+            "ko": "코곤의 살아 있는 캠퍼스"
+          },
+          "body": {
+            "en": "On Lilia Avenue in Barangay Cogon stands ACLC College of Ormoc, a private educational institution recognized in the Commission on Higher Education's regional directory. Its story belongs to Ormoc's everyday life: students come here to learn, prepare for careers and take part in a community of classmates and teachers. Rather than a museum with unrestricted galleries, this is an active school. The most respectful way to encounter it is to look at the campus from an authorized area, follow posted instructions and ask staff before entering. The ARgala exhibit brings the school's documented educational story to you without making school access a condition of discovery.",
+            "ja": "オルモック市コゴン地区のリリア通りに、ACLCカレッジがあります。フィリピン高等教育委員会の地域名簿にも掲載される私立の教育機関です。ここで学生は学び、仕事に備え、同級生や教員とともに学校生活を送っています。自由に展示室を巡れる博物館とは違い、現在も授業が行われる学校です。見学するときは許可された場所から外観を眺め、掲示に従い、敷地に入る前に職員へ確認しましょう。ARgalaの展示なら、学校への立ち入りを必要とせず、記録に基づいた教育の物語に触れられます。",
+            "ko": "오르모크시 코곤 바랑가이의 릴리아 애비뉴에는 ACLC 칼리지가 있습니다. 필리핀 고등교육위원회 지역 명부에 등재된 사립 교육기관입니다. 학생들은 이곳에서 배우고 진로를 준비하며 동료와 교사들과 학교생활을 이어 갑니다. 누구나 전시실을 돌아다니는 박물관이 아니라 지금도 수업이 진행되는 학교입니다. 방문할 때는 허용된 곳에서 외관을 살펴보고 안내문을 따르며 교내에 들어가기 전에 직원에게 문의하세요. ARgala에서는 학교 출입을 전제로 하지 않고 기록에 근거한 교육 이야기를 만날 수 있습니다."
+          },
+          "mediaIds": [
+            "D10-archive-2014"
+          ]
+        },
+        {
+          "id": "chapter-2",
+          "title": {
+            "en": "From computer studies to many pathways",
+            "ja": "コンピューター教育から広がる進路",
+            "ko": "컴퓨터 교육에서 다양한 진로로"
+          },
+          "body": {
+            "en": "ACLC is part of the AMA Education System, whose learning-center branch began with short computer courses in 1986. The Ormoc campus reflects the wider shift toward more varied education. A Department of Education record for school year 2024–2025 lists senior-high academic and technical-vocational specializations and older permits dating back to 2015. A national TESDA register also identifies three-year diploma recognition in web applications development and hotel-and-restaurant technology, alongside office-focused fields. These records show how practical digital skills can sit beside service and business training. Course availability changes, so a prospective student should ask the school about its present offerings rather than treating a historical list as today's prospectus.",
+            "ja": "ACLCはAMA教育システムの一員です。その学習センター部門は1986年に短期のコンピューター講座から始まりました。オルモック校でも、より多様な学びへの広がりが記録されています。教育省の2024〜2025年度資料には、高校上級課程の学術分野と職業技術分野が載り、2015年にさかのぼる許可も示されています。TESDAの全国名簿には、ウェブアプリ開発やホテル・レストラン技術の3年制ディプロマに加え、事務分野の認定記録もあります。こうした資料は、デジタル技術とサービス、ビジネス分野の学びが並ぶ歩みを伝えます。ただし開講状況は変わるため、最新情報は学校に確認してください。",
+            "ko": "ACLC는 AMA 교육 시스템에 속합니다. 이 학습센터 계열은 1986년 단기 컴퓨터 강좌에서 출발했습니다. 오르모크 캠퍼스의 기록에서도 교육 분야가 넓어지는 모습을 볼 수 있습니다. 교육부의 2024~2025학년도 자료에는 고등학교 상급 과정의 일반·기술직업 분야와 2015년까지 거슬러 올라가는 허가 기록이 나옵니다. TESDA의 전국 명부에는 웹 애플리케이션 개발, 호텔·레스토랑 기술의 3년제 디플로마와 사무 분야의 인정 기록도 실려 있습니다. 이는 디지털 기술과 서비스, 비즈니스 교육이 함께 발전해 온 흔적입니다. 개설 과정은 바뀔 수 있으므로 최신 정보는 학교에 확인하세요."
+          },
+          "mediaIds": []
+        },
+        {
+          "id": "chapter-3",
+          "title": {
+            "en": "Skills beyond the classroom",
+            "ja": "教室の外で試される技能",
+            "ko": "교실 밖에서 펼치는 실력"
+          },
+          "body": {
+            "en": "Technical learning also has a public stage. In August 2023, the Philippine Information Agency reported ACLC Ormoc entrants in the Leyte Provincial Skills Competition, including IT Network Systems Administration and Web Technologies. The 2025 WorldSkills ASEAN Manila roster later listed an Ormoc-linked competitor, Nixon Marc Enerez, representing the Philippines in IT Network Systems Administration. These are records of participation, not proof of a medal or a permanent school ranking. They nevertheless make an inviting connection: skills practiced in classrooms and workshops can be tested before a wider community. When viewing this exhibit, think of the students currently working through problems, projects and aspirations on the campus nearby.",
+            "ja": "技術を学ぶ機会は教室の外にも広がっています。2023年8月、フィリピン情報局はレイテ州の技能競技会にACLCオルモック校の参加者がいたことを報じました。競技分野にはITネットワークシステム管理やウェブ技術が含まれます。2025年のWorldSkills ASEAN Manilaの名簿には、オルモック校とのつながりが報じられたニクソン・マーク・エネレスが、フィリピン代表のITネットワークシステム管理の出場者として掲載されています。これは参加の記録であり、メダル獲得や学校の順位を示すものではありません。それでも、授業や実習で磨いた力が、より広い場で試されることを教えてくれます。",
+            "ko": "기술을 배우는 무대는 교실 밖으로도 이어집니다. 2023년 8월 필리핀 정보국은 레이테 지방 기능경기대회에 ACLC 오르모크 학생들이 참가했다고 보도했습니다. 종목에는 IT 네트워크 시스템 관리와 웹 기술이 포함됐습니다. 2025년 WorldSkills ASEAN Manila 참가자 명단에는 오르모크 학교와의 연관성이 보도된 닉슨 마크 에네레스가 필리핀 IT 네트워크 시스템 관리 대표로 올라 있습니다. 이는 참가 기록일 뿐 메달 수상이나 학교 순위의 증거는 아닙니다. 하지만 수업과 실습에서 기른 능력이 더 넓은 무대에서 시험받을 수 있다는 점을 보여 줍니다. 전시를 보며 지금도 가까운 캠퍼스에서 과제와 꿈을 키우는 학생들을 떠올려 보세요."
+          },
+          "mediaIds": []
+        }
+      ],
+      "gallery": [
+        "D10-archive-2014"
+      ],
+      "coverMediaId": "D10-archive-2014"
     }
   ],
   "media": [
@@ -2364,6 +2506,28 @@
       "width": 1200,
       "height": 900,
       "sha256": "6114a4aace05fb3ee42019564f97227958644d8c9be97c50c6b28ddd3a5962bf"
+    },
+    {
+      "id": "D10-archive-2014",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-archive-2014.jpg",
+      "credit": "Ormoc ACLC-associated school gallery (2014); individual photographer not identified; staff permission reported for this school-only project",
+      "sourceUrl": "https://ormocaclc.wordpress.com/gallery/",
+      "caption": {
+        "en": "A school graduation group pictured in Ormoc ACLC’s 2014 public gallery; archival school life, not a current campus portrait.",
+        "ja": "2014年に公開されたオルモックACLC関連の写真ギャラリーに掲載された卒業生の集合写真。現在の校舎を示す写真ではありません。",
+        "ko": "2014년 공개된 오르모크 ACLC 관련 사진 갤러리의 졸업 단체 사진입니다. 현재 캠퍼스 건물 사진은 아닙니다."
+      },
+      "alt": {
+        "en": "Archival photograph of a college graduation group on stage, with ACLC College signage behind them.",
+        "ja": "背後にACLC Collegeの表示がある舞台上で撮影された、過去の卒業生の集合写真。",
+        "ko": "뒤편에 ACLC College 표지가 있는 무대에서 촬영한 과거 졸업 단체 사진."
+      },
+      "width": 612,
+      "height": 612,
+      "sha256": "ae7e7664587b316dc52eee28975f612edc240ec9d1dcc01f3fcc8d61db9229e9",
+      "licenseUrl": "https://ormocaclc.wordpress.com/gallery/",
+      "usageScope": "Nonpublic school demonstration only, per owner report of staff permission; photographer rights otherwise unverified"
     }
   ]
 }

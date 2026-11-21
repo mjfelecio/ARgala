@@ -11,7 +11,7 @@ export type ExhibitStageProfile = Readonly<{
   destinationId: DestinationId;
   galleryId: string;
   media: readonly DestinationMedia[];
-  theme: 'shoreline' | 'fern' | 'basin' | 'roots' | 'fields' | 'fairway' | 'ridges' | 'garden' | 'coast';
+  theme: 'shoreline' | 'fern' | 'basin' | 'roots' | 'fields' | 'fairway' | 'ridges' | 'garden' | 'coast' | 'campus';
   gallery: readonly [x: number, y: number, forward: number];
   stations: readonly (readonly [x: number, y: number, forward: number])[];
   photoIslands?: readonly Readonly<{ angle: number; mediaIds: readonly [string] | readonly [string, string] }>[];
@@ -34,6 +34,7 @@ const stages: Readonly<Record<DestinationId, ExhibitStageProfile>> = Object.free
   D06: profile('D06', 'fairway', [-0.04, 0.2, 2.4], [[-0.46, -0.55, 2.16], [0.46, -0.6, 2.27]]),
   D07: profile('D07', 'ridges', [0.04, 0.26, 2.45], [[-0.44, -0.68, 2.27], [0.44, -0.5, 2.14]]),
   D08: profile('D08', 'garden', [0, 0.23, 2.4], [[-0.46, -0.6, 2.2], [0.46, -0.6, 2.2]]),
+  D10: profile('D10', 'campus', [0, 0.19, 2.4], []),
   D09: profile('D09', 'coast', [0, 0.19, 2.4], [[-0.45, -0.57, 2.18], [0.45, -0.57, 2.18]]),
 });
 export const danaoStageProfile = stages.D01;

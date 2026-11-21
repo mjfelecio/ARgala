@@ -1,15 +1,31 @@
 import type { Language } from '../../../supabase/functions/_shared/contracts';
 
-export type AudioClip = { source: number; rightsReference: string; approvalReference: string; previewOnly?: true };
+export type ApprovedEffectName = 'reveal' | 'panel_open' | 'page_turn' | 'panel_close' | 'view_switch';
+type AudioReview = { rightsReference: string; approvalReference: string };
+export type AudioAssetClip = AudioReview & { source: number; previewOnly?: true };
+export type AudioClip = AudioAssetClip | (AudioReview & { source: ApprovedEffectName; previewOnly?: never });
 export type AudioCue = AudioClip & { channel: 'voice' | 'effect'; playbackId: number };
 export type AudioEvent = 'initialized' | 'deployed' | 'focused' | 'trackingLost' | 'pageChanged' | 'closed' | 'modeSwitched';
-export type AudioManifest = { voices: Record<Language, AudioClip | null>; effects: Record<Exclude<AudioEvent, 'initialized'>, AudioClip | null> };
+export type AudioManifest = { voices: Record<Language, AudioAssetClip | null>; effects: Record<Exclude<AudioEvent, 'initialized'>, AudioClip | null> };
 export type AudioPreferences = { systemVoice: boolean; soundEffects: boolean };
+
+const approvedEffect = (source: ApprovedEffectName): AudioClip => ({
+  source,
+  rightsReference: 'docs/content/final-handoff-2026-11-19/audio/audio-review.json',
+  approvalReference: 'Owner-approved original effects, 2026-11-19',
+});
 
 /** Each recording requires rights and release review. Missing locale clips stay silent. */
 export const approvedSystemAudio: AudioManifest = {
   voices: { en: null, ja: null, ko: null },
-  effects: { deployed: null, focused: null, trackingLost: null, pageChanged: null, closed: null, modeSwitched: null },
+  effects: {
+    deployed: approvedEffect('reveal'),
+    focused: approvedEffect('panel_open'),
+    pageChanged: approvedEffect('page_turn'),
+    closed: approvedEffect('panel_close'),
+    modeSwitched: approvedEffect('view_switch'),
+    trackingLost: null,
+  },
 };
 
 export class ArSystemAudio {
@@ -49,7 +65,7 @@ export class ArSystemAudio {
     if (!enabled || this.cue && (!voice || this.cue.channel === 'voice')) return;
 
     const clip = voice ? this.manifest.voices[language] : this.manifest.effects[event];
-    if (!clip || clip.previewOnly && !this.allowPreview || !Number.isSafeInteger(clip.source) || clip.source <= 0 || !clip.rightsReference.trim() || !clip.approvalReference.trim()) return;
+    if (!clip || clip.previewOnly && !this.allowPreview || typeof clip.source === 'number' && (!Number.isSafeInteger(clip.source) || clip.source <= 0) || !clip.rightsReference.trim() || !clip.approvalReference.trim()) return;
 
     // Voice replaces any current effect. A keyed native player owns each cue,
     // and completion from the previous player cannot finish its replacement.

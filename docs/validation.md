@@ -1,5 +1,28 @@
 # Foundation validation
 
+## Final school content handoff — 2026-11-21
+
+The archive checksum manifest passed. A separate byte comparison matched 25
+integrated files to their originals, including the GeoJSON, its label sidecar,
+all nine History visuals, all five effect WAVs and the three-locale voice
+script. The GeoJSON and its Metro mirror share the same SHA-256. Catalog
+regressions compare the original nine destination records and 53 presentation
+media records to their approved baselines. GPS tests cover entrance-only and
+polygon-only admission, uncertain samples, rearm and fresh startup validation.
+Showcase regressions cover the D10 archival gallery and school capture rules.
+
+`npm run check` passed TypeScript, zero-warning ESLint and **1,783 tests across
+155 files**. The Android JavaScript export, SDK configuration, dependency check,
+Expo Doctor (21/21), native patch guards, Viro touch suite and Android module
+autolinking passed. Edge checks and local PostgreSQL journal, content and limiter
+suites passed.
+
+The D10 SQL migration is ready to apply to the configured backend. APK
+packaging, Galaxy A53 audio and AR acceptance, and in-person verification of the
+approximate D10 entrance are pending. See the
+[final school handoff](content/final-handoff-2026-11-19/README.md) for recording
+status and media scope.
+
 ## Featured AR, arrival and visitor flows — 2026-11-18
 
 Feature regressions exercise the catalog-to-details navigation and both map

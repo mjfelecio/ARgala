@@ -103,7 +103,8 @@ it('rechecks the latest raw approved-radius reading at pending mount and trackin
 it('claims the unlock once per principal, destination and corroborated visit', () => {
  const featured = syntheticApprovedDestination();
  let available = false;
- const store = new ArAdmissionStore('owner', id => id === 'D01' && available ? featured : getDestination(id), syntheticFeaturedGeofence);
+ const unavailable = { ...featured, ar: undefined };
+ const store = new ArAdmissionStore('owner', id => id === 'D01' ? available ? featured : unavailable : getDestination(id), syntheticFeaturedGeofence);
  const report = (lease: number, timestamp: number, longitude = 0) => {
   vi.mocked(Date.now).mockReturnValue(timestamp);
   store.publish(lease, { running: true, watcherStatus: 'ready', sample: { position: { ...syntheticArrivalPoint, longitude }, accuracy: 5, timestamp } });

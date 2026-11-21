@@ -1,0 +1,44 @@
+{
+  "scriptSetId": "A-VOICE-READY",
+  "version": "2026-11-18-draft-1",
+  "purpose": "Original exhibit-ready cue for editorial review; one shared intent for Showcase and on-site presentation, without claiming arrival, permission, or safety to move.",
+  "status": "owner_approved_scripts_recordings_not_yet_produced",
+  "assetsProduced": [],
+  "recordingDirection": "One voice, conversational volume, friendly and unhurried. Pause briefly between sentences. Invite looking, not walking. Do not add a place name or imply that the device has verified arrival.",
+  "scripts": [
+    {
+      "feedbackId": "A-VOICE-EN",
+      "locale": "en",
+      "line": "Your exhibit is ready. Look around to explore.",
+      "pronunciationReview": "Exhibit: stress the second syllable (ig-ZIB-it). Let ‘look around’ sound like an invitation rather than a movement command.",
+      "nativeReviewer": null,
+      "nativeReviewStatus": "pending",
+      "reviewDate": null,
+      "approvedTakeId": null,
+      "ownerApproved": true
+    },
+    {
+      "feedbackId": "A-VOICE-JA",
+      "locale": "ja",
+      "line": "展示の準備ができました。周りに目を向けてみましょう。",
+      "pronunciationReview": "展示＝てんじ、準備＝じゅんび、周り＝まわり、目を向けて＝めをむけて。Native reviewer: confirm the invitation sounds natural as a no-walking AR cue.",
+      "nativeReviewer": null,
+      "nativeReviewStatus": "pending",
+      "reviewDate": null,
+      "approvedTakeId": null,
+      "ownerApproved": true
+    },
+    {
+      "feedbackId": "A-VOICE-KO",
+      "locale": "ko",
+      "line": "전시가 준비됐습니다. 주위를 둘러보세요.",
+      "pronunciationReview": "Read ‘준비됐습니다’ smoothly; pause at the full stop. Native reviewer: check natural phrasing and that ‘둘러보세요’ suggests looking around without requiring movement.",
+      "nativeReviewer": null,
+      "nativeReviewStatus": "pending",
+      "reviewDate": null,
+      "approvedTakeId": null,
+      "ownerApproved": true
+    }
+  ],
+  "ownerApprovedOn": "2026-11-19"
+}

@@ -1,0 +1,834 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "2026-11-19-10-history-handoff-v1",
+  "baselineContentVersion": "2026-11-13-presentation-v1",
+  "purpose": "Research and editorial review only; not a runtime locale patch or release approval.",
+  "locales": [
+    "en",
+    "ja",
+    "ko"
+  ],
+  "ownerReview": "D01–D09 approved as-is; D10 proposed new content",
+  "independentNativeLanguageReview": "pending",
+  "approvedForOnsiteDistribution": false,
+  "entries": [
+    {
+      "destinationId": "D01",
+      "feedbackId": "H-D01",
+      "contentId": "D01-history",
+      "proposedPanelId": "history",
+      "researchStatus": "documented_history_draft",
+      "historyType": "Protection and scientific mapping",
+      "title": {
+        "en": "Two ways of mapping a lake",
+        "ja": "湖を描いた二つの地図",
+        "ko": "호수를 그린 두 가지 지도"
+      },
+      "text": {
+        "en": "In 1998, the legal description of Lake Danao Natural Park followed more than the shoreline. President Fidel V. Ramos’s proclamation traced parts of its boundary along Hagimit Creek and the Binahaan River, protecting both the lake and its surroundings. In July 2022, a University of the Philippines team made a different kind of map. They crossed the lake in a zigzag pattern, recording its depth with sonar. Their underwater map showed a narrow channel linking a smaller, shallower basin in the northwest to a wider, deeper one.",
+        "ja": "1998年、ダナオ湖自然公園の境界を定める際、目印になったのは湖岸だけではありません。フィデル・V・ラモス大統領の布告は、境界の一部をハギミット川とビナハアン川の流れに沿って定め、湖とその周辺をともに保護の対象としました。2022年7月、フィリピン大学の調査チームが描いたのは、もう一つの地図です。湖面をジグザグに進み、音波で水深を測りました。こうして浮かび上がった湖底の地形を見ると、北西の小さく浅いくぼみが、細い水路を通じて、より広く深いくぼみにつながっています。",
+        "ko": "1998년 다나오 호수 자연공원의 경계를 정할 때 기준이 된 것은 호숫가만이 아니었습니다. 피델 V. 라모스 대통령의 포고령은 경계 일부를 하기미트 개울과 비나하안강의 물길을 따라 정해 호수와 그 주변을 함께 보호하도록 했습니다. 2022년 7월, 필리핀대학교 조사팀은 전혀 다른 지도를 만들었습니다. 호수를 지그재그로 가로지르며 음파로 수심을 측정한 것입니다. 그렇게 그린 호수 바닥 지도에는 북서쪽의 작고 얕은 분지와 그보다 넓고 깊은 분지, 그리고 둘을 잇는 좁은 물길이 나타났습니다."
+      },
+      "claims": [
+        {
+          "id": "D01-C01",
+          "sentences": [
+            1,
+            2
+          ],
+          "summary": "1998 natural-park designation and watercourse-based legal boundary",
+          "sourceIds": [
+            "H01"
+          ]
+        },
+        {
+          "id": "D01-C02",
+          "sentences": [
+            3,
+            4,
+            5
+          ],
+          "summary": "July 2022 UP field survey, sonar route and two connected basins",
+          "sourceIds": [
+            "H02"
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "The 1998 milestone overlaps existing chapter-3; the 2022 mapping story adds new content. Do not rewrite or delete the original chapter automatically.",
+        "The 1998 protected-area description is not an AR visitor-area polygon.",
+        "No numerical depth, lake area, geological origin, water-quality or swimming-safety claim is added."
+      ],
+      "excludedClaims": [
+        "A folktale belonging to another Lake Danao in Southern Leyte",
+        "An unverified 1972 founding narrative",
+        "Any claim that the whole protected park is safe for handheld AR"
+      ],
+      "name": {
+        "en": "Lake Danao Natural Park",
+        "ja": "ダナオ湖自然公園",
+        "ko": "다나오 호수 자연공원"
+      },
+      "englishWordCount": 87,
+      "ownerReview": "pending",
+      "nativeLanguageReview": {
+        "en": "pending",
+        "ja": "pending",
+        "ko": "pending"
+      },
+      "approvedForOnsiteDistribution": false,
+      "oralTraditionIncluded": false,
+      "historyMediaReferences": [
+        "HI-D01-01"
+      ],
+      "ownerApprovedAsIsOn": "2026-11-19",
+      "approvalStatus": "owner_approved_existing_text"
+    },
+    {
+      "destinationId": "D02",
+      "feedbackId": "H-D02",
+      "contentId": "D02-history",
+      "proposedPanelId": "history",
+      "researchStatus": "documented_natural_history_draft",
+      "historyType": "A botanical collection and a new species description",
+      "title": {
+        "en": "A tiny plant with a long story",
+        "ja": "小さな植物の長い物語",
+        "ko": "작은 식물에 담긴 긴 이야기"
+      },
+      "text": {
+        "en": "On 23 August 2000, Felix Schumm and Uwe Schwarz collected a tiny pale-green plant growing on bark in the area around Lake Kasudsuran. In 2023, Schwarz and two colleagues used that specimen to describe a new species of leafy liverwort, Bazzania globuliformis. Its name comes from the shape of its leaves when they dry: they curl inward until they look almost round. The researchers compared the effect to a string of pearls. When they published the description, this one collection was the only record of the species they knew.",
+        "ja": "2000年8月23日、フェリックス・シュムとウーヴェ・シュヴァルツは、カスドゥスラン湖の周辺で木の皮に生えていた淡い緑色の小さな植物を採集しました。2023年、シュヴァルツら3人はこの標本をもとに、茎に葉がつく苔類（たいるい）の新種として Bazzania globuliformis を発表しました。名前の由来は、乾いたときの葉の形です。一枚一枚が内側に巻き、丸い粒のようになります。研究者たちはその様子を、糸に通した真珠にたとえました。発表当時、この種について研究者たちが把握していた採集記録は、この一例だけでした。",
+        "ko": "2000년 8월 23일, 펠릭스 슘과 우베 슈바르츠는 카수드수란 호수 주변에서 나무껍질에 자라는 연녹색의 작은 식물을 채집했습니다. 2023년 슈바르츠와 동료 두 명은 이 표본을 바탕으로 줄기에 잎이 달리는 간류의 신종 Bazzania globuliformis를 학계에 발표했습니다. 이름의 실마리는 마른 잎의 모양에 있습니다. 잎이 안으로 말리면 동그란 알갱이처럼 보입니다. 연구자들은 그 모습을 실에 꿴 진주에 비유했습니다. 발표 당시 연구자들이 알고 있던 이 종의 채집 기록은 이 한 건뿐이었습니다."
+      },
+      "claims": [
+        {
+          "id": "D02-C01",
+          "sentences": [
+            1
+          ],
+          "summary": "Named collectors, 23 August 2000 and bark habitat around the lake",
+          "sourceIds": [
+            "H03",
+            "H04"
+          ]
+        },
+        {
+          "id": "D02-C02",
+          "sentences": [
+            2
+          ],
+          "summary": "2023 original description of Bazzania globuliformis from the collection",
+          "sourceIds": [
+            "H03"
+          ]
+        },
+        {
+          "id": "D02-C03",
+          "sentences": [
+            3,
+            4,
+            5
+          ],
+          "summary": "Dry leaf shape, etymology, comparison and type-only record at publication",
+          "sourceIds": [
+            "H03"
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "This is documented natural history, not a founding story or an oral tradition.",
+        "Keep the scientific name italic in display if supported. Do not invent a Japanese or Korean common name.",
+        "The specimen label uses a different barangay name; it does not override the locally confirmed Ga-as visitor route. Specimen coordinates are deliberately not republished as a visitor location.",
+        "Do not identify any existing photograph as this species without expert confirmation."
+      ],
+      "excludedClaims": [
+        "Endemic only to this lake",
+        "Still present or readily visible to visitors",
+        "Extinct",
+        "First discovery of the lake",
+        "Exact collection tree or visitor route"
+      ],
+      "name": {
+        "en": "Lake Kasudsuran",
+        "ja": "カスドゥスラン湖",
+        "ko": "카수드수란 호수"
+      },
+      "englishWordCount": 89,
+      "ownerReview": "pending",
+      "nativeLanguageReview": {
+        "en": "pending",
+        "ja": "pending",
+        "ko": "pending"
+      },
+      "approvedForOnsiteDistribution": false,
+      "oralTraditionIncluded": false,
+      "historyMediaReferences": [
+        "HI-D02-01"
+      ],
+      "ownerApprovedAsIsOn": "2026-11-19",
+      "approvalStatus": "owner_approved_existing_text"
+    },
+    {
+      "destinationId": "D03",
+      "feedbackId": "H-D03",
+      "contentId": "D03-history",
+      "proposedPanelId": "history",
+      "researchStatus": "documented_history_draft",
+      "historyType": "Community advocacy and wetland records",
+      "title": {
+        "en": "A lake people spoke up for",
+        "ja": "湖を守ろうと声を上げた人々",
+        "ko": "호수를 위해 목소리를 낸 사람들"
+      },
+      "text": {
+        "en": "In April 2018, Hanzel Federicos started a petition asking officials to change the route of a proposed road toward Lake Janagdan. The petition described the lake as a water source for Cabintan and asked that the road serve farmers without cutting through forest. That year, the Eastern Visayas Regional Development Council endorsed shifting road funds from the Janagdan project to access roads serving other destinations. The lake also appears in a separate conservation record: the national Biodiversity Management Bureau listed both a wetland assessment and a management plan for Janagdan among the documents it reviewed in 2018.",
+        "ja": "2018年4月、ハンゼル・フェデリコスは、ジャナグダン湖に向かう道路の建設計画について、ルートの変更を当局に求める署名活動を始めました。請願書は湖をカビンタンの水源とし、農家の役に立ち、しかも森を分断しない道を求めています。同じ年、東ビサヤ地域開発評議会は、ジャナグダンの道路事業の予算を、ほかの目的地に通じる道路に振り向ける案を支持しました。自然保護に関する別の記録にも湖の名が残っています。フィリピンの生物多様性管理局が2018年に検討した文書には、この湖の湿地評価書と管理計画の両方が挙げられています。",
+        "ko": "2018년 4월 한젤 페데리코스는 자나그단 호수로 향하는 도로의 예정 노선을 바꿔 달라며 당국에 낼 청원의 서명을 받기 시작했습니다. 청원서는 호수가 카빈탄의 수원이라고 설명하고, 숲을 가르지 않으면서 농민에게 도움이 되는 노선을 요청했습니다. 그해 동부 비사야 지역개발협의회는 자나그단 도로 사업 예산을 다른 목적지로 통하는 진입로에 돌리는 안을 지지했습니다. 호수의 이름은 별도의 자연보전 기록에도 나옵니다. 필리핀 생물다양성관리국은 2018년에 검토한 문서로 자나그단의 습지 평가서와 관리 계획을 모두 꼽았습니다."
+      },
+      "claims": [
+        {
+          "id": "D03-C01",
+          "sentences": [
+            1,
+            2
+          ],
+          "summary": "Petition author, month, stated water concern and rerouting objective",
+          "sourceIds": [
+            "H05"
+          ]
+        },
+        {
+          "id": "D03-C02",
+          "sentences": [
+            3
+          ],
+          "summary": "RDC VIII Resolution 89/2018 endorsed fund realignment",
+          "sourceIds": [
+            "H06"
+          ]
+        },
+        {
+          "id": "D03-C03",
+          "sentences": [
+            4
+          ],
+          "summary": "BMB reported review of a Janagdan wetland assessment and management plan",
+          "sourceIds": [
+            "H07"
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "Some 2018 road history overlaps existing chapter-2; the named petition and BMB records add detail.",
+        "The petition is primary evidence of campaigners’ claims, not a hydrological or geological assessment.",
+        "Council endorsement does not prove money was transferred or works completed. Review of a management plan does not prove its adoption.",
+        "The official council register was retrieved through indexed text; direct fetch returned 403. Obtain the signed resolution if publication requires a certified record."
+      ],
+      "excludedClaims": [
+        "The petition alone caused the decision",
+        "Current drinking-water safety",
+        "Verified volcanic origin or Hanagdan alias",
+        "A current blanket road or visitor-access ban"
+      ],
+      "name": {
+        "en": "Lake Janagdan",
+        "ja": "ジャナグダン湖",
+        "ko": "자나그단 호수"
+      },
+      "englishWordCount": 97,
+      "ownerReview": "pending",
+      "nativeLanguageReview": {
+        "en": "pending",
+        "ja": "pending",
+        "ko": "pending"
+      },
+      "approvedForOnsiteDistribution": false,
+      "oralTraditionIncluded": false,
+      "historyMediaReferences": [
+        "HI-D03-01"
+      ],
+      "ownerApprovedAsIsOn": "2026-11-19",
+      "approvalStatus": "owner_approved_existing_text"
+    },
+    {
+      "destinationId": "D04",
+      "feedbackId": "H-D04",
+      "contentId": "D04-history",
+      "proposedPanelId": "history",
+      "researchStatus": "documented_history_draft",
+      "historyType": "Community mangrove restoration",
+      "title": {
+        "en": "A shoreline rebuilt together",
+        "ja": "みんなで育て直した海岸の森",
+        "ko": "함께 되살린 바닷가 숲"
+      },
+      "text": {
+        "en": "The mangroves at Naungan carry a history of community restoration. In 2000, the Naungan–San Juan Mangrove Planters Association received a community forestry agreement from the Department of Environment and Natural Resources. Typhoon Yolanda damaged the plantings and destroyed seedling nurseries in 2013. The following year, a cash-for-work project paid workers to clear storm damage and build a mangrove nursery. In 2017, the city and its partners developed the Naungan–San Juan Mangrove Reserve and Bird Sanctuary for ecotourism. The visitor landscape grew from continuing work to restore and care for the coast.",
+        "ja": "ナウンガンのマングローブ林には、地域の人々が海岸を再生してきた歴史があります。2000年、ナウンガン・サンフアン・マングローブ植林者協会は、フィリピン環境天然資源省と、地域住民による森林管理の協定を結びました。2013年には台風ヨランダが植えた木々を傷め、苗を育てる施設を壊しました。翌年、復旧作業に賃金を支払う事業で、人々は台風の後片付けをし、マングローブの苗畑を造りました。2017年にはオルモック市と協力団体が、ナウンガン・サンフアンのマングローブ保護区・野鳥保護区をエコツーリズムの場として整備しました。海岸を再生し、手入れを続けてきた人々の仕事が、訪れる人を迎えるこの風景を育てたのです。",
+        "ko": "나웅안의 맹그로브 숲에는 주민들이 해안을 되살려 온 역사가 깃들어 있습니다. 2000년 나웅안·산후안 맹그로브 식재자 협회는 필리핀 환경천연자원부와 지역사회 산림 관리 협약을 맺었습니다. 2013년 태풍 욜란다가 닥쳐 심어 놓은 나무가 상하고 묘목장이 파괴됐습니다. 이듬해에는 복구 작업에 임금을 지급하는 사업을 통해 사람들이 태풍 잔해를 치우고 맹그로브 묘목장을 조성했습니다. 2017년 오르모크시와 협력 단체들은 나웅안·산후안 맹그로브·조류 보호구역을 생태관광지로 정비했습니다. 방문객이 만나는 이 풍경은 해안을 복원하고 꾸준히 돌봐 온 사람들의 손에서 자라났습니다."
+      },
+      "claims": [
+        {
+          "id": "D04-C01",
+          "sentences": [
+            1,
+            2
+          ],
+          "summary": "Association’s community forestry work and 2000 agreement",
+          "sourceIds": [
+            "H08",
+            "H09"
+          ]
+        },
+        {
+          "id": "D04-C02",
+          "sentences": [
+            3,
+            4
+          ],
+          "summary": "Haiyan/Yolanda damage and 2014 clearing/nursery work",
+          "sourceIds": [
+            "H08"
+          ]
+        },
+        {
+          "id": "D04-C03",
+          "sentences": [
+            5,
+            6
+          ],
+          "summary": "2017 ecotourism initiative and restoration context",
+          "sourceIds": [
+            "H08",
+            "H09"
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "Historical theme overlaps existing chapter-2; retain chapter/media bindings and decide placement during editorial review.",
+        "The forestry-agreement area is not the eco-park’s visitor footprint.",
+        "Do not conflate the existing park with proposed Suroyan/Ormoc Estuary development.",
+        "Confirm association naming and the relationship between the reserve name and the app’s park name with the local reviewer."
+      ],
+      "excludedClaims": [
+        "Exact founding or boardwalk opening date",
+        "Uniform history for every hectare of present mangrove",
+        "Proposed facilities presented as completed"
+      ],
+      "name": {
+        "en": "Ormoc Mangrove Eco-Park",
+        "ja": "オルモック・マングローブ・エコパーク",
+        "ko": "오르모크 맹그로브 생태공원"
+      },
+      "englishWordCount": 91,
+      "ownerReview": "pending",
+      "nativeLanguageReview": {
+        "en": "pending",
+        "ja": "pending",
+        "ko": "pending"
+      },
+      "approvedForOnsiteDistribution": false,
+      "oralTraditionIncluded": false,
+      "historyMediaReferences": [
+        "HI-D04-01"
+      ],
+      "ownerApprovedAsIsOn": "2026-11-19",
+      "approvalStatus": "owner_approved_existing_text"
+    },
+    {
+      "destinationId": "D05",
+      "feedbackId": "H-D05",
+      "contentId": "D05-history",
+      "proposedPanelId": "history",
+      "researchStatus": "regional_context_only_draft",
+      "historyType": "Local cultural history, not the founding of this plantation",
+      "title": {
+        "en": "Local history: Ormoc’s pineapple",
+        "ja": "地域の歴史：オルモックのパイナップル",
+        "ko": "지역의 역사: 오르모크의 파인애플"
+      },
+      "text": {
+        "en": "Ormoc’s connection with pineapple farming predates its modern festival. A 2001 study of land use on Leyte described pineapple and sugarcane as crops grown on a large scale around Ormoc. On 25 June 2017, the city held its first Piña Festival to celebrate its pineapple harvest. STI College Ormoc’s performers won both the street-dancing competition and the festival showdown. These records trace two sides of the fruit’s local story: farming in the surrounding countryside and a public celebration that brought pineapple into the heart of city life.",
+        "ja": "オルモックとパイナップル栽培の結びつきは、今の祭りが始まる前からありました。2001年に発表されたレイテ島の土地利用に関する研究には、オルモック周辺でパイナップルとサトウキビが大規模に栽培されていたとあります。2017年6月25日、市はパイナップルの収穫を祝って初のピニャ祭りを開きました。街頭で踊りを競う部門でも、祭りのショーダウンと呼ばれる競演でも、優勝したのはSTIカレッジ・オルモックのチームです。郊外の畑で育てられ、街では祭りの主役になる。二つの記録は、この果物がオルモックの暮らしとどう結びついてきたかを伝えています。",
+        "ko": "오르모크와 파인애플 농사의 인연은 오늘날의 축제보다 오래됐습니다. 레이테섬의 토지 이용을 다룬 2001년 연구에는 오르모크 일대에서 파인애플과 사탕수수를 대규모로 재배했다고 나옵니다. 2017년 6월 25일, 시는 파인애플 수확을 기념해 첫 피냐 축제를 열었습니다. 거리 춤 경연과 축제의 ‘쇼다운’ 경연 모두 STI 칼리지 오르모크 공연팀이 우승했습니다. 도시 주변의 농촌에서는 작물로, 도시 한복판에서는 축제의 주인공으로 만나는 과일. 이 두 기록은 파인애플이 오르모크 사람들의 삶에 자리 잡은 두 모습을 보여 줍니다."
+      },
+      "claims": [
+        {
+          "id": "D05-C01",
+          "sentences": [
+            1,
+            2
+          ],
+          "summary": "2001 study documented large-scale pineapple and sugarcane around Ormoc",
+          "sourceIds": [
+            "H10"
+          ]
+        },
+        {
+          "id": "D05-C02",
+          "sentences": [
+            3,
+            4
+          ],
+          "summary": "First Piña Festival date, harvest purpose and STI’s competition results",
+          "sourceIds": [
+            "H11"
+          ]
+        },
+        {
+          "id": "D05-C03",
+          "sentences": [
+            5
+          ],
+          "summary": "Editorial synthesis of agricultural and festival records, not parcel history",
+          "sourceIds": [
+            "H10",
+            "H11"
+          ],
+          "type": "editorial_synthesis"
+        }
+      ],
+      "reviewNotes": [
+        "DECISION NEEDED: approve explicitly labeled local-history context, or retain the History placeholder until the operator supplies the plantation’s own history.",
+        "No authenticated founding history for the exact Biliboy parcel was located.",
+        "Do not transfer a SAL/Hibunawon ownership narrative from a different or ambiguously identified plantation.",
+        "The existing D05 chapter-2 already discusses the Piña Festival; review overlap before adding this panel."
+      ],
+      "excludedClaims": [
+        "Farm founding date",
+        "Founder or current landowner",
+        "Giant-sculpture unveiling date",
+        "Cultivar and acreage of this specific field"
+      ],
+      "name": {
+        "en": "Sal’s Pineapple Plantation",
+        "ja": "サルズ・パイナップル農園",
+        "ko": "살스 파인애플 농장"
+      },
+      "englishWordCount": 87,
+      "ownerReview": "pending",
+      "nativeLanguageReview": {
+        "en": "pending",
+        "ja": "pending",
+        "ko": "pending"
+      },
+      "approvedForOnsiteDistribution": false,
+      "oralTraditionIncluded": false,
+      "historyMediaReferences": [
+        "HI-D05-01"
+      ],
+      "ownerApprovedAsIsOn": "2026-11-19",
+      "approvalStatus": "owner_approved_existing_text"
+    },
+    {
+      "destinationId": "D06",
+      "feedbackId": "H-D06",
+      "contentId": "D06-history",
+      "proposedPanelId": "history",
+      "researchStatus": "documented_history_draft",
+      "historyType": "Recorded competitions and visiting golfers",
+      "title": {
+        "en": "Golf across the water",
+        "ja": "海を渡ってゴルフへ",
+        "ko": "바다 건너 골프를 치러"
+      },
+      "text": {
+        "en": "Golf competitions were already being held in Ormoc by September 1994. When three Masonic districts gathered in the city for a convention, their sports committee organized golf competitions at Leyte Golf and Country Club. The course also drew players across the water from Cebu. In a 2009 column, a golfer recalled coming to Ormoc at the invitation of his friend Mariano ‘Nonoy’ Tan. His Cebu friends could catch a fast ferry, play eighteen holes and be home the same day. He remembered the meals and the welcome as fondly as the golf.",
+        "ja": "1994年9月にはすでに、オルモックでゴルフ競技が催されていました。フリーメイソンの3地区が市内で大会を開いた際には、スポーツ委員会がレイテ・ゴルフ・アンド・カントリークラブでゴルフ競技を催しています。海の向こうのセブからも、このコースに人が訪れました。あるゴルファーは2009年のコラムで、友人のマリアノ・「ノノイ」・タンに招かれてオルモックを訪ねた思い出をつづっています。セブの仲間は高速フェリーで海を渡り、18ホールを回ってその日のうちに帰れたそうです。ゴルフと同じくらい懐かしく思い出されたのは、一緒に囲んだ食卓と温かいもてなしでした。",
+        "ko": "1994년 9월에는 이미 오르모크에서 골프 경기가 열리고 있었습니다. 프리메이슨 세 지구가 이 도시에서 대회를 열었을 때, 체육위원회는 레이테 골프 앤드 컨트리클럽에서 골프 경기를 마련했습니다. 바다 건너 세부에서도 이 코스를 찾았습니다. 한 골퍼는 2009년 칼럼에서 친구 마리아노 ‘노노이’ 탄의 초대로 오르모크에 왔던 일을 떠올렸습니다. 세부에 사는 그의 친구들은 고속 여객선을 타고 건너와 18홀을 돌고도 그날 집에 돌아갈 수 있었다고 합니다. 그에게는 골프 못지않게 식사와 따뜻한 환대도 좋은 추억으로 남았습니다."
+      },
+      "claims": [
+        {
+          "id": "D06-C01",
+          "sentences": [
+            1,
+            2
+          ],
+          "summary": "September 1994 convention and club golf competitions",
+          "sourceIds": [
+            "H12"
+          ]
+        },
+        {
+          "id": "D06-C02",
+          "sentences": [
+            3,
+            4,
+            5,
+            6
+          ],
+          "summary": "Golfer’s 2009 recollection of invitations, Cebu day trips and hospitality",
+          "sourceIds": [
+            "H13"
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "The first record proves use by 1994, not that the club opened in 1994.",
+        "The ferry trip is a dated personal recollection, not a current timetable or travel recommendation.",
+        "Keep present admission and booking rules separate from these historical accounts."
+      ],
+      "excludedClaims": [
+        "Unverified 1992 founding date",
+        "Course designer",
+        "Current ferry timings or free admission",
+        "Unrelated Cebu tournament described later in the same column"
+      ],
+      "name": {
+        "en": "Leyte Golf and Country Club",
+        "ja": "レイテ・ゴルフ・アンド・カントリークラブ",
+        "ko": "레이테 골프 앤드 컨트리클럽"
+      },
+      "englishWordCount": 92,
+      "ownerReview": "pending",
+      "nativeLanguageReview": {
+        "en": "pending",
+        "ja": "pending",
+        "ko": "pending"
+      },
+      "approvedForOnsiteDistribution": false,
+      "oralTraditionIncluded": false,
+      "historyMediaReferences": [
+        "HI-D06-01"
+      ],
+      "ownerApprovedAsIsOn": "2026-11-19",
+      "approvalStatus": "owner_approved_existing_text"
+    },
+    {
+      "destinationId": "D07",
+      "feedbackId": "H-D07",
+      "contentId": "D07-history",
+      "proposedPanelId": "history",
+      "researchStatus": "documented_history_draft",
+      "historyType": "Geothermal exploration and a recorded climb",
+      "title": {
+        "en": "An old road into mountain history",
+        "ja": "山の歴史を伝える古い道",
+        "ko": "옛길에 남은 산의 역사"
+      },
+      "text": {
+        "en": "One of the old approaches to Alto Peak tells a story about the search for energy beneath Leyte. In 1991 and 1992, crews drilled three exploratory wells in the Alto Peak area to investigate its geothermal resources. In January 1997, the operator reported that it would discontinue development of that sector. In 2010, mountaineer Gideon Lasco described climbing from the Cabintan side with the Nalda family. His party followed an old road toward a disused drilling site before turning onto a steep forest trail. They reached the summit near nightfall and later saw the lights of Ormoc below.",
+        "ja": "アルト・ピークに通じる古い道の一つは、レイテ島の地下にエネルギーを探った時代を伝えています。1991年と1992年、調査隊はアルト・ピーク一帯の地熱資源を調べるため、合わせて3本の調査井を掘りました。1997年1月、事業者はこの区域の開発を打ち切る方針を報告しています。2010年、登山家ギデオン・ラスコは、ナルダ一家とカビンタン側から山に登った体験をつづりました。一行は使われなくなった掘削現場に向かう古い道をたどり、途中から森の中の急な登山道に入りました。山頂に着いたのは日暮れが迫るころ。その後、眼下にオルモックの街の明かりが見えたといいます。",
+        "ko": "알토 피크로 이어지는 옛길 하나에는 레이테섬 땅속에서 에너지를 찾던 시절의 흔적이 남아 있습니다. 1991년과 1992년 조사팀은 알토 피크 일대의 지열 자원을 살피려고 탐사정 세 곳을 뚫었습니다. 1997년 1월, 사업자는 해당 구역의 개발을 중단할 방침이라고 보고했습니다. 2010년 산악인 기데온 라스코는 날다 가족과 함께 카빈탄 쪽에서 산에 오른 이야기를 남겼습니다. 일행은 더 이상 쓰지 않는 시추 현장으로 향하는 옛길을 따라가다가 가파른 숲길로 접어들었습니다. 해 질 무렵 정상에 닿았고, 나중에는 발아래로 오르모크의 불빛이 보였다고 합니다."
+      },
+      "claims": [
+        {
+          "id": "D07-C01",
+          "sentences": [
+            1,
+            2
+          ],
+          "summary": "Alto Peak geothermal exploration and three wells drilled in 1991–92",
+          "sourceIds": [
+            "H14"
+          ]
+        },
+        {
+          "id": "D07-C02",
+          "sentences": [
+            3
+          ],
+          "summary": "Operator’s January 1997 notice of discontinuing Alto Peak-sector development",
+          "sourceIds": [
+            "H15"
+          ]
+        },
+        {
+          "id": "D07-C03",
+          "sentences": [
+            4,
+            5,
+            6
+          ],
+          "summary": "Lasco’s first-person 2010 climb and observations",
+          "sourceIds": [
+            "H16"
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "The geothermal record concerns an area/sector, not wells on the summit or all geothermal power in Leyte.",
+        "The old approach is historical narrative, not current navigation. Keep SULFATARA directions and guide-required rules unchanged.",
+        "Reaching the summit at dusk in a historical account is not a recommendation for today’s visitors."
+      ],
+      "excludedClaims": [
+        "First ascent",
+        "All Leyte geothermal operations stopped",
+        "An operating power plant on the summit",
+        "Eagle releases or promised sightings",
+        "Historical route as the current approved trail"
+      ],
+      "name": {
+        "en": "Alto Peak",
+        "ja": "アルト・ピーク",
+        "ko": "알토 피크"
+      },
+      "englishWordCount": 98,
+      "ownerReview": "pending",
+      "nativeLanguageReview": {
+        "en": "pending",
+        "ja": "pending",
+        "ko": "pending"
+      },
+      "approvedForOnsiteDistribution": false,
+      "oralTraditionIncluded": false,
+      "historyMediaReferences": [
+        "HI-D07-01"
+      ],
+      "ownerApprovedAsIsOn": "2026-11-19",
+      "approvalStatus": "owner_approved_existing_text"
+    },
+    {
+      "destinationId": "D08",
+      "feedbackId": "H-D08",
+      "contentId": "D08-history",
+      "proposedPanelId": "history",
+      "researchStatus": "documented_visitor_record_draft",
+      "historyType": "Dated garden accounts and community context",
+      "title": {
+        "en": "A garden enters the visitor record",
+        "ja": "訪問記が伝える庭園の姿",
+        "ko": "방문기에 담긴 정원의 모습"
+      },
+      "text": {
+        "en": "Heaven’s Peak was already drawing attention for its flowers by May 2019. A local photo essay published that month singled out the sunflowers and described the garden as a place to walk and take pictures. In January 2020, another visitor described beds planted in blocks of red and yellow, paths between them and a shaded place to rest at the back. A 2022 field report by researchers from Visayas State University and the University of Queensland listed Heaven’s Peak among Cabintan’s attractions. It also described the surrounding barangay as a vegetable-growing community serving markets in both Central and Eastern Visayas.",
+        "ja": "2019年5月にはすでに、ヘブンズ・ピークは花で注目を集めていました。その月に発表された地元の写真エッセーは、とりわけヒマワリに目を留め、散策や撮影を楽しめる庭園として紹介しています。2020年1月の別の訪問記には、赤い花と黄色い花を色ごとにまとめて植えた花壇、その間を縫う小道、奥にあった日陰の休憩場所が描かれています。ビサヤ州立大学とクイーンズランド大学の研究者による2022年の現地調査報告は、カビンタンの見どころの一つにヘブンズ・ピークを挙げました。報告はまた、庭園のあるカビンタン地区では野菜作りが盛んで、ビサヤ中部と東部の市場に出荷されていたと伝えています。",
+        "ko": "2019년 5월에는 이미 헤븐스 피크의 꽃이 사람들의 눈길을 끌고 있었습니다. 그달에 발표된 지역 사진 에세이는 특히 해바라기에 주목하며 정원을 산책하고 사진 찍기 좋은 곳으로 소개했습니다. 2020년 1월, 또 다른 방문객은 빨간 꽃과 노란 꽃을 색깔별로 모아 심은 화단과 그 사이의 오솔길, 정원 안쪽의 그늘진 쉼터에 관해 썼습니다. 비사야스 주립대학교와 퀸즐랜드대학교 연구진은 2022년 현지 조사 보고서에서 헤븐스 피크를 카빈탄의 명소 가운데 하나로 꼽았습니다. 보고서는 정원이 자리한 카빈탄 마을을 중부와 동부 비사야의 시장에 채소를 공급하는 농촌 지역으로 소개했습니다."
+      },
+      "claims": [
+        {
+          "id": "D08-C01",
+          "sentences": [
+            1,
+            2
+          ],
+          "summary": "May 2019 dated garden feature and sunflowers",
+          "sourceIds": [
+            "H17"
+          ]
+        },
+        {
+          "id": "D08-C02",
+          "sentences": [
+            3
+          ],
+          "summary": "January 2020 visitor’s observations of beds, paths and shade",
+          "sourceIds": [
+            "H18"
+          ]
+        },
+        {
+          "id": "D08-C03",
+          "sentences": [
+            4,
+            5
+          ],
+          "summary": "2022 research report lists attraction and Cabintan vegetable-market context",
+          "sourceIds": [
+            "H19"
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "This is a documented visitor record, not an authenticated founder/opening story. Local operator testimony would improve a future edition.",
+        "Do not treat 2019 as the opening year or old flower displays as current conditions.",
+        "The agricultural report describes the barangay, not vegetable production by the garden itself; its imprecise grouping of attractions as peaks is not adopted.",
+        "No source photographs are copied into this research pack."
+      ],
+      "excludedClaims": [
+        "Founder, opening date or verified name-origin legend",
+        "A permanent sunflower season",
+        "Named mountains or guaranteed views",
+        "The garden’s involvement in the agricultural research project"
+      ],
+      "name": {
+        "en": "Heaven’s Peak",
+        "ja": "ヘブンズ・ピーク",
+        "ko": "헤븐스 피크"
+      },
+      "englishWordCount": 100,
+      "ownerReview": "pending",
+      "nativeLanguageReview": {
+        "en": "pending",
+        "ja": "pending",
+        "ko": "pending"
+      },
+      "approvedForOnsiteDistribution": false,
+      "oralTraditionIncluded": false,
+      "historyMediaReferences": [
+        "HI-D08-01"
+      ],
+      "ownerApprovedAsIsOn": "2026-11-19",
+      "approvalStatus": "owner_approved_existing_text"
+    },
+    {
+      "destinationId": "D09",
+      "feedbackId": "H-D09",
+      "contentId": "D09-history",
+      "proposedPanelId": "history",
+      "researchStatus": "documented_history_draft",
+      "historyType": "Operator history with a contemporary interview",
+      "title": {
+        "en": "From beach huts to a bayfront hotel",
+        "ja": "浜辺の小屋から湾を望むホテルへ",
+        "ko": "바닷가 오두막에서 만을 바라보는 호텔로"
+      },
+      "text": {
+        "en": "Before there were hotel rooms on this stretch of Ormoc Bay, people spent weekends at Sal’s Beach under huts of bamboo and nipa. The hotel’s own history says Sabin A. Larrazabal Sr. began planning a hotel in 1990 with an architect from Ormoc and an interior designer from Cebu. By April 2000, columnist Art Borjal could sit on the hotel veranda and look out to sea. Larrazabal, also a pineapple farmer, told him that his first idea for the waterfront lots had been a barbecue stand. The hotel dates its next major expansion to 2006, when it added two buildings for guest rooms, dining and gatherings.",
+        "ja": "オルモック湾のこの海辺にまだホテルの客室がなかったころ、人々はサルズ・ビーチの竹とニッパヤシの小屋で週末を過ごしていました。ホテルの沿革によれば、サビン・A・ララサバル・シニアがオルモックの建築家、セブのインテリアデザイナーとホテルの計画を始めたのは1990年のことです。2000年4月には、コラムニストのアート・ボルハルがホテルのベランダに腰を下ろし、海を眺めています。パイナップル農家でもあったララサバルは、この海辺の土地で最初に考えたのはバーベキューの屋台だったとボルハルに語りました。ホテル側によると、次の大規模な拡張は2006年で、客室や食事、集まりのために2棟を増築しました。",
+        "ko": "오르모크만의 이 바닷가에 호텔 객실이 들어서기 전, 사람들은 살스 비치에서 대나무와 니파야자로 지은 오두막에 자리를 잡고 주말을 보냈습니다. 호텔 연혁에 따르면 사빈 A. 라라사발 시니어는 1990년에 오르모크의 건축가, 세부의 실내 디자이너와 함께 호텔을 계획하기 시작했습니다. 2000년 4월에는 칼럼니스트 아트 보르할이 호텔 베란다에 앉아 바다를 바라본 기록이 있습니다. 파인애플 농사도 짓던 라라사발은 바닷가 땅에 처음 생각한 것은 바비큐 가판대였다고 그에게 들려줬습니다. 호텔 측은 다음으로 크게 확장한 해를 2006년으로 기록합니다. 당시 객실과 식사, 모임을 위한 건물 두 동이 새로 들어섰습니다."
+      },
+      "claims": [
+        {
+          "id": "D09-C01",
+          "sentences": [
+            1,
+            2,
+            5
+          ],
+          "summary": "Operator-reported Sal’s Beach origins, 1990 planning and 2006 expansion",
+          "sourceIds": [
+            "H20"
+          ]
+        },
+        {
+          "id": "D09-C02",
+          "sentences": [
+            3,
+            4
+          ],
+          "summary": "Borjal’s April 2000 visit and founder’s barbecue-stand recollection",
+          "sourceIds": [
+            "H21"
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "1990 is a planning year, not a verified opening year. A 2000 visit proves operation by then, not an exact opening date.",
+        "The timeline overlaps existing chapter-2. The direct 2000 interview adds a new detail; avoid duplicating both panels without editorial review.",
+        "The hotel’s historical page was retrieved through its indexed body after a direct fetch timed out.",
+        "The legacy sabinhotelormoc.com domain is excluded; no current ownership, service or accreditation is claimed."
+      ],
+      "excludedClaims": [
+        "Opened in 1990",
+        "An exact date inferred from a 20-month construction recollection",
+        "Current owner or manager",
+        "Current DOT accreditation, visitor access or booking details"
+      ],
+      "name": {
+        "en": "Sabin Resort Hotel",
+        "ja": "サビン・リゾート・ホテル",
+        "ko": "사빈 리조트 호텔"
+      },
+      "englishWordCount": 106,
+      "ownerReview": "pending",
+      "nativeLanguageReview": {
+        "en": "pending",
+        "ja": "pending",
+        "ko": "pending"
+      },
+      "approvedForOnsiteDistribution": false,
+      "oralTraditionIncluded": false,
+      "historyMediaReferences": [
+        "HI-D09-01"
+      ],
+      "ownerApprovedAsIsOn": "2026-11-19",
+      "approvalStatus": "owner_approved_existing_text"
+    },
+    {
+      "destinationId": "D10",
+      "feedbackId": "H-D10",
+      "contentId": "D10-history",
+      "proposedPanelId": "history",
+      "researchStatus": "documented_history_ready_for_editorial_review",
+      "historyType": "Computer-learning heritage, government course records and skills competition",
+      "title": {
+        "en": "From computer courses to a wider stage",
+        "ja": "コンピューター講座から、広がる学びの舞台へ",
+        "ko": "컴퓨터 강좌에서 더 넓은 무대로"
+      },
+      "text": {
+        "en": "ACLC's story began beyond Ormoc. An institution-associated account dates the AMA Computer Learning Center network to 1986, when it offered short computer courses. Records for the Ormoc campus show how educational paths broadened. Department of Education records list senior-high permits dating from 2015. TESDA's register identifies web-applications development and hotel-and-restaurant technology diplomas with 2020 recognition references. In 2023, a Philippine government report named ACLC Ormoc students among entrants in Leyte's skills competition. The 2025 WorldSkills ASEAN roster later listed a Filipino network-systems competitor also identified with ACLC Ormoc in earlier reports. These milestones document learning and participation, not the unverified date when this campus first opened.",
+        "ja": "ACLCの物語はオルモックだけで始まったわけではありません。学校に関連する資料によると、AMAコンピューター学習センターの系列は1986年に短期コンピューター講座を提供し始めました。オルモック校の記録からは、学びの分野が広がってきたことが分かります。教育省の資料には2015年にさかのぼる高校上級課程の許可が載っています。TESDAの名簿には、2020年の認定番号を持つウェブアプリ開発とホテル・レストラン技術のディプロマも記されています。2023年には、フィリピン政府の報告がレイテ州の技能競技会に参加した同校の学生を紹介しました。2025年のWorldSkills ASEANの名簿には、以前の報告でACLCオルモック校との関係が示されたネットワーク管理分野のフィリピン代表も載っています。これらは学びと参加の歩みであり、校舎が最初に開設された未確認の年を示すものではありません。",
+        "ko": "ACLC의 역사는 오르모크 한 곳에서 시작된 것이 아닙니다. 학교 관련 자료에 따르면 AMA 컴퓨터 학습센터 계열은 1986년 단기 컴퓨터 강좌를 제공하기 시작했습니다. 오르모크 캠퍼스의 기록은 교육 분야가 어떻게 넓어졌는지 보여 줍니다. 교육부 자료에는 2015년부터의 고등학교 상급 과정 허가가 나옵니다. TESDA 명부에는 2020년 인정 번호가 있는 웹 애플리케이션 개발과 호텔·레스토랑 기술 디플로마 과정이 실려 있습니다. 2023년에는 필리핀 정부 보도에서 레이테 기능경기대회에 참가한 ACLC 오르모크 학생들이 언급됐습니다. 2025년 WorldSkills ASEAN 명단에는 앞선 보도에서 이 학교와 연관된 것으로 알려진 필리핀 네트워크 시스템 관리 참가자도 올라 있습니다. 이 기록은 배움과 참가의 역사를 보여 줄 뿐, 이 캠퍼스의 확인되지 않은 최초 개교 연도를 뜻하지는 않습니다."
+      },
+      "claims": [
+        {
+          "id": "D10-C01",
+          "sentences": [
+            1,
+            2
+          ],
+          "summary": "ACLC system history and 1986 origin of the national learning-center network, not Ormoc's local opening date",
+          "sourceIds": [
+            "H22",
+            "H28"
+          ]
+        },
+        {
+          "id": "D10-C02",
+          "sentences": [
+            3,
+            4
+          ],
+          "summary": "School year 2024–2025 government list and historical senior-high government permits at Lilia Avenue from 2015",
+          "sourceIds": [
+            "H23",
+            "H24"
+          ]
+        },
+        {
+          "id": "D10-C03",
+          "sentences": [
+            5
+          ],
+          "summary": "TESDA program recognition register with 2020 references for web applications and hotel/restaurant diplomas",
+          "sourceIds": [
+            "H25"
+          ]
+        },
+        {
+          "id": "D10-C04",
+          "sentences": [
+            6,
+            7
+          ],
+          "summary": "PIA's 2023 competition participation account and the official 2025 WorldSkills Philippines roster",
+          "sourceIds": [
+            "H26",
+            "H27"
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "Treat 1986 as the national ACLC learning-center origin, not the Ormoc campus's local founding year.",
+        "Avoid claiming an exact school opening date, a current 2026 course catalog or that a listed competition participant won a medal.",
+        "ACLC is an operating educational institution. The approved AR geofence is distinct from school admission and the entrance-arrival notification.",
+        "Japanese and Korean are draft translations and should receive ordinary native-language editorial checks before a production release."
+      ],
+      "excludedClaims": [
+        "The Ormoc campus opened in 1986",
+        "The Ormoc campus certainly opened in 2005 without locating the original primary CHED establishment record",
+        "Specific current school office hours or admission entitlement",
+        "Unverified medals, awards, national school rankings or campus photographs"
+      ],
+      "historyMediaReferences": [
+        "HI-D10-01"
+      ],
+      "name": {
+        "en": "ACLC College of Ormoc",
+        "ja": "オルモックACLCカレッジ",
+        "ko": "오르모크 ACLC 칼리지"
+      },
+      "englishWordCount": 106,
+      "ownerReview": "new_content_awaiting_feedback",
+      "nativeLanguageReview": {
+        "en": "new",
+        "ja": "editorial_check",
+        "ko": "editorial_check"
+      },
+      "approvedForOnsiteDistribution": false
+    }
+  ]
+}

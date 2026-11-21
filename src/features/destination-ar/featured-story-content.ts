@@ -5,14 +5,12 @@ import { presentationPhotoAssets } from './featured-presentation-media-assets';
 
 // Supplied destination stories shared by the showcase and its content tests.
 // Reading this display content grants no location or Passport authority.
-const reference = 'ARgala college presentation content, 2026-11-13';
-const value = (text: string) => ({ value: text, approvalReference: reference });
-const translated = (text: { en: string; ja: string; ko: string }) => ({
-  en: value(text.en), ja: value(text.ja), ko: value(text.ko),
-});
 export function featuredStoryContent(id: DestinationId): readonly RingContent[] {
   const destination = content.destinations.find(item => item.id === id);
   if (!destination) return [];
+  const reference = id === 'D10' ? 'Owner-approved final school project handoff, 2026-11-19' : 'ARgala college presentation content, 2026-11-13';
+  const value = (text: string) => ({ value: text, approvalReference: reference });
+  const translated = (text: { en: string; ja: string; ko: string }) => ({ en: value(text.en), ja: value(text.ja), ko: value(text.ko) });
   return destination.chapters.map((chapter, index): RingContent => ({
     id: chapter.id,
     // The Sabin chapter records the supplied history of Sal’s Beach and the hotel.
@@ -28,7 +26,7 @@ export function featuredStoryContent(id: DestinationId): readonly RingContent[] 
           id: photo.id,
           source: presentationPhotoAssets[mediaId as keyof typeof presentationPhotoAssets],
           credit: photo.credit, rightsReference: photo.sourceUrl,
-          approvalReference: reference,
+          approvalReference: reference, usageScope: photo.usageScope,
           alt: translated(photo.alt), caption: translated(photo.caption),
         };
       }),

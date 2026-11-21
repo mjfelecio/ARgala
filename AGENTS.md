@@ -1,5 +1,15 @@
 # ARgala agent operating manual
 
+## Final school content handoff — 2026-11-19
+
+The owner-approved, offline school project features D01–D10. ACLC College of Ormoc is permanently D10. Its separate approximate Directions entrance and landmark display point are reused from the owner’s ACLC notes. Old `pilot-aclc` records remain readable, and the circle diagnostic requires both development guards. Legacy stamps stay separate from D10 progress.
+
+The raw approved GeoJSON and label-to-ID sidecar are authoritative. Preserve the file bytes, geometry, and labels. Verify on-site AR only through fresh, corroborated containment in the assigned polygon. A foreground, opt-in entrance notification uses the Directions point independently of the polygon and the Android background reminder regions. School permission still governs access at ACLC.
+
+Keep the original nine destinations’ chapters, photo bindings and guide material intact as supplied. The school presentation adds D10’s three chapters and 2014 graduation cover, and a separate History panel per site. Preserve the supplied captions, credit, dates, and local school distribution scope. D01 uses the original Figure 2 source link. D02 and D05 retain their Creative Commons attributions. The other seven History visuals are scoped to this nonpublished school project.
+
+Use the five approved short effects with Android transient audio focus and existing independent settings. The three ready scripts are preserved for future recordings and the voice channel stays silent. See [handoff evidence](docs/content/final-handoff-2026-11-19/).
+
 ## Permanent AR Showcase — 2026-11-18
 
 The owner-approved AR Showcase is available to guests and accounts in every build, from Profile and Settings, without a development flag. `/ar-showcase` is canonical; `/viro-ring` redirects. The nine featured destinations use the accepted Photo Islands exhibits as their single presentation. Earlier instructions to retain alternative presentation choices are superseded. The ACLC sample remains a separate, hidden diagnostic under both development guards.

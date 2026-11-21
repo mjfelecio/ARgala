@@ -123,6 +123,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
       <SceneBoundary key={startup.attempt} onFailure={startup.onFailure}>
         <NativeRing onReady={startup.onReady} onTracking={lifecycle.onTracking} onControls={acceptControls} onRecenterResult={recenterResult}
           claimStartupVoice={identity.provenance === 'development' ? undefined : claimStartupVoice}
+          restrictCapture={identity.destinationId === 'D10'}
           viewMode={supportsViews ? viewMode : undefined} onViewComplete={completeView}
           nearbyContent={nearbyView ? { cards: nearby.cards, fix: nearby.fix, onHeading: setHeadingReady, onSelect: selected => setResults({ selected }) } : undefined}
           onMetrics={help && identity.provenance === 'development' ? setMetrics : undefined} reading={reading} content={content} initialProgress={session.progress} onProgress={lifecycle.onProgress}

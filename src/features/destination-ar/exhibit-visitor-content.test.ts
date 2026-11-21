@@ -1,8 +1,10 @@
+import { schoolPresentationHistoryScope } from '@/features/destinations/history-content';
 import { expect, it } from 'vitest';
 import { destinationIds, getDestination } from '@/features/destinations/catalog';
 import { localizationOptions } from '@/i18n/options';
 import { featuredStoryContent } from './featured-story-content';
-import { EXHIBIT_HISTORY_ID, EXHIBIT_VISIT_PLAN_ID, withExhibitVisitorContent } from './exhibit-visitor-content';
+import { EXHIBIT_HISTORY_ID, EXHIBIT_VISIT_PLAN_ID } from './ring-content';
+import { withExhibitVisitorContent } from './exhibit-visitor-content';
 import { ringCopy } from './ring-copy';
 import { paginate } from './content-layout';
 import { createPhotoIslandsProfile, exhibitSceneEntries, restrictPhotoIslandsProfile } from './photo-islands';
@@ -10,25 +12,28 @@ import { buildDestinationStageSlots, getExhibitStageProfile } from './exhibit-st
 import { captureBasis } from './scene-geometry';
 import { RingController } from './ring-controller';
 import type { PoseSample } from './types';
+import historyReview from '../../../docs/content/final-handoff-2026-11-19/history-review.json';
 
 const languages = ['en', 'ja', 'ko'] as const;
 
 it.each(destinationIds)('adds a paginated visit plan and one history entrance to %s', id => {
   const destination = getDestination(id)!;
   const stories = featuredStoryContent(id);
-  const content = withExhibitVisitorContent(destination, stories);
+  const content = withExhibitVisitorContent(destination, stories, schoolPresentationHistoryScope);
   expect(content.slice(0, stories.length)).toEqual(stories);
   const plan = content.find(item => item.id === EXHIBIT_VISIT_PLAN_ID)!;
   expect(plan.approved?.media).toBeUndefined();
-  const history = content.filter(item => item.role === 'history');
-  expect(history).toHaveLength(1);
-  expect(history[0].id).toBe(id === 'D09' ? 'chapter-2' : EXHIBIT_HISTORY_ID);
+  const history = content.find(item => item.id === EXHIBIT_HISTORY_ID)!;
+  const suppliedHistory = historyReview.entries.find(entry => entry.destinationId === id)!;
+  expect(content.filter(item => item.id === EXHIBIT_HISTORY_ID)).toHaveLength(1);
+  expect(history.approved?.media?.map(item => item.id) ?? []).toEqual(id === 'D01' ? [] : suppliedHistory.historyMediaReferences);
   for (const language of languages) {
     const guide = destination.visitorGuide![language].value;
     const copy = localizationOptions.resources[language].translation.destinations;
     const body = ringCopy(plan, 'body', language);
     expect(ringCopy(plan, 'title', language)).toBeTruthy();
-    expect(ringCopy(history[0], 'body', language)).toBeTruthy();
+    expect(ringCopy(history, 'title', language)).toBe(suppliedHistory.title[language]);
+    expect(ringCopy(history, 'body', language)).toBe(suppliedHistory.text[language]);
     for (const [section, heading] of Object.entries(copy.visitorGuide)) {
       expect(body).toContain(heading);
       const values = guide[section as keyof typeof guide];
@@ -41,13 +46,13 @@ it.each(destinationIds)('adds a paginated visit plan and one history entrance to
   }
 });
 
-it('keeps an authorized History chapter and its media without adding duplicate content', () => {
+it('keeps an existing authorized chapter alongside the independently sourced History panel', () => {
   const destination = getDestination('D01')!;
   const stories = featuredStoryContent('D01');
   const existingHistory = { ...stories[1], role: 'history' as const };
   const authorized = [stories[0], existingHistory, stories[2]];
-  const content = withExhibitVisitorContent(destination, authorized);
-  expect(content.filter(item => item.role === 'history')).toEqual([existingHistory]);
+  const content = withExhibitVisitorContent(destination, authorized, schoolPresentationHistoryScope);
+  expect(content.filter(item => item.role === 'history').map(item => item.id)).toEqual([existingHistory.id, EXHIBIT_HISTORY_ID]);
   expect(content.find(item => item.id === existingHistory.id)).toBe(existingHistory);
   expect(content.filter(item => item.id === EXHIBIT_VISIT_PLAN_ID)).toHaveLength(1);
 });

@@ -24,6 +24,8 @@ import { useArAdmission, useAdmissionSnapshot, useAdmissionSource } from '@/feat
 import { simulateArEntry } from '@/features/destination-ar/simulation-loader';
 import { isViroSpikeEnabled } from '@/features/destination-ar/dev-guard';
 import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
+import { useEntranceArrival } from '@/features/destinations/entrance-arrival-context';
+import { EntranceArrivalBanner, EntranceArrivalGuidance } from '@/features/destinations/entrance-arrival-guidance';
 import { ArrivalUnlock } from '@/features/destinations/arrival-unlock';
 import { DISCOVERY } from '@/config/limits';
 import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
@@ -74,9 +76,12 @@ export default function MapScreen() {
   if (!Constants.expoConfig?.extra?.mapsConfigured) return <Screen><Notice>{t('map.missingKey')}</Notice><LaunchControls /></Screen>;
   return <LocatedMap />;
 }
+function incomingFeaturedDestination(id: unknown) {
+  return getDestination(id === 'pilot-aclc' && !isViroSpikeEnabled() ? 'D10' : id);
+}
 function LocatedMap() {
   const params = useLocalSearchParams<{ featuredDestinationId?: string }>();
-  const selected = getDestination(params.featuredDestinationId);
+  const selected = incomingFeaturedDestination(params.featuredDestinationId);
   const { t } = useTranslation();
   const location = useDeviceLocation({ distanceIntervalMeters: 0 });
   // A tab refocus rechecks permissions and starts GPS again. Keep the existing
@@ -96,7 +101,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
   const queryClient = useQueryClient();
   const params = useLocalSearchParams<{ placeId?: string; featuredDestinationId?: string; selectionToken?: string }>();
   const parsedId = detailsRequestSchema.safeParse({ providerId: params.placeId, language });
-  const incomingFeatured = getDestination(params.featuredDestinationId) ?? (parsedId.success ? matchedFeaturedDestination({ provider: 'google', providerId: parsedId.data.providerId }) : null);
+  const incomingFeatured = incomingFeaturedDestination(params.featuredDestinationId) ?? (parsedId.success ? matchedFeaturedDestination({ provider: 'google', providerId: parsedId.data.providerId }) : null);
   const [featuredId, setFeaturedId] = useState(incomingFeatured?.id ?? null);
   const contentDestination = useDestinationLookup();
   const featured = contentDestination(featuredId);
@@ -121,6 +126,7 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
   const arInput = { running: active && focused, watcherStatus: location.watcherStatus ?? 'pending', sample: location.watcherSample ?? null } as const;
   const onsite = !!(featured && featured.id !== 'pilot-aclc');
   const arrival = useDestinationProximity(admission && onsite ? null : featured, arInput);
+  const entranceArrival = useEntranceArrival(featured, arInput);
   const arSource = useAdmissionSource(admission, featured?.id ?? null, arInput, true);
   const snapshot = useAdmissionSnapshot(admission);
   const arrivalState = admission && onsite
@@ -311,13 +317,14 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
       onLayout={(event) => setHeaderHeight(event.nativeEvent.layout.height + insets.top)}
       onOpenAr={() => router.navigate('/ar')} onOpenDestinations={() => router.navigate('/destinations')}
       onOpenSavedPlaces={() => { if (canInteract()) router.navigate('/saved-places'); }} />
+    <EntranceArrivalBanner show={entranceArrival.snapshot?.showNotice === true} />
     </View>
     <MapRecenter disabled={!enabled} position={sheetPosition} onPress={() => enabled && map.current?.animateToRegion({ ...position, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400)} />
     <HomePlaceSheet saveAction={<>{featured ? <SavePlaceAction variant="outline" className="h-auto min-h-12 w-full py-3" reference={{kind:'featured',id:featured.id}} aliases={featuredBookmarkAliases(featured.id, journal?.state.bookmarks ?? [])} /> : selectedId ? <SavePlaceAction variant="outline" className="h-auto min-h-12 w-full py-3" reference={{kind:'google',id:selectedId}} placeName={place?.name ?? seed?.name} pin={place && (completeSnapshot?.updatedAt ?? seed?.capturedAt) ? { coordinates: place.coordinates, capturedAt: completeSnapshot?.updatedAt ?? seed!.capturedAt! } : undefined} /> : null}<JournalFeedback/></>} geometry={sheetGeometry} animatedPosition={sheetPosition} key={selectionKey} state={state} selectedPlace={place ?? null} selectionName={seed?.name} hasSelection={!!selectedId || !!featured}
       featured={!!featured} canRequest={mapEnabled && !!place && (!featured || !!destinationToRoutePlace(featured))} canLoadDetails={mapEnabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!complete || !!featured} detailsLoading={details.isFetching} mapLoading={!mapReady}
       locationStatus={locationStatus}
-      extraStatus={<>{savedMarkers.truncated && <Text className="font-sans text-xs text-muted">{t('exploreCleanup.zoomSaved')}</Text>}{featured && <ArrivalInvitation state={arrivalState} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} keepInline={onsite} onLaunch={admission ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
+      extraStatus={<>{savedMarkers.truncated && <Text className="font-sans text-xs text-muted">{t('exploreCleanup.zoomSaved')}</Text>}<EntranceArrivalGuidance destination={featured} language={language} arrival={entranceArrival} />{featured && <ArrivalInvitation state={arrivalState} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} keepInline={onsite} onLaunch={admission && (onsite || isViroSpikeEnabled()) ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
       selectionMedia={featured?.media?.length ? <DaytimeGallery media={featured.media} variant="sheet" /> : undefined}
       selectionSummary={featured ? featured.copy?.[language]?.overview?.value ?? t('arrival.teaser') : place && locationReady ? t('exploreCleanup.distance', { meters: Math.round(distanceMeters(position, place.coordinates)) }) : undefined}
       onViewDetails={featured ? () => { if (canInteract()) router.navigate({ pathname: '/destinations/[destinationId]', params: { destinationId: featured.id } }); } : undefined}

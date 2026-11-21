@@ -1,3 +1,4 @@
+import { schoolPresentationHistoryScope } from '@/features/destinations/history-content';
 import { useEarnedStamp } from '@/features/journal/use-earned-stamp';
 import { JournalFeedback } from '@/features/journal/actions';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -64,9 +65,14 @@ function PreparedScene({ entry, store, content }: { entry: PreparedArEntry; stor
   const { t } = useTranslation(); const active = useAppActive(); const focused = useIsFocused();
   // Admission captures this content version. Later observer renders cannot widen
   // its gallery or replace the surviving native host with a showcase profile.
-  const [authorizedContent] = useState(() => entry.kind === 'approved' ? withExhibitVisitorContent(entry.destination, content) : content);
+  const [authorizedContent] = useState(() => {
+    if (entry.kind !== 'approved') return content;
+    const historyScope = entry.identity.provenance === 'verified' && entry.destination.ar?.storyApproval?.scope === 'school-presentation'
+      ? schoolPresentationHistoryScope : undefined;
+    return withExhibitVisitorContent(entry.destination, content, historyScope);
+  });
   const [galleryMediaIds] = useState(() => {
-    const bound = new Set(authorizedContent.flatMap(tile => tile.approved?.media?.map(photo => photo.id) ?? []));
+    const bound = new Set(content.flatMap(tile => tile.approved?.media?.map(photo => photo.id) ?? []));
     return Object.freeze((getDestination(entry.destination.id)?.media ?? []).filter(photo => bound.has(photo.id)).map(photo => photo.id));
   });
   const destinationId = entry.destination.id;

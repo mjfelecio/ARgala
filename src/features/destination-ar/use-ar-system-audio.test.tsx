@@ -4,6 +4,15 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { approvedSystemAudio, type AudioManifest, type AudioPreferences } from './system-audio';
 import { useArSystemAudio } from './use-ar-system-audio';
 
+const nativeModule = vi.hoisted(() => ({
+  exists: true,
+  play: vi.fn<(token: number, cue: string) => Promise<void>>(),
+  stop: vi.fn<(token: number) => Promise<void>>(),
+}));
+vi.mock('expo-modules-core', () => ({
+  requireOptionalNativeModule: (name: string) => nativeModule.exists && name === 'ArSystemAudio' ? nativeModule : null,
+}));
+
 const preferences = { systemVoice: true, soundEffects: true };
 const clip = { source: 1, rightsReference: 'Test rights', approvalReference: 'Test review' };
 const manifest: AudioManifest = {
@@ -13,12 +22,13 @@ const manifest: AudioManifest = {
 let tree: ReactTestRenderer | undefined;
 let audio: ReturnType<typeof useArSystemAudio>;
 
-function Probe({ running, settings = preferences, claimStartupVoice }: {
+function Probe({ running, settings = preferences, claimStartupVoice, preview = true }: {
   running: boolean;
   settings?: AudioPreferences;
   claimStartupVoice?: () => boolean;
+  preview?: boolean;
 }) {
-  const value = useArSystemAudio('en', settings, running, manifest, claimStartupVoice);
+  const value = useArSystemAudio('en', settings, running, preview ? manifest : undefined, claimStartupVoice);
   useLayoutEffect(() => { audio = value; }, [value]);
   return null;
 }
@@ -31,6 +41,9 @@ const update = async (props: ComponentProps<typeof Probe>) => {
 };
 
 beforeEach(() => {
+  nativeModule.exists = true;
+  nativeModule.play.mockReset().mockImplementation(() => new Promise(() => {}));
+  nativeModule.stop.mockReset().mockResolvedValue(undefined);
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   vi.stubGlobal('__DEV__', true);
   vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
@@ -96,4 +109,54 @@ it.each([[false, '1'], [true, '']] as const)('keeps an audition silent when eith
   await update({ running: true });
   await act(async () => audio.event('initialized', 'entry', true));
   expect(audio.cue).toBeNull();
+});
+
+it('cancels an approved Android effect on interruption and ignores a retired native completion', async () => {
+  const retired = Promise.withResolvers<void>();
+  nativeModule.play.mockReturnValueOnce(retired.promise);
+  await update({ running: true, preview: false });
+  await act(async () => { audio.event('deployed', 'entry'); });
+  await act(async () => vi.dynamicImportSettled());
+  const [firstToken] = nativeModule.play.mock.calls[0];
+  expect(nativeModule.play).toHaveBeenCalledExactlyOnceWith(firstToken, 'reveal');
+  await update({ running: true, preview: false, settings: { ...preferences, systemVoice: false } });
+  expect(nativeModule.play).toHaveBeenCalledOnce();
+  expect(nativeModule.stop).not.toHaveBeenCalled();
+
+  await update({ running: false, preview: false });
+  expect(nativeModule.stop).toHaveBeenCalledExactlyOnceWith(firstToken);
+  await update({ running: true, preview: false });
+  expect(nativeModule.play).toHaveBeenCalledOnce();
+  await act(async () => audio.event('modeSwitched', 'current'));
+  await act(async () => vi.dynamicImportSettled());
+  const [nextToken] = nativeModule.play.mock.calls[1];
+  expect(nextToken).not.toBe(firstToken);
+  expect(nativeModule.play).toHaveBeenLastCalledWith(nextToken, 'view_switch');
+
+  await act(async () => retired.resolve());
+  expect(audio.cue?.source).toBe('view_switch');
+  await update({ running: true, preview: false, settings: { ...preferences, soundEffects: false } });
+  expect(nativeModule.stop).toHaveBeenLastCalledWith(nextToken);
+  expect(audio.cue).toBeNull();
+});
+
+it('drops a denied or unavailable approved cue without blocking a later interaction', async () => {
+  nativeModule.exists = false;
+  await update({ running: true, preview: false });
+  await act(async () => audio.event('deployed', 'entry'));
+  await act(async () => vi.dynamicImportSettled());
+  expect(nativeModule.play).not.toHaveBeenCalled();
+  expect(audio.cue).toBeNull();
+
+  nativeModule.exists = true;
+  nativeModule.play.mockRejectedValueOnce(new Error('Android audio focus denied'));
+  await act(async () => audio.event('focused', 'denied'));
+  await act(async () => vi.dynamicImportSettled());
+  expect(nativeModule.play).toHaveBeenCalledOnce();
+  expect(audio.cue).toBeNull();
+  await act(async () => audio.event('focused', 'denied'));
+  expect(nativeModule.play).toHaveBeenCalledOnce();
+  await act(async () => audio.event('closed', 'accepted'));
+  await act(async () => vi.dynamicImportSettled());
+  expect(nativeModule.play).toHaveBeenLastCalledWith(expect.any(Number), 'panel_close');
 });

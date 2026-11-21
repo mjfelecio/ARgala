@@ -7,9 +7,9 @@ const ar = { schemaVersion: 1, contentVersion: 'test-1', tiles: [
   { id: 'overview', role: 'overview', title: { en: approved('Test title') }, body: { en: approved('Test body') } },
   { id: 'history', role: 'history', title: { en: approved('Test history') }, body: { en: approved('Test history body') } },
 ] };
-it('keeps the pilot separate from the nine provisional launch labels and contains no invented authority', () => {
-  expect(listDestinations()).toHaveLength(9);
-  expect(listFeaturedDestinations().map(d => d.id)).toEqual([...listDestinations().map(d => d.id), 'pilot-aclc']);
+it('keeps the pilot separate from the ten permanent destinations without inventing a pilot approval', () => {
+  expect(listDestinations()).toHaveLength(10);
+  expect(listFeaturedDestinations().map(d => d.id)).toEqual(listDestinations().map(d => d.id));
   const pilot = getDestination('pilot-aclc');
   expect(pilot).not.toBeNull();
   for (const key of ['copy', 'media']) expect(pilot).not.toHaveProperty(key);
@@ -32,7 +32,7 @@ it('requires independent activation and radius approvals and never substitutes a
 it('does not authorize a featured destination through legacy circle metadata', () => {
   const activation = { point: { latitude: 0, longitude: 0 }, pointApprovalReference: 'test', radiusMeters: 50, radiusApprovalReference: 'test' };
   const featured = destinationSchema.parse({ ...base, id: 'D01', ar: { ...ar, activation } });
-  expect(activationPolicy(featured)).toBeNull();
+  expect(activationPolicy(featured, () => null)).toBeNull();
 });
 it('validates versions, stable tile identity, unique roles and every translated field approval', () => {
   expect(destinationSchema.safeParse({ ...base, ar }).success).toBe(true);

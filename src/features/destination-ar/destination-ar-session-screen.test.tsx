@@ -193,6 +193,27 @@ it('hands photo capture only to the current live navigator and retires the old f
   await active(true); await settle(); await ready();
   expect(tree!.root.findByType('photo-controls' as React.ElementType).props.sessionKey).not.toBe(key);
 });
+it('retires in-app capture while a school-only History image is in the reader', async () => {
+  native.exhibit.mockImplementationOnce(async () => (await import('./exhibit-ring-scene')).getExhibitSceneHost('D03')!);
+  await mount(() => <ShowcaseScreen />);
+  await selectDestination('D03'); await layout(); await start(); await ready();
+  const capture = tree!.root.findByType('photo-controls' as React.ElementType).props.capture;
+  await click('ring-tile-exhibit:history'); await finish();
+  expect(tree!.root.findAllByType('photo-controls' as React.ElementType)).toHaveLength(0);
+  expect((await capture('restricted-history')).errorCode).toBe(6);
+  expect(native.screenshot).not.toHaveBeenCalled();
+  await click('ring-action-close'); await finish();
+  expect(tree!.root.findAllByType('photo-controls' as React.ElementType)).toHaveLength(1);
+});
+
+it('keeps in-app capture unavailable throughout the ACLC school exhibit', async () => {
+  native.exhibit.mockImplementationOnce(async () => (await import('./exhibit-ring-scene')).getExhibitSceneHost('D10')!);
+  await mount(() => <ShowcaseScreen />);
+  await selectDestination('D10'); await layout(); await start(); await ready();
+  expect(node('exhibit-gallery-entry')).toBeDefined();
+  expect(tree!.root.findAllByType('photo-controls' as React.ElementType)).toHaveLength(0);
+});
+
 it.each(['UNSUPPORTED', 'SUPPORTED', 'TRANSIENT', 'UNKNOWN', 'FAILED', 'MISSING'])('offers fallback only for definite native incapability: %s', async result => {
   if (result === 'MISSING') delete nativeUi.modules.VRTARSceneNavigatorModule;
   else native.support.mockImplementation(callback => callback(result));
@@ -495,6 +516,23 @@ it.each(['en', 'ja', 'ko'])('auditions %s voice on explicit full preview and pla
   await act(async () => sound().props.onFinish()); await click('ring-action-close'); await finish(); expect(sound().props.source).toBe(208);
   await active(false); expect(sound()).toBeUndefined();
 });
+it('retires a pending close cue when tracking is interrupted while preserving accepted close', async () => {
+  native.audio.mockResolvedValue(auditionManifest);
+  await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await start(); await ready();
+  const sounds = () => tree!.root.findAllByType('viro-sound' as React.ElementType);
+  expect(sounds()[0].props.source).toBe(204);
+  await act(async () => sounds()[0].props.onFinish());
+  await click('ring-tile-history'); await finish();
+  expect(sounds()[0].props.source).toBe(205);
+  await act(async () => sounds()[0].props.onFinish());
+
+  await click('ring-action-close');
+  await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
+  await finish();
+  await ready();
+  expect(node('ring-focused-panel')).toBeUndefined();
+  expect(sounds()).toHaveLength(0);
+});
 it('keeps failed optional audition loading from blocking native entry or exposing diagnostic messages', async () => {
   native.audio.mockRejectedValue(new Error('PRIVATE_AUDIO_ERROR'));
   await mount(() => React.createElement(SessionRoute)); await press('destinationRing.title'); await layout(); await start(); await ready();
@@ -660,8 +698,9 @@ it.each(destinationIds)('opens only the explicitly selected %s Exhibit with its 
   expect(native.exhibit).toHaveBeenCalledWith(id); expect(native.support).not.toHaveBeenCalled();
   await layout(); await start(); await ready();
   expect(cameras()).toHaveLength(1); expect(node('exhibit-gallery-entry')).toBeDefined();
-  const captureKey = tree!.root.findByType('photo-controls' as React.ElementType).props.sessionKey;
-  expect(captureKey).toContain(id);
+  const photoControls = tree!.root.findAllByType('photo-controls' as React.ElementType);
+  if (id === 'D10') expect(photoControls).toHaveLength(0);
+  else expect(photoControls[0].props.sessionKey).toContain(id);
   await click('exhibit-gallery-entry'); await finish();
   await click('ring-action-gallery-photo-next');
   const source = tree!.root.findByProps({ testID: 'ring-gallery-image' }).props.source;
@@ -683,5 +722,5 @@ it('keeps a showcase stamp when accepted native readiness and background occur i
     native.active = false; tree!.update(wrapper());
   });
   await active(true); await press('destinationAr.exit');
-  expect(copy()).toContain(translations.t('arShowcase.passportCount', { count: 1, total: 9 }));
+  expect(copy()).toContain(translations.t('arShowcase.passportCount', { count: 1, total: 10 }));
 });

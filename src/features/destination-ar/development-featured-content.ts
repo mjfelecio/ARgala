@@ -2,7 +2,8 @@ import type { DestinationId } from '@/features/destinations/catalog';
 import type { RingContent } from './ring-content';
 import en from '@/i18n/locales/en.json';
 
-const sources: Record<DestinationId, readonly string[]> = {
+type ResearchDestinationId = Exclude<DestinationId, 'D10'>;
+const sources: Record<ResearchDestinationId, readonly string[]> = {
   "D01": [
     "https://lawphil.net/executive/proc/proc1998/proc_1155_1998.html",
     "https://lawphil.net/statutes/repacts/ra2018/ra_11038_2018.html",
@@ -96,7 +97,7 @@ const sources: Record<DestinationId, readonly string[]> = {
   ]
 };
 export const developmentFeaturedStories = Object.fromEntries(
-  (Object.keys(sources) as DestinationId[]).map(id => [id, {
+  (Object.keys(sources) as ResearchDestinationId[]).map(id => [id, {
     sources: sources[id],
     chapters: en.featuredResearch.stories[id].map((_, index): RingContent => ({
       id: index === 0 ? 'overview' : `chapter-${index + 1}`,
@@ -105,4 +106,4 @@ export const developmentFeaturedStories = Object.fromEntries(
       bodyKey: `featuredResearch.stories.${id}.${index}.body`,
     })),
   }]),
-) as unknown as Record<DestinationId, { sources: readonly string[]; chapters: readonly RingContent[] }>;
+) as unknown as Record<ResearchDestinationId, { sources: readonly string[]; chapters: readonly RingContent[] }>;

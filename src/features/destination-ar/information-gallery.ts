@@ -4,14 +4,16 @@ import type { ReadingSize } from './reading-preference';
 import { readerLayout, readerLineBudget } from './reader-layout';
 
 export type GalleryPage = ContentPage & ({ kind: 'text'; media?: never; mediaPage?: never } | { kind: 'image'; media: DestinationMedia; mediaPage: number });
-export function galleryPages(textPages: readonly ContentPage[], media: readonly DestinationMedia[], locale: string, size: ReadingSize, credit: (value: string) => string, englishFallback: string, presentation: 'photo' | 'gallery' | 'story' = 'story', captionHeight: number = readerLayout.caption.height): GalleryPage[] {
+export function galleryPages(textPages: readonly ContentPage[], media: readonly DestinationMedia[], locale: string, size: ReadingSize, credit: (value: string) => string, englishFallback: string, presentation: 'photo' | 'gallery' | 'story' = 'story', captionHeight: number = readerLayout.caption.height, captionFirst = false): GalleryPage[] {
   const language = locale.startsWith('ja') ? 'ja' : locale.startsWith('ko') ? 'ko' : 'en';
   const images = media.map(item => {
     const alt = localizedContent(item.alt, language);
     const caption = localizedContent(item.caption, language);
-    const metadata = [alt?.englishFallback ? englishFallback : undefined, alt?.value,
-      caption?.englishFallback && !alt?.englishFallback ? englishFallback : undefined,
-      caption?.value !== alt?.value ? caption?.value : undefined, credit(item.credit)].filter(Boolean).join('\n');
+    const descriptions = [alt?.englishFallback ? englishFallback : undefined, alt?.value];
+    const captions = [caption?.englishFallback && (captionFirst || !alt?.englishFallback) ? englishFallback : undefined,
+      caption?.value !== alt?.value ? caption?.value : undefined];
+    const lines = captionFirst ? [...captions, ...descriptions] : [...descriptions, ...captions];
+    const metadata = [...lines, credit(item.credit)].filter(Boolean).join('\n');
     // Metadata has its own measured region below the photograph. Keep complete
     // source offsets and repeat the same image through caption/credit pages.
     return paginate(metadata, size, '', readerLineBudget(captionHeight, readingMetrics[size].fontSize)).map((page, index): GalleryPage => ({

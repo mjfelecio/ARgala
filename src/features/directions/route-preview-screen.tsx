@@ -21,6 +21,8 @@ import { useArAdmission, useAdmissionSnapshot, useAdmissionSource } from '@/feat
 import { simulateArEntry } from '@/features/destination-ar/simulation-loader';
 import { isViroSpikeEnabled } from '@/features/destination-ar/dev-guard';
 import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
+import { useEntranceArrival } from '@/features/destinations/entrance-arrival-context';
+import { EntranceArrivalBanner, EntranceArrivalGuidance } from '@/features/destinations/entrance-arrival-guidance';
 import { ArrivalUnlock } from '@/features/destinations/arrival-unlock';
 import { createRoutePreviewIntent } from './route-preview-intent';
 import { googleMapsNavigationUrl } from './google-maps-navigation';
@@ -64,12 +66,15 @@ function Preview({ token }: { token: unknown }) {
   const { data, result, location, usable, running } = preview;
   const admission = useArAdmission(); const { language } = useSettings();
   const contentDestination = useDestinationLookup();
-  const featured = contentDestination(data?.intent.featuredDestinationId);
+  const featuredId = data?.intent.featuredDestinationId;
+  const featured = featuredId === 'pilot-aclc' && !isViroSpikeEnabled() ? null : contentDestination(featuredId);
   // A failed/expired preview may still offer an explicit development simulation.
   // Its foreground lease needs no GPS owner; absent GPS cannot grant real entry.
-  const arSource = useAdmissionSource(admission, featured?.id ?? null, { running,
+  const arInput = { running,
     watcherStatus: preview.locationEnabled ? location.watcherStatus : 'pending',
-    sample: preview.locationEnabled ? location.watcherSample ?? null : null }, true);
+    sample: preview.locationEnabled ? location.watcherSample ?? null : null } as const;
+  const entranceArrival = useEntranceArrival(featured, arInput);
+  const arSource = useAdmissionSource(admission, featured?.id ?? null, arInput, true);
   const onsite = !!(featured && featured.id !== 'pilot-aclc');
   const snapshot = useAdmissionSnapshot(admission);
   const arrivalState = admission && onsite
@@ -159,6 +164,9 @@ function Preview({ token }: { token: unknown }) {
           <Text accessibilityRole="header" className="shrink font-sans text-card font-ui-semibold text-brand-strong">{t('directions.title')}</Text>
         </View>
       </View>
+      {entranceArrival.snapshot?.showNotice && <View className="absolute inset-x-0" style={{ top: headerHeight }} pointerEvents="none">
+        <EntranceArrivalBanner show />
+      </View>}
       <View testID="route-preview-dock" className="absolute inset-0" pointerEvents="box-none">
       <RoutePreviewSheet geometry={sheetGeometry} height={viewportHeight} headerHeight={headerHeight} bottomInset={insets.bottom} position={sheetPosition}
         onOccupation={setDockHeight} onSettledHeight={setSettledDockHeight}>
@@ -203,7 +211,8 @@ function Preview({ token }: { token: unknown }) {
               : <Button variant="outline" accessibilityLabel={t('directions.stopNavigation')} onPress={navigation.stop}><Button.Label>{t('directions.stopNavigation')}</Button.Label></Button>}
           </View>}
           </RoutePreviewPrimary>
-          {data?.intent.featuredDestinationId && <ArrivalInvitation state={arrivalState} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} keepInline={onsite} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
+          <EntranceArrivalGuidance destination={featured} language={language} arrival={entranceArrival} />
+          {featured && <ArrivalInvitation state={arrivalState} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} keepInline={onsite} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
           {featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}
           {expanded && place && <View className="gap-4 border-t border-outline pt-4">

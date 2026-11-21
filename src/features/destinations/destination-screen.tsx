@@ -19,6 +19,7 @@ import { createRoutePreviewIntent } from '@/features/directions/route-preview-in
 import { destinationName, getDestination } from './catalog';
 import { VisitorGuide } from './visitor-guide';
 import { DaytimeGallery } from './daytime-gallery';
+import { DestinationHistory } from './destination-history';
 import { NearbyEstablishments } from './nearby-establishments';
 import { destinationToRoutePlace } from './routing';
 import { setFeaturedSelection } from './map-selection';
@@ -38,9 +39,10 @@ export default function DestinationScreen() {
   const openProviderLink = useOpenProviderLink();
   const active = useAppActive(); const focused = useIsFocused();
   const navigating = useRef(false);
-  const destination = getDestination(destinationId);
+  const catalogId = destinationId === 'pilot-aclc' ? 'D10' : destinationId;
+  const destination = getDestination(catalogId);
   const lookupContent = useDestinationLookup();
-  const storyDestination = lookupContent(destinationId);
+  const storyDestination = lookupContent(catalogId);
   useEffect(() => { if (focused) navigating.current = false; }, [focused, destination?.id]);
   const routePlace = destination ? destinationToRoutePlace(destination, language) : null;
   const mappedDestination = destination?.center && destination.centerApprovalReference ? destination : null;
@@ -102,6 +104,7 @@ export default function DestinationScreen() {
             <Ionicons name="information-circle-outline" size={24} color={accent} accessible={false} /><Text className="min-w-0 flex-1 font-sans text-sm text-brand-strong">{t('destinations.contentPending')}</Text>
           </View></>}
         </View>
+        <DestinationHistory key={destination.id} destinationId={destination.id} />
         <DestinationReminderAction destination={destination} />
         <NearbyEstablishments key={`nearby:${destination.id}`} destination={destination} />
       </> : <Text className="font-sans text-base text-muted">{t('destinations.unavailable')}</Text>}

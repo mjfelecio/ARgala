@@ -35,6 +35,9 @@ export type ContentManifest = z.infer<typeof contentManifestSchema>;
 /** Complete text overlay; geometry, provider mappings and licensed bundle assets never come from this protocol. */
 export function resolveContent(destination: Destination | null, manifest: ContentManifest | null): Destination | null {
   if (!destination) return null;
+  // This handoff authorizes the exact bundled school version. The text-only
+  // update channel cannot inherit that approval or replace an approved chapter.
+  if (destination.ar?.storyApproval?.scope === 'school-presentation') return destination;
   const update = manifest?.destinations.find(item => item.id === destination.id);
   return update ? destinationSchema.parse({ ...destination, ar: {
     ...destination.ar, schemaVersion: 1, contentVersion: update.contentVersion,

@@ -1,7 +1,10 @@
 import { z } from 'zod';
 import { distanceMeters, type Coordinate } from '@/features/location/geo';
 import { destinationIds, type DestinationId } from './catalog';
-import bundledGeofences from './featured-ar-geofences.json';
+import approvedMapping from './data/approved-geofence-mapping.json';
+// Metro's JSON transformer requires a .json suffix. The adjacent .geojson
+// original and this runtime copy are both pinned to the owner's byte hash.
+import approvedGeometry from './data/approved-visitor-geofences.geojson.json';
 
 const positionSchema = z.tuple([z.number().min(-180).max(180), z.number().min(-90).max(90)]).readonly();
 const ringSchema = z.array(positionSchema).min(4).readonly();
@@ -115,9 +118,57 @@ export const arGeofenceRegistrySchema = z.object({
   destinations: z.partialRecord(z.enum(destinationIds), arGeofenceSchema).readonly(),
 }).strict().readonly();
 
-const bundled = arGeofenceRegistrySchema.safeParse(bundledGeofences);
+const featureCollectionSchema = z.object({
+  type: z.literal('FeatureCollection'),
+  features: z.array(z.object({
+    type: z.literal('Feature'),
+    properties: z.object({ label: z.string().min(1) }).strict(),
+    geometry: geometrySchema,
+  }).strict()).length(destinationIds.length),
+}).strict();
+const mappingSchema = z.object({
+  schemaVersion: z.literal(1),
+  approvedBy: reference,
+  dateOfUserApproval: z.iso.date(),
+  sourceFileSha256: z.string().regex(/^[a-f0-9]{64}$/),
+  sourceFile: z.literal('geofences/approved-visitor-geofences.geojson'),
+  sourceFeatureOrderIsNotDestinationOrder: z.literal(true),
+  geometryInterpretation: reference,
+  coordinateEdits: z.literal(0),
+  features: z.array(z.object({
+    sourceFeatureIndex: z.number().int().min(0).max(destinationIds.length - 1),
+    sourceLabelExact: z.string().min(1),
+    destinationId: z.enum(destinationIds),
+    approvalStatus: z.literal('owner_approved'),
+  }).strict()).length(destinationIds.length),
+}).strict();
+
+export function resolveApprovedGeofences(raw: unknown, sidecar: unknown) {
+  const collection = featureCollectionSchema.safeParse(raw);
+  const mapping = mappingSchema.safeParse(sidecar);
+  if (!collection.success || !mapping.success) return null;
+  const byLabel = new Map(collection.data.features.map(feature => [feature.properties.label, feature.geometry]));
+  const assignments = mapping.data.features;
+  if (byLabel.size !== assignments.length ||
+      new Set(assignments.map(item => item.sourceLabelExact)).size !== assignments.length ||
+      new Set(assignments.map(item => item.destinationId)).size !== assignments.length ||
+      new Set(assignments.map(item => item.sourceFeatureIndex)).size !== assignments.length) return null;
+  const { schemaVersion, dateOfUserApproval, sourceFile, sourceFileSha256 } = mapping.data;
+  const registry = arGeofenceRegistrySchema.safeParse({
+    schemaVersion,
+    destinations: Object.fromEntries(assignments.map(item => [item.destinationId, {
+      geometryVersion: dateOfUserApproval,
+      sourceReference: `${sourceFile} · ${item.sourceLabelExact} · SHA-256 ${sourceFileSha256}`,
+      approvalReference: `${item.approvalStatus} · ${dateOfUserApproval}`,
+      geometry: byLabel.get(item.sourceLabelExact),
+    }])),
+  });
+  return registry.success ? registry.data.destinations : null;
+}
+
+const bundled = resolveApprovedGeofences(approvedGeometry, approvedMapping);
 export function getBundledArGeofence(id: DestinationId): ArGeofence | null {
-  return bundled.success && Object.hasOwn(bundled.data.destinations, id) ? bundled.data.destinations[id] ?? null : null;
+  return bundled && Object.hasOwn(bundled, id) ? bundled[id] ?? null : null;
 }
 
 function distanceToSegment(point: Coordinate, a: Position, b: Position) {

@@ -1,5 +1,5 @@
-import type { AudioClip, AudioManifest } from './system-audio';
-const sample = (source: number): AudioClip => ({ source, previewOnly: true,
+import type { AudioAssetClip, AudioManifest } from './system-audio';
+const sample = (source: number): AudioAssetClip => ({ source, previewOnly: true,
   rightsReference: 'assets/development/ar-audio/README.md',
   approvalReference: 'Owner requested development audition, 2026-11-02; voice/language/release review pending',
 });

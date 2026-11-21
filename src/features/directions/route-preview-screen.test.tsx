@@ -461,9 +461,11 @@ it('keeps its collapsed map height and zoom framing through both sheet detents',
  expect(routeService.walking).not.toHaveBeenCalled();
 });
 
-it('uses route-owned continuous samples for featured arrival without another route request', async () => {
+it('uses route-owned continuous samples for the hidden ACLC diagnostic without another route request', async () => {
  const { getDestination } = await import('@/features/destinations/catalog');
  const { destinationToRoutePlace } = await import('@/features/destinations/routing');
+ Object.assign(globalThis, { __DEV__: true });
+ vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
  const pilot = getDestination('pilot-aclc')!; const target = destinationToRoutePlace(pilot)!;
  controls.token = createRoutePreviewIntent(client, target, { origin, destination: target.coordinates, route }, 'map', 'en', 'pilot-aclc');
  await mount();
@@ -480,6 +482,27 @@ it('uses route-owned continuous samples for featured arrival without another rou
  expect(output()).not.toContain(translations.t('arrival.contentPending'));
  controls.focused = false; await update();
  expect(output()).not.toContain(translations.t('arrival.eligible'));
+ expect(routeService.walking).not.toHaveBeenCalled();
+ vi.unstubAllEnvs();
+});
+
+it('retains walking preview for legacy ACLC in release without exposing diagnostic arrival', async () => {
+ const { getDestination } = await import('@/features/destinations/catalog');
+ const { destinationToRoutePlace } = await import('@/features/destinations/routing');
+ const pilot = getDestination('pilot-aclc')!;
+ const target = destinationToRoutePlace(pilot)!;
+ controls.token = createRoutePreviewIntent(client, target, { origin, destination: target.coordinates, route }, 'map', 'en', 'pilot-aclc');
+ await mount();
+ for (let reading = 0; reading < 3; reading++) {
+   const timestamp = Date.now() + 3000;
+   vi.mocked(Date.now).mockReturnValue(timestamp);
+   controls.location.watcherSample = { position: pilot.center!, accuracy: 5, timestamp };
+   await update();
+ }
+ expect(tree!.root.findAllByType('polyline')).toHaveLength(1);
+ expect(tree!.root.findAllByProps({ testID: 'arrival-invitation' })).toHaveLength(0);
+ expect(button('arrival.unlockStart')).toBeUndefined();
+ expect(button('arrival.launch')).toBeUndefined();
  expect(routeService.walking).not.toHaveBeenCalled();
 });
 
@@ -535,6 +558,67 @@ it.each(['Explore', 'Directions'] as const)('shows one approved unlock starting 
   const navigation = vi.mocked(router.push).mock.calls.at(-1)![0] as { pathname: string; params: { destinationId: 'D01'; entryToken: string } };
   expect(navigation.pathname).toBe('/destination-ar/[destinationId]');
   expect(store.take(navigation.params.entryToken, navigation.params.destinationId)?.identity.provenance).toBe('verified');
+  expect(routeService.walking).not.toHaveBeenCalled();
+});
+
+it.each([
+  ['en', 'Explore'], ['ja', 'Directions'], ['ko', 'Directions'],
+] as const)('shows a consented %s entrance-only notice from %s without opening AR', async (language, firstScreen) => {
+  const { AdmissionContext } = await import('@/features/destination-ar/admission-context');
+  const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+  const { EntranceArrivalContext } = await import('@/features/destinations/entrance-arrival-context');
+  const { EntranceArrivalStore } = await import('@/features/destinations/entrance-arrival');
+  const content = await import('@/features/destination-content/context');
+  const { destinationSchema, getDestination } = await import('@/features/destinations/catalog');
+  const { getBundledArGeofence, geofenceProximity } = await import('@/features/destinations/ar-geofences');
+  const { destinationToRoutePlace } = await import('@/features/destinations/routing');
+  const { syntheticApprovedDestination } = await import('@/features/destinations/ar-geofence-fixtures');
+  const base = getDestination('D02')!;
+  const approved = syntheticApprovedDestination();
+  const featured = destinationSchema.parse({ ...base, ar: approved.ar, media: approved.media });
+  const lookup = (id: unknown) => id === 'D02' ? featured : getDestination(id);
+  vi.spyOn(content, 'useDestinationLookup').mockReturnValue(lookup);
+  const admission = new ArAdmissionStore('owner', lookup);
+  const entrance = new EntranceArrivalStore();
+  const target = destinationToRoutePlace(featured)!;
+  expect(geofenceProximity(getBundledArGeofence('D02')!, target.coordinates).contained).toBe(false);
+  await translations.changeLanguage(language);
+  controls.language = language;
+  controls.home = firstScreen === 'Explore';
+  controls.mapParams = { featuredDestinationId: 'D02' };
+  controls.token = createRoutePreviewIntent(client, target, { origin, destination: target.coordinates, route }, 'map', language, 'D02');
+  const view = () => <AdmissionContext.Provider value={admission}><EntranceArrivalContext.Provider value={entrance}>
+    {render()}
+  </EntranceArrivalContext.Provider></AdmissionContext.Provider>;
+  const sample = async () => {
+    const timestamp = Date.now() + 3000;
+    vi.mocked(Date.now).mockReturnValue(timestamp);
+    controls.location.watcherSample = { position: target.coordinates, accuracy: 5, timestamp };
+    await act(async () => tree!.update(view()));
+  };
+  await act(async () => { tree = create(view()); });
+  await sample();
+  expect(output()).toContain(translations.t('arrival.entranceDistance', { meters: 0 }));
+  expect(output()).toContain(translations.t('arrival.entranceStatus.checking'));
+  await sample();
+  expect(output()).not.toContain(translations.t('arrival.entranceReached'));
+  expect(translations.exists('arrival.entranceReached', { lng: language, fallbackLng: false })).toBe(true);
+  await press('arrival.entranceEnable');
+  expect(tree!.root.findByProps({ testID: 'entrance-arrival-banner' })).toBeDefined();
+  expect(output()).toContain(translations.t('arrival.entranceReached'));
+  expect(output()).toContain(translations.t('arrival.entranceGuide'));
+  expect(button('arrival.unlockStart')).toBeUndefined();
+  expect(admission.getSnapshot()?.eligible).toBe(false);
+  expect(router.push).not.toHaveBeenCalled();
+  const dismiss = button('arrival.entranceDismiss')!.props.onPress;
+  controls.home = !controls.home;
+  await act(async () => tree!.update(view()));
+  await act(async () => dismiss());
+  await sample();
+  await sample();
+  expect(output()).not.toContain(translations.t('arrival.entranceReached'));
+  expect(output()).toContain(translations.t('arrival.entranceStatus.reached'));
+  expect(button('arrival.entranceDisable')).toBeDefined();
   expect(routeService.walking).not.toHaveBeenCalled();
 });
 

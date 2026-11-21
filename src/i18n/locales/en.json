@@ -267,7 +267,8 @@
   "destinations": {
     "title": "Featured Destinations",
     "shortTitle": "Featured",
-    "intro": "Explore nine destinations across Ormoc’s lakes, mountains, coast and countryside.",
+    "intro": "Explore ten featured destinations across Ormoc, from the city to its lakes, mountains, coast and countryside.",
+    "aclcArchiveLabel": "2014 graduation archive",
     "provisional": "Destination",
     "contentPending": "Visitor information is not available yet.",
     "centerMissing": "Nearby search is unavailable for this destination.",
@@ -412,6 +413,21 @@
     "expired": "This AR session has expired. Return to Explore to verify arrival and start a new session."
   },
   "arrival": {
+    "entranceTitle": "Directions entrance",
+    "entranceDistance": "About {{meters}} m to the entrance",
+    "entranceStatus": {
+      "uncertain": "Waiting for a current, accurate location.",
+      "checking": "Checking whether you're near the entrance…",
+      "reached": "You're near the entrance."
+    },
+    "entranceEnable": "Notify me at the entrance",
+    "entranceDisable": "Turn off entrance alert",
+    "entranceConsent": "Show an in-app alert for this entrance while the app is open.",
+    "entranceReached": "You've reached the entrance",
+    "entranceFollow": "You're near the entrance to {{destination}}. Follow local signs and staff guidance. AR unlocks after we confirm your location in its activation area.",
+    "entranceGuide": "Continue with your required local guide and follow their instructions.",
+    "entranceSchool": "Follow school staff instructions and enter campus only with school permission.",
+    "entranceDismiss": "Dismiss entrance alert",
     "unlockTitle": "AR unlocked",
     "unlockStart": "Start AR",
     "unavailable": "AR isn't available here yet. When available, it unlocks after you arrive and your location is confirmed.",

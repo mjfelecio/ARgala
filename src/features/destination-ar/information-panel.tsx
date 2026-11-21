@@ -8,7 +8,8 @@ import { ViroImage, ViroNode, ViroQuad } from '@reactvision/react-viro';
 import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { paginate, readingMetrics, type ReadingCursor } from './content-layout';
-import type { RingContent } from './development-ring-content';
+import { exhibitVisitorLocale } from '@/i18n/locales/ar-exhibit-visitor';
+import { EXHIBIT_HISTORY_ID, type RingContent } from './ring-content';
 import type { FocusSelection } from './ring-controller';
 import { ringMetrics } from './scene-geometry';
 import { readingSizes, type ReadingSize } from './reading-preference';
@@ -36,13 +37,17 @@ export function InformationPanel({ selection, content, previous, reading, enable
   const { t, i18n } = useTranslation();
   const { ref, reduced, moving, closing, animation, transform } = usePanelTransition(selection, enabled, onComplete, animationPrefix);
   const locale = i18n.resolvedLanguage ?? i18n.language;
+  const visitorCopy = exhibitVisitorLocale(locale);
   const chapter = chapterPresentation(content, locale, key => t(key), key => i18n.exists(key));
+  const isSourcedHistory = content.hasHistorySources === true;
+  const sourcesHint = chapter.media.length ? visitorCopy.historySourcesHint : visitorCopy.historyFigureHint;
+  const body = isSourcedHistory ? `${chapter.body}\n\n${sourcesHint}` : chapter.body;
   const layout = useCallback((size: ReadingSize) => {
     let pages;
-    try { pages = paginate(chapter.body, size, chapter.title); }
+    try { pages = paginate(body, size, chapter.title); }
     catch { pages = paginate(t('destinationRing.contentFailed'), size); }
-    return galleryPages(pages, chapter.media, locale, size, credit => t('destinationRing.imageCredit', { credit }), t('destinations.englishFallback'), chapter.presentation);
-  }, [chapter.body, chapter.title, chapter.media, chapter.presentation, locale, t]);
+    return galleryPages(pages, chapter.media, locale, size, credit => t('destinationRing.imageCredit', { credit }), t('destinations.englishFallback'), chapter.presentation, undefined, isSourcedHistory);
+  }, [body, chapter.title, chapter.media, chapter.presentation, locale, t, isSourcedHistory]);
   const pages = useMemo(() => layout(reading.size), [layout, reading.size]);
   const cursor = galleryCursor(pages, previous, locale, reading.size);
   const page = pages[cursor.page]; const interactive = enabled && !moving;
@@ -72,7 +77,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
     <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.49 : 0.44, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.07 : 0.14} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 4 : 6, 'left', '600')} />
     {!closing && <>
       {decorations && focusGlint && <HolographicGlint animationPrefix={animationPrefix} id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
-      <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
+      <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={content.id === EXHIBIT_HISTORY_ID ? visitorCopy.history : t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
       <ArText testID="ring-sample-label" position={[0.28, 0.555, 0.006]} width={0.56} height={0.06} text={content.approved ? t('destinationStories.openedCount', { count: openedCount, total: chapterCount }) : t('destinationRing.sampleLabel')} style={style.text(3)} />
       {pageMotion ? <PageTransition animationPrefix={animationPrefix} identity={`${content.id}:${cursor.page}:${locale}:${reading.size}`} enabled={interactive} reduced={reduced}>{pageContent}</PageTransition> : pageContent}
       {selection.phase === 'focused' && <ViroNode testID="ring-reader-toolbar" position={[0, readerLayout.toolbar.y, 0.012]}>

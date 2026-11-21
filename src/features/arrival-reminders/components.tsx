@@ -20,6 +20,11 @@ function reminderLocale(resolvedLanguage: string | undefined): ReminderSelection
   return resolvedLanguage === 'ja' || resolvedLanguage === 'ko' ? resolvedLanguage : 'en';
 }
 
+function matchesReminder(selection: ReminderSelection, destination: Destination) {
+  return selection.destinationId === destination.id ||
+    (destination.id === 'D10' && selection.destinationId === 'pilot-aclc');
+}
+
 export function DestinationReminderAction({ destination }: { destination: Destination }) {
   const reminder = useArrivalReminders();
   const { t, i18n } = useTranslation();
@@ -28,7 +33,7 @@ export function DestinationReminderAction({ destination }: { destination: Destin
   const focused = useIsFocused();
   if (!reminder) return null;
   const { snapshot, controller } = reminder;
-  const selected = snapshot.selections.find(selection => selection.destinationId === destination.id);
+  const selected = snapshot.selections.find(selection => matchesReminder(selection, destination));
   const available = Boolean(reminderDestination(destination.id));
   const label = t(selected ? 'reminders.disable' : 'reminders.enable');
 
@@ -39,7 +44,7 @@ export function DestinationReminderAction({ destination }: { destination: Destin
     <Button variant="outline" accessibilityLabel={label}
       isDisabled={!snapshot.ready || (snapshot.busy && !selected) || !active || !focused || (!selected && !available)}
       onPress={() => {
-        if (selected) void controller.disable(destination.id);
+        if (selected) void controller.disable(selected.destinationId);
         else void reminder.enable(destination, reminderLocale(i18n.resolvedLanguage));
       }}>
       <Ionicons name={selected ? 'notifications-off-outline' : 'notifications-outline'} size={22} color={accent} accessible={false} />
@@ -91,7 +96,7 @@ export function ReminderSettings() {
       <Button.Label className="shrink">{t('reminders.browse')}</Button.Label>
     </Button>}
     {listFeaturedDestinations().map(destination => {
-      const selected = snapshot.selections.find(selection => selection.destinationId === destination.id);
+      const selected = snapshot.selections.find(selection => matchesReminder(selection, destination));
       if (!selected) return null;
       const name = destinationName(destination, locale);
       const status = selected.claimed
@@ -106,7 +111,7 @@ export function ReminderSettings() {
         <Button variant="outline" className="h-auto min-h-12 self-start py-3"
           isDisabled={!snapshot.ready || !active || !focused}
           accessibilityLabel={t('reminders.disableFor', { destination: name })}
-          onPress={() => void controller.disable(destination.id)}>
+          onPress={() => void controller.disable(selected.destinationId)}>
           <Ionicons name="notifications-off-outline" size={22} color={accent} accessible={false} />
           <Button.Label className="shrink">{t('reminders.disable')}</Button.Label>
         </Button>
