@@ -4012,3 +4012,22 @@ anchors through repeated size changes.
 The Galaxy A53 was absent from both USB enumeration and ADB during this review.
 Native clipping, CJK glyph appearance, camera-background contrast and physical
 touch acceptance remain pending on the existing APK.
+
+### Galaxy A53 follow-up
+
+Reviewed the existing development APK 1.0.2 (version code 2) over USB Metro
+at 1080×2400, 420 dpi and 110% system text. In English, opened the Lake Danao
+History reader, used Next and Previous, changed the reading size in both
+directions, verified return to the same page at the original size, and closed
+the reader. Reviewed live Japanese Kasudsuran visit guidance, including the
+required-guide accent and indented activity list, and Korean Lake Danao
+guidance at the largest reading size. The Japanese and Korean checks used
+zero Android animation scales. Observed native glyphs and paging over the
+mixed light and dark camera background. Android Back returned to the picker.
+
+On the Japanese timing page, a full stop wrapped onto a line by itself.
+The shared hard-wrap logic now carries adjacent text with closing CJK
+punctuation and keeps opening punctuation with its following text. Repeated
+the same native page over Metro and verified the full stop stayed attached.
+English and the prior Android animation scales were restored. `npm run check`
+passed all 1,814 tests and the Android bundle exported successfully.

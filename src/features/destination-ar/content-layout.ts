@@ -29,6 +29,8 @@ export function paginate(text: string, size: ReadingSize, heading = '', maxLines
 }
 
 type ReaderRow = { text: string; end: number; separator: string };
+const cjkClosingPunctuation = /^[、。，．：；？！）］｝〉》」』】〕〗〙〛]/u;
+const cjkOpeningPunctuation = /^[（［｛〈《「『【〔〖〘〚]/u;
 
 export function readerTextPage(rows: readonly ReaderRow[], start: number): ContentPage {
   // Ordinary words flow across the native box. Explicit paragraph breaks and
@@ -60,6 +62,10 @@ export function wrapReaderText(text: string, fontSize: number, width?: number): 
       for (let index = parts.length - 1; index >= 0; index--) {
         if (parts[index].segment === ' ' || parts[index].segment === '\t') { split = index + 1; break; }
       }
+      // Keep Japanese punctuation on the same row as the adjacent text, even
+      // when the renderer needs an explicit wrap for an unbroken CJK string.
+      while (split > 1 && (cjkClosingPunctuation.test(parts[split]?.segment ?? part.segment) ||
+          cjkOpeningPunctuation.test(parts[split - 1].segment))) split--;
       const line = parts.slice(0, split); const last = line[line.length - 1];
       finishLine(line, last.index + last.segment.length, last.segment === ' ' || last.segment === '\t' ? '' : '\n');
       parts = parts.slice(split); units = parts.reduce((total, item) => total + graphemeAdvance(item.segment, fontSize), 0);
