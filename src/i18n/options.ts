@@ -1,3 +1,6 @@
+import arNearbyKo from './locales/ar-nearby.ko.json';
+import arNearbyJa from './locales/ar-nearby.ja.json';
+import arNearbyEn from './locales/ar-nearby.en.json';
 import arShowcaseKo from './locales/ar-showcase.ko.json';
 import arShowcaseJa from './locales/ar-showcase.ja.json';
 import arShowcaseEn from './locales/ar-showcase.en.json';
@@ -13,4 +16,4 @@ import journalCleanupEn from './locales/journal-cleanup.en.json';
 import en from './locales/en.json';
 import ko from './locales/ko.json';
 import ja from './locales/ja.json';
-export const localizationOptions = { resources: { en: { translation: { ...en, arShowcase: arShowcaseEn, journalCleanup: journalCleanupEn, destinationCleanup: destinationCleanupEn, exploreCleanup: exploreCleanupEn } }, ko: { translation: { ...ko, arShowcase: arShowcaseKo, journalCleanup: journalCleanupKo, destinationCleanup: destinationCleanupKo, exploreCleanup: exploreCleanupKo } }, ja: { translation: { ...ja, arShowcase: arShowcaseJa, journalCleanup: journalCleanupJa, destinationCleanup: destinationCleanupJa, exploreCleanup: exploreCleanupJa } } }, supportedLngs: ['en', 'ko', 'ja'], fallbackLng: 'en', interpolation: { escapeValue: false }, initAsync: false };
+export const localizationOptions = { resources: { en: { translation: { ...en, arNearby: arNearbyEn, arShowcase: arShowcaseEn, journalCleanup: journalCleanupEn, destinationCleanup: destinationCleanupEn, exploreCleanup: exploreCleanupEn } }, ko: { translation: { ...ko, arNearby: arNearbyKo, arShowcase: arShowcaseKo, journalCleanup: journalCleanupKo, destinationCleanup: destinationCleanupKo, exploreCleanup: exploreCleanupKo } }, ja: { translation: { ...ja, arNearby: arNearbyJa, arShowcase: arShowcaseJa, journalCleanup: journalCleanupJa, destinationCleanup: destinationCleanupJa, exploreCleanup: exploreCleanupJa } } }, supportedLngs: ['en', 'ko', 'ja'], fallbackLng: 'en', interpolation: { escapeValue: false }, initAsync: false };

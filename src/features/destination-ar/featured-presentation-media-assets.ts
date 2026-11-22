@@ -52,5 +52,6 @@ export const presentationPhotoAssets = {
   "D09-maps-01": require("../../../assets/presentation/featured/D09-maps-01.jpg") as number,
   "D09-maps-03": require("../../../assets/presentation/featured/D09-maps-03.jpg") as number,
   "D09-maps-04": require("../../../assets/presentation/featured/D09-maps-04.jpg") as number,
+  "D10-archive-2014": require("../../../assets/presentation/featured/D10-archive-2014.jpg") as number,
   "D09-maps-05": require("../../../assets/presentation/featured/D09-maps-05.jpg") as number,
 } as const;

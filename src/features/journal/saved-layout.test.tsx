@@ -217,3 +217,26 @@ it.each(['principal','blur','unmount'])('retires a retained saved-open callback 
  else await act(async()=>{tree!.unmount();tree=undefined;});
  await act(async()=>oldOpen());expect(router.navigate).not.toHaveBeenCalled();expect(placesService.details).not.toHaveBeenCalled();
 });
+
+it.each([false, true])('opens legacy ACLC as D10 and removes only its saved group (current ID also saved: %s)', async both => {
+ const legacy = {kind:'featured',id:'pilot-aclc'} as const;
+ const current = {kind:'featured',id:'D10'} as const;
+ const unrelated = {kind:'featured',id:'D01'} as const;
+ journal.state.bookmarks = [...(both ? [current] : []), legacy, unrelated];
+ journal.metadata['featured:pilot-aclc'] = {note:'My original note'};
+ const before = JSON.stringify(journal.state);
+
+ await mount();
+ const list = tree!.root.findByType('virtualized-list' as React.ElementType);
+ expect(list.props.data).toEqual([both ? current : legacy, unrelated]);
+ expect(list.props.keyExtractor(legacy)).toBe('featured:D10');
+ expect(output()).toContain('My original note');
+ expect(JSON.stringify(journal.state)).toBe(before);
+
+ await act(async()=>openButton().props.onPress());
+ expect(router.push).toHaveBeenCalledExactlyOnceWith({pathname:'/destinations/[destinationId]',params:{destinationId:'D10'}});
+ const remove = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('journal.remove'))!;
+ await act(async()=>remove.props.onPress());
+ if (both) expect(journal.save).toHaveBeenCalledExactlyOnceWith(current,false,undefined,[legacy]);
+ else expect(journal.save).toHaveBeenCalledExactlyOnceWith(legacy,false);
+});

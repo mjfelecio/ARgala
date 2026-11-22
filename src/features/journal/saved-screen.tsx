@@ -15,8 +15,8 @@ import { FlatList, Image, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { withUniwind } from 'uniwind';
-import { matchedFeaturedDestination } from '@/features/destinations/map-selection';
-import { destinationName, getDestination } from '@/features/destinations/catalog';
+import { destinationName } from '@/features/destinations/catalog';
+import { destinationForBookmark } from './bookmark-aliases';
 import { JournalFeedback, SavePlaceAction } from './actions';
 import { useJournal } from './context';
 import { bookmarkKey, type Bookmark } from './model';
@@ -27,7 +27,6 @@ import { BookmarkEditor } from './bookmark-editor';
 
 const SafeArea = withUniwind(SafeAreaView);
 const StyledImage = withUniwind(Image);
-const destinationForBookmark=(reference:Bookmark)=>reference.kind==='featured'?getDestination(reference.id):matchedFeaturedDestination({provider:'google',providerId:reference.id});
 const logicalBookmarkKey=(reference:Bookmark)=>{const destination=destinationForBookmark(reference);return destination?`featured:${destination.id}`:bookmarkKey(reference);};
 export default function SavedPlacesScreen() {
   const { t } = useTranslation();
@@ -54,8 +53,16 @@ export default function SavedPlacesScreen() {
         ...(cached?{place:cached.place,updatedAt:cached.updatedAt}:{})});
     } else router.push({pathname:'/destinations/[destinationId]',params:{destinationId:reference.id}});
   }
-  const visible=new Map<string,Bookmark>();const groups=new Map<string,Bookmark[]>();
-  for(const reference of journal?.ready?journal.state.bookmarks:[]){const key=logicalBookmarkKey(reference);groups.set(key,[...(groups.get(key)??[]),reference]);if(!visible.has(key)||reference.kind==='featured')visible.set(key,reference);}
+  const visible = new Map<string, Bookmark>();
+  const groups = new Map<string, Bookmark[]>();
+  for (const reference of journal?.ready ? journal.state.bookmarks : []) {
+    const key = logicalBookmarkKey(reference);
+    groups.set(key, [...(groups.get(key) ?? []), reference]);
+    const representative = visible.get(key);
+    if (!representative || bookmarkKey(reference) === key || reference.kind === 'featured' && representative.kind === 'google') {
+      visible.set(key, reference);
+    }
+  }
   const rows=[...visible.values()];
   const [accent, onAccent] = useThemeColor(['accent', 'accent-foreground']);
   return <SafeArea className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
@@ -66,7 +73,7 @@ export default function SavedPlacesScreen() {
       <Text accessibilityRole="header" className="shrink font-sans text-section font-ui-semibold text-brand-strong">{t('journal.savedTitle')}</Text>
     </View>
     <FlatList<Bookmark> className="flex-1" contentContainerClassName="px-4 pb-8" keyboardShouldPersistTaps="handled"
-      data={rows} keyExtractor={bookmarkKey}
+      data={rows} keyExtractor={logicalBookmarkKey}
       ListHeaderComponent={<View className="gap-3 pb-4"><JournalSyncStatusView /><JournalFeedback />
         <View className="gap-1 pt-2">
           <Text accessibilityRole="header" className="font-sans text-title font-ui-bold text-brand-strong">{t('journal.savedHeading')}</Text>

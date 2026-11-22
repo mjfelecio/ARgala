@@ -1,17 +1,57 @@
-import { useCallback, useEffect, useLayoutEffect, useState, useSyncExternalStore } from 'react';
-import { ArSystemAudio, approvedSystemAudio, type AudioEvent, type AudioPreferences, type AudioManifest } from './system-audio';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { ArSystemAudio, approvedSystemAudio, type AudioCue, type AudioEvent, type AudioPreferences, type AudioManifest } from './system-audio';
 import { isViroSpikeEnabled } from './dev-guard';
+import { playApprovedArEffect } from './native-ar-audio';
 import type { Language } from '../../../supabase/functions/_shared/contracts';
-export function useArSystemAudio(language: Language, preferences: AudioPreferences | undefined, running: boolean, previewManifest?: AudioManifest) {
-  const [audio] = useState(() => new ArSystemAudio(previewManifest ?? approvedSystemAudio, undefined, !!previewManifest && isViroSpikeEnabled()));
-  useLayoutEffect(() => { audio.updateManifest(previewManifest ?? approvedSystemAudio, !!previewManifest && isViroSpikeEnabled()); }, [audio, previewManifest]);
+
+function channelEnabled(cue: AudioCue, preferences: AudioPreferences | undefined) {
+  return cue.channel === 'voice' ? preferences?.systemVoice : preferences?.soundEffects;
+}
+
+export function useArSystemAudio(
+  language: Language,
+  preferences: AudioPreferences | undefined,
+  running: boolean,
+  previewManifest?: AudioManifest,
+  claimStartupVoice?: () => boolean,
+) {
+  const audition = previewManifest && isViroSpikeEnabled() ? previewManifest : undefined;
+  const manifest = audition ?? approvedSystemAudio;
+  const [audio] = useState(() => new ArSystemAudio(manifest, undefined, !!audition));
   const cue = useSyncExternalStore(audio.subscribe, audio.getSnapshot, audio.getSnapshot);
-  useEffect(() => { audio.finish(); }, [audio, language]);
-  useEffect(() => { if (!running) { audio.finish(); } }, [audio, running]);
-  useEffect(() => { if (cue && !(cue.channel === 'voice' ? preferences?.systemVoice : preferences?.soundEffects)) audio.finish(); }, [audio, cue, preferences?.systemVoice, preferences?.soundEffects]);
+  const scope = useMemo(() => ({ language, running }), [language, running]);
+  const liveScope = useRef<typeof scope | null>(null);
+  const settings = useRef({ preferences, claimStartupVoice });
+
+  useLayoutEffect(() => {
+    liveScope.current = scope;
+    return () => {
+      liveScope.current = null;
+      audio.finish();
+    };
+  }, [audio, scope]);
+  useLayoutEffect(() => {
+    audio.updateManifest(manifest, !!audition);
+    settings.current = { preferences, claimStartupVoice };
+    const playing = audio.getSnapshot();
+    if (playing && !channelEnabled(playing, preferences)) audio.finish(playing.playbackId);
+  }, [audio, manifest, audition, preferences, claimStartupVoice]);
+
+  const effectsEnabled = preferences?.soundEffects === true;
+  useLayoutEffect(() => {
+    if (!scope.running || !effectsEnabled || !cue || typeof cue.source === 'number' || cue !== audio.getSnapshot()) return;
+    return playApprovedArEffect(cue.source, () => audio.finish(cue.playbackId));
+  }, [audio, cue, scope, effectsEnabled]);
+
   const event = useCallback((kind: AudioEvent, id: string, firstVisit = false) => {
-    if (running && preferences) audio.event(kind, id, language, preferences, firstVisit);
-  }, [audio, language, preferences, running]);
-  const finish = useCallback(() => { if (cue) audio.finish(cue.playbackId); }, [audio, cue]);
-  return { cue: running ? cue : null, event, finish };
+    if (!scope.running || liveScope.current !== scope) return;
+    const current = settings.current;
+    if (!current.preferences) return;
+    const startupVoice = kind === 'initialized' && firstVisit && (current.claimStartupVoice?.() ?? true);
+    audio.event(kind, id, scope.language, current.preferences, startupVoice);
+  }, [audio, scope]);
+  const playbackId = cue?.playbackId;
+  const finish = useCallback(() => { if (playbackId !== undefined) audio.finish(playbackId); }, [audio, playbackId]);
+
+  return { cue: running && cue && channelEnabled(cue, preferences) ? cue : null, event, finish };
 }

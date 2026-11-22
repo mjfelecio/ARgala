@@ -4,7 +4,7 @@ import type { ArNativeStyle } from './native-styles';
 
 const textureScale = 8;
 type Props = Omit<ComponentProps<typeof ViroText>, 'style' | 'width' | 'height' | 'scale'> & {
-  width: number; height: number; style: ReturnType<ArNativeStyle['text']>;
+  width: number; height: number; style: Omit<ReturnType<ArNativeStyle['text']>, 'textAlignVertical'> & { textAlignVertical: 'top' | 'center' };
 };
 /** Rasterize larger glyphs, then reduce the whole layout to its intended world size.
  * Viro fontSize controls texture resolution; 3–8 point textures visibly pixelate.

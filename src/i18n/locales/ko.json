@@ -228,7 +228,8 @@
   "destinations": {
     "title": "추천 여행지",
     "shortTitle": "추천 명소",
-    "intro": "오르모크의 호수와 산, 해안과 전원에 자리한 아홉 명소를 둘러보세요.",
+    "intro": "오르모크 시내부터 호수, 산, 해안, 전원까지 열 곳의 추천 여행지를 둘러보세요.",
+    "aclcArchiveLabel": "2014년 졸업 기록 사진",
     "provisional": "명소",
     "contentPending": "방문 정보가 아직 없습니다.",
     "centerMissing": "이 여행지에서는 주변 검색을 이용할 수 없습니다.",
@@ -373,6 +374,23 @@
     "expired": "이 AR 세션이 만료되었습니다. 탐색으로 돌아가 도착을 확인한 후 새 세션을 시작하세요."
   },
   "arrival": {
+    "entranceTitle": "길 안내 입구",
+    "entranceDistance": "입구까지 약 {{meters}} m",
+    "entranceStatus": {
+      "uncertain": "정확한 현재 위치를 기다리는 중이에요.",
+      "checking": "입구 근처에 있는지 확인 중이에요…",
+      "reached": "입구 근처에 있어요."
+    },
+    "entranceEnable": "입구에 도착하면 알림 받기",
+    "entranceDisable": "입구 알림 끄기",
+    "entranceConsent": "앱이 열려 있을 때 이 입구에 가까워지면 앱 안에서 알려 드려요.",
+    "entranceReached": "입구 근처에 도착했어요",
+    "entranceFollow": "{{destination}} 입구 근처입니다. 현장 표지와 직원 안내를 따라 주세요. AR은 이용 구역 안에 있는 것이 확인되면 열려요.",
+    "entranceGuide": "반드시 현지 가이드와 함께 이동하고 가이드의 안내를 따라 주세요.",
+    "entranceSchool": "학교 직원의 안내를 따르고, 학교의 허가를 받은 뒤에만 교내에 들어가세요.",
+    "entranceDismiss": "입구 알림 닫기",
+    "unlockTitle": "AR이 열렸어요",
+    "unlockStart": "AR 시작",
     "unavailable": "이 장소의 AR은 아직 이용할 수 없어요. 이용 가능해지면 실제로 도착하고 현재 위치가 확인된 후 AR이 열려요.",
     "uncertain": "위치를 켜고 이 여행지를 방문하세요. 실제로 도착한 것이 확인되면 AR이 열려요.",
     "distant": "실제로 이 여행지에 도착하고 현재 위치가 확인되면 AR이 열려요.",
@@ -491,6 +509,14 @@
   },
   "reminders": {
     "title": "가까운 목적지 알림",
+    "sectionExplanation": "선택한 목적지에 가까워지면 알림을 한 번 받을 수 있어요.",
+    "browse": "추천 목적지 둘러보기",
+    "disableFor": "{{destination}} 알림 끄기",
+    "statusActive": "알림 켜짐",
+    "statusUsed": "일회성 알림 사용 완료",
+    "statusNeedsPermission": "권한 허용 필요",
+    "statusUnavailable": "알림을 사용할 수 없음",
+    "statusIncomplete": "설정 미완료",
     "enable": "가까워지면 알려 주세요",
     "disable": "알림 끄기",
     "explanation": "목적지에서 약 150m 이내로 가까워지면 한 번 알려 드려요. 휴대폰에 따라 알림이 늦거나 오지 않을 수 있어요. 이 알림만으로 방문이 확인되거나 여권 도장이 추가되지는 않아요.",

@@ -228,7 +228,8 @@
   "destinations": {
     "title": "おすすめの目的地",
     "shortTitle": "注目スポット",
-    "intro": "オルモックの湖、山、海岸、田園に広がる9つのスポットを巡りましょう。",
+    "intro": "オルモックの市街地から湖、山、海岸、田園まで、10か所のおすすめスポットを巡りましょう。",
+    "aclcArchiveLabel": "2014年の卒業写真",
     "provisional": "スポット",
     "contentPending": "訪問情報はまだありません。",
     "centerMissing": "この目的地では周辺検索を利用できません。",
@@ -373,6 +374,23 @@
     "expired": "このARセッションは期限切れです。探索に戻り、到着を確認して新しいセッションを開始してください。"
   },
   "arrival": {
+    "entranceTitle": "案内先の入口",
+    "entranceDistance": "入口まで約{{meters}} m",
+    "entranceStatus": {
+      "uncertain": "正確な現在地を取得しています。",
+      "checking": "入口付近にいるか確認しています…",
+      "reached": "入口付近です。"
+    },
+    "entranceEnable": "入口付近で知らせる",
+    "entranceDisable": "入口の通知をオフにする",
+    "entranceConsent": "アプリを開いている間、この入口の近くでアプリ内にお知らせを表示します。",
+    "entranceReached": "入口付近に到着しました",
+    "entranceFollow": "{{destination}}の入口付近です。現地の案内表示と係員の指示に従ってください。ARは、対象エリア内にいることを確認できると体験できます。",
+    "entranceGuide": "必ず地元ガイドと一緒に進み、ガイドの指示に従ってください。",
+    "entranceSchool": "学校職員の指示に従い、学校の許可を得てから敷地に入ってください。",
+    "entranceDismiss": "入口のお知らせを閉じる",
+    "unlockTitle": "ARを体験できます",
+    "unlockStart": "ARを開始",
     "unavailable": "この場所のARはまだ利用できません。利用可能になると、現地への到着と現在地を確認した後に体験できます。",
     "uncertain": "位置情報をオンにして、この場所を訪れてください。現地にいることを確認できるとARを体験できます。",
     "distant": "実際にこの場所を訪れ、現在地を確認できるとARを体験できます。",
@@ -491,6 +509,14 @@
   },
   "reminders": {
     "title": "近くの目的地のリマインダー",
+    "sectionExplanation": "選んだ目的地に近づくと、一度だけ通知を受け取れます。",
+    "browse": "おすすめの目的地を見る",
+    "disableFor": "{{destination}}のリマインダーをオフにする",
+    "statusActive": "リマインダーはオン",
+    "statusUsed": "一度限りのリマインダーは使用済み",
+    "statusNeedsPermission": "権限の許可が必要",
+    "statusUnavailable": "リマインダーは利用できません",
+    "statusIncomplete": "設定が未完了",
     "enable": "近くに来たら通知する",
     "disable": "リマインダーをオフ",
     "explanation": "目的地の約150m以内に近づいたとき、一度だけお知らせします。通知が遅れたり、届かなかったりすることがあります。この通知だけでは訪問の確認やパスポートのスタンプにはなりません。",

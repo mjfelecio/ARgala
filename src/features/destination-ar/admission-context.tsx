@@ -18,6 +18,11 @@ export function useAdmissionSource(store: ArAdmissionStore | null, id: FeaturedD
   const owner = useMemo(() => ({ store, id, running, select }), [store, id, running, select]);
   const lease = useRef<{ owner: typeof owner; token: number } | null>(null);
   const committedOwner = useRef<typeof owner | null>(null);
+  const committedInput = useRef(input);
+  useLayoutEffect(() => {
+    committedInput.current = { running, watcherStatus, sample };
+    if (store && lease.current?.owner === owner) store.publish(lease.current.token, committedInput.current);
+  }, [store, owner, running, watcherStatus, sample]);
   // Retire old actions at commit, before passive lease cleanup/publication.
   useLayoutEffect(() => {
     committedOwner.current = owner;
@@ -30,15 +35,15 @@ export function useAdmissionSource(store: ArAdmissionStore | null, id: FeaturedD
     const token = store.acquire(id);
     if (token === null) return;
     lease.current = { owner, token };
+    store.publish(token, committedInput.current);
     const timer = setInterval(() => store.tick(), 1000);
     return () => { clearInterval(timer); store.release(token); if (lease.current?.owner === owner) lease.current = null; };
   }, [store, id, running, select, owner]);
-  useEffect(() => {
-    if (store && lease.current?.owner === owner) store.publish(lease.current.token, { running, watcherStatus, sample });
-  }, [store, id, running, watcherStatus, sample, owner]);
   const begin = useCallback((kind: 'approved' | 'draft', language: Language) =>
     store && id && committedOwner.current === owner && lease.current?.owner === owner ? store.begin(lease.current.token, id, kind, language) : null, [store, id, owner]);
   const beginSimulation = useCallback((kind: 'approved' | 'draft', language: Language) =>
     store && id && committedOwner.current === owner && lease.current?.owner === owner ? store.beginSimulation(lease.current.token, id, kind, language) : null, [store, id, owner]);
-  return { begin, beginSimulation };
+  const claimUnlock = useCallback((language: Language) =>
+    !!(store && id && committedOwner.current === owner && lease.current?.owner === owner && store.claimUnlock(lease.current.token, id, language)), [store, id, owner]);
+  return { begin, beginSimulation, claimUnlock };
 }

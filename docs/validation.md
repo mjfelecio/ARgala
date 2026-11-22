@@ -1,5 +1,57 @@
 # Foundation validation
 
+## Final school content handoff — 2026-11-21
+
+The archive checksum manifest passed. A separate byte comparison matched 25
+integrated files to their originals, including the GeoJSON, its label sidecar,
+all nine History visuals, all five effect WAVs and the three-locale voice
+script. The GeoJSON and its Metro mirror share the same SHA-256. Catalog
+regressions compare the original nine destination records and 53 presentation
+media records to their approved baselines. GPS tests cover entrance-only and
+polygon-only admission, uncertain samples, rearm and fresh startup validation.
+Showcase regressions cover the D10 archival gallery and school capture rules.
+
+`npm run check` passed TypeScript, zero-warning ESLint and **1,783 tests across
+155 files**. The Android JavaScript export, SDK configuration, dependency check,
+Expo Doctor (21/21), native patch guards, Viro touch suite and Android module
+autolinking passed. Edge checks and local PostgreSQL journal, content and limiter
+suites passed.
+
+The D10 SQL migration is ready to apply to the configured backend. APK
+packaging, Galaxy A53 audio and AR acceptance, and in-person verification of the
+approximate D10 entrance are pending. See the
+[final school handoff](content/final-handoff-2026-11-19/README.md) for recording
+status and media scope.
+
+## Featured AR, arrival and visitor flows — 2026-11-18
+
+Feature regressions exercise the catalog-to-details navigation and both map
+actions, reminder management, approved synthetic polygon and multipolygon
+fixtures, the cross-screen arrival unlock, and localized Photo Islands reading.
+The real Showcase session tests preserve a focused reader and camera host
+through both view transitions, fence retired scan and photo callbacks, keep the
+results list available during limited tracking, and exercise the guest path
+without starting GPS or Places. Timestamp and alignment tests cover expiry,
+overlapping bearings, and unstable camera heading.
+
+`npm run check` passed TypeScript, zero-warning ESLint and **1,742 tests across
+153 files**. Android bundle export, Expo dependency validation, Expo Doctor
+(21/21), Android configuration, Android module autolinking, native patch
+verification, and the Viro touch/renderer guard suite passed.
+
+The nine-site on-site registry awaits approved boundaries and release content
+references. History uses localized placeholders where supplied content has no
+history chapter. Public audio stays silent pending approved EN/JA/KO voice and
+effect files. The Android heading module is autolinked. Older compatible builds
+without that module can present Nearby results as a list.
+
+Physical acceptance requires an approved Android APK and an ARCore device.
+Verify rear-camera directions outdoors at known bearings, stationary fixes,
+native taps and animation timing, EN/JA/KO at larger text sizes, reduced motion,
+and each audio preference combination after recordings are integrated. Verify
+each site's admission with real inside, outside, excluded-area and re-entry
+samples once its approved data is available.
+
 ## Expo Update configuration — 2026-11-13
 
 Installed SDK 57 `expo-updates` and ran `eas update:configure` for the existing
@@ -3902,3 +3954,122 @@ rebuilt preview; it cannot repair a1.0.0 installation by OTA alone. Preview buil
 now increment the Android build number. Native preview installation and physical
 compositor/footer/Help/capture acceptance are pending at this record's creation.
 No production update, store submission, provider request or reminder change.
+
+## Destination review refinements — 2026-11-22
+
+The Directions entrance alert uses two fresh foreground fixes at least three
+seconds apart, each with a raw distance of at most 20 m and reported accuracy
+of at most 50 m. The display distance rounds independently. Consent, conservative
+65 m exit confirmation and per-approach deduplication still belong to the entrance
+alert. Polygon unlock and background reminders retain their existing owners.
+Boundary tests cover 19.99, 20 and 20.01 m, an accuracy above the ceiling, stale
+and implausible fixes, and exit/re-entry. EN/JA/KO screen tests cover the entrance
+card, consent and notice on Explore and Directions and exercise the distinction
+between a confirmed entrance and an ineligible polygon.
+
+Destination pages use one localized History paragraph per destination and retain
+matching bundled visuals and captions. The viewer carries credit, licence where
+supplied and school-use details. The full research handoff still records the
+sources, including Lake Danao's unbundled figure. Both development guards protect
+the celebration preview. Its shared dialog has one preview close action and
+never calls the verified unlock or launch handlers.
+
+Nearby results keep the original two-minute deadline. The results page suspends
+the AR session and camera, GPS and heading ownership. Closing uses the existing
+session recovery path and directional cards wait for fresh alignment. Opening and
+closing do not submit another scan. Google Maps and supplied provider credits
+are shown on the results page. The owner-selected omission on the camera view
+differs from the published [Places attribution policy](https://developers.google.com/maps/documentation/places/web-service/policies?hl=en).
+
+TypeScript, zero-warning lint and all **1,789 tests in 155 files** passed with
+`npm run check`. The release-mode Android Hermes export with the preview flag
+enabled contains the Nearby results screen and excludes the celebration preview
+button identifier and its action text. `git diff --check` passed.
+
+Galaxy A53 review used the existing 1.0.2 development APK (version code 2) over
+USB Metro, at the original 420 dpi and 110% font scale and temporarily at 480 dpi
+(360 dp wide), 150% font scale and disabled system animations. Checked
+inline History in English, Japanese and Korean, the festival photo viewer,
+the entrance card and celebration preview in Explore and Directions, Android
+Back, the live AR selector, weak compass copy, native camera release and
+reconnect using Android camera-service state, and the expired results screen.
+The original scan was retained after Back, and no new scan was required to
+reopen it. A moving status line shifted the first action on device. The final
+ordering places status above the actions. The original English, density, font
+scale and animation settings were restored. Field acceptance remains open
+for a real entrance notification and a separate polygon unlock.
+
+## Editorial typography in the AR reader — 2026-11-22
+
+The native reader now uses separate headings, hanging bullets and marked
+callouts for all ten visit plans. Local annotations add paragraph breaks and
+practical guidance to approved story text. The source wording, photo sequence,
+caption credits and the 2.25-unit reader are preserved. Tests cover the ten
+guides in English, Japanese and Korean at all three reading sizes, repeated
+headings, long items, the native control hit owners and exact text and caption
+anchors through repeated size changes.
+
+The Galaxy A53 was absent from both USB enumeration and ADB during this review.
+Native clipping, CJK glyph appearance, camera-background contrast and physical
+touch acceptance remain pending on the existing APK.
+
+### Galaxy A53 follow-up
+
+Reviewed the existing development APK 1.0.2 (version code 2) over USB Metro
+at 1080×2400, 420 dpi and 110% system text. In English, opened the Lake Danao
+History reader, used Next and Previous, changed the reading size in both
+directions, verified return to the same page at the original size, and closed
+the reader. Reviewed live Japanese Kasudsuran visit guidance, including the
+required-guide accent and indented activity list, and Korean Lake Danao
+guidance at the largest reading size. The Japanese and Korean checks used
+zero Android animation scales. Observed native glyphs and paging over the
+mixed light and dark camera background. Android Back returned to the picker.
+
+On the Japanese timing page, a full stop wrapped onto a line by itself.
+The shared hard-wrap logic now carries adjacent text with closing CJK
+punctuation and keeps opening punctuation with its following text. Repeated
+the same native page over Metro and verified the full stop stayed attached.
+English and the prior Android animation scales were restored. `npm run check`
+passed all 1,814 tests and the Android bundle exported successfully.
+
+## Visit guidance in Photo Islands — 2026-11-22
+
+Five panels in the captured exhibit frame show localized visit essentials.
+Getting there, When to visit and Safety sit in the upper row. Things to do and
+Before you go sit below, and standalone History sits to their right. The
+focused reader keeps the source guide wording and restores its section cursor.
+The existing reading preference controls both views.
+
+Automated layout checks cover 450 combinations of destination, section,
+language and reading size. Angular bounds checks cover the full galleries,
+each individual authorized photo as a welcome cover, and story-only exhibits,
+including extra authorized chapters.
+Scene tests exercise the painted hit surface, reading size changes, a 2.25-unit
+focus, Close, Recenter, recovery from logical progress, reduced motion and
+switching between Destination details and Nearby. Showcase and verified route
+tests exercise their shared content and retain the existing Passport checks.
+
+`npm run check` passed TypeScript, lint and all 1,836 tests in 156 files. The
+Android entry and lazy exhibit bundles both built and served over Metro.
+The Galaxy A53 disappeared from USB before the new exhibit could be opened.
+On-device checks for the starting view, native text and touch, and large EN,
+JA and KO text with reduced motion remain pending.
+
+### Galaxy A53 follow-up and inner padding
+
+The existing development APK rendered Lake Danao over USB Metro at 1080×2400,
+420 dpi and 110% system text. In the initial recentered view, Getting there
+appeared beneath the welcome photo and Safety was visible at the right edge.
+The capture showed the heading touching a painted corner stroke. The guide
+layout now reserves space inside the stroke, and the English activities label
+reads “Things to do.” The updated panels and full Getting there reader rendered
+at the largest reading size. An ADB press opened the reader, Close returned to
+the group, and switching to Nearby and back preserved the exhibit. The Android
+animation scales were restored after the run. Full physical look-around and
+finger-tap acceptance, and the large Japanese and Korean device checks,
+remain pending after testing stopped at 1% battery.
+
+All 450 padded layouts passed. At the largest size, combining any pair among
+When to visit, Things to do and Before you go exceeded the padded height in
+all 30 destination-language combinations. The five sections remain separate.
+`npm run check` passed all 1,836 tests after the padding change.

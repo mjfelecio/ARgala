@@ -9,6 +9,9 @@ import { localizationOptions } from '@/i18n/options';
 import { destinationIds, destinationName, getDestination } from '@/features/destinations/catalog';
 import ShowcaseScreen from './showcase-screen';
 import { ShowcaseEntry } from './showcase-entry';
+import { EXHIBIT_HISTORY_ID, EXHIBIT_GUIDE_IDS } from './ring-content';
+import { featuredStoryContent } from './featured-story-content';
+import type { RingContent } from './ring-content';
 const runtime = vi.hoisted(() => ({ principal: 'a' as string | null, guest: false, focused: true, active: true, load: vi.fn(), push: vi.fn() }));
 vi.mock('@/features/auth/provider', () => ({ useAuth: () => ({ session: runtime.principal ? { user: { id: runtime.principal } } : null }) }));
 vi.mock('@/features/auth/guest-context', () => ({ useGuestAccess: () => ({ enabled: runtime.guest }) }));
@@ -30,7 +33,7 @@ beforeEach(async () => {
   translations = createInstance(); await translations.use(initReactI18next).init({ ...localizationOptions, lng: 'en', react: { useSuspense: false } });
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.useRealTimers(); vi.unstubAllEnvs(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
-it.each([false, true])('opens all nine release exhibits for guest=%s without native startup on browse', async guest => {
+it.each([false, true])('opens all ten school presentation exhibits for guest=%s without native startup on browse', async guest => {
   runtime.guest = guest; runtime.principal = guest ? null : 'a'; await mount();
   for (const id of destinationIds) expect(copy()).toContain(destinationName(getDestination(id)!));
   expect(runtime.load).not.toHaveBeenCalled();
@@ -39,7 +42,13 @@ it.each([false, true])('opens all nine release exhibits for guest=%s without nat
     expect(runtime.load).toHaveBeenLastCalledWith(id);
     expect(experience().props.identity).toMatchObject({ destinationId: id, principalId: guest ? 'guest' : 'a', provenance: 'showcase' });
     expect(experience().props.galleryMediaIds).toHaveLength(getDestination(id)!.media!.length);
-    expect(experience().props.content).toHaveLength(id === 'D01' || id === 'D05' ? 3 : 2);
+    const content: readonly RingContent[] = experience().props.content;
+    const stories = featuredStoryContent(id);
+    expect(content.slice(0, stories.length).map(({ id, role, approved }) => ({ id, role, approved })))
+      .toEqual(stories.map(({ id, role, approved }) => ({ id, role, approved })));
+    expect(content.find(panel => panel.id === EXHIBIT_GUIDE_IDS.preparation)?.readerBlocks?.en)
+      .toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'bullet' })]));
+    expect(content.filter(panel => panel.id === EXHIBIT_HISTORY_ID)).toHaveLength(1);
     await act(async () => experience().props.onReturn());
   }
 });
@@ -47,11 +56,11 @@ it('awards demo stamps only from tracking establishment, resets stale callbacks 
   await mount(); await press(destinationName(getDestination('D01')!)); const retired = experience().props.onEstablished;
   expect(experience().props.preparation.props.stamped).toBe(false);
   await act(async () => { retired(); retired(); });
-  await act(async () => experience().props.onReturn()); expect(copy()).toContain(translations.t('arShowcase.passportCount', { count: 1, total: 9 }));
+  await act(async () => experience().props.onReturn()); expect(copy()).toContain(translations.t('arShowcase.passportCount', { count: 1, total: destinationIds.length }));
   await press(translations.t('arShowcase.reset')); await act(async () => retired());
-  expect(copy()).toContain(translations.t('arShowcase.passportCount', { count: 0, total: 9 }));
+  expect(copy()).toContain(translations.t('arShowcase.passportCount', { count: 0, total: destinationIds.length }));
   runtime.principal = 'b'; await act(async () => tree!.update(view())); await act(async () => retired());
-  expect(copy()).toContain(translations.t('arShowcase.passportCount', { count: 0, total: 9 }));
+  expect(copy()).toContain(translations.t('arShowcase.passportCount', { count: 0, total: destinationIds.length }));
 });
 it('retires blur and timed-out imports until explicit recovery, and never renders a late result', async () => {
   const late = Promise.withResolvers<() => null>(); runtime.load.mockReturnValueOnce(late.promise); await mount();

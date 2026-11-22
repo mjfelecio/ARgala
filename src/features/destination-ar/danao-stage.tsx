@@ -10,7 +10,12 @@ import type { Basis, RingSlot } from './scene-geometry';
 import type { ExhibitStageProfile } from './exhibit-stage';
 import type { ArNativeStyle } from './native-styles';
 import type { IntroVariant } from './intro-policy';
-import { photoIslandMetrics, photoIslandCoverSize, type ExhibitGalleryEntrance } from './photo-islands';
+import { photoIslandGuide, photoIslandMetrics, photoIslandCoverSize, type ExhibitGalleryEntrance } from './photo-islands';
+import { exhibitVisitorLocale } from '@/i18n/locales/ar-exhibit-visitor';
+import { EXHIBIT_HISTORY_ID } from './ring-content';
+import { guideContentWidth, layoutGuideEssentials } from './editorial-layout';
+import { EditorialReaderPage } from './editorial-reader-page';
+import type { ReadingSize } from './reading-preference';
 import { fitPhotoInsideRoundedFrame } from './native-panel-geometry';
 
 /** Finite native-only reveal, inside the route-owned introduction deadline. */
@@ -53,14 +58,29 @@ export function ExhibitGalleryEntry({ profile, entry = { id: profile.galleryId }
 
 export function PhotoIslandStoryTile({ content, slot, enabled, style, onSelect, opened = false, ordinal = 1, chapterCount = 1 }: ComponentProps<typeof InformationTile>) {
   const { t, i18n } = useTranslation();
-  const chapter = chapterPresentation(content, i18n.resolvedLanguage ?? i18n.language, key => t(key), key => i18n.exists(key));
+  const locale = i18n.resolvedLanguage ?? i18n.language;
+  const chapter = chapterPresentation(content, locale, key => t(key), key => i18n.exists(key));
+  const label = content.id === EXHIBIT_HISTORY_ID ? exhibitVisitorLocale(locale).history : t('destinationStories.chapter', { current: ordinal, total: chapterCount });
   const select = useCoverAction(enabled, () => onSelect(content.id));
   return <ViroNode testID={`ring-tile-${content.id}`} position={slot.position} rotation={slot.rotation} onClick={enabled ? select : undefined}>
     <ExhibitFrame width={photoIslandMetrics.storyWidth} height={photoIslandMetrics.storyHeight} decorations={false} interactiveSurface={enabled} />
-    <ArText position={[0, 0.18, 0.007]} width={0.94} height={0.075} text={t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3.3, 'left')} />
+    <ArText position={[0, 0.18, 0.007]} width={0.94} height={0.075} text={label} style={style.text(3.3, 'left')} />
     <ArText position={[0, 0.005, 0.007]} width={0.94} height={0.19} text={chapter.coverTitle} style={style.text(5.3, 'left', '600')} />
     <ArText testID={opened ? `ring-opened-${content.id}` : undefined} position={[0, -0.185, 0.007]} width={0.94} height={0.075}
       text={t(opened ? 'destinationStories.opened' : 'presentation.readStory')} style={style.text(3.3, 'left')} />
+  </ViroNode>;
+}
+
+export function PhotoIslandGuidePanel({ content, slot, enabled, style, onSelect, size }: Pick<ComponentProps<typeof InformationTile>,
+  'content' | 'slot' | 'enabled' | 'style' | 'onSelect'> & { size: ReadingSize }) {
+  const { i18n } = useTranslation();
+  const locale = i18n.resolvedLanguage ?? i18n.language;
+  const language = locale.startsWith('ja') ? 'ja' : locale.startsWith('ko') ? 'ko' : 'en';
+  const essentials = content.guideEssentials?.[language] ?? [];
+  const select = useCoverAction(enabled, () => onSelect(content.id));
+  return <ViroNode testID={`ring-guide-${content.id}`} position={slot.position} rotation={slot.rotation} onClick={enabled ? select : undefined}>
+    <ExhibitFrame width={photoIslandGuide.width} height={photoIslandGuide.height} decorations={false} interactiveSurface={enabled} />
+    <EditorialReaderPage blocks={layoutGuideEssentials(essentials, size)} style={style} contentWidth={guideContentWidth} />
   </ViroNode>;
 }
 

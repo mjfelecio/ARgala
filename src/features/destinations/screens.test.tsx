@@ -11,9 +11,12 @@ import { router } from 'expo-router';
 import { queryClient } from '@/lib/query';
 import { localizationOptions } from '@/i18n/options';
 import { placesService } from '@/features/places/service';
-import { destinationName, listDestinations } from './catalog';
+import { destinationName, getDestination, listDestinations } from './catalog';
+import { exhibitVisitorCopy } from '@/i18n/locales/ar-exhibit-visitor';
+import { destinationHistory, schoolPresentationHistoryScope } from './history-content';
 import DestinationsScreen from './destinations-screen';
 import DestinationScreen from './destination-screen';
+import { featuredSelectionOptions } from './map-selection';
 import { DestinationContentContext } from '@/features/destination-content/context';
 
 const controls = vi.hoisted(() => ({ params: { destinationId: 'D01' } as Record<string, unknown>, language: 'en' as 'en' | 'ko' | 'ja', focused: true, active: true, back: true }));
@@ -55,13 +58,14 @@ beforeEach(async () => {
   const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
 });
 afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; client.clear(); notifyManager.setScheduler(cb => setTimeout(cb, 0)); vi.restoreAllMocks(); });
-it('lists all nine presentation destinations with working stable-ID map navigation and no sensors or provider work', async () => {
+it('lists all ten presentation destinations with working stable-ID details navigation and no sensors or provider work', async () => {
   await mount(<DestinationsScreen />);
   for (const destination of listDestinations()) {
     expect(output()).toContain(destination.provisionalName);
     const card = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === destination.provisionalName)!;
     await act(async () => card.props.onPress());
-    expect(router.navigate).toHaveBeenLastCalledWith({ pathname: '/', params: { featuredDestinationId: destination.id } });
+    expect(router.navigate).toHaveBeenLastCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: destination.id } });
+    expect(client.getQueryData(featuredSelectionOptions(destination.id).queryKey)).toBeUndefined();
   }
   expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
 });
@@ -78,7 +82,7 @@ it.each(listDestinations())('does not emit duplicate sibling keys for $id', asyn
     args.some(argument => String(argument).includes('same key')));
   expect(keyWarnings).toEqual([]);
 });
-it.each([undefined, 'D10', ['D01'], '../D01'])('handles an invalid deep link %j and returns safely', async id => {
+it.each([undefined, 'D11', ['D01'], '../D01'])('handles an invalid deep link %j and returns safely', async id => {
   controls.params = { destinationId: id }; controls.back = false; await mount();
   expect(output()).toContain(translations.t('destinations.unavailable'));
   await act(async () => button('placeDetails.back')!.props.onPress()); expect(router.navigate).toHaveBeenCalledWith('/destinations');
@@ -120,12 +124,12 @@ it('does not create directions intent from an inactive catalog owner', async () 
  controls.active = false; await mount(); await act(async () => button('placeDetails.directions')!.props.onPress()); expect(router.push).not.toHaveBeenCalled();
 });
 
-it('opens the ACLC pilot card on the existing map without acquiring catalog GPS', async () => {
+it('opens the permanent ACLC card in details without acquiring catalog GPS', async () => {
   await mount(<DestinationsScreen />);
   const card = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === 'ACLC College of Ormoc');
   expect(card).toBeDefined();
   await act(async () => card!.props.onPress());
-  expect(router.navigate).toHaveBeenCalledWith({ pathname: '/', params: { featuredDestinationId: 'pilot-aclc' } });
+  expect(router.navigate).toHaveBeenCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D10' } });
   expect(placesService.details).not.toHaveBeenCalled();
 });
 it.each(['en', 'ja', 'ko'])('puts %s destination choices before optional content maintenance', async locale => {
@@ -137,10 +141,9 @@ it.each(['en', 'ja', 'ko'])('puts %s destination choices before optional content
   expect(destination).toBeGreaterThan(-1);
   expect(updates).toBeGreaterThan(destination);
   const action = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === 'ACLC College of Ormoc')!;
-  expect(action.props.className).toContain('rounded-card');
-  expect(action.props.className).toContain('bg-surface');
+  expect(action.props.className).toContain('active:opacity-80');
   const name = action.findAllByType('text').find(node => node.props.children === 'ACLC College of Ormoc')!;
-  expect(name.props.className).toContain('text-card');
+  expect(name.props.className).toContain('text-section');
   expect(action.findAllByType('text').map(node => node.props.children).flat()).not.toContain(translations.t('destinations.provisional'));
   expect(placesService.nearby).not.toHaveBeenCalled();
   expect(placesService.details).not.toHaveBeenCalled();
@@ -153,9 +156,9 @@ it('shows the supplied summary but keeps full AR chapters out of prearrival 2D d
  expect(output()).toContain('Private approved overview'); expect(output()).not.toContain('Private approved highlight');
 });
 
-it.each(['en', 'ja', 'ko'])('renders the %s catalog count from the preserved nine-destination total', async language => {
+it.each(['en', 'ja', 'ko'])('renders the %s catalog count for all ten destinations', async language => {
   await translations.changeLanguage(language); await mount(<DestinationsScreen />);
-  const heading = translations.t('destinations.exploreCount', { count: 9 });
+  const heading = translations.t('destinations.exploreCount', { count: listDestinations().length });
   expect(heading).not.toBe('destinations.exploreCount');
   expect(output()).toContain(heading);
   expect(placesService.details).not.toHaveBeenCalled();
@@ -170,7 +173,7 @@ it('keeps supplied content in the single page scroll owner and preserves directi
  expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.details).not.toHaveBeenCalled();
 });
 
-it('reports installed approved story availability without granting prearrival story access or changing bundled navigation', async () => {
+it('resolves legacy ACLC details links to D10 with localized visitor guidance', async () => {
  const {contentManifestSchema}=await import('@/features/destination-content/model');
  const {manifest}=await import('@/features/destination-content/test-fixtures');
  controls.params={destinationId:'pilot-aclc'};
@@ -179,8 +182,9 @@ it('reports installed approved story availability without granting prearrival st
  for(const locale of ['en','ja','ko']) {
   controls.language=locale as 'en'|'ja'|'ko';
   await act(async()=>{await translations.changeLanguage(locale);tree!.update(render(<DestinationContentContext.Provider value={state}><DestinationScreen/></DestinationContentContext.Provider>));});
-  expect(output()).toContain(translations.t('destinations.storiesOnSite'));
-  expect(output()).not.toContain(translations.t('destinations.storiesPending'));
+  const aclc = getDestination('D10')!;
+  expect(output()).toContain(destinationName(aclc, controls.language));
+  expect(output()).toContain(aclc.visitorGuide![controls.language].value.arrival);
   expect(output()).not.toContain('Synthetic test');
  }
  expect(button('placeDetails.directions')!.props.disabled).not.toBe(true);
@@ -205,23 +209,50 @@ it('makes Maps the full-width primary action while preserving secondary Directio
  expect(nativeUi.openURL).toHaveBeenCalledWith(expect.stringContaining('https://www.google.com/maps/'));
  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
-it('opens listing photography separately from the sibling title map action, with no nested buttons', async () => {
+it('makes the featured cover and title one details action and leaves photo viewing on the details page', async () => {
  await mount(<DestinationsScreen />);
  const destination = listDestinations()[0];
- const name = destinationName(destination, 'en');
- const photo = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === translations.t('destinationCleanup.viewPhoto', { name }));
- expect(photo).toBeDefined();
- expect(photo!.findAllByType('button')).toHaveLength(1);
- await act(async () => photo!.props.onPress());
- expect(router.navigate).not.toHaveBeenCalled();
+ const card = tree!.root.findByProps({ testID: `featured-photo-card:${destination.id}` });
+ const controls = card.findAllByType('button');
+ expect(controls).toHaveLength(1);
+ expect(controls[0].props.accessibilityLabel).toBe(destinationName(destination, 'en'));
+ await act(async () => controls[0].props.onPress());
+ expect(router.navigate).toHaveBeenCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D01' } });
+ expect(tree!.root.findAllByType('modal' as React.ElementType)).toHaveLength(0);
+
+ await act(async () => tree!.update(render()));
+ const firstPhoto = destination.media![0];
+ const photo = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === firstPhoto.alt.en.value)!;
+ await act(async () => photo.props.onPress());
  const modal = tree!.root.findByType('modal' as React.ElementType);
- expect(modal.findByProps({ testID: `viewer-photo:${destination.media![0].id}` }).props.resizeMode).toBe('contain');
- await act(async () => modal.props.onRequestClose());
- const title = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === name)!;
- expect(title.findAllByType('button')).toHaveLength(1);
- await act(async () => title.props.onPress());
- expect(router.navigate).toHaveBeenCalledWith({ pathname: '/', params: { featuredDestinationId: 'D01' } });
+ expect(modal.findByProps({ testID: `viewer-photo:${firstPhoto.id}` }).props.resizeMode).toBe('contain');
  expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it.each(['en', 'ja', 'ko'] as const)('hands the selected destination to Explore through a localized %s action', async language => {
+ controls.language = language;
+ await translations.changeLanguage(language);
+ await mount();
+ const key = 'destinationCleanup.viewOnExplore';
+ expect(translations.t(key)).not.toBe(key);
+ expect(router.dismissTo).not.toHaveBeenCalled();
+ const map = button(key)!;
+ await act(async () => {
+   map.props.onPress();
+   map.props.onPress();
+ });
+ expect(client.getQueryData(featuredSelectionOptions('D01').queryKey)).toEqual({ destinationId: 'D01' });
+ expect(router.dismissTo).toHaveBeenCalledExactlyOnceWith({ pathname: '/', params: { featuredDestinationId: 'D01' } });
+ expect(router.navigate).not.toHaveBeenCalled();
+ expect(router.push).not.toHaveBeenCalled();
+ expect(nativeUi.openURL).not.toHaveBeenCalled();
+ expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
+});
+it('does not offer a map handoff for a destination without a curated center', async () => {
+ const catalog = await import('./catalog');
+ vi.spyOn(catalog, 'getDestination').mockReturnValue(catalog.destinationSchema.parse({ id: 'D01', provisionalName: 'Unmapped fixture' }));
+ await mount();
+ expect(button('destinationCleanup.viewOnExplore')).toBeUndefined();
+ expect(router.dismissTo).not.toHaveBeenCalled();
 });
 it('gives every guide activity, preparation and safety item a noninteractive prefix while retaining paragraphs', async () => {
  await mount();
@@ -244,4 +275,49 @@ it('recognizes and removes a legacy Google alias on the featured destination pag
  await mount(<JournalContext.Provider value={journal}><DestinationScreen/></JournalContext.Provider>);
  const remove=button('journal.remove');expect(remove).toBeDefined();await act(async()=>remove!.props.onPress());
  expect(save).toHaveBeenCalledExactlyOnceWith({kind:'featured',id:'D01'},false,undefined,[alias]);
+});
+
+it.each(['en', 'ja', 'ko'] as const)('shows inline Lake Danao History in %s without source links', async language => {
+  const history = destinationHistory('D01', schoolPresentationHistoryScope)!;
+  controls.language = language;
+  await translations.changeLanguage(language);
+  await mount();
+  expect(output()).toContain(exhibitVisitorCopy[language].history);
+  expect(output()).toContain(history.summary[language]);
+  expect(output()).not.toContain(history.entry.text[language]);
+  expect(output()).not.toContain(exhibitVisitorCopy[language].historySources);
+  expect(tree!.root.findAllByProps({ testID: 'history-visual' })).toHaveLength(0);
+  expect(placesService.nearby).not.toHaveBeenCalled();
+});
+
+it('keeps the festival photo credit, license and school-use scope in the photo viewer', async () => {
+  const history = destinationHistory('D05', schoolPresentationHistoryScope)!;
+  controls.params = { destinationId: 'D05' };
+  controls.language = 'ko';
+  await translations.changeLanguage('ko');
+  await mount();
+  expect(output()).toContain(history.caption.ko.value);
+  expect(output()).not.toContain(history.media!.credit);
+  expect(tree!.root.findAllByType('img').find(node => node.props.testID === 'history-visual')!.props.resizeMode).toBe('contain');
+  await act(async () => tree!.root.findAllByType('button').find(node => node.props.testID === 'history-visual-open')!.props.onPress());
+  expect(tree!.root.findAllByType('img').find(node => node.props.testID === `viewer-photo:${history.media!.id}`)!.props.resizeMode).toBe('contain');
+  expect(output()).toContain(history.media!.credit);
+  expect(output()).toContain(exhibitVisitorCopy.ko.historySchoolScope);
+  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === 'CC BY-SA 4.0')!.props.onPress());
+  expect(nativeUi.openURL).toHaveBeenCalledWith(history.visual.licenseUrl);
+});
+
+it('recognizes and removes the legacy ACLC bookmark in permanent D10 details', async () => {
+ const legacy = {kind:'featured',id:'pilot-aclc'} as const;
+ const save = vi.fn(async()=>true);
+ const journal: JournalContextValue = {
+   state:{...emptyJournal(),bookmarks:[legacy,{kind:'featured',id:'D01'}]},metadata:{},ready:true,error:null,
+   principalId:'guest',sync:{phase:'local'},save,award:async()=>false,syncNow:()=>{},retry:()=>{},
+ };
+ controls.params = {destinationId:'D10'};
+ await mount(<JournalContext.Provider value={journal}><DestinationScreen/></JournalContext.Provider>);
+ const remove = button('journal.remove');
+ expect(remove).toBeDefined();
+ await act(async()=>remove!.props.onPress());
+ expect(save).toHaveBeenCalledExactlyOnceWith({kind:'featured',id:'D10'},false,undefined,[legacy]);
 });

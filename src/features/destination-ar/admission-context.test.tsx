@@ -82,3 +82,17 @@ it.each(['begin', 'beginSimulation'] as const)('preserves captured %s across an 
  expect(results).toHaveLength(1); expect(results[0]).not.toBeNull();
  expect(current.source[method]).toBe(launch);
 });
+
+it('rechecks a committed outside fix before the launch callback can use old evidence', async () => {
+ await ready();
+ const launch = current.source.begin;
+ const next = sample(19000);
+ const results: (string | null)[] = [];
+ await act(async () => {
+  vi.mocked(Date.now).mockReturnValue(19000);
+  tree!.update(render({ ...next, sample: { ...next.sample!, position: { ...next.sample!.position, latitude: next.sample!.position.latitude + 51 / 111195 } } }, {
+   onCommit: () => { results.push(launch('draft', 'en')); },
+  }));
+ });
+ expect(results).toEqual([null]);
+});

@@ -47,6 +47,10 @@ with tempfile.TemporaryDirectory(prefix='argala-journal-pg-') as directory:
         assert limiter == 'f|f|t', limiter
         denied(user_a, 'SELECT * FROM private.google_request_limits;')
         denied('', f"SELECT public.sync_travel_journal('{client_a}','30000000-0000-4000-8000-000000000001',1,0,'{json.dumps(empty)}');")
+        aclc = {**empty, 'bookmarks': [{'kind':'featured','id':'D10'}],
+                'stamps': [{'destinationId':f'D{i:02d}','visitedAt':i} for i in range(1,11)] + [{'destinationId':'pilot-aclc','visitedAt':11}]}
+        aclc_literal = json.dumps(aclc).replace("'", "''")
+        assert sql(f"SELECT private.valid_travel_journal('{aclc_literal}'::jsonb);") == 't'
         saved = {**empty, 'bookmarks': [ref]}
         first = request(user_a, client_a, 1, 0, saved)
         assert first['status'] == 'applied' and first['revision'] == 1

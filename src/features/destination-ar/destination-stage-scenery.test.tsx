@@ -8,11 +8,11 @@ const native = vi.hoisted(() => ({ reduced: false }));
 vi.mock('react-native-reanimated', () => ({ useReducedMotion: () => native.reduced }));
 vi.mock('@reactvision/react-viro', () => ({ ViroNode: 'node', ViroPolyline: 'polyline' }));
 afterEach(() => { native.reduced = false; vi.restoreAllMocks(); });
-it('gives every destination distinct bounded symbolic scenery without interactive geometry', async () => {
+it('retains the original outdoor exhibits’ distinct bounded symbolic scenery without interactive geometry', async () => {
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
   const original = console.error; vi.spyOn(console, 'error').mockImplementation((...args: unknown[]) => { if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args); });
   const shapes = new Set<string>();
-  for (const id of destinationIds.slice(1)) {
+  for (const id of destinationIds.filter(id => id !== 'D01' && id !== 'D10')) {
     const profile = getExhibitStageProfile(id)!; const contours = stageContours(profile.theme);
     expect(contours.length).toBeGreaterThan(3); expect(contours.length).toBeLessThanOrEqual(32);
     expect(contours.flatMap(contour => contour.points).every(point => point.every(Number.isFinite) && Math.abs(point[0]) <= 1.8 && Math.abs(point[1]) <= 1.3)).toBe(true);
@@ -29,4 +29,5 @@ it('gives every destination distinct bounded symbolic scenery without interactiv
     await act(async () => tree.unmount()); native.reduced = false;
   }
   expect(shapes.size).toBe(8);
+  expect(stageContours(getExhibitStageProfile('D10')!.theme)).toEqual([]);
 });

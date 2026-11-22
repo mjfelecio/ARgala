@@ -1,6 +1,7 @@
 import type { ExhibitStageProfile } from './exhibit-stage';
 import type { Basis, RingEntry, RingSlot } from './scene-geometry';
 import presentationContent from './featured-presentation-content.json';
+import { EXHIBIT_HISTORY_ID, EXHIBIT_GUIDE_IDS, isExhibitGuide } from './ring-content';
 import type { DestinationId } from '@/features/destinations/catalog';
 
 export type ExhibitGalleryEntrance = Readonly<{ id: string; mediaId?: string }>;
@@ -18,12 +19,13 @@ const destinationAngles: Readonly<Record<DestinationId, readonly number[]>> = Ob
   D05: Object.freeze([-100, 65, 165]), D06: Object.freeze([-85, 80, 175]),
   D07: Object.freeze([-100, 100]), D08: Object.freeze([-95, 70, 165]),
   D09: Object.freeze([-90, 80, 175]),
+  D10: Object.freeze([]),
 });
 
 /** Immutable display configuration; never destination geography or progress. */
 export function createPhotoIslandsProfile(front: ExhibitStageProfile, angles: readonly number[] = destinationAngles[front.destinationId]): ExhibitStageProfile {
   const bayCount = Math.ceil((front.media.length - 1) / 2);
-  if (front.media.length < 2 || angles.length !== bayCount || bayCount < front.stations.length || angles.some(angle => !Number.isFinite(angle))
+  if (front.media.length < 1 || angles.length !== bayCount || bayCount < front.stations.length || angles.some(angle => !Number.isFinite(angle))
     || new Set(angles.map(normalized)).size !== angles.length) throw new Error('Invalid photo islands');
   return Object.freeze({ ...front, photoIslands: Object.freeze(angles.map((angle, index) => {
     const first = front.media[1 + index * 2].id; const second = front.media[2 + index * 2]?.id;
@@ -81,24 +83,71 @@ export function photoIslandStoryY(profile: ExhibitStageProfile, bayIndex: number
   return Math.min(photoIslandMetrics.storyY, bottom - photoIslandMetrics.storyClearance - photoIslandMetrics.storyHeight / 2);
 }
 
+// The welcome photo sits above the group. Every guide surface faces the
+// captured center, and the lower pair sits between the three upper headings.
+export const photoIslandGuide = { width: 1.27, height: 0.85, radius: 2.75, topY: -0.94, lowerY: -1.86 } as const;
+const guideSlots = new Map<string, { angle: number; row: 0 | 1 }>([
+  [EXHIBIT_GUIDE_IDS.arrival, { angle: 0, row: 0 }],
+  [EXHIBIT_GUIDE_IDS.bestTime, { angle: -27, row: 0 }],
+  [EXHIBIT_GUIDE_IDS.safety, { angle: 27, row: 0 }],
+  [EXHIBIT_GUIDE_IDS.activities, { angle: -14.5, row: 1 }],
+  [EXHIBIT_GUIDE_IDS.preparation, { angle: 14.5, row: 1 }],
+]);
+
+/** Fit the group between the welcome cover and any extra story row in the
+ * captured view. Keep full-size panels and their row spacing in world units. */
+function guidePlacement(profile: ExhibitStageProfile, welcome: ExhibitGalleryEntrance | undefined, overflowY: number | null) {
+  const { height, topY, lowerY, radius } = photoIslandGuide;
+  const rowPitch = topY - lowerY;
+  if (overflowY === null) return { radius, topY, rowPitch, angleScale: 1 };
+
+  const clearance = 0.025;
+  const welcomeBottom = welcome
+    ? (photoIslandMetrics.welcomeY - (photoIslandCoverSize(profile, welcome).height + 0.04) / 2) / photoIslandMetrics.welcomeRadius
+    : 0.12;
+  const overflowCorner = Math.hypot(photoIslandMetrics.storyRadius, photoIslandMetrics.storyWidth / 2);
+  const overflowTop = (overflowY + photoIslandMetrics.storyHeight / 2) / overflowCorner;
+  const upperLimit = welcomeBottom - clearance;
+  const available = upperLimit - overflowTop - clearance;
+  const depth = Math.max(radius, (height + rowPitch) / available);
+  return { radius: depth, topY: upperLimit * depth - height / 2, rowPitch, angleScale: radius / depth };
+}
+
 /** Each entrance is a real native focus/Close target in the captured frame. */
 export function buildPhotoIslandSlots(profile: ExhibitStageProfile, entries: readonly RingEntry[], basis: Basis): RingSlot[] {
   const bays = profile.photoIslands; const gallery = exhibitGalleryEntries(profile);
-  if (!bays || entries.length < gallery.length || entries.length > gallery.length + 12 || new Set(entries.map(entry => entry.id)).size !== entries.length
+  const chapters = entries.slice(gallery.length).filter(entry => entry.id !== EXHIBIT_HISTORY_ID && !isExhibitGuide(entry.id));
+  if (!bays || entries.length < gallery.length || chapters.length > 12 || new Set(entries.map(entry => entry.id)).size !== entries.length
     || gallery.some((entry, index) => entries[index]?.id !== entry.id)) throw new Error('Invalid photo island entries');
-  const storyAngles = destinationAngles[profile.destinationId];
+  const storyAngles = profile.destinationId === 'D10' ? [-96, 88, 168] : destinationAngles[profile.destinationId];
   // Preserve the accepted gallery and first story bays exactly. Additional
   // authorized chapters use a separate lower ring, clear of those controls.
   const overflowY = Math.min(photoIslandMetrics.storyY, ...bays.map((_, index) => photoIslandStoryY(profile, index)))
     - photoIslandMetrics.storyHeight - photoIslandMetrics.storyClearance;
+  const hasOverflow = chapters.length > storyAngles.length;
+  const guideGroup = guidePlacement(profile, gallery[0], hasOverflow ? overflowY : null);
+  let chapterIndex = 0;
   return entries.map((entry, index) => {
-    let x: number, y: number, z: number, angle: number, scale: number;
+    const guide = guideSlots.get(entry.id);
+    let y: number, angle: number, scale: number, radius: number;
     if (index === 0 && gallery.length) {
-      x = 0; y = photoIslandMetrics.welcomeY; z = photoIslandMetrics.welcomeRadius; angle = 0;
+      y = photoIslandMetrics.welcomeY;
+      radius = photoIslandMetrics.welcomeRadius;
+      angle = 0;
       scale = photoIslandCoverSize(profile, gallery[0]).width / 1.25;
+    } else if (guide) {
+      y = guideGroup.topY - guide.row * guideGroup.rowPitch;
+      radius = guideGroup.radius;
+      angle = guide.angle * guideGroup.angleScale;
+      scale = photoIslandGuide.width / 1.25;
+    } else if (entry.id === EXHIBIT_HISTORY_ID) {
+      y = hasOverflow ? -0.83 : -1.69;
+      radius = hasOverflow ? 2.65 : photoIslandMetrics.storyRadius;
+      angle = hasOverflow ? 40 : 52;
+      scale = photoIslandMetrics.storyWidth / 1.25;
     } else {
       const photo = index < gallery.length;
-      const localIndex = photo ? index - 1 : index - gallery.length;
+      const localIndex = photo ? index - 1 : chapterIndex++;
       const mediaId = gallery[index]?.mediaId;
       const bayIndex = photo ? bays.findIndex(bay => bay.mediaIds.some(id => id === mediaId)) : localIndex;
       const bay = bays[bayIndex];
@@ -107,13 +156,13 @@ export function buildPhotoIslandSlots(profile: ExhibitStageProfile, entries: rea
       const overflow = !photo && localIndex >= storyAngles.length;
       angle = overflow ? (localIndex - storyAngles.length) * 360 / (12 - storyAngles.length)
         : (bay?.angle ?? storyAngles[localIndex]) + (photo ? composition.angle : 0);
-      const radians = angle * Math.PI / 180;
-      const radius = photo ? composition.radius : photoIslandMetrics.storyRadius;
-      x = Math.sin(radians) * radius;
-      z = Math.cos(radians) * radius;
+      radius = photo ? composition.radius : photoIslandMetrics.storyRadius;
       y = photo ? composition.y : overflow ? overflowY : bay ? photoIslandStoryY(profile, bayIndex) : photoIslandMetrics.storyY;
       scale = (photo ? photoIslandCoverSize(profile, gallery[index]).width : photoIslandMetrics.storyWidth) / 1.25;
     }
+    const radians = angle * Math.PI / 180;
+    const x = Math.sin(radians) * radius;
+    const z = Math.cos(radians) * radius;
     return { ...entry, angle: normalized(angle), scale,
       position: [basis.right[0] * x + basis.forward[0] * z, y, basis.right[2] * x + basis.forward[2] * z],
       rotation: [0, ((basis.yaw - angle + 540) % 360 + 360) % 360 - 180, 0],

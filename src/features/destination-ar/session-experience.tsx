@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Text, View } from 'react-native';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { BackHandler, Text, View } from 'react-native';
 import { router, useIsFocused, useNavigation } from 'expo-router';
 import type { NativeStackNavigationProp } from 'expo-router/native-stack';
 import { useReducedMotion } from 'react-native-reanimated';
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
 import { useThemeColor } from 'heroui-native/hooks';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { destinationIds, type DestinationId } from '@/features/destinations/catalog';
 import { useSettings } from '@/features/settings/provider';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
 import { useAppActive } from '@/lib/use-app-active';
@@ -27,6 +28,11 @@ import type { RingControls, RingMetrics } from './destination-ring-scene';
 import type { SessionIdentity } from './session';
 import { ArPhotoControls } from '@/features/ar-photo/ar-photo-controls';
 import type { NativeCapture } from '@/features/ar-photo/types';
+import { advanceView, arViewDuration, defaultArView, requestView, settleInterruptedView, type ArView, type ArViewPhase } from './ar-view-mode';
+import { useNearbyMode } from './use-nearby-mode';
+import type { Coordinate } from '@/features/location/geo';
+import type { NearbyHeadingStatus } from './nearby-mode';
+import { NearbyControls, NearbyResults } from './nearby-controls';
 
 export type SessionExperienceProps = { introductionMemory?: IntroductionMemory; preparation?: React.ReactNode; sceneLoader: typeof loadRingScene; audioManifest?: AudioManifest; identity: SessionIdentity; freshEligible(): boolean; content: readonly RingContent[]; galleryMediaIds?: readonly string[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
 export function DestinationArSessionExperience({ sceneLoader, introductionMemory, preparation, audioManifest, identity, freshEligible, content, galleryMediaIds, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey, preflightNoticeKey }: SessionExperienceProps) {
@@ -35,15 +41,32 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
   const [transitionReady, setTransitionReady] = useState(true); const [scene, setScene] = useState({ width: 0, height: 0 });
   const [NativeRing, setNativeRing] = useState<Awaited<ReturnType<typeof loadRingScene>> | null>(null);
-  const { systemVoice, soundEffects } = useSettings();
+  const { systemVoice, soundEffects, language } = useSettings();
   const audioPreferences = useMemo(() => ({ systemVoice, soundEffects }), [systemVoice, soundEffects]);
   const audition = identity.provenance === 'development' && isViroSpikeEnabled() ? audioManifest : undefined;
   const reading = useReadingSize(); const introduction = useArIntroduction(identity, introductionMemory); const reduced = useReducedMotion();
   const [previewEntrance, setPreviewEntrance] = useState(false);
+  const [results, setResults] = useState<{ selected: string | null; origin: Coordinate | null } | null>(null);
+  const closeResults = useCallback(() => setResults(null), []);
+  useEffect(() => {
+    if (!results || !focused || !active) return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      closeResults();
+      return true;
+    });
+    return () => subscription.remove();
+  }, [results, focused, active, closeResults]);
   const variant = introVariant({ ready: true, established: false, seen: introduction.seen && !previewEntrance, reduced });
-  const lifecycle = useArSession({ identity, tileIds: content.map(item => item.id), galleryMediaIds, running: focused && active, transitionReady,
+  const lifecycle = useArSession({ identity, tileIds: content.map(item => item.id), galleryMediaIds, running: focused && active && !results, transitionReady,
     entryReady, measured: scene.width > 0 && scene.height > 0 && NativeRing !== null && introduction.loaded, freshEligible, onEstablished, reveal: true, revealDurationMs: introDuration(variant) });
   const { startup, session, close } = lifecycle;
+  const startupVoice = useRef<string | null>(null);
+  const sessionKey = JSON.stringify([identity.principalId, identity.admissionId, identity.destinationId, identity.provenance]);
+  const claimStartupVoice = useCallback(() => {
+    if (startupVoice.current === sessionKey) return false;
+    startupVoice.current = sessionKey;
+    return true;
+  }, [sessionKey]);
   const completeIntroduction = introduction.complete;
   const reportFailure = startup.onFailure;
   useEffect(() => {
@@ -67,10 +90,46 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
   }, []);
   const [poseRequired, setPoseRequired] = useState(false); const recenterResult = useCallback((success: boolean) => setPoseRequired(!success), []);
   const [help, setHelp] = useState(false); const [metrics, setMetrics] = useState<RingMetrics>({ received: 0, applied: 0 });
-  const exploring = session.phase === 'exploring'; const revealing = session.phase === 'reveal' || session.phase === 'limited' && session.revealedCount < content.length;
+  const exploring = session.phase === 'exploring';
+  const supportsViews = identity.provenance !== 'development' && destinationIds.includes(identity.destinationId as DestinationId);
+  const signedIn = !!identity.principalId && identity.principalId !== 'guest';
+  const [viewMode, setViewMode] = useState(defaultArView);
+  const [heading, setHeading] = useState<NearbyHeadingStatus>('weak');
+  const [preferredNearbyId, setPreferredNearbyId] = useState<string | null>(null);
+  const readyView = startup.mountScene && exploring && focused && active && !help;
+  const nearbyView = supportsViews && viewMode.view === 'nearby';
+  const detailsView = !nearbyView && viewMode.phase === 'ready';
+  const inNearby = startup.mountScene && session.established && focused && active && !help && nearbyView;
+  const browsingNearby = inNearby && viewMode.phase === 'ready';
+  const nearby = useNearbyMode(inNearby && signedIn, readyView && browsingNearby, language, preferredNearbyId);
+  if (!readyView && viewMode.phase !== 'ready') setViewMode(settleInterruptedView(viewMode));
+  if (heading !== 'weak' && (!readyView || !nearbyView || !nearby.fix || !nearby.cards.length)) setHeading('weak');
+  const showResults = (selected: string | null) => {
+    if (!browsingNearby || !nearby.result || !nearby.isResultCurrent(nearby.result)) return;
+    setResults(current => current ?? { selected, origin: nearby.position });
+  };
+  const viewOwner = useRef(false);
+  useLayoutEffect(() => {
+    viewOwner.current = readyView;
+    return () => { viewOwner.current = false; };
+  }, [readyView]);
+  const completeView = useCallback((id: number, phase: ArViewPhase) => {
+    if (viewOwner.current) setViewMode(current => advanceView(current, id, phase));
+  }, []);
+  useEffect(() => {
+    if (!readyView || viewMode.phase === 'ready') return;
+    const { phase, id } = viewMode;
+    // Give the native completion priority and bound missing callbacks during view creation.
+    const timer = setTimeout(() => completeView(id, phase), arViewDuration[phase] + 200);
+    return () => clearTimeout(timer);
+  }, [readyView, viewMode, completeView]);
+  const revealing = session.phase === 'reveal' || session.phase === 'limited' && session.revealedCount < content.length;
   const compactUtilities = scene.height > 0 && scene.height < 600;
   const showLiveGuidance = session.phase === 'limited' || revealing || poseRequired || help;
   const preparing = !startup.mountScene && !session.established;
+  if (results) return <NearbyResults nearby={nearby} selected={results.selected} origin={results.origin}
+    onShowInCamera={providerId => { setPreferredNearbyId(providerId); closeResults(); }}
+    onShowAll={() => setResults(current => current && { ...current, selected: null })} onClose={closeResults} />;
   if (startup.errorCode === 'unsupported' && unsupportedFallback && focused && active) return <>{unsupportedFallback}</>;
   return <View testID="destination-ar-scene" className={preparing ? 'flex-1 bg-page' : 'flex-1 bg-ink'} onLayout={event => {
     const { width, height } = event.nativeEvent.layout;
@@ -80,6 +139,10 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
     {startup.mountScene && NativeRing && <View style={{ position: 'absolute', top: 0, left: 0, width: scene.width, height: scene.height }}>
       <SceneBoundary key={startup.attempt} onFailure={startup.onFailure}>
         <NativeRing onReady={startup.onReady} onTracking={lifecycle.onTracking} onControls={acceptControls} onRecenterResult={recenterResult}
+          claimStartupVoice={identity.provenance === 'development' ? undefined : claimStartupVoice}
+          restrictCapture={identity.destinationId === 'D10'}
+          viewMode={supportsViews ? viewMode : undefined} onViewComplete={completeView}
+          nearbyContent={nearbyView ? { cards: nearby.cards, fix: nearby.fix, onHeading: setHeading, onSelect: showResults } : undefined}
           onMetrics={help && identity.provenance === 'development' ? setMetrics : undefined} reading={reading} content={content} initialProgress={session.progress} onProgress={lifecycle.onProgress}
           audioPreferences={audioPreferences} audioManifest={audition} firstVisit={!introduction.seen || previewEntrance && identity.provenance === 'development'}
           visibleTileCount={session.phase === 'reveal' ? Infinity : session.revealedCount} deployment={session.phase === 'reveal' ? variant : undefined} interactive={exploring && !help} effectsEnabled={!help} />
@@ -87,8 +150,20 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
     </View>}
     <ArUtilityChrome appearance={preparing ? 'page' : 'camera'} viewportHeight={scene.height} titleKey={identity.provenance === 'development' ? 'destinationRing.title' : 'arShowcase.title'} title={title} onReturn={onReturn} onExit={() => { close(); onExit?.(); }} actions={startup.phase === 'live' ? <>
       <Button variant="secondary" accessibilityLabel={t('destinationRing.help')} accessibilityState={{ expanded: help }} onPress={() => setHelp(value => !value)}><Button.Label>{t('destinationRing.help')}</Button.Label></Button>
-    </> : undefined} bottom={startup.phase === 'live' && !help ? <>
-      <ArPhotoControls capture={capture} running={exploring && focused && active} compact={compactUtilities} sessionKey={JSON.stringify([identity.principalId, identity.admissionId, identity.destinationId, identity.provenance, startup.attempt])} leadingAction={
+    </> : undefined} underHeader={startup.phase === 'live' && supportsViews && !help &&
+      <View testID="ar-view-selector" accessibilityRole="tablist" accessibilityLabel={t('arNearby.mode')}
+        className="mx-4 mt-2 max-w-sm shrink-0 flex-row gap-1 self-center rounded-card bg-ar-panel p-1">
+        {(['details', 'nearby'] as const).map((view: ArView) => <Button key={view} testID={`ar-select-${view}`}
+          variant={viewMode.target === view ? 'primary' : 'ghost'} className="h-auto min-h-12 min-w-0 flex-1 px-3 py-2"
+          accessibilityRole="tab" accessibilityLabel={t(`arNearby.${view}`)} accessibilityState={{ selected: viewMode.target === view }}
+          isDisabled={!readyView || viewMode.phase !== 'ready'} onPress={() => setViewMode(current => requestView(current, view, reduced))}>
+          <Button.Label className={viewMode.target === view ? 'shrink text-center' : 'shrink text-center text-white'}>{t(`arNearby.${view}`)}</Button.Label>
+        </Button>)}
+      </View>}
+      bottom={startup.phase === 'live' && !help ? <>
+      {nearbyView && <NearbyControls signedIn={signedIn} nearby={nearby} heading={heading} trackingLost={session.phase === 'limited'}
+        disabled={!readyView || viewMode.phase !== 'ready'} resultsEnabled={browsingNearby} onShowResults={() => showResults(null)} />}
+      {detailsView && <><ArPhotoControls capture={capture} running={exploring && focused && active} compact={compactUtilities} sessionKey={`${sessionKey}:${startup.attempt}`} leadingAction={
         <Button variant="secondary" isIconOnly={compactUtilities} className={compactUtilities ? 'size-12 p-0' : 'min-h-12'} accessibilityLabel={t('destinationRing.recenter')} isDisabled={!exploring} onPress={() => controls.current?.recenter()}>{compactUtilities ? <Ionicons name="scan-outline" size={22} color={utilityInk} accessible={false} /> : <Button.Label>{t('destinationRing.recenter')}</Button.Label>}</Button>
       } />
       {readerControls?.readerAvailable && exploring && focused && active && <View testID="ar-reading-controls" className="flex-row items-center gap-2" pointerEvents="box-none">
@@ -98,7 +173,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
       {reading.error && <View testID="ar-reading-feedback" className="w-full gap-2">
         <Text accessibilityRole="alert" className="font-sans text-sm text-white">{t(`destinationRing.${reading.error}`)}</Text>
         <Action title={t('common.retry')} onPress={() => void reading.retry()} disabled={reading.pending} />
-      </View>}
+      </View>}</>}
     </> : undefined}>
       {!startup.mountScene && preparation}
       {session.phase === 'expired' ? <View className="gap-3 p-4"><Notice>{t(identity.provenance === 'showcase' ? 'arShowcase.expired' : 'destinationSession.expired')}</Notice>
@@ -110,7 +185,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
       {!session.established && guidance}
       {session.established && (startup.phase === 'checking' || startup.phase === 'prepared' || startup.phase === 'initializing') && <Notice>{t('destinationSession.restoring')}</Notice>}
       {startup.phase === 'live' && showLiveGuidance && <View className="gap-2 p-4">
-        {(session.phase === 'limited' || revealing) && <Notice>{t(session.phase === 'limited' ? 'destinationAr.trackingLost' : 'destinationSession.reveal')}</Notice>}
+        {((session.phase === 'limited' && (!nearbyView || !signedIn || help)) || revealing) && <Notice>{t(session.phase === 'limited' ? 'destinationAr.trackingLost' : 'destinationSession.reveal')}</Notice>}
         {!session.established || revealing ? <Text className="rounded-card bg-ar-panel p-3 font-sans text-sm text-white">{t('destinationStories.exploreHint')}</Text> : null}
         {identity.provenance === 'development' && <Text className="rounded-card bg-ar-panel p-2 font-sans text-xs text-white">{t(developmentNoticeKey ?? 'destinationRing.prototype')}</Text>}
         {session.phase === 'limited' && <Action title={t('destinationSession.retryTracking')} onPress={lifecycle.retryTracking} disabled={startup.pending} />}

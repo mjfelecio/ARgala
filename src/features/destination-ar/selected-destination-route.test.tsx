@@ -6,7 +6,9 @@ import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import { withHeroUI } from '@/test/native-ui';
 import { localizationOptions } from '@/i18n/options';
 import { useDeviceLocation } from '@/features/location/use-device-location';
+import { syntheticApprovedDestination, syntheticArrivalPoint, syntheticFeaturedGeofence } from '@/features/destinations/ar-geofence-fixtures';
 import { getDestination } from '@/features/destinations/catalog';
+import { getBundledArGeofence } from '@/features/destinations/ar-geofences';
 import { router } from 'expo-router';
 import { AdmissionContext } from './admission-context';
 import { ArAdmissionStore } from './admission-store';
@@ -14,6 +16,7 @@ import SelectedDestinationArRoute from './selected-destination-route';
 import { loadDraftRingContent } from './draft-content-loader';
 import { loadExhibitScene } from './exhibit-loader';
 import { loadRingScene } from './ring-loader';
+import { EXHIBIT_HISTORY_ID, EXHIBIT_GUIDE_IDS, type RingContent } from './ring-content';
 const control = vi.hoisted(() => ({ params: {} as Record<string, unknown>, active: true, sample: null as { position: { latitude: number; longitude: number }; timestamp: number; accuracy: number } | null }));
 vi.mock('expo-router', () => ({ useLocalSearchParams: () => control.params, useIsFocused: () => true, router: { dismissTo: vi.fn(), navigate: vi.fn() } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => control.active }));
@@ -70,7 +73,7 @@ it('labels simulated entry and never enables a route GPS owner for it', async ()
  expect(scene.props.developmentNoticeKey).toBe('arrival.simulatedLive');
  expect(vi.mocked(useDeviceLocation).mock.calls.every(call => call[0]?.enabled === false)).toBe(true);
 });
-it('uses approved content with verified pending provenance in release without loading draft modules', async () => {
+it('keeps even legacy approved trial content behind the diagnostic guards', async () => {
  const catalog = await import('@/features/destinations/catalog'); const pilot = catalog.getDestination('pilot-aclc')!;
  const approved = (value: string) => ({ value, approvalReference: 'synthetic test approval' });
  const media = { id: 'synthetic-route-photo', source: 1, credit: 'Synthetic credit', rightsReference: 'test', approvalReference: 'test', alt: { en: approved('Synthetic photo') } };
@@ -78,48 +81,72 @@ it('uses approved content with verified pending provenance in release without lo
  store.setContentResolver(id => id === 'pilot-aclc' ? fixture : null);
  Object.assign(globalThis, { __DEV__: false }); store.select('pilot-aclc'); const lease = store.acquire('pilot-aclc')!;
  for (const time of [10000, 13000, 16000]) { vi.mocked(Date.now).mockReturnValue(time); store.publish(lease, { running: true, watcherStatus: 'ready', sample: { timestamp: time, accuracy: 5, position: fixture.center! } }); }
- const entryToken = store.begin(lease, 'pilot-aclc', 'approved', 'en'); store.release(lease); control.params = { destinationId: 'pilot-aclc', entryToken };
+ const entryToken = store.begin(lease, 'pilot-aclc', 'approved', 'en');
+ expect(entryToken).toBeNull();
+ store.release(lease); control.params = { destinationId: 'pilot-aclc', entryToken };
  await act(async () => { tree = create(render()); });
- const scene = tree!.root.findByType('ar-experience' as React.ElementType);
- expect(scene.props.identity.provenance).toBe('verified'); expect(scene.props.content[0].approved.body.en.value).toBe('Approved body');
- expect(scene.props.content[0].approved.media).toEqual([media]);
- expect(scene.props.entryReady).toBe(false); expect(loadDraftRingContent).not.toHaveBeenCalled();
+ expect(tree!.root.findAllByType('ar-experience' as React.ElementType)).toHaveLength(0);
+ expect(useDeviceLocation).not.toHaveBeenCalled();
+ expect(loadDraftRingContent).not.toHaveBeenCalled();
 });
 
-function featuredFixture() {
- const pilot = getDestination('pilot-aclc')!;
- const translated = { en: { value: 'Synthetic approved', approvalReference: 'Test' }, ja: { value: 'Synthetic approved', approvalReference: 'Test' }, ko: { value: 'Synthetic approved', approvalReference: 'Test' } };
- const originals = getDestination('D01')!.media!;
- const media = originals.slice(0, 3).map(photo => ({ ...photo, alt: translated, caption: translated, offlineRightsReference: 'Synthetic offline permission' }));
- return { ...pilot, id: 'D01' as const, media, ar: { ...pilot.ar!, storyApproval: { contentVersion: pilot.ar!.contentVersion, approvalReference: 'Synthetic editorial approval', reviewer: 'Test', reviewedAt: '2026-11-18', primaryChapterIds: ['overview'] }, tiles: [{ id: 'overview', role: 'overview' as const, title: translated, body: translated, mediaIds: media.slice(0, 2).map(photo => photo.id) }] } };
-}
-it('keeps the nine-destination exhibit path behind real content and geographic authorization in release', async () => {
+it('keeps the featured exhibit path behind real content and geographic authorization in release', async () => {
  Object.assign(globalThis, { __DEV__: false }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '');
- const fixture = featuredFixture(); store.setContentResolver(id => id === 'D01' ? fixture : null);
+ const fixture = syntheticApprovedDestination();
+ store = new ArAdmissionStore('owner', id => id === 'D01' ? fixture : null, syntheticFeaturedGeofence);
  store.select('D01'); const lease = store.acquire('D01')!;
  expect(store.begin(lease, 'D01', 'approved', 'en')).toBeNull();
- for (const time of [10000, 13000, 16000]) { vi.mocked(Date.now).mockReturnValue(time); store.publish(lease, { running: true, watcherStatus: 'ready', sample: { timestamp: time, accuracy: 5, position: fixture.center! } }); }
+ for (const time of [10000, 13000, 16000]) { vi.mocked(Date.now).mockReturnValue(time); store.publish(lease, { running: true, watcherStatus: 'ready', sample: { timestamp: time, accuracy: 5, position: syntheticArrivalPoint } }); }
  const entryToken = store.begin(lease, 'D01', 'approved', 'en'); expect(entryToken).toBeTypeOf('string'); store.release(lease);
  control.params = { destinationId: 'D01', entryToken };
  await act(async () => { tree = create(render()); });
  let scene = tree!.root.findByType('ar-experience' as React.ElementType);
  expect(scene.props.entryReady).toBe(false); expect(scene.props.freshEligible()).toBe(false);
- const authorized = fixture.media.slice(0, 2).map(photo => photo.id);
+ const authorized = fixture.media!.slice(0, 2).map(photo => photo.id);
  expect(scene.props.galleryMediaIds).toEqual(authorized);
  expect(scene.props.content[0].approved.media.map((photo: { id: string }) => photo.id)).toEqual(authorized);
+ const panels: readonly RingContent[] = scene.props.content;
+ expect(panels.map(panel => panel.id)).toEqual(['overview', ...Object.values(EXHIBIT_GUIDE_IDS), EXHIBIT_HISTORY_ID]);
+ expect(panels.find(panel => panel.id === EXHIBIT_GUIDE_IDS.arrival)?.approved?.body.en?.value).toContain(fixture.visitorGuide!.en.value.arrival);
  const loader = scene.props.sceneLoader;
  await loader(); expect(loadExhibitScene).toHaveBeenLastCalledWith('D01', authorized); expect(loadRingScene).not.toHaveBeenCalled();
  for (const time of [19000, 22000, 25000]) {
-  vi.mocked(Date.now).mockReturnValue(time); control.sample = { timestamp: time, accuracy: 5, position: fixture.center! };
+  vi.mocked(Date.now).mockReturnValue(time); control.sample = { timestamp: time, accuracy: 5, position: syntheticArrivalPoint };
   await act(async () => tree!.update(render()));
  }
  scene = tree!.root.findByType('ar-experience' as React.ElementType);
  expect(scene.props.entryReady).toBe(true); expect(scene.props.freshEligible()).toBe(true); expect(scene.props.sceneLoader).toBe(loader);
  expect(scene.props.galleryMediaIds).toEqual(authorized);
 });
-it('does not promote the supplied featured catalog to approved on-site content', () => {
- store.select('D01'); const lease = store.acquire('D01')!;
- for (const time of [10000, 13000, 16000]) { vi.mocked(Date.now).mockReturnValue(time); store.publish(lease, { running: true, watcherStatus: 'ready', sample: { timestamp: time, accuracy: 5, position: getDestination('D01')!.center! } }); }
- expect(store.begin(lease, 'D01', 'approved', 'en')).toBeNull();
- expect(loadExhibitScene).not.toHaveBeenCalled();
+it('admits the bundled ACLC school exhibit through its polygon and revalidates in the route', async () => {
+ Object.assign(globalThis, { __DEV__: false }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '');
+ const fence = getBundledArGeofence('D10')!;
+ expect(fence.geometry.type).toBe('Polygon');
+ if (fence.geometry.type !== 'Polygon') return;
+ const [longitude, latitude] = fence.geometry.coordinates[0][0];
+ const position = { longitude, latitude };
+ store.select('D10'); const lease = store.acquire('D10')!;
+ expect(store.begin(lease, 'D10', 'approved', 'en')).toBeNull();
+ for (const timestamp of [10000, 13000]) {
+  vi.mocked(Date.now).mockReturnValue(timestamp);
+  store.publish(lease, { running: true, watcherStatus: 'ready', sample: { position, timestamp, accuracy: 5 } });
+ }
+ const entryToken = store.begin(lease, 'D10', 'approved', 'en');
+ expect(entryToken).toBeTypeOf('string');
+ store.release(lease);
+ control.params = { destinationId: 'D10', entryToken };
+ await act(async () => { tree = create(render()); });
+ const scene = tree!.root.findByType('ar-experience' as React.ElementType);
+ expect(scene.props.identity).toMatchObject({ provenance: 'verified', destinationId: 'D10' });
+ expect(scene.props.entryReady).toBe(false);
+ expect(scene.props.galleryMediaIds).toEqual(['D10-archive-2014']);
+ await scene.props.sceneLoader();
+ expect(loadExhibitScene).toHaveBeenCalledWith('D10', ['D10-archive-2014']);
+ expect(loadRingScene).not.toHaveBeenCalled();
+ for (const timestamp of [16000, 19000]) {
+  vi.mocked(Date.now).mockReturnValue(timestamp);
+  control.sample = { position, timestamp, accuracy: 5 };
+  await act(async () => tree!.update(render()));
+ }
+ expect(scene.props.freshEligible()).toBe(true);
 });

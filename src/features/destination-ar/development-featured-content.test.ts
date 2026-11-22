@@ -6,10 +6,10 @@ import { ringCopy } from './ring-copy';
 import { developmentFeaturedStories } from './development-featured-content';
 
 describe('featured research previews', () => {
-  it('provides sourced chapters for every featured destination through the real locale fallback', async () => {
+  it('provides sourced chapters for the nine research previews through the real locale fallback', async () => {
     const i18n = createInstance();
     await i18n.init({ ...localizationOptions, lng: 'ja' });
-    expect(Object.keys(developmentFeaturedStories)).toEqual(destinationIds);
+    expect(Object.keys(developmentFeaturedStories)).toEqual(destinationIds.filter(id => id !== 'D10'));
     for (const story of Object.values(developmentFeaturedStories)) {
       expect(story.chapters.length).toBeGreaterThanOrEqual(2);
       expect(story.sources.length).toBeGreaterThan(0);

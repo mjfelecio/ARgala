@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { paginate, reflowCursor, readingMetrics } from './content-layout';
+import { paginate, reflowCursor, readingMetrics, wrapReaderText } from './content-layout';
 it('wraps normal Latin words at spaces while retaining every source character', () => {
   const text = 'Discover meaningful destination stories with context. '.repeat(8);
   const pages = paginate(text, 'standard');
@@ -71,4 +71,14 @@ it.each(['en', 'ja', 'ko'])('lays out actual %s development resources without lo
       expect(pages.map(page => sample.body.slice(page.start, page.end)).join('')).toBe(sample.body);
     }
   }
+});
+
+it('keeps Japanese punctuation with the surrounding text at hard row breaks', () => {
+  const bestTime = '明るい時間に早めに出発し、天候をガイドと確認して、明るいうちに戻れる余裕を確保してください。徒歩の目安は約1時間ですが、ルートの所要時間はガイドと相談してください。';
+  for (const fontSize of [4, 5, 6]) {
+    const rows = wrapReaderText(bestTime, fontSize);
+    expect(rows.map(row => row.text).join('')).toBe(bestTime);
+    expect(rows.some(row => /^[、。]/u.test(row.text))).toBe(false);
+  }
+  expect(wrapReaderText('甲'.repeat(5) + '（日本語）', 5, 0.34).every(row => !row.text.endsWith('（'))).toBe(true);
 });

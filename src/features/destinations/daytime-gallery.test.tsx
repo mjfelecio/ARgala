@@ -45,7 +45,7 @@ it('shows only photographs in the horizontal strip, with captions and required c
  expect(tree!.root.findAllByType('img')).toHaveLength(2);
  expect(visibleText()).toContain(translations.t('destinationCleanup.photoCount', { count: 2 }));
 });
-it('opens every one of the 53 bundled photographs in original order and retains the strip owner after Android Back', async () => {
+it('opens every one of the 54 bundled photographs in original order and retains the strip owner after Android Back', async () => {
  let count = 0;
  for (const destination of listDestinations()) {
   await act(async () => { if (tree) tree.update(render(destination.media)); else tree = create(render(destination.media)); });
@@ -65,7 +65,7 @@ it('opens every one of the 53 bundled photographs in original order and retains 
    count++;
   }
  }
- expect(count).toBe(53);
+ expect(count).toBe(54);
 });
 it('pages from the selected photo with previous, next and swipe, keeping long captions above bottom safe-area controls', async () => {
  await act(async () => { tree = create(render([photo, second])); });

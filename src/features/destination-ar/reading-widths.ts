@@ -14,7 +14,7 @@ export const readingContentWidth = 1.08;
 // Pinned Viro 3.0.3 VROText.h: one font point is 0.01 world units.
 // ArText's 8x rasterization and reciprocal scale cancel in world space.
 const pointToWorld = 0.01;
-export const readingEmBudget = (fontSize: number) => (readingContentWidth - 0.04) / (fontSize * pointToWorld);
+export const readingEmBudget = (fontSize: number, width = readingContentWidth) => (width - 0.04) / (fontSize * pointToWorld);
 
 export function graphemeAdvance(segment: string, fontSize: number) {
   let advance = 0;

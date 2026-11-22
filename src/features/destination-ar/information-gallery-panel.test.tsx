@@ -270,3 +270,28 @@ it('uses a rounded authored toolbar surface without changing control hit sizes',
    }
  }
 });
+
+it('renders separate native heading, bullet and callout nodes and retains paging and Close', async () => {
+  currentContent = { ...content, approved: { ...content.approved!, media: [] }, readerBlocks: { en: [
+    { kind: 'callout', text: 'Check with staff first.' },
+    { kind: 'heading', text: 'Before you go' },
+    { kind: 'bullet', text: 'Carry water.' },
+    { kind: 'bullet', text: 'Use grippy shoes.' },
+    { kind: 'bullet', text: 'Follow the marked paths. '.repeat(15) },
+  ] } };
+  await mount();
+  expect(text('ring-reader-heading')).toBe('Before you go');
+  expect(text('ring-reader-bullet')).toBe('Carry water.');
+  expect(text('ring-reader-callout')).toBe('Check with staff first.');
+  const markers = tree.root.findAllByType('quad' as React.ElementType).filter(node => node.props.testID === 'ring-reader-marker');
+  expect(markers.length).toBeGreaterThan(1);
+  expect(markers.every(node => node.props.ignoreEventHandling)).toBe(true);
+  await press('next');
+  expect(text('ring-reader-heading')).toBe('Before you go');
+  const previous = saved!;
+  await press('larger');
+  expect(saved!.offset).toBeLessThanOrEqual(previous.offset);
+  await press('previous');
+  await press('close');
+  expect(closed).toHaveBeenCalledOnce();
+});

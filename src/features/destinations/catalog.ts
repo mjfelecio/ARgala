@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { coordinateSchema, detailsRequestSchema, type Language } from '../../../supabase/functions/_shared/contracts';
 import { presentationCatalog } from './presentation-catalog';
+import { aclcDirectionsEntrance, aclcDisplayPoint, aclcLocationReference } from './aclc-locations';
 
-export const destinationIds = ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09'] as const;
+export const destinationIds = ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09', 'D10'] as const;
 export type DestinationId = typeof destinationIds[number];
 export const featuredDestinationIds = [...destinationIds, 'pilot-aclc'] as const;
 export type FeaturedDestinationId = typeof featuredDestinationIds[number];
@@ -15,6 +16,7 @@ const guide = z.object({ arrival: text, bestTime: text, activities: z.array(text
 const approvedGuide = z.object({ value: guide, approvalReference: text }).strict();
 const mediaSchema = z.object({
   offlineRightsReference: text.optional(),
+  usageScope: text.optional(),
   id: text, source: z.number().int().positive(), credit: text, rightsReference: text, approvalReference: text,
   // A bundled require(...) asset only; no remote photo loading or provider-photo cache.
   alt: translatedText.extend({ en: approvedText }), caption: translatedText.optional(),
@@ -28,6 +30,7 @@ const arTileSchema = z.object({
 const arSchema = z.object({
   schemaVersion: z.literal(1), contentVersion: text.max(80),
   storyApproval: z.object({ contentVersion: text.max(80), approvalReference: text, reviewer: text, reviewedAt: z.iso.date(),
+    scope: z.literal('school-presentation').optional(),
     primaryChapterIds: z.array(text.max(80)).min(1).max(12).refine(ids => new Set(ids).size === ids.length).readonly(),
   }).strict().optional(),
   activation: z.object({ point: coordinateSchema, pointApprovalReference: text,
@@ -56,21 +59,18 @@ export type DestinationMedia = z.infer<typeof mediaSchema>;
 // None of these display/navigation fields establish native AR or Passport authority.
 const catalog: readonly Destination[] = Object.freeze(presentationCatalog.map(item => destinationSchema.parse(item)));
 export const listDestinations = (): readonly Destination[] => catalog;
-const pilotApproval = 'Owner supplied entrance and approved Maps place activation center, 2026-10-27; docs/aclc-pilot-inputs.md';
-const pilotPoint = { latitude: 11.022973, longitude: 124.6054992 };
 const pilot = destinationSchema.parse({
   id: 'pilot-aclc', provisionalName: 'ACLC College of Ormoc',
-  center: pilotPoint, centerApprovalReference: pilotApproval,
-  routeEntrance: { latitude: 11.022845368322905, longitude: 124.60452610504089 },
-  routeEntranceApprovalReference: pilotApproval,
+  center: aclcDisplayPoint, centerApprovalReference: aclcLocationReference,
+  routeEntrance: aclcDirectionsEntrance, routeEntranceApprovalReference: aclcLocationReference,
   ar: { schemaVersion: 1, contentVersion: 'pilot-inputs-2026-10-27', tiles: [],
-    activation: { point: pilotPoint, pointApprovalReference: pilotApproval, radiusMeters: 50,
+    activation: { point: aclcDisplayPoint, pointApprovalReference: aclcLocationReference, radiusMeters: 50,
       radiusApprovalReference: 'Approved blueprint tentative 50m trial; field calibration pending' } },
 });
-/** Pilot is not a change to the client launch roster. */
-export const listFeaturedDestinations = (): readonly Destination[] => [...catalog, pilot];
+export const listFeaturedDestinations = listDestinations;
+/** Historic journal/reminder records and the developer diagnostic retain their ID. */
 export function getDestination(id: unknown): Destination | null {
-  return typeof id === 'string' ? listFeaturedDestinations().find(d => d.id === id) ?? null : null;
+  return id === 'pilot-aclc' ? pilot : typeof id === 'string' ? catalog.find(d => d.id === id) ?? null : null;
 }
 export const destinationName = (destination: Destination, language: Language = 'en') =>
   localizedContent(destination.localizedNames, language)?.value ?? destination.verifiedName?.value ?? destination.provisionalName;

@@ -5,12 +5,12 @@ const { evaluation, host } = vi.hoisted(() => ({ evaluation: vi.fn(), host: vi.f
 vi.mock('./exhibit-ring-scene', () => { evaluation(); return { getExhibitSceneHost: host }; });
 afterEach(() => { vi.unstubAllEnvs(); evaluation.mockClear(); host.mockClear(); });
 it('does not evaluate native code for unknown destinations or diagnostics', async () => {
-  for (const id of ['D10', 'unknown', 'pilot-aclc']) expect(await loadExhibitScene(id)).toBeNull();
+  for (const id of ['D11', 'unknown', 'pilot-aclc']) expect(await loadExhibitScene(id)).toBeNull();
   expect(evaluation).not.toHaveBeenCalled();
 });
-it('loads all nine destination exhibits in release without the spike flag', async () => {
+it('loads all ten destination exhibits in release without the spike flag', async () => {
   Object.assign(globalThis, { __DEV__: false }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '');
-  for (const id of ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09']) expect(await loadExhibitScene(id)).toBeTypeOf('function');
+  for (const id of ['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09', 'D10']) expect(await loadExhibitScene(id)).toBeTypeOf('function');
   expect(evaluation).toHaveBeenCalledOnce();
 });
 

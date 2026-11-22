@@ -3,18 +3,22 @@ import { paginate, readingMetrics, type ContentPage, type ReadingCursor } from '
 import type { ReadingSize } from './reading-preference';
 import { readerLayout, readerLineBudget } from './reader-layout';
 
-export type GalleryPage = ContentPage & ({ kind: 'text'; media?: never; mediaPage?: never } | { kind: 'image'; media: DestinationMedia; mediaPage: number });
-export function galleryPages(textPages: readonly ContentPage[], media: readonly DestinationMedia[], locale: string, size: ReadingSize, credit: (value: string) => string, englishFallback: string, presentation: 'photo' | 'gallery' | 'story' = 'story', captionHeight: number = readerLayout.caption.height): GalleryPage[] {
+export type GalleryPage<TextPage extends ContentPage = ContentPage> =
+  | (TextPage & { kind: 'text'; media?: never; mediaPage?: never })
+  | (ContentPage & { kind: 'image'; media: DestinationMedia; mediaPage: number });
+export function galleryPages<TextPage extends ContentPage>(textPages: readonly TextPage[], media: readonly DestinationMedia[], locale: string, size: ReadingSize, credit: (value: string) => string, englishFallback: string, presentation: 'photo' | 'gallery' | 'story' = 'story', captionHeight: number = readerLayout.caption.height, captionFirst = false): GalleryPage<TextPage>[] {
   const language = locale.startsWith('ja') ? 'ja' : locale.startsWith('ko') ? 'ko' : 'en';
   const images = media.map(item => {
     const alt = localizedContent(item.alt, language);
     const caption = localizedContent(item.caption, language);
-    const metadata = [alt?.englishFallback ? englishFallback : undefined, alt?.value,
-      caption?.englishFallback && !alt?.englishFallback ? englishFallback : undefined,
-      caption?.value !== alt?.value ? caption?.value : undefined, credit(item.credit)].filter(Boolean).join('\n');
+    const descriptions = [alt?.englishFallback ? englishFallback : undefined, alt?.value];
+    const captions = [caption?.englishFallback && (captionFirst || !alt?.englishFallback) ? englishFallback : undefined,
+      caption?.value !== alt?.value ? caption?.value : undefined];
+    const lines = captionFirst ? [...captions, ...descriptions] : [...descriptions, ...captions];
+    const metadata = [...lines, credit(item.credit)].filter(Boolean).join('\n');
     // Metadata has its own measured region below the photograph. Keep complete
     // source offsets and repeat the same image through caption/credit pages.
-    return paginate(metadata, size, '', readerLineBudget(captionHeight, readingMetrics[size].fontSize)).map((page, index): GalleryPage => ({
+    return paginate(metadata, size, '', readerLineBudget(captionHeight, readingMetrics[size].fontSize)).map((page, index): Extract<GalleryPage, { kind: 'image' }> => ({
       ...page, kind: 'image', media: item, mediaPage: index,
     }));
   });
@@ -38,14 +42,16 @@ export function galleryCursor(pages: readonly GalleryPage[], previous: ReadingCu
       const index = previous.locale === locale
         ? byOffset ?? matches.at(-1)!
         : matches[Math.min(matches.length - 1, Math.max(0, previous.mediaPage ?? 0))];
-      return cursorAtPage(pages, index, locale, size);
+      const cursor = cursorAtPage(pages, index, locale, size);
+      return byOffset === undefined ? cursor : { ...cursor, offset: previous.offset };
     }
   }
   const textPages = pages.filter(page => !page.media);
   // Mixed-page indices are not text indices. Preserve source offsets through
   // inserted covers, size changes and legacy text-only session snapshots.
-  const index = previous.locale === locale && !previous.mediaId
-    ? textPages.findIndex(page => page.start <= previous.offset && page.end > previous.offset) : 0;
-  const text = textPages[index < 0 ? textPages.length - 1 : index];
-  return cursorAtPage(pages, pages.indexOf(text), locale, size);
+  const matchingText = previous.locale === locale && !previous.mediaId
+    ? textPages.find(page => page.start <= previous.offset && page.end > previous.offset) : undefined;
+  const text = matchingText ?? (previous.locale === locale && !previous.mediaId ? textPages.at(-1) : textPages[0]);
+  const cursor = cursorAtPage(pages, text ? pages.indexOf(text) : 0, locale, size);
+  return matchingText ? { ...cursor, offset: previous.offset } : cursor;
 }

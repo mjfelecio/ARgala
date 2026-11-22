@@ -1,0 +1,26 @@
+{
+  "ownerDecisionDate": "2026-11-19",
+  "baselineVersion": "2026-11-13-presentation-v1",
+  "baselineUntouched": true,
+  "sourceGeofenceAttachment": "All Geofence(1) (identical by SHA-256 to All Geofence)",
+  "sourceGeofenceSHA256": "d2dea011cb845d5fe27d289f592b4539200896bb97de614ad4cc5dce44d97b33",
+  "geofencesApprovedByUser": 10,
+  "audioEffectsApprovedByUser": 5,
+  "voiceScriptsApprovedByUser": 3,
+  "voiceRecordingsIncluded": 0,
+  "newPermanentDestination": "D10 ACLC College of Ormoc",
+  "previousPhotosUnchanged": 53,
+  "previousChaptersUnchanged": 20,
+  "historyPhotosBundled": 9,
+  "historyPhotoLeadsPending": 1,
+  "historyVisualsWithUnverifiedThirdPartyRights": 7,
+  "additionalD10MediaRecords": 1,
+  "noAppFilesModified": true,
+  "releaseCaveats": [
+    "D10 local coordinate reuse needs Codex check",
+    "seven public images/documents bundled only for nonpublished school use; additional rights needed for broader release",
+    "D10 contemporary exterior photo remains optional",
+    "new D10 translation editorial review",
+    "native device checks and missing voice recordings"
+  ]
+}

@@ -1,19 +1,19 @@
 import { expect, it } from 'vitest';
 import { destinationSchema, getDestination, listDestinations, localizedContent } from './catalog';
 
-it('contains the nine owner-supplied presentation destinations in stable order without AR authority', () => {
+it('contains the ten owner-supplied presentation destinations in stable order without circle authority', () => {
   const all = listDestinations();
-  expect(all.map(d => d.id)).toEqual(['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09']);
+  expect(all.map(d => d.id)).toEqual(['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09', 'D10']);
   expect(all[4].verifiedName?.value).toBe('Sal’s Pineapple Plantation');
   for (const destination of all) {
     expect(destinationSchema.safeParse(destination).success).toBe(true);
     expect(destination.center).toBeDefined(); expect(destination.routeEntrance).toBeDefined();
-    expect(destination.media?.length).toBeGreaterThan(1);
-    expect(destination.ar).toBeUndefined();
+    expect(destination.media?.length).toBeGreaterThan(0);
+    expect(destination.ar?.activation).toBeUndefined();
     expect(getDestination(destination.id)).toEqual(destination);
   }
 });
-it.each([null, undefined, '', 'D10', 'd01', ['D01'], '../D01'])('rejects unknown ID %j', id => expect(getDestination(id)).toBeNull());
+it.each([null, undefined, '', 'D11', 'd01', ['D01'], '../D01'])('rejects unknown ID %j', id => expect(getDestination(id)).toBeNull());
 const base = { id: 'D01', provisionalName: 'Synthetic test destination' };
 it.each([{ latitude: NaN, longitude: 0 }, { latitude: Infinity, longitude: 0 }, { latitude: 91, longitude: 0 }, { latitude: 0, longitude: -181 }])('rejects invalid coordinates %j', center => {
   expect(destinationSchema.safeParse({ ...base, center, centerApprovalReference: 'test-only' }).success).toBe(false);

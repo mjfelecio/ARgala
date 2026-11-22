@@ -42,6 +42,9 @@ with tempfile.TemporaryDirectory(prefix='argala-content-pg-') as directory:
         ]}
         def literal(value):
             return "'" + json.dumps(value).replace("'", "''") + "'::jsonb"
+        all_ids = [f'D{i:02d}' for i in range(1,11)] + ['pilot-aclc']
+        all_sites = dict(artifact, destinations=[dict(artifact['destinations'][0], id=id_) for id_ in all_ids])
+        assert sql('SELECT private.valid_destination_manifest(' + literal(all_sites) + ');') == 't'
         for invalid in [dict(artifact, approvalStatus='draft'), dict(artifact, revision=0), dict(artifact, schemaVersion=2),
                         dict(artifact, destinations=artifact['destinations'] * 2), dict(artifact, media=[{'source': 1}]),
                         dict(artifact, destinations=[dict(artifact['destinations'][0], center={'latitude': 1, 'longitude': 1})]),

@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 1,
+  "version": "2026-11-18-research-review-v1",
+  "purpose": "Audio asset research and original review previews, not a production runtime manifest or app implementation.",
+  "status": "owner_approved_sfx_and_voice_scripts",
+  "productionApproved": true,
+  "soundDirection": "Restrained, warm wood/glass/air gestures for Seafoam Forest. Reveal carries the most presence; frequent page and close cues stay brief. No music bed, real-world alarm, animal imitation, navigation sound or borrowed brand motif.",
+  "deliveryFormat": "48 kHz, 16-bit, mono, uncompressed signed little-endian PCM in RIFF/WAVE. Non-looping local files.",
+  "formatBasisSourceIds": [
+    "A01",
+    "A02"
+  ],
+  "formatCaveat": "Supported format choice, not proof of compatibility or intelligibility in the app. Viro version and actual Galaxy A53 playback must be checked by the implementing agent.",
+  "cueDirection": [
+    {
+      "name": "reveal",
+      "feedbackId": "A-REVEAL",
+      "label": "Exhibit reveal",
+      "intent": "Soft layered bloom; the strongest cue in this set.",
+      "trigger": "After an exhibit reveal succeeds. If ready speech is playing, suppress this effect rather than overlap or replay it late."
+    },
+    {
+      "name": "panel_open",
+      "feedbackId": "A-OPEN",
+      "label": "Panel open",
+      "intent": "A small upward wooden/glass gesture.",
+      "trigger": "After a different panel successfully opens; not on a disabled tap or repeated tap on the same panel."
+    },
+    {
+      "name": "page_turn",
+      "feedbackId": "A-PAGE",
+      "label": "Page turn",
+      "intent": "A light paper-grain flick, deliberately brief.",
+      "trigger": "After a valid page change; coalesce rapid changes and discard stale effects, with no sound for a rejected/end-of-book action."
+    },
+    {
+      "name": "panel_close",
+      "feedbackId": "A-CLOSE",
+      "label": "Panel close",
+      "intent": "A low, short settling gesture.",
+      "trigger": "After a panel actually closes; do not play during interruption or scene teardown."
+    },
+    {
+      "name": "view_switch",
+      "feedbackId": "A-SWITCH",
+      "label": "View switch",
+      "intent": "A paired airy handoff distinct from the reveal.",
+      "trigger": "Only for the committed incoming view after a successful handoff, not a stale/cancelled transition. Reduced motion must not delay the state change for audio."
+    }
+  ],
+  "voice": {
+    "scriptFile": "voice-scripts.json",
+    "recordingsProduced": 0,
+    "recordings": [],
+    "sourceIds": [
+      "A07",
+      "A03",
+      "A04"
+    ],
+    "readinessRule": "Speak the selected localized ready line once per intentionally opened AR session, after the exhibit is loaded and tracking is normal. Camera tracking is not proof of arrival, admission, a detected surface, or safe surroundings.",
+    "doNotRepeatOn": [
+      "Tracking recovery",
+      "Page/panel change",
+      "Mode switch",
+      "App return after interruption"
+    ],
+    "productionBrief": "Approved scripts. Generate three properly licensed EN/JA/KO recordings from voice-generation-brief.md; no recordings are yet bundled.",
+    "missingClipPolicy": "Remain silent. Do not synthesize or fetch speech at runtime, substitute another language, or block the UI. Text remains available.",
+    "scriptApprovalStatus": "owner_approved_on_2026-11-19"
+  },
+  "playbackHandoff": [
+    {
+      "rule": "Voice and Effects controls remain independent; the same localized visible and accessible status must work with both off.",
+      "sourceIds": [
+        "A04",
+        "A06"
+      ]
+    },
+    {
+      "rule": "Give startup speech priority inside the app. Drop competing effects; do not queue stale one-shots or replay them after speech.",
+      "sourceIds": [
+        "A04"
+      ]
+    },
+    {
+      "rule": "Request and respect Android audio focus. On denial, interruption, backgrounding or scene exit, cancel and reset pending playback. Do not resume a fragment after a call or screen lock.",
+      "sourceIds": [
+        "A03"
+      ]
+    },
+    {
+      "rule": "Treat mute, pause and cancel/reset as distinct behavior. Verify the existing Viro player's lifecycle and one-shot completion handling against the installed version.",
+      "sourceIds": [
+        "A01"
+      ]
+    },
+    {
+      "rule": "Use local, non-looping assets. A missing/failed clip is silent and must not block a successful interaction. Never make sound necessary to understand an action.",
+      "sourceIds": [
+        "A01",
+        "A04",
+        "A06"
+      ]
+    },
+    {
+      "rule": "The unlock modal has no audio dependency. These effects are AR exhibit feedback, not eligibility confirmation, a direction to walk, or an environmental-safety cue.",
+      "sourceIds": [
+        "A05",
+        "A07"
+      ]
+    }
+  ],
+  "preferenceMatrix": [
+    {
+      "voice": false,
+      "effects": false,
+      "expected": "No app audio; complete localized visible and accessible feedback."
+    },
+    {
+      "voice": true,
+      "effects": false,
+      "expected": "Approved localized ready speech only; absent speech remains silent."
+    },
+    {
+      "voice": false,
+      "effects": true,
+      "expected": "Approved effects only; no speech or fallback voice."
+    },
+    {
+      "voice": true,
+      "effects": true,
+      "expected": "Ready speech has priority; competing effects are skipped, later successful actions may play effects."
+    }
+  ],
+  "reviewChecklist": [
+    "Project owner approves the five cue identities and perceived levels; repeat paging many times to check fatigue.",
+    "Native EN/JA/KO listeners approve wording, pronunciation, tone and actual recorded takes.",
+    "Galaxy A53 in the actual build: offline playback, user-selected speaker/headphone volume and realistic ambient noise.",
+    "Calls, audio-focus denial/loss, headset disconnection, lock/unlock, background/return and scene exit: no unexpected speaker blast or stale replay.",
+    "All four Voice/Effects combinations; no settings coupling and no sound-only information.",
+    "Rapid taps, cancelled swaps, reduced motion, missing/broken clips and TalkBack.",
+    "Confirm asset distribution terms and retain release approval; procedural provenance does not certify exclusivity."
+  ],
+  "verificationLimits": [
+    "Digital file structure, levels and checksums can be measured; listening quality and phone-speaker performance have not been signed off.",
+    "No human speech recordings were generated or obtained. The three voice lines are owner-approved scripts awaiting recordings.",
+    "No app repository, audio player or production manifest has been changed.",
+    "Peak and RMS values are digital measurements, not sound-pressure measurements or guarantees of safe/adequate outdoor loudness."
+  ],
+  "cueMetadataFile": "audio/metadata.json",
+  "generatorFile": "provenance/synthesize_argala.py",
+  "provenance": "New procedural synthesis from sine functions, seeded noise, envelopes and filters. No samples, stock recordings, speech, music recordings, or model voices used.",
+  "distributionNotes": "No third-party sample library or performance clearance is required by these inputs; no exclusivity or legal clearance is asserted. Project owner to approve release and applicable terms.",
+  "cues": [
+    {
+      "name": "reveal",
+      "filename": "reveal.wav",
+      "status": "owner_approved",
+      "duration_seconds": 0.88,
+      "frames": 42240,
+      "sample_peak_dbfs": -10.0,
+      "rms_dbfs": -22.02,
+      "dc_mean_full_scale": 6.502324884588068e-09,
+      "sample_rate_hz": 48000,
+      "channels": 1,
+      "bit_depth": 16,
+      "encoding": "RIFF/WAVE PCM signed little-endian",
+      "first_nonzero_sample_ms": 0.146,
+      "sha256": "e99c4e6b3a37947ed8c95b8e5b6e339782d4309946be1e698e04871baf5b339d",
+      "procedure": "Layered, offset 349/523/698 Hz softly excited resonances, with airy grain.",
+      "target_sample_peak_dbfs": -10,
+      "seed": 384107,
+      "feedbackId": "A-REVEAL",
+      "label": "Exhibit reveal",
+      "intent": "Soft layered bloom; the strongest cue in this set.",
+      "trigger": "After an exhibit reveal succeeds. If ready speech is playing, suppress this effect rather than overlap or replay it late.",
+      "relativePath": "audio/reveal.wav",
+      "releaseApproved": true,
+      "ownerApprovedOn": "2026-11-19"
+    },
+    {
+      "name": "panel_open",
+      "filename": "panel_open.wav",
+      "status": "owner_approved",
+      "duration_seconds": 0.26,
+      "frames": 12480,
+      "sample_peak_dbfs": -14.0,
+      "rms_dbfs": -26.941,
+      "dc_mean_full_scale": 6.846892528044871e-08,
+      "sample_rate_hz": 48000,
+      "channels": 1,
+      "bit_depth": 16,
+      "encoding": "RIFF/WAVE PCM signed little-endian",
+      "first_nonzero_sample_ms": 0.104,
+      "sha256": "053005880b146babed3d938f644cea87cc129e2e27b8fd50ebe07d1f799eb804",
+      "procedure": "Short upward-curving wood tap, with an offset higher glass resonance.",
+      "target_sample_peak_dbfs": -14,
+      "seed": 384108,
+      "feedbackId": "A-OPEN",
+      "label": "Panel open",
+      "intent": "A small upward wooden/glass gesture.",
+      "trigger": "After a different panel successfully opens; not on a disabled tap or repeated tap on the same panel.",
+      "relativePath": "audio/panel_open.wav",
+      "releaseApproved": true,
+      "ownerApprovedOn": "2026-11-19"
+    },
+    {
+      "name": "page_turn",
+      "filename": "page_turn.wav",
+      "status": "owner_approved",
+      "duration_seconds": 0.15,
+      "frames": 7200,
+      "sample_peak_dbfs": -18.001,
+      "rms_dbfs": -32.03,
+      "dc_mean_full_scale": -6.357828776041667e-08,
+      "sample_rate_hz": 48000,
+      "channels": 1,
+      "bit_depth": 16,
+      "encoding": "RIFF/WAVE PCM signed little-endian",
+      "first_nonzero_sample_ms": 0.667,
+      "sha256": "5926114a68e2c2117ab51fa1f05f068e590ce7cc4ac8614542d7f2f05dd6bd24",
+      "procedure": "Two unequal filtered paper-grain gestures with a short damped wooden edge.",
+      "target_sample_peak_dbfs": -18,
+      "seed": 384109,
+      "feedbackId": "A-PAGE",
+      "label": "Page turn",
+      "intent": "A light paper-grain flick, deliberately brief.",
+      "trigger": "After a valid page change; coalesce rapid changes and discard stale effects, with no sound for a rejected/end-of-book action.",
+      "relativePath": "audio/page_turn.wav",
+      "releaseApproved": true,
+      "ownerApprovedOn": "2026-11-19"
+    },
+    {
+      "name": "panel_close",
+      "filename": "panel_close.wav",
+      "status": "owner_approved",
+      "duration_seconds": 0.22,
+      "frames": 10560,
+      "sample_peak_dbfs": -18.001,
+      "rms_dbfs": -31.3,
+      "dc_mean_full_scale": -9.825735381155303e-08,
+      "sample_rate_hz": 48000,
+      "channels": 1,
+      "bit_depth": 16,
+      "encoding": "RIFF/WAVE PCM signed little-endian",
+      "first_nonzero_sample_ms": 0.125,
+      "sha256": "13a8f22aa18efa2b7a724068b754a646adc4c8ac07dbc3fd784ed0015ab94d18",
+      "procedure": "Downward-pitched damped body with short soft felt contact.",
+      "target_sample_peak_dbfs": -18,
+      "seed": 384110,
+      "feedbackId": "A-CLOSE",
+      "label": "Panel close",
+      "intent": "A low, short settling gesture.",
+      "trigger": "After a panel actually closes; do not play during interruption or scene teardown.",
+      "relativePath": "audio/panel_close.wav",
+      "releaseApproved": true,
+      "ownerApprovedOn": "2026-11-19"
+    },
+    {
+      "name": "view_switch",
+      "filename": "view_switch.wav",
+      "status": "owner_approved",
+      "duration_seconds": 0.46,
+      "frames": 22080,
+      "sample_peak_dbfs": -14.0,
+      "rms_dbfs": -27.415,
+      "dc_mean_full_scale": 9.674956833106883e-09,
+      "sample_rate_hz": 48000,
+      "channels": 1,
+      "bit_depth": 16,
+      "encoding": "RIFF/WAVE PCM signed little-endian",
+      "first_nonzero_sample_ms": 1.25,
+      "sha256": "d9703f3bcd8e549152ac5d5dd3ff6d8748ea744ee61450de0ae8b8edc1bf7be1",
+      "procedure": "Two overlapping filtered-air gestures change bands, with a hint of resonance.",
+      "target_sample_peak_dbfs": -14,
+      "seed": 384111,
+      "feedbackId": "A-SWITCH",
+      "label": "View switch",
+      "intent": "A paired airy handoff distinct from the reveal.",
+      "trigger": "Only for the committed incoming view after a successful handoff, not a stale/cancelled transition. Reduced motion must not delay the state change for audio.",
+      "relativePath": "audio/view_switch.wav",
+      "releaseApproved": true,
+      "ownerApprovedOn": "2026-11-19"
+    }
+  ],
+  "audition": {
+    "name": "audition",
+    "filename": "audition.wav",
+    "status": "preview_not_approved",
+    "duration_seconds": 4.77,
+    "frames": 228960,
+    "sample_peak_dbfs": -10.0,
+    "rms_dbfs": -28.246,
+    "dc_mean_full_scale": -6.664390750567784e-10,
+    "sample_rate_hz": 48000,
+    "channels": 1,
+    "bit_depth": 16,
+    "encoding": "RIFF/WAVE PCM signed little-endian",
+    "first_nonzero_sample_ms": 0.146,
+    "sha256": "1d69894b9ab0b0be8e177adc3da98122e3b8f5a106fa2f6aa59d72aaaeb71401",
+    "timeline": [
+      {
+        "name": "reveal",
+        "start_seconds": 0.0,
+        "end_seconds": 0.88
+      },
+      {
+        "name": "panel_open",
+        "start_seconds": 1.58,
+        "end_seconds": 1.84
+      },
+      {
+        "name": "page_turn",
+        "start_seconds": 2.54,
+        "end_seconds": 2.69
+      },
+      {
+        "name": "panel_close",
+        "start_seconds": 3.39,
+        "end_seconds": 3.61
+      },
+      {
+        "name": "view_switch",
+        "start_seconds": 4.31,
+        "end_seconds": 4.77
+      }
+    ],
+    "inter_cue_silence_seconds": 0.7,
+    "narration": false
+  },
+  "ownerApprovedOn": "2026-11-19"
+}

@@ -8,24 +8,24 @@ import { RingController } from './ring-controller';
 import content from './featured-presentation-content.json';
 
 const pose = { position: [0, 2, 0] as [number, number, number], forward: [0, 0, -1] as [number, number, number] };
-const bayCounts = [3, 2, 3, 3, 3, 3, 2, 3, 3];
+const bayCounts = [3, 2, 3, 3, 3, 3, 2, 3, 3, 0];
 
-it('gives all53 photographs unique entrances and retains exactly20 chapters without duplicate padding', () => {
+it('gives all 54 photographs unique entrances and retains exactly 23 chapters without duplicate padding', () => {
   const allMedia: string[] = []; let chapterCount = 0; const layouts = new Set<string>();
   destinationIds.forEach((id, index) => {
     const front = getExhibitStageProfile(id)!; const profile = createPhotoIslandsProfile(front);
     const chapters = featuredStoryContent(id); const entrances = exhibitGalleryEntries(profile);
     expect(profile.photoIslands).toHaveLength(bayCounts[index]);
     expect(profile.photoIslands!.every(bay => bay.mediaIds.length === 1 || bay.mediaIds.length === 2)).toBe(true);
-    expect(profile.photoIslands!.at(-1)!.mediaIds.length).toBe(profile.media.length === 6 ? 1 : 2);
+    if (id !== 'D10') expect(profile.photoIslands!.at(-1)!.mediaIds.length).toBe(profile.media.length === 6 ? 1 : 2);
     expect(entrances.map(entry => entry.mediaId)).toEqual(profile.media.map(media => media.id));
     expect(exhibitSceneEntries(profile, chapters)).toHaveLength(profile.media.length + chapters.length);
     expect(front.photoIslands).toBeUndefined(); expect(profile.theme).toBe(front.theme);
     allMedia.push(...entrances.map(entry => entry.mediaId!)); chapterCount += chapters.length;
     layouts.add(JSON.stringify(buildDestinationStageSlots(profile, exhibitSceneEntries(profile, chapters), captureBasis(pose)!).map(slot => slot.position)));
   });
-  expect(allMedia).toHaveLength(53); expect(new Set(allMedia).size).toBe(53);
-  expect(chapterCount).toBe(20); expect(layouts.size).toBe(9);
+  expect(allMedia).toHaveLength(54); expect(new Set(allMedia).size).toBe(54);
+  expect(chapterCount).toBe(23); expect(layouts.size).toBe(10);
 });
 
 it.each(destinationIds)('bounds every %s original photo, clears its stories and retains exact focus/Close scales', id => {
@@ -50,8 +50,10 @@ it.each(destinationIds)('bounds every %s original photo, clears its stories and 
   });
   chapters.forEach((chapter, index) => {
     const slot = slots.find(slot => slot.id === chapter.id)!;
+    const bay = profile.photoIslands?.[index];
+    if (!bay) { expect(id).toBe('D10'); return; }
     expect(slot.position[1]).toBe(photoIslandStoryY(profile, index));
-    for (const mediaId of profile.photoIslands![index].mediaIds) {
+    for (const mediaId of bay.mediaIds) {
       const entranceIndex = entrances.findIndex(entry => entry.mediaId === mediaId);
       const size = photoIslandCoverSize(profile, entrances[entranceIndex]);
       expect(slot.position[1] + 0.26).toBeLessThanOrEqual(slots[entranceIndex].position[1] - size.height / 2 - 0.16 + 1e-9);

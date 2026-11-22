@@ -57,3 +57,13 @@ it('retains only matching reviewed bundle image bindings through text-only updat
   expect(resolveContent(base, renamed)!.ar?.tiles[0]).not.toHaveProperty('mediaIds');
   expect(contentManifestSchema.safeParse({ ...update, destinations: [{ ...update.destinations[0], tiles: [{ ...tile, mediaIds: ['synthetic-photo'] }] }] }).success).toBe(false);
 });
+
+
+it('does not apply a text-only remote update over the exact approved school handoff', () => {
+  const destination = getDestination('D10')!;
+  const input = manifest(2);
+  const update = contentManifestSchema.parse({ ...input, destinations: [{ ...input.destinations[0], id: 'D10',
+    contentVersion: destination.ar!.contentVersion }] });
+  expect(resolveContent(destination, update)).toBe(destination);
+  expect(destination.ar?.tiles).toHaveLength(3);
+});

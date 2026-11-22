@@ -1,6 +1,7 @@
 import { JournalProvider } from '@/features/journal/provider';
 import { DestinationContentProvider } from '@/features/destination-content/provider';
 import { ArrivalReminderProvider } from '@/features/arrival-reminders/provider';
+import { EntranceArrivalProvider } from '@/features/destinations/entrance-arrival-provider';
 import { setFeaturedSelection } from '@/features/destinations/map-selection';
 import { useQueryClient } from '@tanstack/react-query';
 import { DestinationArAdmissionProvider } from '@/features/destination-ar/admission-provider';
@@ -20,7 +21,7 @@ export default function AppLayout() {
   const headerTintColor = useThemeColor('accent');
   return <JournalProvider><DestinationContentProvider><ArrivalReminderProvider onOpenDestination={id => {
     setFeaturedSelection(queryClient, id); router.navigate({ pathname: '/', params: { featuredDestinationId: id } });
-  }}><DestinationArAdmissionProvider><Stack screenOptions={{ headerStyle, headerTitleStyle, headerTintColor, headerShadowVisible: false }}>
+  }}><DestinationArAdmissionProvider><EntranceArrivalProvider><Stack screenOptions={{ headerStyle, headerTitleStyle, headerTintColor, headerShadowVisible: false }}>
     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     <Stack.Screen name="place/[providerId]" options={{ headerShown: false }} />
     <Stack.Screen name="destination-ar/[destinationId]" options={{ headerShown: false }} />
@@ -31,5 +32,5 @@ export default function AppLayout() {
     <Stack.Screen name="ar-showcase" options={{ headerShown: false }} />
     <Stack.Screen name="ar-diagnostics" options={{ headerShown: false }} />
     <Stack.Screen name="viro-ring" options={{ headerShown: false }} />
-  </Stack></DestinationArAdmissionProvider></ArrivalReminderProvider></DestinationContentProvider></JournalProvider>;
+  </Stack></EntranceArrivalProvider></DestinationArAdmissionProvider></ArrivalReminderProvider></DestinationContentProvider></JournalProvider>;
 }

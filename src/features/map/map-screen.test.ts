@@ -15,7 +15,7 @@ import { localizationOptions } from '@/i18n/options';
 import MapScreen from './map-screen';
 import { MapRecenter } from './map-recenter';
 import { claimRoutePreviewIntent } from '@/features/directions/route-preview-intent';
-import { getDestination } from '@/features/destinations/catalog';
+import { destinationIds, getDestination } from '@/features/destinations/catalog';
 
 it('shows the supplied featured summary without initiating paid discovery', async () => {
   controls.params = { featuredDestinationId: 'D01' };
@@ -600,12 +600,12 @@ it('opens the approved ACLC map point and minimal sheet without GPS or paid prov
   controls.params = { featuredDestinationId: 'pilot-aclc' } as typeof controls.params;
   controls.hasLocation = false;
   await act(async () => { tree = create(renderMap()); });
-  expect(tree!.root.findByType('map').props.initialRegion).toMatchObject(getDestination('pilot-aclc')!.center!);
+  expect(tree!.root.findByType('map').props.initialRegion).toMatchObject(getDestination('D10')!.center!);
   expect(JSON.stringify(tree!.toJSON())).toContain('ACLC College of Ormoc');
   expect(tree!.root.findByType('map').props.showsUserLocation).toBe(false);
   expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.nearby).not.toHaveBeenCalled();
 });
-it('opens approved-center featured View Details with the exact curated ID and retains the map on return', async () => {
+it('resolves the legacy ACLC Explore link to permanent D10 and retains the map on return', async () => {
   controls.params = { featuredDestinationId: 'pilot-aclc' };
   controls.hasLocation = false;
   await act(async () => { tree = create(renderMap()); });
@@ -614,7 +614,7 @@ it('opens approved-center featured View Details with the exact curated ID and re
   const centers = controls.animate.mock.calls.length;
   await press('map.expand');
   await press('placeDetails.view');
-  expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'pilot-aclc' } });
+  expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D10' } });
   expect(client.getQueryData(['place-selection', 'pilot-aclc'])).toBeUndefined();
   expect(client.getQueryCache().findAll({ queryKey: ['place-selection'], predicate: query => query.state.data != null })).toHaveLength(0);
   controls.focused = false;
@@ -648,10 +648,10 @@ it('allows a known featured selection after an initial GPS-denied screen', async
 });
 it.each(['initial', 'handoff'] as const)('keeps exact-associated provider %s selection minimal without losing the map', async entry => {
  const catalog = await import('@/features/destinations/catalog'); const selection = await import('@/features/places/selection');
- const pilot = catalog.getDestination('pilot-aclc')!;
- const approved = catalog.destinationSchema.parse({ ...pilot, ar: { ...pilot.ar, providerAssociation: { providerId: destination.providerId, approvalReference: 'Synthetic test association' } } });
+ const featured = catalog.getDestination('D10')!;
+ const approved = catalog.destinationSchema.parse({ ...featured, ar: { schemaVersion: 1, contentVersion: 'test', tiles: [], ...featured.ar, providerAssociation: { providerId: destination.providerId, approvalReference: 'Synthetic test association' } } });
  vi.spyOn(catalog, 'listFeaturedDestinations').mockReturnValue([approved]);
- vi.spyOn(catalog, 'getDestination').mockImplementation(id => id === 'pilot-aclc' ? approved : null);
+ vi.spyOn(catalog, 'getDestination').mockImplementation(id => id === 'D10' ? approved : null);
  selection.setPlaceSelection(client, { ...destination, source: 'discovery', description: 'Rich provider copy must stay hidden' }, 'en');
  let original: unknown;
  if (entry === 'handoff') { await act(async () => { tree = create(renderMap()); }); original = tree!.root.findByType('map'); }
@@ -660,7 +660,7 @@ it.each(['initial', 'handoff'] as const)('keeps exact-associated provider %s sel
  const { HomePlaceSheet } = await import('./place-sheet'); const sheet = tree!.root.findByType(HomePlaceSheet);
  expect(sheet.props.selectedPlace?.provider).toBe('curated'); expect(sheet.props.selectedPlace).not.toHaveProperty('description');
  await press('placeDetails.view');
- expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'pilot-aclc' } });
+ expect(router.navigate).toHaveBeenCalledExactlyOnceWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D10' } });
  if (original) expect(tree!.root.findByType('map')).toBe(original);
  expect(placesService.details).not.toHaveBeenCalled();
 });
@@ -909,13 +909,21 @@ it('offers opted-in simulated arrival without converting a browsing point into G
   expect(store.getSnapshot()?.eligible).toBe(false); expect(placesService.nearby).not.toHaveBeenCalled(); expect(placesService.search).not.toHaveBeenCalled();
  } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
 });
-it.each(['D01', 'D02', 'D03', 'D04', 'D05', 'D06', 'D07', 'D08', 'D09'])('does not offer unready %s a borrowed ACLC draft simulation through a map link', async id => {
+it.each(destinationIds)('does not offer unready %s a borrowed ACLC draft simulation through a map link', async id => {
  const { AdmissionContext } = await import('@/features/destination-ar/admission-context'); const { ArAdmissionStore } = await import('@/features/destination-ar/admission-store');
+ const content = await import('@/features/destination-content/context');
+ const unready = { ...getDestination(id)!, ar: undefined };
+ const lookup = (requested: unknown) => requested === id ? unready : getDestination(requested);
+ vi.spyOn(content, 'useDestinationLookup').mockReturnValue(lookup);
  Object.assign(globalThis, { __DEV__: true }); vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1'); controls.params = { featuredDestinationId: id } as typeof controls.params;
  try {
-  await act(async () => { tree = create(React.createElement(AdmissionContext.Provider, { value: new ArAdmissionStore('owner') }, renderMap())); });
+  await act(async () => { tree = create(React.createElement(AdmissionContext.Provider, { value: new ArAdmissionStore('owner', lookup) }, renderMap())); });
   expect(tree!.root.findAllByType('button').some(button => button.props.accessibilityLabel === translations.t('arrival.simulate'))).toBe(false);
- } finally { Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
+ } finally { const content = await import('@/features/destination-content/context');
+ const unready = { ...getDestination(id)!, ar: undefined };
+ const lookup = (requested: unknown) => requested === id ? unready : getDestination(requested);
+ vi.spyOn(content, 'useDestinationLookup').mockReturnValue(lookup);
+ Object.assign(globalThis, { __DEV__: false }); vi.unstubAllEnvs(); }
 });
 
 it.each(['active', 'focused'] as const)('retires Explore featured simulation actions after %s ownership changes', async lifecycle => {
@@ -970,9 +978,9 @@ it('keeps Google Maps primary in the compact ordinary sheet and removes ordinary
   expect(google!.props.className).toContain('button__root--variant-primary');
 });
 
-it('keeps all nine featured pins present without discovery or a device location', async () => {
+it('keeps all ten featured pins present without discovery or a device location', async () => {
   controls.hasLocation = false; controls.locationStatus = 'denied';
   await act(async () => { tree = create(renderMap()); });
-  expect(tree!.root.findAllByType('featured-marker' as React.ElementType)).toHaveLength(9);
+  expect(tree!.root.findAllByType('featured-marker' as React.ElementType)).toHaveLength(10);
   expect(placesService.details).not.toHaveBeenCalled(); expect(placesService.search).not.toHaveBeenCalled();
 });

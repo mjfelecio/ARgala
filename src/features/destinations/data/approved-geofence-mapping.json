@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "approvedBy": "User says independent outside verifier approved every supplied feature; source preserved as a done deal",
+  "dateOfUserApproval": "2026-11-19",
+  "sourceFileSha256": "d2dea011cb845d5fe27d289f592b4539200896bb97de614ad4cc5dce44d97b33",
+  "sourceFile": "geofences/approved-visitor-geofences.geojson",
+  "sourceFeatureOrderIsNotDestinationOrder": true,
+  "geometryInterpretation": "User-approved near-destination regions for corroborated foreground AR activation; not entrance, property extent, admission or directions",
+  "coordinateEdits": 0,
+  "features": [
+    {
+      "sourceFeatureIndex": 0,
+      "sourceLabelExact": "Lake Danao Natural Park",
+      "destinationId": "D01",
+      "approvalStatus": "owner_approved"
+    },
+    {
+      "sourceFeatureIndex": 1,
+      "sourceLabelExact": "Lake Janagdan",
+      "destinationId": "D03",
+      "approvalStatus": "owner_approved"
+    },
+    {
+      "sourceFeatureIndex": 2,
+      "sourceLabelExact": "Alto Peak",
+      "destinationId": "D07",
+      "approvalStatus": "owner_approved"
+    },
+    {
+      "sourceFeatureIndex": 3,
+      "sourceLabelExact": "Lake Kasudsuran",
+      "destinationId": "D02",
+      "approvalStatus": "owner_approved"
+    },
+    {
+      "sourceFeatureIndex": 4,
+      "sourceLabelExact": "Nungan Mangrove Park",
+      "destinationId": "D04",
+      "approvalStatus": "owner_approved"
+    },
+    {
+      "sourceFeatureIndex": 5,
+      "sourceLabelExact": "Sal’s Pineapple Plantation",
+      "destinationId": "D05",
+      "approvalStatus": "owner_approved"
+    },
+    {
+      "sourceFeatureIndex": 6,
+      "sourceLabelExact": "Leyte Golf and Country Club",
+      "destinationId": "D06",
+      "approvalStatus": "owner_approved"
+    },
+    {
+      "sourceFeatureIndex": 7,
+      "sourceLabelExact": "Heavens Peak",
+      "destinationId": "D08",
+      "approvalStatus": "owner_approved"
+    },
+    {
+      "sourceFeatureIndex": 8,
+      "sourceLabelExact": "ACLC College of Ormoc",
+      "destinationId": "D10",
+      "approvalStatus": "owner_approved"
+    },
+    {
+      "sourceFeatureIndex": 9,
+      "sourceLabelExact": "Sabin Resort Hotel",
+      "destinationId": "D09",
+      "approvalStatus": "owner_approved"
+    }
+  ]
+}

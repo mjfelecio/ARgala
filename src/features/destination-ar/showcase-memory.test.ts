@@ -17,7 +17,7 @@ it('keeps idempotent demo stamps and introductions only in the current showcase 
 it('rejects unknown destinations and keeps subscribed snapshots stable without a change', () => {
   const memory = new ShowcaseMemory(); const first = memory.getSnapshot(); const updates: unknown[] = [];
   const unsubscribe = memory.subscribe(() => updates.push(memory.getSnapshot()));
-  memory.recordEstablished('pilot-aclc', first.generation); memory.recordEstablished('D10', first.generation);
+  memory.recordEstablished('pilot-aclc', first.generation); memory.recordEstablished('D11', first.generation);
   expect(memory.getSnapshot()).toBe(first); expect(updates).toEqual([]);
   memory.recordEstablished('D02', first.generation); expect(updates).toHaveLength(1);
   memory.recordEstablished('D02', first.generation); expect(updates).toHaveLength(1);

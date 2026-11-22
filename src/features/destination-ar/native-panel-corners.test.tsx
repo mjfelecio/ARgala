@@ -47,7 +47,7 @@ it('contains every original photo corner within its rounded painted frame, inclu
       await act(async () => tree.unmount());
     }
   }
-  expect(new Set(originals).size).toBe(53);
+  expect(new Set(originals).size).toBe(54);
 });
 it('uses the painted native quad as the only action hit surface and retires disabled callbacks', async () => {
   const pressed = vi.fn();

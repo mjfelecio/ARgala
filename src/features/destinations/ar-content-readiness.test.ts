@@ -26,8 +26,8 @@ it('requires bound section media, offline rights and reviewed text, captions and
   expect(arStoryReadiness({ ...input, ar: { ...input.ar, tiles: input.ar.tiles.map(tile => ({ ...tile, body: { en: text } })) } }).ready).toBe(false);
   expect(arStoryReadiness({ ...input, ar: { ...input.ar, storyApproval: { ...input.ar.storyApproval, primaryChapterIds: ['missing'] } } }).ready).toBe(false);
 });
-it('leaves provisional map catalog valid and never promotes pilot or draft content', () => {
-  for (const destination of listDestinations()) { expect(destinationSchema.safeParse(destination).success).toBe(true); expect(arStoryReadiness(destination).ready).toBe(false); }
+it('recognizes the scoped school handoff and retains independent admission', () => {
+  for (const destination of listDestinations()) { expect(destinationSchema.safeParse(destination).success).toBe(true); expect(arStoryReadiness(destination)).toMatchObject({ ready: true, scope: 'school-presentation' }); }
   expect(arStoryReadiness({ ...fixture(), id: 'pilot-aclc' }).ready).toBe(false);
 });
 it('does not reuse editorial approval for another content version or duplicate aliases of one cover', () => {
