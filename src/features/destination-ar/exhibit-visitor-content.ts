@@ -14,7 +14,11 @@ function inEveryLanguage(read: (language: Language) => LocalizedText) {
 }
 
 function guideSection(destination: Destination, section: ExhibitGuideSection): RingContent {
-  const sectionTitle = (language: Language) => section === 'safety' ? exhibitVisitorCopy[language].safety : visitorCopy[language].visitorGuide[section];
+  const sectionTitle = (language: Language) => {
+    if (section === 'safety') return exhibitVisitorCopy[language].safety;
+    if (section === 'activities' && language === 'en') return exhibitVisitorCopy.en.thingsToDo;
+    return visitorCopy[language].visitorGuide[section];
+  };
   const blocks = (language: Language, essentials: boolean): ReaderBlock[] => {
     const copy = visitorCopy[language];
     const items = essentials && destination.id !== 'pilot-aclc'

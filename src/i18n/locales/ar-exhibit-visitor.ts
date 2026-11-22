@@ -1,6 +1,7 @@
 export const exhibitVisitorCopy = {
   en: {
     safety: 'Safety',
+    thingsToDo: 'Things to do',
     visitGuideUnavailable: 'Visitor guidance is unavailable for this destination.',
     history: 'History',
     historySources: 'Sources',

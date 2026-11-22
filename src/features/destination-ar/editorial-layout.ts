@@ -34,13 +34,15 @@ function placeBlock(block: ReturnType<typeof measure>, from: number, count: numb
     y: topY - height / 2, x: block.x, width: block.width, height, fontSize: block.fontSize };
 }
 
-export const guideContentWidth = photoIslandGuide.width - 0.14;
-const guidePadding = 0.055;
+// The cover texture paints an inner corner stroke. Keep both glyphs and
+// hanging markers within that painted boundary at the largest reading size.
+export const guideContentWidth = photoIslandGuide.width - 2 * 0.105;
+const guideTopPadding = 0.11;
 
 /** Fit the authored essentials as a whole, with the reader's native wrapping
  * and indents. Authored content is verified at every size without truncation. */
 export function layoutGuideEssentials(blocks: readonly ReaderBlock[], size: ReadingSize) {
-  let y = photoIslandGuide.height / 2 - guidePadding;
+  let y = photoIslandGuide.height / 2 - guideTopPadding;
   return blocks.map(block => {
     const measured = measure(block, readingMetrics[size].fontSize, guideContentWidth);
     const placed = placeBlock(measured, 0, measured.rows.length, y, block.kind === 'bullet' || block.kind === 'callout');

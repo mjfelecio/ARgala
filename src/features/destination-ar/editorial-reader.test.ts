@@ -32,12 +32,12 @@ it.each(destinationIds)('lays out the entire %s visit guide in each language and
         const visible = layoutGuideEssentials(essentials, size);
         expect(visible.map(block => block.text.replace(/\s/g, '')), label)
           .toEqual(essentials.map(block => block.text.replace(/\s/g, '')));
-        let previousBottom = photoIslandGuide.height / 2;
+        let previousBottom = photoIslandGuide.height / 2 - 0.11;
         for (const block of visible) {
           expect(block.y + block.height / 2, label).toBeLessThanOrEqual(previousBottom + 1e-8);
           previousBottom = block.y - block.height / 2;
-          expect(previousBottom, label).toBeGreaterThanOrEqual(-photoIslandGuide.height / 2 + 0.055 - 1e-8);
-          expect(Math.abs(block.x) + block.width / 2, label).toBeLessThan(photoIslandGuide.width / 2);
+          expect(previousBottom, label).toBeGreaterThanOrEqual(-photoIslandGuide.height / 2 + 0.075 - 1e-8);
+          expect(Math.abs(block.x) + block.width / 2, label).toBeLessThanOrEqual(photoIslandGuide.width / 2 - 0.105 + 1e-8);
         }
         const { pages, source } = paginateEditorial(blocks, size);
         expect(pages.map(page => source.slice(page.start, page.end)).join('')).toBe(source);

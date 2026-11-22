@@ -56,8 +56,8 @@ export const visitGuideEssentials: Record<DestinationId, Record<'en' | 'ja' | 'k
       arrival: 'Go to Lake Janagdan Staging Area in Cabintan. Confirm barangay check-in.',
       bestTime: 'Start early. Check trail and weather with your guide. Allow time to return.',
       activities: ['Guided hike', 'Lake views and photos from firm ground'],
-      preparation: ['Confirm registration and briefing.', 'Wear grippy shoes and long clothes. Pack water, rain gear and first aid.'],
-      safety: ['Stay on the agreed trail and firm banks. Watch for slippery footing. Ask before water activities. Turn back if advised.'],
+      preparation: ['Confirm check-in and briefing.', 'Pack grippy shoes, long clothes, water, rain gear and first aid.'],
+      safety: ['Use the agreed trail and firm banks. Ask before water activities. Watch for slips. Turn back if told.'],
     },
     ja: {
       arrival: 'カビンタンのジャナグダン集合地点へ。地区の受付を確認。',
@@ -71,7 +71,7 @@ export const visitGuideEssentials: Record<DestinationId, Record<'en' | 'ja' | 'k
       bestTime: '일찍 출발하고 가이드와 날씨·길 상태를 확인하세요. 돌아올 시간을 넉넉히 잡으세요.',
       activities: ['가이드 동행 하이킹', '단단한 지면에서 호수 감상과 촬영'],
       preparation: ['등록과 안전 안내를 확인하세요.', '미끄럼 방지 신발, 긴 옷, 물, 우비와 구급용품을 챙기세요.'],
-      safety: ['정한 길과 단단한 물가만 이용하세요. 미끄럼에 주의하고 물놀이는 가이드에게 확인하세요. 안내에 따라 돌아서세요.'],
+      safety: ['정한 길과 단단한 물가만 이용하세요. 미끄럼 주의. 물놀이는 가이드에게 확인하고 지시에 따라 돌아서세요.'],
     },
   },
   D04: {
@@ -126,7 +126,7 @@ export const visitGuideEssentials: Record<DestinationId, Record<'en' | 'ja' | 'k
       bestTime: 'Agree on a time with the club and check weather before travelling.',
       activities: ['Golf by club permission only.', 'Enjoy views from authorized areas.'],
       preparation: ['Confirm guest rules, booking and fees.', 'Bring water, sun protection and club-approved attire.'],
-      safety: ['Staff approval is required for course access. Watch for balls and carts. In thunder, stop and seek a solid building.'],
+      safety: ['Course access by permission. Watch for balls and carts. At thunder, stop and seek a solid building.'],
     },
     ja: {
       arrival: 'サンアントニオ／マビニ地区のクラブ受付で手続き。',
@@ -195,7 +195,7 @@ export const visitGuideEssentials: Record<DestinationId, Record<'en' | 'ja' | 'k
       bestTime: 'Agree on a time with the hotel. Visit the bayfront in daylight if permitted.',
       activities: ['Bayfront views in permitted areas', 'Stay, dine or gather by arrangement.'],
       preparation: ['Confirm bookings and facility access.', 'Bring sun/rain gear and suitable shoes.'],
-      safety: ['Use only approved areas. Watch children near water and wet floors. Ask staff before swimming or using a pool.'],
+      safety: ['Use approved areas only. Watch children near water or wet floors. Ask staff before swimming.'],
     },
     ja: {
       arrival: 'バンティゲのサビン・リゾートホテル入口で係員へ。',
@@ -218,7 +218,7 @@ export const visitGuideEssentials: Record<DestinationId, Record<'en' | 'ja' | 'k
       bestTime: 'Confirm a school-approved visiting time before travelling. Prefer daylight.',
       activities: ['View from permitted public areas.', 'Admissions or events by permission.'],
       preparation: ['Confirm appointments and registration.', 'Bring ID if asked. Follow school rules.'],
-      safety: ['No entry or recording without permission. AR gives no access. Stop for AR clear of traffic and emergency routes.'],
+      safety: ['No entry or recording without permission. Stop for AR clear of traffic and emergency routes.'],
     },
     ja: {
       arrival: 'コゴンのリリア通り沿い、ACLC来訪者入口へ。入る前に警備員に確認。',

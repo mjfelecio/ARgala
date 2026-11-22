@@ -30,6 +30,8 @@ it.each(destinationIds)('adds five complete visit guide readers and one history 
   for (const language of languages) {
     const guide = destination.visitorGuide![language].value;
     const copy = localizationOptions.resources[language].translation.destinations;
+    if (language === 'en') expect(plans.map(plan => ringCopy(plan, 'title', language))).toEqual(
+      ['Getting there', 'When to visit', 'Safety', 'Things to do', 'Before you go']);
     expect(ringCopy(history, 'title', language)).toBe(suppliedHistory.title[language]);
     expect(ringCopy(history, 'body', language)).toBe(suppliedHistory.text[language]);
     for (const [index, section] of exhibitGuideSections.entries()) {

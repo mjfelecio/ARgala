@@ -4054,3 +4054,22 @@ Android entry and lazy exhibit bundles both built and served over Metro.
 The Galaxy A53 disappeared from USB before the new exhibit could be opened.
 On-device checks for the starting view, native text and touch, and large EN,
 JA and KO text with reduced motion remain pending.
+
+### Galaxy A53 follow-up and inner padding
+
+The existing development APK rendered Lake Danao over USB Metro at 1080×2400,
+420 dpi and 110% system text. In the initial recentered view, Getting there
+appeared beneath the welcome photo and Safety was visible at the right edge.
+The capture showed the heading touching a painted corner stroke. The guide
+layout now reserves space inside the stroke, and the English activities label
+reads “Things to do.” The updated panels and full Getting there reader rendered
+at the largest reading size. An ADB press opened the reader, Close returned to
+the group, and switching to Nearby and back preserved the exhibit. The Android
+animation scales were restored after the run. Full physical look-around and
+finger-tap acceptance, and the large Japanese and Korean device checks,
+remain pending after testing stopped at 1% battery.
+
+All 450 padded layouts passed. At the largest size, combining any pair among
+When to visit, Things to do and Before you go exceeded the padded height in
+all 30 destination-language combinations. The five sections remain separate.
+`npm run check` passed all 1,836 tests after the padding change.
