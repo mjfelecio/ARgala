@@ -87,3 +87,18 @@ it('shows a History image’s caption before its description without changing re
   expect(history[0].text).toMatch(/^Synthetic caption/);
   expect(history.filter(page => page.kind === 'image').map(page => page.text).join('')).toContain('Synthetic credit');
 });
+
+it('keeps a text or caption anchor through repeated reading-size changes', () => {
+  const chapter = 'A documented story with more than one reading page. '.repeat(30);
+  const layouts = {
+    small: galleryPages(paginate(chapter, 'small'), [media], 'en', 'small', String, 'Fallback'),
+    large: galleryPages(paginate(chapter, 'large'), [media], 'en', 'large', String, 'Fallback'),
+  };
+  for (const kind of ['text', 'image'] as const) {
+    const index = layouts.large.findIndex(page => page.kind === kind && page.start > 0);
+    const original = cursorAtPage(layouts.large, index, 'en', 'large');
+    const smaller = galleryCursor(layouts.small, original, 'en', 'small');
+    expect(smaller.offset).toBe(original.offset);
+    expect(galleryCursor(layouts.large, smaller, 'en', 'large')).toEqual(original);
+  }
+});

@@ -17,42 +17,57 @@ export function paginate(text: string, size: ReadingSize, heading = '', maxLines
   if (text.length > 24000 || heading.length > 24000) throw new Error('AR content exceeds layout budget');
   if (heading) text = `${heading}\n\n${text}`;
   if (!text) return [{ start: 0, end: 0, text: '' }];
-  const budget = readingMetrics[size]; const pages: ContentPage[] = [];
-  const lineLimit = maxLines ?? budget.lines;
-  type Part = { segment: string; index: number };
-  let start = 0; let end = 0; let parts: Part[] = []; let units = 0; let lines: string[] = [];
-  let flow: { text: string; separator: string }[] = [];
-  function finishPage() {
-    // Soft row boundaries are a pagination estimate, not display instructions.
-    // Viro flows ordinary words across its actual box. Explicit paragraph and
-    // long-token/CJK breaks remain hard, avoiding pinned WordWrap's overflow.
-    const flowText = flow.map((line, index) => line.text + (index < flow.length - 1 ? line.separator : '')).join('');
-    pages.push({ start, end, text: lines.join('\n'), flowText }); start = end; lines = []; flow = [];
+  const budget = readingMetrics[size];
+  const rows = wrapReaderText(text, budget.fontSize);
+  const lineLimit = maxLines === undefined ? budget.lines
+    : Number.isInteger(maxLines) && maxLines > 0 ? maxLines : rows.length;
+  const pages: ContentPage[] = [];
+  for (let index = 0; index < rows.length; index += lineLimit) {
+    pages.push(readerTextPage(rows.slice(index, index + lineLimit), rows[index - 1]?.end ?? 0));
   }
-  function finishLine(line: Part[], sourceEnd: number, separator = '\n') {
-    end = sourceEnd; const value = line.map(part => part.segment).join('');
-    lines.push(value); flow.push({ text: value, separator });
-    if (lines.length === lineLimit) finishPage();
+  return pages;
+}
+
+type ReaderRow = { text: string; end: number; separator: string };
+
+export function readerTextPage(rows: readonly ReaderRow[], start: number): ContentPage {
+  // Ordinary words flow across the native box. Explicit paragraph breaks and
+  // protective breaks for long words and CJK remain hard.
+  return {
+    start,
+    end: rows.at(-1)?.end ?? start,
+    text: rows.map(row => row.text).join('\n'),
+    flowText: rows.map((row, index) => row.text + (index < rows.length - 1 ? row.separator : '')).join(''),
+  };
+}
+
+export function wrapReaderText(text: string, fontSize: number, width?: number): ReaderRow[] {
+  const columns = readingEmBudget(fontSize, width);
+  const rows: ReaderRow[] = [];
+  type Part = { segment: string; index: number };
+  let parts: Part[] = [];
+  let units = 0;
+  function finishLine(line: Part[], end: number, separator = '\n') {
+    rows.push({ text: line.map(part => part.segment).join(''), end, separator });
   }
   for (const part of graphemeSegments(text)) {
     if (part.segment === '\n' || part.segment === '\r\n' || part.segment === '\r') {
       finishLine(parts, part.index + part.segment.length); parts = []; units = 0; continue;
     }
-    const width = graphemeAdvance(part.segment, budget.fontSize);
-    while (parts.length && units + width > budget.columns) {
+    const width = graphemeAdvance(part.segment, fontSize);
+    while (parts.length && units + width > columns) {
       let split = parts.length;
       for (let index = parts.length - 1; index >= 0; index--) {
         if (parts[index].segment === ' ' || parts[index].segment === '\t') { split = index + 1; break; }
       }
       const line = parts.slice(0, split); const last = line[line.length - 1];
       finishLine(line, last.index + last.segment.length, last.segment === ' ' || last.segment === '\t' ? '' : '\n');
-      parts = parts.slice(split); units = parts.reduce((total, item) => total + graphemeAdvance(item.segment, budget.fontSize), 0);
+      parts = parts.slice(split); units = parts.reduce((total, item) => total + graphemeAdvance(item.segment, fontSize), 0);
     }
     parts.push(part); units += width;
   }
   if (parts.length) { const last = parts[parts.length - 1]; finishLine(parts, last.index + last.segment.length); }
-  if (lines.length) finishPage();
-  return pages;
+  return rows;
 }
 export function reflowCursor(pages: readonly ContentPage[], previous: ReadingCursor | undefined, locale: string, size: ReadingSize): ReadingCursor {
   let page = Math.min(Math.max(0, previous?.page ?? 0), pages.length - 1);

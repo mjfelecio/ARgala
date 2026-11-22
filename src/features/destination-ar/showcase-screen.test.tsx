@@ -44,8 +44,10 @@ it.each([false, true])('opens all ten school presentation exhibits for guest=%s 
     expect(experience().props.galleryMediaIds).toHaveLength(getDestination(id)!.media!.length);
     const content: readonly RingContent[] = experience().props.content;
     const stories = featuredStoryContent(id);
-    expect(content.slice(0, stories.length)).toEqual(stories);
-    expect(content.find(panel => panel.id === EXHIBIT_VISIT_PLAN_ID)).toBeDefined();
+    expect(content.slice(0, stories.length).map(({ id, role, approved }) => ({ id, role, approved })))
+      .toEqual(stories.map(({ id, role, approved }) => ({ id, role, approved })));
+    expect(content.find(panel => panel.id === EXHIBIT_VISIT_PLAN_ID)?.readerBlocks?.en)
+      .toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'bullet' })]));
     expect(content.filter(panel => panel.id === EXHIBIT_HISTORY_ID)).toHaveLength(1);
     await act(async () => experience().props.onReturn());
   }

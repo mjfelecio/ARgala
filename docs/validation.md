@@ -3998,3 +3998,17 @@ reopen it. A moving status line shifted the first action on device. The final
 ordering places status above the actions. The original English, density, font
 scale and animation settings were restored. Field acceptance remains open
 for a real entrance notification and a separate polygon unlock.
+
+## Editorial typography in the AR reader — 2026-11-22
+
+The native reader now uses separate headings, hanging bullets and marked
+callouts for all ten visit plans. Local annotations add paragraph breaks and
+practical guidance to approved story text. The source wording, photo sequence,
+caption credits and the 2.25-unit reader are preserved. Tests cover the ten
+guides in English, Japanese and Korean at all three reading sizes, repeated
+headings, long items, the native control hit owners and exact text and caption
+anchors through repeated size changes.
+
+The Galaxy A53 was absent from both USB enumeration and ADB during this review.
+Native clipping, CJK glyph appearance, camera-background contrast and physical
+touch acceptance remain pending on the existing APK.

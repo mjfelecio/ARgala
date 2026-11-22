@@ -20,7 +20,7 @@ it.each(destinationIds)('adds a paginated visit plan and one history entrance to
   const destination = getDestination(id)!;
   const stories = featuredStoryContent(id);
   const content = withExhibitVisitorContent(destination, stories, schoolPresentationHistoryScope);
-  expect(content.slice(0, stories.length)).toEqual(stories);
+  expect(content.slice(0, stories.length).map(item => item.approved)).toEqual(stories.map(item => item.approved));
   const plan = content.find(item => item.id === EXHIBIT_VISIT_PLAN_ID)!;
   expect(plan.approved?.media).toBeUndefined();
   const history = content.find(item => item.id === EXHIBIT_HISTORY_ID)!;
@@ -53,7 +53,7 @@ it('keeps an existing authorized chapter alongside the independently sourced His
   const authorized = [stories[0], existingHistory, stories[2]];
   const content = withExhibitVisitorContent(destination, authorized, schoolPresentationHistoryScope);
   expect(content.filter(item => item.role === 'history').map(item => item.id)).toEqual([existingHistory.id, EXHIBIT_HISTORY_ID]);
-  expect(content.find(item => item.id === existingHistory.id)).toBe(existingHistory);
+  expect(content.find(item => item.id === existingHistory.id)?.approved).toBe(existingHistory.approved);
   expect(content.filter(item => item.id === EXHIBIT_VISIT_PLAN_ID)).toHaveLength(1);
 });
 
