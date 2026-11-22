@@ -3,7 +3,7 @@ import { ExhibitFrame } from './exhibit-frame';
 import type { ComponentProps } from 'react';
 import { getExhibitStageProfile, buildDestinationStageSlots, type ExhibitStageProfile } from './exhibit-stage';
 import { destinationIds, type DestinationId } from '@/features/destinations/catalog';
-import { DanaoScenery, ExhibitArrival, ExhibitGalleryEntry, PhotoIslandStoryTile } from './danao-stage';
+import { DanaoScenery, ExhibitArrival, ExhibitGalleryEntry, PhotoIslandStoryTile, PhotoIslandGuidePanel } from './danao-stage';
 import { ExhibitGalleryPanel } from './exhibit-gallery-panel';
 import { createPhotoIslandsProfile, restrictPhotoIslandsProfile } from './photo-islands';
 import { PhotoIslandScenery } from './photo-island-scenery';
@@ -14,7 +14,7 @@ function createStagePresentation(profile: ExhibitStageProfile): RingScenePresent
   const animationPrefix = profile.destinationId === 'D01' ? 'argalaExhibitDanao' : `argalaExhibit${profile.destinationId}`;
   return Object.freeze({
     animationPrefix, buildSlots: (entries, basis) => buildDestinationStageSlots(profile, entries, basis),
-    Tile: PhotoIslandStoryTile, Frame: ExhibitFrame, revealImages: false, pageMotion: false, focusGlint: false, isolateReader: true,
+    Tile: PhotoIslandStoryTile, Guide: PhotoIslandGuidePanel, Frame: ExhibitFrame, revealImages: false, pageMotion: false, focusGlint: false, isolateReader: true,
     // The shared engine's gallery owner requires an actual authorized photo.
     // Story-only entries still use the same Photo Islands story layout/reader.
     ...(profile.media.length ? { stage: Object.freeze({ profile, Entry: ExhibitGalleryEntry, Panel: ExhibitGalleryPanel,

@@ -16,7 +16,7 @@ import SelectedDestinationArRoute from './selected-destination-route';
 import { loadDraftRingContent } from './draft-content-loader';
 import { loadExhibitScene } from './exhibit-loader';
 import { loadRingScene } from './ring-loader';
-import { EXHIBIT_HISTORY_ID, EXHIBIT_VISIT_PLAN_ID, type RingContent } from './ring-content';
+import { EXHIBIT_HISTORY_ID, EXHIBIT_GUIDE_IDS, type RingContent } from './ring-content';
 const control = vi.hoisted(() => ({ params: {} as Record<string, unknown>, active: true, sample: null as { position: { latitude: number; longitude: number }; timestamp: number; accuracy: number } | null }));
 vi.mock('expo-router', () => ({ useLocalSearchParams: () => control.params, useIsFocused: () => true, router: { dismissTo: vi.fn(), navigate: vi.fn() } }));
 vi.mock('@/lib/use-app-active', () => ({ useAppActive: () => control.active }));
@@ -106,8 +106,8 @@ it('keeps the featured exhibit path behind real content and geographic authoriza
  expect(scene.props.galleryMediaIds).toEqual(authorized);
  expect(scene.props.content[0].approved.media.map((photo: { id: string }) => photo.id)).toEqual(authorized);
  const panels: readonly RingContent[] = scene.props.content;
- expect(panels.map(panel => panel.id)).toEqual(['overview', EXHIBIT_VISIT_PLAN_ID, EXHIBIT_HISTORY_ID]);
- expect(panels.find(panel => panel.id === EXHIBIT_VISIT_PLAN_ID)?.approved?.body.en?.value).toContain(fixture.visitorGuide!.en.value.arrival);
+ expect(panels.map(panel => panel.id)).toEqual(['overview', ...Object.values(EXHIBIT_GUIDE_IDS), EXHIBIT_HISTORY_ID]);
+ expect(panels.find(panel => panel.id === EXHIBIT_GUIDE_IDS.arrival)?.approved?.body.en?.value).toContain(fixture.visitorGuide!.en.value.arrival);
  const loader = scene.props.sceneLoader;
  await loader(); expect(loadExhibitScene).toHaveBeenLastCalledWith('D01', authorized); expect(loadRingScene).not.toHaveBeenCalled();
  for (const time of [19000, 22000, 25000]) {

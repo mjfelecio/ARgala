@@ -6,9 +6,12 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
 import { DestinationRingScene, type RingControls } from './destination-ring-scene';
 import { danaoStagePresentation, getExhibitStagePresentation, getExhibitSceneHost } from './exhibit-ring-scene';
+import { withExhibitVisitorContent } from './exhibit-visitor-content';
+import { EXHIBIT_GUIDE_IDS } from './ring-content';
+import { defaultArView, requestView } from './ar-view-mode';
 import { featuredStoryContent } from './featured-story-content';
 import { RingController } from './ring-controller';
-import { ViroMaterials } from '@reactvision/react-viro';
+import { ViroAnimations, ViroMaterials } from '@reactvision/react-viro';
 import type { PoseSample } from './types';
 import { useReadingSize } from './use-reading-size';
 import { exhibitGalleryEntries } from './photo-islands';
@@ -985,4 +988,71 @@ it.each([4, 12].flatMap(count => [false, true].map(gallery => ({ count, gallery 
  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
  await press('ring-action-close'); await finish();
  expect(node(`ring-tile-verified-${count - 1}`)).toBeDefined();
+});
+
+it.each([false, true])('keeps story-only guide reading and frame ownership with reduced motion=%s', async reduced => {
+  native.reduced = reduced;
+  const progress = vi.fn();
+  const content = withExhibitVisitorContent(getDestination('D01')!, featuredStoryContent('D01'));
+  const safety = `ring-guide-${EXHIBIT_GUIDE_IDS.safety}`;
+  sceneOptions = { content, presentation: getExhibitStagePresentation('D01', [])!, onProgress: progress,
+    viewMode: defaultArView, onViewComplete: vi.fn() };
+
+  await mount(); await track(); await pose();
+  const guidePositions = () => Object.values(EXHIBIT_GUIDE_IDS).map(id => node(`ring-guide-${id}`).props.position);
+  const initialPositions = guidePositions();
+  const surface = node(safety).findByType('viro-image' as React.ElementType);
+  expect(surface.props).toMatchObject({ highAccuracyEvents: true, ignoreEventHandling: false });
+  const safetyLabel = () => node(safety).findAllByType('viro-text' as React.ElementType)[0];
+  expect(safetyLabel().props).toMatchObject({ text: 'Safety', ignoreEventHandling: true });
+  const font = safetyLabel().props.style.fontSize;
+  expect(controls?.readerAvailable).toBe(true);
+  const resize = controls!.changeReadingSize!;
+  await act(async () => resize(1));
+  expect(safetyLabel().props.style.fontSize).toBeGreaterThan(font);
+  await act(async () => resize(-1));
+  expect(safetyLabel().props.style.fontSize).toBe(font);
+  const retiredTap = node(safety).props.onClick;
+
+  sceneOptions = { ...sceneOptions, viewMode: requestView(defaultArView, 'nearby', true) };
+  await act(async () => tree.update(wrapper()));
+  expect(node('ar-view-details').props.visible).toBe(false);
+  expect(controls?.readerAvailable).toBe(false);
+  await act(async () => { retiredTap(); resize(1); });
+  expect(node('ring-focused-panel')).toBeUndefined();
+  expect(safetyLabel().props.style.fontSize).toBe(font);
+  sceneOptions = { ...sceneOptions, viewMode: defaultArView };
+  await act(async () => tree.update(wrapper()));
+  expect(guidePositions()).toEqual(initialPositions);
+
+  await press(safety);
+  if (reduced) expect(ViroAnimations.registerAnimations).toHaveBeenCalledWith({
+    argalaExhibitDanaoRingFocus: expect.objectContaining({ duration: 0 }),
+  });
+  await finish();
+  expect(node('ring-focused-panel').props.position).toEqual([0, 2, -2.25]);
+  expect(node(safety)).toBeUndefined();
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual([]);
+  await act(async () => controls!.changeReadingSize!(1));
+  await press('ring-action-next');
+  const page = text('ring-page-indicator');
+  expect(page).toMatch(/^2 /);
+  await act(async () => controls!.recenter());
+  expect(text('ring-page-indicator')).toBe(page);
+  await press('ring-action-close');
+  await finish();
+  expect(guidePositions()).toEqual(initialPositions);
+  await press(safety);
+  await finish();
+  expect(text('ring-page-indicator')).toBe(page);
+
+  const saved = progress.mock.lastCall![0];
+  await act(async () => tree.unmount());
+  native.getItem.mockResolvedValue(native.setItem.mock.lastCall?.[1]);
+  sceneOptions = { ...sceneOptions, initialProgress: saved };
+  await mount(); await track(); await pose();
+  await finish();
+  expect(text('ring-page-indicator')).toBe(page);
+  expect(progress.mock.lastCall?.[0].openedIds).toEqual([]);
+  expect(progress.mock.lastCall?.[0].exhibitGallery).toBeUndefined();
 });

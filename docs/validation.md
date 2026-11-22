@@ -4031,3 +4031,26 @@ punctuation and keeps opening punctuation with its following text. Repeated
 the same native page over Metro and verified the full stop stayed attached.
 English and the prior Android animation scales were restored. `npm run check`
 passed all 1,814 tests and the Android bundle exported successfully.
+
+## Visit guidance in Photo Islands — 2026-11-22
+
+Five panels in the captured exhibit frame show localized visit essentials.
+Getting there, When to visit and Safety sit in the upper row. Things to do and
+Before you go sit below, and standalone History sits to their right. The
+focused reader keeps the source guide wording and restores its section cursor.
+The existing reading preference controls both views.
+
+Automated layout checks cover 450 combinations of destination, section,
+language and reading size. Angular bounds checks cover the full galleries,
+each individual authorized photo as a welcome cover, and story-only exhibits,
+including extra authorized chapters.
+Scene tests exercise the painted hit surface, reading size changes, a 2.25-unit
+focus, Close, Recenter, recovery from logical progress, reduced motion and
+switching between Destination details and Nearby. Showcase and verified route
+tests exercise their shared content and retain the existing Passport checks.
+
+`npm run check` passed TypeScript, lint and all 1,836 tests in 156 files. The
+Android entry and lazy exhibit bundles both built and served over Metro.
+The Galaxy A53 disappeared from USB before the new exhibit could be opened.
+On-device checks for the starting view, native text and touch, and large EN,
+JA and KO text with reduced motion remain pending.

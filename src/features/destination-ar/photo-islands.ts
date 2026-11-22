@@ -1,7 +1,7 @@
 import type { ExhibitStageProfile } from './exhibit-stage';
 import type { Basis, RingEntry, RingSlot } from './scene-geometry';
 import presentationContent from './featured-presentation-content.json';
-import { EXHIBIT_HISTORY_ID, EXHIBIT_VISIT_PLAN_ID } from './ring-content';
+import { EXHIBIT_HISTORY_ID, EXHIBIT_GUIDE_IDS, isExhibitGuide } from './ring-content';
 import type { DestinationId } from '@/features/destinations/catalog';
 
 export type ExhibitGalleryEntrance = Readonly<{ id: string; mediaId?: string }>;
@@ -83,17 +83,40 @@ export function photoIslandStoryY(profile: ExhibitStageProfile, bayIndex: number
   return Math.min(photoIslandMetrics.storyY, bottom - photoIslandMetrics.storyClearance - photoIslandMetrics.storyHeight / 2);
 }
 
-// Utility covers flank the welcome photo below its image, inside the gap
-// between the first story bays. Their slots are independent of story count.
-const utilityAngles = new Map([
-  [EXHIBIT_VISIT_PLAN_ID, -28],
-  [EXHIBIT_HISTORY_ID, 28],
+// The welcome photo sits above the group. Every guide surface faces the
+// captured center, and the lower pair sits between the three upper headings.
+export const photoIslandGuide = { width: 1.27, height: 0.85, radius: 2.75, topY: -0.94, lowerY: -1.86 } as const;
+const guideSlots = new Map<string, { angle: number; row: 0 | 1 }>([
+  [EXHIBIT_GUIDE_IDS.arrival, { angle: 0, row: 0 }],
+  [EXHIBIT_GUIDE_IDS.bestTime, { angle: -27, row: 0 }],
+  [EXHIBIT_GUIDE_IDS.safety, { angle: 27, row: 0 }],
+  [EXHIBIT_GUIDE_IDS.activities, { angle: -14.5, row: 1 }],
+  [EXHIBIT_GUIDE_IDS.preparation, { angle: 14.5, row: 1 }],
 ]);
+
+/** Fit the group between the welcome cover and any extra story row in the
+ * captured view. Keep full-size panels and their row spacing in world units. */
+function guidePlacement(profile: ExhibitStageProfile, welcome: ExhibitGalleryEntrance | undefined, overflowY: number | null) {
+  const { height, topY, lowerY, radius } = photoIslandGuide;
+  const rowPitch = topY - lowerY;
+  if (overflowY === null) return { radius, topY, rowPitch, angleScale: 1 };
+
+  const clearance = 0.025;
+  const welcomeBottom = welcome
+    ? (photoIslandMetrics.welcomeY - (photoIslandCoverSize(profile, welcome).height + 0.04) / 2) / photoIslandMetrics.welcomeRadius
+    : 0.12;
+  const overflowCorner = Math.hypot(photoIslandMetrics.storyRadius, photoIslandMetrics.storyWidth / 2);
+  const overflowTop = (overflowY + photoIslandMetrics.storyHeight / 2) / overflowCorner;
+  const upperLimit = welcomeBottom - clearance;
+  const available = upperLimit - overflowTop - clearance;
+  const depth = Math.max(radius, (height + rowPitch) / available);
+  return { radius: depth, topY: upperLimit * depth - height / 2, rowPitch, angleScale: radius / depth };
+}
 
 /** Each entrance is a real native focus/Close target in the captured frame. */
 export function buildPhotoIslandSlots(profile: ExhibitStageProfile, entries: readonly RingEntry[], basis: Basis): RingSlot[] {
   const bays = profile.photoIslands; const gallery = exhibitGalleryEntries(profile);
-  const chapters = entries.slice(gallery.length).filter(entry => !utilityAngles.has(entry.id));
+  const chapters = entries.slice(gallery.length).filter(entry => entry.id !== EXHIBIT_HISTORY_ID && !isExhibitGuide(entry.id));
   if (!bays || entries.length < gallery.length || chapters.length > 12 || new Set(entries.map(entry => entry.id)).size !== entries.length
     || gallery.some((entry, index) => entries[index]?.id !== entry.id)) throw new Error('Invalid photo island entries');
   const storyAngles = profile.destinationId === 'D10' ? [-96, 88, 168] : destinationAngles[profile.destinationId];
@@ -101,19 +124,26 @@ export function buildPhotoIslandSlots(profile: ExhibitStageProfile, entries: rea
   // authorized chapters use a separate lower ring, clear of those controls.
   const overflowY = Math.min(photoIslandMetrics.storyY, ...bays.map((_, index) => photoIslandStoryY(profile, index)))
     - photoIslandMetrics.storyHeight - photoIslandMetrics.storyClearance;
+  const hasOverflow = chapters.length > storyAngles.length;
+  const guideGroup = guidePlacement(profile, gallery[0], hasOverflow ? overflowY : null);
   let chapterIndex = 0;
   return entries.map((entry, index) => {
-    const utilityAngle = utilityAngles.get(entry.id);
+    const guide = guideSlots.get(entry.id);
     let y: number, angle: number, scale: number, radius: number;
     if (index === 0 && gallery.length) {
       y = photoIslandMetrics.welcomeY;
       radius = photoIslandMetrics.welcomeRadius;
       angle = 0;
       scale = photoIslandCoverSize(profile, gallery[0]).width / 1.25;
-    } else if (utilityAngle !== undefined) {
-      y = photoIslandMetrics.storyY;
-      radius = photoIslandMetrics.storyRadius;
-      angle = utilityAngle;
+    } else if (guide) {
+      y = guideGroup.topY - guide.row * guideGroup.rowPitch;
+      radius = guideGroup.radius;
+      angle = guide.angle * guideGroup.angleScale;
+      scale = photoIslandGuide.width / 1.25;
+    } else if (entry.id === EXHIBIT_HISTORY_ID) {
+      y = hasOverflow ? -0.83 : -1.69;
+      radius = hasOverflow ? 2.65 : photoIslandMetrics.storyRadius;
+      angle = hasOverflow ? 40 : 52;
       scale = photoIslandMetrics.storyWidth / 1.25;
     } else {
       const photo = index < gallery.length;

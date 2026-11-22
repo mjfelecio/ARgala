@@ -9,7 +9,7 @@ import { localizationOptions } from '@/i18n/options';
 import { destinationIds, destinationName, getDestination } from '@/features/destinations/catalog';
 import ShowcaseScreen from './showcase-screen';
 import { ShowcaseEntry } from './showcase-entry';
-import { EXHIBIT_HISTORY_ID, EXHIBIT_VISIT_PLAN_ID } from './ring-content';
+import { EXHIBIT_HISTORY_ID, EXHIBIT_GUIDE_IDS } from './ring-content';
 import { featuredStoryContent } from './featured-story-content';
 import type { RingContent } from './ring-content';
 const runtime = vi.hoisted(() => ({ principal: 'a' as string | null, guest: false, focused: true, active: true, load: vi.fn(), push: vi.fn() }));
@@ -46,7 +46,7 @@ it.each([false, true])('opens all ten school presentation exhibits for guest=%s 
     const stories = featuredStoryContent(id);
     expect(content.slice(0, stories.length).map(({ id, role, approved }) => ({ id, role, approved })))
       .toEqual(stories.map(({ id, role, approved }) => ({ id, role, approved })));
-    expect(content.find(panel => panel.id === EXHIBIT_VISIT_PLAN_ID)?.readerBlocks?.en)
+    expect(content.find(panel => panel.id === EXHIBIT_GUIDE_IDS.preparation)?.readerBlocks?.en)
       .toEqual(expect.arrayContaining([expect.objectContaining({ kind: 'bullet' })]));
     expect(content.filter(panel => panel.id === EXHIBIT_HISTORY_ID)).toHaveLength(1);
     await act(async () => experience().props.onReturn());

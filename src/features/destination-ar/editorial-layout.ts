@@ -3,6 +3,7 @@ import { readerLayout } from './reader-layout';
 import type { ReadingSize } from './reading-preference';
 import { readingContentWidth } from './reading-widths';
 import type { ReaderBlock } from './ring-content';
+import { photoIslandGuide } from './photo-islands';
 
 export type PlacedReaderBlock = ReaderBlock & {
   y: number; x: number; width: number; height: number; fontSize: number; marker: boolean;
@@ -17,13 +18,35 @@ const paragraphGap = 0.035;
 const inset = 0.06;
 const epsilon = 1e-8;
 
-function measure(block: ReaderBlock, font: number) {
+function measure(block: ReaderBlock, font: number, contentWidth = readingContentWidth) {
   const indent = block.kind === 'bullet' || block.kind === 'callout' ? inset : 0;
   const fontSize = block.kind === 'heading' ? font + 0.65 : font;
-  const width = readingContentWidth - indent;
+  const width = contentWidth - indent;
   const bold = block.kind === 'heading' || block.kind === 'callout';
   return { ...block, width, fontSize, x: indent / 2, lineHeight: fontSize * 0.02,
     rows: wrapReaderText(block.text, fontSize, bold ? width * 0.92 : width) };
+}
+
+function placeBlock(block: ReturnType<typeof measure>, from: number, count: number, topY: number, marker: boolean): PlacedReaderBlock {
+  const height = count * block.lineHeight;
+  const slice = readerTextPage(block.rows.slice(from, from + count), 0);
+  return { kind: block.kind, text: slice.flowText ?? slice.text, marker,
+    y: topY - height / 2, x: block.x, width: block.width, height, fontSize: block.fontSize };
+}
+
+export const guideContentWidth = photoIslandGuide.width - 0.14;
+const guidePadding = 0.055;
+
+/** Fit the authored essentials as a whole, with the reader's native wrapping
+ * and indents. Authored content is verified at every size without truncation. */
+export function layoutGuideEssentials(blocks: readonly ReaderBlock[], size: ReadingSize) {
+  let y = photoIslandGuide.height / 2 - guidePadding;
+  return blocks.map(block => {
+    const measured = measure(block, readingMetrics[size].fontSize, guideContentWidth);
+    const placed = placeBlock(measured, 0, measured.rows.length, y, block.kind === 'bullet' || block.kind === 'callout');
+    y -= placed.height + itemGap;
+    return placed;
+  });
 }
 
 export function paginateEditorial(blocks: readonly ReaderBlock[], size: ReadingSize) {
@@ -50,11 +73,9 @@ export function paginateEditorial(blocks: readonly ReaderBlock[], size: ReadingS
   }
 
   function place(block: ReturnType<typeof measure>, from: number, count: number, gap: number, marker = false) {
-    const height = count * block.lineHeight;
-    const slice = readerTextPage(block.rows.slice(from, from + count), 0);
-    placed.push({ kind: block.kind, text: slice.flowText ?? slice.text, marker,
-      y: top - used - gap - height / 2, x: block.x, width: block.width, height, fontSize: block.fontSize });
-    used += gap + height;
+    const blockLayout = placeBlock(block, from, count, top - used - gap, marker);
+    placed.push(blockLayout);
+    used += gap + blockLayout.height;
   }
 
   for (const [index, block] of measured.entries()) {

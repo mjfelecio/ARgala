@@ -11,7 +11,7 @@ import { useReducedMotion } from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { paginate, readingMetrics, type ContentPage, type ReadingCursor } from './content-layout';
 import { exhibitVisitorLocale } from '@/i18n/locales/ar-exhibit-visitor';
-import { EXHIBIT_HISTORY_ID, type ReaderBlock, type RingContent } from './ring-content';
+import { EXHIBIT_HISTORY_ID, isExhibitGuide, type ReaderBlock, type RingContent } from './ring-content';
 import type { FocusSelection } from './ring-controller';
 import { ringMetrics } from './scene-geometry';
 import { readingSizes, type ReadingSize } from './reading-preference';
@@ -41,6 +41,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
   const locale = i18n.resolvedLanguage ?? i18n.language;
   const visitorCopy = exhibitVisitorLocale(locale);
   const chapter = chapterPresentation(content, locale, key => t(key), key => i18n.exists(key));
+  const isGuide = isExhibitGuide(content.id);
   const isSourcedHistory = content.hasHistorySources === true;
   const creditHint = isSourcedHistory && chapter.media.length ? visitorCopy.historySourcesHint : '';
   const body = creditHint ? `${chapter.body}\n\n${creditHint}` : chapter.body;
@@ -93,8 +94,8 @@ export function InformationPanel({ selection, content, previous, reading, enable
     <ArText testID="ring-chapter-title" position={[0, closing ? 0 : page.kind === 'image' ? 0.49 : 0.44, 0.006]} width={1.12} height={!closing && page.kind === 'image' ? 0.07 : 0.14} text={chapter.coverTitle} style={style.text(!closing && page.kind === 'image' ? 4 : 6, 'left', '600')} />
     {!closing && <>
       {decorations && focusGlint && <HolographicGlint animationPrefix={animationPrefix} id="ring-focus-glint" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} active={interactive} reduced={reduced} />}
-      <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={content.id === EXHIBIT_HISTORY_ID ? visitorCopy.history : t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />
-      <ArText testID="ring-sample-label" position={[0.28, 0.555, 0.006]} width={0.56} height={0.06} text={content.approved ? t('destinationStories.openedCount', { count: openedCount, total: chapterCount }) : t('destinationRing.sampleLabel')} style={style.text(3)} />
+      {!isGuide && <ArText testID="ring-chapter-position" position={[-0.3, 0.555, 0.006]} width={0.52} height={0.06} text={content.id === EXHIBIT_HISTORY_ID ? visitorCopy.history : t('destinationStories.chapter', { current: ordinal, total: chapterCount })} style={style.text(3, 'left')} />}
+      {!isGuide && <ArText testID="ring-sample-label" position={[0.28, 0.555, 0.006]} width={0.56} height={0.06} text={content.approved ? t('destinationStories.openedCount', { count: openedCount, total: chapterCount }) : t('destinationRing.sampleLabel')} style={style.text(3)} />}
       {pageMotion ? <PageTransition animationPrefix={animationPrefix} identity={`${content.id}:${cursor.page}:${locale}:${reading.size}`} enabled={interactive} reduced={reduced}>{pageContent}</PageTransition> : pageContent}
       {selection.phase === 'focused' && <ViroNode testID="ring-reader-toolbar" position={[0, readerLayout.toolbar.y, 0.012]}>
       <Frame variant="toolbar" width={readerLayout.toolbar.width} height={readerLayout.toolbar.height} decorations={false} />

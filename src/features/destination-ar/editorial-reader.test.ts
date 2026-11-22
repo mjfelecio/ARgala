@@ -3,10 +3,12 @@ import { destinationIds, getDestination } from '@/features/destinations/catalog'
 import { destinationHistory, schoolPresentationHistoryScope } from '@/features/destinations/history-content';
 import { featuredStoryContent } from './featured-story-content';
 import { withExhibitVisitorContent } from './exhibit-visitor-content';
-import { EXHIBIT_HISTORY_ID, EXHIBIT_VISIT_PLAN_ID } from './ring-content';
+import { EXHIBIT_HISTORY_ID, EXHIBIT_GUIDE_IDS, exhibitGuideSections } from './ring-content';
 import { readingSizes } from './reading-preference';
 import { readerLayout } from './reader-layout';
-import { paginateEditorial } from './editorial-layout';
+import { layoutGuideEssentials, paginateEditorial } from './editorial-layout';
+
+import { photoIslandGuide } from './photo-islands';
 
 const locales = ['en', 'ja', 'ko'] as const;
 const grades = ['D01', 'D03', 'D05', 'D06', 'D07', 'D08', 'D10'];
@@ -14,24 +16,38 @@ const grades = ['D01', 'D03', 'D05', 'D06', 'D07', 'D08', 'D10'];
 it.each(destinationIds)('lays out the entire %s visit guide in each language and size', id => {
   const destination = getDestination(id)!;
   const entries = withExhibitVisitorContent(destination, featuredStoryContent(id), schoolPresentationHistoryScope);
-  const plan = entries.find(entry => entry.id === EXHIBIT_VISIT_PLAN_ID)!;
-  for (const locale of locales) {
-    const blocks = plan.readerBlocks?.[locale];
-    expect(blocks?.filter(block => block.kind === 'heading')).toHaveLength(5);
-    expect(blocks?.[0].kind === 'callout').toBe(!!destination.requiresGuide);
-    const guide = destination.visitorGuide![locale].value;
-    expect(blocks?.filter(block => block.kind === 'bullet').map(block => block.text))
-      .toEqual([...guide.activities, ...guide.preparation, ...guide.safety]);
-    for (const size of readingSizes) {
-      const { pages, source } = paginateEditorial(blocks!, size);
-      expect(pages.map(page => source.slice(page.start, page.end)).join('')).toBe(source);
-      for (const page of pages) {
-        expect(page.blocks.at(-1)?.kind).not.toBe('heading');
-        let previousBottom = readerLayout.body.y + readerLayout.body.height / 2;
-        for (const block of page.blocks) {
-          expect(block.y + block.height / 2).toBeLessThanOrEqual(previousBottom + 1e-8);
+  for (const section of exhibitGuideSections) {
+    const plan = entries.find(entry => entry.id === EXHIBIT_GUIDE_IDS[section])!;
+    for (const locale of locales) {
+      const blocks = plan.readerBlocks![locale]!;
+      const essentials = plan.guideEssentials![locale]!;
+      expect(essentials[0].kind).toBe('heading');
+      expect(essentials.length).toBeGreaterThan(1);
+      if (section === 'arrival' && destination.requiresGuide) {
+        expect(essentials[1]).toEqual(blocks[0]);
+        expect(essentials[1].kind).toBe('callout');
+      }
+      for (const size of readingSizes) {
+        const label = `${id}/${section}/${locale}/${size}`;
+        const visible = layoutGuideEssentials(essentials, size);
+        expect(visible.map(block => block.text.replace(/\s/g, '')), label)
+          .toEqual(essentials.map(block => block.text.replace(/\s/g, '')));
+        let previousBottom = photoIslandGuide.height / 2;
+        for (const block of visible) {
+          expect(block.y + block.height / 2, label).toBeLessThanOrEqual(previousBottom + 1e-8);
           previousBottom = block.y - block.height / 2;
-          expect(previousBottom).toBeGreaterThanOrEqual(readerLayout.body.y - readerLayout.body.height / 2 - 1e-8);
+          expect(previousBottom, label).toBeGreaterThanOrEqual(-photoIslandGuide.height / 2 + 0.055 - 1e-8);
+          expect(Math.abs(block.x) + block.width / 2, label).toBeLessThan(photoIslandGuide.width / 2);
+        }
+        const { pages, source } = paginateEditorial(blocks, size);
+        expect(pages.map(page => source.slice(page.start, page.end)).join('')).toBe(source);
+        for (const page of pages) {
+          let previousBottom = readerLayout.body.y + readerLayout.body.height / 2;
+          for (const block of page.blocks) {
+            expect(block.y + block.height / 2).toBeLessThanOrEqual(previousBottom + 1e-8);
+            previousBottom = block.y - block.height / 2;
+            expect(previousBottom).toBeGreaterThanOrEqual(readerLayout.body.y - readerLayout.body.height / 2 - 1e-8);
+          }
         }
       }
     }

@@ -7,7 +7,7 @@ import * as React from 'react';
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ViroARScene, ViroARSceneNavigator, ViroSound, ViroNode, ViroTrackingStateConstants } from '@reactvision/react-viro';
 import { useTranslation } from 'react-i18next';
-import type { RingContent } from './ring-content';
+import { isExhibitGuide, type RingContent } from './ring-content';
 import { RingController, type FocusSelection } from './ring-controller';
 import { useArNativeStyle } from './native-styles';
 import { InformationTile } from './information-tile';
@@ -21,7 +21,7 @@ import type { Basis, RingEntry as RingEntryShape, RingSlot } from './scene-geome
 import type { LogicalArProgress } from './session';
 import type { NativeCapture } from '@/features/ar-photo/types';
 import type { ExhibitStageProfile } from './exhibit-stage';
-import type { ExhibitArrival, ExhibitGalleryEntry, DanaoScenery } from './danao-stage';
+import type { ExhibitArrival, ExhibitGalleryEntry, DanaoScenery, PhotoIslandGuidePanel } from './danao-stage';
 import type { ExhibitGalleryPanel } from './exhibit-gallery-panel';
 import { exhibitGalleryEntries, exhibitSceneEntries, isExhibitGalleryEntry } from './photo-islands';
 import { ArViewLayer } from './ar-view-layer';
@@ -33,6 +33,7 @@ export type RingScenePresentation = Readonly<{
   animationPrefix: string;
   buildSlots(entries: readonly RingEntryShape[], basis: Basis): RingSlot[];
   Tile: typeof InformationTile;
+  Guide?: typeof PhotoIslandGuidePanel;
   Frame: typeof HolographicFrame;
   revealImages: boolean;
   pageMotion?: boolean;
@@ -63,8 +64,10 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
   const stage = presentation?.stage; const GalleryEntry = stage?.Entry; const GalleryPanel = stage?.Panel;
   const Scenery = stage?.Scenery; const Arrival = stage?.Arrival;
   const Tile = presentation?.Tile ?? InformationTile;
+  const Guide = presentation?.Guide;
   const [restored] = useState(initialProgress);
   const [snapshot] = useState(() => content.filter(item => ringCopy(item, 'body', i18n.resolvedLanguage ?? i18n.language, key => t(key), key => i18n.exists(key)).trim()));
+  const stories = snapshot.filter(item => !isExhibitGuide(item.id));
   const [controller] = useState(() => new RingController(stage ? exhibitSceneEntries(stage.profile, snapshot) : snapshot, presentation?.buildSlots));
   const [frame, setFrame] = useState<{ slots: RingSlot[]; position: Vector3 } | null>(null);
   const [tracking, setTracking] = useState<TrackingState>('unavailable');
@@ -93,7 +96,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
   const readingCommand = useRef<ReadingCommand | null>(null);
   const acceptReadingCommand = useCallback((command: ReadingCommand | null) => { readingCommand.current = command; }, []);
   const [cursors, setCursors] = useState<Record<string, ReadingCursor>>(() => initialProgress?.cursors ?? {});
-  const [openedIds, setOpenedIds] = useState<readonly string[]>(() => (initialProgress?.openedIds ?? []).filter(id => snapshot.some(item => item.id === id)));
+  const [openedIds, setOpenedIds] = useState<readonly string[]>(() => (initialProgress?.openedIds ?? []).filter(id => stories.some(item => item.id === id)));
   const [galleryCursor, setGalleryCursor] = useState<ReadingCursor | undefined>(() => stage ? restored?.exhibitGallery?.cursor ?? {
     page: 0, offset: 0, locale: i18n.resolvedLanguage ?? i18n.language, size: reading.size, mediaId: stage.profile.media[0]?.id, mediaPage: 0,
   } : undefined);
@@ -130,7 +133,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
     const playCompletion = interruptedAudioTransition.current !== token;
     if (focused?.phase === 'focused') {
       if (playCompletion) audioEvent('focused', String(focused.token));
-      if (!stage || !isExhibitGalleryEntry(stage.profile, focused.id)) setOpenedIds(previous => previous.includes(focused.id) ? previous : [...previous, focused.id]);
+      if (!isExhibitGuide(focused.id) && (!stage || !isExhibitGalleryEntry(stage.profile, focused.id))) setOpenedIds(previous => previous.includes(focused.id) ? previous : [...previous, focused.id]);
     } else if (!focused && playCompletion) audioEvent('closed', String(token));
     setSelection(focused);
   }, [controller, audioEvent, stage]);
@@ -149,17 +152,27 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
     const success = controller.recenter(performance.now()); onRecenterResult?.(success);
     if (!success) return;
     completedTransition.current = null;
-    if (openingId && (!stage || !isExhibitGalleryEntry(stage.profile, openingId))) setOpenedIds(previous => previous.includes(openingId) ? previous : [...previous, openingId]);
+    if (openingId && !isExhibitGuide(openingId) && (!stage || !isExhibitGalleryEntry(stage.profile, openingId))) setOpenedIds(previous => previous.includes(openingId) ? previous : [...previous, openingId]);
     setFrame({ slots: controller.slots, position: controller.ringPosition! });
     setSelection(controller.selection);
   }, [controller, onRecenterResult, stage]);
   const readerToken = selection?.token;
-  const readerAvailable = selection?.phase === 'focused' && interactive && tracking === 'normal';
+  const guidesVisible = !!(frame && Guide && !selection && visibleTileCount >= stories.length && snapshot.some(item => isExhibitGuide(item.id)));
+  const guideControls = guidesVisible && !deployment && interactive && tracking === 'normal';
+  const guideControlsRef = useRef(false);
+  useLayoutEffect(() => {
+    guideControlsRef.current = guideControls;
+    return () => { guideControlsRef.current = false; };
+  }, [guideControls]);
+  const readerAvailable = (selection?.phase === 'focused' && interactive && tracking === 'normal') || guideControls;
   const canRead = useCallback(() => alive.current && interactiveRef.current && trackingRef.current === 'normal'
     && controller.selection?.phase === 'focused' && controller.selection.token === readerToken, [controller, readerToken]);
+  const changePreference = reading.change;
   const changeReadingSize = useCallback<ReadingCommand>(delta => {
     if (canRead()) readingCommand.current?.(delta);
-  }, [canRead]);
+    else if (guideControls && guideControlsRef.current && alive.current && interactiveRef.current
+      && trackingRef.current === 'normal' && !controller.selection) changePreference(delta);
+  }, [canRead, changePreference, controller, guideControls]);
   const selectedContent = snapshot.find(item => item.id === selection?.id);
   const captureRestricted = selectedContent?.restrictCapture === true;
   useLayoutEffect(() => {
@@ -249,14 +262,17 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
       {!stage && deployment === 'full' && controller.basis && <CinematicEmblem basis={controller.basis} animationPrefix={animationPrefix} />}
       {stage && Scenery && Arrival && !selection && controller.basis && quality === 'standard' && effectsEnabled && tracking === 'normal' && (interactive || !!deployment) && <Arrival deployment={deployment} order={0}><Scenery basis={controller.basis} /></Arrival>}
       {stage && GalleryEntry && Arrival && !selection && exhibitGalleryEntries(stage.profile).map(entry => <Arrival key={entry.id} deployment={deployment} order={1}><GalleryEntry profile={stage.profile} entry={entry} slot={frame.slots.find(slot => slot.id === entry.id)!} enabled={!deployment && interactive && tracking === 'normal'} style={style} onSelect={select} /></Arrival>)}
-      {frame.slots.filter(slot => !stage || !isExhibitGalleryEntry(stage.profile, slot.id)).slice(0, Math.max(0, visibleTileCount)).map((slot, index) => {
+      {Guide && guidesVisible && frame.slots.filter(slot => isExhibitGuide(slot.id)).map(slot =>
+        <Guide key={slot.id} slot={slot} content={snapshot.find(item => item.id === slot.id)!}
+          enabled={guideControls} style={style} onSelect={select} size={reading.size} />)}
+      {frame.slots.filter(slot => !isExhibitGuide(slot.id) && (!stage || !isExhibitGalleryEntry(stage.profile, slot.id))).slice(0, Math.max(0, visibleTileCount)).map((slot, index) => {
         if (selection && (presentation?.isolateReader || selection.id === slot.id)) return null;
-        const tile = (localSlot: RingSlot) => <Tile slot={localSlot} ordinal={index + 1} chapterCount={snapshot.length} opened={openedIds.includes(slot.id)} content={snapshot.find(item => item.id === slot.id)!} enabled={!deployment && interactive && tracking === 'normal' && (!selection || selection.phase === 'focused')} style={style} onSelect={select} decorations={quality === 'standard' && (!stage || effectsEnabled && (interactive || !!deployment) && tracking === 'normal')} />;
+        const tile = (localSlot: RingSlot) => <Tile slot={localSlot} ordinal={index + 1} chapterCount={stories.length} opened={openedIds.includes(slot.id)} content={snapshot.find(item => item.id === slot.id)!} enabled={!deployment && interactive && tracking === 'normal' && (!selection || selection.phase === 'focused')} style={style} onSelect={select} decorations={quality === 'standard' && (!stage || effectsEnabled && (interactive || !!deployment) && tracking === 'normal')} />;
         if (stage && Arrival) return <Arrival key={slot.id} deployment={deployment} order={index + 2}>{tile(slot)}</Arrival>;
         return deployment && controller.basis ? <CinematicTile key={slot.id} slot={slot} basis={controller.basis} variant={deployment} ordinal={index} peers={frame.slots} animationPrefix={animationPrefix}>{tile({ ...slot, position: [0, 0, 0], rotation: [0, 0, 0] })}</CinematicTile> : <React.Fragment key={slot.id}>{tile(slot)}</React.Fragment>;
       })}
     </ViroNode>}
-    {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel animationPrefix={animationPrefix} Frame={presentation?.Frame} revealImages={presentation?.revealImages} pageMotion={presentation?.pageMotion} focusGlint={presentation?.focusGlint} selection={selection} ordinal={frame!.slots.filter(slot => !stage || !isExhibitGalleryEntry(stage.profile, slot.id)).findIndex(slot => slot.id === selection.id) + 1} chapterCount={snapshot.length} openedCount={openedIds.length} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style} decorations={quality === 'standard'}
+    {selection && selectedContent && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}><InformationPanel animationPrefix={animationPrefix} Frame={presentation?.Frame} revealImages={presentation?.revealImages} pageMotion={presentation?.pageMotion} focusGlint={presentation?.focusGlint} selection={selection} ordinal={stories.findIndex(item => item.id === selection.id) + 1} chapterCount={stories.length} openedCount={openedIds.length} content={selectedContent} previous={cursors[selection.id]} reading={reading} enabled={interactive && tracking === 'normal'} style={style} decorations={quality === 'standard'}
       onCursor={(id, cursor) => setCursors(previous => ({ ...previous, [id]: cursor }))} onClose={close} onComplete={complete} onPageChange={pageSound} externalReadingControls={externalReadingControls} onReadingControls={acceptReadingCommand} canInteract={canRead} /></ViroNode>}
     {selection && stage && GalleryPanel && isExhibitGalleryEntry(stage.profile, selection.id) && <ViroNode ref={panelFrame} testID="ring-panel-frame" position={selection.origin}>
       <GalleryPanel profile={stage.profile} selection={selection} previous={galleryCursor} reading={reading} enabled={interactive && tracking === 'normal'} style={style} animationPrefix={animationPrefix}

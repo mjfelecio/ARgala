@@ -1,7 +1,7 @@
 export const exhibitVisitorCopy = {
   en: {
-    visitPlan: 'Plan your visit',
-    visitPlanUnavailable: 'Visitor guidance is unavailable for this destination.',
+    safety: 'Safety',
+    visitGuideUnavailable: 'Visitor guidance is unavailable for this destination.',
     history: 'History',
     historySources: 'Sources',
     historySourcesHint: 'Open the History photo in destination details for its credits.',
@@ -12,8 +12,8 @@ export const exhibitVisitorCopy = {
     historyUnavailable: 'History is unavailable for this destination.',
   },
   ja: {
-    visitPlan: '訪問ガイド',
-    visitPlanUnavailable: 'この目的地の訪問案内はまだありません。',
+    safety: '安全',
+    visitGuideUnavailable: 'この目的地の訪問案内はまだありません。',
     history: '歴史',
     historySources: '出典',
     historySourcesHint: '画像のクレジットは、目的地の詳細画面の「歴史」で写真を開くと確認できます。',
@@ -24,8 +24,8 @@ export const exhibitVisitorCopy = {
     historyUnavailable: 'この目的地の歴史はまだ紹介されていません。',
   },
   ko: {
-    visitPlan: '방문 계획',
-    visitPlanUnavailable: '이곳의 방문 안내는 아직 제공되지 않습니다.',
+    safety: '안전',
+    visitGuideUnavailable: '이곳의 방문 안내는 아직 제공되지 않습니다.',
     history: '역사',
     historySources: '출처',
     historySourcesHint: '목적지 상세 화면의 역사 사진을 열면 이미지 출처를 확인할 수 있습니다.',
