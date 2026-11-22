@@ -19,20 +19,25 @@ export function EntranceArrivalGuidance({ destination, language, arrival }: {
   const { snapshot, setEnabled, dismiss } = arrival;
   if (!destination || !snapshot) return null;
   const toggleKey = snapshot.enabled ? 'arrival.entranceDisable' : 'arrival.entranceEnable';
-  return <View testID="entrance-arrival-guidance" className="gap-2 py-3">
-    <Text accessibilityRole="header" className="font-sans text-card font-ui-semibold text-brand-strong">{t('arrival.entranceTitle')}</Text>
-    {snapshot.distanceMeters !== null && <Text className="font-sans text-sm text-muted">{t('arrival.entranceDistance', { meters: snapshot.distanceMeters })}</Text>}
-    {snapshot.status !== 'distance' && <Text className="font-sans text-sm text-muted">{t(`arrival.entranceStatus.${snapshot.status}`)}</Text>}
-    {snapshot.showNotice && <View testID="entrance-arrival-notice" className="gap-2 rounded-card bg-mint p-4">
+  const status = snapshot.status === 'distance'
+    ? t('arrival.entranceDistance', { meters: snapshot.distanceMeters })
+    : t(`arrival.entranceStatus.${snapshot.status}`);
+  return <View testID="entrance-arrival-guidance" className="w-full gap-3 rounded-card border border-outline bg-surface p-4">
+    <View className="gap-1">
+      <Text accessibilityRole="header" className="font-sans text-card font-ui-semibold text-brand-strong">{t('arrival.entranceTitle')}</Text>
+      <Text className="font-sans text-sm text-muted">{status}</Text>
+    </View>
+    {snapshot.showNotice && <View testID="entrance-arrival-notice" className="gap-2 rounded-card bg-mint p-3">
+      <Text accessibilityRole="header" className="font-sans text-base font-ui-semibold text-brand-strong">{t('arrival.entranceReached')}</Text>
       <Text className="font-sans text-sm text-foreground">{t('arrival.entranceFollow', { destination: destinationName(destination, language) })}</Text>
       {destination.requiresGuide && <Text className="font-sans text-sm text-foreground">{t('arrival.entranceGuide')}</Text>}
       {destination.id === 'D10' && <Text className="font-sans text-sm text-foreground">{t('arrival.entranceSchool')}</Text>}
-      <Button variant="ghost" className="min-h-12 self-start" accessibilityLabel={t('arrival.entranceDismiss')} onPress={dismiss}>
+      <Button variant="ghost" className="h-auto min-h-12 w-full py-3" accessibilityLabel={t('arrival.entranceDismiss')} onPress={dismiss}>
         <Button.Label className="shrink text-center">{t('arrival.entranceDismiss')}</Button.Label>
       </Button>
     </View>}
     {!snapshot.enabled && <Text className="font-sans text-sm text-muted">{t('arrival.entranceConsent')}</Text>}
-    <Button variant="outline" className="min-h-12 self-start" accessibilityLabel={t(toggleKey)} onPress={() => setEnabled(!snapshot.enabled)}>
+    <Button variant="outline" className="h-auto min-h-12 w-full py-3" accessibilityLabel={t(toggleKey)} onPress={() => setEnabled(!snapshot.enabled)}>
       <Button.Label className="shrink text-center">{t(toggleKey)}</Button.Label>
     </Button>
   </View>;

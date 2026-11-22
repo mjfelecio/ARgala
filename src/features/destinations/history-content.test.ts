@@ -11,6 +11,11 @@ it('keeps the handoff’s claim-to-source links and restricted use scope', () =>
     expect(destinationHistory(entry.destinationId)).toBeUndefined();
     const history = destinationHistory(entry.destinationId, schoolPresentationHistoryScope)!;
     expect(history.entry).toBe(entry);
+    for (const language of ['en', 'ja', 'ko'] as const) {
+      expect(history.summary[language]).toBeTruthy();
+      expect(history.summary[language]).not.toMatch(/[\r\n]/);
+      expect(history.summary[language].length).toBeLessThan(entry.text[language].length);
+    }
     expect(history.citations.map(source => source.id)).toEqual([...new Set(entry.claims.flatMap(claim => claim.sourceIds))]);
     expect(history.entry.approvedForOnsiteDistribution).toBe(false);
   }

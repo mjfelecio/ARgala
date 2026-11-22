@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { withUniwind } from 'uniwind';
 
 const SafeOverlay = withUniwind(SafeAreaView);
-export function ArUtilityChrome({ children, actions, bottom, viewportHeight, titleKey = 'destinationAr.title', title, onReturn, onExit, appearance = 'camera' }: { appearance?: 'page' | 'camera'; children: React.ReactNode; actions?: React.ReactNode; bottom?: React.ReactNode; viewportHeight?: number; titleKey?: string; title?: string; onReturn?(): void; onExit?(): void }) {
+export function ArUtilityChrome({ children, actions, underHeader, bottom, viewportHeight, titleKey = 'destinationAr.title', title, onReturn, onExit, appearance = 'camera' }: { appearance?: 'page' | 'camera'; children: React.ReactNode; actions?: React.ReactNode; underHeader?: React.ReactNode; bottom?: React.ReactNode; viewportHeight?: number; titleKey?: string; title?: string; onReturn?(): void; onExit?(): void }) {
   const { t } = useTranslation();
   const accent = useThemeColor('accent');
   const leave = () => { onExit?.(); if (onReturn) { onReturn(); return; } if (router.canGoBack()) router.back(); else router.navigate('/profile'); };
@@ -34,6 +34,7 @@ export function ArUtilityChrome({ children, actions, bottom, viewportHeight, tit
       <Text accessibilityRole="header" accessibilityLabel={title ?? t(titleKey)} numberOfLines={2} className="grow shrink font-sans text-card font-ui-semibold text-white">{title ?? t(titleKey)}</Text>
       {actions}
     </View>
+    {underHeader}
     <ScrollView testID="ar-utility-body" className="grow-0 shrink">{children}</ScrollView>
   </SafeOverlay>
     {bottom && <SafeOverlay testID="ar-bottom-utilities" style={{ maxHeight: bottomMaxHeight }} onLayout={event => setBottomHeight(event.nativeEvent.layout.height)} className="absolute bottom-0 left-0 right-0" edges={['bottom', 'left', 'right']} pointerEvents="box-none">

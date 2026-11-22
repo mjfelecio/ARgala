@@ -1,5 +1,6 @@
 import { nativeUi, withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
+import { BackHandler } from 'react-native';
 import * as Reanimated from 'react-native-reanimated';
 import { PortalHost } from 'heroui-native/portal';
 import { createRequire } from 'node:module';
@@ -14,7 +15,7 @@ import { ViroRingRoute } from './dev-entry';
 import { router } from 'expo-router';
 import { destinationIds, getDestination, destinationName } from '@/features/destinations/catalog';
 const native = vi.hoisted(() => ({ exhibit: vi.fn(), active: true, focused: true, reduced: false, eligible: true, guest: false,
-  principal: 'owner' as string | null, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
+  headingModule: vi.fn(), principal: 'owner' as string | null, context: null as React.Context<unknown> | null, focusContext: null as React.Context<boolean | undefined> | null,
   transitions: new Map<string, Set<(event: { data: { closing: boolean } }) => void>>(), get: vi.fn(), request: vi.fn(), support: vi.fn(), getItem: vi.fn(), setItem: vi.fn(), gallery: vi.fn(), audio: vi.fn(), load: vi.fn(), gate: vi.fn(), screenshot: vi.fn(), positionWatch: vi.fn(), scanNearby: vi.fn(),
 }));
 vi.mock('./holographic-assets', () => ({ holographicAssets: { glint: 108, frame: 101, reader: 109, toolbar: 110, actionMask: 111, overview: 102, history: 103, highlights: 104, 'visitor-notes': 105, facts: 106, chapter: 107 } }));
@@ -30,7 +31,7 @@ vi.mock('expo-location', () => ({
   watchPositionAsync: native.positionWatch,
 }));
 vi.mock('@/features/places/service', () => ({ placesService: { nearby: native.scanNearby } }));
-vi.mock('./camera-heading', () => ({ cameraHeadingModule: () => null, updateHeadingLocation: vi.fn() }));
+vi.mock('./camera-heading', () => ({ cameraHeadingModule: native.headingModule, updateHeadingLocation: vi.fn() }));
 vi.mock('expo-camera', () => ({ Camera: { getCameraPermissionsAsync: native.get, requestCameraPermissionsAsync: native.request } }));
 vi.mock('@/features/settings/provider', () => ({ useSettings: () => ({ systemVoice: true, soundEffects: true, language: translations?.resolvedLanguage ?? 'en' }) }));
 vi.mock('./intro-emblem-asset', () => ({ introEmblemAsset: 1 }));
@@ -97,6 +98,9 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   const Scene = getExhibitSceneHost('D01')!;
   native.exhibit.mockResolvedValue(Scene);
   const stop = vi.fn();
+  const heading = { start: vi.fn(), stop: vi.fn(), addListener: vi.fn(() => ({ remove: vi.fn() })) };
+  native.headingModule.mockReturnValue(heading);
+  const back = vi.spyOn(BackHandler, 'addEventListener');
   native.positionWatch.mockReset().mockImplementation(async (_options, receive) => {
     receive({ coords: { latitude: 11, longitude: 124, accuracy: 5 }, timestamp: Date.now() });
     return { remove: stop };
@@ -135,20 +139,44 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   native.scanNearby.mockResolvedValueOnce([{ id: 'synthetic-place', providerId: 'synthetic-place', name: 'Test nearby place',
     provider: 'google', coordinates: { latitude: 11.001, longitude: 124 }, attributions: [] }]);
   await press('arNearby.rescan');
+  expect(copy()).toContain(translations.t('arNearby.headingWeak'));
+  expect(copy()).not.toContain('Google Maps');
+  expect(heading.start).toHaveBeenCalledOnce();
   await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
-  const list = tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('arNearby.results', { count: 1 }))!;
+  expect(copy()).toContain(translations.t('arNearby.trackingLost'));
+  const resultsButton = () => tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('arNearby.results', { count: 1 }))!;
+  const list = resultsButton();
   expect(list.props.disabled).toBeFalsy();
   await act(async () => list.props.onPress());
   expect(copy()).toContain('Test nearby place');
-  await press('common.close');
+  expect(copy()).toContain('Google Maps');
+  expect(cameras()).toHaveLength(0);
+  expect(stop).toHaveBeenCalledOnce();
+  expect(heading.stop).toHaveBeenCalledWith(heading.start.mock.calls[0][0]);
+  await act(async () => { expect(back.mock.calls.at(-1)![1]({ type: 'hardwareBackPress', timeStamp: Date.now() })).toBe(true); });
+  expect(cameras()).toHaveLength(1);
+  await ready([0, 2, 0], [0, 0, -1], false);
+  await act(async () => { await vi.advanceTimersByTimeAsync(1000); });
+  expect(node('ar-nearby-bearing-frame').props.visible).toBe(false);
+  expect(heading.start).toHaveBeenCalledTimes(2);
+  expect(heading.start.mock.calls[1][0]).not.toBe(heading.start.mock.calls[0][0]);
+  await act(async () => resultsButton().props.onPress());
+  expect(copy()).toContain('Test nearby place');
+  expect(native.scanNearby).toHaveBeenCalledTimes(2);
+  await act(async () => { await vi.advanceTimersByTimeAsync(120000); });
+  expect(copy()).not.toContain('Test nearby place');
+  expect(copy()).toContain(translations.t('arNearby.resultsExpired'));
+  expect(cameras()).toHaveLength(0);
+  await press('arNearby.returnToAr');
+  expect(cameras()).toHaveLength(1);
   await ready([0, 2, 0], [0, 0, -1], false);
   await pressMode('details');
   await act(async () => node('ar-view-nearby').props.animation.onFinish());
   expect(node('ar-view-nearby')).toBeUndefined();
   await act(async () => node('ar-view-details').props.animation.onFinish());
-  expect(cameras()[0]).toBe(camera);
+  expect(cameras()[0]).not.toBe(camera);
   expect(node('ring-focused-panel')).toBeDefined();
-  expect(stop).toHaveBeenCalledOnce();
+  expect(stop).toHaveBeenCalledTimes(3);
   await pressMode('nearby');
   await act(async () => node('ar-view-details').props.animation.onFinish());
   await act(async () => node('ar-view-nearby').props.animation.onFinish());
@@ -164,6 +192,8 @@ it('keeps guest Showcase in Nearby view without accessing location or Places', a
   await selectDestination('D01'); await layout(); await start(); await ready();
   await act(async () => tree!.root.findAllByType('button').find(button => button.props.testID === 'ar-select-nearby')!.props.onPress());
   expect(copy()).toContain(translations.t('arNearby.signInHint'));
+  await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
+  expect(copy()).toContain(translations.t('destinationAr.trackingLost'));
   expect(cameras()).toHaveLength(1);
   expect(native.positionWatch).not.toHaveBeenCalled();
   expect(native.scanNearby).not.toHaveBeenCalled();
@@ -240,7 +270,7 @@ beforeEach(async () => {
   native.active = native.focused = native.eligible = true; native.reduced = false; native.guest = false; native.principal = 'owner'; native.transitions.clear();
   vi.spyOn(Reanimated, 'useReducedMotion').mockImplementation(() => native.reduced);
   native.get.mockReset().mockResolvedValue(granted); native.request.mockReset().mockResolvedValue({ ...granted, granted: false, status: 'denied' });
-  native.positionWatch.mockReset(); native.scanNearby.mockReset();
+  native.positionWatch.mockReset(); native.scanNearby.mockReset(); native.headingModule.mockReset().mockReturnValue(null);
   native.screenshot.mockReset(); native.audio.mockReset().mockResolvedValue(null); native.gallery.mockReset().mockImplementation(async () => (await import('./development-ring-content')).developmentRingContent);
   native.support.mockReset().mockImplementation(callback => callback('SUPPORTED')); nativeUi.modules.VRTARSceneNavigatorModule = { isARSupportedOnDevice: native.support };
   native.getItem.mockReset().mockImplementation(async key => key.startsWith('argala.ar-') ? 'complete' : null); native.setItem.mockReset().mockResolvedValue(undefined);

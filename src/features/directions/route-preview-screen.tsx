@@ -23,7 +23,7 @@ import { isViroSpikeEnabled } from '@/features/destination-ar/dev-guard';
 import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
 import { useEntranceArrival } from '@/features/destinations/entrance-arrival-context';
 import { EntranceArrivalBanner, EntranceArrivalGuidance } from '@/features/destinations/entrance-arrival-guidance';
-import { ArrivalUnlock } from '@/features/destinations/arrival-unlock';
+import { ArrivalUnlock, ArrivalUnlockPreview } from '@/features/destinations/arrival-unlock';
 import { createRoutePreviewIntent } from './route-preview-intent';
 import { googleMapsNavigationUrl } from './google-maps-navigation';
 import type { TravelMode } from '../../../supabase/functions/_shared/contracts';
@@ -212,6 +212,8 @@ function Preview({ token }: { token: unknown }) {
           </View>}
           </RoutePreviewPrimary>
           <EntranceArrivalGuidance destination={featured} language={language} arrival={entranceArrival} />
+          {__DEV__ && isViroSpikeEnabled() && running && featured && <ArrivalUnlockPreview key={featured.id}
+            destinationTitle={destinationName(featured, language)} language={language} />}
           {featured && <ArrivalInvitation state={arrivalState} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} keepInline={onsite} onLaunch={admission ? launchAr : undefined} onDismiss={preview.arrival.dismiss} />}
           {featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
           {!place && <Text className="font-sans text-base text-muted">{t('directions.unavailable')}</Text>}

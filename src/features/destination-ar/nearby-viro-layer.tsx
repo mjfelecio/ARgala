@@ -6,14 +6,14 @@ import type { WatcherSample } from '@/features/destinations/proximity';
 import { ArText } from './ar-text';
 import { cameraHeadingModule, updateHeadingLocation } from './camera-heading';
 import { HolographicFrame } from './holographic-frame';
-import { CameraNorthAlignment, matchCameraHeading, type NearbyCard } from './nearby-mode';
+import { CameraNorthAlignment, matchCameraHeading, type NearbyCard, type NearbyHeadingStatus } from './nearby-mode';
 import type { ArNativeStyle } from './native-styles';
 import { validPose } from './scene-geometry';
 import type { PoseSample, Vector3 } from './types';
 
 export type NearbySceneContent = Readonly<{
   cards: readonly NearbyCard[]; fix: WatcherSample | null;
-  onHeading(ready: boolean): void; onSelect(providerId: string): void;
+  onHeading(status: NearbyHeadingStatus): void; onSelect(providerId: string): void;
 }>;
 
 const pairingMs = 250;
@@ -42,7 +42,7 @@ export function NearbyViroLayer({ content, tracking, interactive, animateArrival
     if (visibleRef.current === value) return;
     visibleRef.current = value;
     setVisible(value);
-    onHeading(value);
+    onHeading(value ? 'ready' : 'weak');
   }, [onHeading]);
   const reset = useCallback(() => {
     alignment.reset();
@@ -73,14 +73,20 @@ export function NearbyViroLayer({ content, tracking, interactive, animateArrival
     if (module && fix && headingOwner.current !== null) updateHeadingLocation(module, headingOwner.current, fix);
   }, [module, content.fix]);
   useEffect(() => {
-    if (!running || !module) return;
+    if (!running) return;
+    if (!module) { onHeading('unavailable'); return; }
     const nativeOwner = ++nextHeadingOwner;
     headingOwner.current = nativeOwner;
     let latestHeadingAt = -Infinity;
+    const startupTimeout = setTimeout(() => onHeading('no-reading'), 2500);
     const subscription = module.addListener('onHeading', ({ owner, degrees, measuredAt }) => {
       if (owner !== nativeOwner || headingOwner.current !== nativeOwner) return;
       const age = Date.now() - measuredAt;
       if (!Number.isFinite(age) || age < -50 || age > headingMaxAgeMs || measuredAt <= latestHeadingAt) return;
+      if (latestHeadingAt === -Infinity) {
+        clearTimeout(startupTimeout);
+        onHeading('weak');
+      }
       latestHeadingAt = measuredAt;
       if (degrees === null) { reset(); return; }
       const now = performance.now();
@@ -103,10 +109,11 @@ export function NearbyViroLayer({ content, tracking, interactive, animateArrival
     return () => {
       headingOwner.current = null;
       clearInterval(interval);
+      clearTimeout(startupTimeout);
       subscription.remove();
       module.stop(nativeOwner);
     };
-  }, [alignment, running, module, reset, setReady]);
+  }, [alignment, running, module, onHeading, reset, setReady]);
   const canSelect = visible && interactive && tracking;
   return <ViroNode ref={root} testID="ar-nearby-bearing-frame" position={origin} visible={visible && running} ignoreEventHandling={!canSelect}>
     {visible && content.cards.length > 0 && <NearbyCardArrival animate={animateArrival}>{content.cards.map(card => <ViroNode key={card.place.providerId} position={card.position} rotation={card.rotation} ignoreEventHandling={!canSelect}

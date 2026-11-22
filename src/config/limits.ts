@@ -6,7 +6,7 @@ export const DESTINATIONS = { nearbyRadiusMeters: 500 } as const;
 /** Nearby OS reminders are best effort and never evidence of AR arrival. */
 export const ARRIVAL_REMINDERS = { radiusMeters: 150, maxDestinations: 10 } as const;
 /** Foreground entrance guidance uses its own accuracy and approach/exit distances. */
-export const ENTRANCE_ARRIVAL = { radiusMeters: 35, exitMeters: 65, maxAccuracyMeters: 25 } as const;
+export const ENTRANCE_ARRIVAL = { radiusMeters: 20, exitMeters: 65, maxAccuracyMeters: 50 } as const;
 export const ACTIVATION = { defaultMeters: 100, minMeters: 10, maxMeters: 1000 } as const;
 export const LOCATION = { distanceIntervalMeters: 5, timeIntervalMs: 3000, timeoutMs: 15000 } as const;
 /** Approximate portrait projection, not physical camera calibration. */

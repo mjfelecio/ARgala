@@ -19,7 +19,7 @@ beforeEach(() => {
     if (!String(args[0]).startsWith('react-test-renderer is deprecated')) original(...args);
   });
 });
-afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.useRealTimers(); vi.restoreAllMocks(); });
+afterEach(async () => { await act(async () => tree?.unmount()); tree = undefined; vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
 async function setup(language: 'en' | 'ja' | 'ko' = 'en') {
   const i18n = createInstance();
@@ -80,5 +80,32 @@ it('retires the Start action when eligibility is lost', async () => {
   await act(async () => tree!.update(view(false)));
   expect(button('arrival.unlockStart')).toBeUndefined();
   await act(async () => start());
+  expect(onLaunch).not.toHaveBeenCalled();
+});
+
+it('replays the celebration in development with a single preview dismissal', async () => {
+  const { ArrivalUnlockPreview } = await import('./arrival-unlock');
+  const { i18n, find, button, claimUnlock, onLaunch } = await setup();
+  const view = () => <I18nextProvider i18n={i18n}>{withHeroUI(<>
+    <ArrivalUnlockPreview destinationTitle="Synthetic destination" language="en" />
+    <PortalHost />
+  </>)}</I18nextProvider>;
+  await act(async () => { tree = create(view()); });
+  expect(find('arrival-unlock-preview')).toHaveLength(0);
+  vi.stubGlobal('__DEV__', true);
+  vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '0');
+  await act(async () => tree!.update(view()));
+  expect(find('arrival-unlock-preview')).toHaveLength(0);
+  vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
+  await act(async () => tree!.update(view()));
+  const open = () => tree!.root.findAllByType('button').find(node => node.props.testID === 'arrival-unlock-preview')!.props.onPress;
+  await act(async () => open()());
+  expect(find('arrival-unlock-medallion')).toHaveLength(1);
+  expect(button('arrival.unlockStart')).toBeUndefined();
+  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === 'Close preview')!.props.onPress());
+  expect(find('arrival-unlock-medallion')).toHaveLength(0);
+  await act(async () => open()());
+  expect(find('arrival-unlock-medallion')).toHaveLength(1);
+  expect(claimUnlock).not.toHaveBeenCalled();
   expect(onLaunch).not.toHaveBeenCalled();
 });

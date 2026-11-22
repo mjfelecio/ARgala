@@ -277,35 +277,32 @@ it('recognizes and removes a legacy Google alias on the featured destination pag
  expect(save).toHaveBeenCalledExactlyOnceWith({kind:'featured',id:'D01'},false,undefined,[alias]);
 });
 
-it('shows Lake Danao’s reviewed History with an explicit Figure 2 link and no bundled History image', async () => {
+it.each(['en', 'ja', 'ko'] as const)('shows inline Lake Danao History in %s without source links', async language => {
   const history = destinationHistory('D01', schoolPresentationHistoryScope)!;
+  controls.language = language;
+  await translations.changeLanguage(language);
   await mount();
-  expect(output()).not.toContain(history.entry.title.en);
-  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === exhibitVisitorCopy.en.history)!.props.onPress());
-  expect(output()).toContain(history.entry.title.en);
-  expect(output()).toContain(history.entry.text.en);
+  expect(output()).toContain(exhibitVisitorCopy[language].history);
+  expect(output()).toContain(history.summary[language]);
+  expect(output()).not.toContain(history.entry.text[language]);
+  expect(output()).not.toContain(exhibitVisitorCopy[language].historySources);
   expect(tree!.root.findAllByProps({ testID: 'history-visual' })).toHaveLength(0);
-  expect(nativeUi.openURL).not.toHaveBeenCalled();
-  const link = tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === exhibitVisitorCopy.en.historyFigure)!;
-  expect(link.props.accessibilityRole).toBe('link');
-  await act(async () => link.props.onPress());
-  expect(nativeUi.openURL).toHaveBeenCalledWith(history.visual.sourceUrl);
   expect(placesService.nearby).not.toHaveBeenCalled();
 });
 
-it('opens the 2019 festival image in contain mode and exposes its original license', async () => {
+it('keeps the festival photo credit, license and school-use scope in the photo viewer', async () => {
   const history = destinationHistory('D05', schoolPresentationHistoryScope)!;
   controls.params = { destinationId: 'D05' };
   controls.language = 'ko';
   await translations.changeLanguage('ko');
   await mount();
-  await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === exhibitVisitorCopy.ko.history)!.props.onPress());
-  expect(output()).toContain(history.entry.text.ko);
   expect(output()).toContain(history.caption.ko.value);
-  expect(output()).toContain(history.media!.credit);
+  expect(output()).not.toContain(history.media!.credit);
   expect(tree!.root.findAllByType('img').find(node => node.props.testID === 'history-visual')!.props.resizeMode).toBe('contain');
   await act(async () => tree!.root.findAllByType('button').find(node => node.props.testID === 'history-visual-open')!.props.onPress());
   expect(tree!.root.findAllByType('img').find(node => node.props.testID === `viewer-photo:${history.media!.id}`)!.props.resizeMode).toBe('contain');
+  expect(output()).toContain(history.media!.credit);
+  expect(output()).toContain(exhibitVisitorCopy.ko.historySchoolScope);
   await act(async () => tree!.root.findAllByType('button').find(node => node.props.accessibilityLabel === 'CC BY-SA 4.0')!.props.onPress());
   expect(nativeUi.openURL).toHaveBeenCalledWith(history.visual.licenseUrl);
 });

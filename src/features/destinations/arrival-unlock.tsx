@@ -7,6 +7,7 @@ import { ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { FadeIn, Keyframe, useReducedMotion } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { isViroSpikeEnabled } from '@/features/destination-ar/dev-guard';
 import type { Language } from '../../../supabase/functions/_shared/contracts';
 
 const medallionMs = 160;
@@ -57,7 +58,24 @@ function UnlockOffer({ destinationTitle, language, claimUnlock, onLaunch }: Unlo
   return <UnlockDialog destinationTitle={destinationTitle} onLaunch={onLaunch} onDismiss={() => setOpenFor(null)} />;
 }
 
-function UnlockDialog({ destinationTitle, onLaunch, onDismiss }: { destinationTitle: string; onLaunch(): void; onDismiss(): void }) {
+export function ArrivalUnlockPreview({ destinationTitle, language }: { destinationTitle: string; language: Language }) {
+  const [open, setOpen] = useState(false);
+  if (!__DEV__ || !isViroSpikeEnabled()) return null;
+  const copy = {
+    en: { action: 'Preview AR unlock celebration', dismiss: 'Close preview' },
+    ja: { action: 'AR解放のお祝い演出を試す', dismiss: 'プレビューを閉じる' },
+    ko: { action: 'AR 잠금 해제 축하 효과 미리 보기', dismiss: '미리 보기 닫기' },
+  }[language];
+  return <>
+    <Button testID="arrival-unlock-preview" variant="outline" className="h-auto min-h-12 w-full py-3"
+      accessibilityLabel={copy.action} onPress={() => setOpen(true)}>
+      <Button.Label className="shrink text-center">{copy.action}</Button.Label>
+    </Button>
+    {open && <UnlockDialog destinationTitle={destinationTitle} dismissLabel={copy.dismiss} onDismiss={() => setOpen(false)} />}
+  </>;
+}
+
+function UnlockDialog({ destinationTitle, onLaunch, onDismiss, dismissLabel }: { destinationTitle: string; onLaunch?(): void; onDismiss(): void; dismissLabel?: string }) {
   const { t } = useTranslation();
   const accent = useThemeColor('accent');
   const reducedMotion = useReducedMotion();
@@ -80,7 +98,7 @@ function UnlockDialog({ destinationTitle, onLaunch, onDismiss }: { destinationTi
     if (!active.current || (launch && !canStart)) return;
     active.current = false;
     onDismiss();
-    if (launch) onLaunch();
+    if (launch) onLaunch?.();
   }
   return <Dialog isOpen animation="disable-all" onOpenChange={open => { if (!open) close(); }}>
     <Dialog.Portal>
@@ -100,15 +118,15 @@ function UnlockDialog({ destinationTitle, onLaunch, onDismiss }: { destinationTi
             <Dialog.Title className="text-center font-sans text-title font-ui-bold text-brand-strong">{t('arrival.unlockTitle')}</Dialog.Title>
             <Text className="text-center font-sans text-base text-muted">{destinationTitle}</Text>
           </View>
-          <View className="min-h-12">
+          {onLaunch && <View className="min-h-12">
             {canStart && <Animated.View entering={reducedMotion ? undefined : FadeIn.duration(medallionMs)}>
               <Button accessibilityLabel={t('arrival.unlockStart')} onPress={() => close(true)}>
                 <Button.Label className="shrink text-center">{t('arrival.unlockStart')}</Button.Label>
               </Button>
             </Animated.View>}
-          </View>
-          <Button variant="ghost" accessibilityLabel={t('arrival.dismiss')} onPress={() => close()}>
-            <Button.Label className="shrink text-center">{t('arrival.dismiss')}</Button.Label>
+          </View>}
+          <Button variant="ghost" accessibilityLabel={dismissLabel ?? t('arrival.dismiss')} onPress={() => close()}>
+            <Button.Label className="shrink text-center">{dismissLabel ?? t('arrival.dismiss')}</Button.Label>
           </Button>
         </ScrollView>
       </Dialog.Content>

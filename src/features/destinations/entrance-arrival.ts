@@ -100,7 +100,7 @@ export class EntranceArrivalStore {
       }
     }
     const distance = distanceMeters(sample.position, source.target.point);
-    const within = distance + sample.accuracy <= ENTRANCE_ARRIVAL.radiusMeters;
+    const within = distance <= ENTRANCE_ARRIVAL.radiusMeters;
     const beyond = distance - sample.accuracy >= ENTRANCE_ARRIVAL.exitMeters;
     source.approachSince = within ? source.approachSince ?? sample.timestamp : null;
     source.exitSince = beyond ? source.exitSince ?? sample.timestamp : null;

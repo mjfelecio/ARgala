@@ -12,6 +12,8 @@ export function nearbySearchOrigin(sample: WatcherSample | null, status: string,
   return sample.position;
 }
 
+export type NearbyHeadingStatus = 'weak' | 'ready' | 'unavailable' | 'no-reading';
+
 type ScanScope = { location: Coordinate; language: NonNullable<NearbySearch['language']> };
 type ScanResult = Readonly<{ places: Place[]; receivedAt: number; elapsedAt: number; language: ScanScope['language'] }>;
 type ScanSnapshot = Readonly<{ result: ScanResult | null; busy: boolean; error: unknown; expired: boolean }>;

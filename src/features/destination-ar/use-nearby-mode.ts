@@ -58,7 +58,9 @@ export function useNearbyMode(running: boolean, requestAllowed: boolean, languag
     if (origin) void scan.scan({ location: origin, language: scope.language });
   }, [scan, scope]);
 
-  return { location, position, fix, state, result, cards, search };
+  const isResultCurrent = (value: NonNullable<typeof result>) =>
+    scan.getSnapshot().result === value && scan.remaining(value) > 0;
+  return { location, position, fix, state, result, cards, search, isResultCurrent };
 }
 
 export type NearbyMode = ReturnType<typeof useNearbyMode>;

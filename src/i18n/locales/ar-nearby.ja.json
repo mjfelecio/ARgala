@@ -13,7 +13,12 @@
   "empty": "周辺にスポットは見つかりませんでした。",
   "results": "検索結果を見る（{{count}}件）",
   "resultsTitle": "周辺スポット",
-  "headingUnavailable": "方角を取得できません。検索結果は一覧で確認できます。",
+  "headingUnavailable": "方位センサーを利用できません。検索結果は引き続き確認できます。",
   "showInCamera": "ARでカードを表示",
-  "distance": "約{{meters}} m先"
+  "distance": "約{{meters}} m先",
+  "headingWeak": "コンパスの信号が弱いため、カードを配置できません",
+  "trackingLost": "ARの追跡が途切れました。端末をゆっくり動かして復旧してください。",
+  "returnToAr": "ARに戻る",
+  "resultsExpired": "検索結果の有効期限が切れました。ARに戻って再検索してください。",
+  "headingNoReading": "コンパスの読み取りを待っています。検索結果は引き続き確認できます。"
 }

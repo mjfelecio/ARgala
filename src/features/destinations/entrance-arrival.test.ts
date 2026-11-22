@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { distanceMeters } from '@/features/location/geo';
 import { destinationSchema } from './catalog';
 import { EntranceArrivalStore, entranceTarget } from './entrance-arrival';
 import type { ArrivalInput } from './proximity';
@@ -10,7 +11,7 @@ const destination = destinationSchema.parse({
 });
 const target = entranceTarget(destination)!;
 const sample = (timestamp: number, meters = 0, accuracy: number | null = 5): ArrivalInput => ({
-  running: true, watcherStatus: 'ready', sample: { timestamp, accuracy, position: { latitude: meters / 111195, longitude: 0 } },
+  running: true, watcherStatus: 'ready', sample: { timestamp, accuracy, position: { latitude: meters / 6371008.8 * 180 / Math.PI, longitude: 0 } },
 });
 
 it('takes the cited directions entrance independently of center, geometry and the hidden pilot', () => {
@@ -20,7 +21,7 @@ it('takes the cited directions entrance independently of center, geometry and th
   expect(entranceTarget({ ...destination, id: 'pilot-aclc' })).toBeNull();
 });
 
-it('shows distance from a fresh watcher and requires two distinct conservative fixes before notifying', () => {
+it('shows distance from a fresh watcher and requires two distinct fixes before notifying', () => {
   const store = new EntranceArrivalStore();
   const lease = store.acquire(target, 10000);
   store.setEnabled(lease, true, 10000);
@@ -36,6 +37,20 @@ it('shows distance from a fresh watcher and requires two distinct conservative f
   publish(16000, 10);
   expect(store.getSnapshot()).toMatchObject({ status: 'reached', showNotice: true });
 });
+
+it.each([[19.99, true], [20, true], [20.01, false]])(
+  'evaluates the raw %s m distance with a fix reporting 50 m accuracy',
+  (meters, reached) => {
+    const store = new EntranceArrivalStore();
+    const lease = store.acquire(target, 10000);
+    store.setEnabled(lease, true, 10000);
+    const first = sample(10000, meters, 50);
+    expect(distanceMeters(point, first.sample!.position)).toBe(meters);
+    store.publish(lease, first, 10000);
+    store.publish(lease, sample(13000, meters, 50), 13000);
+    expect(store.getSnapshot()).toMatchObject({ distanceMeters: 20, showNotice: reached });
+  },
+);
 
 it('requires consent and deduplicates an approach across screen, selection, permission and lifecycle gaps', () => {
   const store = new EntranceArrivalStore();
@@ -91,7 +106,7 @@ it('expires stale evidence and rejects invalid or implausible watcher fixes', ()
   publish(13000, 0);
   expect(store.getSnapshot()).toMatchObject({ distanceMeters: null, status: 'uncertain' });
   publish(16000, 0, null);
-  publish(19000, 0, 26);
+  publish(19000, 0, 51);
   expect(store.getSnapshot()).toMatchObject({ distanceMeters: null, status: 'uncertain' });
   publish(22000, 0);
   publish(25000, 0);

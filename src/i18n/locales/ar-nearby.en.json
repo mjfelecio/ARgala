@@ -13,7 +13,12 @@
   "empty": "No places turned up nearby.",
   "results": "View results ({{count}})",
   "resultsTitle": "Nearby places",
-  "headingUnavailable": "Direction is unavailable. You can still view the results.",
+  "headingUnavailable": "Heading hardware is unavailable. You can still view results.",
   "showInCamera": "Show card in AR",
-  "distance": "{{meters}} m away"
+  "distance": "{{meters}} m away",
+  "headingWeak": "Compass signal is too weak to place cards",
+  "trackingLost": "AR tracking was lost. Move your phone slowly to restore it.",
+  "returnToAr": "Return to AR",
+  "resultsExpired": "These results have expired. Return to AR to scan again.",
+  "headingNoReading": "No compass reading yet. You can still view results."
 }

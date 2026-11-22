@@ -7,6 +7,7 @@ import { Image, Modal, ScrollView, Text, View, useWindowDimensions } from 'react
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { withUniwind } from 'uniwind';
+import { useOpenProviderLink } from '@/features/map/attributions';
 import { useSettings } from '@/features/settings/provider';
 import { localizedContent, type DestinationMedia } from './catalog';
 
@@ -14,12 +15,14 @@ const StyledImage = withUniwind(Image);
 const StyledSafeAreaView = withUniwind(SafeAreaView);
 
 /** Session-only photo browsing. It owns no chapter, Passport or admission state. */
-export function DestinationPhotoViewer({ media, initialId, onClose }: {
+export function DestinationPhotoViewer({ media, initialId, onClose, creditDetails }: {
   media: readonly DestinationMedia[];
   initialId: string;
   onClose(): void;
+  creditDetails?: { scope: string; locator: string; license?: { label: string; url: string } };
 }) {
   const { t } = useTranslation();
+  const openLink = useOpenProviderLink();
   const { language } = useSettings();
   const accent = useThemeColor('accent');
   const { width, height } = useWindowDimensions();
@@ -72,6 +75,14 @@ export function DestinationPhotoViewer({ media, initialId, onClose }: {
         {caption && <Text selectable className="font-sans text-base text-white">{caption.value}</Text>}
         {(caption?.englishFallback || alt?.englishFallback) && <Text className="font-sans text-xs text-white/80">{t('destinations.englishFallback')}</Text>}
         <Text selectable className="font-sans text-sm text-white/80">{selected.credit}</Text>
+        {creditDetails && <>
+          <Text selectable className="font-sans text-sm text-white/80">{creditDetails.locator}</Text>
+          <Text className="font-sans text-sm text-white/80">{creditDetails.scope}</Text>
+          {creditDetails.license && <Button variant="secondary" accessibilityRole="link" className="h-auto min-h-12 self-start py-3"
+            accessibilityLabel={creditDetails.license.label} onPress={() => openLink(creditDetails.license!.url)}>
+            <Button.Label className="shrink">{creditDetails.license.label}</Button.Label>
+          </Button>}
+        </>}
       </ScrollView>
       <View testID="destination-photo-controls" className="flex-row items-center justify-between gap-3 px-4 py-3">
         <Button isIconOnly variant="secondary" isDisabled={index === 0} accessibilityLabel={t('destinationCleanup.previousPhoto')} onPress={() => move(-1)}>

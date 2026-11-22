@@ -40,8 +40,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
   const visitorCopy = exhibitVisitorLocale(locale);
   const chapter = chapterPresentation(content, locale, key => t(key), key => i18n.exists(key));
   const isSourcedHistory = content.hasHistorySources === true;
-  const sourcesHint = chapter.media.length ? visitorCopy.historySourcesHint : visitorCopy.historyFigureHint;
-  const body = isSourcedHistory ? `${chapter.body}\n\n${sourcesHint}` : chapter.body;
+  const body = isSourcedHistory && chapter.media.length ? `${chapter.body}\n\n${visitorCopy.historySourcesHint}` : chapter.body;
   const layout = useCallback((size: ReadingSize) => {
     let pages;
     try { pages = paginate(body, size, chapter.title); }

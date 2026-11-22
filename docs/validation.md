@@ -3954,3 +3954,47 @@ rebuilt preview; it cannot repair a1.0.0 installation by OTA alone. Preview buil
 now increment the Android build number. Native preview installation and physical
 compositor/footer/Help/capture acceptance are pending at this record's creation.
 No production update, store submission, provider request or reminder change.
+
+## Destination review refinements — 2026-11-22
+
+The Directions entrance alert uses two fresh foreground fixes at least three
+seconds apart, each with a raw distance of at most 20 m and reported accuracy
+of at most 50 m. The display distance rounds independently. Consent, conservative
+65 m exit confirmation and per-approach deduplication still belong to the entrance
+alert. Polygon unlock and background reminders retain their existing owners.
+Boundary tests cover 19.99, 20 and 20.01 m, an accuracy above the ceiling, stale
+and implausible fixes, and exit/re-entry. EN/JA/KO screen tests cover the entrance
+card, consent and notice on Explore and Directions and exercise the distinction
+between a confirmed entrance and an ineligible polygon.
+
+Destination pages use one localized History paragraph per destination and retain
+matching bundled visuals and captions. The viewer carries credit, licence where
+supplied and school-use details. The full research handoff still records the
+sources, including Lake Danao's unbundled figure. Both development guards protect
+the celebration preview. Its shared dialog has one preview close action and
+never calls the verified unlock or launch handlers.
+
+Nearby results keep the original two-minute deadline. The results page suspends
+the AR session and camera, GPS and heading ownership. Closing uses the existing
+session recovery path and directional cards wait for fresh alignment. Opening and
+closing do not submit another scan. Google Maps and supplied provider credits
+are shown on the results page. The owner-selected omission on the camera view
+differs from the published [Places attribution policy](https://developers.google.com/maps/documentation/places/web-service/policies?hl=en).
+
+TypeScript, zero-warning lint and all **1,789 tests in 155 files** passed with
+`npm run check`. The release-mode Android Hermes export with the preview flag
+enabled contains the Nearby results screen and excludes the celebration preview
+button identifier and its action text. `git diff --check` passed.
+
+Galaxy A53 review used the existing 1.0.2 development APK (version code 2) over
+USB Metro, at the original 420 dpi and 110% font scale and temporarily at 480 dpi
+(360 dp wide), 150% font scale and disabled system animations. Checked
+inline History in English, Japanese and Korean, the festival photo viewer,
+the entrance card and celebration preview in Explore and Directions, Android
+Back, the live AR selector, weak compass copy, native camera release and
+reconnect using Android camera-service state, and the expired results screen.
+The original scan was retained after Back, and no new scan was required to
+reopen it. A moving status line shifted the first action on device. The final
+ordering places status above the actions. The original English, density, font
+scale and animation settings were restored. Field acceptance remains open
+for a real entrance notification and a separate polygon unlock.

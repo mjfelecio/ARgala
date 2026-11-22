@@ -2,6 +2,7 @@ import historyReview from '../../../docs/content/final-handoff-2026-11-19/histor
 import historyImages from '../../../docs/content/final-handoff-2026-11-19/history-images.json';
 import sources from '../../../docs/content/final-handoff-2026-11-19/sources.json';
 import { historyVisualTranslations } from '@/i18n/locales/ar-history-visuals';
+import { destinationHistorySummaries } from '@/i18n/locales/destination-history';
 import type { DestinationMedia } from './catalog';
 
 export const schoolPresentationHistoryScope = 'offline-school-presentation';
@@ -52,7 +53,8 @@ const histories = new Map(historyReview.entries.map(entry => {
     if (!source) throw new Error(`Missing History citation ${id}`);
     return source;
   });
-  return [entry.destinationId, { entry, visual, caption, creativeCommons, media, citations }];
+  const summary = destinationHistorySummaries[entry.destinationId as keyof typeof destinationHistorySummaries];
+  return [entry.destinationId, { entry, summary, visual, caption, creativeCommons, media, citations }];
 }));
 
 /** The supplied history review and visual manifest have no public release approval. */

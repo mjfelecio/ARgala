@@ -598,14 +598,19 @@ it.each([
   };
   await act(async () => { tree = create(view()); });
   await sample();
-  expect(output()).toContain(translations.t('arrival.entranceDistance', { meters: 0 }));
-  expect(output()).toContain(translations.t('arrival.entranceStatus.checking'));
+  const card = tree!.root.findByProps({ testID: 'entrance-arrival-guidance' });
+  expect(card.findAllByType('text').map(node => node.props.children)).toEqual(expect.arrayContaining([
+    translations.t('arrival.entranceTitle'), translations.t('arrival.entranceStatus.checking'),
+  ]));
+  expect(button('arrival.entranceEnable')?.props.className).toContain('w-full');
   await sample();
   expect(output()).not.toContain(translations.t('arrival.entranceReached'));
   expect(translations.exists('arrival.entranceReached', { lng: language, fallbackLng: false })).toBe(true);
   await press('arrival.entranceEnable');
   expect(tree!.root.findByProps({ testID: 'entrance-arrival-banner' })).toBeDefined();
-  expect(output()).toContain(translations.t('arrival.entranceReached'));
+  const notice = tree!.root.findByProps({ testID: 'entrance-arrival-notice' });
+  expect(notice.findAllByType('text').some(node =>
+    node.props.accessibilityRole === 'header' && node.props.children === translations.t('arrival.entranceReached'))).toBe(true);
   expect(output()).toContain(translations.t('arrival.entranceGuide'));
   expect(button('arrival.unlockStart')).toBeUndefined();
   expect(admission.getSnapshot()?.eligible).toBe(false);

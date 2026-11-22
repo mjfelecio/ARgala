@@ -26,7 +26,7 @@ import { isViroSpikeEnabled } from '@/features/destination-ar/dev-guard';
 import { ArrivalInvitation } from '@/features/destinations/arrival-invitation';
 import { useEntranceArrival } from '@/features/destinations/entrance-arrival-context';
 import { EntranceArrivalBanner, EntranceArrivalGuidance } from '@/features/destinations/entrance-arrival-guidance';
-import { ArrivalUnlock } from '@/features/destinations/arrival-unlock';
+import { ArrivalUnlock, ArrivalUnlockPreview } from '@/features/destinations/arrival-unlock';
 import { DISCOVERY } from '@/config/limits';
 import { createRoutePreviewIntent } from '@/features/directions/route-preview-intent';
 import { distanceMeters, isCoordinate, type Coordinate } from '@/features/location/geo';
@@ -324,7 +324,16 @@ function MapContent({ position, locationReady, accuracy, locationStatus, locatio
       featured={!!featured} canRequest={mapEnabled && !!place && (!featured || !!destinationToRoutePlace(featured))} canLoadDetails={mapEnabled} resultCount={nearby.data?.length ?? 0} errorKey={error ? edgeErrorMessageKey(error) : undefined}
       detailsLoaded={!!complete || !!featured} detailsLoading={details.isFetching} mapLoading={!mapReady}
       locationStatus={locationStatus}
-      extraStatus={<>{savedMarkers.truncated && <Text className="font-sans text-xs text-muted">{t('exploreCleanup.zoomSaved')}</Text>}<EntranceArrivalGuidance destination={featured} language={language} arrival={entranceArrival} />{featured && <ArrivalInvitation state={arrivalState} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} keepInline={onsite} onLaunch={admission && (onsite || isViroSpikeEnabled()) ? launchAr : undefined} onDismiss={arrival.dismiss} />}{featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}{accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}</>}
+      extraStatus={<>
+        {savedMarkers.truncated && <Text className="font-sans text-xs text-muted">{t('exploreCleanup.zoomSaved')}</Text>}
+        <EntranceArrivalGuidance destination={featured} language={language} arrival={entranceArrival} />
+        {featured && <ArrivalInvitation state={arrivalState} chapterCount={chapterCount} contentReady={contentReady} draft={draftAr} keepInline={onsite}
+          onLaunch={admission && (onsite || isViroSpikeEnabled()) ? launchAr : undefined} onDismiss={arrival.dismiss} />}
+        {__DEV__ && isViroSpikeEnabled() && active && focused && featured && <ArrivalUnlockPreview key={JSON.stringify([principalId, featured.id])}
+          destinationTitle={destinationName(featured, language)} language={language} />}
+        {featured && admission && isViroSpikeEnabled() && (contentReady || featured.id === 'pilot-aclc') && <Button variant="outline" accessibilityLabel={t('arrival.simulate')} onPress={() => void simulateArrival()}><Button.Label>{t('arrival.simulate')}</Button.Label></Button>}
+        {accuracy !== null && accuracy > activationRadiusMeters && <Notice>{t('location.approximate', { meters: Math.round(accuracy) })}</Notice>}
+      </>}
       selectionMedia={featured?.media?.length ? <DaytimeGallery media={featured.media} variant="sheet" /> : undefined}
       selectionSummary={featured ? featured.copy?.[language]?.overview?.value ?? t('arrival.teaser') : place && locationReady ? t('exploreCleanup.distance', { meters: Math.round(distanceMeters(position, place.coordinates)) }) : undefined}
       onViewDetails={featured ? () => { if (canInteract()) router.navigate({ pathname: '/destinations/[destinationId]', params: { destinationId: featured.id } }); } : undefined}
