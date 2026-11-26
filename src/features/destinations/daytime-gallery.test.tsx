@@ -1,11 +1,11 @@
-import { withHeroUI } from '@/test/native-ui';
+import { nativeUi, withHeroUI } from '@/test/native-ui';
 import * as React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { createInstance, type i18n } from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
-import { destinationSchema, listDestinations, localizedContent, type DestinationMedia } from './catalog';
+import { destinationSchema, getDestination, listDestinations, localizedContent, type DestinationMedia } from './catalog';
 import { DaytimeGallery } from './daytime-gallery';
 import { ScrollView as GestureScrollView } from 'react-native-gesture-handler';
 const controls = vi.hoisted(() => ({ language: 'en' as 'en' | 'ko' | 'ja' }));
@@ -45,14 +45,15 @@ it('shows only photographs in the horizontal strip, with captions and required c
  expect(tree!.root.findAllByType('img')).toHaveLength(2);
  expect(visibleText()).toContain(translations.t('destinationCleanup.photoCount', { count: 2 }));
 });
-it('opens every one of the 54 bundled photographs in original order and retains the strip owner after Android Back', async () => {
+it('opens all 63 bundled visuals in gallery order and retains the strip owner after Android Back', async () => {
  let count = 0;
  for (const destination of listDestinations()) {
   await act(async () => { if (tree) tree.update(render(destination.media)); else tree = create(render(destination.media)); });
   const strip = tree!.root.findByProps({ testID: 'destination-photo-strip' });
   expect(strip.props.horizontal).toBe(true);
   expect(strip.findAllByType('img').map(node => node.props.source)).toEqual(destination.media!.map(item => item.source));
-  expect(visibleText()).toContain(translations.t('destinationCleanup.photoCount', { count: destination.media!.length }));
+  const countKey = destination.id === 'D10' ? 'destinations.imageCount' : 'destinationCleanup.photoCount';
+  expect(visibleText()).toContain(translations.t(countKey, { count: destination.media!.length }));
   for (const item of destination.media!) {
    await act(async () => photoButton(item.alt.en.value).props.onPress());
    expect(tree!.root.findByProps({ testID: `viewer-photo:${item.id}` }).props.resizeMode).toBe('contain');
@@ -65,7 +66,24 @@ it('opens every one of the 54 bundled photographs in original order and retains 
    count++;
   }
  }
- expect(count).toBe(54);
+ expect(count).toBe(63);
+});
+it.each(['en', 'ja', 'ko'] as const)('shows the school record in %s with its full image and explicit source link', async language => {
+ controls.language = language;
+ await translations.changeLanguage(language);
+ const media = getDestination('D10')!.media!;
+ const record = media.find(item => item.id === 'D10-stem-congress-2026')!;
+ nativeUi.openURL.mockReset().mockResolvedValue(undefined);
+ await act(async () => { tree = create(render(media)); });
+ expect(visibleText()).toContain(translations.t('destinations.campusGallery'));
+ const entrance = photoButton(record.alt[language]!.value);
+ expect(entrance.findByType('img').props.resizeMode).toBe('contain');
+ expect(nativeUi.openURL).not.toHaveBeenCalled();
+ await act(async () => entrance.props.onPress());
+ expect(visibleText()).toContain(record.caption![language]!.value);
+ expect(button('destinations.nextImage').props.disabled).toBe(true);
+ await act(async () => button('destinations.openImageSource').props.onPress());
+ expect(nativeUi.openURL).toHaveBeenCalledWith(record.rightsReference);
 });
 it('pages from the selected photo with previous, next and swipe, keeping long captions above bottom safe-area controls', async () => {
  await act(async () => { tree = create(render([photo, second])); });

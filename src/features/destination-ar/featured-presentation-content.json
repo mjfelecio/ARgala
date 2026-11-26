@@ -1309,14 +1309,14 @@
         "ko": "오르모크 ACLC 칼리지"
       },
       "tagline": {
-        "en": "A campus of learning, skills and ambition",
-        "ja": "学びと技能、挑戦が育つキャンパス",
-        "ko": "배움과 기술, 도전이 자라는 캠퍼스"
+        "en": "From Lilia Avenue to the city’s welcome team",
+        "ja": "リリア通りから、まちの案内役へ",
+        "ko": "릴리아 애비뉴에서 도시의 안내자로"
       },
       "summary": {
-        "en": "Discover a living educational landmark on Lilia Avenue, where Ormoc students develop academic, technical and professional skills. This is an active private campus: visits beyond public areas require school permission.",
-        "ja": "リリア通りにある、学びが今も続く教育のランドマーク。オルモックの学生たちが学問、技術、職業に関わる力を育んでいます。私立学校として運営中のため、一般に開放されていない場所への訪問には学校の許可が必要です。",
-        "ko": "릴리아 애비뉴에서 오르모크 학생들이 학업과 기술, 직업 역량을 키우는 교육 현장을 만나 보세요. 현재 운영 중인 사립 캠퍼스이므로 공개 구역 밖을 방문하려면 학교의 허가가 필요합니다."
+        "en": "An orange tower carries the ACLC name above the trees on Lilia Avenue. This is the Ormoc school where student journalists practiced headline writing with visiting editors. Its students have also built award-winning software in Cebu and welcomed tourism officers from across the Philippines to their own city.",
+        "ja": "リリア通りの木立の向こうに、ACLCの名を掲げたオレンジ色の塔が見えます。ここオルモックの学生記者たちは、学外から来た編集者と見出しの書き方を学びました。セブで自作のソフトウェアが賞を受けたのも、フィリピン各地の観光担当者を地元で迎えたのも、この学校の学生たちです。",
+        "ko": "릴리아 애비뉴의 나무 너머로 주황색 탑에 걸린 ACLC 간판이 보입니다. 이곳 오르모크의 학생 기자들은 학교를 찾아온 편집자들과 기사 제목 쓰기를 연습했습니다. 세부에서 직접 만든 소프트웨어로 상을 받은 학생들도, 필리핀 각지의 관광 담당자들을 오르모크에서 맞이한 학생들도 이 학교에서 공부했습니다."
       },
       "location": {
         "center": null,
@@ -1329,66 +1329,42 @@
       "requiresGuide": false,
       "visitorGuide": {
         "en": {
-          "arrival": "Navigate to ACLC College of Ormoc on Lilia Avenue in Barangay Cogon. Use the school's designated visitor entrance and ask the guard or reception before proceeding. The entrance-arrival reminder is separate from the nearby approved AR polygon.",
-          "bestTime": "Come during a school-approved visiting period, preferably in daylight. Contact the school before traveling: academic calendars, examinations, holidays and campus access may change. Do not assume public-tour hours.",
+          "arrival": "The campus is on Lilia Avenue in Barangay Cogon, Ormoc City, Leyte.",
+          "bestTime": "Message the college’s official Facebook page before setting out to check visitor access and that day’s hours.",
           "activities": [
-            "Observe the campus exterior respectfully from an authorized public area.",
-            "Ask the admissions office about programs and school life if staff are available and approve the visit.",
-            "Attend a campus event or guided visit only when formally open to visitors.",
-            "Explore the ARgala history exhibit from its independently approved AR activation area, without entering restricted school spaces."
+            "From the public side of Lilia Avenue, look through the front fence for the orange tower and the white ACLC lettering."
           ],
           "preparation": [
-            "Confirm the reason for your visit and any appointment or visitor-registration requirement with the school.",
-            "Bring identification if the school requests it, and follow dress and conduct requirements.",
-            "Keep your phone charged, respect lessons and privacy, and allow time for traffic around Lilia Avenue."
+            "Ask staff at the gate before entering or taking photographs on campus."
           ],
           "safety": [
-            "This is an operating school, not an unrestricted tourist attraction. Do not cross a gate, enter classrooms or access staff areas without authorization.",
-            "Never photograph or record students, children, staff or school documents without appropriate consent and permission.",
-            "Stop walking before using AR. Stay out of vehicle lanes, driveways and emergency routes; obey guards, signs and staff instructions.",
-            "A geofence AR unlock is not permission to enter school property."
+            "Step clear of the driveway and stop walking before opening the AR view."
           ]
         },
         "ja": {
-          "arrival": "オルモック市コゴン地区のリリア通りにあるACLCカレッジを目指してください。学校が指定する来訪者入口を使い、先へ進む前に警備員または受付に確認してください。入口到着の通知と、別に承認されたAR起動区域は異なります。",
-          "bestTime": "学校が訪問を許可している時間帯、できれば明るい時間に訪れてください。授業日程、試験、休校日、立ち入り条件は変わるため、出発前に学校へ確認してください。一般向け見学時間があるとは限りません。",
+          "arrival": "キャンパスはレイテ州オルモック市コゴン地区のリリア通りにあります。",
+          "bestTime": "見学できる時間や入構の可否は、出発前に学校の公式Facebookページでお問い合わせください。",
           "activities": [
-            "許可された公共の場所からキャンパスの外観を静かに見学する。",
-            "担当者が対応でき、訪問が許可された場合に限り、入学担当窓口で学科や学校生活について尋ねる。",
-            "一般来訪者向けに正式に公開された行事や案内付き見学に参加する。",
-            "立ち入り禁止区域へ入らず、独立して承認されたAR起動区域からARgalaの歴史展示を見る。"
+            "リリア通りの公道側から正面の柵越しに、オレンジ色の塔と白い「ACLC」の文字が見えます。"
           ],
           "preparation": [
-            "訪問目的と、予約や来訪者登録が必要かどうかを学校に確認してください。",
-            "求められる場合は身分証を用意し、服装や行動の規則に従ってください。",
-            "携帯電話を充電し、授業とプライバシーを尊重し、リリア通りの交通状況にも余裕を持ってください。"
+            "構内に入るときや校内で撮影するときは、門の職員にお尋ねください。"
           ],
           "safety": [
-            "ここは運営中の学校であり、自由に入れる観光施設ではありません。許可なく門を越えたり、教室や職員用区域へ入ったりしないでください。",
-            "適切な同意と許可なく、学生、子ども、職員、学校の書類を撮影・録音しないでください。",
-            "ARを使う前に立ち止まってください。車道、出入口、緊急車両の通路をふさがず、警備員、標識、職員の指示に従ってください。",
-            "AR起動区域に入っても、学校敷地への立ち入り許可にはなりません。"
+            "車の出入口を避け、立ち止まってからARを開いてください。"
           ]
         },
         "ko": {
-          "arrival": "오르모크시 코곤 바랑가이의 릴리아 애비뉴에 있는 ACLC 칼리지로 이동하세요. 학교에서 지정한 방문객 출입구를 이용하고 더 들어가기 전에 경비원이나 안내 데스크에 확인하세요. 입구 도착 알림과 별도로 승인된 AR 활성화 구역은 서로 다릅니다.",
-          "bestTime": "학교가 방문을 허용한 시간, 가능하면 낮에 방문하세요. 학사 일정과 시험, 휴교일, 출입 규정은 바뀔 수 있으므로 출발 전에 학교에 문의하세요. 일반인 대상 캠퍼스 투어 시간이 있다고 가정하지 마세요.",
+          "arrival": "캠퍼스는 레이테주 오르모크시 코곤 바랑가이의 릴리아 애비뉴에 있습니다.",
+          "bestTime": "방문 전 학교 공식 페이스북 페이지로 그날의 방문 가능 여부와 시간을 문의하세요.",
           "activities": [
-            "허용된 공공장소에서 캠퍼스 외관을 조용히 살펴보세요.",
-            "담당자가 응대할 수 있고 방문이 승인된 경우 입학처에 학과와 학교생활을 문의하세요.",
-            "방문객에게 공식적으로 개방된 행사나 안내 방문에만 참여하세요.",
-            "학교 제한 구역에 들어가지 않고 별도로 승인된 AR 활성화 구역에서 ARgala 역사 전시를 감상하세요."
+            "릴리아 애비뉴의 공도에서 정문 울타리 너머를 바라보면 주황색 탑과 흰색 ACLC 글씨가 보입니다."
           ],
           "preparation": [
-            "방문 목적과 예약 또는 방문객 등록이 필요한지 학교에 확인하세요.",
-            "학교에서 요청하면 신분증을 준비하고 복장과 행동 수칙을 따르세요.",
-            "휴대전화를 충전하고 수업과 사생활을 존중하며 릴리아 애비뉴 주변 교통 상황을 고려하세요."
+            "교내에 들어가거나 안에서 사진을 찍기 전에는 정문 직원에게 먼저 문의하세요."
           ],
           "safety": [
-            "현재 운영 중인 학교이며 누구나 출입할 수 있는 관광지는 아닙니다. 허가 없이 교문을 지나거나 교실, 교직원 구역에 들어가지 마세요.",
-            "적절한 동의와 허가 없이 학생, 미성년자, 직원 또는 학교 문서를 촬영하거나 녹음하지 마세요.",
-            "AR을 사용하기 전 걸음을 멈추세요. 차도, 차량 출입구, 비상 통로를 피하고 경비원과 표지판, 교직원의 안내를 따르세요.",
-            "AR 활성화 구역에 들어갔다고 해서 교내 출입이 허가되는 것은 아닙니다."
+            "차량 출입구를 피해 잠시 멈춘 뒤 AR 화면을 여세요."
           ]
         }
       },
@@ -1396,52 +1372,63 @@
         {
           "id": "overview",
           "title": {
-            "en": "A working campus in Cogon",
-            "ja": "コゴン地区の学びの現場",
-            "ko": "코곤의 살아 있는 캠퍼스"
+            "en": "A newsroom for a day in Cogon",
+            "ja": "コゴンにやって来た一日編集部",
+            "ko": "코곤에 찾아온 하루 편집국"
           },
           "body": {
-            "en": "On Lilia Avenue in Barangay Cogon stands ACLC College of Ormoc, a private educational institution recognized in the Commission on Higher Education's regional directory. Its story belongs to Ormoc's everyday life: students come here to learn, prepare for careers and take part in a community of classmates and teachers. Rather than a museum with unrestricted galleries, this is an active school. The most respectful way to encounter it is to look at the campus from an authorized area, follow posted instructions and ask staff before entering. The ARgala exhibit brings the school's documented educational story to you without making school access a condition of discovery.",
-            "ja": "オルモック市コゴン地区のリリア通りに、ACLCカレッジがあります。フィリピン高等教育委員会の地域名簿にも掲載される私立の教育機関です。ここで学生は学び、仕事に備え、同級生や教員とともに学校生活を送っています。自由に展示室を巡れる博物館とは違い、現在も授業が行われる学校です。見学するときは許可された場所から外観を眺め、掲示に従い、敷地に入る前に職員へ確認しましょう。ARgalaの展示なら、学校への立ち入りを必要とせず、記録に基づいた教育の物語に触れられます。",
-            "ko": "오르모크시 코곤 바랑가이의 릴리아 애비뉴에는 ACLC 칼리지가 있습니다. 필리핀 고등교육위원회 지역 명부에 등재된 사립 교육기관입니다. 학생들은 이곳에서 배우고 진로를 준비하며 동료와 교사들과 학교생활을 이어 갑니다. 누구나 전시실을 돌아다니는 박물관이 아니라 지금도 수업이 진행되는 학교입니다. 방문할 때는 허용된 곳에서 외관을 살펴보고 안내문을 따르며 교내에 들어가기 전에 직원에게 문의하세요. ARgala에서는 학교 출입을 전제로 하지 않고 기록에 근거한 교육 이야기를 만날 수 있습니다."
+            "en": "How do you turn a story into a headline? On March 9, 2024, nine members of Amaranth, the student press at Visayas State University, brought that question to ACLC in Ormoc. More than 30 students from the school’s own publication, The Marquee, took part.\n\nThey split into groups for sessions that included headline writing, editorial cartooning and photojournalism. Then came the writing session. The visitors read the students’ work and gave them feedback.",
+            "ja": "記事の中身を、ひとつの見出しでどう伝えるか。2024年3月9日、ビサヤ州立大学の学生メディア「Amaranth」の9人が、オルモックのACLCを訪れました。迎えたのは、同校の学生新聞「The Marquee」で活動する30人を超える学生たちです。\n\n参加者はグループに分かれ、見出しの付け方や風刺漫画、報道写真などを学びました。そのあと自分たちで作品を仕上げ、訪れた学生記者から講評を受けました。",
+            "ko": "기사 한 편을 제목 한 줄에 어떻게 담을까요? 2024년 3월 9일, 비사야스 주립대학교 학생 언론사 ‘Amaranth’의 기자 9명이 오르모크 ACLC를 찾았습니다. 이 학교 학생 신문 ‘The Marquee’에서 활동하는 학생들이 30명 넘게 참여했습니다.\n\n참가자들은 조를 나눠 기사 제목 쓰기, 시사만평 그리기, 보도사진 찍기 등을 배웠습니다. 이어서 직접 작품을 완성하고 방문한 학생 기자들에게 의견을 들었습니다."
           },
-          "mediaIds": [
-            "D10-archive-2014"
-          ]
+          "mediaIds": []
         },
         {
           "id": "chapter-2",
           "title": {
-            "en": "From computer studies to many pathways",
-            "ja": "コンピューター教育から広がる進路",
-            "ko": "컴퓨터 교육에서 다양한 진로로"
+            "en": "Three programmers take ProofPass to Cebu",
+            "ja": "3人の学生がセブで披露した「ProofPass」",
+            "ko": "세부에서 선보인 세 학생의 ProofPass"
           },
           "body": {
-            "en": "ACLC is part of the AMA Education System, whose learning-center branch began with short computer courses in 1986. The Ormoc campus reflects the wider shift toward more varied education. A Department of Education record for school year 2024–2025 lists senior-high academic and technical-vocational specializations and older permits dating back to 2015. A national TESDA register also identifies three-year diploma recognition in web applications development and hotel-and-restaurant technology, alongside office-focused fields. These records show how practical digital skills can sit beside service and business training. Course availability changes, so a prospective student should ask the school about its present offerings rather than treating a historical list as today's prospectus.",
-            "ja": "ACLCはAMA教育システムの一員です。その学習センター部門は1986年に短期のコンピューター講座から始まりました。オルモック校でも、より多様な学びへの広がりが記録されています。教育省の2024〜2025年度資料には、高校上級課程の学術分野と職業技術分野が載り、2015年にさかのぼる許可も示されています。TESDAの全国名簿には、ウェブアプリ開発やホテル・レストラン技術の3年制ディプロマに加え、事務分野の認定記録もあります。こうした資料は、デジタル技術とサービス、ビジネス分野の学びが並ぶ歩みを伝えます。ただし開講状況は変わるため、最新情報は学校に確認してください。",
-            "ko": "ACLC는 AMA 교육 시스템에 속합니다. 이 학습센터 계열은 1986년 단기 컴퓨터 강좌에서 출발했습니다. 오르모크 캠퍼스의 기록에서도 교육 분야가 넓어지는 모습을 볼 수 있습니다. 교육부의 2024~2025학년도 자료에는 고등학교 상급 과정의 일반·기술직업 분야와 2015년까지 거슬러 올라가는 허가 기록이 나옵니다. TESDA의 전국 명부에는 웹 애플리케이션 개발, 호텔·레스토랑 기술의 3년제 디플로마와 사무 분야의 인정 기록도 실려 있습니다. 이는 디지털 기술과 서비스, 비즈니스 교육이 함께 발전해 온 흔적입니다. 개설 과정은 바뀔 수 있으므로 최신 정보는 학교에 확인하세요."
+            "en": "Three students from Ormoc built a software project they called ProofPass. At the Cash 3.0 hackathon in Cebu City on August 1–2, 2026, the challenge was to build an application using Bitcoin Cash and CashScript, a language for programming transactions.\n\nTwelve schools took part. The ACLC Ormoc team finished second overall, and the organizers gave ProofPass a separate award for Best CashTokens Project.",
+            "ja": "オルモックの学生3人が、自分たちのソフトウェアに付けた名前は「ProofPass」です。2026年8月1日と2日、セブ市の開発コンテスト「Cash 3.0」では、ビットコインキャッシュと、取引の条件を記述する言語CashScriptを使ってアプリを作る課題に挑みました。\n\n出場は12校。ACLCオルモック校は総合2位に入り、ProofPassはCashTokensを活用した最優秀作品にも選ばれました。",
+            "ko": "오르모크의 학생 세 명은 자신들이 만든 소프트웨어에 ‘ProofPass’라는 이름을 붙였습니다. 2026년 8월 1일부터 이틀간 세부시에서 열린 ‘Cash 3.0’ 해커톤의 과제는 비트코인 캐시와 거래 조건을 작성하는 언어인 CashScript로 앱을 만드는 것이었습니다.\n\n모두 12개 학교가 참여했습니다. ACLC 오르모크 팀은 종합 2위에 올랐고, ProofPass는 CashTokens를 활용한 최우수 프로젝트로도 선정됐습니다."
           },
-          "mediaIds": []
+          "mediaIds": [
+            "D10-proofpass"
+          ]
         },
         {
           "id": "chapter-3",
           "title": {
-            "en": "Skills beyond the classroom",
-            "ja": "教室の外で試される技能",
-            "ko": "교실 밖에서 펼치는 실력"
+            "en": "When Ormoc’s students became its guides",
+            "ja": "学生が地元オルモックを案内する日",
+            "ko": "오르모크를 안내한 학생들"
           },
           "body": {
-            "en": "Technical learning also has a public stage. In August 2023, the Philippine Information Agency reported ACLC Ormoc entrants in the Leyte Provincial Skills Competition, including IT Network Systems Administration and Web Technologies. The 2025 WorldSkills ASEAN Manila roster later listed an Ormoc-linked competitor, Nixon Marc Enerez, representing the Philippines in IT Network Systems Administration. These are records of participation, not proof of a medal or a permanent school ranking. They nevertheless make an inviting connection: skills practiced in classrooms and workshops can be tested before a wider community. When viewing this exhibit, think of the students currently working through problems, projects and aspirations on the campus nearby.",
-            "ja": "技術を学ぶ機会は教室の外にも広がっています。2023年8月、フィリピン情報局はレイテ州の技能競技会にACLCオルモック校の参加者がいたことを報じました。競技分野にはITネットワークシステム管理やウェブ技術が含まれます。2025年のWorldSkills ASEAN Manilaの名簿には、オルモック校とのつながりが報じられたニクソン・マーク・エネレスが、フィリピン代表のITネットワークシステム管理の出場者として掲載されています。これは参加の記録であり、メダル獲得や学校の順位を示すものではありません。それでも、授業や実習で磨いた力が、より広い場で試されることを教えてくれます。",
-            "ko": "기술을 배우는 무대는 교실 밖으로도 이어집니다. 2023년 8월 필리핀 정보국은 레이테 지방 기능경기대회에 ACLC 오르모크 학생들이 참가했다고 보도했습니다. 종목에는 IT 네트워크 시스템 관리와 웹 기술이 포함됐습니다. 2025년 WorldSkills ASEAN Manila 참가자 명단에는 오르모크 학교와의 연관성이 보도된 닉슨 마크 에네레스가 필리핀 IT 네트워크 시스템 관리 대표로 올라 있습니다. 이는 참가 기록일 뿐 메달 수상이나 학교 순위의 증거는 아닙니다. 하지만 수업과 실습에서 기른 능력이 더 넓은 무대에서 시험받을 수 있다는 점을 보여 줍니다. 전시를 보며 지금도 가까운 캠퍼스에서 과제와 꿈을 키우는 학생들을 떠올려 보세요."
+            "en": "In October 2026, some of the people showing visitors around Ormoc were still studying tourism and hospitality. From October 20 to 22, the city hosted the national convention of the Association of Tourism Officers of the Philippines.\n\nACLC students welcomed delegates, helped with their travel and served as tour guides. The college credits the Ormoc City Tourism Office and Lorraine Travel and Tours for giving students the chance to guide visitors in the city where they study.",
+            "ja": "2026年10月、オルモックで来訪者を案内したのは、観光やホスピタリティを学ぶ学生たちでした。10月20日から22日まで、市内ではフィリピンの自治体の観光担当者が集まる全国大会が開かれました。\n\nACLCの学生たちは参加者を出迎え、移動を手伝い、ガイドも務めました。学校によれば、普段学んでいるまちを自分たちで案内するこの機会をつくったのは、オルモック市観光局と旅行会社Lorraine Travel and Toursです。",
+            "ko": "2026년 10월, 오르모크를 찾은 손님들을 안내한 이들 가운데는 관광과 호텔 서비스를 공부하는 학생들이 있었습니다. 10월 20일부터 22일까지 필리핀 각지의 관광 담당자들이 전국 대회를 위해 이 도시에 모였습니다.\n\nACLC 학생들은 참가자들을 맞이하고 이동을 도왔으며 투어 가이드로도 나섰습니다. 학교는 학생들이 평소 공부하는 도시를 직접 안내할 기회를 마련해 준 오르모크시 관광사무소와 여행사 Lorraine Travel and Tours에 감사를 전했습니다."
           },
-          "mediaIds": []
+          "mediaIds": [
+            "D10-tourism-team"
+          ]
         }
       ],
       "gallery": [
-        "D10-archive-2014"
+        "D10-cover",
+        "D10-courtyard",
+        "D10-entrance",
+        "D10-ched-visit",
+        "D10-proofpass",
+        "D10-tourism-team",
+        "D10-leadership-summit",
+        "D10-school-seal",
+        "D10-archive-2014",
+        "D10-stem-congress-2026"
       ],
-      "coverMediaId": "D10-archive-2014"
+      "coverMediaId": "D10-cover"
     }
   ],
   "media": [
@@ -2508,26 +2495,217 @@
       "sha256": "6114a4aace05fb3ee42019564f97227958644d8c9be97c50c6b28ddd3a5962bf"
     },
     {
+      "id": "D10-cover",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-cover.jpg",
+      "credit": "Jess Edrian (Maps contributor)",
+      "sourceUrl": "https://www.google.com/maps/place/ACLC+College+of+Ormoc/@11.0228377,124.6043756,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgICfw6uoHA!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FANWiy9Rb0ymYU5JxaYYAvaFh0v33OSA682YCnyDIqDyYaUyIxWugviFusYZow9Hq3g3t_A0pDSGHwTt8JbgoHRt1womkkXedoyPKMlRq8l49JeZs3FYoSOOHiQmEt8sunTkKg0BRQmwL%3Dw203-h203-k-no!7i3024!8i3024!4m7!3m6!1s0x3307f17c4aa6e44f:0x72e5cf9be0c7cb2d!8m2!3d11.022973!4d124.6054992!10e5!16s%2Fg%2F11ncdw7mnk?entry=ttu&g_ep=EgoyMDI2MTExOC4xIKXMDSoASAFQAw%3D%3D",
+      "caption": {
+        "en": "Sunlight on the Cogon campus, March 2024.",
+        "ja": "陽光を受けるコゴンの校舎。2024年3月。",
+        "ko": "햇살이 비치는 코곤 캠퍼스. 2024년 3월."
+      },
+      "alt": {
+        "en": "Two multistory wings meet around a courtyard. Sunlight catches the white ACLC sign high on the orange tower.",
+        "ja": "中庭を囲むように2棟の校舎が並ぶ。オレンジ色の塔の上部にある白いACLCの文字に日が当たっている。",
+        "ko": "여러 층으로 된 두 건물이 안뜰을 둘러싸고 있다. 주황색 탑 위쪽의 흰색 ACLC 글씨에 햇빛이 닿는다."
+      },
+      "width": 1600,
+      "height": 900,
+      "sha256": "8d8d2e32ac7110b2c040496d5446b71ddd681a5dd5bd7699ddf429a35faf8f2a",
+      "usageScope": "Nonpublic offline school assignment only, per owner authorization; Maps contributor permission unconfirmed. Display crop of the courtyard photograph."
+    },
+    {
+      "id": "D10-courtyard",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-courtyard.jpg",
+      "credit": "Jess Edrian (Maps contributor)",
+      "sourceUrl": "https://www.google.com/maps/place/ACLC+College+of+Ormoc/@11.0228377,124.6043756,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgICfw6uoHA!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FANWiy9Rb0ymYU5JxaYYAvaFh0v33OSA682YCnyDIqDyYaUyIxWugviFusYZow9Hq3g3t_A0pDSGHwTt8JbgoHRt1womkkXedoyPKMlRq8l49JeZs3FYoSOOHiQmEt8sunTkKg0BRQmwL%3Dw203-h203-k-no!7i3024!8i3024!4m7!3m6!1s0x3307f17c4aa6e44f:0x72e5cf9be0c7cb2d!8m2!3d11.022973!4d124.6054992!10e5!16s%2Fg%2F11ncdw7mnk?entry=ttu&g_ep=EgoyMDI2MTExOC4xIKXMDSoASAFQAw%3D%3D",
+      "caption": {
+        "en": "Sunlight on the Cogon campus, March 2024.",
+        "ja": "陽光を受けるコゴンの校舎。2024年3月。",
+        "ko": "햇살이 비치는 코곤 캠퍼스. 2024년 3월."
+      },
+      "alt": {
+        "en": "Two multistory wings meet around a courtyard. Sunlight catches the white ACLC sign high on the orange tower.",
+        "ja": "中庭を囲むように2棟の校舎が並ぶ。オレンジ色の塔の上部にある白いACLCの文字に日が当たっている。",
+        "ko": "여러 층으로 된 두 건물이 안뜰을 둘러싸고 있다. 주황색 탑 위쪽의 흰색 ACLC 글씨에 햇빛이 닿는다."
+      },
+      "width": 2048,
+      "height": 2048,
+      "sha256": "e79cfbe6f87889d968dd4d429e6e5a256c1a4b977e3959379ed6ab24660ca5b1",
+      "usageScope": "Nonpublic offline school assignment only, per owner authorization; Maps contributor permission unconfirmed."
+    },
+    {
+      "id": "D10-entrance",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-entrance.jpg",
+      "credit": "keziah conquer mobile (Maps contributor)",
+      "sourceUrl": "https://www.google.com/maps/place/ACLC+College+of+Ormoc/@11.0228377,124.6043756,3a,75y,90t/data=!3m8!1e2!3m6!1sCIHM0ogKEICAgIDZgqWAWg!2e10!3e12!6shttps:%2F%2Flh3.googleusercontent.com%2Fgps-cs-s%2FANWiy9RgiYI-ErFbi_LMHCLM1u2OvLt82_PdlfDZWWmPLr1rrkgPdiciyok7d01PQoJ7LvT9X7d2Onz2_rrG9MoeAMj2gILZV1Ra6nOBYGB9BTnU7ZWBU-pGunMRFam4qn6ebXyddXU%3Dw203-h152-k-no!7i4080!8i3060!4m7!3m6!1s0x3307f17c4aa6e44f:0x72e5cf9be0c7cb2d!8m2!3d11.022973!4d124.6054992!10e5!16s%2Fg%2F11ncdw7mnk?entry=ttu&g_ep=EgoyMDI2MTExOC4xIKXMDSoASAFQAw%3D%3D",
+      "caption": {
+        "en": "The entrance on Lilia Avenue, September 2023.",
+        "ja": "リリア通りに面した出入口。2023年9月。",
+        "ko": "릴리아 애비뉴 쪽 출입구. 2023년 9월."
+      },
+      "alt": {
+        "en": "An open metal gate marked EXIT and a pedestrian-lane sign stand in front of parked motorcycles and the orange ACLC tower.",
+        "ja": "「EXIT」と書かれた金属の門が開いている。歩行者通路の案内板と駐車中のバイクの奥に、オレンジ色の校舎の塔が見える。",
+        "ko": "‘EXIT’ 표지가 달린 철문이 열려 있다. 보행로 안내판과 주차된 오토바이 뒤로 주황색 ACLC 탑이 보인다."
+      },
+      "width": 2048,
+      "height": 1536,
+      "sha256": "1a04370460a10f4ed30d0eeb45576f2f94b995a2f18213bc4a6e00412a364082",
+      "usageScope": "Nonpublic offline school assignment only, per owner authorization; Maps contributor permission and identifiable-person consent unconfirmed."
+    },
+    {
+      "id": "D10-ched-visit",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-ched-visit.webp",
+      "credit": "ACLC College of Ormoc, mirrored school post",
+      "sourceUrl": "https://img5.schoolandcollegelistings.com/740/939/1547371097409391.jpg",
+      "caption": {
+        "en": "The college prepared this display for a higher education monitoring visit in October 2026.",
+        "ja": "2026年10月、高等教育委員会の訪問に合わせて学校が用意した案内画面。",
+        "ko": "2026년 10월 고등교육위원회의 현장 방문을 맞아 학교가 준비한 안내 화면."
+      },
+      "alt": {
+        "en": "A blue screen between white flower arrangements lists four programs under review. Papers and water bottles sit on the tables in front.",
+        "ja": "白い花に挟まれた青い画面に、審査対象の4課程が並ぶ。手前のテーブルには書類と水のボトルが置かれている。",
+        "ko": "흰 꽃 장식 사이에 놓인 파란 화면에 심사 대상 네 과정이 적혀 있다. 앞쪽 탁자에 서류와 물병이 놓여 있다."
+      },
+      "width": 960,
+      "height": 720,
+      "sha256": "0b8c7b1d91656c44873663f3b15dd6ac3757ccd8714646e0d4a61590c64b518c",
+      "usageScope": "Nonpublic offline school assignment only, per owner report of staff permission; mirrored school post, original file unconfirmed."
+    },
+    {
+      "id": "D10-proofpass",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-proofpass.jpg",
+      "credit": "Technocrats, ACLC College of Ormoc",
+      "sourceUrl": "https://www.facebook.com/photo/?fbid=1036064155998856&set=a.111311681807446",
+      "caption": {
+        "en": "ACLC Ormoc’s team celebrates second place at the Cash 3.0 hackathon in Cebu, August 2026.",
+        "ja": "セブ市の開発コンテスト「Cash 3.0」で総合2位に入ったACLCオルモック校のチーム。2026年8月。",
+        "ko": "2026년 8월 세부시 ‘Cash 3.0’ 해커톤에서 종합 2위에 오른 ACLC 오르모크 팀."
+      },
+      "alt": {
+        "en": "A Technocrats collage shows team members holding certificates and a prize board marked “1st Runner-Up.”",
+        "ja": "学生団体Technocratsのコラージュ。チームのメンバーが賞状と「1st Runner-Up」と書かれた賞金パネルを手にしている。",
+        "ko": "학생 단체 Technocrats의 사진 모음. 팀원들이 상장과 ‘1st Runner-Up’이라고 적힌 상금 보드판을 들고 있다."
+      },
+      "width": 1201,
+      "height": 1236,
+      "sha256": "9167e0232514372e201f436288c61c24458ec16c7cbededd9ee08d32c7dbec17",
+      "usageScope": "Nonpublic offline school assignment only, per owner report of staff permission; component-photo and participant permissions unconfirmed."
+    },
+    {
+      "id": "D10-tourism-team",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-tourism-team.webp",
+      "credit": "ACLC College of Ormoc, mirrored school post",
+      "sourceUrl": "https://img3.schoolandcollegelistings.com/721/635/1549301417216359.jpg",
+      "caption": {
+        "en": "ACLC hospitality and tourism students at the national tourism officers’ convention in Ormoc, October 2026.",
+        "ja": "オルモックで開かれた観光担当者の全国大会に参加した、観光・ホスピタリティ専攻の学生たち。2026年10月。",
+        "ko": "2026년 10월 오르모크에서 열린 전국 관광 담당자 대회에 참여한 ACLC 관광·호텔서비스 전공 학생들."
+      },
+      "alt": {
+        "en": "Students in black suits and ties stand in a row in front of a white event banner bearing the Ormoc name.",
+        "ja": "黒いスーツにネクタイ姿の学生たちが、オルモックの名が入った白い大会幕の前に並んでいる。",
+        "ko": "검은 정장에 넥타이를 맨 학생들이 오르모크 이름이 적힌 흰색 행사 현수막 앞에 나란히 서 있다."
+      },
+      "width": 960,
+      "height": 720,
+      "sha256": "8acd157843d3ed24d3f10da13efc885c6ffcd60c2ae322b739f5eae6f9f8a476",
+      "usageScope": "Nonpublic offline school assignment only, per owner report of staff permission; mirrored school post, photographer and participant permissions unconfirmed."
+    },
+    {
+      "id": "D10-leadership-summit",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-leadership-summit.jpg",
+      "credit": "Earl Josiah L. Jandoc / College Department Supreme Student Council",
+      "sourceUrl": "https://www.facebook.com/photo/?fbid=122326347716069873&set=pcb.122326351580069873",
+      "caption": {
+        "en": "Student leaders make paper chains at ACLC Ormoc’s leadership summit, October 2026.",
+        "ja": "2026年10月、ACLCオルモック校のリーダーシップ研修で紙の輪をつなぐ学生たち。",
+        "ko": "2026년 10월 ACLC 오르모크 리더십 행사에서 종이 고리를 잇는 학생들."
+      },
+      "alt": {
+        "en": "Long lines of colored paper stretch across the floor of a yellow-walled hall. Students stand along the sides and bend down to join the links.",
+        "ja": "黄色い壁の広い室内に、色紙の鎖が何本も長く伸びている。両側には学生が並び、かがんで輪をつなぐ姿も見える。",
+        "ko": "노란 벽 사이로 여러 줄의 색종이 사슬이 바닥에 길게 뻗어 있다. 양옆에 선 학생들 가운데 몇 명이 몸을 숙여 고리를 잇고 있다."
+      },
+      "width": 2048,
+      "height": 1156,
+      "sha256": "63bbeebf7b4dc8e35f2aade3ef57784074f9ff9bef9e764bcadfb7c22ac5bfa4",
+      "usageScope": "Nonpublic offline school assignment only, per owner report of staff permission; credited photographer and participant permissions unconfirmed."
+    },
+    {
       "id": "D10-archive-2014",
       "destinationId": "D10",
       "file": "assets/presentation/featured/D10-archive-2014.jpg",
       "credit": "Ormoc ACLC-associated school gallery (2014); individual photographer not identified; staff permission reported for this school-only project",
       "sourceUrl": "https://ormocaclc.wordpress.com/gallery/",
       "caption": {
-        "en": "A school graduation group pictured in Ormoc ACLC’s 2014 public gallery; archival school life, not a current campus portrait.",
-        "ja": "2014年に公開されたオルモックACLC関連の写真ギャラリーに掲載された卒業生の集合写真。現在の校舎を示す写真ではありません。",
-        "ko": "2014년 공개된 오르모크 ACLC 관련 사진 갤러리의 졸업 단체 사진입니다. 현재 캠퍼스 건물 사진은 아닙니다."
+        "en": "A graduation group in the Ormoc ACLC school archive, published in 2014.",
+        "ja": "オルモックACLCの学校アーカイブに2014年に掲載された卒業の集合写真。",
+        "ko": "2014년 오르모크 ACLC 학교 기록에 실린 졸업 단체 사진."
       },
       "alt": {
-        "en": "Archival photograph of a college graduation group on stage, with ACLC College signage behind them.",
-        "ja": "背後にACLC Collegeの表示がある舞台上で撮影された、過去の卒業生の集合写真。",
-        "ko": "뒤편에 ACLC College 표지가 있는 무대에서 촬영한 과거 졸업 단체 사진."
+        "en": "A graduation group poses on a stage with an ACLC College banner behind them.",
+        "ja": "ACLC Collegeの横断幕を背に、卒業の記念撮影で人々が舞台に並んでいる。",
+        "ko": "무대에 선 사람들이 뒤쪽의 ACLC College 현수막을 배경으로 졸업 기념사진을 찍고 있다."
       },
       "width": 612,
       "height": 612,
       "sha256": "ae7e7664587b316dc52eee28975f612edc240ec9d1dcc01f3fcc8d61db9229e9",
       "licenseUrl": "https://ormocaclc.wordpress.com/gallery/",
       "usageScope": "Nonpublic school demonstration only, per owner report of staff permission; photographer rights otherwise unverified"
+    },
+    {
+      "id": "D10-school-seal",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-school-seal.jpg",
+      "kind": "emblem",
+      "credit": "ACLC College of Ormoc · official Facebook page",
+      "sourceUrl": "https://www.facebook.com/aclccollegeoformoc",
+      "caption": {
+        "en": "The seal displayed on the official ACLC College of Ormoc page.",
+        "ja": "オルモックACLCカレッジの公式ページに掲載されている校章。",
+        "ko": "오르모크 ACLC 칼리지 공식 페이지에 게시된 학교 문장."
+      },
+      "alt": {
+        "en": "Circular ACLC College of Ormoc City seal in blue, white and red.",
+        "ja": "青、白、赤を使ったオルモックACLCカレッジの円形の校章。",
+        "ko": "파란색, 흰색, 빨간색으로 된 오르모크 ACLC 칼리지의 원형 문장."
+      },
+      "width": 720,
+      "height": 720,
+      "sha256": "5888f4cd44be30b0e1fabd4ab0ca660e40df72b621d34fc50652421027e03c51",
+      "usageScope": "Nonpublic school demonstration only."
+    },
+    {
+      "id": "D10-stem-congress-2026",
+      "destinationId": "D10",
+      "file": "assets/presentation/featured/D10-stem-congress-2026.png",
+      "kind": "document",
+      "credit": "DepEd Region VIII · Regional Memorandum No. 1471, s. 2026, Annex B (excerpt)",
+      "sourceUrl": "https://depedro8.azurewebsites.net/wp-content/uploads/2026/11/RM-No.-1471-2026-CLMD-EPF-111026.pdf#page=5",
+      "caption": {
+        "en": "The November 2026 regional science fair memorandum lists the ACLC Ormoc campus for individual and team STEM Congress sessions on December 14 and 15.",
+        "ja": "2026年11月の地域科学フェアの通知では、12月14日と15日のSTEMコングレスの個人・チーム部門の会場にオルモックACLCキャンパスが指定されています。",
+        "ko": "2026년 11월 지역 과학전 공문은 12월 14일과 15일 STEM 콩그레스 개인·팀 부문 개최 장소로 오르모크 ACLC 캠퍼스를 명시합니다."
+      },
+      "alt": {
+        "en": "Excerpt of the DepEd schedule listing ACLC Ormoc Campus as the STEM Congress venue.",
+        "ja": "STEMコングレスの会場にオルモックACLCキャンパスを記載した教育省の日程表の抜粋。",
+        "ko": "STEM 콩그레스 장소로 오르모크 ACLC 캠퍼스가 적힌 교육부 일정표 발췌."
+      },
+      "width": 796,
+      "height": 329,
+      "sha256": "fa7b8b6c8f72a8107183a4885e5c2e8880b08a5c9d247063cc1abe79d33632bb",
+      "usageScope": "Nonpublic school demonstration only."
     }
   ]
 }

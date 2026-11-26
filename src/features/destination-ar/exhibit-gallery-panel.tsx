@@ -32,6 +32,7 @@ export function ExhibitGalleryPanel({ profile, selection, previous, reading, ena
   canInteract?(): boolean;
 }) {
   const { t, i18n } = useTranslation(); const locale = i18n.resolvedLanguage ?? i18n.language;
+  const hasNonPhotoMedia = profile.media.some(item => item.kind);
   const { ref, moving, closing, animation, transform } = usePanelTransition(selection, enabled, onComplete, animationPrefix);
   const layout = useCallback((size: ReadingSize) => galleryPages([], profile.media, locale, size,
     credit => t('destinationRing.imageCredit', { credit }), t('destinations.englishFallback'), 'gallery', exhibitGalleryLayout.caption.height), [profile.media, locale, t]);
@@ -64,9 +65,9 @@ export function ExhibitGalleryPanel({ profile, selection, previous, reading, ena
   return <ViroNode ref={ref} key={selection.token} testID="ring-focused-panel" position={transform.position} rotation={transform.rotation}
     scale={[transform.scale, transform.scale, transform.scale]} opacity={enabled ? 1 : 0.35} animation={animation}>
     <ExhibitFrame variant="reader" width={ringMetrics.panelWidth + 0.025} height={ringMetrics.panelHeight + 0.025} decorations={false} />
-    <ArText testID="exhibit-gallery-heading" position={[-0.22, closing ? 0 : 0.55, 0.006]} width={0.65} height={0.08} text={t('presentation.galleryTitle')} style={style.text(4, 'left', '600')} />
+    <ArText testID="exhibit-gallery-heading" position={[-0.22, closing ? 0 : 0.55, 0.006]} width={0.65} height={0.08} text={t(hasNonPhotoMedia ? 'destinations.campusGallery' : 'presentation.galleryTitle')} style={style.text(4, 'left', '600')} />
     {!closing && <>
-      <ArText testID="exhibit-photo-position" position={[0.35, 0.55, 0.006]} width={0.4} height={0.08} text={t('presentation.photoPosition', { current: photoIndex + 1, total: profile.media.length })} style={style.text(3)} />
+      <ArText testID="exhibit-photo-position" position={[0.35, 0.55, 0.006]} width={0.4} height={0.08} text={t(hasNonPhotoMedia ? 'destinations.imagePosition' : 'presentation.photoPosition', { current: photoIndex + 1, total: profile.media.length })} style={style.text(3)} />
       <BundledGalleryPage key={page.media!.id} page={page} size={reading.size} style={style} enabled={interactive} layout={exhibitGalleryLayout} animationPrefix={animationPrefix} />
       {selection.phase === 'focused' && <>
         {metadataIndices.length > 1 && <ViroNode testID="exhibit-caption-toolbar" position={[0, exhibitGalleryLayout.metadataY, 0.012]}>

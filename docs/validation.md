@@ -4073,3 +4073,47 @@ All 450 padded layouts passed. At the largest size, combining any pair among
 When to visit, Things to do and Before you go exceeded the padded height in
 all 30 destination-language combinations. The five sections remain separate.
 `npm run check` passed all 1,836 tests after the padding change.
+
+## ACLC Ormoc campus gallery — 2026-11-22
+
+Featured Destinations and AR Showcase use the official college seal as the
+cover and include the 2014 graduation photograph and the November 2026 DepEd
+STEM Congress schedule excerpt. Tests exercise all three locales, caption and
+credit paging, explicit source links and the exact external Maps listing.
+The verified on-site route still receives the chapter media from the reviewed
+November 19 handoff. Baseline checks preserve the other nine destinations and
+all original History visuals.
+
+`npm run check` passed TypeScript, lint and all 1,840 tests in 156 files.
+The Android export contained byte-identical copies of all three D10 assets.
+The connected A53 had a release APK installed. The refreshed Android screens
+and Viro rendering were outside this device check.
+
+## ACLC school exhibit package — 2026-11-26
+
+The owner-supplied D10 school exhibit package replaced the Featured and
+Showcase copy in English, Japanese and Korean while retaining the chapter IDs
+`overview`, `chapter-2` and `chapter-3`. The D10 gallery now has ten entries:
+the Lilia Avenue cover, courtyard, entrance, CHED visit, ProofPass, tourism
+team, leadership summit, school seal, 2014 archive and the November 2026 STEM
+Congress excerpt. Chapter media bindings are `chapter-2` → ProofPass and
+`chapter-3` → tourism team; `overview` remains text-only. The courtyard and
+entrance originals are bundled as 2048-pixel display derivatives; the supplied
+originals remain outside the repository in the handoff package. Verified
+on-site AR still uses the reviewed 19 November chapters in
+`destination-D10.json`, and D10 continues to withhold in-app AR capture.
+
+History now reads *Two addresses in Ormoc* and cites the April 2015 CHED
+senior-high list, the school’s own Lopez Jaena spelling, the March 2022 TESDA
+diploma register and the May 2025 DepEd pilot memorandum (`H29`–`H32`). The
+2014 graduation archive keeps its original bytes, caption and credit. The short
+visit-guide panels and the D10 editorial anchors were rewritten for the new
+copy, and the five photo-island bay angles were checked against both the normal
+and twelve-chapter guide layouts.
+
+`npm run check` passed TypeScript, lint and all 1,840 tests in 156 files.
+`npm run export:android` completed, and all ten D10 assets were present in the
+export with byte-identical SHA-256 hashes. `git diff --check` reported no
+whitespace errors. No APK was built for this package; Android screen, native
+Viro text/image rendering, touch delivery and the new photo proportions remain
+device-unverified and require separate build approval.

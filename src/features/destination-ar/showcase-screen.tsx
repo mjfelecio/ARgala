@@ -76,14 +76,12 @@ function ShowcaseOwner({ principalId }: { principalId: string }) {
 function ShowcaseDestinationCard({ destinationId, name, stamped, onPress }: { destinationId: DestinationId; name: string; stamped: boolean; onPress(): void }) {
   const { t } = useTranslation(); const [failed, setFailed] = useState(false);
   const destination = getDestination(destinationId)!; const cover = destination.media?.find(photo => photo.id === destination.coverMediaId) ?? destination.media?.[0];
-  const archival = cover?.id === 'D10-archive-2014';
-  return <DestinationPhotoCard archival={archival} id={`showcase-${destinationId}`} source={cover?.source} failed={failed} onImageError={() => setFailed(true)}>
+  return <DestinationPhotoCard containImage={cover?.kind === 'emblem'} id={`showcase-${destinationId}`} source={cover?.source} failed={failed} onImageError={() => setFailed(true)}>
     <Pressable className="active:opacity-80" accessibilityRole="button" accessibilityLabel={name} accessibilityHint={t('arShowcase.openHint')} onPress={onPress}>
       <View className="min-h-56" />
       <View className="min-h-24 flex-row items-center gap-4 p-5">
         <View className="min-w-0 flex-1 gap-1">
           <Text className="font-sans text-section font-ui-semibold text-white">{name}</Text>
-          {archival && <Text className="font-sans text-xs text-white">{t('destinations.aclcArchiveLabel')}</Text>}
           {stamped && <Text className="font-sans text-sm text-white">{t('arShowcase.visited')}</Text>}
         </View>
         <Ionicons name={stamped ? 'checkmark-circle' : 'chevron-forward'} size={24} color="white" accessible={false} />
@@ -95,8 +93,7 @@ function ShowcasePreparation({ destinationId, stamped }: { destinationId: Destin
   const { t } = useTranslation(); const { language } = useSettings(); const [failed, setFailed] = useState(false);
   const destination = getDestination(destinationId)!; const cover = destination.media?.find(photo => photo.id === destination.coverMediaId) ?? destination.media?.[0];
   return <View className="gap-4">
-    {cover && !failed && <Photo source={cover.source} className="h-52 w-full rounded-card" resizeMode={destinationId === 'D10' ? 'contain' : 'cover'} accessible accessibilityLabel={localizedContent(cover.alt, language)?.value} onError={() => setFailed(true)} />}
-    {destinationId === 'D10' && cover && !failed && <Text className="font-sans text-sm text-foreground">{localizedContent(cover.caption, language)?.value}</Text>}
+    {cover && !failed && <Photo source={cover.source} className="h-52 w-full rounded-card" resizeMode={cover.kind === 'emblem' ? 'contain' : 'cover'} accessible accessibilityLabel={localizedContent(cover.alt, language)?.value} onError={() => setFailed(true)} />}
     {cover && <Text className="font-sans text-xs text-muted">{t('destinationRing.imageCredit', { credit: cover.credit })}</Text>}
     <View className="gap-2 rounded-card bg-mint p-4"><Text className="font-sans text-card font-ui-semibold text-brand-strong">{t('arShowcase.ready')}</Text><Text className="font-sans text-sm text-foreground">{t('arShowcase.readyHint')}</Text></View>
     {stamped && <Text className="font-sans text-sm text-muted">{t('arShowcase.visited')}</Text>}

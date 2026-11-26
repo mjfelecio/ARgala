@@ -75,8 +75,8 @@ export function withExhibitVisitorContent(destination: Destination, chapters: re
     hasHistorySources: true,
     ...(history.media && !history.creativeCommons ? { restrictCapture: true as const } : {}),
     approved: {
-      title: historyTranslations(history.entry.title),
-      body: historyTranslations(history.entry.text),
+      title: historyTranslations(history.entry.title, history.reference),
+      body: historyTranslations(history.entry.text, history.reference),
       presentation: 'story',
       media: history.media ? [history.media] : [],
     },

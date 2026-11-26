@@ -19,7 +19,7 @@ const destinationAngles: Readonly<Record<DestinationId, readonly number[]>> = Ob
   D05: Object.freeze([-100, 65, 165]), D06: Object.freeze([-85, 80, 175]),
   D07: Object.freeze([-100, 100]), D08: Object.freeze([-95, 70, 165]),
   D09: Object.freeze([-90, 80, 175]),
-  D10: Object.freeze([]),
+  D10: Object.freeze([-136, -72, 64, 128, 192]),
 });
 
 /** Immutable display configuration; never destination geography or progress. */
@@ -119,7 +119,7 @@ export function buildPhotoIslandSlots(profile: ExhibitStageProfile, entries: rea
   const chapters = entries.slice(gallery.length).filter(entry => entry.id !== EXHIBIT_HISTORY_ID && !isExhibitGuide(entry.id));
   if (!bays || entries.length < gallery.length || chapters.length > 12 || new Set(entries.map(entry => entry.id)).size !== entries.length
     || gallery.some((entry, index) => entries[index]?.id !== entry.id)) throw new Error('Invalid photo island entries');
-  const storyAngles = profile.destinationId === 'D10' ? [-96, 88, 168] : destinationAngles[profile.destinationId];
+  const storyAngles = profile.destinationId === 'D10' ? [88, 168, 248] : destinationAngles[profile.destinationId];
   // Preserve the accepted gallery and first story bays exactly. Additional
   // authorized chapters use a separate lower ring, clear of those controls.
   const overflowY = Math.min(photoIslandMetrics.storyY, ...bays.map((_, index) => photoIslandStoryY(profile, index)))

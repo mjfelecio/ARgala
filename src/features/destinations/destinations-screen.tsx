@@ -42,11 +42,10 @@ export default function DestinationsScreen() {
           <View className="min-w-0 flex-1 gap-1"><Text className="font-sans text-card font-ui-semibold text-brand-strong">{name}</Text></View>
           <Ionicons name="chevron-forward" size={20} color={accent} accessible={false} />
         </Button>;
-        const archival = cover.id === 'D10-archive-2014';
-        return <DestinationPhotoCard archival={archival} key={destination.id} id={`featured-${destination.id}`} testID={`featured-photo-card:${destination.id}`} source={cover.source}
+        return <DestinationPhotoCard containImage={cover.kind === 'emblem'} key={destination.id} id={`featured-${destination.id}`} testID={`featured-photo-card:${destination.id}`} source={cover.source}
           failed={failed.has(cover.id)} onImageError={() => setFailed(previous => new Set([...previous, cover.id]))}>
           <Pressable accessibilityRole="button" accessibilityLabel={name}
-            accessibilityHint={archival ? localizedContent(cover.caption, language)?.value : undefined} onPress={() => openDestination(destination.id)}
+            accessibilityHint={cover.kind === 'emblem' ? localizedContent(cover.caption, language)?.value : undefined} onPress={() => openDestination(destination.id)}
             className="justify-end active:opacity-80">
             <View className="min-h-56 items-center justify-center gap-2 p-4">
               {failed.has(cover.id) && <>
@@ -57,7 +56,6 @@ export default function DestinationsScreen() {
             <View className="min-h-24 flex-row items-center gap-4 p-5">
               <View className="min-w-0 flex-1 gap-1">
                 <Text className="font-sans text-section font-ui-semibold text-white">{name}</Text>
-                {archival && <Text className="font-sans text-xs text-white">{t('destinations.aclcArchiveLabel')}</Text>}
               </View>
               <Ionicons name="chevron-forward" size={24} color="white" accessible={false} />
             </View>

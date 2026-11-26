@@ -6,6 +6,7 @@ import { destinationIds, destinationName, getDestination, listDestinations, list
 import { destinationToRoutePlace } from './routing';
 import { arStoryReadiness } from './ar-content-readiness';
 import content from '../destination-ar/featured-presentation-content.json';
+import aclcHandoff from '../../../docs/content/final-handoff-2026-11-19/destination-D10.json';
 import { featuredStoryContent } from '../destination-ar/featured-story-content';
 
 it('keeps the approved nine destination records and 53 photo bindings exactly intact', () => {
@@ -14,8 +15,8 @@ it('keeps the approved nine destination records and 53 photo bindings exactly in
   expect(hash(content.media.slice(0, 53))).toBe('ccba46ac96f62c19534b9038180ca56a4bb0f0d425f92c452244f2aa0e46e4c5');
 });
 
-it('bundles 54 source photographs and 23 exact chapters for ten permanent destinations', () => {
-  expect(content.media).toHaveLength(54);
+it('bundles 63 visuals and 23 chapters for ten permanent destinations', () => {
+  expect(content.media).toHaveLength(63);
   expect(content.destinations.flatMap(item => item.chapters)).toHaveLength(23);
   for (const photo of content.media) {
     const bytes = readFileSync(fileURLToPath(new URL(`../../../${photo.file}`, import.meta.url)));
@@ -68,7 +69,7 @@ it('records separate location confirmations, guide requirements and preserves th
 });
 
 
-it('keeps permanent ACLC as D10 with its dated school-only cover and two distinct legacy coordinate references', () => {
+it('leads the D10 gallery with the Lilia Avenue cover while retaining its archive, seal and separate coordinates', () => {
   const permanent = getDestination('D10')!;
   const trial = getDestination('pilot-aclc')!;
   expect(listFeaturedDestinations().map(item => item.id)).toEqual(destinationIds);
@@ -76,10 +77,28 @@ it('keeps permanent ACLC as D10 with its dated school-only cover and two distinc
   expect(permanent.routeEntrance).toEqual(trial.routeEntrance);
   expect(permanent.routeEntrance).not.toEqual(permanent.center);
   expect(destinationToRoutePlace(permanent)?.coordinates).toEqual(trial.routeEntrance);
-  const cover = permanent.media?.[0];
-  expect(cover?.id).toBe('D10-archive-2014');
-  expect(cover?.usageScope).toContain('Nonpublic school demonstration only');
-  expect(cover?.caption?.en?.value).toContain('2014 public gallery');
-  expect(cover?.offlineRightsReference).toBeUndefined();
+  expect(permanent.coverMediaId).toBe('D10-cover');
+  expect(permanent.media!.map(item => item.id)).toEqual([
+    'D10-cover', 'D10-courtyard', 'D10-entrance', 'D10-ched-visit', 'D10-proofpass',
+    'D10-tourism-team', 'D10-leadership-summit', 'D10-school-seal', 'D10-archive-2014',
+    'D10-stem-congress-2026',
+  ]);
+  const cover = permanent.media![0];
+  expect(cover).toMatchObject({ id: 'D10-cover', credit: 'Jess Edrian (Maps contributor)' });
+  expect(cover.kind).toBeUndefined();
+  expect(cover.caption?.en?.value).toContain('March 2024');
+  const seal = permanent.media!.find(item => item.id === 'D10-school-seal')!;
+  expect(seal).toMatchObject({ kind: 'emblem', rightsReference: 'https://www.facebook.com/aclccollegeoformoc' });
+  const archive = permanent.media!.find(item => item.id === 'D10-archive-2014')!;
+  expect(archive.usageScope).toContain('Nonpublic school demonstration only');
+  expect(archive.caption?.en?.value).toContain('published in 2014');
+  const record = permanent.media!.find(item => item.id === 'D10-stem-congress-2026')!;
+  expect(record).toMatchObject({ kind: 'document' });
+  expect(record.caption?.en?.value).toContain('November 2026');
+  expect(featuredStoryContent('D10').map(chapter => chapter.approved?.media?.map(item => item.id))).toEqual([
+    [], ['D10-proofpass'], ['D10-tourism-team'],
+  ]);
+  expect(permanent.ar?.tiles.map(tile => tile.mediaIds)).toEqual(aclcHandoff.chapters.map(chapter => chapter.mediaIds));
+  expect(permanent.ar?.tiles.map(tile => tile.body.en?.value)).toEqual(aclcHandoff.chapters.map(chapter => chapter.body.en));
   expect(permanent.ar?.activation).toBeUndefined();
 });

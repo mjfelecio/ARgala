@@ -128,8 +128,17 @@ it('opens the permanent ACLC card in details without acquiring catalog GPS', asy
   await mount(<DestinationsScreen />);
   const card = tree!.root.findAllByType('button').find(b => b.props.accessibilityLabel === 'ACLC College of Ormoc');
   expect(card).toBeDefined();
+  const cover = tree!.root.findByProps({ testID: 'featured-photo-card:D10' }).findByType('img');
+  expect(cover.props).toMatchObject({ source: getDestination('D10')!.media![0].source, resizeMode: 'cover' });
   await act(async () => card!.props.onPress());
   expect(router.navigate).toHaveBeenCalledWith({ pathname: '/destinations/[destinationId]', params: { destinationId: 'D10' } });
+  expect(placesService.details).not.toHaveBeenCalled();
+});
+it('opens the exact ACLC listing, where visitors can browse its campus photos', async () => {
+  controls.params = { destinationId: 'D10' };
+  await mount();
+  await act(async () => button('destinationCleanup.openMaps')!.props.onPress());
+  expect(nativeUi.openURL).toHaveBeenCalledWith('https://www.google.com/maps/search/?api=1&query=ACLC%20College%20of%20Ormoc&query_place_id=ChIJT-SmSnzxBzMRLcvH4JvP5XI');
   expect(placesService.details).not.toHaveBeenCalled();
 });
 it.each(['en', 'ja', 'ko'])('puts %s destination choices before optional content maintenance', async locale => {

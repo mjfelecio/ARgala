@@ -46,8 +46,8 @@ export const destinationHistorySummaries = {
     ko: '호텔이 들어서기 전, 가족들은 살스 비치의 대나무와 니파야자 오두막에서 주말을 보냈습니다. 호텔 연혁에 따르면 사빈 A. 라라사발 시니어가 1990년에 호텔을 구상하기 시작했고, 2006년에 객실과 식사, 모임을 위한 건물 두 동이 추가됐습니다.',
   },
   D10: {
-    en: 'The AMA Computer Learning Center network traces its roots to short computer courses offered in 1986. Records for ACLC Ormoc show senior-high permits from 2015, technical diploma recognition references from 2020, and students taking part in Leyte’s 2023 skills competition.',
-    ja: 'AMAコンピューター・ラーニングセンターのネットワークは、1986年の短期コンピューター講座に始まります。オルモック校には、2015年からの後期中等教育の許可、2020年の技術系ディプロマ課程の認定記録、2023年のレイテ技能競技大会への学生参加の記録が残っています。',
-    ko: 'AMA 컴퓨터 학습 센터 네트워크는 1986년 단기 컴퓨터 과정에서 출발했습니다. 오르목 캠퍼스의 기록에는 2015년부터의 고등학교 과정 허가, 2020년 기술 디플로마 과정 인정 내역, 2023년 레이테 기능 경연대회 학생 참가가 남아 있습니다.',
+    en: 'A 2015 national senior-high list placed ACLC at Bonifacio and Lopez Jaena streets in Ormoc, with technical and hospitality offerings side by side. By March 2022 the technical education register listed the college on Lilia Avenue in Barangay Cogon, and in May 2025 the Department of Education chose the school for its strengthened senior-high pilot.',
+    ja: '2015年の全国高校上級課程の学校一覧では、ACLCの住所はオルモックのボニファシオ通りとロペス・ハエナ通りの角でした。そこには技術系とホスピタリティ系の学びが並んでいます。2022年3月には技術教育技能開発庁の名簿にコゴン地区リリア通りの住所が載り、2025年5月には教育省が同校を高校上級課程の新しいカリキュラムを試行する学校に選びました。',
+    ko: '2015년 전국 고등학교 상급과정 명단에는 ACLC의 주소가 오르모크의 보니파시오 거리와 로페스 하에나 거리가 만나는 곳으로 적혀 있으며 기술과 호텔·관광 분야가 나란히 실려 있었습니다. 2022년 3월 필리핀 기술교육기능개발청 명부에는 코곤 바랑가이 릴리아 애비뉴 주소가 올랐고, 2025년 5월 교육부는 이 학교를 고등학교 상급과정 개편 시범 학교로 선정했습니다.',
   },
 } satisfies Record<string, Record<'en' | 'ja' | 'ko', string>>;

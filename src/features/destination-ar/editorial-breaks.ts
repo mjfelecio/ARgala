@@ -20,9 +20,6 @@ export default {
   "D08/chapter-2": {"en":[["Choose daylight and fa","bullet","safety"],["Paths can be slippery","callout"],["Keep children close, t","bullet"]],"ja":[["眺めを楽しむなら、日中の穏やかな天候を選びま","bullet","safety"],["園路は濡れると滑ることがあります。","callout"],["子どもから目を離さず、ごみを持ち帰り、近隣の","bullet"]],"ko":[["전망을 즐기려면 날씨가 좋은 낮 시간을","bullet","safety"],["길은 젖으면 미끄러울 수 있습니다.","callout"],["아이들을 가까이에서 살피고 쓰레기는 되가","bullet"]]},
   "D09/overview": {"en":[["Arrive at the hotel en","paragraph"]],"ja":[["ホテル入口に到着したら、敷地を見て回る前にス","paragraph"]],"ko":[["호텔 입구에 도착하면 둘러보기 전에 직원","paragraph"]]},
   "D09/chapter-2": {"en":[["From beach huts to acc","paragraph"]],"ja":[["海辺の小屋から宿泊や集まりの空間へと規模が変","paragraph"]],"ko":[["해변의 오두막에서 숙박과 모임 공간으로","paragraph"]]},
-  "D10/overview": {"en":[["The most respectful wa","callout","arrival"],["The ARgala exhibit bri","paragraph"]],"ja":[["見学するときは許可された場所から外観を眺め、","callout","arrival"],["ARgalaの展示なら、学校への立ち入りを必","paragraph"]],"ko":[["방문할 때는 허용된 곳에서 외관을 살펴보","callout","arrival"],["ARgala에서는 학교 출입을 전제로 하","paragraph"]]},
-  "D10/chapter-2": {"en":[["A national TESDA regis","paragraph"]],"ja":[["TESDAの全国名簿には、ウェブアプリ開発や","paragraph"]],"ko":[["TESDA의 전국 명부에는 웹 애플리케이","paragraph"]]},
-  "D10/chapter-3": {"en":[["These are records of p","paragraph"]],"ja":[["2025年のWorldSkills ASEA","paragraph"]],"ko":[["이는 참가 기록일 뿐 메달 수상이나 학교","paragraph"]]},
   "D01/exhibit:history": {"en":[["In July 2022, a Univer","paragraph"]],"ja":[["湖面をジグザグに進み、音波で水深を測りました","paragraph"]],"ko":[["2022년 7월, 필리핀대학교 조사팀은","paragraph"]]},
   "D02/exhibit:history": {"en":[["The researchers compar","paragraph"]],"ja":[["一枚一枚が内側に巻き、丸い粒のようになります","paragraph"]],"ko":[["잎이 안으로 말리면 동그란 알갱이처럼 보","paragraph"]]},
   "D03/exhibit:history": {"en":[["The lake also appears","paragraph"]],"ja":[["自然保護に関する別の記録にも湖の名が残ってい","paragraph"]],"ko":[["호수의 이름은 별도의 자연보전 기록에도","paragraph"]]},
@@ -32,5 +29,6 @@ export default {
   "D07/exhibit:history": {"en":[["In 2010, mountaineer G","paragraph"]],"ja":[["一行は使われなくなった掘削現場に向かう古い道","paragraph"]],"ko":[["2010년 산악인 기데온 라스코는 날다","paragraph"]]},
   "D08/exhibit:history": {"en":[["A 2022 field report by","paragraph"]],"ja":[["ビサヤ州立大学とクイーンズランド大学の研究者","paragraph"]],"ko":[["비사야스 주립대학교와 퀸즐랜드대학교 연구","paragraph"]]},
   "D09/exhibit:history": {"en":[["By April 2000, columni","paragraph"]],"ja":[["パイナップル農家でもあったララサバルは、この","paragraph"]],"ko":[["파인애플 농사도 짓던 라라사발은 바닷가","paragraph"]]},
-  "D10/exhibit:history": {"en":[["TESDA's register ident","paragraph"]],"ja":[["TESDAの名簿には、2020年の認定番号を","paragraph"]],"ko":[["TESDA 명부에는 2020년 인정 번호","paragraph"]]}
+  "D10/chapter-2": {"en":[["Twelve schools took part","callout"]],"ja":[["出場は12校","callout"]],"ko":[["모두 12개 학교가 참여","callout"]]},
+  "D10/exhibit:history": {"en":[["By March 2022","paragraph"]],"ja":[["2022年3月には","paragraph"]],"ko":[["2022년 3월","paragraph"]]}
 } as const;

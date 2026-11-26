@@ -15,6 +15,7 @@ const copy = z.object({ overview: approvedText.optional(), highlights: approvedH
 const guide = z.object({ arrival: text, bestTime: text, activities: z.array(text), preparation: z.array(text), safety: z.array(text) }).strict();
 const approvedGuide = z.object({ value: guide, approvalReference: text }).strict();
 const mediaSchema = z.object({
+  kind: z.enum(['emblem', 'document']).optional(),
   offlineRightsReference: text.optional(),
   usageScope: text.optional(),
   id: text, source: z.number().int().positive(), credit: text, rightsReference: text, approvalReference: text,

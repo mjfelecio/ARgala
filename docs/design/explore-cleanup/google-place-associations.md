@@ -22,6 +22,7 @@ below is explicit about its source.
 | D06 | `ChIJV4vCg4zxBzMROhJPn8Hz9DY` | [Homes.ph: named Leyte Golf Club map selection](https://homes.ph/restaurant/cities/ormoc?near=ChIJV4vCg4zxBzMROhJPn8Hz9DY&view=map); [GolfPH: named club with direct Google Maps listing](https://golfph.com/golf-courses/leyte-golf-and-country-club/) |
 | D08 | `ChIJ4f0tMujlBzMRGLcx2nl2Mtc` | [Top-Rated: Heaven’s Peak](https://www.top-rated.online/cities/Ormoc/place/p/9261979/Heaven%27s+Peak) |
 | D09 | `ChIJ5XvVgmT3BzMRqp2AP1xolmQ` | [VenueKonnex: Sabin Resort Hotel](https://venuekonnex.com/listing/sabin-resort-hotel/) |
+| D10 | `ChIJT-SmSnzxBzMRLcvH4JvP5XI` | [Waze: ACLC College of Ormoc](https://www.waze.com/live-map/directions/ph/eastern-visayas/ormoc-city/aclc-college-of-ormoc?to=place.ChIJT-SmSnzxBzMRLcvH4JvP5XI); [CHED Region VIII directory](https://heida.ched.gov.ph/hei-directory/8) |
 
 ### Verification details
 
@@ -59,6 +60,10 @@ below is explicit about its source.
   its dedicated `vag-place-id-single` marker. Its primary Maps URL uses
   **10.990489, 124.6211319**, matching the catalog center to rounding. No other
   `ChIJ` ID appears in the page.
+- **D10 (2026-11-22):** the Waze link names the Lilia Avenue college and carries
+  its exact Google place ID. The public Maps listing resolves it to the same
+  name and display point (**11.022973, 124.6054992**). CHED corroborates the campus
+  name and address. The external handoff now opens the listing with its photo gallery.
 
 The D01/D06 feature comparisons are reproducible: the observed 20-byte decoded
 IDs have prefix `0a 12 09`, an eight-byte little-endian value at bytes 3–10,
