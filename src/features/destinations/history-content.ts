@@ -23,8 +23,9 @@ const photos: Record<BundledVisualId, number> = {
 };
 
 const handoffReference = '2026-11-19 History content handoff for the offline school project';
-export function historyTranslations(text: { en: string; ja: string; ko: string }) {
-  const approved = (value: string) => ({ value, approvalReference: handoffReference });
+const schoolExhibitReference = 'Owner-supplied ACLC school exhibit package 2026-11-22; docs/content/aclc-opencode-handoff.md';
+export function historyTranslations(text: { en: string; ja: string; ko: string }, reference = handoffReference) {
+  const approved = (value: string) => ({ value, approvalReference: reference });
   return { en: approved(text.en), ja: approved(text.ja), ko: approved(text.ko) };
 }
 
@@ -34,15 +35,16 @@ const histories = new Map(historyReview.entries.map(entry => {
     item.destinationId === entry.destinationId && entry.historyMediaReferences.includes(item.visualId));
   if (!visual) throw new Error(`Missing History visual for ${entry.destinationId}`);
   const translations = historyVisualTranslations[visual.visualId as VisualId];
-  const caption = historyTranslations({ en: visual.captionEn, ja: translations.ja.caption, ko: translations.ko.caption });
-  const alt = historyTranslations({ en: visual.altEn, ja: translations.ja.alt, ko: translations.ko.alt });
+  const reference = entry.destinationId === 'D10' ? schoolExhibitReference : handoffReference;
+  const caption = historyTranslations({ en: visual.captionEn, ja: translations.ja.caption, ko: translations.ko.caption }, reference);
+  const alt = historyTranslations({ en: visual.altEn, ja: translations.ja.alt, ko: translations.ko.alt }, reference);
   const creativeCommons = visual.status === 'licensed_asset_bundled_review_pending';
   const media: DestinationMedia | undefined = visual.assetPath && visual.authorCredit ? {
     id: visual.visualId,
     source: photos[visual.visualId as BundledVisualId],
     credit: creativeCommons ? `${visual.authorCredit} · ${visual.license}` : visual.authorCredit,
     rightsReference: visual.licenseUrl,
-    approvalReference: handoffReference,
+    approvalReference: reference,
     usageScope: historyImages.distributionScope,
     alt,
     caption,
@@ -54,7 +56,7 @@ const histories = new Map(historyReview.entries.map(entry => {
     return source;
   });
   const summary = destinationHistorySummaries[entry.destinationId as keyof typeof destinationHistorySummaries];
-  return [entry.destinationId, { entry, summary, visual, caption, creativeCommons, media, citations }];
+  return [entry.destinationId, { entry, summary, visual, caption, creativeCommons, media, citations, reference }];
 }));
 
 /** The supplied history review and visual manifest have no public release approval. */

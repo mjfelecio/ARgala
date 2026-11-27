@@ -540,6 +540,50 @@
       "locator": "About ACLC College, AMA membership and range of degree programs",
       "evidence": "Confirms ACLC College as an AMA Education System member with a heritage in computer studies and expanded degree-level pathways.",
       "limits": "National franchise marketing list is not an Ormoc-specific course catalog; do not advertise every listed degree as offered locally."
+    },
+    {
+      "id": "H29",
+      "title": "Clarification on Enrolment in Higher Education Institutions (HEIs) for School Years 2016–2017 and 2017–2018 — senior high school list",
+      "publisher": "Commission on Higher Education",
+      "date": "April 2015 list, checked 2026-11-22",
+      "url": "https://ched.gov.ph/wp-content/uploads/2017/09/Clarification-on-Enrolment-in-Higher-Education-Institutions-HEIs-for-School-Years-2016-2017-and-2017-2018.pdf",
+      "type": "Primary government school list",
+      "locator": "Entry 22, split across printed list pages 3–4",
+      "evidence": "Places ACLC at the corner of Bonifacio and Lopez Jaena streets in Ormoc and lists computer hardware servicing, animation, bread and pastry production and tour guiding for that entry.",
+      "limits": "Records offerings at that time. It does not date a campus transfer or confirm current courses; the first page prints “Lopez Jaina.”"
+    },
+    {
+      "id": "H30",
+      "title": "ACLC Ormoc corner-address graphic",
+      "publisher": "ACLC College of Ormoc (Facebook)",
+      "date": "Archived graphic, undated; checked 2026-11-22",
+      "url": "https://www.facebook.com/photo/?fbid=468385395307972&set=a=468385355307976",
+      "type": "School-published graphic",
+      "locator": "Bonifacio and Lopez Jaena corner address",
+      "evidence": "Confirms the school’s own spelling of Lopez Jaena at the Bonifacio Street corner.",
+      "limits": "The posting date cannot date a campus transfer."
+    },
+    {
+      "id": "H31",
+      "title": "Consolidated Validated Diploma Data as of March 2022",
+      "publisher": "Technical Education and Skills Development Authority",
+      "date": "2022-03",
+      "url": "https://www.tesda.gov.ph/Uploads/File/Diploma/Consolidated%20Validated%20Diploma%20Data%20ao%20March%202022.pdf",
+      "type": "Primary government program register",
+      "locator": "Entries 264–265",
+      "evidence": "Lists ACLC College of Ormoc on Lilia Avenue, Barangay Cogon, with three-year web applications development and hotel and restaurant management diplomas.",
+      "limits": "Program names and recognition references differ from later registers; this is not proof of an opening date or current offerings."
+    },
+    {
+      "id": "H32",
+      "title": "Regional Memorandum 567, s. 2025 — Strengthened Senior High School pilot schools",
+      "publisher": "Department of Education, Region VIII",
+      "date": "2025-05-22",
+      "url": "https://depedro8.azurewebsites.net/wp-content/uploads/2025/05/RM-No.-567-s.2025-CLMD-05222025-ESF.pdf",
+      "type": "Primary government memorandum",
+      "locator": "Partial list, first entry",
+      "evidence": "Selects ACLC Ormoc for the strengthened senior high school pilot for school year 2025–26.",
+      "limits": "Records selection for participation; it supplies no evaluation of student outcomes."
     }
   ]
 }

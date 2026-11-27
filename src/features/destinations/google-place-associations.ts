@@ -12,5 +12,6 @@ const associations: Partial<Record<FeaturedDestinationId, string>> = {
   D06: 'ChIJV4vCg4zxBzMROhJPn8Hz9DY',
   D08: 'ChIJ4f0tMujlBzMRGLcx2nl2Mtc',
   D09: 'ChIJ5XvVgmT3BzMRqp2AP1xolmQ',
+  D10: 'ChIJT-SmSnzxBzMRLcvH4JvP5XI',
 };
 export const displayGooglePlaceId = (id: FeaturedDestinationId): string | undefined => associations[id];

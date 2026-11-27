@@ -23,7 +23,7 @@ it('keeps the handoff’s claim-to-source links and restricted use scope', () =>
   expect(destinationHistory('pilot-aclc', schoolPresentationHistoryScope)).toBeUndefined();
 });
 
-it('bundles the original nine History visuals byte-for-byte and reuses the archival D10 cover', () => {
+it('bundles the History visuals byte-for-byte and reuses the D10 archive image from its gallery', () => {
   const bundled = historyImages.entries.filter(entry => entry.assetPath);
   expect(bundled).toHaveLength(9);
   expect(bundled.filter(entry => entry.status === 'licensed_asset_bundled_review_pending').map(entry => entry.license)).toEqual(['CC BY 3.0', 'CC BY-SA 4.0']);
@@ -47,5 +47,7 @@ it('bundles the original nine History visuals byte-for-byte and reuses the archi
   }
   expect(sources.size).toBe(9);
   expect(destinationHistory('D01', schoolPresentationHistoryScope)?.media).toBeUndefined();
-  expect(destinationHistory('D10', schoolPresentationHistoryScope)?.media?.source).toBe(getDestination('D10')?.media?.[0]?.source);
+  const archive = getDestination('D10')?.media?.find(item => item.id === 'D10-archive-2014');
+  expect(archive).toBeDefined();
+  expect(destinationHistory('D10', schoolPresentationHistoryScope)?.media?.source).toBe(archive?.source);
 });

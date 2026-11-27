@@ -38,15 +38,17 @@ beforeEach(async () => {
 });
 afterEach(async () => { await act(async () => tree?.unmount()); vi.restoreAllMocks(); });
 
-it.each(destinationIds.flatMap(id => (['en', 'ja', 'ko'] as const).map(locale => ({ id, locale }))))('browses every $id $locale photo without prose, retaining every caption and credit', async ({ id, locale }) => {
+it.each(destinationIds.flatMap(id => (['en', 'ja', 'ko'] as const).map(locale => ({ id, locale }))))('browses every $id $locale gallery image with its full caption and credit', async ({ id, locale }) => {
   profile = getExhibitStageProfile(id)!; await translations.changeLanguage(locale); await mount();
-  expect(translations.getResource(locale, 'translation', 'presentation.galleryTitle')).toBeTruthy();
-  expect(text('exhibit-gallery-heading')).toBe(translations.t('presentation.galleryTitle'));
+  const title = id === 'D10' ? 'destinations.campusGallery' : 'presentation.galleryTitle';
+  const position = id === 'D10' ? 'destinations.imagePosition' : 'presentation.photoPosition';
+  expect(translations.getResource(locale, 'translation', title)).toBeTruthy();
+  expect(text('exhibit-gallery-heading')).toBe(translations.t(title));
   const compact = (value: string) => value.replace(/\s/g, '');
   for (let index = 0; index < profile.media.length; index++) {
     const photo = profile.media[index];
     expect(image().props).toMatchObject({ source: photo.source, resizeMode: 'ScaleToFit', ignoreEventHandling: true });
-    expect(text('exhibit-photo-position')).toBe(translations.t('presentation.photoPosition', { current: index + 1, total: profile.media.length }));
+    expect(text('exhibit-photo-position')).toBe(translations.t(position, { current: index + 1, total: profile.media.length }));
     expect(text('ring-body')).toBeUndefined();
     const retainedImage = image(); const caption = [text('ring-gallery-caption')!];
     let steps = 0;

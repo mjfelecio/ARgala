@@ -33,6 +33,7 @@ export function DestinationPhotoViewer({ media, initialId, onClose, creditDetail
   const pages = useRef<ScrollView>(null);
   const index = Math.max(0, media.findIndex(item => item.id === selectedId));
   const selected = media[index];
+  const hasNonPhotoMedia = media.some(item => item.kind);
   const caption = selected ? localizedContent(selected.caption, language) : null;
   const alt = selected ? localizedContent(selected.alt, language) : null;
   useEffect(() => { pages.current?.scrollTo({ x: index * pageWidth, animated: false }); }, [index, pageWidth]);
@@ -71,10 +72,14 @@ export function DestinationPhotoViewer({ media, initialId, onClose, creditDetail
       </View>
       <ScrollView key={selected.id} testID="destination-photo-caption" className="shrink-0"
         style={{ maxHeight: height * 0.28 }} contentContainerClassName="gap-2 px-4 pt-3 pb-2">
-        <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-white/80">{t('destinationCleanup.photoPosition', { current: index + 1, total: media.length })}</Text>
+        <Text accessibilityLiveRegion="polite" className="font-sans text-sm text-white/80">{t(hasNonPhotoMedia ? 'destinations.imagePosition' : 'destinationCleanup.photoPosition', { current: index + 1, total: media.length })}</Text>
         {caption && <Text selectable className="font-sans text-base text-white">{caption.value}</Text>}
         {(caption?.englishFallback || alt?.englishFallback) && <Text className="font-sans text-xs text-white/80">{t('destinations.englishFallback')}</Text>}
         <Text selectable className="font-sans text-sm text-white/80">{selected.credit}</Text>
+        {selected.kind && <Button variant="secondary" accessibilityRole="link" className="h-auto min-h-12 self-start py-3"
+          accessibilityLabel={t('destinations.openImageSource')} onPress={() => openLink(selected.rightsReference)}>
+          <Button.Label className="shrink">{t('destinations.openImageSource')}</Button.Label>
+        </Button>}
         {creditDetails && <>
           <Text selectable className="font-sans text-sm text-white/80">{creditDetails.locator}</Text>
           <Text className="font-sans text-sm text-white/80">{creditDetails.scope}</Text>
@@ -85,11 +90,11 @@ export function DestinationPhotoViewer({ media, initialId, onClose, creditDetail
         </>}
       </ScrollView>
       <View testID="destination-photo-controls" className="flex-row items-center justify-between gap-3 px-4 py-3">
-        <Button isIconOnly variant="secondary" isDisabled={index === 0} accessibilityLabel={t('destinationCleanup.previousPhoto')} onPress={() => move(-1)}>
+        <Button isIconOnly variant="secondary" isDisabled={index === 0} accessibilityLabel={t(hasNonPhotoMedia ? 'destinations.previousImage' : 'destinationCleanup.previousPhoto')} onPress={() => move(-1)}>
           <Ionicons name="chevron-back" size={24} color={accent} accessible={false} />
         </Button>
         <Button variant="secondary" className="min-w-0 flex-1" accessibilityLabel={t('common.close')} onPress={onClose}><Button.Label>{t('common.close')}</Button.Label></Button>
-        <Button isIconOnly variant="secondary" isDisabled={index === media.length - 1} accessibilityLabel={t('destinationCleanup.nextPhoto')} onPress={() => move(1)}>
+        <Button isIconOnly variant="secondary" isDisabled={index === media.length - 1} accessibilityLabel={t(hasNonPhotoMedia ? 'destinations.nextImage' : 'destinationCleanup.nextPhoto')} onPress={() => move(1)}>
           <Ionicons name="chevron-forward" size={24} color={accent} accessible={false} />
         </Button>
       </View>

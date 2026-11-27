@@ -8,7 +8,9 @@ import { presentationPhotoAssets } from './featured-presentation-media-assets';
 export function featuredStoryContent(id: DestinationId): readonly RingContent[] {
   const destination = content.destinations.find(item => item.id === id);
   if (!destination) return [];
-  const reference = id === 'D10' ? 'Owner-approved final school project handoff, 2026-11-19' : 'ARgala college presentation content, 2026-11-13';
+  const reference = id === 'D10'
+    ? 'Owner-supplied ACLC school exhibit package, 2026-11-22, building on the 2026-11-19 school handoff'
+    : 'ARgala college presentation content, 2026-11-13';
   const value = (text: string) => ({ value: text, approvalReference: reference });
   const translated = (text: { en: string; ja: string; ko: string }) => ({ en: value(text.en), ja: value(text.ja), ko: value(text.ko) });
   return destination.chapters.map((chapter, index): RingContent => ({
