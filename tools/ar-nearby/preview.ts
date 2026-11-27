@@ -4,8 +4,8 @@ import type { Place } from '@/features/places/service';
 const googleMapsAttribution = new URL('../../assets/attribution/google-maps.png', import.meta.url).href;
 
 const definitions = {
-  heading: ['Camera heading (°)', 0, 359, 1, 0],
-  fov: ['Browser field of view (°)', 35, 105, 1, 60],
+  heading: ['Camera heading (°)', 0, 359, 1, 359],
+  fov: ['Browser field of view (°)', 35, 105, 1, 52],
   radius: ['Ring radius', 1.5, 7, 0.05, nearbyCardDefaults.radius],
   laneSpacing: ['Lane spacing', 0.1, 1, 0.01, nearbyCardDefaults.laneSpacing],
   separation: ['Same-lane separation (°)', 1, 45, 1, nearbyCardDefaults.separation],

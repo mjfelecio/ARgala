@@ -3,7 +3,7 @@ import type { Place } from '@/features/places/service';
 import type { Vector3 } from './types';
 
 export type NearbyCard = Readonly<{ place: Place; distance: number; position: Vector3; rotation: Vector3 }>;
-export const nearbyCardDefaults = { radius: 3.2, laneSpacing: 0.48, separation: 15, width: 0.78, height: 0.38 } as const;
+export const nearbyCardDefaults = { radius: 3.05, laneSpacing: 0.55, separation: 16, width: 0.78, height: 0.38 } as const;
 type LayoutOptions = { radius: number; laneSpacing: number; separation: number };
 
 export function layoutNearbyCards(places: readonly Place[], origin: Coordinate, preferredId?: string | null, options: LayoutOptions = nearbyCardDefaults): NearbyCard[] {

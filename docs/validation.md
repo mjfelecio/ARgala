@@ -4173,3 +4173,19 @@ ADB listed no connected device. The diagnostic panel’s native layout, outdoor
 GPS timing, foreground and background arrival delivery, AR tracking, compass
 alignment and physical taps remain field checks. See the
 [location field guide](ar-location-field-guide.md).
+
+### Nearby spacing follow-up
+
+Applied the owner’s preview settings for the 3.05-unit radius, 0.55-unit lane
+spacing and 16° same-lane separation. The saved 359° heading and 52° field of
+view are browser defaults. A regression checks that two bearings about 15.5°
+apart now occupy separate lanes. The browser walkthrough passed again,
+including the clustered preset and selecting a preferred card.
+`npm run check` passed all 1,844 tests across 156 files.
+
+The Galaxy A53 ran the installed preview APK (1.0.2, version code 3). Indoors,
+Lake Danao Showcase reached tracking-ready, Nearby showed 20 results after a
+scan, and floating cards appeared. An ADB tap on a floating card opened its
+individual result. Show card in AR returned to the camera with the 20 results
+retained. This exercise covered the installed layout. The updated native
+spacing and outdoor sensor accuracy still need device verification.
