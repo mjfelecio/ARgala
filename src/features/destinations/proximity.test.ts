@@ -80,3 +80,17 @@ it('admits two current readings over three seconds with practical accuracy insid
  expect(model.update(input(13000, 45, 50), 13000).eligible).toBe(true);
  expect(model.update(input(16000, 51, 50), 16000).eligible).toBe(false);
 });
+
+it('reports corroboration, resets and the evaluated boundary from the deciding model', () => {
+  const model = new DestinationProximity('pilot-aclc', policy, undefined, true);
+  const observe = (time: number, meters = 0) => {
+    const fix = input(time, meters);
+    const state = model.update(fix, time);
+    return { eligible: state.eligible, ...model.evidence(fix, time) };
+  };
+  expect(observe(10000)).toMatchObject({ decision: 'corroborating', contained: true, boundaryMeters: 50, count: 1, spanMs: 0 });
+  expect(observe(10000)).toMatchObject({ decision: 'corroborating', repeated: true, count: 1 });
+  expect(observe(13000)).toMatchObject({ decision: 'eligible', eligible: true, count: 2, spanMs: 3000 });
+  expect(observe(16000, 400)).toMatchObject({ decision: 'jump', eligible: false, contained: null, count: 0 });
+  expect(observe(50000)).toMatchObject({ decision: 'sample-gap', eligible: false, contained: true, count: 1 });
+});

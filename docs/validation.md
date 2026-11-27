@@ -4152,3 +4152,100 @@ completed in this session. The ARCore content-provider `Unknown authority`
 warning appeared in `logcat`; tracking had already worked before the wall, so it
 was not treated as a session failure. No APK was built. These residual checks
 still need a short handheld pass.
+
+## Location diagnostics and Nearby browser preview — 2026-11-27
+
+The development readout reports the active admission model’s decision, measured
+fix age, accuracy, containment and corroboration. Tests cover the current
+lease, both build guards, stale and repeated samples, jump and gap resets, and
+existing Nearby lane order and preferred-place priority. `npm run check` passed
+type checking, lint and all 1,843 tests across 156 files. Release eligibility
+thresholds and public Nearby screens use their existing behavior.
+
+Chromium exercised the preview at 1360 × 900 and 360 × 750, with 150% root text
+size and long English, Japanese and Korean fixture names on the narrow screen.
+The walkthrough covered keyboard activation, clustered bearings, a preferred
+card, weak heading and lost GPS, result expiry while viewing a place, return to
+camera, and saved settings round-trip. All requests stayed on localhost. The
+local preview bundle also built successfully.
+
+ADB listed no connected device. The diagnostic panel’s native layout, outdoor
+GPS timing, foreground and background arrival delivery, AR tracking, compass
+alignment and physical taps remain field checks. See the
+[location field guide](ar-location-field-guide.md).
+
+### Nearby spacing follow-up
+
+Applied the owner’s preview settings for the 3.05-unit radius, 0.55-unit lane
+spacing and 16° same-lane separation. The saved 359° heading and 52° field of
+view are browser defaults. A regression checks that two bearings about 15.5°
+apart now occupy separate lanes. The browser walkthrough passed again,
+including the clustered preset and selecting a preferred card.
+`npm run check` passed all 1,844 tests across 156 files.
+
+The Galaxy A53 ran the installed preview APK (1.0.2, version code 3). Indoors,
+Lake Danao Showcase reached tracking-ready, Nearby showed 20 results after a
+scan, and floating cards appeared. An ADB tap on a floating card opened its
+individual result. Show card in AR returned to the camera with the 20 results
+retained. This exercise covered the installed layout. The updated native
+spacing and outdoor sensor accuracy still need device verification.
+
+### Direct Maps handoff from Nearby cards
+
+The Showcase integration test drives native tracking and heading callbacks to
+make a floating card actionable, then verifies that one tap opens the Google
+Maps URL for the scanned provider ID without starting another Places request
+or opening the results screen. A retained tap after tracking loss is ignored.
+The separate View results action remains available when tracking is limited.
+
+The browser replay covers the simulated Maps handoff and the separate current
+and proposed results flows. `npm run check` passed type checking, lint and all
+1,844 tests. The proposed list remains available for browser review. The installed Android preview predates this handoff change.
+
+### Browser results footer and compact Maps actions
+
+The browser opens in Proposed. Return to AR stays pinned beneath the scrollable
+results and place detail, including when results expire. Each proposed result
+has a compact Maps action with the full place name in its accessible label.
+Chromium verified the pinned footer while scrolling, keyboard navigation,
+expired-result recovery, and long EN/JA/KO names at 360 × 750 with 150% text.
+Type checking and preview lint passed.
+
+### Approved results layout on Android
+
+Nearby results use distance-ordered rows when an origin is available, with a
+compact Maps action and a safe-area footer outside the scrolling content.
+Opening a place name shows its detail inside results. Android Back returns
+from detail to the list, and Return to AR closes either view. The obsolete
+Show card in AR action and its app-only preference state were removed.
+
+The Showcase integration test verifies the footer on list, detail and expiry,
+the direct Maps action, ignored expired actions, and Back navigation.
+The new counts and Maps labels resolved in EN, JA and KO. `npm run check`
+passed all 1,844 tests, and the Android JavaScript bundle exported successfully. The installed preview predates this
+layout and native visual verification is pending.
+
+## AR field-test readiness — 2026-11-27
+
+Checked AR source revision `89adc5a`. `npm run check` passed 1,844 tests
+across 156 files. The native patch verification, Android configuration,
+destination-content SQL checks, browser walkthrough and Android JavaScript
+export passed. The Viro test passed all 15 Java/Robolectric cases and the
+renderer version and checksum guards. Its first run stopped on read-only
+generated test archives. Making the two cached outputs writable resolved it.
+
+Loaded the app's catalog, approved geometry and arrival model for all ten
+destinations. All had launch-ready EN/JA/KO chapters and registered polygons.
+Synthetic fixed readings at each Directions point matched the expected
+containment after 3 s of corroboration. D02, D03 and D07 entrances were outside.
+D08 and D10 entrances were about 23 m and 6 m inside, respectively. Refer to
+the [field guide](ar-location-field-guide.md#entrance-checks-for-the-field-pass)
+for the rounded boundary distances.
+
+The charging Galaxy A53 ran the installed Preview 1.0.2, version code 3.
+Lake Kasudsuran Showcase opened, displayed and dismissed Help, and returned to
+the exhibit with Recenter after a brief background transition. Testing ended
+at 6% battery with the camera closed. This Preview predates the latest local
+AR changes. Native verification of the updated Nearby layout and Maps
+handoff, outdoor unlock timing, physical touch and compass alignment remain
+field work. No APK or update was published.

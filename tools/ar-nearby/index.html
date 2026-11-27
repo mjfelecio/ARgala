@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Nearby Places preview · ARgala</title>
+  <link rel="stylesheet" href="./preview.css">
+</head>
+<body>
+<main>
+  <header class="intro">
+    <h1>Nearby Places preview</h1>
+    <p>Turn the simulated camera, inspect which places get a card, and compare the two results layouts. All places and sensor readings are simulated.</p>
+  </header>
+  <div class="workspace">
+    <section class="viewer" aria-label="Phone preview">
+      <div id="mode" class="segments" aria-label="Layout version">
+        <button type="button" data-mode="current" aria-pressed="false">Current</button>
+        <button type="button" data-mode="proposed" aria-pressed="true">Proposed</button>
+      </div>
+      <div id="phone" class="phone"></div>
+      <p class="note">Browser perspective approximates the camera. The app and preview share bearing, distance, and lane allocation.</p>
+    </section>
+    <section class="controls" aria-label="Preview controls">
+      <h2>Camera and layout</h2>
+      <div class="scenario">
+        <label>Scenario <select id="scenario">
+          <option value="outdoor">Outdoor sample</option><option value="cluster">Clustered bearings</option>
+          <option value="weak">Weak heading</option><option value="unavailable">Heading unavailable</option>
+          <option value="gps">GPS lost</option><option value="expired">Expired results</option>
+          <option value="names">Long EN / JA / KO names</option><option value="empty">No results</option>
+          <option value="unscanned">Before scanning</option>
+        </select></label>
+        <label>Camera light <select id="lighting"><option value="day">Daylight</option><option value="night">Low light</option></select></label>
+      </div>
+      <div id="sliders" class="sliders"></div>
+      <p class="note" id="edit-hint">Layout settings apply in Proposed. Camera heading and field of view apply in both versions.</p>
+      <div class="file-actions">
+        <button type="button" id="reset">Reset to app defaults</button>
+        <button type="button" id="download">Download settings</button>
+        <button type="button" id="import">Import settings</button>
+        <input id="settings-file" type="file" accept=".json,application/json" hidden>
+      </div>
+      <p id="file-status" class="note" role="status"></p>
+      <h2>Place placement</h2>
+      <p class="note">Edit fixture bearings and distances here.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th scope="col">Place</th><th scope="col">Bearing °</th><th scope="col">Distance m</th><th scope="col">Placement</th></tr></thead>
+        <tbody id="places"></tbody>
+      </table></div>
+    </section>
+  </div>
+</main>
+<script type="module" src="./preview.ts"></script>
+</body>
+</html>

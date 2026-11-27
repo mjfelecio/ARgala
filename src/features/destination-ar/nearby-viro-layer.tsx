@@ -6,6 +6,7 @@ import type { WatcherSample } from '@/features/destinations/proximity';
 import { ArText } from './ar-text';
 import { cameraHeadingModule, updateHeadingLocation } from './camera-heading';
 import { HolographicFrame } from './holographic-frame';
+import { nearbyCardDefaults } from './nearby-card-layout';
 import { CameraNorthAlignment, matchCameraHeading, type NearbyCard, type NearbyHeadingStatus } from './nearby-mode';
 import type { ArNativeStyle } from './native-styles';
 import { validPose } from './scene-geometry';
@@ -13,7 +14,7 @@ import type { PoseSample, Vector3 } from './types';
 
 export type NearbySceneContent = Readonly<{
   cards: readonly NearbyCard[]; fix: WatcherSample | null;
-  onHeading(status: NearbyHeadingStatus): void; onSelect(providerId: string): void;
+  onHeading(status: NearbyHeadingStatus): void; onOpenPlace(providerId: string): void;
 }>;
 
 const pairingMs = 250;
@@ -117,8 +118,8 @@ export function NearbyViroLayer({ content, tracking, interactive, animateArrival
   const canSelect = visible && interactive && tracking;
   return <ViroNode ref={root} testID="ar-nearby-bearing-frame" position={origin} visible={visible && running} ignoreEventHandling={!canSelect}>
     {visible && content.cards.length > 0 && <NearbyCardArrival animate={animateArrival}>{content.cards.map(card => <ViroNode key={card.place.providerId} position={card.position} rotation={card.rotation} ignoreEventHandling={!canSelect}
-      onClick={canSelect ? () => { if (interactiveRef.current && visibleRef.current) content.onSelect(card.place.providerId); } : undefined}>
-      <HolographicFrame width={0.78} height={0.38} decorations={false} interactiveSurface={canSelect} />
+      onClick={canSelect ? () => { if (interactiveRef.current && visibleRef.current) content.onOpenPlace(card.place.providerId); } : undefined}>
+      <HolographicFrame width={nearbyCardDefaults.width} height={nearbyCardDefaults.height} decorations={false} interactiveSurface={canSelect} />
       <ArText text={card.place.name} maxLines={2} textLineBreakMode="WordWrap" textClipMode="ClipToBounds"
         width={0.69} height={0.22} position={[0, 0.045, 0.006]} style={style.text(4.3, 'center', '600')} />
       <ArText text={t('arNearby.distance', { meters: Math.round(card.distance) })} width={0.67} height={0.08}

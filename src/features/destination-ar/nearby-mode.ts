@@ -1,9 +1,10 @@
 import { AR, ARRIVAL, DISCOVERY } from '@/config/limits';
-import { bearingDegrees, distanceMeters, isCoordinate, relativeHeading, type Coordinate } from '@/features/location/geo';
+import { isCoordinate, relativeHeading, type Coordinate } from '@/features/location/geo';
 import type { WatcherSample } from '@/features/destinations/proximity';
 import type { NearbySearch, Place } from '@/features/places/service';
 import { captureBasis } from './scene-geometry';
-import type { PoseSample, Vector3 } from './types';
+import type { PoseSample } from './types';
+export { layoutNearbyCards, type NearbyCard } from './nearby-card-layout';
 
 export function nearbySearchOrigin(sample: WatcherSample | null, status: string, now: number): Coordinate | null {
   if (status !== 'ready' || !sample || !isCoordinate(sample.position) || !Number.isFinite(now) || !Number.isFinite(sample.timestamp) ||
@@ -75,26 +76,6 @@ export function matchCameraHeading(pose: PoseSample, trueHeading: number) {
   if (!Number.isFinite(trueHeading) || trueHeading < 0 || trueHeading >= 360) return null;
   const basis = captureBasis(pose);
   return basis ? relativeHeading(-basis.yaw, trueHeading) : null;
-}
-
-export type NearbyCard = Readonly<{ place: Place; distance: number; position: Vector3; rotation: Vector3 }>;
-const cardRadius = 3.2;
-const laneHeights = [0, 0.48, -0.48, 0.96, -0.96];
-
-export function layoutNearbyCards(places: readonly Place[], origin: Coordinate, preferredId?: string | null): NearbyCard[] {
-  const ranked = places.map(place => ({ place, distance: distanceMeters(origin, place.coordinates), bearing: bearingDegrees(origin, place.coordinates) }))
-    .filter(item => item.distance >= 1)
-    .sort((a, b) => Number(b.place.providerId === preferredId) - Number(a.place.providerId === preferredId) ||
-      a.distance - b.distance || a.place.providerId.localeCompare(b.place.providerId));
-  const used = laneHeights.map(() => [] as number[]);
-  return ranked.flatMap(({ place, distance, bearing }) => {
-    const lane = used.findIndex(angles => angles.every(other => Math.abs(relativeHeading(bearing, other)) >= 15));
-    if (lane === -1) return [];
-    used[lane].push(bearing);
-    const radians = bearing * Math.PI / 180;
-    return [{ place, distance, position: [Math.sin(radians) * cardRadius, laneHeights[lane], -Math.cos(radians) * cardRadius],
-      rotation: [0, -bearing, 0] }];
-  });
 }
 
 /** Viro and Android deliver different streams. Establish north only after

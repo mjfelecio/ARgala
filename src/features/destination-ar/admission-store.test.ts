@@ -140,3 +140,30 @@ it('claims the unlock once per principal, destination and corroborated visit', (
  store.close();
  expect(store.claimUnlock(directions, 'D01', 'en')).toBe(false);
 });
+
+it('reports the live admission decision only to the current guarded lease', () => {
+  vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
+  const store = new ArAdmissionStore('guest');
+  store.select('D10');
+  const lease = store.acquire('D10')!;
+  const position = { latitude: 0, longitude: 0 };
+  vi.mocked(Date.now).mockReturnValue(12000);
+  store.publish(lease, { running: true, watcherStatus: 'ready', sample: { position, timestamp: 12000, accuracy: 51 } });
+  expect(store.fieldEvidence(lease)).toMatchObject({ decision: 'accuracy', accuracy: 51, ageMs: 0, count: 0 });
+  store.publish(lease, { running: true, watcherStatus: 'ready', sample: { position, timestamp: 12000, accuracy: 8 } });
+  expect(store.fieldEvidence(lease)).toMatchObject({ decision: 'outside', contained: false, count: 0 });
+  store.tick();
+  expect(store.fieldEvidence(lease)?.repeated).toBe(true);
+  vi.mocked(Date.now).mockReturnValue(22001);
+  store.tick();
+  expect(store.fieldEvidence(lease)).toMatchObject({ decision: 'stale-fix', contained: null, ageMs: 10001 });
+  vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '0');
+  expect(store.fieldEvidence(lease)).toBeNull();
+  vi.stubEnv('EXPO_PUBLIC_VIRO_SPIKE', '1');
+  vi.stubGlobal('__DEV__', false);
+  expect(store.fieldEvidence(lease)).toBeNull();
+  vi.stubGlobal('__DEV__', true);
+  store.release(lease);
+  expect(store.fieldEvidence(lease)).toBeNull();
+  vi.unstubAllGlobals();
+});

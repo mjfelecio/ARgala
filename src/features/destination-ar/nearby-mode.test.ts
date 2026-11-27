@@ -80,7 +80,7 @@ describe('Nearby Places', () => {
     const places = Array.from({ length: 20 }, (_, index) => place(String(index), 11.001 + index * 0.0001, 124));
     expect(layoutNearbyCards(places, center).some(card => card.place.id === '19')).toBe(false);
     const cards = layoutNearbyCards(places, center, '19');
-    expect(cards[0]).toMatchObject({ place: { id: '19' }, position: [0, 0, -3.2] });
+    expect(cards[0]).toMatchObject({ place: { id: '19' }, position: [0, 0, -3.05] });
   });
 
 
@@ -99,4 +99,22 @@ describe('Nearby Places', () => {
     expect(alignment.get(2200)).toBeNull();
   });
 
+});
+
+it('preserves production lane order and applies preview tuning only when supplied', () => {
+  const places = Array.from({ length: 6 }, (_, index) => place(String(index), 11.001 + index * 0.001, 124));
+  const baseline = layoutNearbyCards(places, center);
+  expect(baseline.map(card => card.position)).toEqual([0, 0.55, -0.55, 1.1, -1.1].map(y => [0, y, -3.05]));
+  const adjusted = layoutNearbyCards(places, center, '5', { radius: 4, laneSpacing: 0.6, separation: 15 });
+  expect(adjusted.map(card => card.position)).toEqual([0, 0.6, -0.6, 1.2, -1.2].map(y => [0, y, -4]));
+  expect(adjusted.map(card => card.place.id)).toEqual(['5', '0', '1', '2', '3']);
+  expect(layoutNearbyCards(places, center)).toEqual(baseline);
+});
+
+it('moves closely spaced bearings onto different lanes under the tuned default', () => {
+  const equator = { latitude: 0, longitude: 0 };
+  const places = [place('north', 0.001, 0), place('north-east', 0.001, 0.000278)];
+  expect(layoutNearbyCards(places, equator).map(card => card.position[1])).toEqual([0, 0.55]);
+  const previous = { radius: 3.2, laneSpacing: 0.48, separation: 15 };
+  expect(layoutNearbyCards(places, equator, null, previous).map(card => card.position[1])).toEqual([0, 0]);
 });
