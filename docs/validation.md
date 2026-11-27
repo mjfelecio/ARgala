@@ -4201,3 +4201,12 @@ The separate View results action remains available when tracking is limited.
 The browser replay covers the simulated Maps handoff and the separate current
 and proposed results flows. `npm run check` passed type checking, lint and all
 1,844 tests. The proposed list remains available for browser review. The installed Android preview predates this handoff change.
+
+### Browser results footer and compact Maps actions
+
+The browser opens in Proposed. Return to AR stays pinned beneath the scrollable
+results and place detail, including when results expire. Each proposed result
+has a compact Maps action with the full place name in its accessible label.
+Chromium verified the pinned footer while scrolling, keyboard navigation,
+expired-result recovery, and long EN/JA/KO names at 360 × 750 with 150% text.
+Type checking and preview lint passed.

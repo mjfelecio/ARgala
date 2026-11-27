@@ -16,8 +16,8 @@
   <div class="workspace">
     <section class="viewer" aria-label="Phone preview">
       <div id="mode" class="segments" aria-label="Layout version">
-        <button type="button" data-mode="current" aria-pressed="true">Current</button>
-        <button type="button" data-mode="proposed" aria-pressed="false">Proposed</button>
+        <button type="button" data-mode="current" aria-pressed="false">Current</button>
+        <button type="button" data-mode="proposed" aria-pressed="true">Proposed</button>
       </div>
       <div id="phone" class="phone"></div>
       <p class="note">Browser perspective approximates the camera. The app and preview share bearing, distance, and lane allocation.</p>
@@ -44,7 +44,7 @@
       </div>
       <p id="file-status" class="note" role="status"></p>
       <h2>Place placement</h2>
-      <p class="note">Edit fixture bearings and distances here. Select a place in the preview to see how preference changes its lane.</p>
+      <p class="note">Edit fixture bearings and distances here.</p>
       <div class="table-wrap"><table>
         <thead><tr><th scope="col">Place</th><th scope="col">Bearing °</th><th scope="col">Distance m</th><th scope="col">Placement</th></tr></thead>
         <tbody id="places"></tbody>

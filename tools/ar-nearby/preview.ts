@@ -26,7 +26,7 @@ const lighting = element<HTMLSelectElement>('lighting');
 const file = element<HTMLInputElement>('settings-file');
 const fileStatus = element('file-status');
 let settings = { ...defaults };
-let mode = 'current';
+let mode = 'proposed';
 let view: 'camera' | 'list' | 'detail' = 'camera';
 let selected: string | null = null;
 let preferred: string | null = null;
@@ -88,13 +88,14 @@ const origin = { latitude: 0, longitude: 0 };
 const distance = (place: Place) => distanceMeters(origin, place.coordinates);
 const distanceLabel = (place: Place) => `${Math.round(distance(place))} m away`;
 const proposed = () => mode === 'proposed';
+const scrollSurface = () => phone.querySelector<HTMLElement>('.result-scroll') ?? phone;
 
 function go(next: typeof view, id: string | null = null) {
   view = next;
   selected = id;
   render();
-  phone.scrollTop = 0;
-  phone.querySelector<HTMLElement>('h2')?.focus();
+  scrollSurface().scrollTop = 0;
+  phone.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true });
 }
 
 function showResults() {
@@ -172,56 +173,71 @@ function camera(places: Place[], cards: ReturnType<typeof layoutNearbyCards>, he
   phone.append(title, stage, node('div', undefined, 'shade'), message, dock);
 }
 
+function mapsAction(place: Place) {
+  const action = button('Maps', () => openMaps(place), 'maps-action', `maps-${place.providerId}`);
+  action.setAttribute('aria-label', `Open ${place.name} in Google Maps`);
+  return action;
+}
+
 function results(places: Place[]) {
   phone.className = `phone page ${mode}`;
   const place = places.find(item => item.providerId === selected);
   const title = node('h2', proposed() && place ? place.name : 'Nearby places');
   title.tabIndex = -1;
-  const backToCamera = button('Return to AR', () => { announcement = ''; go('camera'); }, 'back', 'return');
+  const backToCamera = button('Return to AR', () => { announcement = ''; go('camera'); }, proposed() ? 'primary' : 'back', 'return');
   const top = node('header', undefined, 'page-header');
+  const body = node('div', undefined, 'result-body');
+
   if (proposed()) {
-    top.append(place ? button('All results', () => go('list'), 'back', 'all') : backToCamera, title);
+    const scroll = node('div', undefined, 'result-scroll');
+    const footer = node('footer', undefined, 'results-footer');
+    footer.append(backToCamera);
+    phone.append(scroll, footer);
+    if (place) top.append(button('All results', () => { announcement = ''; go('list'); }, 'back', 'all'));
+    top.append(title);
     if (place && originCaptured) top.append(node('p', distanceLabel(place), 'detail-distance'));
     if (!place && places.length) top.append(node('p', `${places.length} places found`, 'note'));
-  } else {
-    top.append(title, backToCamera);
+    scroll.append(top);
+    if (!places.length) {
+      scroll.append(node('p', 'These results have expired. Return to AR to scan again.', 'notice'));
+      return;
+    }
+    if (place) {
+      body.append(mapsAction(place));
+    } else {
+      const ordered = originCaptured ? [...places].sort((a, b) => distance(a) - distance(b)) : places;
+      for (const item of ordered) {
+        const row = node('div', undefined, 'proposed-row');
+        const details = button(item.name, () => { announcement = ''; go('detail', item.providerId); }, 'place-details', `place-${item.providerId}`);
+        details.replaceChildren(node('strong', item.name));
+        if (originCaptured) details.append(node('span', distanceLabel(item)));
+        row.append(details, mapsAction(item));
+        body.append(row);
+      }
+    }
+    body.append(attribution());
+    scroll.append(body);
+    return;
   }
+
+  top.append(title, backToCamera);
   phone.append(top);
   if (!places.length) {
     phone.append(node('p', 'These results have expired. Return to AR to scan again.', 'notice'));
     return;
   }
-  const body = node('div', undefined, 'result-body');
-  const actions = (item: Place) => {
-    const group = node('div', undefined, 'result-actions');
+  body.append(attribution());
+  for (const item of places) {
+    const row = node('section', undefined, 'current-row');
+    row.append(node('h3', item.name));
+    if (originCaptured) row.append(node('p', distanceLabel(item), 'note'));
+    const actions = node('div', undefined, 'result-actions');
     if (originCaptured && distance(item) >= 1) {
-      group.append(button('Show card in AR', () => showCard(item), proposed() ? 'primary' : '', `pin-${item.providerId}`));
-    } else if (proposed()) {
-      group.append(node('p', originCaptured ? 'Too close for a reliable bearing.' : 'Waiting for a usable location.', 'note'));
+      actions.append(button('Show card in AR', () => showCard(item), '', `pin-${item.providerId}`));
     }
-    group.append(button('Open in Google Maps', () => openMaps(item), '', `maps-${item.providerId}`));
-    return group;
-  };
-  if (!proposed()) {
-    body.append(attribution());
-    for (const item of places) {
-      const row = node('section', undefined, 'current-row');
-      row.append(node('h3', item.name));
-      if (originCaptured) row.append(node('p', distanceLabel(item), 'note'));
-      row.append(actions(item));
-      body.append(row);
-    }
-  } else if (place) {
-    body.append(actions(place), attribution(), backToCamera);
-  } else {
-    const ordered = originCaptured ? [...places].sort((a, b) => distance(a) - distance(b)) : places;
-    for (const item of ordered) {
-      const row = button(item.name, () => go('detail', item.providerId), 'proposed-row', `place-${item.providerId}`);
-      row.replaceChildren(node('strong', item.name));
-      if (originCaptured) row.append(node('span', distanceLabel(item)));
-      body.append(row);
-    }
-    body.append(attribution());
+    actions.append(button('Open in Google Maps', () => openMaps(item), '', `maps-${item.providerId}`));
+    row.append(actions);
+    body.append(row);
   }
   phone.append(body);
 }
@@ -229,7 +245,7 @@ function results(places: Place[]) {
 const tableStatuses = new Map<string, HTMLElement>();
 function render() {
   const focusedAction = phone.contains(document.activeElement) ? (document.activeElement as HTMLElement).dataset.action : undefined;
-  const previousScroll = phone.scrollTop;
+  const previousScroll = scrollSurface().scrollTop;
   const scenario = scenarios.value;
   const all = makePlaces();
   const places = scanned && scenario !== 'expired' ? all : [];
@@ -243,9 +259,11 @@ function render() {
   if (announcement) {
     const status = node('p', announcement, 'feedback');
     status.setAttribute('role', 'status');
-    phone.append(status);
+    const footer = phone.querySelector('.results-footer');
+    if (footer) footer.prepend(status);
+    else phone.append(status);
   }
-  phone.scrollTop = previousScroll;
+  scrollSurface().scrollTop = previousScroll;
   if (focusedAction) Array.from(phone.querySelectorAll<HTMLButtonElement>('button')).find(control => control.dataset.action === focusedAction)?.focus({ preventScroll: true });
   for (const place of all) {
     const status = tableStatuses.get(place.providerId);
