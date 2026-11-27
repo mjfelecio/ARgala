@@ -18,6 +18,21 @@ Use the same Android build for the series. Note the device, OS, build, approxima
 6. In Nearby Places, use a test account and explicitly scan outdoors. Turn slowly with the phone upright, tap a floating card to open its place in Google Maps, then return to AR and open **View results**. Check the compact **Maps** action, open a place by tapping its name, and use the bottom **Return to AR** button from both views. Repeat with weak heading or tracking loss, then recover. Check long names in EN/JA/KO, bright and low-light readability, and real finger taps. One known device observation is tracking loss facing a featureless wall. [Prior device evidence](validation.md#d10-device-verification-over-adb--2026-11-27)
 7. For the presentation indoors, try **Profile → AR Showcase → destination → Start AR** against a textured, well-lit scene. Describe the Demo Passport as the showcase record. Have the browser preview ready to explain Nearby layout independently of GPS, account access and live camera tracking.
 
+## Entrance checks for the field pass
+
+The bundled coordinates were checked against the approved polygons using the
+app’s geometry code. Distances below are straight-line distances to the
+nearest boundary, rounded to the nearest metre. Confirm access on the ground
+and choose a permitted point comfortably inside for the first unlock test.
+
+| Destination | Directions point relative to the AR boundary |
+| --- | --- |
+| D02 · Lake Kasudsuran | Outside by about 1,813 m |
+| D03 · Lake Janagdan | Outside by about 562 m |
+| D07 · Alto Peak | Outside by about 864 m |
+| D08 · Heavens Peak | Inside by about 23 m |
+| D10 · ACLC College of Ormoc | Approximate entrance is inside by about 6 m |
+
 ## Systems and knobs
 
 ### Watcher and verified arrival

@@ -4224,3 +4224,28 @@ the direct Maps action, ignored expired actions, and Back navigation.
 The new counts and Maps labels resolved in EN, JA and KO. `npm run check`
 passed all 1,844 tests, and the Android JavaScript bundle exported successfully. The installed preview predates this
 layout and native visual verification is pending.
+
+## AR field-test readiness — 2026-11-27
+
+Checked AR source revision `89adc5a`. `npm run check` passed 1,844 tests
+across 156 files. The native patch verification, Android configuration,
+destination-content SQL checks, browser walkthrough and Android JavaScript
+export passed. The Viro test passed all 15 Java/Robolectric cases and the
+renderer version and checksum guards. Its first run stopped on read-only
+generated test archives. Making the two cached outputs writable resolved it.
+
+Loaded the app's catalog, approved geometry and arrival model for all ten
+destinations. All had launch-ready EN/JA/KO chapters and registered polygons.
+Synthetic fixed readings at each Directions point matched the expected
+containment after 3 s of corroboration. D02, D03 and D07 entrances were outside.
+D08 and D10 entrances were about 23 m and 6 m inside, respectively. Refer to
+the [field guide](ar-location-field-guide.md#entrance-checks-for-the-field-pass)
+for the rounded boundary distances.
+
+The charging Galaxy A53 ran the installed Preview 1.0.2, version code 3.
+Lake Kasudsuran Showcase opened, displayed and dismissed Help, and returned to
+the exhibit with Recenter after a brief background transition. Testing ended
+at 6% battery with the camera closed. This Preview predates the latest local
+AR changes. Native verification of the updated Nearby layout and Maps
+handoff, outdoor unlock timing, physical touch and compass alignment remain
+field work. No APK or update was published.
