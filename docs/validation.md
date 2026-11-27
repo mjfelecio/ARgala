@@ -4117,3 +4117,38 @@ export with byte-identical SHA-256 hashes. `git diff --check` reported no
 whitespace errors. No APK was built for this package; Android screen, native
 Viro text/image rendering, touch delivery and the new photo proportions remain
 device-unverified and require separate build approval.
+
+### D10 device verification over adb — 2026-11-27
+
+An over-the-air update was published to the existing `preview` channel rather
+than building an APK: update group `41ae78e4-25a6-4d8e-9a8e-754094bf87a0`,
+runtime version 1.0.2, commit `d788940`. The installed preview build
+(`versionName 1.0.2`, `versionCode 3`) requested updates through the embedded
+`expo-channel-name: preview` header. `--environment preview` supplied the same
+sensitive Maps key and Supabase variables, so `mapsConfigured` stayed true and
+the Explore map rendered.
+
+Tested on a Samsung Galaxy A53 5G (`SM-A536E`), Android 16, over USB adb:
+
+- The app downloaded the update on the first launch (`DownloadComplete`,
+  `NEW_UPDATE_LOADED`) and ran it on the second (`NoUpdatesAvailable`).
+- Featured Destinations showed the ACLC card with the new 16:9 courtyard cover.
+- D10 details showed the new summary, `Campus gallery — 10 images`, and the
+  full-aspect gallery viewer from 1/10 to 10/10, including the school seal, the
+  2014 graduation archive and the November 2026 STEM Congress excerpt, each with
+  caption, credit and source where applicable.
+- History showed the *Two addresses in Ormoc* body text.
+- AR Showcase opened the D10 demo with the courtyard and tourism-team imagery,
+  the short visitor-guide panels, and the `chapter-2` ProofPass reader. Tapping a
+  native card opened the reader, confirming touch delivery.
+- The Nearby Places layer listed results (20) and a 263 m Google Maps place.
+- Leaving AR awarded the D10 demo stamp (`1 of 10 destinations explored`); demo
+  progress is showcase-local and resets on exit as designed.
+- `logcat` loaded `NotoSansCJK` for Viro, so the CJK fallback path is active.
+
+ARCore lost tracking while the stationary phone faced a featureless wall, so the
+remaining chapter turns and an actual Japanese/Korean AR glyph pass were not
+completed in this session. The ARCore content-provider `Unknown authority`
+warning appeared in `logcat`; tracking had already worked before the wall, so it
+was not treated as a session failure. No APK was built. These residual checks
+still need a short handheld pass.
