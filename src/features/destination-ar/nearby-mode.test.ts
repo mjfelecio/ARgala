@@ -100,3 +100,13 @@ describe('Nearby Places', () => {
   });
 
 });
+
+it('preserves production lane order and applies preview tuning only when supplied', () => {
+  const places = Array.from({ length: 6 }, (_, index) => place(String(index), 11.001 + index * 0.001, 124));
+  const baseline = layoutNearbyCards(places, center);
+  expect(baseline.map(card => card.position)).toEqual([0, 0.48, -0.48, 0.96, -0.96].map(y => [0, y, -3.2]));
+  const adjusted = layoutNearbyCards(places, center, '5', { radius: 4, laneSpacing: 0.6, separation: 15 });
+  expect(adjusted.map(card => card.position)).toEqual([0, 0.6, -0.6, 1.2, -1.2].map(y => [0, y, -4]));
+  expect(adjusted.map(card => card.place.id)).toEqual(['5', '0', '1', '2', '3']);
+  expect(layoutNearbyCards(places, center)).toEqual(baseline);
+});

@@ -45,5 +45,8 @@ export function useAdmissionSource(store: ArAdmissionStore | null, id: FeaturedD
     store && id && committedOwner.current === owner && lease.current?.owner === owner ? store.beginSimulation(lease.current.token, id, kind, language) : null, [store, id, owner]);
   const claimUnlock = useCallback((language: Language) =>
     !!(store && id && committedOwner.current === owner && lease.current?.owner === owner && store.claimUnlock(lease.current.token, id, language)), [store, id, owner]);
-  return { begin, beginSimulation, claimUnlock };
+  const fieldEvidence = useCallback(() =>
+    store && committedOwner.current === owner && lease.current?.owner === owner ? store.fieldEvidence(lease.current.token) : null,
+  [store, owner]);
+  return { begin, beginSimulation, claimUnlock, fieldEvidence };
 }

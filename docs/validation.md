@@ -4152,3 +4152,24 @@ completed in this session. The ARCore content-provider `Unknown authority`
 warning appeared in `logcat`; tracking had already worked before the wall, so it
 was not treated as a session failure. No APK was built. These residual checks
 still need a short handheld pass.
+
+## Location diagnostics and Nearby browser preview — 2026-11-27
+
+The development readout reports the active admission model’s decision, measured
+fix age, accuracy, containment and corroboration. Tests cover the current
+lease, both build guards, stale and repeated samples, jump and gap resets, and
+existing Nearby lane order and preferred-place priority. `npm run check` passed
+type checking, lint and all 1,843 tests across 156 files. Release eligibility
+thresholds and public Nearby screens use their existing behavior.
+
+Chromium exercised the preview at 1360 × 900 and 360 × 750, with 150% root text
+size and long English, Japanese and Korean fixture names on the narrow screen.
+The walkthrough covered keyboard activation, clustered bearings, a preferred
+card, weak heading and lost GPS, result expiry while viewing a place, return to
+camera, and saved settings round-trip. All requests stayed on localhost. The
+local preview bundle also built successfully.
+
+ADB listed no connected device. The diagnostic panel’s native layout, outdoor
+GPS timing, foreground and background arrival delivery, AR tracking, compass
+alignment and physical taps remain field checks. See the
+[location field guide](ar-location-field-guide.md).

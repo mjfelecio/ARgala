@@ -34,6 +34,10 @@ export class ArAdmissionStore {
   }
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => this.listeners.delete(listener); };
   getSnapshot = () => this.arrival;
+  fieldEvidence(lease: number) {
+    if (this.closed || lease !== this.lease || !isViroSpikeEnabled()) return null;
+    return this.model?.evidence(this.input, Date.now()) ?? null;
+  }
   currentLease = () => this.lease;
   selectedId = () => this.selected;
   /** Refresh future content lookup only; issued entries and geographic evidence remain unchanged. */
@@ -55,7 +59,7 @@ export class ArAdmissionStore {
     if (id) {
       const episode = this.episodes.get(id) ?? { active: false, unlockShown: false };
       this.episodes.set(id, episode);
-      this.model = new DestinationProximity(id, activationPolicy(this.resolveDestination(id), this.resolveGeofence), episode);
+      this.model = new DestinationProximity(id, activationPolicy(this.resolveDestination(id), this.resolveGeofence), episode, typeof __DEV__ !== 'undefined' && isViroSpikeEnabled());
     }
     this.emit();
   }

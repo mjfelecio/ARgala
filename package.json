@@ -63,6 +63,7 @@
     "eslint-config-expo": "~57.0.2",
     "react-test-renderer": "19.2.3",
     "typescript": "~6.0.3",
+    "vite": "8.3.4",
     "vitest": "^5.0.5"
   },
   "scripts": {
@@ -84,7 +85,8 @@
     "check:android": "node scripts/check-android-config.mjs",
     "lint:edge": "npx --yes deno@2.9.6 lint --config supabase/functions/deno.json supabase/functions",
     "test:journal-sync": "python3 scripts/test-journal-sync.py",
-    "test:destination-content": "python3 scripts/test-destination-content.py"
+    "test:destination-content": "python3 scripts/test-destination-content.py",
+    "preview:ar-nearby": "vite --config tools/ar-nearby/vite.config.mts"
   },
   "private": true,
   "expo": {

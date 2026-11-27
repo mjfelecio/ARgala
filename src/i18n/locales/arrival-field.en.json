@@ -1,0 +1,42 @@
+{
+  "title": "Location diagnostics",
+  "heading": "{{destinationId}} · Location diagnostics",
+  "repeated": " · same sample, no new corroboration",
+  "fix": "Watcher {{status}} · fix age {{age}} s · accuracy {{accuracy}}",
+  "boundary": "Admission {{status}} · boundary {{distance}}",
+  "span": "Inside fixes {{count}}/{{required}} · span {{seconds}}/{{requiredSeconds}} s",
+  "waiting": "Waiting for the active admission source",
+  "content": "Exhibit content {{status}}",
+  "entrance": "Entrance {{status}} · {{distance}}",
+  "inside": "inside",
+  "outside": "outside",
+  "status": {
+    "pending": "pending",
+    "error": "error",
+    "ready": "ready",
+    "unavailable": "unavailable",
+    "uncertain": "uncertain",
+    "distance": "approaching",
+    "checking": "checking",
+    "reached": "reached"
+  },
+  "reasons": {
+    "no-policy": "No admission geometry",
+    "inactive": "Admission source inactive",
+    "watcher-pending": "Waiting for the continuous watcher",
+    "watcher-error": "Continuous watcher failed",
+    "no-fix": "No continuous fix yet",
+    "invalid-time": "Invalid fix time",
+    "stale-fix": "Fix is too old",
+    "future-fix": "Fix timestamp is too far ahead",
+    "invalid-position": "Invalid fix position",
+    "accuracy": "Reported accuracy is missing or outside the limit",
+    "older-fix": "Fix arrived out of timestamp order",
+    "conflicting-fix": "Same timestamp carried different evidence",
+    "jump": "Position jumped beyond the movement allowance",
+    "sample-gap": "Sample gap restarted corroboration",
+    "outside": "Fix is outside the admission area",
+    "corroborating": "Waiting for corroborating fixes inside",
+    "eligible": "Location evidence qualifies"
+  }
+}
