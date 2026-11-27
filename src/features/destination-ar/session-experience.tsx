@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { router, useIsFocused, useNavigation } from 'expo-router';
 import type { NativeStackNavigationProp } from 'expo-router/native-stack';
 import { useReducedMotion } from 'react-native-reanimated';
@@ -51,14 +51,6 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
   const [previewEntrance, setPreviewEntrance] = useState(false);
   const [results, setResults] = useState<{ origin: Coordinate | null } | null>(null);
   const closeResults = useCallback(() => setResults(null), []);
-  useEffect(() => {
-    if (!results || !focused || !active) return;
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      closeResults();
-      return true;
-    });
-    return () => subscription.remove();
-  }, [results, focused, active, closeResults]);
   const variant = introVariant({ ready: true, established: false, seen: introduction.seen && !previewEntrance, reduced });
   const lifecycle = useArSession({ identity, tileIds: content.map(item => item.id), galleryMediaIds, running: focused && active && !results, transitionReady,
     entryReady, measured: scene.width > 0 && scene.height > 0 && NativeRing !== null && introduction.loaded, freshEligible, onEstablished, reveal: true, revealDurationMs: introDuration(variant) });
@@ -98,13 +90,12 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
   const signedIn = !!identity.principalId && identity.principalId !== 'guest';
   const [viewMode, setViewMode] = useState(defaultArView);
   const [heading, setHeading] = useState<NearbyHeadingStatus>('weak');
-  const [preferredNearbyId, setPreferredNearbyId] = useState<string | null>(null);
   const readyView = startup.mountScene && exploring && focused && active && !help;
   const nearbyView = supportsViews && viewMode.view === 'nearby';
   const detailsView = !nearbyView && viewMode.phase === 'ready';
   const inNearby = startup.mountScene && session.established && focused && active && !help && nearbyView;
   const browsingNearby = inNearby && viewMode.phase === 'ready';
-  const nearby = useNearbyMode(inNearby && signedIn, readyView && browsingNearby, language, preferredNearbyId);
+  const nearby = useNearbyMode(inNearby && signedIn, readyView && browsingNearby, language);
   if (!readyView && viewMode.phase !== 'ready') setViewMode(settleInterruptedView(viewMode));
   if (heading !== 'weak' && (!readyView || !nearbyView || !nearby.fix || !nearby.cards.length)) setHeading('weak');
   const showResults = () => {
@@ -144,8 +135,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
   const showLiveGuidance = session.phase === 'limited' || revealing || poseRequired || help;
   const preparing = !startup.mountScene && !session.established;
   if (results) return <NearbyResults nearby={nearby} origin={results.origin}
-    onShowInCamera={providerId => { setPreferredNearbyId(providerId); closeResults(); }}
-    onClose={closeResults} />;
+    interactive={focused && active} onClose={closeResults} />;
   if (startup.errorCode === 'unsupported' && unsupportedFallback && focused && active) return <>{unsupportedFallback}</>;
   return <View testID="destination-ar-scene" className={preparing ? 'flex-1 bg-page' : 'flex-1 bg-ink'} onLayout={event => {
     const { width, height } = event.nativeEvent.layout;

@@ -3,7 +3,7 @@ import { useDeviceLocation } from '@/features/location/use-device-location';
 import { placesService, type NearbySearch } from '@/features/places/service';
 import { layoutNearbyCards, nearbySearchOrigin, NearbyScan } from './nearby-mode';
 
-export function useNearbyMode(running: boolean, requestAllowed: boolean, language: NonNullable<NearbySearch['language']>, preferredId: string | null) {
+export function useNearbyMode(running: boolean, requestAllowed: boolean, language: NonNullable<NearbySearch['language']>) {
   const location = useDeviceLocation({ enabled: running, requestOnStart: false, distanceIntervalMeters: 0 });
   const [scan] = useState(() => new NearbyScan(placesService.nearby));
   const state = useSyncExternalStore(scan.subscribe, scan.getSnapshot, scan.getSnapshot);
@@ -49,7 +49,7 @@ export function useNearbyMode(running: boolean, requestAllowed: boolean, languag
   const position = running && sample && sample.timestamp >= epochAt ? nearbySearchOrigin(sample, location.watcherStatus, now) : null;
   const fix = position ? sample : null;
   const result = state.result?.language === language && scan.remaining(state.result) > 0 ? state.result : null;
-  const cards = useMemo(() => result && position ? layoutNearbyCards(result.places, position, preferredId) : [], [result, position, preferredId]);
+  const cards = useMemo(() => result && position ? layoutNearbyCards(result.places, position) : [], [result, position]);
   const search = useCallback(() => {
     if (latest.current !== scope || !scope.running) return;
     const current = evidence.current;

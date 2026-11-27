@@ -175,7 +175,33 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   expect(cameras()).toHaveLength(0);
   expect(stop).toHaveBeenCalledOnce();
   expect(heading.stop).toHaveBeenCalledWith(heading.start.mock.calls[0][0]);
-  await act(async () => { expect(back.mock.calls.at(-1)![1]({ type: 'hardwareBackPress', timeStamp: Date.now() })).toBe(true); });
+
+  const returnLabel = translations.t('arNearby.returnToAr');
+  const scroll = () => tree!.root.findByProps({ testID: 'ar-nearby-results-scroll' });
+  const footer = () => tree!.root.findByProps({ testID: 'ar-nearby-results-footer' });
+  const footerHasReturn = () => footer().findAllByType('button').some(item => item.props.accessibilityLabel === returnLabel);
+  expect(scroll().findAllByType('button').some(item => item.props.accessibilityLabel === returnLabel)).toBe(false);
+  expect(footerHasReturn()).toBe(true);
+  expect(copy()).not.toContain('Show card in AR');
+  expect(copy()).toContain('1 place found');
+  const mapsLabel = translations.t('arNearby.openPlaceInMaps', { name: 'Test nearby place' });
+  const mapsButton = () => scroll().findAllByType('button').find(item => item.props.accessibilityLabel === mapsLabel)!;
+  await act(async () => mapsButton().props.onPress());
+  expect(nativeUi.openURL).toHaveBeenCalledTimes(2);
+  const placeRow = scroll().findAllByType('button').find(item => item.props.accessibilityRole === 'button' && !item.props.accessibilityLabel)!;
+  await act(async () => placeRow.props.onPress());
+  expect(copy()).toContain(translations.t('arNearby.allResults'));
+  expect(mapsButton()).toBeDefined();
+  expect(footerHasReturn()).toBe(true);
+  expect(cameras()).toHaveLength(0);
+
+  const pressBack = async () => {
+    await act(async () => { expect(back.mock.calls.at(-1)![1]({ type: 'hardwareBackPress', timeStamp: Date.now() })).toBe(true); });
+  };
+  await pressBack();
+  expect(copy()).not.toContain(translations.t('arNearby.allResults'));
+  expect(cameras()).toHaveLength(0);
+  await pressBack();
   expect(cameras()).toHaveLength(1);
   await ready([0, 2, 0], [0, 0, -1], false);
   await act(async () => { await vi.advanceTimersByTimeAsync(1000); });
@@ -185,9 +211,13 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   await act(async () => resultsButton().props.onPress());
   expect(copy()).toContain('Test nearby place');
   expect(native.scanNearby).toHaveBeenCalledTimes(2);
+  const expiredMaps = mapsButton().props.onPress;
   await act(async () => { await vi.advanceTimersByTimeAsync(120000); });
   expect(copy()).not.toContain('Test nearby place');
   expect(copy()).toContain(translations.t('arNearby.resultsExpired'));
+  expect(footerHasReturn()).toBe(true);
+  await act(async () => expiredMaps());
+  expect(nativeUi.openURL).toHaveBeenCalledTimes(2);
   expect(cameras()).toHaveLength(0);
   await press('arNearby.returnToAr');
   expect(cameras()).toHaveLength(1);

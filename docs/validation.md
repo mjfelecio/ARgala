@@ -4210,3 +4210,17 @@ has a compact Maps action with the full place name in its accessible label.
 Chromium verified the pinned footer while scrolling, keyboard navigation,
 expired-result recovery, and long EN/JA/KO names at 360 × 750 with 150% text.
 Type checking and preview lint passed.
+
+### Approved results layout on Android
+
+Nearby results use distance-ordered rows when an origin is available, with a
+compact Maps action and a safe-area footer outside the scrolling content.
+Opening a place name shows its detail inside results. Android Back returns
+from detail to the list, and Return to AR closes either view. The obsolete
+Show card in AR action and its app-only preference state were removed.
+
+The Showcase integration test verifies the footer on list, detail and expiry,
+the direct Maps action, ignored expired actions, and Back navigation.
+The new counts and Maps labels resolved in EN, JA and KO. `npm run check`
+passed all 1,844 tests, and the Android JavaScript bundle exported successfully. The installed preview predates this
+layout and native visual verification is pending.
