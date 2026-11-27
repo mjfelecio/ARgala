@@ -14,7 +14,7 @@ import type { PoseSample, Vector3 } from './types';
 
 export type NearbySceneContent = Readonly<{
   cards: readonly NearbyCard[]; fix: WatcherSample | null;
-  onHeading(status: NearbyHeadingStatus): void; onSelect(providerId: string): void;
+  onHeading(status: NearbyHeadingStatus): void; onOpenPlace(providerId: string): void;
 }>;
 
 const pairingMs = 250;
@@ -118,7 +118,7 @@ export function NearbyViroLayer({ content, tracking, interactive, animateArrival
   const canSelect = visible && interactive && tracking;
   return <ViroNode ref={root} testID="ar-nearby-bearing-frame" position={origin} visible={visible && running} ignoreEventHandling={!canSelect}>
     {visible && content.cards.length > 0 && <NearbyCardArrival animate={animateArrival}>{content.cards.map(card => <ViroNode key={card.place.providerId} position={card.position} rotation={card.rotation} ignoreEventHandling={!canSelect}
-      onClick={canSelect ? () => { if (interactiveRef.current && visibleRef.current) content.onSelect(card.place.providerId); } : undefined}>
+      onClick={canSelect ? () => { if (interactiveRef.current && visibleRef.current) content.onOpenPlace(card.place.providerId); } : undefined}>
       <HolographicFrame width={nearbyCardDefaults.width} height={nearbyCardDefaults.height} decorations={false} interactiveSurface={canSelect} />
       <ArText text={card.place.name} maxLines={2} textLineBreakMode="WordWrap" textClipMode="ClipToBounds"
         width={0.69} height={0.22} position={[0, 0.045, 0.006]} style={style.text(4.3, 'center', '600')} />

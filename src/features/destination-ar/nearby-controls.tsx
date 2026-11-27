@@ -58,14 +58,14 @@ export function NearbyControls({ signedIn, nearby, heading, trackingLost, disabl
   </View>;
 }
 
-export function NearbyResults({ nearby, selected, origin, onShowInCamera, onShowAll, onClose }: {
-  nearby: NearbyMode; selected: string | null; origin: Coordinate | null;
-  onShowInCamera(id: string): void; onShowAll(): void; onClose(): void;
+export function NearbyResults({ nearby, origin, onShowInCamera, onClose }: {
+  nearby: NearbyMode; origin: Coordinate | null;
+  onShowInCamera(id: string): void; onClose(): void;
 }) {
   const { t } = useTranslation();
   const openLink = useOpenProviderLink();
   const { result, isResultCurrent } = nearby;
-  const places = result ? selected ? result.places.filter(place => place.providerId === selected) : result.places : [];
+  const places = result?.places ?? [];
   return <StyledSafeAreaView testID="ar-nearby-results-screen" className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
     <FocusedStatusBar style="dark" />
     <ScrollView className="flex-1" contentContainerClassName="gap-4 px-4 py-4">
@@ -73,7 +73,6 @@ export function NearbyResults({ nearby, selected, origin, onShowInCamera, onShow
       <Button variant={result ? 'secondary' : 'primary'} className="h-auto min-h-12 w-full py-3"
         accessibilityLabel={t('arNearby.returnToAr')} onPress={onClose}><Button.Label className="shrink text-center">{t('arNearby.returnToAr')}</Button.Label></Button>
       {result ? <>
-        {selected && <Button variant="ghost" onPress={onShowAll}><Button.Label>{t('arNearby.results', { count: result.places.length })}</Button.Label></Button>}
         <View className="gap-3 rounded-card bg-surface p-3">
           <View className="gap-1 p-2">
             <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" style={{ height: 18, width: 98 }} resizeMode="contain" />

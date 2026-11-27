@@ -4189,3 +4189,15 @@ scan, and floating cards appeared. An ADB tap on a floating card opened its
 individual result. Show card in AR returned to the camera with the 20 results
 retained. This exercise covered the installed layout. The updated native
 spacing and outdoor sensor accuracy still need device verification.
+
+### Direct Maps handoff from Nearby cards
+
+The Showcase integration test drives native tracking and heading callbacks to
+make a floating card actionable, then verifies that one tap opens the Google
+Maps URL for the scanned provider ID without starting another Places request
+or opening the results screen. A retained tap after tracking loss is ignored.
+The separate View results action remains available when tracking is limited.
+
+The browser replay covers the simulated Maps handoff and the separate current
+and proposed results flows. `npm run check` passed type checking, lint and all
+1,844 tests. The proposed list remains available for browser review. The installed Android preview predates this handoff change.

@@ -98,7 +98,8 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   const Scene = getExhibitSceneHost('D01')!;
   native.exhibit.mockResolvedValue(Scene);
   const stop = vi.fn();
-  const heading = { start: vi.fn(), stop: vi.fn(), addListener: vi.fn(() => ({ remove: vi.fn() })) };
+  const heading = { start: vi.fn(), stop: vi.fn(),
+    addListener: vi.fn((_event: string, _receive: (event: { owner: number; degrees: number; measuredAt: number }) => void) => ({ remove: vi.fn() })) };
   native.headingModule.mockReturnValue(heading);
   const back = vi.spyOn(BackHandler, 'addEventListener');
   native.positionWatch.mockReset().mockImplementation(async (_options, receive) => {
@@ -142,7 +143,28 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   expect(copy()).toContain(translations.t('arNearby.headingWeak'));
   expect(copy()).not.toContain('Google Maps');
   expect(heading.start).toHaveBeenCalledOnce();
+  const receiveHeading = heading.addListener.mock.calls[0][1];
+  const nativeScene = tree!.root.findByType('native-scene' as React.ElementType);
+  for (let sample = 0; sample < 3; sample++) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(100);
+      nativeScene.props.onCameraTransformUpdate({ position: [0, 2, 0], forward: [0, 0, -1] });
+      receiveHeading({ owner: heading.start.mock.calls[0][0], degrees: 0, measuredAt: Date.now() });
+    });
+  }
+  expect(node('ar-nearby-bearing-frame').props.visible).toBe(true);
+  const card = tree!.root.findAllByType('node' as React.ElementType)
+    .find(item => item.props.position?.[2] === -3.05 && item.props.onClick)!;
+  const tapCard = card.props.onClick;
+  nativeUi.openURL.mockReset().mockResolvedValue(undefined);
+  await act(async () => tapCard());
+  expect(nativeUi.openURL).toHaveBeenCalledExactlyOnceWith('https://www.google.com/maps/search/?api=1&query=Test%20nearby%20place&query_place_id=synthetic-place');
+  expect(cameras()[0]).toBe(camera);
+  expect(copy()).not.toContain('ar-nearby-results-screen');
+  expect(native.scanNearby).toHaveBeenCalledTimes(2);
   await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
+  await act(async () => tapCard());
+  expect(nativeUi.openURL).toHaveBeenCalledTimes(1);
   expect(copy()).toContain(translations.t('arNearby.trackingLost'));
   const resultsButton = () => tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('arNearby.results', { count: 1 }))!;
   const list = resultsButton();

@@ -97,10 +97,10 @@ function go(next: typeof view, id: string | null = null) {
   phone.querySelector<HTMLElement>('h2')?.focus();
 }
 
-function showResults(id: string | null) {
+function showResults() {
   originCaptured = scenarios.value !== 'gps';
   announcement = '';
-  go(id === null ? 'list' : 'detail', id);
+  go('list');
 }
 
 function showCard(place: Place) {
@@ -144,7 +144,7 @@ function camera(places: Place[], cards: ReturnType<typeof layoutNearbyCards>, he
     const layout = proposed() ? settings : nearbyCardDefaults;
     const depth = layout.radius * Math.cos(angle);
     const focal = 50 / Math.tan(halfFov);
-    const control = button(card.place.name, () => showResults(card.place.providerId), 'floating', `card-${card.place.providerId}`);
+    const control = button(card.place.name, () => openMaps(card.place), 'floating', `card-${card.place.providerId}`);
     control.replaceChildren(node('strong', card.place.name), node('small', distanceLabel(card.place)));
     control.style.left = `${50 + Math.tan(angle) * focal}%`;
     control.style.top = `calc(50% - ${card.position[1] * focal / depth}cqw)`;
@@ -155,7 +155,7 @@ function camera(places: Place[], cards: ReturnType<typeof layoutNearbyCards>, he
     if (card.place.providerId === preferred) control.classList.add('preferred');
     stage.append(control);
   }
-  if (places.length) dock.append(button(`View results (${places.length})`, () => showResults(null), 'primary', 'results'));
+  if (places.length) dock.append(button(`View results (${places.length})`, showResults, 'primary', 'results'));
   const scan = button(scanned ? 'Scan again' : 'Scan nearby', () => {
     scanned = true;
     if (scenario === 'expired' || scenario === 'unscanned') {
@@ -185,7 +185,6 @@ function results(places: Place[]) {
     if (!place && places.length) top.append(node('p', `${places.length} places found`, 'note'));
   } else {
     top.append(title, backToCamera);
-    if (place) top.append(button(`View results (${places.length})`, () => go('list'), 'back', 'all'));
   }
   phone.append(top);
   if (!places.length) {
@@ -205,7 +204,7 @@ function results(places: Place[]) {
   };
   if (!proposed()) {
     body.append(attribution());
-    for (const item of place ? [place] : places) {
+    for (const item of places) {
       const row = node('section', undefined, 'current-row');
       row.append(node('h3', item.name));
       if (originCaptured) row.append(node('p', distanceLabel(item), 'note'));
@@ -321,6 +320,7 @@ const sliderRefresh = entries.map(([key, [label, min, max, step]]) => {
 const modeButtons = Array.from(element('mode').querySelectorAll<HTMLButtonElement>('button'));
 for (const control of modeButtons) control.onclick = () => {
   mode = control.dataset.mode!;
+  if (!proposed() && view === 'detail') { view = 'list'; selected = null; }
   for (const candidate of modeButtons) candidate.setAttribute('aria-pressed', String(candidate === control));
   sliderRefresh.forEach(refresh => refresh());
   render();
