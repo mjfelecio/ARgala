@@ -4,14 +4,17 @@ import { Action, Notice } from '@/ui/shared';
 import { SystemSettingsAction } from '@/features/location/status';
 import type { StartupError, StartupPhase } from './types';
 
-export function ArPreflight({ phase, errorCode, pending, canAskAgain, onStart, noticeKey = 'destinationAr.prototype', appearance = 'camera' }: {
-  appearance?: 'page' | 'camera'; noticeKey?: string; phase: StartupPhase; errorCode: StartupError | null; pending: boolean; canAskAgain: boolean; onStart(prompt?: boolean): void;
+export function ArPreflight({ phase, errorCode, pending, canAskAgain, onStart, noticeKey = 'destinationAr.prototype', appearance = 'camera', restoring = false }: {
+  restoring?: boolean; appearance?: 'page' | 'camera'; noticeKey?: string; phase: StartupPhase; errorCode: StartupError | null; pending: boolean; canAskAgain: boolean; onStart(prompt?: boolean): void;
 }) {
   const { t } = useTranslation();
   if (phase === 'live') return null;
+  if (restoring && (phase === 'checking' || phase === 'prepared' || phase === 'initializing')) {
+    return <Notice busy>{t('destinationSession.restoring')}</Notice>;
+  }
   const page = appearance === 'page';
   const ink = page ? 'text-brand-strong' : 'text-white';
-  return <View className={page ? 'gap-4 rounded-card bg-surface p-5' : 'mx-4 mt-4 gap-3 rounded-card bg-ar-panel p-4'}>
+  return <View className={page ? 'gap-4 rounded-card bg-surface p-5' : 'gap-3 rounded-card bg-ar-panel p-4'}>
     <Text accessibilityRole="header" className={`font-sans text-section font-ui-semibold ${ink}`}>{t('destinationStories.preflightTitle')}</Text>
     <Text className={`font-sans text-sm ${page ? 'text-foreground' : 'text-white'}`}>{t(noticeKey)}</Text>
     {errorCode ? <Notice>{t(`destinationAr.errors.${errorCode}`)}</Notice>

@@ -97,7 +97,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
   const browsingNearby = inNearby && viewMode.phase === 'ready';
   const nearby = useNearbyMode(inNearby && signedIn, readyView && browsingNearby, language);
   if (!readyView && viewMode.phase !== 'ready') setViewMode(settleInterruptedView(viewMode));
-  if (heading !== 'weak' && (!readyView || !nearbyView || !nearby.fix || !nearby.cards.length)) setHeading('weak');
+  if (heading !== 'weak' && (!readyView || !nearbyView || !nearby.result)) setHeading('weak');
   const showResults = () => {
     if (!browsingNearby || !nearby.result || !nearby.isResultCurrent(nearby.result)) return;
     setResults(current => current ?? { origin: nearby.position });
@@ -107,7 +107,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
     if (readyView && browsingNearby && !results && heading === 'ready') {
       nearbyLink.current = id => {
         const result = nearby.result;
-        if (!result || !nearby.isResultCurrent(result) || !nearby.cards.some(card => card.place.providerId === id)) return;
+        if (!result || !nearby.isResultCurrent(result)) return;
         const place = result.places.find(item => item.providerId === id);
         if (place) openProviderLink(googleMapsPlaceUrl(place));
       };
@@ -148,7 +148,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
           claimStartupVoice={identity.provenance === 'development' ? undefined : claimStartupVoice}
           restrictCapture={identity.destinationId === 'D10'}
           viewMode={supportsViews ? viewMode : undefined} onViewComplete={completeView}
-          nearbyContent={nearbyView ? { cards: nearby.cards, fix: nearby.fix, onHeading: setHeading, onOpenPlace: openNearbyPlace } : undefined}
+          nearbyContent={nearbyView ? { enabled: inNearby && signedIn, resultId: nearby.result?.places.length ? nearby.result.id : null, cards: nearby.cards, fix: nearby.fix, onHeading: setHeading, onOpenPlace: openNearbyPlace } : undefined}
           onMetrics={help && identity.provenance === 'development' ? setMetrics : undefined} reading={reading} content={content} initialProgress={session.progress} onProgress={lifecycle.onProgress}
           audioPreferences={audioPreferences} audioManifest={audition} firstVisit={!introduction.seen || previewEntrance && identity.provenance === 'development'}
           visibleTileCount={session.phase === 'reveal' ? Infinity : session.revealedCount} deployment={session.phase === 'reveal' ? variant : undefined} interactive={exploring && !help} effectsEnabled={!help} />
@@ -182,15 +182,14 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
       </View>}</>}
     </> : undefined}>
       {!startup.mountScene && preparation}
-      {session.phase === 'expired' ? <View className="gap-3 p-4"><Notice>{t(identity.provenance === 'showcase' ? 'arShowcase.expired' : 'destinationSession.expired')}</Notice>
+      {session.phase === 'expired' ? <View className="gap-3"><Notice>{t(identity.provenance === 'showcase' ? 'arShowcase.expired' : 'destinationSession.expired')}</Notice>
         <Action title={t(identity.provenance === 'showcase' ? 'arShowcase.return' : 'arrival.returnToMap')} onPress={() => { close(); onExit?.(); if (onReturn) onReturn(); else router.navigate('/'); }} />
-      </View> : <ArPreflight appearance={preparing ? 'page' : 'camera'} noticeKey={preflightNoticeKey ?? (identity.provenance === 'verified' ? 'arrival.preflight' : 'destinationAr.prototype')} phase={startup.phase} errorCode={startup.errorCode} pending={startup.pending} canAskAgain={startup.canAskAgain} onStart={prompt => void startup.start(prompt)} />}
-      {audition && startup.phase === 'idle' && <View className="px-4 pb-3"><Notice>{t('destinationStories.audioPreview')}</Notice></View>}
-      {identity.provenance === 'development' && isViroSpikeEnabled() && startup.phase === 'idle' && !startup.pending && <View className="px-4 pb-3"><Action title={t('destinationStories.previewEntrance')} onPress={() => { setPreviewEntrance(true); void startup.start(false); }} /></View>}
+      </View> : <ArPreflight restoring={session.established} appearance={preparing ? 'page' : 'camera'} noticeKey={preflightNoticeKey ?? (identity.provenance === 'verified' ? 'arrival.preflight' : 'destinationAr.prototype')} phase={startup.phase} errorCode={startup.errorCode} pending={startup.pending} canAskAgain={startup.canAskAgain} onStart={prompt => void startup.start(prompt)} />}
+      {audition && startup.phase === 'idle' && <View className="gap-3"><Notice>{t('destinationStories.audioPreview')}</Notice></View>}
+      {identity.provenance === 'development' && isViroSpikeEnabled() && startup.phase === 'idle' && !startup.pending && <View className="gap-3"><Action title={t('destinationStories.previewEntrance')} onPress={() => { setPreviewEntrance(true); void startup.start(false); }} /></View>}
       {progressFeedback}
       {!session.established && guidance}
-      {session.established && (startup.phase === 'checking' || startup.phase === 'prepared' || startup.phase === 'initializing') && <Notice>{t('destinationSession.restoring')}</Notice>}
-      {startup.phase === 'live' && showLiveGuidance && <View className="gap-2 p-4">
+      {startup.phase === 'live' && showLiveGuidance && <View className="gap-3">
         {((session.phase === 'limited' && (!nearbyView || !signedIn || help)) || revealing) && <Notice>{t(session.phase === 'limited' ? 'destinationAr.trackingLost' : 'destinationSession.reveal')}</Notice>}
         {!session.established || revealing ? <Text className="rounded-card bg-ar-panel p-3 font-sans text-sm text-white">{t('destinationStories.exploreHint')}</Text> : null}
         {identity.provenance === 'development' && <Text className="rounded-card bg-ar-panel p-2 font-sans text-xs text-white">{t(developmentNoticeKey ?? 'destinationRing.prototype')}</Text>}

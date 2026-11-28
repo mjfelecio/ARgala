@@ -4249,3 +4249,21 @@ at 6% battery with the camera closed. This Preview predates the latest local
 AR changes. Native verification of the updated Nearby layout and Maps
 handoff, outdoor unlock timing, physical touch and compass alignment remain
 field work. No APK or update was published.
+
+## Outdoor AR feedback — 2026-11-28
+
+Sampled both outdoor recordings. The first showed a restoring notice flush
+with the viewport around 03:09. The second showed an isolated History caption
+around 00:56 before the reader settled. Verified ACLC now captures all ten
+bundled school-gallery images while retaining its chapter bindings and capture
+policy. AR notices share a 16 dp gutter and 12 dp stack gap, and recovery
+uses one status notice. History’s image caption waits for focus completion.
+
+The Nearby regression exercised a GPS accuracy drop, a held card’s Maps
+handoff, rejection of a scan on the held fix, heading timeout and reacquisition,
+and immediate hide on tracking loss. Result text has no tap target. Chromium
+verified the read-only list, compact Maps actions, pinned footer, 150% text
+at 360 × 750, and expired-results recovery. All 1,844 tests, the
+destination-content checks, and the Android export passed. The installed
+Preview predates these changes. The native layout and sensor buffer still need a handset pass
+on the updated revision.

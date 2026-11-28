@@ -99,7 +99,7 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   native.exhibit.mockResolvedValue(Scene);
   const stop = vi.fn();
   const heading = { start: vi.fn(), stop: vi.fn(),
-    addListener: vi.fn((_event: string, _receive: (event: { owner: number; degrees: number; measuredAt: number }) => void) => ({ remove: vi.fn() })) };
+    addListener: vi.fn((_event: string, _receive: (event: { owner: number; degrees: number | null; measuredAt: number }) => void) => ({ remove: vi.fn() })) };
   native.headingModule.mockReturnValue(heading);
   const back = vi.spyOn(BackHandler, 'addEventListener');
   native.positionWatch.mockReset().mockImplementation(async (_options, receive) => {
@@ -162,9 +162,39 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   expect(cameras()[0]).toBe(camera);
   expect(copy()).not.toContain('ar-nearby-results-screen');
   expect(native.scanNearby).toHaveBeenCalledTimes(2);
+  const receiveFix = native.positionWatch.mock.calls[0][1];
+  const fix = (accuracy: number) => receiveFix({ coords: { latitude: 11, longitude: 124, accuracy }, timestamp: Date.now() });
+  const pair = async (degrees: number | null, advance = 100) => {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(advance);
+      nativeScene.props.onCameraTransformUpdate({ position: [0, 2, 0], forward: [0, 0, -1] });
+      receiveHeading({ owner: heading.start.mock.calls[0][0], degrees, measuredAt: Date.now() });
+    });
+  };
+  await act(async () => fix(101));
+  await pair(0, 2000);
+  expect(node('ar-nearby-bearing-frame').props.visible).toBe(true);
+  await act(async () => tapCard());
+  expect(nativeUi.openURL).toHaveBeenCalledTimes(2);
+  await press('arNearby.rescan');
+  expect(native.scanNearby).toHaveBeenCalledTimes(2);
+  await act(async () => fix(5));
+  await pair(0);
+  await pair(0);
+  await pair(0);
+  expect(node('ar-nearby-bearing-frame').props.visible).toBe(true);
+  await pair(null);
+  await act(async () => { await vi.advanceTimersByTimeAsync(4899); });
+  expect(node('ar-nearby-bearing-frame').props.visible).toBe(true);
+  await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+  expect(node('ar-nearby-bearing-frame').props.visible).toBe(false);
+  await pair(0);
+  await pair(0);
+  await pair(0);
+  expect(node('ar-nearby-bearing-frame').props.visible).toBe(true);
   await act(async () => tree!.root.findByType('native-scene' as React.ElementType).props.onTrackingUpdated(2, 1));
   await act(async () => tapCard());
-  expect(nativeUi.openURL).toHaveBeenCalledTimes(1);
+  expect(nativeUi.openURL).toHaveBeenCalledTimes(2);
   expect(copy()).toContain(translations.t('arNearby.trackingLost'));
   const resultsButton = () => tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('arNearby.results', { count: 1 }))!;
   const list = resultsButton();
@@ -187,21 +217,9 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   const mapsLabel = translations.t('arNearby.openPlaceInMaps', { name: 'Test nearby place' });
   const mapsButton = () => scroll().findAllByType('button').find(item => item.props.accessibilityLabel === mapsLabel)!;
   await act(async () => mapsButton().props.onPress());
-  expect(nativeUi.openURL).toHaveBeenCalledTimes(2);
-  const placeRow = scroll().findAllByType('button').find(item => item.props.accessibilityRole === 'button' && !item.props.accessibilityLabel)!;
-  await act(async () => placeRow.props.onPress());
-  expect(copy()).toContain(translations.t('arNearby.allResults'));
-  expect(mapsButton()).toBeDefined();
-  expect(footerHasReturn()).toBe(true);
-  expect(cameras()).toHaveLength(0);
-
-  const pressBack = async () => {
-    await act(async () => { expect(back.mock.calls.at(-1)![1]({ type: 'hardwareBackPress', timeStamp: Date.now() })).toBe(true); });
-  };
-  await pressBack();
-  expect(copy()).not.toContain(translations.t('arNearby.allResults'));
-  expect(cameras()).toHaveLength(0);
-  await pressBack();
+  expect(nativeUi.openURL).toHaveBeenCalledTimes(3);
+  expect(scroll().findAllByType('button').map(item => item.props.accessibilityLabel)).toEqual([mapsLabel]);
+  await act(async () => { expect(back.mock.calls.at(-1)![1]({ type: 'hardwareBackPress', timeStamp: Date.now() })).toBe(true); });
   expect(cameras()).toHaveLength(1);
   await ready([0, 2, 0], [0, 0, -1], false);
   await act(async () => { await vi.advanceTimersByTimeAsync(1000); });
@@ -217,7 +235,7 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   expect(copy()).toContain(translations.t('arNearby.resultsExpired'));
   expect(footerHasReturn()).toBe(true);
   await act(async () => expiredMaps());
-  expect(nativeUi.openURL).toHaveBeenCalledTimes(2);
+  expect(nativeUi.openURL).toHaveBeenCalledTimes(3);
   expect(cameras()).toHaveLength(0);
   await press('arNearby.returnToAr');
   expect(cameras()).toHaveLength(1);
@@ -258,6 +276,7 @@ it('bounds the complete top utility stack to the measured short scene and keeps 
   const top = tree!.root.findAllByType('safe-area' as React.ElementType).find(node => node.props.testID === 'ar-top-utilities')!;
   expect(top.props.style.maxHeight).toBe(360);
   const body = tree!.root.findByProps({ testID: 'ar-utility-body' });
+  expect(body.props.contentContainerClassName).toBe('gap-3 px-4');
   expect(body.findAllByProps({ testID: 'ar-help' })).toHaveLength(1);
   expect(body.findAllByProps({ accessibilityLabel: translations.t('destinationStories.dismissHelp') }).length).toBeGreaterThan(0);
   expect(cameras()).toHaveLength(1);
@@ -294,6 +313,12 @@ it('keeps in-app capture unavailable throughout the ACLC school exhibit', async 
   await selectDestination('D10'); await layout(); await start(); await ready();
   expect(node('exhibit-gallery-entry')).toBeDefined();
   expect(tree!.root.findAllByType('photo-controls' as React.ElementType)).toHaveLength(0);
+  await click('ring-tile-exhibit:history');
+  const captions = () => tree!.root.findAllByType('viro-text' as React.ElementType)
+    .filter(item => item.props.testID === 'ring-gallery-caption');
+  expect(captions()).toHaveLength(0);
+  await finish();
+  expect(captions()).toHaveLength(1);
 });
 
 it.each(['UNSUPPORTED', 'SUPPORTED', 'TRANSIENT', 'UNKNOWN', 'FAILED', 'MISSING'])('offers fallback only for definite native incapability: %s', async result => {

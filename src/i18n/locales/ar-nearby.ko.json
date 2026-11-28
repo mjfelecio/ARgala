@@ -15,7 +15,6 @@
   "resultsTitle": "주변 장소",
   "headingUnavailable": "방향 센서를 사용할 수 없습니다. 검색 결과는 계속 볼 수 있습니다.",
   "resultCount_other": "장소 {{count}}개",
-  "allResults": "모든 결과",
   "maps": "지도",
   "openPlaceInMaps": "Google 지도에서 {{name}} 열기",
   "distance": "{{meters}}m 거리",

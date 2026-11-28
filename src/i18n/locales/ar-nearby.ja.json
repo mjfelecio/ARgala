@@ -15,7 +15,6 @@
   "resultsTitle": "周辺スポット",
   "headingUnavailable": "方位センサーを利用できません。検索結果は引き続き確認できます。",
   "resultCount_other": "{{count}} 件の検索結果",
-  "allResults": "すべての結果",
   "maps": "マップ",
   "openPlaceInMaps": "Google マップで{{name}}を開く",
   "distance": "約{{meters}} m先",

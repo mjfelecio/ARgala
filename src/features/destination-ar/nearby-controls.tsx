@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { BackHandler, Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { BackHandler, Image, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'heroui-native/button';
@@ -26,12 +26,13 @@ export function NearbyControls({ signedIn, nearby, heading, trackingLost, disabl
 }) {
   const { t } = useTranslation();
   const { location, position, search, state, result } = nearby;
+  const holdingLocation = !!result && heading === 'ready' && !position;
   const count = result?.places.length ?? 0;
   const action = result || state.expired ? 'arNearby.rescan' : 'arNearby.scan';
   const resultsLabel = t('arNearby.results', { count });
   let message: string | null = null;
   if (trackingLost) message = 'arNearby.trackingLost';
-  else if (!position && location.status === 'ready') message = 'arNearby.waitingLocation';
+  else if (!position && !holdingLocation && location.status === 'ready') message = 'arNearby.waitingLocation';
   else if (position) {
     if (!result) message = state.expired ? 'arNearby.expired' : 'arNearby.firstScan';
     else if (!count) message = 'arNearby.empty';
@@ -42,7 +43,7 @@ export function NearbyControls({ signedIn, nearby, heading, trackingLost, disabl
       <Text className={guidanceClass}>{t('arNearby.signInHint')}</Text>
       <Button variant="secondary" accessibilityLabel={t('journal.signIn')} isDisabled={disabled} onPress={() => router.push('/sign-in')}><Button.Label>{t('journal.signIn')}</Button.Label></Button>
     </> : <>
-      {!position && <LocationStatus location={location}
+      {!position && !holdingLocation && <LocationStatus location={location}
         renderMessage={(message, busy) => <Text accessibilityLiveRegion={busy ? 'none' : 'polite'} className={guidanceClass}>{message}</Text>}
         renderRetry={onPress => <Button variant="secondary" isDisabled={disabled} onPress={onPress}><Button.Label>{t(location.status === 'denied' && location.canAskAgain ? 'arNearby.enableLocation' : 'location.retry')}</Button.Label></Button>}
         renderSettingsAction={onPress => <Button variant="secondary" isDisabled={disabled} onPress={onPress}><Button.Label>{t('common.openSettings')}</Button.Label></Button>} />}
@@ -66,9 +67,6 @@ export function NearbyResults({ nearby, origin, interactive, onClose }: {
   const { t } = useTranslation();
   const openLink = useOpenProviderLink();
   const { result, isResultCurrent } = nearby;
-  const [selection, setSelection] = useState<{ result: NonNullable<typeof result>; providerId: string } | null>(null);
-  const selected = selection && selection.result === result
-    ? result.places.find(place => place.providerId === selection.providerId) : undefined;
   const places = result?.places ?? [];
   const rows = origin
     ? places.map(place => ({ place, meters: distanceMeters(origin, place.coordinates) })).sort((a, b) => a.meters - b.meters)
@@ -76,12 +74,11 @@ export function NearbyResults({ nearby, origin, interactive, onClose }: {
   useEffect(() => {
     if (!interactive) return;
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (selected) setSelection(null);
-      else onClose();
+      onClose();
       return true;
     });
     return () => subscription.remove();
-  }, [interactive, selected, onClose]);
+  }, [interactive, onClose]);
 
   const mapsAction = (place: Place) => <Button variant="outline" className="h-auto min-h-12 min-w-12 shrink-0 px-3 py-2 self-start"
     accessibilityLabel={t('arNearby.openPlaceInMaps', { name: place.name })} isDisabled={!interactive}
@@ -92,31 +89,25 @@ export function NearbyResults({ nearby, origin, interactive, onClose }: {
 
   return <StyledSafeAreaView testID="ar-nearby-results-screen" className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
     <FocusedStatusBar style="dark" />
-    <ScrollView key={selected?.providerId ?? 'results'} testID="ar-nearby-results-scroll"
+    <ScrollView testID="ar-nearby-results-scroll"
       className="min-h-0 flex-1" contentContainerClassName="pb-4">
       <View className="gap-2 border-b border-outline px-4 py-4">
-        {selected && <Button variant="ghost" className="h-auto min-h-12 self-start py-2"
-          accessibilityLabel={t('arNearby.allResults')} onPress={() => setSelection(null)}>
-          <Button.Label>{t('arNearby.allResults')}</Button.Label>
-        </Button>}
-        <Text accessibilityRole="header" className="font-sans text-section font-ui-bold text-brand-strong">{selected?.name ?? t('arNearby.resultsTitle')}</Text>
-        {selected && origin && <Text className="font-sans text-sm font-ui-semibold text-brand-strong">{distanceText(distanceMeters(origin, selected.coordinates))}</Text>}
-        {!selected && result && <Text className="font-sans text-sm text-muted">{t('arNearby.resultCount', { count: places.length })}</Text>}
+        <Text accessibilityRole="header" className="font-sans text-section font-ui-bold text-brand-strong">{t('arNearby.resultsTitle')}</Text>
+        {result && <Text className="font-sans text-sm text-muted">{t('arNearby.resultCount', { count: places.length })}</Text>}
       </View>
       {result ? <View className="gap-3 px-4">
-        {selected ? <View className="pt-4">{mapsAction(selected)}</View> : <View>
+        <View>
           {rows.map(({ place, meters }) => <View key={place.providerId} className="flex-row items-center gap-2 border-b border-outline py-2">
-            <Pressable accessibilityRole="button" disabled={!interactive} className="min-h-12 min-w-0 flex-1 justify-center gap-1 rounded-input px-1 py-2 active:bg-mint"
-              onPress={() => { if (interactive && isResultCurrent(result)) setSelection({ result, providerId: place.providerId }); }}>
+            <View className="min-h-12 min-w-0 flex-1 justify-center gap-1 px-1 py-2">
               <Text className="font-sans text-base font-ui-bold text-brand-strong">{place.name}</Text>
               {meters !== null && <Text className="font-sans text-sm text-muted">{distanceText(meters)}</Text>}
-            </Pressable>
+            </View>
             <View className="self-center">{mapsAction(place)}</View>
           </View>)}
-        </View>}
+        </View>
         <View className="gap-1 py-1">
           <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" style={{ height: 18, width: 98 }} resizeMode="contain" />
-          <ProviderAttributions places={selected ? [selected] : places} />
+          <ProviderAttributions places={places} />
         </View>
       </View> : <Text accessibilityLiveRegion="polite" className="px-4 py-4 font-sans text-base text-muted">{t('arNearby.resultsExpired')}</Text>}
     </ScrollView>

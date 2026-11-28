@@ -55,7 +55,7 @@ export default function DestinationArScreen({ variant = 'square' }: { variant?: 
       <Button variant="secondary" accessibilityLabel={t('destinationRing.help')} accessibilityState={{ expanded: help }} onPress={() => setHelp(value => !value)}><Button.Label>{t('destinationRing.help')}</Button.Label></Button>
     </> : undefined}>
       <ArPreflight phase={startup.phase} pending={startup.pending} canAskAgain={startup.canAskAgain} errorCode={startup.errorCode} onStart={prompt => void startup.start(prompt)} />
-      {startup.phase === 'live' && <View className="gap-2 p-4">
+      {startup.phase === 'live' && <View className="gap-3">
         {variant === 'ring' ? <>
           <Text className="font-sans text-sm text-white">{t(tracking === 'normal' ? 'destinationRing.live' : 'destinationAr.trackingLost')}</Text>
           <Text className="font-sans text-xs text-white">{t('destinationRing.prototype')}</Text>

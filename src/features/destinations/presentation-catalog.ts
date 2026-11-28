@@ -48,6 +48,7 @@ export const presentationCatalog = content.destinations.map(destination => {
     visitorGuide: { en: value(destination.visitorGuide.en), ja: value(destination.visitorGuide.ja), ko: value(destination.visitorGuide.ko) },
     ar: {
       schemaVersion: 1, contentVersion: content.contentVersion, tiles: chapters,
+      ...(isAclc ? { onSiteGalleryMediaIds: media.map(photo => photo.id) } : {}),
       storyApproval: {
         scope: 'school-presentation', approvalReference: handoffReference, reviewer: 'Project owner', reviewedAt: '2026-11-19',
         contentVersion: content.contentVersion, primaryChapterIds: chapters.filter(chapter => chapter.mediaIds.length).map(chapter => chapter.id),

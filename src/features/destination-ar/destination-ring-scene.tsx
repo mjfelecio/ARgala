@@ -286,7 +286,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
       {viewMode && onViewComplete ? <>
         <ArViewLayer view="details" state={viewMode} interactive={interactive} onComplete={onViewComplete}>{detailsContent}</ArViewLayer>
         {viewMode.view === 'nearby' && <ArViewLayer view="nearby" state={viewMode} interactive={canUseNearby} onComplete={onViewComplete}>
-          {nearbyContent && <NearbyViroLayer content={nearbyContent} tracking={tracking === 'normal'} interactive={canUseNearby} animateArrival={viewMode.phase === 'ready'} registerPose={registerNearbyPose} style={style} />}
+          {nearbyContent && <NearbyViroLayer key={nearbyContent.resultId} content={nearbyContent} tracking={tracking === 'normal'} interactive={canUseNearby} animateArrival={viewMode.phase === 'ready'} registerPose={registerNearbyPose} style={style} />}
         </ArViewLayer>}
       </> : detailsContent}
     </ViroNode>

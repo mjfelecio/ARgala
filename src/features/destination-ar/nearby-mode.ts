@@ -16,7 +16,7 @@ export function nearbySearchOrigin(sample: WatcherSample | null, status: string,
 export type NearbyHeadingStatus = 'weak' | 'ready' | 'unavailable' | 'no-reading';
 
 type ScanScope = { location: Coordinate; language: NonNullable<NearbySearch['language']> };
-type ScanResult = Readonly<{ places: Place[]; receivedAt: number; elapsedAt: number; language: ScanScope['language'] }>;
+type ScanResult = Readonly<{ id: number; places: Place[]; receivedAt: number; elapsedAt: number; language: ScanScope['language'] }>;
 type ScanSnapshot = Readonly<{ result: ScanResult | null; busy: boolean; error: unknown; expired: boolean }>;
 const initialScan: ScanSnapshot = { result: null, busy: false, error: null, expired: false };
 
@@ -63,7 +63,7 @@ export class NearbyScan {
       const places = await this.search({ center: { ...location }, language, radiusMeters: DISCOVERY.radiusMeters });
       if (id !== this.generation) return;
       const distinct = new Map(places.map(place => [place.providerId, place]));
-      const result = { places: [...distinct.values()].slice(0, DISCOVERY.maxResults), receivedAt: this.now(), elapsedAt: this.elapsed(), language };
+      const result = { id, places: [...distinct.values()].slice(0, DISCOVERY.maxResults), receivedAt: this.now(), elapsedAt: this.elapsed(), language };
       this.publish({ result, busy: false, error: null, expired: false });
     } catch (error) {
       if (id === this.generation) this.publish({ ...this.snapshot, busy: false, error });

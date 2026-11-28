@@ -83,7 +83,7 @@ export function InformationPanel({ selection, content, previous, reading, enable
     return () => { current = false; onReadingControls?.(null); };
   }, [interactive, changeSize, onReadingControls]);
   const pageContent = page.kind === 'image'
-    ? <BundledGalleryPage animateImages={decorations} revealImages={revealImages && pageMotion} animationPrefix={animationPrefix} key={`${page.media!.id}:${page.media!.source}`} page={page} size={reading.size} style={style} enabled={interactive} />
+    ? <BundledGalleryPage showCaption={content.id !== EXHIBIT_HISTORY_ID || selection.phase === 'focused'} animateImages={decorations} revealImages={revealImages && pageMotion} animationPrefix={animationPrefix} key={`${page.media!.id}:${page.media!.source}`} page={page} size={reading.size} style={style} enabled={interactive} />
     : page.blocks ? <EditorialReaderPage blocks={page.blocks} style={style} />
     : <ArText testID="ring-body" position={[0, bodyY, 0.006]} width={readingContentWidth} height={bodyHeight} text={(page.flowText ?? page.text) || t('destinationRing.empty')}
       textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[reading.size].fontSize, 'left')} />;
@@ -125,11 +125,11 @@ export function InformationPanel({ selection, content, previous, reading, enable
  * on explicit Retry. A bundled source replacement starts clean under its key.
  */
 export type GalleryPageLayout = { image: { y: number; height: number }; caption: { y: number; height: number } };
-export function BundledGalleryPage(props: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean; revealImages?: boolean; animateImages?: boolean; animationPrefix?: string; layout?: GalleryPageLayout }) {
+export function BundledGalleryPage(props: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean; showCaption?: boolean; revealImages?: boolean; animateImages?: boolean; animationPrefix?: string; layout?: GalleryPageLayout }) {
   const [attempt, setAttempt] = useState(0);
   return <GalleryImageAttempt key={attempt} {...props} onRetry={() => setAttempt(previous => previous + 1)} />;
 }
-function GalleryImageAttempt({ page, size, style, enabled, onRetry, revealImages, animateImages, animationPrefix = 'argala', layout }: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean; onRetry(): void; revealImages?: boolean; animateImages?: boolean; animationPrefix?: string; layout?: GalleryPageLayout }) {
+function GalleryImageAttempt({ page, size, style, enabled, onRetry, revealImages, animateImages, animationPrefix = 'argala', layout, showCaption = true }: { page: GalleryPage; size: ReadingSize; style: ArNativeStyle; enabled: boolean; showCaption?: boolean; onRetry(): void; revealImages?: boolean; animateImages?: boolean; animationPrefix?: string; layout?: GalleryPageLayout }) {
   const imageY = layout?.image.y ?? readerLayout.image.y; const imageHeight = layout?.image.height ?? readerLayout.image.height;
   const captionY = layout?.caption.y ?? readerLayout.caption.y; const captionHeight = layout?.caption.height ?? readerLayout.caption.height;
   const { t } = useTranslation(); const [status, setStatus] = useState<'loading' | 'ready' | 'failed'>('loading');
@@ -160,8 +160,8 @@ function GalleryImageAttempt({ page, size, style, enabled, onRetry, revealImages
       {status === 'loading' && <ArText testID="ring-gallery-loading" position={[0, imageY, 0.008]} width={readingContentWidth} height={imageHeight}
         text={t('common.loading')} style={style.text(4)} />}
     </>}
-    <ArText testID="ring-gallery-caption" position={[0, captionY, 0.006]} width={readingContentWidth} height={captionHeight} text={page.flowText ?? page.text}
-      textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[size].fontSize, 'left')} />
+    {showCaption && <ArText testID="ring-gallery-caption" position={[0, captionY, 0.006]} width={readingContentWidth} height={captionHeight} text={page.flowText ?? page.text}
+      textLineBreakMode="WordWrap" textClipMode="ClipToBounds" style={style.text(readingMetrics[size].fontSize, 'left')} />}
   </>;
 }
 function PhotoReveal({ reveal, children, ...props }: ComponentProps<typeof PageTransition> & { reveal: boolean }) {

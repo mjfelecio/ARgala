@@ -22,7 +22,7 @@ export function ArUtilityChrome({ children, actions, underHeader, bottom, viewpo
       <Button isIconOnly variant="ghost" accessibilityLabel={t('destinationAr.exit')} onPress={leave}><Ionicons name="arrow-back" color={accent} size={24} accessible={false} /></Button>
       <Text accessibilityRole="header" className="min-w-0 flex-1 font-sans text-section font-ui-semibold text-brand-strong">{title ?? t(titleKey)}</Text>
     </View>
-    <ScrollView contentContainerClassName="gap-4 px-4 pb-8" className="flex-1">{children}</ScrollView>
+    <ScrollView contentContainerClassName="gap-3 px-4 pb-8" className="flex-1">{children}</ScrollView>
   </SafeOverlay>;
   // Keep overlay hit bounds at visible controls, leaving the measured native
   // scene reachable below them. box-none alone is not a physical touch test.
@@ -35,7 +35,7 @@ export function ArUtilityChrome({ children, actions, underHeader, bottom, viewpo
       {actions}
     </View>
     {underHeader}
-    <ScrollView testID="ar-utility-body" className="grow-0 shrink">{children}</ScrollView>
+    <ScrollView testID="ar-utility-body" className="mt-3 grow-0 shrink" contentContainerClassName="gap-3 px-4" pointerEvents="box-none">{children}</ScrollView>
   </SafeOverlay>
     {bottom && <SafeOverlay testID="ar-bottom-utilities" style={{ maxHeight: bottomMaxHeight }} onLayout={event => setBottomHeight(event.nativeEvent.layout.height)} className="absolute bottom-0 left-0 right-0" edges={['bottom', 'left', 'right']} pointerEvents="box-none">
       <ScrollView testID="ar-bottom-utility-body" className="grow-0 shrink" contentContainerClassName="items-center px-4 pb-3" pointerEvents="box-none">
