@@ -75,6 +75,7 @@ button.primary { background: var(--green); border-color: var(--green); color: wh
 .results-footer .feedback { margin: 0; font-size: .8rem; }
 .proposed .attribution { margin-block: .35rem .1rem; }
 .proposed-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .5rem; border-bottom: 1px solid var(--line); }
+.proposed-row.row-highlight { background: var(--mint); border-radius: .75rem; }
 .place-details { display: grid; gap: .2rem; text-align: left; border: 0; border-radius: .5rem; background: transparent; padding: .7rem .3rem; }
 .place-details strong { overflow-wrap: anywhere; }
 .place-details span { font-size: .83rem; color: var(--muted); }

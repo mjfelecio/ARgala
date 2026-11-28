@@ -15,7 +15,7 @@ import type { PoseSample, Vector3 } from './types';
 export type NearbySceneContent = Readonly<{
   enabled: boolean; resultId: number | null;
   cards: readonly NearbyCard[]; fix: WatcherSample | null;
-  onHeading(status: NearbyHeadingStatus): void; onOpenPlace(providerId: string): void;
+  onHeading(status: NearbyHeadingStatus): void; onSelectPlace(providerId: string): void;
 }>;
 
 const pairingMs = 250;
@@ -146,7 +146,7 @@ export function NearbyViroLayer({ content, tracking, interactive, animateArrival
       onClick={canSelect ? () => {
         const current = placement.current;
         if (interactiveRef.current && current && performance.now() - current.at < nearbyDisplayGraceMs && current.cards.includes(card)) {
-          content.onOpenPlace(card.place.providerId);
+          content.onSelectPlace(card.place.providerId);
         }
       } : undefined}>
       <HolographicFrame width={nearbyCardDefaults.width} height={nearbyCardDefaults.height} decorations={false} interactiveSurface={canSelect} />
