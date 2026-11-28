@@ -38,6 +38,13 @@ export class RingController {
     return { captured, position: [...this.position] };
   }
   get ringPosition(): Vector3 | null { return this.position ? [...this.position] : null; }
+  syncRingPosition(): Vector3 | null {
+    if (this.latest) {
+      this.position = [...this.latest.position];
+      this.publishedAt = this.sampledAt;
+    }
+    return this.ringPosition;
+  }
   // Finishing an accepted animation is not a new interaction. Retain its
   // authority through scheduling delay, but require this tracking epoch's pose.
   hasTrackingPose() { return this.tracking === 'normal' && this.latest !== null; }

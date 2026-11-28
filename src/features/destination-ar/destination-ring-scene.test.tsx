@@ -8,7 +8,7 @@ import { DestinationRingScene, type RingControls } from './destination-ring-scen
 import { danaoStagePresentation, getExhibitStagePresentation, getExhibitSceneHost } from './exhibit-ring-scene';
 import { withExhibitVisitorContent } from './exhibit-visitor-content';
 import { EXHIBIT_GUIDE_IDS } from './ring-content';
-import { defaultArView, requestView } from './ar-view-mode';
+import { advanceView, defaultArView, requestView } from './ar-view-mode';
 import { featuredStoryContent } from './featured-story-content';
 import { RingController } from './ring-controller';
 import { ViroAnimations, ViroMaterials } from '@reactvision/react-viro';
@@ -71,6 +71,40 @@ it('waits for normal horizontal pose, then publishes native translation without 
   const last = native.patches.filter(item => item.id === 'ring-root').at(-1)!;
   expect((last.patch.position as number[])[0]).toBeGreaterThan(3.8);
   expect(node('ring-tile-overview').props.rotation).toEqual([0, 0, 0]);
+});
+it('skips hidden Details transforms and aligns it to the latest pose on entry without moving the open reader', async () => {
+  sceneOptions = { viewMode: defaultArView, onViewComplete: vi.fn() };
+  await mount(); await track(); await pose();
+  const frame = node('ring-native-frame');
+  const ring = node('ring-root');
+  await press('ring-tile-history'); await finish(); await press('ring-action-next');
+  const reader = node('ring-focused-panel');
+  const page = text('ring-page-indicator');
+  const focus = reader.props.position;
+
+  const nearby = requestView(defaultArView, 'nearby', true);
+  sceneOptions.viewMode = nearby;
+  await act(async () => tree.update(wrapper()));
+  const retiredPose = tree.root.findByType('native-scene' as React.ElementType).props.onCameraTransformUpdate;
+  native.patches.length = 0;
+  await pose({ position: [2, 2, 0], forward: [1, 0, 0] }, 1100);
+  await pose({ position: [2.1, 2, 0], forward: [1, 0, 0] }, 1110);
+  await pose({ position: [50, 2, 0], forward: [NaN, 0, 0] }, 1111);
+  expect(native.patches.filter(({ id }) => id === 'ring-root' || id === 'ring-panel-frame')).toEqual([]);
+
+  const leaving = requestView(nearby, 'details', false);
+  sceneOptions.viewMode = advanceView(leaving, leaving.id, 'exit');
+  await act(async () => tree.update(wrapper()));
+  expect(node('ar-view-details').props.visible).toBe(true);
+  expect(node('ring-native-frame')).toBe(frame);
+  expect(node('ring-root')).toBe(ring);
+  expect(node('ring-focused-panel')).toBe(reader);
+  expect(reader.props.position).toEqual(focus);
+  expect(text('ring-page-indicator')).toBe(page);
+  expect(native.patches.filter(({ id }) => id === 'ring-root')).toEqual([{ id: 'ring-root', patch: { position: [2.1, 2, 0] } }]);
+  await act(async () => { vi.setSystemTime(1200); retiredPose({ position: [3, 2, 0], forward: [1, 0, 0] }); });
+  expect(native.patches.filter(({ id }) => id === 'ring-root').at(-1)?.patch.position).toEqual([3, 2, 0]);
+  expect(ready).toHaveBeenCalledOnce();
 });
 it('counts only completed chapter focus, never collapse intent or stale completions', async () => {
   const progress = vi.fn(); sceneOptions = { onProgress: progress };

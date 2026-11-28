@@ -4267,3 +4267,17 @@ at 360 × 750, and expired-results recovery. All 1,844 tests, the
 destination-content checks, and the Android export passed. The installed
 Preview predates these changes. The native layout and sensor buffer still need a handset pass
 on the updated revision.
+
+## AR view-switch performance — 2026-11-28
+
+The focused AR run passed 654 tests across 52 files, including the outdoor
+feedback coverage. The new regressions verify that the hidden Details ring
+receives no pose transforms, restores the latest valid translation as Details
+enters, and keeps the open reader on the same page. A single watcher sample
+expires without intervening scene renders, and a queued Scan press checks the
+live deadline even before the UI updates.
+
+The owner tried the ACLC Showcase on the Galaxy A53 with Preview 1.0.2
+(version code 3) before the new update was published and described the
+baseline as much faster. That observation is the reference for the OTA
+comparison.

@@ -9,6 +9,7 @@ import { createInstance, type i18n } from 'i18next';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { localizationOptions } from '@/i18n/options';
+import { AR } from '@/config/limits';
 import SessionRoute, { DestinationArSessionExperience } from './destination-ar-session-screen';
 import ShowcaseScreen from './showcase-screen';
 import { ViroRingRoute } from './dev-entry';
@@ -253,6 +254,37 @@ it('switches the actual Showcase camera layers in sequence and scans only on exp
   await act(async () => { await vi.advanceTimersByTimeAsync(1000); retiredScan(); });
   expect(native.scanNearby).toHaveBeenCalledTimes(2);
 });
+it('expires Nearby GPS without a new sample or a recurring scene render and checks freshness on Scan', async () => {
+  native.reduced = true;
+  const { getExhibitSceneHost } = await import('./exhibit-ring-scene');
+  native.exhibit.mockResolvedValue(getExhibitSceneHost('D01')!);
+  native.positionWatch.mockImplementation(async (_options, receive) => {
+    receive({ coords: { latitude: 11, longitude: 124, accuracy: 5 }, timestamp: Date.now() });
+    return { remove: vi.fn() };
+  });
+  await mount(() => <ShowcaseScreen />);
+  await selectDestination('D01'); await layout(); await start(); await ready();
+  await act(async () => tree!.root.findAllByType('button').find(button => button.props.testID === 'ar-select-nearby')!.props.onPress());
+  const scan = () => tree!.root.findAllByType('button').find(button => button.props.accessibilityLabel === translations.t('arNearby.scan'))!;
+  const currentPoseHandler = () => tree!.root.findByType('native-scene' as React.ElementType).props.onCameraTransformUpdate;
+  const poseHandler = currentPoseHandler();
+  const pressScan = scan().props.onPress;
+  expect(scan().props.disabled).toBe(false);
+  await act(async () => { await vi.advanceTimersByTimeAsync(AR.positionMaxAgeMs); });
+  expect(currentPoseHandler()).toBe(poseHandler);
+  expect(scan().props.disabled).toBe(false);
+
+  // A native press may arrive after the wall-clock deadline but before the UI timer.
+  const deadline = Date.now() + 1;
+  vi.setSystemTime(deadline);
+  await act(async () => pressScan());
+  expect(native.scanNearby).not.toHaveBeenCalled();
+  await act(async () => { await vi.advanceTimersByTimeAsync(1); });
+  expect(scan().props.disabled).toBe(true);
+  expect(copy()).toContain(translations.t('arNearby.waitingLocation'));
+  expect(native.positionWatch).toHaveBeenCalledOnce();
+});
+
 it('keeps guest Showcase in Nearby view without accessing location or Places', async () => {
   native.principal = null;
   native.guest = true;
