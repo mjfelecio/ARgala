@@ -7,18 +7,22 @@ import { ArText } from './ar-text';
 import { cameraHeadingModule, updateHeadingLocation } from './camera-heading';
 import { HolographicFrame } from './holographic-frame';
 import { nearbyCardDefaults } from './nearby-card-layout';
-import { CameraNorthAlignment, matchCameraHeading, type NearbyCard, type NearbyHeadingStatus } from './nearby-mode';
+import { CameraNorthAlignment, matchCameraHeading, nearbySearchOrigin, type NearbyCard, type NearbyHeadingStatus } from './nearby-mode';
 import type { ArNativeStyle } from './native-styles';
 import { validPose } from './scene-geometry';
 import type { PoseSample, Vector3 } from './types';
 
 export type NearbySceneContent = Readonly<{
+  enabled: boolean; resultId: number | null;
   cards: readonly NearbyCard[]; fix: WatcherSample | null;
   onHeading(status: NearbyHeadingStatus): void; onOpenPlace(providerId: string): void;
 }>;
 
 const pairingMs = 250;
 const headingMaxAgeMs = 180;
+export const nearbyDisplayGraceMs = 5000;
+const emptyCards: readonly NearbyCard[] = [];
+type Placement = { offset: number; at: number; cards: readonly NearbyCard[] };
 let nextHeadingOwner = 0;
 const origin: Vector3 = [0, 0, 0];
 
@@ -30,48 +34,64 @@ export function NearbyViroLayer({ content, tracking, interactive, animateArrival
   const latestPose = useRef<{ sample: PoseSample; at: number } | null>(null);
   const [alignment] = useState(() => new CameraNorthAlignment());
   const lastTransform = useRef(-Infinity);
-  const [visible, setVisible] = useState(false);
-  const visibleRef = useRef(false);
+  const [shown, setShown] = useState(emptyCards);
+  const placement = useRef<Placement | null>(null);
+  const expiryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const interactiveRef = useRef(false);
   const [module] = useState(cameraHeadingModule);
   const { onHeading } = content;
   const headingOwner = useRef<number | null>(null);
-  const latestFix = useRef(content.fix);
-  const hasFix = !!content.fix;
-  const running = hasFix && tracking && content.cards.length > 0;
-  const setReady = useCallback((value: boolean) => {
-    if (visibleRef.current === value) return;
-    visibleRef.current = value;
-    setVisible(value);
-    onHeading(value ? 'ready' : 'weak');
+  const evidence = useRef(content);
+  const running = content.enabled && tracking && content.resultId !== null;
+  const clearDisplay = useCallback(() => {
+    clearTimeout(expiryTimer.current);
+    expiryTimer.current = undefined;
+    if (!placement.current) return;
+    placement.current = null;
+    setShown(emptyCards);
+    onHeading('weak');
   }, [onHeading]);
-  const reset = useCallback(() => {
-    alignment.reset();
-    latestPose.current = null;
-    lastTransform.current = -Infinity;
-    setReady(false);
-  }, [alignment, setReady]);
+  const expire = useCallback(function tick() {
+    const current = placement.current;
+    if (!current) return;
+    const remaining = current.at + nearbyDisplayGraceMs - performance.now();
+    if (remaining > 0) expiryTimer.current = setTimeout(tick, remaining);
+    else clearDisplay();
+  }, [clearDisplay]);
+
   useLayoutEffect(() => {
-    interactiveRef.current = interactive && tracking;
+    interactiveRef.current = interactive && running;
     return () => { interactiveRef.current = false; };
-  }, [interactive, tracking]);
+  }, [interactive, running]);
   useLayoutEffect(() => {
-    if (!running) { reset(); return; }
+    evidence.current = content;
+  }, [content]);
+  useLayoutEffect(() => {
+    if (!running) {
+      headingOwner.current = null;
+      clearDisplay();
+      return;
+    }
     const unregister = registerPose(sample => {
       if (!validPose(sample)) return;
       const now = performance.now();
       latestPose.current = { sample, at: now };
-      const offset = alignment.get(now);
-      if (offset === null || now - lastTransform.current < 90) return;
+      const current = placement.current;
+      if (!current || now - current.at >= nearbyDisplayGraceMs || now - lastTransform.current < 90) return;
       lastTransform.current = now;
-      root.current?.setNativeProps({ position: sample.position, rotation: [0, -offset, 0] });
+      root.current?.setNativeProps({ position: sample.position, rotation: [0, -current.offset, 0] });
     });
-    return () => { unregister(); reset(); };
-  }, [alignment, running, registerPose, reset]);
+    return () => {
+      unregister();
+      clearTimeout(expiryTimer.current);
+      expiryTimer.current = undefined;
+      alignment.reset();
+      latestPose.current = null;
+      lastTransform.current = -Infinity;
+    };
+  }, [alignment, running, registerPose, clearDisplay]);
   useLayoutEffect(() => {
-    const fix = content.fix;
-    latestFix.current = fix;
-    if (module && fix && headingOwner.current !== null) updateHeadingLocation(module, headingOwner.current, fix);
+    if (module && content.fix && headingOwner.current !== null) updateHeadingLocation(module, headingOwner.current, content.fix);
   }, [module, content.fix]);
   useEffect(() => {
     if (!running) return;
@@ -89,36 +109,46 @@ export function NearbyViroLayer({ content, tracking, interactive, animateArrival
         onHeading('weak');
       }
       latestHeadingAt = measuredAt;
-      if (degrees === null) { reset(); return; }
+      if (degrees === null) { alignment.reset(); return; }
       const now = performance.now();
       const pose = latestPose.current;
       if (!pose || now - pose.at > pairingMs) return;
       const offset = matchCameraHeading(pose.sample, degrees);
-      if (offset === null) { reset(); return; }
+      if (offset === null) { alignment.reset(); return; }
       const next = alignment.observe(offset, degrees, now);
-      if (next === null) { setReady(false); return; }
-      if (!visibleRef.current) {
+      const { fix, cards } = evidence.current;
+      if (next === null || !nearbySearchOrigin(fix, 'ready', Date.now())) return;
+      if (!cards.length) { clearDisplay(); return; }
+
+      // Only a jointly usable GPS fix and heading pair can renew the display.
+      // Render the last accepted layout through a short sensor interruption.
+      const previous = placement.current;
+      placement.current = { offset: next, at: now, cards };
+      if (previous?.cards !== cards) setShown(cards);
+      if (!previous || now - previous.at >= nearbyDisplayGraceMs) {
         root.current?.setNativeProps({ position: pose.sample.position, rotation: [0, -next, 0] });
-        setReady(true);
+        onHeading('ready');
       }
+      if (expiryTimer.current === undefined) expiryTimer.current = setTimeout(expire, nearbyDisplayGraceMs);
     });
     module.start(nativeOwner);
-    if (latestFix.current) updateHeadingLocation(module, nativeOwner, latestFix.current);
-    const interval = setInterval(() => {
-      if (visibleRef.current && alignment.get(performance.now()) === null) reset();
-    }, 250);
+    if (evidence.current.fix) updateHeadingLocation(module, nativeOwner, evidence.current.fix);
     return () => {
       headingOwner.current = null;
-      clearInterval(interval);
       clearTimeout(startupTimeout);
       subscription.remove();
       module.stop(nativeOwner);
     };
-  }, [alignment, running, module, onHeading, reset, setReady]);
-  const canSelect = visible && interactive && tracking;
-  return <ViroNode ref={root} testID="ar-nearby-bearing-frame" position={origin} visible={visible && running} ignoreEventHandling={!canSelect}>
-    {visible && content.cards.length > 0 && <NearbyCardArrival animate={animateArrival}>{content.cards.map(card => <ViroNode key={card.place.providerId} position={card.position} rotation={card.rotation} ignoreEventHandling={!canSelect}
-      onClick={canSelect ? () => { if (interactiveRef.current && visibleRef.current) content.onOpenPlace(card.place.providerId); } : undefined}>
+  }, [alignment, running, module, onHeading, expire, clearDisplay]);
+  const canSelect = shown.length > 0 && interactive && running;
+  return <ViroNode ref={root} testID="ar-nearby-bearing-frame" position={origin} visible={shown.length > 0 && running} ignoreEventHandling={!canSelect}>
+    {shown.length > 0 && running && <NearbyCardArrival animate={animateArrival}>{shown.map(card => <ViroNode key={card.place.providerId} position={card.position} rotation={card.rotation} ignoreEventHandling={!canSelect}
+      onClick={canSelect ? () => {
+        const current = placement.current;
+        if (interactiveRef.current && current && performance.now() - current.at < nearbyDisplayGraceMs && current.cards.includes(card)) {
+          content.onOpenPlace(card.place.providerId);
+        }
+      } : undefined}>
       <HolographicFrame width={nearbyCardDefaults.width} height={nearbyCardDefaults.height} decorations={false} interactiveSurface={canSelect} />
       <ArText text={card.place.name} maxLines={2} textLineBreakMode="WordWrap" textClipMode="ClipToBounds"
         width={0.69} height={0.22} position={[0, 0.045, 0.006]} style={style.text(4.3, 'center', '600')} />

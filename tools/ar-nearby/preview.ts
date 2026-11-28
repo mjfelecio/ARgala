@@ -27,8 +27,7 @@ const file = element<HTMLInputElement>('settings-file');
 const fileStatus = element('file-status');
 let settings = { ...defaults };
 let mode = 'proposed';
-let view: 'camera' | 'list' | 'detail' = 'camera';
-let selected: string | null = null;
+let view: 'camera' | 'list' = 'camera';
 let preferred: string | null = null;
 let originCaptured = true;
 let scanned = true;
@@ -90,9 +89,8 @@ const distanceLabel = (place: Place) => `${Math.round(distance(place))} m away`;
 const proposed = () => mode === 'proposed';
 const scrollSurface = () => phone.querySelector<HTMLElement>('.result-scroll') ?? phone;
 
-function go(next: typeof view, id: string | null = null) {
+function go(next: typeof view) {
   view = next;
-  selected = id;
   render();
   scrollSurface().scrollTop = 0;
   phone.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true });
@@ -181,8 +179,7 @@ function mapsAction(place: Place) {
 
 function results(places: Place[]) {
   phone.className = `phone page ${mode}`;
-  const place = places.find(item => item.providerId === selected);
-  const title = node('h2', proposed() && place ? place.name : 'Nearby places');
+  const title = node('h2', 'Nearby places');
   title.tabIndex = -1;
   const backToCamera = button('Return to AR', () => { announcement = ''; go('camera'); }, proposed() ? 'primary' : 'back', 'return');
   const top = node('header', undefined, 'page-header');
@@ -193,27 +190,21 @@ function results(places: Place[]) {
     const footer = node('footer', undefined, 'results-footer');
     footer.append(backToCamera);
     phone.append(scroll, footer);
-    if (place) top.append(button('All results', () => { announcement = ''; go('list'); }, 'back', 'all'));
     top.append(title);
-    if (place && originCaptured) top.append(node('p', distanceLabel(place), 'detail-distance'));
-    if (!place && places.length) top.append(node('p', `${places.length} places found`, 'note'));
+    if (places.length) top.append(node('p', `${places.length} places found`, 'note'));
     scroll.append(top);
     if (!places.length) {
       scroll.append(node('p', 'These results have expired. Return to AR to scan again.', 'notice'));
       return;
     }
-    if (place) {
-      body.append(mapsAction(place));
-    } else {
-      const ordered = originCaptured ? [...places].sort((a, b) => distance(a) - distance(b)) : places;
-      for (const item of ordered) {
-        const row = node('div', undefined, 'proposed-row');
-        const details = button(item.name, () => { announcement = ''; go('detail', item.providerId); }, 'place-details', `place-${item.providerId}`);
-        details.replaceChildren(node('strong', item.name));
-        if (originCaptured) details.append(node('span', distanceLabel(item)));
-        row.append(details, mapsAction(item));
-        body.append(row);
-      }
+    const ordered = originCaptured ? [...places].sort((a, b) => distance(a) - distance(b)) : places;
+    for (const item of ordered) {
+      const row = node('div', undefined, 'proposed-row');
+      const details = node('div', undefined, 'place-details');
+      details.append(node('strong', item.name));
+      if (originCaptured) details.append(node('span', distanceLabel(item)));
+      row.append(details, mapsAction(item));
+      body.append(row);
     }
     body.append(attribution());
     scroll.append(body);
@@ -338,7 +329,6 @@ const sliderRefresh = entries.map(([key, [label, min, max, step]]) => {
 const modeButtons = Array.from(element('mode').querySelectorAll<HTMLButtonElement>('button'));
 for (const control of modeButtons) control.onclick = () => {
   mode = control.dataset.mode!;
-  if (!proposed() && view === 'detail') { view = 'list'; selected = null; }
   for (const candidate of modeButtons) candidate.setAttribute('aria-pressed', String(candidate === control));
   sliderRefresh.forEach(refresh => refresh());
   render();
@@ -419,7 +409,7 @@ file.onchange = async () => {
   }
 };
 phone.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && view !== 'camera') go(view === 'detail' && proposed() ? 'list' : 'camera');
+  if (event.key === 'Escape' && view !== 'camera') go('camera');
 });
 sliderRefresh.forEach(refresh => refresh());
 buildTable();

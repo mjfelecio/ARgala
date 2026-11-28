@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { AR, ARRIVAL } from '@/config/limits';
 import { useDeviceLocation } from '@/features/location/use-device-location';
 import { placesService, type NearbySearch } from '@/features/places/service';
 import { layoutNearbyCards, nearbySearchOrigin, NearbyScan } from './nearby-mode';
@@ -7,7 +8,6 @@ export function useNearbyMode(running: boolean, requestAllowed: boolean, languag
   const location = useDeviceLocation({ enabled: running, requestOnStart: false, distanceIntervalMeters: 0 });
   const [scan] = useState(() => new NearbyScan(placesService.nearby));
   const state = useSyncExternalStore(scan.subscribe, scan.getSnapshot, scan.getSnapshot);
-  const [now, setNow] = useState(Date.now);
   const sample = location.watcherSample ?? null;
   // A prior owner's rendered fix is still in the hook on the first commit of a new owner.
   // Wait for a sample from this focus/mode epoch before using it again.
@@ -34,19 +34,44 @@ export function useNearbyMode(running: boolean, requestAllowed: boolean, languag
   useLayoutEffect(() => { if (!requestAllowed) scan.retire(); }, [requestAllowed, scan]);
   useLayoutEffect(() => { scan.retire(true); }, [language, scan]);
   useEffect(() => {
-    if (!running) return;
-    const tick = () => { setNow(Date.now()); scan.expire(); };
-    tick();
-    const timer = setInterval(tick, 1000);
-    return () => clearInterval(timer);
-  }, [running, scan]);
-  useEffect(() => {
-    if (!state.result) return;
-    const timer = setTimeout(() => scan.expire(), Math.max(1, Math.ceil(scan.remaining(state.result))));
+    const result = state.result;
+    if (!result) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    function checkExpiry() {
+      if (!result || scan.getSnapshot().result !== result) return;
+      const remaining = scan.remaining(result);
+      if (remaining === 0) scan.expire();
+      else timer = setTimeout(checkExpiry, Math.ceil(remaining));
+    }
+    checkExpiry();
     return () => clearTimeout(timer);
-  }, [scan, state.result]);
+  }, [running, scan, state.result]);
 
-  const position = running && sample && sample.timestamp >= epochAt ? nearbySearchOrigin(sample, location.watcherStatus, now) : null;
+  // A location fix can become usable or expire without another watcher event.
+  // The snapshot remains the same coordinate (or null) between those boundaries.
+  const candidate = running && sample && sample.timestamp >= epochAt &&
+    nearbySearchOrigin(sample, location.watcherStatus, sample.timestamp) ? sample : null;
+  const getPosition = useCallback(() => nearbySearchOrigin(candidate, 'ready', Date.now()), [candidate]);
+  const subscribePosition = useCallback((notify: () => void) => {
+    if (!candidate) return () => {};
+    const validFrom = candidate.timestamp - ARRIVAL.futureToleranceMs;
+    const expiresAfter = candidate.timestamp + AR.positionMaxAgeMs;
+    let timer: ReturnType<typeof setTimeout>;
+    let wasFresh = getPosition() !== null;
+    function checkFreshness() {
+      const now = Date.now();
+      const isFresh = now >= validFrom && now <= expiresAfter;
+      if (isFresh !== wasFresh) {
+        wasFresh = isFresh;
+        notify();
+      }
+      if (now < validFrom) timer = setTimeout(checkFreshness, Math.min(2147483647, validFrom - now));
+      else if (isFresh) timer = setTimeout(checkFreshness, expiresAfter - now + 1);
+    }
+    checkFreshness();
+    return () => clearTimeout(timer);
+  }, [candidate, getPosition]);
+  const position = useSyncExternalStore(subscribePosition, getPosition, getPosition);
   const fix = position ? sample : null;
   const result = state.result?.language === language && scan.remaining(state.result) > 0 ? state.result : null;
   const cards = useMemo(() => result && position ? layoutNearbyCards(result.places, position) : [], [result, position]);

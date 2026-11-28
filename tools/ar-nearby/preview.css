@@ -64,7 +64,6 @@ button.primary { background: var(--green); border-color: var(--green); color: wh
 .page-header { padding: 1rem; display: grid; gap: .65rem; }
 .page-header h2 { font-size: 1.5rem; }
 .page.proposed .page-header { padding-bottom: .95rem; border-bottom: 1px solid var(--line); }
-.proposed button.back { justify-self: start; background: transparent; border-color: transparent; color: var(--ink); }
 .result-body { margin: 0 1rem 1rem; display: grid; gap: .65rem; }
 .current .result-body { border-radius: .95rem; background: white; padding: .9rem; }
 .current-row { border-top: 1px solid var(--line); padding-top: .75rem; display: grid; gap: .45rem; }
@@ -74,12 +73,9 @@ button.primary { background: var(--green); border-color: var(--green); color: wh
 .result-scroll { overflow-y: auto; overscroll-behavior: contain; scrollbar-color: #a4b8ad transparent; }
 .results-footer { display: grid; gap: .5rem; border-top: 1px solid var(--line); background: #fcfbf7; padding: .75rem 1rem; }
 .results-footer .feedback { margin: 0; font-size: .8rem; }
-.proposed .result-body > .maps-action { justify-self: start; margin-top: .75rem; }
 .proposed .attribution { margin-block: .35rem .1rem; }
-.detail-distance { color: var(--ink); font-weight: 700; }
 .proposed-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: .5rem; border-bottom: 1px solid var(--line); }
 .place-details { display: grid; gap: .2rem; text-align: left; border: 0; border-radius: .5rem; background: transparent; padding: .7rem .3rem; }
-.place-details:hover { background: var(--mint); }
 .place-details strong { overflow-wrap: anywhere; }
 .place-details span { font-size: .83rem; color: var(--muted); }
 .maps-action { min-width: 3rem; padding-inline: .65rem; font-weight: 700; font-size: .875rem; }

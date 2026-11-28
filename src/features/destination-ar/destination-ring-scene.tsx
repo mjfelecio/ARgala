@@ -49,6 +49,7 @@ export function DestinationRingScene(props: Props) {
 }
 function OwnedReadingRingScene(props: Props) { const reading = useReadingSize(); return <RingScene {...props} reading={reading} />; }
 function RingScene({ presentation: requestedPresentation, onReady, onTracking, onControls, onRecenterResult, onMetrics, content, reading, viewMode, nearbyContent, onViewComplete, claimStartupVoice, initialProgress, onProgress, visibleTileCount = Infinity, interactive: sceneInteractive = true, effectsEnabled = true, deployment, firstVisit = false, audioPreferences, audioManifest, externalReadingControls = false }: Props & { reading: ReturnType<typeof useReadingSize>; externalReadingControls?: boolean }) {
+  const detailsVisible = !viewMode || !onViewComplete || viewMode.view === 'details';
   const interactive = sceneInteractive && (!viewMode || viewMode.view === 'details' && viewMode.phase === 'ready');
   const canUseNearby = sceneInteractive && viewMode?.view === 'nearby' && viewMode.phase === 'ready';
   const nearbyPose = useRef<((pose: PoseSample) => void) | null>(null);
@@ -138,15 +139,21 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
     setSelection(focused);
   }, [controller, audioEvent, stage]);
   useLayoutEffect(() => { void Promise.resolve().then(flushCompletion); }, [interactive, tracking, flushCompletion]);
+  const detailsVisibleRef = useRef(detailsVisible);
   useLayoutEffect(() => {
-    if (frame) ring.current?.setNativeProps({ position: controller.ringPosition! });
-  }, [controller, frame]);
+    const returning = detailsVisible && !detailsVisibleRef.current;
+    detailsVisibleRef.current = detailsVisible;
+    if (!detailsVisible || !frame) return;
+    const position = returning ? controller.syncRingPosition() : controller.ringPosition;
+    if (!position) return;
+    ring.current?.setNativeProps({ position });
+  }, [controller, detailsVisible, frame]);
   useLayoutEffect(() => {
     closingCommitted.current = selection?.phase === 'closing';
     // Explicitly commit both directions of the origin handoff: unchanged
     // declarative coordinates cannot reset an imperatively translated parent.
-    if (selection) panelFrame.current?.setNativeProps({ position: closingCommitted.current ? controller.ringPosition! : selection.origin });
-  }, [controller, selection]);
+    if (detailsVisible && selection) panelFrame.current?.setNativeProps({ position: closingCommitted.current ? controller.ringPosition! : selection.origin });
+  }, [controller, detailsVisible, selection]);
   const recenter = useCallback(() => {
     const openingId = controller.selection?.phase === 'opening' ? controller.selection.id : null;
     const success = controller.recenter(performance.now()); onRecenterResult?.(success);
@@ -203,7 +210,6 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
     counts.current.received++;
     const update = controller.pose(sample, performance.now());
     if (update.position) {
-      counts.current.applied++;
       if (update.captured) {
         // Restore logical focus only after this frame supplies its own valid pose.
         if (restored?.selectedId && snapshot.some(item => item.id === restored.selectedId)) {
@@ -215,7 +221,8 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
         }
         setFrame({ slots: controller.slots, position: update.position }); onReady();
       }
-      else {
+      else if (detailsVisibleRef.current) {
+        counts.current.applied++;
         ring.current?.setNativeProps({ position: update.position });
         if (closingCommitted.current && controller.selection?.phase === 'closing') panelFrame.current?.setNativeProps({ position: update.position });
       }
@@ -286,7 +293,7 @@ function RingScene({ presentation: requestedPresentation, onReady, onTracking, o
       {viewMode && onViewComplete ? <>
         <ArViewLayer view="details" state={viewMode} interactive={interactive} onComplete={onViewComplete}>{detailsContent}</ArViewLayer>
         {viewMode.view === 'nearby' && <ArViewLayer view="nearby" state={viewMode} interactive={canUseNearby} onComplete={onViewComplete}>
-          {nearbyContent && <NearbyViroLayer content={nearbyContent} tracking={tracking === 'normal'} interactive={canUseNearby} animateArrival={viewMode.phase === 'ready'} registerPose={registerNearbyPose} style={style} />}
+          {nearbyContent && <NearbyViroLayer key={nearbyContent.resultId} content={nearbyContent} tracking={tracking === 'normal'} interactive={canUseNearby} animateArrival={viewMode.phase === 'ready'} registerPose={registerNearbyPose} style={style} />}
         </ArViewLayer>}
       </> : detailsContent}
     </ViroNode>

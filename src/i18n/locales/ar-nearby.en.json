@@ -16,7 +16,6 @@
   "headingUnavailable": "Heading hardware is unavailable. You can still view results.",
   "resultCount_one": "{{count}} place found",
   "resultCount_other": "{{count}} places found",
-  "allResults": "All results",
   "maps": "Maps",
   "openPlaceInMaps": "Open {{name}} in Google Maps",
   "distance": "{{meters}} m away",

@@ -73,7 +73,8 @@ function PreparedScene({ entry, store, content }: { entry: PreparedArEntry; stor
   });
   const [galleryMediaIds] = useState(() => {
     const bound = new Set(content.flatMap(tile => tile.approved?.media?.map(photo => photo.id) ?? []));
-    return Object.freeze((getDestination(entry.destination.id)?.media ?? []).filter(photo => bound.has(photo.id)).map(photo => photo.id));
+    const reviewedGallery = entry.identity.provenance === 'verified' ? entry.destination.ar?.onSiteGalleryMediaIds : undefined;
+    return Object.freeze((entry.destination.media ?? []).filter(photo => reviewedGallery?.includes(photo.id) || bound.has(photo.id)).map(photo => photo.id));
   });
   const destinationId = entry.destination.id;
   const sceneLoader = useCallback(async () => {

@@ -37,6 +37,7 @@ const arSchema = z.object({
   activation: z.object({ point: coordinateSchema, pointApprovalReference: text,
     radiusMeters: z.number().finite().min(10).max(1000), radiusApprovalReference: text }).strict().optional(),
   providerAssociation: z.object({ providerId: detailsRequestSchema.shape.providerId, approvalReference: text }).strict().optional(),
+  onSiteGalleryMediaIds: z.array(text).refine(ids => new Set(ids).size === ids.length).readonly().optional(),
   tiles: z.array(arTileSchema).max(12).refine(items => new Set(items.map(item => item.id)).size === items.length)
     .refine(items => ['overview', 'history'].every(role => items.filter(item => item.role === role).length <= 1)).readonly(),
 }).strict();
@@ -52,6 +53,8 @@ export const destinationSchema = z.object({
   media: z.array(mediaSchema).refine(items => new Set(items.map(item => item.id)).size === items.length).readonly().optional(),
 }).strict().refine(d => !d.center || !!d.centerApprovalReference, { path: ['centerApprovalReference'] })
   .refine(d => !d.routeEntrance || !!d.routeEntranceApprovalReference, { path: ['routeEntranceApprovalReference'] })
+  .refine(d => !d.ar?.onSiteGalleryMediaIds || d.id === 'D10' && d.ar.storyApproval?.scope === 'school-presentation' &&
+    d.ar.onSiteGalleryMediaIds.every(id => d.media?.some(photo => photo.id === id)), { path: ['ar', 'onSiteGalleryMediaIds'] })
   .refine(d => (d.ar?.tiles ?? []).every(tile => (tile.mediaIds ?? []).every(id => d.media?.some(media => media.id === id))), { path: ['ar', 'tiles'] }).readonly();
 export type Destination = z.infer<typeof destinationSchema>;
 export type DestinationMedia = z.infer<typeof mediaSchema>;

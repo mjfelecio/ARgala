@@ -139,9 +139,11 @@ it('admits the bundled ACLC school exhibit through its polygon and revalidates i
  const scene = tree!.root.findByType('ar-experience' as React.ElementType);
  expect(scene.props.identity).toMatchObject({ provenance: 'verified', destinationId: 'D10' });
  expect(scene.props.entryReady).toBe(false);
- expect(scene.props.galleryMediaIds).toEqual(['D10-archive-2014']);
+ const expectedGallery = ['D10-cover', 'D10-courtyard', 'D10-entrance', 'D10-ched-visit', 'D10-proofpass', 'D10-tourism-team', 'D10-leadership-summit', 'D10-school-seal', 'D10-archive-2014', 'D10-stem-congress-2026'];
+ expect(scene.props.galleryMediaIds).toEqual(expectedGallery);
+ expect(scene.props.content.find((item: RingContent) => item.id === 'overview').approved.media.map((photo: { id: string }) => photo.id)).toEqual(['D10-archive-2014']);
  await scene.props.sceneLoader();
- expect(loadExhibitScene).toHaveBeenCalledWith('D10', ['D10-archive-2014']);
+ expect(loadExhibitScene).toHaveBeenCalledWith('D10', expectedGallery);
  expect(loadRingScene).not.toHaveBeenCalled();
  for (const timestamp of [16000, 19000]) {
   vi.mocked(Date.now).mockReturnValue(timestamp);

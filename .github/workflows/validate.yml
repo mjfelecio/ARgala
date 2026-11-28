@@ -24,8 +24,17 @@ jobs:
       - run: npm run test:viro-touch
       - run: npm run check:edge
       - run: npm run lint:edge
-      - run: npx expo install --check
+      # The lockfile and Expo's bundled map define the native set for existing APKs.
+      - name: Check compatibility with the installed Expo SDK
+        run: npx expo install --check
+        env:
+          EXPO_OFFLINE: '1'
+      - name: Report latest Expo SDK patch recommendations
+        run: npx expo install --check
+        continue-on-error: true
       - run: npx --yes expo-doctor
+        env:
+          EXPO_DOCTOR_SKIP_DEPENDENCY_VERSION_CHECK: '1'
       - run: npm run check:android
       - run: npm run export:android
       - name: Install PostgreSQL test binaries
