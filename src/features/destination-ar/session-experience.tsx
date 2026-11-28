@@ -9,8 +9,6 @@ import { useThemeColor } from 'heroui-native/hooks';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { destinationIds, type DestinationId } from '@/features/destinations/catalog';
 import { useSettings } from '@/features/settings/provider';
-import { useOpenProviderLink } from '@/features/map/attributions';
-import { googleMapsPlaceUrl } from '@/features/places/maps-url';
 import { FocusedStatusBar } from '@/features/navigation/focused-status-bar';
 import { useAppActive } from '@/lib/use-app-active';
 import { Action, Notice } from '@/ui/shared';
@@ -39,7 +37,6 @@ import { NearbyControls, NearbyResults } from './nearby-controls';
 export type SessionExperienceProps = { introductionMemory?: IntroductionMemory; preparation?: React.ReactNode; sceneLoader: typeof loadRingScene; audioManifest?: AudioManifest; identity: SessionIdentity; freshEligible(): boolean; content: readonly RingContent[]; galleryMediaIds?: readonly string[]; entryReady?: boolean; onEstablished?(): void; onExit?(): void; onReturn?(): void; title?: string; guidance?: React.ReactNode; progressFeedback?: React.ReactNode; unsupportedFallback?: React.ReactNode; developmentNoticeKey?: string; preflightNoticeKey?: string };
 export function DestinationArSessionExperience({ sceneLoader, introductionMemory, preparation, audioManifest, identity, freshEligible, content, galleryMediaIds, entryReady = true, onEstablished, onExit, onReturn, title, guidance, progressFeedback, unsupportedFallback, developmentNoticeKey, preflightNoticeKey }: SessionExperienceProps) {
   const { t } = useTranslation(); const focused = useIsFocused(); const active = useAppActive();
-  const openProviderLink = useOpenProviderLink();
   const utilityInk = useThemeColor('foreground');
   const stack = useNavigation<NativeStackNavigationProp<Record<string, object | undefined>>>('/(app)');
   const [transitionReady, setTransitionReady] = useState(true); const [scene, setScene] = useState({ width: 0, height: 0 });
@@ -49,7 +46,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
   const audition = identity.provenance === 'development' && isViroSpikeEnabled() ? audioManifest : undefined;
   const reading = useReadingSize(); const introduction = useArIntroduction(identity, introductionMemory); const reduced = useReducedMotion();
   const [previewEntrance, setPreviewEntrance] = useState(false);
-  const [results, setResults] = useState<{ origin: Coordinate | null } | null>(null);
+  const [results, setResults] = useState<{ origin: Coordinate | null; selection?: { placeId: string; resultId: number } } | null>(null);
   const closeResults = useCallback(() => setResults(null), []);
   const variant = introVariant({ ready: true, established: false, seen: introduction.seen && !previewEntrance, reduced });
   const lifecycle = useArSession({ identity, tileIds: content.map(item => item.id), galleryMediaIds, running: focused && active && !results, transitionReady,
@@ -102,19 +99,19 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
     if (!browsingNearby || !nearby.result || !nearby.isResultCurrent(nearby.result)) return;
     setResults(current => current ?? { origin: nearby.position });
   };
-  const nearbyLink = useRef<((id: string) => void) | null>(null);
+  const nearbySelection = useRef<((id: string) => void) | null>(null);
   useLayoutEffect(() => {
     if (readyView && browsingNearby && !results && heading === 'ready') {
-      nearbyLink.current = id => {
+      nearbySelection.current = id => {
         const result = nearby.result;
         if (!result || !nearby.isResultCurrent(result)) return;
-        const place = result.places.find(item => item.providerId === id);
-        if (place) openProviderLink(googleMapsPlaceUrl(place));
+        if (!result.places.some(item => item.providerId === id)) return;
+        setResults(current => current ?? { origin: nearby.position, selection: { placeId: id, resultId: result.id } });
       };
     }
-    return () => { nearbyLink.current = null; };
+    return () => { nearbySelection.current = null; };
   });
-  const openNearbyPlace = useCallback((id: string) => nearbyLink.current?.(id), []);
+  const selectNearbyPlace = useCallback((id: string) => nearbySelection.current?.(id), []);
   const viewOwner = useRef(false);
   useLayoutEffect(() => {
     viewOwner.current = readyView;
@@ -135,6 +132,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
   const showLiveGuidance = session.phase === 'limited' || revealing || poseRequired || help;
   const preparing = !startup.mountScene && !session.established;
   if (results) return <NearbyResults nearby={nearby} origin={results.origin}
+    selectedPlaceId={results.selection?.resultId === nearby.result?.id ? results.selection?.placeId : undefined}
     interactive={focused && active} onClose={closeResults} />;
   if (startup.errorCode === 'unsupported' && unsupportedFallback && focused && active) return <>{unsupportedFallback}</>;
   return <View testID="destination-ar-scene" className={preparing ? 'flex-1 bg-page' : 'flex-1 bg-ink'} onLayout={event => {
@@ -148,7 +146,7 @@ export function DestinationArSessionExperience({ sceneLoader, introductionMemory
           claimStartupVoice={identity.provenance === 'development' ? undefined : claimStartupVoice}
           restrictCapture={identity.destinationId === 'D10'}
           viewMode={supportsViews ? viewMode : undefined} onViewComplete={completeView}
-          nearbyContent={nearbyView ? { enabled: inNearby && signedIn, resultId: nearby.result?.places.length ? nearby.result.id : null, cards: nearby.cards, fix: nearby.fix, onHeading: setHeading, onOpenPlace: openNearbyPlace } : undefined}
+          nearbyContent={nearbyView ? { enabled: inNearby && signedIn, resultId: nearby.result?.places.length ? nearby.result.id : null, cards: nearby.cards, fix: nearby.fix, onHeading: setHeading, onSelectPlace: selectNearbyPlace } : undefined}
           onMetrics={help && identity.provenance === 'development' ? setMetrics : undefined} reading={reading} content={content} initialProgress={session.progress} onProgress={lifecycle.onProgress}
           audioPreferences={audioPreferences} audioManifest={audition} firstVisit={!introduction.seen || previewEntrance && identity.provenance === 'development'}
           visibleTileCount={session.phase === 'reveal' ? Infinity : session.revealedCount} deployment={session.phase === 'reveal' ? variant : undefined} interactive={exploring && !help} effectsEnabled={!help} />

@@ -32,11 +32,18 @@ let preferred: string | null = null;
 let originCaptured = true;
 let scanned = true;
 let announcement = '';
+if (new URLSearchParams(location.search).get('scenario') === 'handoff') scenarios.value = 'handoff';
 let fixtureScenario = scenarios.value;
 let fixtures = scenarioFixtures(fixtureScenario);
 
 function scenarioFixtures(scenario: string): Fixture[] {
   if (scenario === 'empty') return [];
+  if (scenario === 'handoff') {
+    const names = ['Trailhead Kiosk', 'Ridge Viewpoint', 'Public Market', 'Garden Walk', 'Town Library', 'Visitor Information',
+      'Orchard Gate', 'Picnic Shelter', 'Boat Landing', 'Footbridge', 'Viewpoint Pavilion'];
+    return [...names.map((name, index) => ({ name, bearing: 55 + index * 24, distance: 90 + 45 * index })),
+      { name: 'Lakeside Café', bearing: 0, distance: 640 }];
+  }
   const names = ['Lakeside Café', 'Trailhead Kiosk', 'Ridge Viewpoint', 'Public Market', 'Garden Walk', 'Town Library', 'Visitor Information'];
   if (scenario === 'names') names.splice(0, 3,
     'Lakeside Community Heritage and Visitor Information Centre',
@@ -96,10 +103,18 @@ function go(next: typeof view) {
   phone.querySelector<HTMLElement>('h2')?.focus({ preventScroll: true });
 }
 
-function showResults() {
+function showResults(selectedPlace?: Place) {
   originCaptured = scenarios.value !== 'gps';
   announcement = '';
   go('list');
+  if (!selectedPlace) return;
+  const row = phone.querySelector<HTMLElement>(`[data-place-id="${CSS.escape(selectedPlace.providerId)}"]`);
+  if (!row) return;
+  const scroll = scrollSurface();
+  scroll.scrollTop = Math.max(0, row.getBoundingClientRect().top - scroll.getBoundingClientRect().top - 8);
+  row.classList.add('row-highlight');
+  row.focus({ preventScroll: true });
+  window.setTimeout(() => row.classList.remove('row-highlight'), 1600);
 }
 
 function showCard(place: Place) {
@@ -143,7 +158,10 @@ function camera(places: Place[], cards: ReturnType<typeof layoutNearbyCards>, he
     const layout = proposed() ? settings : nearbyCardDefaults;
     const depth = layout.radius * Math.cos(angle);
     const focal = 50 / Math.tan(halfFov);
-    const control = button(card.place.name, () => openMaps(card.place), 'floating', `card-${card.place.providerId}`);
+    const control = button(card.place.name, () => {
+      if (proposed()) showResults(card.place);
+      else openMaps(card.place);
+    }, 'floating', `card-${card.place.providerId}`);
     control.replaceChildren(node('strong', card.place.name), node('small', distanceLabel(card.place)));
     control.style.left = `${50 + Math.tan(angle) * focal}%`;
     control.style.top = `calc(50% - ${card.position[1] * focal / depth}cqw)`;
@@ -154,7 +172,7 @@ function camera(places: Place[], cards: ReturnType<typeof layoutNearbyCards>, he
     if (card.place.providerId === preferred) control.classList.add('preferred');
     stage.append(control);
   }
-  if (places.length) dock.append(button(`View results (${places.length})`, showResults, 'primary', 'results'));
+  if (places.length) dock.append(button(`View results (${places.length})`, () => showResults(), 'primary', 'results'));
   const scan = button(scanned ? 'Scan again' : 'Scan nearby', () => {
     scanned = true;
     if (scenario === 'expired' || scenario === 'unscanned') {
@@ -200,6 +218,8 @@ function results(places: Place[]) {
     const ordered = originCaptured ? [...places].sort((a, b) => distance(a) - distance(b)) : places;
     for (const item of ordered) {
       const row = node('div', undefined, 'proposed-row');
+      row.dataset.placeId = item.providerId;
+      row.tabIndex = -1;
       const details = node('div', undefined, 'place-details');
       details.append(node('strong', item.name));
       if (originCaptured) details.append(node('span', distanceLabel(item)));

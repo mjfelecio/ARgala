@@ -4281,3 +4281,14 @@ The owner tried the ACLC Showcase on the Galaxy A53 with Preview 1.0.2
 (version code 3) before the new update was published and described the
 baseline as much faster. That observation is the reference for the OTA
 comparison.
+
+On the updated Preview, the owner reported no noticeable speed difference
+during handheld testing. AR was smooth with screen recording off, and Nearby
+cards stayed visible through more heading fluctuations.
+
+The follow-up card action opens the Nearby results list at the matching row,
+with a 1.6-second mint highlight after layout. Google Maps opens from the
+row's explicit Maps action. The interaction regression covers a tap during
+the sensor display buffer, deferred scroll, highlight expiry, and retired
+actions. All 1,847 tests and the Android export passed. Handset verification
+of this follow-up remains pending.

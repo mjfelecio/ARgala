@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { BackHandler, Image, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -61,12 +61,35 @@ export function NearbyControls({ signedIn, nearby, heading, trackingLost, disabl
   </View>;
 }
 
-export function NearbyResults({ nearby, origin, interactive, onClose }: {
-  nearby: NearbyMode; origin: Coordinate | null; interactive: boolean; onClose(): void;
+export function NearbyResults({ nearby, origin, selectedPlaceId, interactive, onClose }: {
+  nearby: NearbyMode; origin: Coordinate | null; selectedPlaceId?: string; interactive: boolean; onClose(): void;
 }) {
   const { t } = useTranslation();
   const openLink = useOpenProviderLink();
   const { result, isResultCurrent } = nearby;
+  const scroll = useRef<ScrollView>(null);
+  const [targetOffset, setTargetOffset] = useState<number | null>(null);
+  const [contentReady, setContentReady] = useState(false);
+  const revealed = useRef(false);
+  const [highlighted, setHighlighted] = useState(false);
+  const resultsInteractive = useRef(false);
+  useLayoutEffect(() => {
+    resultsInteractive.current = interactive;
+    return () => { resultsInteractive.current = false; };
+  }, [interactive]);
+  // The row is a direct scroll child, so its layout Y includes the list header.
+  useLayoutEffect(() => {
+    if (!selectedPlaceId || !interactive || revealed.current || !contentReady || targetOffset === null ||
+        !scroll.current || !result || !isResultCurrent(result)) return;
+    revealed.current = true;
+    scroll.current.scrollTo({ y: Math.max(0, targetOffset - 8), animated: false });
+    setHighlighted(true);
+  }, [contentReady, interactive, isResultCurrent, result, selectedPlaceId, targetOffset]);
+  useEffect(() => {
+    if (!highlighted) return;
+    const timer = setTimeout(() => setHighlighted(false), 1600);
+    return () => clearTimeout(timer);
+  }, [highlighted]);
   const places = result?.places ?? [];
   const rows = origin
     ? places.map(place => ({ place, meters: distanceMeters(origin, place.coordinates) })).sort((a, b) => a.meters - b.meters)
@@ -82,34 +105,38 @@ export function NearbyResults({ nearby, origin, interactive, onClose }: {
 
   const mapsAction = (place: Place) => <Button variant="outline" className="h-auto min-h-12 min-w-12 shrink-0 px-3 py-2 self-start"
     accessibilityLabel={t('arNearby.openPlaceInMaps', { name: place.name })} isDisabled={!interactive}
-    onPress={() => { if (interactive && result && isResultCurrent(result)) openLink(googleMapsPlaceUrl(place)); }}>
+    onPress={() => { if (resultsInteractive.current && result && isResultCurrent(result)) openLink(googleMapsPlaceUrl(place)); }}>
     <Button.Label className="font-ui-semibold">{t('arNearby.maps')}</Button.Label>
   </Button>;
   const distanceText = (meters: number) => t('arNearby.distance', { meters: Math.round(meters) });
 
   return <StyledSafeAreaView testID="ar-nearby-results-screen" className="flex-1 bg-page" edges={['top', 'bottom', 'left', 'right']}>
     <FocusedStatusBar style="dark" />
-    <ScrollView testID="ar-nearby-results-scroll"
+    <ScrollView ref={scroll} testID="ar-nearby-results-scroll"
+      onContentSizeChange={selectedPlaceId ? (_width, height) => { if (height > 0) setContentReady(true); } : undefined}
       className="min-h-0 flex-1" contentContainerClassName="pb-4">
       <View className="gap-2 border-b border-outline px-4 py-4">
         <Text accessibilityRole="header" className="font-sans text-section font-ui-bold text-brand-strong">{t('arNearby.resultsTitle')}</Text>
         {result && <Text className="font-sans text-sm text-muted">{t('arNearby.resultCount', { count: places.length })}</Text>}
       </View>
-      {result ? <View className="gap-3 px-4">
-        <View>
-          {rows.map(({ place, meters }) => <View key={place.providerId} className="flex-row items-center gap-2 border-b border-outline py-2">
+      {result ? <>
+        {rows.map(({ place, meters }) => {
+          const selected = place.providerId === selectedPlaceId;
+          return <View key={place.providerId} testID={selected ? 'ar-nearby-selected-row' : undefined}
+            onLayout={selected ? event => setTargetOffset(event.nativeEvent.layout.y) : undefined}
+            className={`mx-4 flex-row items-center gap-2 border-b border-outline py-2 ${selected && highlighted ? 'rounded-card bg-mint' : ''}`}>
             <View className="min-h-12 min-w-0 flex-1 justify-center gap-1 px-1 py-2">
               <Text className="font-sans text-base font-ui-bold text-brand-strong">{place.name}</Text>
               {meters !== null && <Text className="font-sans text-sm text-muted">{distanceText(meters)}</Text>}
             </View>
             <View className="self-center">{mapsAction(place)}</View>
-          </View>)}
-        </View>
-        <View className="gap-1 py-1">
+          </View>;
+        })}
+        <View className="mx-4 mt-3 gap-1 py-1">
           <Image source={googleMapsAttribution} accessibilityLabel="Google Maps" style={{ height: 18, width: 98 }} resizeMode="contain" />
           <ProviderAttributions places={places} />
         </View>
-      </View> : <Text accessibilityLiveRegion="polite" className="px-4 py-4 font-sans text-base text-muted">{t('arNearby.resultsExpired')}</Text>}
+      </> : <Text accessibilityLiveRegion="polite" className="px-4 py-4 font-sans text-base text-muted">{t('arNearby.resultsExpired')}</Text>}
     </ScrollView>
     <View testID="ar-nearby-results-footer" className="shrink-0 border-t border-outline bg-page px-4 py-3">
       <Button className="h-auto min-h-12 w-full py-3" accessibilityLabel={t('arNearby.returnToAr')} onPress={onClose}>
